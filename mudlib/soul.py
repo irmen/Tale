@@ -4,7 +4,13 @@ A player's 'soul', which provides a lot of possible emotes (verbs).
 Written by Irmen de Jong (irmen@razorvine.net)
 Based on soul.c written in LPC by profezzorn@nannymud
 
-MISSING: whisper, say, tell
+MISSING: whisper, tell
+These are special in the sense that all user input is directed only at the given target.
+
+BUG: PHYS crashes
+BUG: msg-adverb in verbdata doesn't work, for instance with chant
+BUG: multiple adverbs don't work?
+
 """
 
 import mudlib.languagetools as lang
@@ -36,6 +42,7 @@ VERBS = {
 "snap":      ( SIMP, None, "snap$ \nYOUR fingers \nAT", "at"),
 "lust":      ( DEFA, None, "", "for"),
 "burp":      ( DEFA, ( "rudely", ), "", "at"),
+"bump":      ( DEFA, ( "clumsily", ), "", "into"),
 "wink":      ( DEFA, ( "suggestively", ), "", "at"),
 "smile":     ( DEFA, ( "happily", ), "", "at"),
 "yawn":      ( DEFA, None, "", "at"),
@@ -51,6 +58,8 @@ VERBS = {
 "chuckle":   ( DEFA, None, "", "at" ),
 "bow":       ( DEFA, None, "", "to" ),
 "surrender": ( DEFA, None, "", "to" ),
+"sit":       ( DEFA, ( "down", ), "", "in front of" ),
+"stand":     ( DEFA, ( "up", ), "", "in front of" ),
 "capitulate": ( DEFA, ( "unconditionally", ), "", "to" ),
 "glare":     ( DEFA, ( "stonily", ), "", "at" ),
 "giggle":    ( DEFA, ( "merrily", ), "", "at" ),
@@ -84,11 +93,11 @@ VERBS = {
 "ogle":      ( PREV, None, "" ),
 "pet":       ( SIMP, None, "pet$ \nWHO \nHOW \nWHERE" ),
 "barf":      ( DEFA, None, "", "on" ),
+"listen":    ( DEFA, None, "", "to" ),
 "purr":      ( DEFA, None, "", "at" ),
 "curtsy":    ( DEFA, None, "", "before" ),
 "puzzle":    ( SIMP, None, "look$ \nHOW puzzled \nAT", "at" ),
 "grovel":    ( DEFA, None, "", "before" ),
-"listen":    ( DEFA, None, "", "to" ),
 "tongue":    ( SIMP, None, "stick$ \nYOUR tongue out \nHOW \nAT", "at" ),
 "apologize": ( DEFA, None, "", "to" ),
 "complain":  ( DEFA, None, "", "about" ),
@@ -98,6 +107,7 @@ VERBS = {
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
 "headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
 "shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
+"stink":     ( DEUX, None, "smell \nYOUR armpits. Eeew!", "smells \nYOUR armpits. Eeew!"),
 "grimace":   ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
 "stomp":     ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
 "snigger":   ( DEFA, ( "jeeringly", ), "", "at" ),
@@ -122,11 +132,13 @@ VERBS = {
 "exclaim":  ( SIMP, None, " \nHOW exclaim$ \nAT: \nWHAT!", "" ),
 "quote":    ( SIMP, None, " \nHOW quote$ \nAT \nMSG", "to" ),
 "ask":      ( SIMP, None, " \nHOW ask$ \nAT: \nWHAT?", "" ),
+"request":  ( SIMP, None, " \nHOW request$ \nAT \nWHAT", "" ),
+"consult":  ( SIMP, None, " \nHOW consult$ \nAT \nWHAT", "" ),
 "mumble":   ( SIMP, None, "mumble$ \nMSG \nHOW \nAT", "to" ),
 "murmur":   ( SIMP, None, "murmur$ \nMSG \nHOW \nAT", "to" ),
 "scream":   ( SIMP, ( "loudly", ), "scream$ \nMSG \nHOW \nAT", "at" ),
 "yell":     ( SIMP, ( "in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at" ),
-"utter":    ( SIMP, (  ), " \nHOW utter$ \nMSG \nAT", "to" ),
+"utter":    ( SIMP, None, " \nHOW utter$ \nMSG \nAT", "to" ),
 
 # Verbs that require a person
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
@@ -142,6 +154,7 @@ VERBS = {
 "caper":    ( PERS, ( "merrily", ), "caper$ \nHOW about", "caper$ around \nWHO \nHOW" ),
 "beep":     ( PERS, ( "triumphantly", None, "on the nose" ), " \nHOW beep$ \nMYself \nWHERE", " \nHOW beep$ \nWHO \nWHERE" ),
 "blink":    ( PERS, None, "blink$ \nHOW", "blink$ \nHOW at \nWHO" ),
+"knock":    ( PHYS, ( None, None, "on the head" ), "" ),
 "bonk":     ( PHYS, ( None, None, "on the head" ), "" ),
 "bop":      ( PHYS, ( None, None, "on the head" ), "" ),
 "stroke":   ( PHYS, ( None, None, "on the cheek" ), "" ),
@@ -157,6 +170,8 @@ VERBS = {
 "strangle": ( PREV, None, "" ),
 "hate":     ( PREV, None, "" ),
 "fondle":   ( PREV, None, "" ),
+"nominate": ( PREV, None, "" ),
+"turn":     ( PREV, None, "\nYOUR head towards" ),
 "squeeze":  ( PREV, ( "fondly", ), "" ),
 "comfort":  ( PREV, None, "" ),
 "nudge":    ( PHYS, ( "suggestively", ), "" ),
@@ -196,6 +211,7 @@ VERBS = {
 "forgive":  ( PREV, None, "" ),
 "congratulate": ( PREV, None, "" ),
 "ayt":      ( SIMP, None, "wave$ \nYOUR hand in front of \nPOSS face, \nIS \nSUBJ \nHOW there?" ),
+"judge":    ( PREV, None, "", ),
 
 # Verbs that don't need, nor use persons
 "roll":     ( SIMP, ( "to the ceiling", ), "roll$ \nYOUR eyes \nHOW" ),
@@ -245,6 +261,7 @@ VERBS = {
 "pout":     ( SHRT, None, "" ),
 "hiccup":   ( SHRT, None, "" ),
 "frown":    ( SHRT, None, "" ),
+"pray":     ( SIMP, None, "mumble$ a short prayer \nAT", "to" ),
 "gasp":     ( SHRT, ( "in astonishment", ), "" ),
 "think":    ( SHRT, ( "carefully", ), "" ),
 "ponder":   ( SHRT, ( "over some problem", ), "" ),
@@ -326,7 +343,7 @@ def player_message(message, who):
     print "*player_message:", repr(message)  # XXX
     message = insert_targetnames(message, who)
     message = message.replace(" \nYOUR", " your")
-    return lang.fullstop("You " + message.strip())
+    return lang.fullstop("you " + message.strip())
 
 
 def check_person(action, who):
@@ -337,7 +354,7 @@ def check_person(action, who):
 
 def spacify(string):
     """returns string prefixed with a space, if it has contents. If it is empty, prefix nothing"""
-    return " " + string if string else ""
+    return " " + string.lstrip() if string else ""
 
 
 def reduce_verb(player, verb, who, adverbs, message, bodyparts):
@@ -363,8 +380,7 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
     else:
         where = " " + lang.join([BODY_PARTS[part] for part in bodyparts])
     how = "" if not adverbs else adverbs[0]  # normal-adverb
-    if how:
-        how = " " + how
+    how = spacify(how or "")
     print "*HOW=", how  # XXX
     print "*WHERE=", where  # XXX
 
@@ -424,7 +440,7 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
         raise NotImplementedError("Unknown vtype " + vtype)
 
     if who and len(verbdata) > 3:
-        action = action.replace(" \nAT", " " + verbdata[3] + " \nWHO")
+        action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
     else:
         action = action.replace(" \nAT", "")
 

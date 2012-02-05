@@ -2,10 +2,10 @@ import inflect
 
 inflecter = inflect.engine()
 
-# genders are m,f,None
-SUBJECTIVE = { "m": "he",  "f": "she", None: "it"  }
-POSSESSIVE = { "m": "his", "f": "her", None: "its" }
-OBJECTIVE  = { "m": "him", "f": "her", None: "it"  }
+# genders are m,f,n
+SUBJECTIVE = { "m": "he",  "f": "she", "n": "it"  }
+POSSESSIVE = { "m": "his", "f": "her", "n": "its" }
+OBJECTIVE  = { "m": "him", "f": "her", "n": "it"  }
 
 # join a list of words to "a,b,c,d and e"
 join = inflecter.join
