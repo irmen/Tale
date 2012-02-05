@@ -6,14 +6,11 @@ Based on soul.c written in LPC by profezzorn@nannymud
 
 MISSING: whisper, say, tell
 """
-import mudlib.languagetools
+
+import mudlib.languagetools as lang
+
 
 class SoulException(Exception): pass
-
-class Player(object):
-    def __init__(self, name):
-        self.name=name
-        self.possessive="his"
 
 
 DEFA = 1  # adds HOW+AT   (you smile happily at Fritz)
@@ -29,86 +26,86 @@ FULL = 9  # not used yet
 # escapes used: AT, HOW, IS, MSG, MY, OBJ, POSS, SUBJ, THEIR, WHAT, WHERE, WHO, YOUR
 
 VERBS = {
-"flex":     ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW"),
-"snort":    ( SIMP, None, "snort$ \nHOW \nAT", "at"),
-"pant":     ( SIMP, ( "heavily", ), "pant$ \nHOW \nAT", "at"),
-"hmm":      ( SIMP, None, "hmm$ \nHOW \nAT", "at"),
-"ack":      ( SIMP, None, "ack$ \nHOW \nAT", "at"),
-"guffaw":   ( SIMP, None, "guffaw$ \nHOW \nAT", "at"),
-"raise":    ( SIMP, None, " \nHOW raise$ an eyebrow \nAT", "at"),
-"snap":     ( SIMP, None, "snap$ \nYOUR fingers \nAT", "at"),
-"lust":     ( DEFA, None, "", "for"),
-"burp":     ( DEFA, ( "rudely", ), "", "at"),
-"wink":     ( DEFA, ( "suggestively", ), "", "at"),
-"smile":    ( DEFA, ( "happily", ), "", "at"),
-"yawn":     ( DEFA, None, "", "at"),
-"swoon":    ( DEFA, ( "romantically", ), "", "at"),
-"sneer":    ( DEFA, ( "disdainfully", ), "", "at"),
-"beam":     ( DEFA, None, "", "at" ),
-"point":    ( DEFA, None, "", "at" ),
-"grin":     ( DEFA, ( "evilly", ), "", "at" ),
-"laugh":    ( DEFA, None, "", "at" ),
-"nod":      ( DEFA, ( "solemnly", ), "", "at" ),
-"wave":     ( DEFA, ( "happily", ), "", "at" ),
-"cackle":   ( DEFA, ( "gleefully", ), "", "at" ),
-"chuckle":  ( DEFA, None, "", "at" ),
-"bow":      ( DEFA, None, "", "to" ),
-"surrender":( DEFA, None, "", "to" ),
-"capitulate":( DEFA, ( "unconditionally", ), "", "to" ),
-"glare":    ( DEFA, ( "stonily", ), "", "at" ),
-"giggle":   ( DEFA, ( "merrily", ), "", "at" ),
-"groan":    ( DEFA, None, "", "at" ),
-"grunt":    ( DEFA, None, "", "at" ),
-"growl":    ( DEFA, None, "", "at" ),
-"breathe":  ( DEFA, ( "heavily", ), "", "at" ),
-"argh":     ( DEFA, None, "", "at" ),
-"scowl":    ( DEFA, ( "darkly", ), "", "at" ),
-"snarl":    ( DEFA, None, "", "at" ),
-"recoil":   ( DEFA, ( "with fear", ), "", "from" ),
-"moan":     ( DEFA, None, "", "at" ),
-"howl":     ( DEFA, ( "in pain", ), "", "at" ),
-"puke":     ( DEFA, None, "", "on" ),
-"drool":    ( DEFA, None, "", "on" ),
-"sneeze":   ( DEFA, ( "loudly", ), "", "at" ),
-"spit":     ( DEFA, None, "", "on" ),
-"stare":    ( DEFA, None, "", "at" ),
-"whistle":  ( DEFA, ( "appreciatively", ), "", "at" ),
-"applaud":  ( DEFA, None, "", "" ),
-"leer":     ( DEFA, None, "", "at" ),
-"agree":    ( DEFA, None, "", "with" ),
-"believe":  ( PERS, None, "believe$ in \nMYself \nHOW", "believe$ \nWHO \nHOW" ),
-"understand":( PERS, ( "now", ), "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
-"disagree": ( DEFA, None, "", "with" ),
-"fart":     ( DEFA, None, "", "at" ),
-"dance":    ( DEFA, None, "", "with" ),
-"flirt":    ( DEFA, None, "", "with" ),
-"meow":     ( DEFA, None, "", "at" ),
-"bark":     ( DEFA, None, "", "at" ),
-"ogle":     ( PREV, None, "" ),
-"pet":      ( SIMP, None, "pet$ \nWHO \nHOW \nWHERE" ),
-"barf":     ( DEFA, None, "", "on" ),
-"purr":     ( DEFA, None, "", "at" ),
-"curtsy":  ( DEFA, None, "", "before" ),
-"puzzle":   ( SIMP, None, "look$ \nHOW puzzled \nAT", "at" ),
-"grovel":   ( DEFA, None, "", "before" ),
-"listen":   ( DEFA, None, "", "to" ),
-"tongue":   ( SIMP, None, "stick$ \nYOUR tongue out \nHOW \nAT", "at" ),
-"apologize":( DEFA, None, "", "to" ),
-"complain": ( DEFA, None, "", "about" ),
-"rotate":   ( PERS, None, "rotate$ \nHOW", "rotate$ \nWHO \nHOW" ),
-"excuse":   ( PERS, None, " \nHOW excuse$ \nMYself", " \nHOW excuse$ \nMYself to \nWHO" ),
-"beg":      ( PERS, None, "beg$ \nHOW", "beg$ \nWHO for mercy \nHOW" ),
-"fear":     ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
-"headshake":( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
-"shake":    ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
-"grimace":  ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
-"stomp":    ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
-"snigger":  ( DEFA, ( "jeeringly", ), "", "at" ),
-"watch":    ( QUAD, ( "carefully", ), "watch the surroundings \nHOW", "watches the surroundings \nHOW", "watch \nWHO \nHOW",  "watches \nWHO \nHOW", ),
-"scratch":  ( QUAD, ( None, None, "on the head" ), "scratch \nMYself \nHOW \nWHERE", "scratches \nMYself \nHOW \nWHERE", "scratch \nWHO \nHOW \nWHERE", "scratches \nWHO \nHOW \nWHERE",    ),
-"tap":      ( PERS, ( "impatiently", None, "on the shoulder" ), "tap$ \nYOUR foot \nHOW", "tap$ \nWHO \nWHERE" ),
-"wobble":   ( SIMP, None, "wobble$ \nAT \nHOW", "" ),
-"yodel":    ( SIMP, None, "yodel$ a merry tune \nHOW", "" ),
+"flex":      ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW"),
+"snort":     ( SIMP, None, "snort$ \nHOW \nAT", "at"),
+"pant":      ( SIMP, ( "heavily", ), "pant$ \nHOW \nAT", "at"),
+"hmm":       ( SIMP, None, "hmm$ \nHOW \nAT", "at"),
+"ack":       ( SIMP, None, "ack$ \nHOW \nAT", "at"),
+"guffaw":    ( SIMP, None, "guffaw$ \nHOW \nAT", "at"),
+"raise":     ( SIMP, None, " \nHOW raise$ an eyebrow \nAT", "at"),
+"snap":      ( SIMP, None, "snap$ \nYOUR fingers \nAT", "at"),
+"lust":      ( DEFA, None, "", "for"),
+"burp":      ( DEFA, ( "rudely", ), "", "at"),
+"wink":      ( DEFA, ( "suggestively", ), "", "at"),
+"smile":     ( DEFA, ( "happily", ), "", "at"),
+"yawn":      ( DEFA, None, "", "at"),
+"swoon":     ( DEFA, ( "romantically", ), "", "at"),
+"sneer":     ( DEFA, ( "disdainfully", ), "", "at"),
+"beam":      ( DEFA, None, "", "at" ),
+"point":     ( DEFA, None, "", "at" ),
+"grin":      ( DEFA, ( "evilly", ), "", "at" ),
+"laugh":     ( DEFA, None, "", "at" ),
+"nod":       ( DEFA, ( "solemnly", ), "", "at" ),
+"wave":      ( DEFA, ( "happily", ), "", "at" ),
+"cackle":    ( DEFA, ( "gleefully", ), "", "at" ),
+"chuckle":   ( DEFA, None, "", "at" ),
+"bow":       ( DEFA, None, "", "to" ),
+"surrender": ( DEFA, None, "", "to" ),
+"capitulate": ( DEFA, ( "unconditionally", ), "", "to" ),
+"glare":     ( DEFA, ( "stonily", ), "", "at" ),
+"giggle":    ( DEFA, ( "merrily", ), "", "at" ),
+"groan":     ( DEFA, None, "", "at" ),
+"grunt":     ( DEFA, None, "", "at" ),
+"growl":     ( DEFA, None, "", "at" ),
+"breathe":   ( DEFA, ( "heavily", ), "", "at" ),
+"argh":      ( DEFA, None, "", "at" ),
+"scowl":     ( DEFA, ( "darkly", ), "", "at" ),
+"snarl":     ( DEFA, None, "", "at" ),
+"recoil":    ( DEFA, ( "with fear", ), "", "from" ),
+"moan":      ( DEFA, None, "", "at" ),
+"howl":      ( DEFA, ( "in pain", ), "", "at" ),
+"puke":      ( DEFA, None, "", "on" ),
+"drool":     ( DEFA, None, "", "on" ),
+"sneeze":    ( DEFA, ( "loudly", ), "", "at" ),
+"spit":      ( DEFA, None, "", "on" ),
+"stare":     ( DEFA, None, "", "at" ),
+"whistle":   ( DEFA, ( "appreciatively", ), "", "at" ),
+"applaud":   ( DEFA, None, "", "" ),
+"leer":      ( DEFA, None, "", "at" ),
+"agree":     ( DEFA, None, "", "with" ),
+"believe":   ( PERS, None, "believe$ in \nMYself \nHOW", "believe$ \nWHO \nHOW" ),
+"understand": ( PERS, ( "now", ), "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
+"disagree":  ( DEFA, None, "", "with" ),
+"fart":      ( DEFA, None, "", "at" ),
+"dance":     ( DEFA, None, "", "with" ),
+"flirt":     ( DEFA, None, "", "with" ),
+"meow":      ( DEFA, None, "", "at" ),
+"bark":      ( DEFA, None, "", "at" ),
+"ogle":      ( PREV, None, "" ),
+"pet":       ( SIMP, None, "pet$ \nWHO \nHOW \nWHERE" ),
+"barf":      ( DEFA, None, "", "on" ),
+"purr":      ( DEFA, None, "", "at" ),
+"curtsy":    ( DEFA, None, "", "before" ),
+"puzzle":    ( SIMP, None, "look$ \nHOW puzzled \nAT", "at" ),
+"grovel":    ( DEFA, None, "", "before" ),
+"listen":    ( DEFA, None, "", "to" ),
+"tongue":    ( SIMP, None, "stick$ \nYOUR tongue out \nHOW \nAT", "at" ),
+"apologize": ( DEFA, None, "", "to" ),
+"complain":  ( DEFA, None, "", "about" ),
+"rotate":    ( PERS, None, "rotate$ \nHOW", "rotate$ \nWHO \nHOW" ),
+"excuse":    ( PERS, None, " \nHOW excuse$ \nMYself", " \nHOW excuse$ \nMYself to \nWHO" ),
+"beg":       ( PERS, None, "beg$ \nHOW", "beg$ \nWHO for mercy \nHOW" ),
+"fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
+"headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
+"shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
+"grimace":   ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
+"stomp":     ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
+"snigger":   ( DEFA, ( "jeeringly", ), "", "at" ),
+"watch":     ( QUAD, ( "carefully", ), "watch the surroundings \nHOW", "watches the surroundings \nHOW", "watch \nWHO \nHOW",  "watches \nWHO \nHOW", ),
+"scratch":   ( QUAD, ( None, None, "on the head" ), "scratch \nMYself \nHOW \nWHERE", "scratches \nMYself \nHOW \nWHERE", "scratch \nWHO \nHOW \nWHERE", "scratches \nWHO \nHOW \nWHERE",    ),
+"tap":       ( PERS, ( "impatiently", None, "on the shoulder" ), "tap$ \nYOUR foot \nHOW", "tap$ \nWHO \nWHERE" ),
+"wobble":    ( SIMP, None, "wobble$ \nAT \nHOW", "" ),
+"yodel":     ( SIMP, None, "yodel$ a merry tune \nHOW", "" ),
 
 # Message-based verbs
 "curse":    ( PERS, None, "curse$ \nWHAT \nHOW", "curse$ \nWHO \nHOW" ),
@@ -197,7 +194,7 @@ VERBS = {
 "ruffle":   ( SIMP, None, "ruffle$ \nPOSS hair \nHOW" ),
 "ignore":   ( PREV, None, "" ),
 "forgive":  ( PREV, None, "" ),
-"congratulate":( PREV, None, "" ),
+"congratulate": ( PREV, None, "" ),
 "ayt":      ( SIMP, None, "wave$ \nYOUR hand in front of \nPOSS face, \nIS \nSUBJ \nHOW there?" ),
 
 # Verbs that don't need, nor use persons
@@ -266,7 +263,7 @@ VERBS = {
 
 }
 
-assert not any(type(v[1])==str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
+assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
 
 ADJECTIVES = { "bored", "confused", "curious", "sad", "surprised", "tired"}
 
@@ -304,62 +301,44 @@ BODY_PARTS = {
 ACTION_QUALIFIERS = { "help", "fail", "again", "dont", "don't", "feeling", "suddenly"}
 
 
-def test():
-    verb=raw_input("verb?")
-    who=raw_input("who (comma-separated list)?").strip()
-    if not who:
-        who=None
-    else:
-        who=[Player(name) for name in who.split(",")]
-    adverbs=raw_input("adverbs (comma-separated list)?")
-    if not adverbs:
-        adverbs=None
-    else:
-        adverbs=adverbs.split(",")
-    message=raw_input("message?")
-    bodyparts=raw_input("bodyparts (comma-separated list)?")
-    if not bodyparts:
-        bodyparts=None
-    else:
-        bodyparts=bodyparts.split(",")
-    player = Player("<playername>")
-    who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverbs, message, bodyparts)
-    print "PLAYER:",player_message
-    print "ROOM:",room_message
-    for target in who:
-        print "TARGET %s: %s" % (target.name, target_message)
 
 
 def insert_targetnames(message, who):
-    targetnames=mudlib.languagetools.join([t.name for t in who or []])
-    return message.replace(" \nWHO", " "+targetnames)
+    targetnames = lang.join([t.name for t in who or []])
+    return message.replace(" \nWHO", " " + targetnames)
+
 
 def room_message(player, message, who):
-    print "*room_message:",repr(message) # XXX
+    print "*room_message:", repr(message)  # XXX
     message = insert_targetnames(message, who)
-    message = message.replace(" \nYOUR", " "+player.possessive)
-    return "%s %s." % (player.name, message.strip())
+    message = message.replace(" \nYOUR", " " + player.possessive)
+    return lang.fullstop(player.name + " " + message.strip())
+
 
 def target_message(player, message):
-    print "*target_message:",repr(message) # XXX
+    print "*target_message:", repr(message)  # XXX
     message = message.replace(" \nWHO", " you")
-    message = message.replace(" \nYOUR", " "+player.possessive)
-    return "%s %s." % (player.name, message.strip())
+    message = message.replace(" \nYOUR", " " + player.possessive)
+    return lang.fullstop(player.name + " " + message.strip())
+
 
 def player_message(message, who):
-    print "*player_message:",repr(message) #XXX
+    print "*player_message:", repr(message)  # XXX
     message = insert_targetnames(message, who)
     message = message.replace(" \nYOUR", " your")
-    return "You %s." % message.strip()
+    return lang.fullstop("You " + message.strip())
+
 
 def check_person(action, who):
     if not who and ("\nWHO" in action or "\nPOSS" in action or "\nTHEIR" in action or "\nOBJ" in action):
         return False
     return True
 
+
 def spacify(string):
     """returns string prefixed with a space, if it has contents. If it is empty, prefix nothing"""
-    return " "+string if string else ""
+    return " " + string if string else ""
+
 
 def reduce_verb(player, verb, who, adverbs, message, bodyparts):
     """
@@ -372,22 +351,22 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
     who = who or []
     bodyparts = bodyparts or []
     if message:
-        msg=" '"+message+"'"
-        message = " "+message
+        msg = " '" + message + "'"
+        message = " " + message
     else:
-        msg=""
+        msg = ""
     adverbs = adverbs or verbdata[1] or []
-    print "*ADVERBS=",adverbs # XXX
+    print "*ADVERBS=", adverbs  # XXX
     # XXX adverbs in verbdata: (normal-adverb, adverb-for-message, adverb-for-bodypart)
-    if bodyparts and len(adverbs)>2 and adverbs[2]:
-        where = " "+adverbs[2]  # replace bodyparts string by specific ones from verbs table
+    if bodyparts and len(adverbs) > 2 and adverbs[2]:
+        where = " " + adverbs[2]  # replace bodyparts string by specific ones from verbs table
     else:
-        where = " "+mudlib.languagetools.join([BODY_PARTS[part] for part in bodyparts])
+        where = " " + lang.join([BODY_PARTS[part] for part in bodyparts])
     how = "" if not adverbs else adverbs[0]  # normal-adverb
     if how:
-        how = " "+how
-    print "*HOW=",how # XXX
-    print "*WHERE=",where # XXX
+        how = " " + how
+    print "*HOW=", how  # XXX
+    print "*WHERE=", where  # XXX
 
     def result_messages(action, action_room):
         return who, \
@@ -397,60 +376,60 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
 
     # construct the action string
     action = None
-    if vtype==DEUX:
+    if vtype == DEUX:
         action = verbdata[2]
         action_room = verbdata[3]
         if not check_person(action, who):
-            raise SoulException("Need person for verb "+verb)
-        action=action.replace(" \nWHERE", where)
-        action_room=action_room.replace(" \nWHERE", where)
-        action=action.replace(" \nWHAT", message)
-        action=action.replace(" \nMSG", msg)
-        action_room=action_room.replace(" \nWHAT",message)
-        action_room=action_room.replace(" \nMSG",msg)
-        action=action.replace(" \nHOW", how)
-        action_room=action_room.replace(" \nHOW", how)
+            raise SoulException("Need person for verb " + verb)
+        action = action.replace(" \nWHERE", where)
+        action_room = action_room.replace(" \nWHERE", where)
+        action = action.replace(" \nWHAT", message)
+        action = action.replace(" \nMSG", msg)
+        action_room = action_room.replace(" \nWHAT", message)
+        action_room = action_room.replace(" \nMSG", msg)
+        action = action.replace(" \nHOW", how)
+        action_room = action_room.replace(" \nHOW", how)
         return result_messages(action, action_room)
-    elif vtype==QUAD:
+    elif vtype == QUAD:
         if not who:
             action = verbdata[2]
             action_room = verbdata[3]
         else:
             action = verbdata[4]
             action_room = verbdata[5]
-        action=action.replace(" \nWHERE", where)
-        action_room=action_room.replace(" \nWHERE", where)
-        action=action.replace(" \nWHAT", message)
-        action=action.replace(" \nMSG", msg)
-        action_room=action_room.replace(" \nWHAT",message)
-        action_room=action_room.replace(" \nMSG",msg)
-        action=action.replace(" \nHOW", how)
-        action_room=action_room.replace(" \nHOW", how)
+        action = action.replace(" \nWHERE", where)
+        action_room = action_room.replace(" \nWHERE", where)
+        action = action.replace(" \nWHAT", message)
+        action = action.replace(" \nMSG", msg)
+        action_room = action_room.replace(" \nWHAT", message)
+        action_room = action_room.replace(" \nMSG", msg)
+        action = action.replace(" \nHOW", how)
+        action_room = action_room.replace(" \nHOW", how)
         return result_messages(action, action_room)
-    elif vtype==FULL:
+    elif vtype == FULL:
         raise NotImplementedError("vtype FULL")  # doesn't matter, FULL is not used yet anyway
-    elif vtype==DEFA:
-        action = verb+"$ \nHOW \nAT"
-    elif vtype==PREV:
-        action = verb+"$"+spacify(verbdata[2])+" \nWHO \nHOW"
-    elif vtype==PHYS:
-        action = verb+"$"+spacify(verbdata[2])+" \nWHO \nHOW \nWHERE"
-    elif vtype==SHRT:
-        action = verb+"$"+spacify(verbdata[2])+" \nHOW"
-    elif vtype==PERS:
+    elif vtype == DEFA:
+        action = verb + "$ \nHOW \nAT"
+    elif vtype == PREV:
+        action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW"
+    elif vtype == PHYS:
+        action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
+    elif vtype == SHRT:
+        action = verb + "$" + spacify(verbdata[2]) + " \nHOW"
+    elif vtype == PERS:
         action = verbdata[3] if who else verbdata[2]
-    elif vtype==SIMP:
+    elif vtype == SIMP:
         action = verbdata[2]
     else:
-        raise NotImplementedError("Unknown vtype "+vtype)
+        raise NotImplementedError("Unknown vtype " + vtype)
 
-    if who and len(verbdata)>3:
-        action = action.replace(" \nAT", " "+verbdata[3]+" \nWHO")
+    if who and len(verbdata) > 3:
+        action = action.replace(" \nAT", " " + verbdata[3] + " \nWHO")
     else:
         action = action.replace(" \nAT", "")
 
     if not check_person(action, who):
-        raise SoulException("Need person for verb "+verb)
+        raise SoulException("Need person for verb " + verb)
 
     action = action.replace(" \nHOW", how)
     action = action.replace(" \nWHERE", where)
@@ -462,7 +441,22 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
     return result_messages(action, action_room)
 
 
-# me myself I
-# them him her it
-# all everybody everyone
-# except but
+class Soul(object):
+    """
+    The 'soul' of a Player. Handles the highlevel verb actions and allows for the social player interaction.
+    """
+    def __init__(self):
+        pass
+
+    def process_verb(self, player, commandstring):
+        verb = ""
+        who = None
+        adverbs = None
+        message = None
+        bodyparts = None
+        raise NotImplementedError("command string parser")   # @TODO: add command string parser...
+        return self.process_verb_parsed(player, verb, who, adverbs, message, bodyparts)
+
+    def process_verb_parsed(self, player, verb, who=None, adverbs=None, message="", bodyparts=None):
+        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverbs, message, bodyparts)
+        return who, player_message, room_message, target_message
