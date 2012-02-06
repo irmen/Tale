@@ -34,6 +34,11 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(" abc", mudlib.soul.spacify(" abc"))
         self.assertEqual(" abc", mudlib.soul.spacify("  abc"))
 
+    def testUnknownVerb(self):
+        soul = mudlib.soul.Soul()
+        with self.assertRaises(mudlib.soul.UnknownVerbException):
+            soul.process_verb_parsed(None, "_unknown_verb_")
+
     def testGender(self):
         soul = mudlib.soul.Soul()
         with self.assertRaises(KeyError):
@@ -58,6 +63,21 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("you peer at max, kate, and the cat.", player_message)
         self.assertEqual("julie peers at max, kate, and the cat.", room_message)
         self.assertEqual("julie peers at you.", target_message)
+
+    def testMessageQuote(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        targets = [mudlib.npc.NPC("max","m"), mudlib.npc.NPC("kate","f"), mudlib.npc.NPC("the cat", "n")]
+        # babble
+        who, player_message, room_message, target_message = soul.process_verb_parsed(player, "babble")
+        self.assertTrue(len(who)==0)
+        self.assertEqual("you babble something incoherently.", player_message)
+        self.assertEqual("julie babbles something incoherently.", room_message)
+        # babble with message
+        who, player_message, room_message, target_message = soul.process_verb_parsed(player, "babble", message="blurp")
+        self.assertTrue(len(who)==0)
+        self.assertEqual("you babble 'blurp' incoherently.", player_message)
+        self.assertEqual("julie babbles 'blurp' incoherently.", room_message)
 
     def testDEFA(self):
         soul = mudlib.soul.Soul()

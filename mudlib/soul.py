@@ -5,17 +5,14 @@ A player's 'soul', which provides a lot of possible emotes (verbs).
 Written by Irmen de Jong (irmen@razorvine.net)
 Based on ancient soul.c v1 written in LPC by Fredrik Hübinette (aka profezzorn@nannymud)
 
-MISSING: whisper, tell
-These are special in the sense that all user input is directed only at the given target.
-
-BUG: msg-adverb in verbdata doesn't yet work, for instance with chant, go
-
 """
 
 import mudlib.languagetools as lang
 
 
 class SoulException(Exception):
+    pass
+class UnknownVerbException(SoulException):
     pass
 
 
@@ -31,6 +28,7 @@ FULL = 9  # not used yet
 
 # escapes used: AT, HOW, IS, MSG, MY, OBJ, POSS, SUBJ, THEIR, WHAT, WHERE, WHO, YOUR
 # adverbs tuple: (adverb, message, where)
+# if message starts with a ' (single quote), it will appear *without quotes*.
 
 VERBS = {
 "flex":      ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW" ),
@@ -140,6 +138,7 @@ VERBS = {
 "scream":   ( SIMP, ( "loudly", ), "scream$ \nMSG \nHOW \nAT", "at" ),
 "yell":     ( SIMP, ( "in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at" ),
 "utter":    ( SIMP, None, " \nHOW utter$ \nMSG \nAT", "to" ),
+"whisper":  ( SIMP, None, "whisper$ \nMSG \nHOW \nAT", "to" ),
 
 # Verbs that require a person
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
@@ -180,6 +179,7 @@ VERBS = {
 "hit":      ( PHYS, ( None, None, "in the face" ), "" ),
 "kick":     ( PHYS, ( "hard", ), "" ),
 "tackle":   ( SIMP, None, "tackle$ \nWHO \nHOW", "" ),
+"tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),
 "spank":    ( PHYS, ( None, None, "on the butt" ), "" ),
 "pat":      ( PHYS, ( None, None, "on the head" ), "" ),
 "punch":    ( DEUX, ( None, None, "in the eye" ), "punch \nWHO \nHOW \nWHERE", "punches \nWHO \nHOW \nWHERE" ),
@@ -321,21 +321,18 @@ def insert_targetnames(message, who):
 
 
 def room_message(player, message, who):
-    print "*room_message:", repr(message)  # XXX
     message = insert_targetnames(message, who)
     message = message.replace(" \nYOUR", " " + player.possessive)
     return lang.fullstop(player.name + " " + message.strip())
 
 
 def target_message(player, message):
-    print "*target_message:", repr(message)  # XXX
     message = message.replace(" \nWHO", " you")
     message = message.replace(" \nYOUR", " " + player.possessive)
     return lang.fullstop(player.name + " " + message.strip())
 
 
 def player_message(message, who):
-    print "*player_message:", repr(message)  # XXX
     message = insert_targetnames(message, who)
     message = message.replace(" \nYOUR", " your")
     return lang.fullstop("you " + message.strip())
@@ -358,29 +355,36 @@ def reduce_verb(player, verb, who, adverb, message, bodyparts):
     the user and converts it to an internal representation:
     (targets, playermessage, roommessage, targetmessage)
     """
-    verbdata = VERBS[verb]
+    if not player:
+        raise SoulException("no player in reduce_verb")
+    verbdata = VERBS.get(verb)
+    if not verbdata:
+        raise UnknownVerbException(verb)
     vtype = verbdata[0]
     who = who or []
     bodyparts = bodyparts or []
+    if not message and verbdata[1] and len(verbdata[1]) > 1:
+        message = verbdata[1][1]  # get the message from the verbs table
     if message:
-        msg = " '" + message + "'"
-        message = " " + message
+        if message.startswith("'"):
+            # use the message without single quotes around it
+            msg = message = spacify(message[1:])
+        else:
+            msg = " '" + message + "'"
+            message = " " + message
     else:
-        msg = ""
+        msg = message = ""
     if not adverb:
         if verbdata[1]:
             adverb = verbdata[1][0]    # normal-adverb
         else:
             adverb = ""
-    print "*ADVERB=", adverb  # XXX
     where = ""
     if bodyparts:
         where = " " + lang.join([BODY_PARTS[part] for part in bodyparts])
     elif not bodyparts and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
         where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
     how = spacify(adverb)
-    print "*HOW=", how  # XXX
-    print "*WHERE=", where  # XXX
 
     def result_messages(action, action_room):
         return who, \
