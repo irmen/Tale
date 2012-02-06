@@ -1,22 +1,22 @@
+# -*- coding: utf-8 -*-
 """
 A player's 'soul', which provides a lot of possible emotes (verbs).
 
 Written by Irmen de Jong (irmen@razorvine.net)
-Based on soul.c written in LPC by profezzorn@nannymud
+Based on ancient soul.c v1 written in LPC by Fredrik Hübinette (aka profezzorn@nannymud)
 
 MISSING: whisper, tell
 These are special in the sense that all user input is directed only at the given target.
 
-BUG: PHYS crashes
-BUG: msg-adverb in verbdata doesn't work, for instance with chant
-BUG: multiple adverbs don't work?
+BUG: msg-adverb in verbdata doesn't yet work, for instance with chant, go
 
 """
 
 import mudlib.languagetools as lang
 
 
-class SoulException(Exception): pass
+class SoulException(Exception):
+    pass
 
 
 DEFA = 1  # adds HOW+AT   (you smile happily at Fritz)
@@ -30,24 +30,25 @@ QUAD = 8  # like DEUX, but also provides two more texts for when a target is use
 FULL = 9  # not used yet
 
 # escapes used: AT, HOW, IS, MSG, MY, OBJ, POSS, SUBJ, THEIR, WHAT, WHERE, WHO, YOUR
+# adverbs tuple: (adverb, message, where)
 
 VERBS = {
-"flex":      ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW"),
-"snort":     ( SIMP, None, "snort$ \nHOW \nAT", "at"),
-"pant":      ( SIMP, ( "heavily", ), "pant$ \nHOW \nAT", "at"),
-"hmm":       ( SIMP, None, "hmm$ \nHOW \nAT", "at"),
-"ack":       ( SIMP, None, "ack$ \nHOW \nAT", "at"),
-"guffaw":    ( SIMP, None, "guffaw$ \nHOW \nAT", "at"),
-"raise":     ( SIMP, None, " \nHOW raise$ an eyebrow \nAT", "at"),
-"snap":      ( SIMP, None, "snap$ \nYOUR fingers \nAT", "at"),
+"flex":      ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW" ),
+"snort":     ( SIMP, None, "snort$ \nHOW \nAT", "at" ),
+"pant":      ( SIMP, ( "heavily", ), "pant$ \nHOW \nAT", "at" ),
+"hmm":       ( SIMP, None, "hmm$ \nHOW \nAT", "at" ),
+"ack":       ( SIMP, None, "ack$ \nHOW \nAT", "at" ),
+"guffaw":    ( SIMP, None, "guffaw$ \nHOW \nAT", "at" ),
+"raise":     ( SIMP, None, " \nHOW raise$ an eyebrow \nAT", "at" ),
+"snap":      ( SIMP, None, "snap$ \nYOUR fingers \nAT", "at" ),
 "lust":      ( DEFA, None, "", "for"),
-"burp":      ( DEFA, ( "rudely", ), "", "at"),
+"burp":      ( DEFA, ( "rudely", ), "", "at" ),
 "bump":      ( DEFA, ( "clumsily", ), "", "into"),
-"wink":      ( DEFA, ( "suggestively", ), "", "at"),
-"smile":     ( DEFA, ( "happily", ), "", "at"),
-"yawn":      ( DEFA, None, "", "at"),
-"swoon":     ( DEFA, ( "romantically", ), "", "at"),
-"sneer":     ( DEFA, ( "disdainfully", ), "", "at"),
+"wink":      ( DEFA, ( "suggestively", ), "", "at" ),
+"smile":     ( DEFA, ( "happily", ), "", "at" ),
+"yawn":      ( DEFA, None, "", "at" ),
+"swoon":     ( DEFA, ( "romantically", ), "", "at" ),
+"sneer":     ( DEFA, ( "disdainfully", ), "", "at" ),
 "beam":      ( DEFA, None, "", "at" ),
 "point":     ( DEFA, None, "", "at" ),
 "grin":      ( DEFA, ( "evilly", ), "", "at" ),
@@ -107,7 +108,7 @@ VERBS = {
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
 "headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
 "shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
-"stink":     ( DEUX, None, "smell \nYOUR armpits. Eeew!", "smells \nYOUR armpits. Eeew!"),
+"stink":     ( DEUX, None, "smell \nYOUR armpits. Eeew!", "smells \nYOUR armpits. Eeew!" ),
 "grimace":   ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
 "stomp":     ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
 "snigger":   ( DEFA, ( "jeeringly", ), "", "at" ),
@@ -122,7 +123,7 @@ VERBS = {
 "swear":    ( SIMP, None, "swear$ \nWHAT \nAT \nHOW", "before" ),
 "criticize": ( PERS, None, "criticize$ \nWHAT \nHOW", "criticize$ \nWHO \nHOW" ),
 "lie":      ( PERS, None, "lie$ \nMSG \nHOW", "lie$ to \nWHO \nHOW" ),
-"mutter":   ( PERS, None, "mutter$ \nMSG \nHOW", "mutter$ to \nWHO \nHOW" ),
+"mutter":   ( PERS, None, "mutter$ \nMSG \nHOW", "mutter$ \nMSG to \nWHO \nHOW" ),
 "say":      ( SIMP, ( None, "'nothing" ), " \nHOW say$ \nMSG \nAT", "to" ),
 "babble":   ( SIMP, ( "incoherently", "'something" ), "babble$ \nMSG \nHOW \nAT", "to" ),
 "chant":    ( SIMP, ( None, "Hare Krishna Krishna Hare Hare" ), " \nHOW chant$: \nWHAT", "" ),
@@ -235,7 +236,7 @@ VERBS = {
 "panic":    ( SHRT, None, "" ),
 "pace":     ( SIMP, ( "impatiently", ), "start$ pacing \nHOW" ),
 "pale":     ( SIMP, None, "turn$ white as ashes \nHOW" ),
-"die":      ( DEUX, None, "fall \nHOW down and play dead", "falls \nHOW to the ground, dead" ),
+"die":      ( DEUX, None, " \nHOW fall down and play dead", " \nHOW falls to the ground, dead" ),
 "sleep":    ( DEUX, ( "soundly", ), "fall asleep \nHOW", "falls asleep \nHOW" ),
 "stumble":  ( SHRT, None, "" ),
 "bounce":   ( SHRT, None, "" ),
@@ -282,9 +283,7 @@ VERBS = {
 
 assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
 
-ADJECTIVES = { "bored", "confused", "curious", "sad", "surprised", "tired"}
-
-HOW = { "very", "quite", "barely", "extremely", "somewhat", "almost"}
+ACTION_QUALIFIERS = { "suddenly", "fail", "again", "pretend", "dont", "don't", "attempt" }
 
 BODY_PARTS = {
         "hand": "on the hand",
@@ -314,10 +313,6 @@ BODY_PARTS = {
         "everywhere": "everywhere",
         "shoulder": "on the shoulder"
     }
-
-ACTION_QUALIFIERS = { "help", "fail", "again", "dont", "don't", "feeling", "suddenly"}
-
-
 
 
 def insert_targetnames(message, who):
@@ -357,7 +352,7 @@ def spacify(string):
     return " " + string.lstrip() if string else ""
 
 
-def reduce_verb(player, verb, who, adverbs, message, bodyparts):
+def reduce_verb(player, verb, who, adverb, message, bodyparts):
     """
     This function takes a verb and the arguments given by
     the user and converts it to an internal representation:
@@ -372,15 +367,18 @@ def reduce_verb(player, verb, who, adverbs, message, bodyparts):
         message = " " + message
     else:
         msg = ""
-    adverbs = adverbs or verbdata[1] or []
-    print "*ADVERBS=", adverbs  # XXX
-    # XXX adverbs in verbdata: (normal-adverb, adverb-for-message, adverb-for-bodypart)
-    if bodyparts and len(adverbs) > 2 and adverbs[2]:
-        where = " " + adverbs[2]  # replace bodyparts string by specific ones from verbs table
-    else:
+    if not adverb:
+        if verbdata[1]:
+            adverb = verbdata[1][0]    # normal-adverb
+        else:
+            adverb = ""
+    print "*ADVERB=", adverb  # XXX
+    where = ""
+    if bodyparts:
         where = " " + lang.join([BODY_PARTS[part] for part in bodyparts])
-    how = "" if not adverbs else adverbs[0]  # normal-adverb
-    how = spacify(how or "")
+    elif not bodyparts and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
+        where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
+    how = spacify(adverb)
     print "*HOW=", how  # XXX
     print "*WHERE=", where  # XXX
 
@@ -467,12 +465,12 @@ class Soul(object):
     def process_verb(self, player, commandstring):
         verb = ""
         who = None
-        adverbs = None
+        adverb = None
         message = None
         bodyparts = None
         raise NotImplementedError("command string parser")   # @TODO: add command string parser...
-        return self.process_verb_parsed(player, verb, who, adverbs, message, bodyparts)
+        return self.process_verb_parsed(player, verb, who, adverb, message, bodyparts)
 
-    def process_verb_parsed(self, player, verb, who=None, adverbs=None, message="", bodyparts=None):
-        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverbs, message, bodyparts)
+    def process_verb_parsed(self, player, verb, who=None, adverb=None, message="", bodyparts=None):
+        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverb, message, bodyparts)
         return who, player_message, room_message, target_message
