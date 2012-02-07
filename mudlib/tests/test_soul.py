@@ -36,8 +36,9 @@ class TestSoul(unittest.TestCase):
 
     def testUnknownVerb(self):
         soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
         with self.assertRaises(mudlib.soul.UnknownVerbException):
-            soul.process_verb_parsed(None, "_unknown_verb_")
+            soul.process_verb_parsed(player, "_unknown_verb_")
 
     def testGender(self):
         soul = mudlib.soul.Soul()
