@@ -8,24 +8,29 @@ def test():
         who = None
     else:
         who = [mudlib.baseobjects.Living(name, "m") for name in who.split(",")]
-    adverbs = raw_input("adverbs (comma-separated list)?")
-    if not adverbs:
-        adverbs = None
-    else:
-        adverbs = adverbs.split(",")
+    adverb = raw_input("adverb?")
     message = raw_input("message?")
-    bodyparts = raw_input("bodyparts (comma-separated list)?")
-    if not bodyparts:
-        bodyparts = None
-    else:
-        bodyparts = bodyparts.split(",")
+    bodypart = raw_input("bodypart?")
     player = mudlib.player.Player("<playername>", "f")
-    who, player_message, room_message, target_message = player.socialize_parsed(verb, who, adverbs, message, bodyparts)
+    who, player_message, room_message, target_message = player.socialize_parsed(verb, who, adverb, message, bodypart)
+    print "PLAYER:", player_message
+    print "ROOM:", room_message
+    for target in who:
+        print "TARGET %s: %s" % (target.name, target_message)
+
+def test2():
+    cmd = raw_input("cmd?")
+    player = mudlib.player.Player("Fritz", "m")
+    player.location = mudlib.baseobjects.Location("somewhere")
+    player.location.all_livings["max"] = mudlib.baseobjects.Living("max","m")
+    player.location.all_livings["julie"] = mudlib.baseobjects.Living("julie","f")
+    verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
+    print "VERB:", verb
     print "PLAYER:", player_message
     print "ROOM:", room_message
     for target in who:
         print "TARGET %s: %s" % (target.name, target_message)
 
 if __name__ == "__main__":
-    test()
+    test2()
 

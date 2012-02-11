@@ -93,6 +93,7 @@ class Living(MudObject):
         self.subjective = languagetools.SUBJECTIVE[self.gender]
         self.possessive = languagetools.POSSESSIVE[self.gender]
         self.objective = languagetools.OBJECTIVE[self.gender]
+        self.location = None
 
 
 class Container(MudObject):
@@ -119,3 +120,5 @@ class Location(Container):
     """
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description)
+        self.all_livings = {}
+

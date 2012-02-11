@@ -14,5 +14,5 @@ class Player(baseobjects.Living):
     def socialize(self, commandstring):
         return self.soul.process_verb(self, commandstring)
 
-    def socialize_parsed(self, verb, who=None, adverbs=None, message="", bodyparts=None):
-        return self.soul.process_verb_parsed(self, verb, who, adverbs, message, bodyparts)
+    def socialize_parsed(self, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
+        return self.soul.process_verb_parsed(self, verb, who, adverb, message, bodypart, qualifier)

@@ -7,12 +7,15 @@ Based on ancient soul.c v1 written in LPC by Fredrik Hübinette (aka profezzorn@
 
 """
 
+import re
 import mudlib.languagetools as lang
 
 
 class SoulException(Exception):
     pass
-class UnknownVerbException(SoulException):
+class ParseException(SoulException):
+    pass
+class UnknownVerbException(ParseException):
     pass
 
 
@@ -283,7 +286,16 @@ VERBS = {
 
 assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
 
-ACTION_QUALIFIERS = { "suddenly", "fail", "again", "pretend", "dont", "don't", "attempt" }
+ACTION_QUALIFIERS = {
+    # qualifier -> (actionmsg, roommsg, use room actionstr)
+    "suddenly": ("suddenly %s", "suddenly %s", True),
+    "fail": ("try to %s, but fail miserably", "tries to %s, but fails miserably", False),
+    "again": ("%s again", "%s again", True),
+    "pretend": ("pretend to %s", "pretends to %s", False),
+    "dont": ("don't %s", "doesn't %s", False),
+    "don't": ("don't %s", "doesn't %s", False),
+    "attempt": ("attempt to %s, without much success", "attempts to %s, without much success", False)
+}
 
 BODY_PARTS = {
         "hand": "on the hand",
@@ -315,29 +327,6 @@ BODY_PARTS = {
     }
 
 
-def insert_targetnames(message, who):
-    targetnames = lang.join([t.name for t in who or []])
-    return message.replace(" \nWHO", " " + targetnames)
-
-
-def room_message(player, message, who):
-    message = insert_targetnames(message, who)
-    message = message.replace(" \nYOUR", " " + player.possessive)
-    return lang.fullstop(player.name + " " + message.strip())
-
-
-def target_message(player, message):
-    message = message.replace(" \nWHO", " you")
-    message = message.replace(" \nYOUR", " " + player.possessive)
-    return lang.fullstop(player.name + " " + message.strip())
-
-
-def player_message(message, who):
-    message = insert_targetnames(message, who)
-    message = message.replace(" \nYOUR", " your")
-    return lang.fullstop("you " + message.strip())
-
-
 def check_person(action, who):
     if not who and ("\nWHO" in action or "\nPOSS" in action or "\nTHEIR" in action or "\nOBJ" in action):
         return False
@@ -349,115 +338,8 @@ def spacify(string):
     return " " + string.lstrip() if string else ""
 
 
-def reduce_verb(player, verb, who, adverb, message, bodyparts):
-    """
-    This function takes a verb and the arguments given by
-    the user and converts it to an internal representation:
-    (targets, playermessage, roommessage, targetmessage)
-    """
-    if not player:
-        raise SoulException("no player in reduce_verb")
-    verbdata = VERBS.get(verb)
-    if not verbdata:
-        raise UnknownVerbException(verb)
-    vtype = verbdata[0]
-    who = who or []
-    bodyparts = bodyparts or []
-    if not message and verbdata[1] and len(verbdata[1]) > 1:
-        message = verbdata[1][1]  # get the message from the verbs table
-    if message:
-        if message.startswith("'"):
-            # use the message without single quotes around it
-            msg = message = spacify(message[1:])
-        else:
-            msg = " '" + message + "'"
-            message = " " + message
-    else:
-        msg = message = ""
-    if not adverb:
-        if verbdata[1]:
-            adverb = verbdata[1][0]    # normal-adverb
-        else:
-            adverb = ""
-    where = ""
-    if bodyparts:
-        where = " " + lang.join([BODY_PARTS[part] for part in bodyparts])
-    elif not bodyparts and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
-        where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
-    how = spacify(adverb)
-
-    def result_messages(action, action_room):
-        return who, \
-               player_message(action, who), \
-               room_message(player, action_room, who), \
-               target_message(player, action_room)
-
-    # construct the action string
-    action = None
-    if vtype == DEUX:
-        action = verbdata[2]
-        action_room = verbdata[3]
-        if not check_person(action, who):
-            raise SoulException("Need person for verb " + verb)
-        action = action.replace(" \nWHERE", where)
-        action_room = action_room.replace(" \nWHERE", where)
-        action = action.replace(" \nWHAT", message)
-        action = action.replace(" \nMSG", msg)
-        action_room = action_room.replace(" \nWHAT", message)
-        action_room = action_room.replace(" \nMSG", msg)
-        action = action.replace(" \nHOW", how)
-        action_room = action_room.replace(" \nHOW", how)
-        return result_messages(action, action_room)
-    elif vtype == QUAD:
-        if not who:
-            action = verbdata[2]
-            action_room = verbdata[3]
-        else:
-            action = verbdata[4]
-            action_room = verbdata[5]
-        action = action.replace(" \nWHERE", where)
-        action_room = action_room.replace(" \nWHERE", where)
-        action = action.replace(" \nWHAT", message)
-        action = action.replace(" \nMSG", msg)
-        action_room = action_room.replace(" \nWHAT", message)
-        action_room = action_room.replace(" \nMSG", msg)
-        action = action.replace(" \nHOW", how)
-        action_room = action_room.replace(" \nHOW", how)
-        return result_messages(action, action_room)
-    elif vtype == FULL:
-        raise NotImplementedError("vtype FULL")  # doesn't matter, FULL is not used yet anyway
-    elif vtype == DEFA:
-        action = verb + "$ \nHOW \nAT"
-    elif vtype == PREV:
-        action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW"
-    elif vtype == PHYS:
-        action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
-    elif vtype == SHRT:
-        action = verb + "$" + spacify(verbdata[2]) + " \nHOW"
-    elif vtype == PERS:
-        action = verbdata[3] if who else verbdata[2]
-    elif vtype == SIMP:
-        action = verbdata[2]
-    else:
-        raise NotImplementedError("Unknown vtype " + vtype)
-
-    if who and len(verbdata) > 3:
-        action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
-    else:
-        action = action.replace(" \nAT", "")
-
-    if not check_person(action, who):
-        raise SoulException("Need person for verb " + verb)
-
-    action = action.replace(" \nHOW", how)
-    action = action.replace(" \nWHERE", where)
-    action = action.replace(" \nWHAT", message)
-    action = action.replace(" \nMSG", msg)
-    action_room = action
-    action = action.replace("$", "")
-    action_room = action_room.replace("$", "s")
-    return result_messages(action, action_room)
-
+_message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
+_skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
 
 class Soul(object):
     """
@@ -467,14 +349,230 @@ class Soul(object):
         pass
 
     def process_verb(self, player, commandstring):
-        verb = ""
-        who = None
-        adverb = None
-        message = None
-        bodyparts = None
-        raise NotImplementedError("command string parser")   # @TODO: add command string parser...
-        return self.process_verb_parsed(player, verb, who, adverb, message, bodyparts)
+        """
+        Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
+        and another tuple containing the targets of the action and the various action messages.
+        """
+        qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
+        if who:
+            # translate the names to actual Livings objects
+            if player.location and player.location.all_livings:
+                all_livings = player.location.all_livings
+            else:
+                all_livings = { player.name: player }
+            who = [ all_livings[name] for name in who ]
+        result = self.process_verb_parsed(player, verb, who, adverb, message, bodypart, qualifier)
+        if qualifier:
+            verb = qualifier + " " + verb
+        return verb, result
 
-    def process_verb_parsed(self, player, verb, who=None, adverb=None, message="", bodyparts=None):
-        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverb, message, bodyparts)
+    def process_verb_parsed(self, player, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
+        """
+        This function takes a verb and the arguments given by the user
+        and converts it to an internal representation: (targets, playermessage, roommessage, targetmessage)
+        """
+        if not player:
+            raise SoulException("no player in reduce_verb")
+        verbdata = VERBS.get(verb)
+        if not verbdata:
+            raise UnknownVerbException(verb)
+        vtype = verbdata[0]
+        who = who or []
+        if not message and verbdata[1] and len(verbdata[1]) > 1:
+            message = verbdata[1][1]  # get the message from the verbs table
+        if message:
+            if message.startswith("'"):
+                # use the message without single quotes around it
+                msg = message = spacify(message[1:])
+            else:
+                msg = " '" + message + "'"
+                message = " " + message
+        else:
+            msg = message = ""
+        if not adverb:
+            if verbdata[1]:
+                adverb = verbdata[1][0]    # normal-adverb
+            else:
+                adverb = ""
+        where = ""
+        if bodypart:
+            where = " " + BODY_PARTS[bodypart]
+        elif not bodypart and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
+            where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
+        how = spacify(adverb)
+
+        def result_messages(action, action_room):
+            if qualifier:
+                qual_action, qual_room, use_room_default = ACTION_QUALIFIERS[qualifier]
+                action_room = qual_room % action_room if use_room_default else qual_room % action
+                action = qual_action % action
+
+            def insert_targetnames(message, who):
+                targetnames = lang.join([t.name for t in who or []])
+                return message.replace(" \nWHO", " " + targetnames)
+
+            # construct message seen by player
+            player_message = insert_targetnames(action, who)
+            player_message = player_message.replace(" \nYOUR", " your")
+            player_message = lang.fullstop("you " + player_message.strip())
+            # construct message seen by room
+            room_message = insert_targetnames(action_room, who)
+            room_message = room_message.replace(" \nYOUR", " " + player.possessive)
+            room_message = lang.fullstop(player.name + " " + room_message.strip())
+            # construct message seen by targets
+            target_message = action_room.replace(" \nWHO", " you")
+            target_message = target_message.replace(" \nYOUR", " " + player.possessive)
+            target_message = lang.fullstop(player.name + " " + target_message.strip())
+            return who, player_message, room_message, target_message
+
+        # construct the action string
+        action = None
+        if vtype == DEUX:
+            action = verbdata[2]
+            action_room = verbdata[3]
+            if not check_person(action, who):
+                raise SoulException("Need person for verb " + verb)
+            action = action.replace(" \nWHERE", where)
+            action_room = action_room.replace(" \nWHERE", where)
+            action = action.replace(" \nWHAT", message)
+            action = action.replace(" \nMSG", msg)
+            action_room = action_room.replace(" \nWHAT", message)
+            action_room = action_room.replace(" \nMSG", msg)
+            action = action.replace(" \nHOW", how)
+            action_room = action_room.replace(" \nHOW", how)
+            return result_messages(action, action_room)
+        elif vtype == QUAD:
+            if not who:
+                action = verbdata[2]
+                action_room = verbdata[3]
+            else:
+                action = verbdata[4]
+                action_room = verbdata[5]
+            action = action.replace(" \nWHERE", where)
+            action_room = action_room.replace(" \nWHERE", where)
+            action = action.replace(" \nWHAT", message)
+            action = action.replace(" \nMSG", msg)
+            action_room = action_room.replace(" \nWHAT", message)
+            action_room = action_room.replace(" \nMSG", msg)
+            action = action.replace(" \nHOW", how)
+            action_room = action_room.replace(" \nHOW", how)
+            return result_messages(action, action_room)
+        elif vtype == FULL:
+            raise NotImplementedError("vtype FULL")  # doesn't matter, FULL is not used yet anyway
+        elif vtype == DEFA:
+            action = verb + "$ \nHOW \nAT"
+        elif vtype == PREV:
+            action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW"
+        elif vtype == PHYS:
+            action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
+        elif vtype == SHRT:
+            action = verb + "$" + spacify(verbdata[2]) + " \nHOW"
+        elif vtype == PERS:
+            action = verbdata[3] if who else verbdata[2]
+        elif vtype == SIMP:
+            action = verbdata[2]
+        else:
+            raise NotImplementedError("Unknown vtype " + vtype)
+
+        if who and len(verbdata) > 3:
+            action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
+        else:
+            action = action.replace(" \nAT", "")
+
+        if not check_person(action, who):
+            raise SoulException("Need person for verb " + verb)
+
+        action = action.replace(" \nHOW", how)
+        action = action.replace(" \nWHERE", where)
+        action = action.replace(" \nWHAT", message)
+        action = action.replace(" \nMSG", msg)
+        action_room = action
+        action = action.replace("$", "")
+        action_room = action_room.replace("$", "s")
+        return result_messages(action, action_room)
+        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverb, message, bodypart, qualifier)
         return who, player_message, room_message, target_message
+
+    def parse(self, player, cmd):
+        """
+        Parse a command string into the following tuple:
+        qualifier, verb, who, adverb, message, bodypart
+        who = a set of player/npc names (only strings (names) are returned, not the corresponding player objects)
+        """
+        qualifier = None
+        verb = None
+        adverb = None
+        who = set()
+        message = []
+        bodypart = None
+
+        # a substring enclosed in quotes will be extracted as the message
+        m = _message_regex.search(cmd)
+        if m:
+            message = [m.group(1).strip()]
+            parts = cmd.partition(m.group(0))
+            cmd = parts[0] + parts[2]
+
+        words = cmd.split()
+        if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
+            qualifier = words.pop(0)
+        if words[0] in _skip_words:
+            words.pop(0)
+        if words[0] in VERBS:
+            verb = words.pop(0)
+        else:
+            raise UnknownVerbException(words[0])
+
+        include_flag = True
+        collect_message = False
+        verbdata = VERBS[verb][2]
+        message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
+        if player.location and player.location.all_livings:
+            all_livings = player.location.all_livings
+        else:
+            # if the player is not in a sensible location, just make up a fake one
+            all_livings = { player.name: player }
+        for word in words:
+            if collect_message:
+                message.append(word)
+                continue
+            if word in ("them", "him", "her", "it"):
+                raise ParseException("it is not clear who you mean.")
+            elif word in ("me", "myself", "i", "I"):
+                if include_flag:
+                    who.add(player.name)
+                elif player.name in who:
+                    who.remove(player.name)
+            elif word in BODY_PARTS:
+                if bodypart:
+                    raise ParseException("you can't do that %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
+                bodypart = word
+            elif word in ("everyone", "everybody", "all"):
+                if include_flag:
+                    if not all_livings:
+                        raise ParseException("there is nobody here.")
+                    who.update(all_livings.keys())    # include everyone visible
+                else:
+                    who.clear()
+            elif word == "everything":
+                raise ParseException("you can't do something to everything around you, be more specific.")
+            elif word in ("except", "but"):
+                include_flag = not include_flag
+            elif word in lang.ADVERBS:
+                if adverb:
+                    raise ParseException("you can't do that %s and %s." % (adverb, word))
+                adverb = word
+            elif word in all_livings:
+                if include_flag:
+                    who.add(word)
+                elif word in who:
+                    who.remove(word)
+            else:
+                if message_verb:
+                    collect_message = True
+                    message.append(word)
+                elif word not in _skip_words:
+                    raise ParseException("%s is unrecognized." % word)
+
+        message = " ".join(message)
+        return qualifier, verb, who, adverb, message, bodypart

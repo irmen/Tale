@@ -1,4 +1,4 @@
-a cappella
+acapella
 abjectly
 ably
 abnormally
@@ -126,7 +126,7 @@ artily
 artistically
 artisticly
 artlessly
-as well
+aswell
 ashamedly
 assiduously
 assuringly
@@ -226,7 +226,6 @@ brusquely
 brutally
 busily
 buzzingly
-by chance
 cadaverously
 caddishly
 cagily
@@ -424,7 +423,7 @@ dangerously
 daringly
 darkly
 dazzlingly
-de facto
+defacto
 deadly
 dearly
 deathly
@@ -1070,7 +1069,6 @@ intermittently
 internally
 internationally
 intimately
-into space
 intolerably
 intransitively
 intravenously
@@ -1815,7 +1813,6 @@ soothingly
 sordidly
 sorely
 sorrowfully
-sort of
 sortof
 sothingly
 soulfully
