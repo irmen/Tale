@@ -147,6 +147,10 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("you triumphantly beep max on the arm.", player_msg)
         self.assertEqual("julie triumphantly beeps max on the arm.", room_msg)
         self.assertEqual("julie triumphantly beeps you on the arm.", target_msg)
+        # check handling of more than one bodypart
+        with self.assertRaises(mudlib.soul.ParseException) as ex:
+            soul.process_verb(player, "kick max side knee")
+        self.assertEqual("you can't do that both in the side and on the knee.", ex.exception.message)
 
     def testQualifier(self):
         soul = mudlib.soul.Soul()
@@ -171,7 +175,7 @@ class TestSoul(unittest.TestCase):
         # check handling of more than one adverb
         with self.assertRaises(mudlib.soul.ParseException) as ex:
             soul.process_verb(player, "cough sickly and noisily")
-        self.assertEqual("you can't do that sickly and noisily.", ex.exception.message)
+        self.assertEqual("you can't do that both sickly and noisily.", ex.exception.message)
         # check handling of adverb prefix where there is 1 unique result
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "cough sic")
         self.assertEqual("you cough sickly.", player_msg)

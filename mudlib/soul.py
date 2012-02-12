@@ -4,8 +4,8 @@ A player's 'soul', which provides a lot of possible emotes (verbs).
 
 Written by Irmen de Jong (irmen@razorvine.net)
 Based on ancient soul.c v1.2 written in LPC by profezzorn@nannymud (Fredrik Hübinette)
-But only the verb table is more or less intact,  the verb parsing and
-message generation are more or less fully rewritten.
+Only the verb table is more or less intact (with some additions and fixes).
+The verb parsing and message generation have been rewritten.
 """
 
 import re
@@ -624,7 +624,7 @@ class Soul(object):
                     who.remove(player.name)
             elif word in BODY_PARTS:
                 if bodypart:
-                    raise ParseException("you can't do that %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
+                    raise ParseException("you can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
                 bodypart = word
             elif word in ("everyone", "everybody", "all"):
                 if include_flag:
@@ -639,7 +639,7 @@ class Soul(object):
                 include_flag = not include_flag
             elif word in lang.ADVERBS:
                 if adverb:
-                    raise ParseException("you can't do that %s and %s." % (adverb, word))
+                    raise ParseException("you can't do that both %s and %s." % (adverb, word))
                 adverb = word
             elif word in all_livings:
                 if include_flag:
@@ -656,7 +656,7 @@ class Soul(object):
                     if len(adverbs)==1:
                         word = adverbs[0]
                         if adverb:
-                            raise ParseException("you can't do that %s and %s." % (adverb, word))
+                            raise ParseException("you can't do that both %s and %s." % (adverb, word))
                         adverb = word
                         continue
                     elif len(adverbs)>1:
