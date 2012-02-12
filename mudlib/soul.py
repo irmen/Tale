@@ -13,10 +13,17 @@ import mudlib.languagetools as lang
 
 
 class SoulException(Exception):
+    """Internal error, should never happen. Not intended for user display."""
     pass
 class ParseException(SoulException):
+    """Problem with parsing the user input. Should be shown to the user as a nice error message."""
     pass
 class UnknownVerbException(ParseException):
+    """
+    The soul doesn't recognise the verb that the user typed.
+    The engine can and should search for other places that define this verb first.
+    If nothing recognises it, this error should be shown to the user in a nice way.
+    """
     pass
 
 
@@ -143,6 +150,7 @@ VERBS = {
 "yell":     ( SIMP, ( "in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at" ),
 "utter":    ( SIMP, None, " \nHOW utter$ \nMSG \nAT", "to" ),
 "whisper":  ( SIMP, None, "whisper$ \nMSG \nHOW \nAT", "to" ),
+"emote":    ( DEUX, None, "emote: player \nWHAT", " \nWHAT"),
 
 # Verbs that require a person
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
@@ -340,6 +348,7 @@ def spacify(string):
 
 
 def who_replacement(actor, target, observer):
+    """determines what word to use for a WHO"""
     if target is actor:
         if actor is observer:
             return "yourself"       # you kick yourself
@@ -353,6 +362,7 @@ def who_replacement(actor, target, observer):
 
 
 def poss_replacement(actor, target, observer):
+    """determines what word to use for a POSS"""
     if target is actor:
         if actor is observer:
             return "your own"       # your own foot
@@ -370,7 +380,8 @@ _skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
 
 class Soul(object):
     """
-    The 'soul' of a Player. Handles the highlevel verb actions and allows for the social player interaction.
+    The 'soul' of a Player. Handles the high level verb actions and allows for social player interaction.
+    Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.
     """
     def __init__(self):
         pass
@@ -399,7 +410,7 @@ class Soul(object):
         and converts it to an internal representation: (targets, playermessage, roommessage, targetmessage)
         """
         if not player:
-            raise SoulException("no player in reduce_verb")
+            raise SoulException("no player in process_verb_parsed")
         verbdata = VERBS.get(verb)
         if not verbdata:
             raise UnknownVerbException(verb)
@@ -520,7 +531,7 @@ class Soul(object):
         elif vtype == SIMP:
             action = verbdata[2]
         else:
-            raise NotImplementedError("Unknown vtype " + vtype)
+            raise SoulException("invalid vtype " + vtype)
 
         if who and len(verbdata) > 3:
             action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
@@ -528,7 +539,7 @@ class Soul(object):
             action = action.replace(" \nAT", "")
 
         if not check_person(action, who):
-            raise SoulException("Need person for verb " + verb)
+            raise ParseException("Need person for verb " + verb)
 
         action = action.replace(" \nHOW", how)
         action = action.replace(" \nWHERE", where)
@@ -538,8 +549,6 @@ class Soul(object):
         action = action.replace("$", "")
         action_room = action_room.replace("$", "s")
         return result_messages(action, action_room)
-        who, player_message, room_message, target_message = reduce_verb(player, verb, who, adverb, message, bodypart, qualifier)
-        return who, player_message, room_message, target_message
 
     def parse(self, player, cmd):
         """
@@ -620,6 +629,16 @@ class Soul(object):
                     collect_message = True
                     message.append(word)
                 elif word not in _skip_words:
+                    # unrecognised word, check if it is a prefix of an adverb
+                    adverbs = lang.adverb_by_prefix(word)
+                    if len(adverbs)==1:
+                        word = adverbs[0]
+                        if adverb:
+                            raise ParseException("you can't do that %s and %s." % (adverb, word))
+                        adverb = word
+                        continue
+                    elif len(adverbs)>1:
+                        raise ParseException("what adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
                     if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
                         raise ParseException("the word %s makes no sense at that location." % word)
                     else:
