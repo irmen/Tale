@@ -3,8 +3,9 @@
 A player's 'soul', which provides a lot of possible emotes (verbs).
 
 Written by Irmen de Jong (irmen@razorvine.net)
-Based on ancient soul.c v1 written in LPC by Fredrik Hübinette (aka profezzorn@nannymud)
-
+Based on ancient soul.c v1.2 written in LPC by profezzorn@nannymud (Fredrik Hübinette)
+But only the verb table is more or less intact,  the verb parsing and
+message generation are more or less fully rewritten.
 """
 
 import re
@@ -29,7 +30,7 @@ DEUX = 7  # a room text is provided with alternate spelling or wording  (you fal
 QUAD = 8  # like DEUX, but also provides two more texts for when a target is used
 FULL = 9  # not used yet
 
-# escapes used: AT, HOW, IS, MSG, MY, OBJ, POSS, SUBJ, THEIR, WHAT, WHERE, WHO, YOUR
+# escapes used: AT, HOW, IS, MSG, MY, POSS, SUBJ, WHAT, WHERE, WHO, YOUR
 # adverbs tuple: (adverb, message, where)
 # if message starts with a ' (single quote), it will appear *without quotes*.
 
@@ -328,7 +329,7 @@ BODY_PARTS = {
 
 
 def check_person(action, who):
-    if not who and ("\nWHO" in action or "\nPOSS" in action or "\nTHEIR" in action or "\nOBJ" in action):
+    if not who and ("\nWHO" in action or "\nPOSS" in action):
         return False
     return True
 
@@ -349,6 +350,19 @@ def who_replacement(actor, target, observer):
             return "you"            # ... kicks you
         else:
             return target.name      # ... kicks ...
+
+
+def poss_replacement(actor, target, observer):
+    if target is actor:
+        if actor is observer:
+            return "your own"       # your own foot
+        else:
+            return actor.possessive + " own"   # his own foot
+    else:
+        if target is observer:
+            return "your"           # your foot
+        else:
+            return target.name + lang.possessive_letter(target.name)
 
 
 _message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
@@ -421,19 +435,43 @@ class Soul(object):
                 action = qual_action % action
             # construct message seen by player
             targetnames = [ who_replacement(player, target, player) for target in who ]
-            player_message = action.replace(" \nWHO", " " + lang.join(targetnames))
-            player_message = player_message.replace(" \nYOUR", " your")
-            player_message = lang.fullstop("you " + player_message.strip())
+            player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
+            player_msg = player_msg.replace(" \nYOUR", " your")
+            player_msg = player_msg.replace(" \nMY", " your")
             # construct message seen by room
             targetnames = [ who_replacement(player, target, None) for target in who ]
-            room_message = action_room.replace(" \nWHO", " " + lang.join(targetnames))
-            room_message = room_message.replace(" \nYOUR", " " + player.possessive)
-            room_message = lang.fullstop(player.name + " " + room_message.strip())
+            room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
+            room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
+            room_msg = room_msg.replace(" \nMY", " " + player.objective)
             # construct message seen by targets
-            target_message = action_room.replace(" \nWHO", " you")
-            target_message = target_message.replace(" \nYOUR", " " + player.possessive)
-            target_message = lang.fullstop(player.name + " " + target_message.strip())
-            return who, player_message, room_message, target_message
+            target_msg = action_room.replace(" \nWHO", " you")
+            target_msg = target_msg.replace(" \nYOUR", " " + player.possessive)
+            target_msg = target_msg.replace(" \nPOSS", " your")
+            target_msg = target_msg.replace(" \nIS", " are")
+            target_msg = target_msg.replace(" \nSUBJ", " you")
+            target_msg = target_msg.replace(" \nMY", " " + player.objective)
+            # fix up POSS, IS, SUBJ in the player and room messages
+            if len(who) == 1:
+                player_msg = player_msg.replace(" \nIS", " is")
+                player_msg = player_msg.replace(" \nSUBJ", " " + who[0].subjective)
+                player_msg = player_msg.replace(" \nPOSS", " " + poss_replacement(player, who[0], player))
+                room_msg = room_msg.replace(" \nIS", " is")
+                room_msg = room_msg.replace(" \nSUBJ", " " + who[0].subjective)
+                room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, who[0], None))
+            else:
+                targetnames_player = lang.join([poss_replacement(player, living, player) for living in who])
+                targetnames_room = lang.join([poss_replacement(player, living, None) for living in who])
+                player_msg = player_msg.replace(" \nIS", " are")
+                player_msg = player_msg.replace(" \nSUBJ", " they")
+                player_msg = player_msg.replace(" \nPOSS", " " + targetnames_player + lang.possessive_letter(targetnames_player))
+                room_msg = room_msg.replace(" \nIS", " are")
+                room_msg = room_msg.replace(" \nSUBJ", " they")
+                room_msg = room_msg.replace(" \nPOSS", " " + targetnames_room + lang.possessive_letter(targetnames_room))
+            # add fullstops at the end
+            player_msg = lang.fullstop("you " + player_msg.strip())
+            room_msg = lang.fullstop(player.name + " " + room_msg.strip())
+            target_msg = lang.fullstop(player.name + " " + target_msg.strip())
+            return who, player_msg, room_msg, target_msg
 
         # construct the action string
         action = None
@@ -582,7 +620,10 @@ class Soul(object):
                     collect_message = True
                     message.append(word)
                 elif word not in _skip_words:
-                    raise ParseException("%s is unrecognized." % word)
+                    if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
+                        raise ParseException("the word %s makes no sense at that location." % word)
+                    else:
+                        raise ParseException("the word %s is unrecognized." % word)
 
         message = " ".join(message)
         return qualifier, verb, who, adverb, message, bodypart

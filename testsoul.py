@@ -16,6 +16,8 @@ def test():
     print "PLAYER:", player_message
     print "ROOM:", room_message
     for target in who:
+        if target is player:
+            continue
         print "TARGET %s: %s" % (target.name, target_message)
 
 def test2():
@@ -30,6 +32,8 @@ def test2():
     print "PLAYER:", player_message
     print "ROOM:", room_message
     for target in who:
+        if target is player:
+            continue
         print "TARGET %s: %s" % (target.name, target_message)
 
 if __name__ == "__main__":
