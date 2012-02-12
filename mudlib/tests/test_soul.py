@@ -49,6 +49,21 @@ class TestSoul(unittest.TestCase):
         with self.assertRaises(mudlib.soul.UnknownVerbException):
             soul.process_verb_parsed(player, "_unknown_verb_")
 
+    def testWho(self):
+        player = mudlib.player.Player("fritz","m")
+        julie = mudlib.baseobjects.Living("julie", "f")
+        harry = mudlib.baseobjects.Living("harry", "m")
+        self.assertEqual("yourself", mudlib.soul.who_replacement(player, player, player))  # you kick yourself
+        self.assertEqual("himself",  mudlib.soul.who_replacement(player, player, julie))   # fritz kicks himself
+        self.assertEqual("harry",    mudlib.soul.who_replacement(player, harry, player))   # you kick harry
+        self.assertEqual("harry",    mudlib.soul.who_replacement(player, harry, julie))    # fritz kicks harry
+        self.assertEqual("harry",    mudlib.soul.who_replacement(player, harry, None))     # fritz kicks harry
+        self.assertEqual("you",      mudlib.soul.who_replacement(julie, player, player))  # julie kicks you
+        self.assertEqual("fritz",    mudlib.soul.who_replacement(julie, player, harry))   # julie kicks fritz
+        self.assertEqual("harry",    mudlib.soul.who_replacement(julie, harry, player))   # julie kicks harry
+        self.assertEqual("you",      mudlib.soul.who_replacement(julie, harry, harry))    # julie kicks you
+        self.assertEqual("harry",    mudlib.soul.who_replacement(julie, harry, None))     # julie kicks harry
+
     def testGender(self):
         soul = mudlib.soul.Soul()
         with self.assertRaises(KeyError):

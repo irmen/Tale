@@ -19,11 +19,12 @@ def test():
         print "TARGET %s: %s" % (target.name, target_message)
 
 def test2():
-    cmd = raw_input("cmd?")
-    player = mudlib.player.Player("Fritz", "m")
+    cmd = raw_input("cmd?> ")
+    player = mudlib.player.Player("fritz", "m")
     player.location = mudlib.baseobjects.Location("somewhere")
     player.location.all_livings["max"] = mudlib.baseobjects.Living("max","m")
     player.location.all_livings["julie"] = mudlib.baseobjects.Living("julie","f")
+    player.location.all_livings[player.name] = player
     verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
     print "VERB:", verb
     print "PLAYER:", player_message
@@ -32,5 +33,7 @@ def test2():
         print "TARGET %s: %s" % (target.name, target_message)
 
 if __name__ == "__main__":
-    test2()
+    while True:
+        test2()
+        print
 

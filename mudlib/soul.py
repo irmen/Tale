@@ -338,6 +338,19 @@ def spacify(string):
     return " " + string.lstrip() if string else ""
 
 
+def who_replacement(actor, target, observer):
+    if target is actor:
+        if actor is observer:
+            return "yourself"       # you kick yourself
+        else:
+            return actor.objective + "self"    # ... kicks himself
+    else:
+        if target is observer:
+            return "you"            # ... kicks you
+        else:
+            return target.name      # ... kicks ...
+
+
 _message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
 _skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
 
@@ -406,17 +419,14 @@ class Soul(object):
                 qual_action, qual_room, use_room_default = ACTION_QUALIFIERS[qualifier]
                 action_room = qual_room % action_room if use_room_default else qual_room % action
                 action = qual_action % action
-
-            def insert_targetnames(message, who):
-                targetnames = lang.join([t.name for t in who or []])
-                return message.replace(" \nWHO", " " + targetnames)
-
             # construct message seen by player
-            player_message = insert_targetnames(action, who)
+            targetnames = [ who_replacement(player, target, player) for target in who ]
+            player_message = action.replace(" \nWHO", " " + lang.join(targetnames))
             player_message = player_message.replace(" \nYOUR", " your")
             player_message = lang.fullstop("you " + player_message.strip())
             # construct message seen by room
-            room_message = insert_targetnames(action_room, who)
+            targetnames = [ who_replacement(player, target, None) for target in who ]
+            room_message = action_room.replace(" \nWHO", " " + lang.join(targetnames))
             room_message = room_message.replace(" \nYOUR", " " + player.possessive)
             room_message = lang.fullstop(player.name + " " + room_message.strip())
             # construct message seen by targets
