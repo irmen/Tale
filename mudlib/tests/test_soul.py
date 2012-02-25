@@ -150,7 +150,7 @@ class TestSoul(unittest.TestCase):
         # check handling of more than one bodypart
         with self.assertRaises(mudlib.soul.ParseException) as ex:
             soul.process_verb(player, "kick max side knee")
-        self.assertEqual("you can't do that both in the side and on the knee.", ex.exception.message)
+        self.assertEqual("You can't do that both in the side and on the knee.", ex.exception.message)
 
     def testQualifier(self):
         soul = mudlib.soul.Soul()
@@ -175,7 +175,7 @@ class TestSoul(unittest.TestCase):
         # check handling of more than one adverb
         with self.assertRaises(mudlib.soul.ParseException) as ex:
             soul.process_verb(player, "cough sickly and noisily")
-        self.assertEqual("you can't do that both sickly and noisily.", ex.exception.message)
+        self.assertEqual("You can't do that both sickly and noisily.", ex.exception.message)
         # check handling of adverb prefix where there is 1 unique result
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "cough sic")
         self.assertEqual("you cough sickly.", player_msg)
@@ -183,7 +183,7 @@ class TestSoul(unittest.TestCase):
         # check handling of adverb prefix where there are more results
         with self.assertRaises(mudlib.soul.ParseException) as ex:
             soul.process_verb(player, "cough si")
-        self.assertEqual("what adverb did you mean: sickly, sideways, signally, significantly, or silently?", ex.exception.message)
+        self.assertEqual("What adverb did you mean: sickly, sideways, signally, significantly, or silently?", ex.exception.message)
 
     def testUnrecognisedWord(self):
         soul = mudlib.soul.Soul()

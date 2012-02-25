@@ -412,6 +412,7 @@ class Soul(object):
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
         and another tuple containing the targets of the action and the various action messages.
+        Any action qualifier is added to the verb string if it is present ("fail kick").
         """
         qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
         if who:
@@ -512,7 +513,7 @@ class Soul(object):
             action = verbdata[2]
             action_room = verbdata[3]
             if not check_person(action, who):
-                raise SoulException("Need person for verb " + verb)
+                raise ParseException("The verb %s needs a person." % verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
             action = action.replace(" \nWHAT", message)
@@ -539,7 +540,7 @@ class Soul(object):
             action_room = action_room.replace(" \nHOW", how)
             return result_messages(action, action_room)
         elif vtype == FULL:
-            raise NotImplementedError("vtype FULL")  # doesn't matter, FULL is not used yet anyway
+            raise SoulException("vtype FULL")  # doesn't matter, FULL is not used yet anyway
         elif vtype == DEFA:
             action = verb + "$ \nHOW \nAT"
         elif vtype == PREV:
@@ -561,7 +562,7 @@ class Soul(object):
             action = action.replace(" \nAT", "")
 
         if not check_person(action, who):
-            raise ParseException("Need person for verb " + verb)
+            raise ParseException("The verb %s needs a person." % verb)
 
         action = action.replace(" \nHOW", how)
         action = action.replace(" \nWHERE", where)
@@ -616,7 +617,7 @@ class Soul(object):
                 message.append(word)
                 continue
             if word in ("them", "him", "her", "it"):
-                raise ParseException("it is not clear who you mean.")
+                raise ParseException("It is not clear who you mean.")
             elif word in ("me", "myself", "i", "I"):
                 if include_flag:
                     who.add(player.name)
@@ -624,22 +625,22 @@ class Soul(object):
                     who.remove(player.name)
             elif word in BODY_PARTS:
                 if bodypart:
-                    raise ParseException("you can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
+                    raise ParseException("You can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
                 bodypart = word
             elif word in ("everyone", "everybody", "all"):
                 if include_flag:
                     if not all_livings:
-                        raise ParseException("there is nobody here.")
+                        raise ParseException("There is nobody here.")
                     who.update(all_livings.keys())    # include everyone visible
                 else:
                     who.clear()
             elif word == "everything":
-                raise ParseException("you can't do something to everything around you, be more specific.")
+                raise ParseException("You can't do something to everything around you, be more specific.")
             elif word in ("except", "but"):
                 include_flag = not include_flag
             elif word in lang.ADVERBS:
                 if adverb:
-                    raise ParseException("you can't do that both %s and %s." % (adverb, word))
+                    raise ParseException("You can't do that both %s and %s." % (adverb, word))
                 adverb = word
             elif word in all_livings:
                 if include_flag:
@@ -651,20 +652,28 @@ class Soul(object):
                     collect_message = True
                     message.append(word)
                 elif word not in _skip_words:
-                    # unrecognised word, check if it is a prefix of an adverb
+                    # unrecognised word.
+                    # check if it could be a person's name
+                    if not who:
+                        for name in all_livings:
+                            if name.startswith(word):
+                                raise ParseException("Did you mean %s?" % name)
+                    # check if it is a prefix of an adverb, if so, suggest the adverbs
                     adverbs = lang.adverb_by_prefix(word)
                     if len(adverbs)==1:
                         word = adverbs[0]
                         if adverb:
-                            raise ParseException("you can't do that both %s and %s." % (adverb, word))
+                            raise ParseException("You can't do that both %s and %s." % (adverb, word))
                         adverb = word
                         continue
                     elif len(adverbs)>1:
-                        raise ParseException("what adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
+                        raise ParseException("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
                     if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
-                        raise ParseException("the word %s makes no sense at that location." % word)
+                        # in case of a misplaced verb, qualifier or bodypart give a little more specific error
+                        raise ParseException("The word %s makes no sense at that location." % word)
                     else:
-                        raise ParseException("the word %s is unrecognized." % word)
+                        # no idea what the user typed, generic error
+                        raise ParseException("The word %s is unrecognized." % word)
 
         message = " ".join(message)
         return qualifier, verb, who, adverb, message, bodypart
