@@ -1,11 +1,10 @@
 import languagetools
+import collections
 
 """
 object hierarchy:
 
 MudObject
-  |
-  +-- Effect
   |
   +-- Item
   |     |
@@ -24,6 +23,8 @@ MudObject
         +-- Bag
         +-- Location
 
+Exit
+Effect
 
 """
 
@@ -36,22 +37,10 @@ class MudObject(object):
     def __init__(self, name, description=None):
         self.name = name
         self.description = description or languagetools.a(name)
-        self.subjective = None
-        self.possessive = None
-        self.objective = None
 
     def __repr__(self):
         clazz = type(self).__name__
         return "<%s '%s' at %s>" % (clazz, self.name, hex(id(self)))
-
-
-class Effect(MudObject):
-    """
-    An abstract effect or alteration that is present on or in another object.
-    This could be a curse or buff, or some other spell effect such as darkness.
-    """
-    def __init__(self, name, description=None):
-        super(Item, self).__init__(name, description)
 
 
 class Item(MudObject):
@@ -121,4 +110,38 @@ class Location(Container):
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description)
         self.all_livings = {}
+        self.items = []
+        self.exits = {}
+    def look(self):
+        """returns a string describing the surroundings"""
+        r = ["["+self.name+"]", self.description if self.description else "You see nothing special about it."]
+        if self.items:
+            r.append("You see " + languagetools.join([languagetools.a(item.name) for item in self.items]) + ".")
+        if self.exits:
+            r.append("You can see the following exits:")
+            for exit in self.exits.values():
+                r.append(exit.description)
+        else:
+            r.append("There are no obvious exits.")
+        if self.all_livings:
+            # @TODO do something with the livings present in the room
+            pass
+        return "\n".join(r)
 
+class Exit(object):
+    """
+    An 'exit' that connects one location to another.
+    """
+    def __init__(self, target_location, description):
+        self.target = target_location
+        self.description = description
+
+
+class Effect(object):
+    """
+    An abstract effect or alteration that is present on or in another object.
+    This could be a curse or buff, or some other spell effect such as darkness.
+    """
+    def __init__(self, name, description=None):
+        self.name = name
+        self.description = description
