@@ -1,5 +1,4 @@
 import languagetools
-import collections
 
 """
 object hierarchy:
@@ -78,6 +77,7 @@ class Living(MudObject):
     """
     def __init__(self, name, gender=None, description=None):
         super(Living, self).__init__(name, description)
+        self.display_name = self.name
         self.gender = gender
         self.subjective = languagetools.SUBJECTIVE[self.gender]
         self.possessive = languagetools.POSSESSIVE[self.gender]
@@ -109,12 +109,13 @@ class Location(Container):
     """
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description)
-        self.all_livings = {}
-        self.items = []
-        self.exits = {}
+        self.livings = set()  # set of livings
+        self.items = []       # sequence of all items in the room
+        self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
+
     def look(self):
         """returns a string describing the surroundings"""
-        r = ["["+self.name+"]", self.description if self.description else "You see nothing special about it."]
+        r = ["[" + self.name + "]", self.description if self.description else "You see nothing special about it."]
         if self.items:
             r.append("You see " + languagetools.join([languagetools.a(item.name) for item in self.items]) + ".")
         if self.exits:
@@ -123,10 +124,15 @@ class Location(Container):
                 r.append(exit.description)
         else:
             r.append("There are no obvious exits.")
-        if self.all_livings:
-            # @TODO do something with the livings present in the room
-            pass
+        if self.livings:
+            livings = languagetools.join([living.name for living in self.livings])
+            if len(self.livings) > 1:
+                livings += " are here."
+            else:
+                livings += " is here."
+            r.append(livings)
         return "\n".join(r)
+
 
 class Exit(object):
     """

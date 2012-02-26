@@ -9,6 +9,7 @@ class Player(baseobjects.Living):
     """
     def __init__(self, name, gender, description=None):
         super(Player, self).__init__(name, gender, description)
+        self.display_name = name.capitalize()
         self.soul = soul.Soul()
 
     def socialize(self, commandstring):

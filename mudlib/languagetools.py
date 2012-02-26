@@ -53,7 +53,7 @@ def adverb_by_prefix(prefix, amount=5):
 def possessive_letter(name):
     if not name:
         return ""
-    if name[-1] in ('s','z','x'):
+    if name[-1] in ('s', 'z', 'x'):
         return "'"        # tess' foot
     elif name.endswith(" own"):
         return ""         # your own...

@@ -380,7 +380,7 @@ def who_replacement(actor, target, observer):
         if target is observer:
             return "you"            # ... kicks you
         else:
-            return target.name      # ... kicks ...
+            return target.display_name      # ... kicks ...
 
 
 def poss_replacement(actor, target, observer):
@@ -394,7 +394,7 @@ def poss_replacement(actor, target, observer):
         if target is observer:
             return "your"           # your foot
         else:
-            return target.name + lang.possessive_letter(target.name)
+            return target.display_name + lang.possessive_letter(target.name)
 
 
 _message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
@@ -417,11 +417,11 @@ class Soul(object):
         qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
         if who:
             # translate the names to actual Livings objects
-            if player.location and player.location.all_livings:
-                all_livings = player.location.all_livings
+            if player.location and player.location.livings:
+                all_livings = player.location.livings
             else:
-                all_livings = { player.name: player }
-            who = [ all_livings[name] for name in who ]
+                all_livings = [ player ]
+            who = [ living for living in all_livings if living.name in who ]
         result = self.process_verb_parsed(player, verb, who, adverb, message, bodypart, qualifier)
         if qualifier:
             verb = qualifier + " " + verb
@@ -431,6 +431,7 @@ class Soul(object):
         """
         This function takes a verb and the arguments given by the user
         and converts it to an internal representation: (targets, playermessage, roommessage, targetmessage)
+        who = sequence of actual mud objects (livings), not just player/npc names (strings)
         """
         if not player:
             raise SoulException("no player in process_verb_parsed")
@@ -503,8 +504,8 @@ class Soul(object):
                 room_msg = room_msg.replace(" \nPOSS", " " + targetnames_room + lang.possessive_letter(targetnames_room))
             # add fullstops at the end
             player_msg = lang.fullstop("you " + player_msg.strip())
-            room_msg = lang.fullstop(player.name + " " + room_msg.strip())
-            target_msg = lang.fullstop(player.name + " " + target_msg.strip())
+            room_msg = lang.fullstop(player.display_name + " " + room_msg.strip())
+            target_msg = lang.fullstop(player.display_name + " " + target_msg.strip())
             return who, player_msg, room_msg, target_msg
 
         # construct the action string
@@ -607,11 +608,11 @@ class Soul(object):
         collect_message = False
         verbdata = VERBS[verb][2]
         message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
-        if player.location and player.location.all_livings:
-            all_livings = player.location.all_livings
+        if player.location and player.location.livings:
+            all_livings_names = { living.name for living in player.location.livings }
         else:
-            # if the player is not in a sensible location, just make up a fake one
-            all_livings = { player.name: player }
+            # if the player is not in a sensible location, just make up a fake livings list
+            all_livings_names = [ player.name ]
         for word in words:
             if collect_message:
                 message.append(word)
@@ -629,9 +630,9 @@ class Soul(object):
                 bodypart = word
             elif word in ("everyone", "everybody", "all"):
                 if include_flag:
-                    if not all_livings:
+                    if not all_livings_names:
                         raise ParseException("There is nobody here.")
-                    who.update(all_livings.keys())    # include everyone visible
+                    who.update(all_livings_names)    # include everyone visible
                 else:
                     who.clear()
             elif word == "everything":
@@ -642,7 +643,7 @@ class Soul(object):
                 if adverb:
                     raise ParseException("You can't do that both %s and %s." % (adverb, word))
                 adverb = word
-            elif word in all_livings:
+            elif word in all_livings_names:
                 if include_flag:
                     who.add(word)
                 elif word in who:
@@ -655,18 +656,18 @@ class Soul(object):
                     # unrecognised word.
                     # check if it could be a person's name
                     if not who:
-                        for name in all_livings:
+                        for name in all_livings_names:
                             if name.startswith(word):
                                 raise ParseException("Did you mean %s?" % name)
                     # check if it is a prefix of an adverb, if so, suggest the adverbs
                     adverbs = lang.adverb_by_prefix(word)
-                    if len(adverbs)==1:
+                    if len(adverbs) == 1:
                         word = adverbs[0]
                         if adverb:
                             raise ParseException("You can't do that both %s and %s." % (adverb, word))
                         adverb = word
                         continue
-                    elif len(adverbs)>1:
+                    elif len(adverbs) > 1:
                         raise ParseException("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
                     if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
                         # in case of a misplaced verb, qualifier or bodypart give a little more specific error
