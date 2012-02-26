@@ -21,6 +21,7 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("a and b", mudlib.languagetools.join(["a", "b"]))
         self.assertEqual("a, b, and c", mudlib.languagetools.join(["a", "b", "c"]))
         self.assertEqual("a, b, or c", mudlib.languagetools.join(["a", "b", "c"], conj="or"))
+        self.assertEqual("c, b, or a", mudlib.languagetools.join(["c", "b", "a"], conj="or"))
     def testAdverbs(self):
         self.assertTrue(len(mudlib.languagetools.ADVERB_LIST)>0)
         self.assertTrue("noisily" in mudlib.languagetools.ADVERBS)

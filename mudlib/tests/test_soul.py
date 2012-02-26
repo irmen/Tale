@@ -152,7 +152,7 @@ class TestSoul(unittest.TestCase):
 
     def testAdverbs(self):
         soul = mudlib.soul.Soul()
-        player = mudlib.player.Player("julie", "f")
+        player = mudlib.player.Player("julie", "f", "human")
         # check handling of more than one adverb
         with self.assertRaises(mudlib.soul.ParseException) as ex:
             soul.process_verb(player, "cough sickly and noisily")
@@ -168,13 +168,13 @@ class TestSoul(unittest.TestCase):
 
     def testUnrecognisedWord(self):
         soul = mudlib.soul.Soul()
-        player = mudlib.player.Player("julie", "f")
+        player = mudlib.player.Player("julie", "f", "human")
         with self.assertRaises(mudlib.soul.ParseException):
             soul.process_verb(player, "cough hubbabubba")
 
     def testParse(self):
         soul = mudlib.soul.Soul()
-        player = mudlib.player.Player("julie", "f")
+        player = mudlib.player.Player("julie", "f", "human")
         player.location = mudlib.baseobjects.Location("somewhere")
         targets = { mudlib.npc.NPC("max","m"), mudlib.npc.NPC("kate","f"), mudlib.npc.NPC("the cat", "n") }
         player.location.livings = targets

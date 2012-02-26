@@ -6,8 +6,8 @@ class NPC(baseobjects.Living):
     Non-Player-Character: computer controlled entity.
     These are neutral or friendly, aggressive NPCs should be Monsters.
     """
-    def __init__(self, name, gender, description=None):
-        super(NPC, self).__init__(name, gender, description)
+    def __init__(self, name, gender, description=None, race="human"):
+        super(NPC, self).__init__(name, gender, description, race)
 
 
 class Monster(NPC):

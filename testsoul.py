@@ -4,7 +4,7 @@ from mudlib.soul import ParseException, UnknownVerbException
 
 def test():
     cmd = raw_input("cmd?> ")
-    player = mudlib.player.Player("fritz", "m")
+    player = mudlib.player.Player("fritz", "m", "human")
     player.location = mudlib.baseobjects.Location("somewhere")
     player.location.livings = { mudlib.baseobjects.Living("max","m"),
                                 mudlib.baseobjects.Living("julie","f"),
