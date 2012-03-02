@@ -1,6 +1,6 @@
-import inflect
 import os
 import bisect
+import inflect
 
 inflecter = inflect.engine()
 
@@ -59,3 +59,13 @@ def possessive_letter(name):
         return ""         # your own...
     else:
         return "s"        # marks foot
+
+
+def possessive(name):
+    return name + possessive_letter(name)
+
+
+def capital(string):
+    if string:
+        string = string[0].upper() + string[1:]
+    return string

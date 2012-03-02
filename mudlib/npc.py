@@ -1,13 +1,13 @@
-import baseobjects
+import mudlib.baseobjects
+import mudlib.languagetools as lang
 
-
-class NPC(baseobjects.Living):
+class NPC(mudlib.baseobjects.Living):
     """
     Non-Player-Character: computer controlled entity.
     These are neutral or friendly, aggressive NPCs should be Monsters.
     """
-    def __init__(self, name, gender, description=None, race="human"):
-        super(NPC, self).__init__(name, gender, description, race)
+    def __init__(self, name, gender, title=None, description=None, race="human"):
+        super(NPC, self).__init__(name, gender, title, description, race)
 
 
 class Monster(NPC):
@@ -15,5 +15,5 @@ class Monster(NPC):
     Special kind of NPC: a monster can be hostile and attack other Livings.
     Usually has Weapons, Armour, and attack actions.
     """
-    def __init__(self, name, gender, description=None):
-        super(Monster, self).__init__(name, gender, description)
+    def __init__(self, name, gender, title=None, description=None):
+        super(Monster, self).__init__(name, gender, title, description)

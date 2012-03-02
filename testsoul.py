@@ -6,8 +6,8 @@ def test():
     cmd = raw_input("cmd?> ")
     player = mudlib.player.Player("fritz", "m", "human")
     player.location = mudlib.baseobjects.Location("somewhere")
-    player.location.livings = { mudlib.baseobjects.Living("max","m"),
-                                mudlib.baseobjects.Living("julie","f"),
+    player.location.livings = { mudlib.baseobjects.Living("max","m", title="mad Max"),
+                                mudlib.baseobjects.Living("julie","f", title="attractive Julie"),
                                 player }
     verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
     print "VERB:", verb

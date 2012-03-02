@@ -380,7 +380,7 @@ def who_replacement(actor, target, observer):
         if target is observer:
             return "you"            # ... kicks you
         else:
-            return target.display_name      # ... kicks ...
+            return target.title      # ... kicks ...
 
 
 def poss_replacement(actor, target, observer):
@@ -394,7 +394,7 @@ def poss_replacement(actor, target, observer):
         if target is observer:
             return "your"           # your foot
         else:
-            return target.display_name + lang.possessive_letter(target.name)
+            return lang.possessive(target.title)
 
 
 _message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
@@ -498,14 +498,14 @@ class Soul(object):
                 targetnames_room = lang.join([poss_replacement(player, living, None) for living in who])
                 player_msg = player_msg.replace(" \nIS", " are")
                 player_msg = player_msg.replace(" \nSUBJ", " they")
-                player_msg = player_msg.replace(" \nPOSS", " " + targetnames_player + lang.possessive_letter(targetnames_player))
+                player_msg = player_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_player))
                 room_msg = room_msg.replace(" \nIS", " are")
                 room_msg = room_msg.replace(" \nSUBJ", " they")
-                room_msg = room_msg.replace(" \nPOSS", " " + targetnames_room + lang.possessive_letter(targetnames_room))
+                room_msg = room_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_room))
             # add fullstops at the end
-            player_msg = lang.fullstop("you " + player_msg.strip())
-            room_msg = lang.fullstop(player.display_name + " " + room_msg.strip())
-            target_msg = lang.fullstop(player.display_name + " " + target_msg.strip())
+            player_msg = lang.fullstop("You " + player_msg.strip())
+            room_msg = lang.fullstop(player.title + " " + room_msg.strip())
+            target_msg = lang.fullstop(player.title + " " + target_msg.strip())
             return who, player_msg, room_msg, target_msg
 
         # construct the action string

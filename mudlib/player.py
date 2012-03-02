@@ -1,16 +1,16 @@
-import baseobjects
-import soul
+import mudlib.baseobjects
+import mudlib.soul
+import mudlib.languagetools as lang
 
-
-class Player(baseobjects.Living):
+class Player(mudlib.baseobjects.Living):
     """
     Player controlled entity.
     Has a Soul for social interaction.
     """
     def __init__(self, name, gender, race="human", description=None):
-        super(Player, self).__init__(name, gender, description, race)
-        self.display_name = name.capitalize()
-        self.soul = soul.Soul()
+        title = lang.capital(name)
+        super(Player, self).__init__(name, gender, title, description, race)
+        self.soul = mudlib.soul.Soul()
 
     def socialize(self, commandstring):
         return self.soul.process_verb(self, commandstring)

@@ -30,7 +30,19 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual(['nobly'], mudlib.languagetools.adverb_by_prefix("no", 1))
         self.assertEqual(["acapella"], mudlib.languagetools.adverb_by_prefix("a",1))
         self.assertEqual([], mudlib.languagetools.adverb_by_prefix("zzzzzzzzzz"))
-
+    def testPossessive(self):
+        self.assertEqual("", mudlib.languagetools.possessive_letter(""))
+        self.assertEqual("s", mudlib.languagetools.possessive_letter("julie"))
+        self.assertEqual("'", mudlib.languagetools.possessive_letter("tess"))
+        self.assertEqual("", mudlib.languagetools.possessive_letter("your own"))
+        self.assertEqual("", mudlib.languagetools.possessive_letter(""))
+        self.assertEqual("julies", mudlib.languagetools.possessive("julie"))
+        self.assertEqual("tess'", mudlib.languagetools.possessive("tess"))
+        self.assertEqual("your own", mudlib.languagetools.possessive("your own"))
+    def testCapital(self):
+        self.assertEqual("", mudlib.languagetools.capital(""))
+        self.assertEqual("X", mudlib.languagetools.capital("x"))
+        self.assertEqual("Xyz AbC", mudlib.languagetools.capital("xyz AbC"))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

@@ -1,5 +1,6 @@
-import languagetools
-import races
+import textwrap
+import mudlib.languagetools as lang
+from mudlib.races import races
 
 """
 object hierarchy:
@@ -35,36 +36,33 @@ Effect
 class MudObject(object):
     """
     Root class of all objects in the mud world
-    All objects have an identifying short name, and an optional longer description.
+    All objects have an identifying short name,
+    an optional short title (shown when listed in a room),
+    and an optional longer description (shown when explicitly 'examined').
+    The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
     """
-    def __init__(self, name, description=None):
+    def __init__(self, name, title=None, description=None):
         self.name = name
-        self.description = description or languagetools.a(name)
+        self.title = title or name
+        if description:
+            self.description = textwrap.dedent(description).strip()
+        else:
+            self.description = self.title
 
     def __repr__(self):
         clazz = type(self).__name__
-        return "<%s '%s' at %s>" % (clazz, self.name, hex(id(self)))
+        return "<%s '%s' (%s) at %s>" % (clazz, self.name, self.title, hex(id(self)))
 
 
-class Thing(MudObject):
-    """
-    Root class of all 'things' in the mud world.
-    Things have a name and an optional longer description.
-    """
-    def __init__(self, name, description=None, visible=True):
-        super(Thing, self).__init__(name, description)
-        self.visible = visible
-
-
-class Item(Thing):
+class Item(MudObject):
     """
     Root class of all Items in the mud world. Items are physical objects.
     Items can usually be moved, carried, or put inside other items.
-    They have a name and an optional longer description.
+    They have a name and optional short and longer descriptions.
     They are always inside a Container, or in an itemslot on another MudObject.
     """
-    def __init__(self, name, description=None):
-        super(Item, self).__init__(name, description)
+    def __init__(self, name, title=None, description=None):
+        super(Item, self).__init__(name, title, description)
 
 
 class Weapon(Item):
@@ -72,16 +70,16 @@ class Weapon(Item):
     An item that can be wielded by a Living (i.e. present in a weapon itemslot),
     and that can be used to attack another Living.
     """
-    def __init__(self, name, description=None):
-        super(Weapon, self).__init__(name, description)
+    def __init__(self, name, title=None, description=None):
+        super(Weapon, self).__init__(name, title, description)
 
 
 class Armour(Item):
     """
     An item that can be worn by a Living (i.e. present in an armour itemslot)
     """
-    def __init__(self, name, description=None):
-        super(Armour, self).__init__(name, description)
+    def __init__(self, name, title=None, description=None):
+        super(Armour, self).__init__(name, title, description)
 
 
 class Living(MudObject):
@@ -90,13 +88,12 @@ class Living(MudObject):
     Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
     They are always inside a Location.
     """
-    def __init__(self, name, gender=None, description=None, race=None):
-        super(Living, self).__init__(name, description)
-        self.display_name = self.name
+    def __init__(self, name, gender=None, title=None, description=None, race=None):
+        super(Living, self).__init__(name, title, description)
         self.gender = gender
-        self.subjective = languagetools.SUBJECTIVE[self.gender]
-        self.possessive = languagetools.POSSESSIVE[self.gender]
-        self.objective = languagetools.OBJECTIVE[self.gender]
+        self.subjective = lang.SUBJECTIVE[self.gender]
+        self.possessive = lang.POSSESSIVE[self.gender]
+        self.objective = lang.OBJECTIVE[self.gender]
         self.location = None
         self.race = None
         self.stats = {}
@@ -105,7 +102,7 @@ class Living(MudObject):
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
-        self.race = races.races[race]
+        self.race = races[race]
         self.stats = {}
         for stat_name, (stat_avg, stat_class) in self.race["stats"].items():
             self.stats[stat_name] = stat_avg
@@ -115,8 +112,8 @@ class Container(MudObject):
     """
     Root class for anything that can contain other MudObjects (in the most abstract sense)
     """
-    def __init__(self, name, description=None):
-        super(Container, self).__init__(name, description)
+    def __init__(self, name, title=None, description=None):
+        super(Container, self).__init__(name, title, description)
 
 
 class Bag(Item, Container):
@@ -124,8 +121,8 @@ class Bag(Item, Container):
     A bag-type container (i.e. an item that acts as a container)
     This can be inside another Container by itself.
     """
-    def __init__(self, name, description=None):
-        super(Bag, self).__init__(name, description)
+    def __init__(self, name, title=None, description=None):
+        super(Bag, self).__init__(name, title, description)
 
 
 class Location(Container):
@@ -134,35 +131,48 @@ class Location(Container):
     Has connections ('exits') to other Locations.
     """
     def __init__(self, name, description=None):
-        super(Location, self).__init__(name, description)
+        super(Location, self).__init__(name, description=description)
         self.livings = set()  # set of livings
         self.items = []       # sequence of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
 
-    def look(self):
+    def look(self, short=False):
         """returns a string describing the surroundings"""
-        r = ["[" + self.name + "]", self.description if self.description else "You see nothing special about it."]
+        r = ["[" + self.name + "]"]
+        if self.description:
+            if not short:
+                r.append(self.description)
         if self.items:
-            itemnames = sorted([item.name for item in self.items if item.visible])
-            itemnames = [languagetools.a(name) for name in itemnames]
-            r.append("You see " + languagetools.join(itemnames) + ".")
-        if self.exits:
-            r.append("You can see the following exits:")
-            exits_seen=set()
-            for exitname in sorted(self.exits):
-                exit = self.exits[exitname]
-                if exit not in exits_seen:
-                    exits_seen.add(exit)
-                    r.append(exit.description)
-        else:
-            r.append("There are no obvious exits.")
-        if self.livings:
-            livings = languagetools.join(sorted(living.name for living in self.livings))
-            if len(self.livings) > 1:
-                livings += " are here."
+            if short:
+                item_names = sorted(item.name for item in self.items)
+                r.append("You see: " + ", ".join(item_names))
             else:
-                livings += " is here."
-            r.append(livings)
+                titles = sorted(item.title for item in self.items)
+                titles = [lang.a(title) for title in titles]
+                r.append("You see " + lang.join(titles) + ".")
+        if self.exits:
+            # r.append("You can see the following exits:")
+            if short:
+                r.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
+            else:
+                exits_seen=set()
+                for exit_name in sorted(self.exits):
+                    exit = self.exits[exit_name]
+                    if exit not in exits_seen:
+                        exits_seen.add(exit)
+                        r.append(exit.description)
+        if self.livings:
+            if short:
+                living_names = sorted(living.name for living in self.livings)
+                r.append("Present: " + ", ".join(living_names))
+            else:
+                titles = sorted(living.title for living in self.livings)
+                titles = lang.join(titles)
+                if len(self.livings) > 1:
+                    titles += " are here."
+                else:
+                    titles += " is here."
+                r.append(lang.capital(titles))
         return "\n".join(r)
 
 
