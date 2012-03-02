@@ -24,7 +24,11 @@ class UnknownVerbException(ParseException):
     The engine can and should search for other places that define this verb first.
     If nothing recognises it, this error should be shown to the user in a nice way.
     """
-    pass
+    def __init__(self, verb, words, qualifier):
+        super(UnknownVerbException, self).__init__(verb)
+        self.verb = verb
+        self.words = words
+        self.qualifier = qualifier
 
 
 DEFA = 1  # adds HOW+AT   (you smile happily at Fritz)
@@ -103,6 +107,7 @@ VERBS = {
 "bark":      ( DEFA, None, "", "at" ),
 "slide":     ( SIMP, None, "slip$ and slide$ \nHOW" ),
 "ogle":      ( PREV, None, "" ),
+"eye":       ( PREV, ("suspiciously", ), "" ),
 "pet":       ( SIMP, None, "pet$ \nWHO \nHOW \nWHERE" ),
 "barf":      ( DEFA, None, "", "on" ),
 "listen":    ( DEFA, None, "", "to" ),
@@ -272,7 +277,7 @@ VERBS = {
 "wake":     ( SIMP, ( "groggily", ), "awake$ \nHOW" ),
 "awake":    ( SIMP, ( "groggily", ), "awake$ \nHOW" ),
 "stumble":  ( SHRT, None, "" ),
-"bounce":   ( SHRT, None, "" ),
+"bounce":   ( SHRT, ( "up and down", ), "" ),
 "sulk":     ( SHRT, ( "in the corner", ), "" ),
 "strut":    ( SHRT, ( "proudly", ), "" ),
 "sniff":    ( SHRT, None, "" ),
@@ -430,14 +435,14 @@ class Soul(object):
     def process_verb_parsed(self, player, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
         """
         This function takes a verb and the arguments given by the user
-        and converts it to an internal representation: (targets, playermessage, roommessage, targetmessage)
+        and converts it to an internal representation: (targets-without-player, playermessage, roommessage, targetmessage)
         who = sequence of actual mud objects (livings), not just player/npc names (strings)
         """
         if not player:
             raise SoulException("no player in process_verb_parsed")
         verbdata = VERBS.get(verb)
         if not verbdata:
-            raise UnknownVerbException(verb)
+            raise UnknownVerbException(verb, None, qualifier)
         vtype = verbdata[0]
         who = who or []
         if not message and verbdata[1] and len(verbdata[1]) > 1:
@@ -506,6 +511,8 @@ class Soul(object):
             player_msg = lang.fullstop("You " + player_msg.strip())
             room_msg = lang.fullstop(player.title + " " + room_msg.strip())
             target_msg = lang.fullstop(player.title + " " + target_msg.strip())
+            if player in who:
+                who.remove(player)  # the player should not be part of the targets
             return who, player_msg, room_msg, target_msg
 
         # construct the action string
@@ -602,7 +609,7 @@ class Soul(object):
         if words[0] in VERBS:
             verb = words.pop(0)
         else:
-            raise UnknownVerbException(words[0])
+            raise UnknownVerbException(words[0], words, qualifier)
 
         include_flag = True
         collect_message = False

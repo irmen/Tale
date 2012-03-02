@@ -16,8 +16,18 @@ class TestSoul(unittest.TestCase):
     def testUnknownVerb(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
-        with self.assertRaises(mudlib.soul.UnknownVerbException):
+        with self.assertRaises(mudlib.soul.UnknownVerbException) as ex:
             soul.process_verb_parsed(player, "_unknown_verb_")
+        self.assertEqual("_unknown_verb_", ex.exception.message)
+        self.assertEqual("_unknown_verb_", ex.exception.verb)
+        self.assertEqual(None, ex.exception.words)
+        self.assertEqual(None, ex.exception.qualifier)
+        with self.assertRaises(mudlib.soul.UnknownVerbException) as ex:
+            soul.process_verb(player, "fail _unknown_verb_ herp derp")
+        self.assertEqual("_unknown_verb_", ex.exception.message)
+        self.assertEqual("_unknown_verb_", ex.exception.verb)
+        self.assertEqual(["_unknown_verb_", "herp", "derp"], ex.exception.words)
+        self.assertEqual("fail", ex.exception.qualifier)
 
     def testWho(self):
         player = mudlib.player.Player("fritz","m")
