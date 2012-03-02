@@ -90,8 +90,8 @@ class TestSoul(unittest.TestCase):
         player.location.livings = livings
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "smile confusedly at everyone")
         self.assertEqual("smile", verb)
-        self.assertEqual(4, len(who))
-        self.assertEqual(livings, set(who))
+        self.assertEqual(3, len(who))
+        self.assertEqual(set(targets), set(who), "player should not be in targets")
         self.assertTrue("max" in player_msg and "the hairy cat" in player_msg and "Kate" in player_msg and "yourself" in player_msg)
         self.assertTrue("max" in room_msg and "the hairy cat" in room_msg and "Kate" in room_msg and "herself" in room_msg)
         self.assertEqual("Julie smiles confusedly at you.", target_msg)
