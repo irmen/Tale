@@ -43,6 +43,17 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("", mudlib.languagetools.capital(""))
         self.assertEqual("X", mudlib.languagetools.capital("x"))
         self.assertEqual("Xyz AbC", mudlib.languagetools.capital("xyz AbC"))
+    def testSplit(self):
+        self.assertEqual([], mudlib.languagetools.split(""))
+        self.assertEqual(["a"], mudlib.languagetools.split("a"))
+        self.assertEqual(["a","b","c"], mudlib.languagetools.split("a b c"))
+        self.assertEqual(["a","b","c"], mudlib.languagetools.split(" a   b  c    "))
+        self.assertEqual(["a","b c d","e"], mudlib.languagetools.split("a 'b c d' e"))
+        self.assertEqual(["a","b c d","e"], mudlib.languagetools.split("a  '  b c d '   e"))
+        self.assertEqual(["a","b c d","e","f g","h"], mudlib.languagetools.split("a 'b c d' e \"f g   \" h"))
+        self.assertEqual(["a","b c \"hi!\" d","e"], mudlib.languagetools.split("a  '  b c \"hi!\" d '   e"))
+        self.assertEqual(["a", "'b"], mudlib.languagetools.split("a 'b"))
+        self.assertEqual(["a", "\"b"], mudlib.languagetools.split("a \"b"))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

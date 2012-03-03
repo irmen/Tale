@@ -126,6 +126,24 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You babble 'blurp' incoherently.", player_msg)
         self.assertEqual("Julie babbles 'blurp' incoherently.", room_msg)
 
+    def testMessageQuoteParse(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        player.location = mudlib.baseobjects.Location("somewhere")
+        player.location.livings = { mudlib.npc.NPC("max","m"), player }
+        # whisper
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper \"hello there\"")
+        self.assertEqual("You whisper 'hello there'.", player_msg)
+        self.assertEqual("Julie whispers 'hello there'.", room_msg)
+        # whisper to a person
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper to max \"hello there\"")
+        self.assertEqual("You whisper 'hello there' to max.", player_msg)
+        self.assertEqual("Julie whispers 'hello there' to max.", room_msg)
+        # whisper to a person with adverb
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper softly to max \"hello there\"")
+        self.assertEqual("You whisper 'hello there' softly to max.", player_msg)
+        self.assertEqual("Julie whispers 'hello there' softly to max.", room_msg)
+
     def testBodypart(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
@@ -159,6 +177,26 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You suddenly tickle max.", player_msg)
         self.assertEqual("Julie suddenly tickles max.", room_msg)
         self.assertEqual("Julie suddenly tickles you.", target_msg)
+        who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "scream", [], message="I have no idea", qualifier="don't")
+        self.assertEqual("You don't scream 'I have no idea' loudly.", player_msg)
+        self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", room_msg)
+        self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", target_msg)
+
+    def testQualifierParse(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "dont scream")
+        self.assertEqual("You don't scream loudly.", player_msg)
+        self.assertEqual("Julie doesn't scream loudly.", room_msg)
+        self.assertEqual("Julie doesn't scream loudly.", target_msg)
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "don't scream")
+        self.assertEqual("You don't scream loudly.", player_msg)
+        self.assertEqual("Julie doesn't scream loudly.", room_msg)
+        self.assertEqual("Julie doesn't scream loudly.", target_msg)
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "don't scream \"I have no idea\"")
+        self.assertEqual("You don't scream 'I have no idea' loudly.", player_msg)
+        self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", room_msg)
+        self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", target_msg)
 
     def testAdverbs(self):
         soul = mudlib.soul.Soul()

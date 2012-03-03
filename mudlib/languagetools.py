@@ -1,4 +1,5 @@
 import os
+import re
 import bisect
 import inflect
 
@@ -69,3 +70,17 @@ def capital(string):
     if string:
         string = string[0].upper() + string[1:]
     return string
+
+
+def split(string):
+    """
+    Split a string on whitespace, but keeps words enclosed in quotes (' or ") together.
+    The quotes themselves are stripped out.
+    """
+    def removequotes(word):
+        if word.startswith(('"',"'")) and word.endswith(('"',"'")):
+            return word[1:-1].strip()
+        return word
+    return [removequotes(p) for p in re.split("( |\\\".*?\\\"|'.*?')", string) if p.strip()]
+
+

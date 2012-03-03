@@ -402,7 +402,7 @@ def poss_replacement(actor, target, observer):
             return lang.possessive(target.title)
 
 
-_message_regex = re.compile(r"['\"]([^'\"]+?)['\"]")
+_message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
 _skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
 
 class Soul(object):
@@ -597,9 +597,8 @@ class Soul(object):
         # a substring enclosed in quotes will be extracted as the message
         m = _message_regex.search(cmd)
         if m:
-            message = [m.group(1).strip()]
-            parts = cmd.partition(m.group(0))
-            cmd = parts[0] + parts[2]
+            message = [m.group(2).strip()]
+            cmd = cmd[:m.start()] + cmd[m.end():]
 
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
@@ -656,7 +655,7 @@ class Soul(object):
                 elif word in who:
                     who.remove(word)
             else:
-                if message_verb:
+                if message_verb and not message:
                     collect_message = True
                     message.append(word)
                 elif word not in _skip_words:
