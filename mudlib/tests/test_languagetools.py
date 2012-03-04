@@ -6,11 +6,21 @@ class TestLanguagetools(unittest.TestCase):
     def testA(self):
         self.assertEqual("a house", mudlib.languagetools.a("house"))
         self.assertEqual("a house", mudlib.languagetools.a("a house"))
+        self.assertEqual("a House", mudlib.languagetools.a("House"))
         self.assertEqual("an egg", mudlib.languagetools.a("egg"))
         self.assertEqual("an egg", mudlib.languagetools.a("an egg"))
-        self.assertEqual("an university", mudlib.languagetools.a("university"), "because of simple rules, university must return an")
+        self.assertEqual("a university", mudlib.languagetools.a("university"))
+        self.assertEqual("a university magazine", mudlib.languagetools.a("university magazine"))
         self.assertEqual("an unindent", mudlib.languagetools.a("unindent"))
+        self.assertEqual("a user", mudlib.languagetools.a("user"))
         self.assertEqual("a history", mudlib.languagetools.a("history"))
+        self.assertEqual("an hour", mudlib.languagetools.a("hour"))
+
+    def testAexceptions(self):
+        self.assertEqual("an unicycle", mudlib.languagetools.a("unicycle"), "unicycle -> an, without regged exception")
+        mudlib.languagetools.reg_a_exceptions({"unicycle": "a"})
+        self.assertEqual("a unicycle", mudlib.languagetools.a("unicycle"), "unicycle -> a, with regged exception")
+        self.assertEqual("a unicycle wheel", mudlib.languagetools.a("unicycle wheel"))
 
     def testFullstop(self):
         self.assertEqual("a.", mudlib.languagetools.fullstop("a"))

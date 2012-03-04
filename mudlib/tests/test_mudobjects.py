@@ -15,7 +15,11 @@ hall.items += [ Item("table", "oak table",
                 Item("key", "rusty key",
                      """
                      an old rusty key without a label
-                     """) ]
+                     """),
+                Item("magazine", "university magazine",
+                     """
+                    a magazine from a university
+                     """)]
 rat,julie = NPC("rat", "m", race="rodent"), NPC("julie", "f", "attractive Julie",
                                  """
                                  She's quite the looker.
@@ -26,7 +30,7 @@ class TestLocations(unittest.TestCase):
     def test_look(self):
         expected = """[Main hall]
 A very large hall.
-You see an oak table and a rusty key.
+You see an oak table, a rusty key, and a university magazine.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
 Attractive Julie and rat are here."""
@@ -39,7 +43,7 @@ A dark attic."""
         expected = """[Attic]"""
         self.assertEqual(expected, attic.look(short=True))
         expected = """[Main hall]
-You see: key, table
+You see: key, magazine, table
 Exits: door, east, up
 Present: julie, rat"""
         self.assertEqual(expected, hall.look(short=True))

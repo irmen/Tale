@@ -19,15 +19,31 @@ def join(words, conj="and"):
     return "%s, %s %s" % (", ".join(words[:-1]), conj, words[-1])
 
 
+__a_exceptions = {
+    "universe": "a",
+    "university": "a",
+    "user": "a",
+    "hour": "an"
+}
+
+
 def a(word):
     """a or an? simplistic version: if the word starts with aeiou, returns an, otherwise a"""
     if not word:
         return ""
     if word.startswith(("a ", "an ")):
         return word
-    if word.startswith(('a', 'e', 'i', 'o', 'u')):
+    firstword = word.split(None, 1)[0]
+    exception = __a_exceptions.get(firstword.lower(), None)
+    if exception:
+        return exception + " " + word
+    elif word.startswith(('a', 'e', 'i', 'o', 'u')):
         return "an " + word
     return "a " + word
+
+
+def reg_a_exceptions(exceptions):
+    __a_exceptions.update(exceptions)
 
 
 def fullstop(sentence, punct="."):
