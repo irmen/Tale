@@ -1,5 +1,5 @@
 import mudlib.baseobjects
-import mudlib.languagetools as lang
+
 
 class NPC(mudlib.baseobjects.Living):
     """

@@ -24,21 +24,21 @@ hall.livings = { rat, julie }
 
 class TestLocations(unittest.TestCase):
     def test_look(self):
-        expected="""[Main hall]
+        expected = """[Main hall]
 A very large hall.
 You see an oak table and a rusty key.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
 Attractive Julie and rat are here."""
         self.assertEqual(expected, hall.look())
-        expected="""[Attic]
+        expected = """[Attic]
 A dark attic."""
         self.assertEqual(expected, attic.look())
 
     def test_look_short(self):
-        expected="""[Attic]"""
+        expected = """[Attic]"""
         self.assertEqual(expected, attic.look(short=True))
-        expected="""[Main hall]
+        expected = """[Main hall]
 You see: key, table
 Exits: door, east, up
 Present: julie, rat"""

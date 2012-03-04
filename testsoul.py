@@ -19,7 +19,7 @@ def ask_user_input():
 
 def examine(words):
     if len(words)<=1:
-        print "YOU SEE:", lang.join([living.title for living in player.location.livings if living is not player])
+        print "YOU ARE %s. YOU SEE: %s" % (player.title, lang.join([living.title for living in player.location.livings if living is not player]))
     else:
         for living in player.location.livings:
             if living.name == words[1]:

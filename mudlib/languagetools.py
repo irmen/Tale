@@ -1,26 +1,37 @@
 import os
 import re
 import bisect
-import inflect
-
-inflecter = inflect.engine()
 
 # genders are m,f,n
 SUBJECTIVE = { "m": "he",  "f": "she", "n": "it"  }
 POSSESSIVE = { "m": "his", "f": "her", "n": "its" }
 OBJECTIVE  = { "m": "him", "f": "her", "n": "it"  }
 
-# join a list of words to "a,b,c,d and e"
-join = inflecter.join
 
-# a or an?
-a = inflecter.a
+def join(words, conj="and"):
+    """join a list of words to 'a,b,c,d and e'"""
+    if not words:
+        return ""
+    if len(words) == 1:
+        return words[0]
+    if len(words) == 2:
+        return "%s %s %s" % (words[0], conj, words[1])
+    return "%s, %s %s" % (", ".join(words[:-1]), conj, words[-1])
 
-# spell out a number
-number_to_words = inflecter.number_to_words
+
+def a(word):
+    """a or an? simplistic version: if the word starts with aeiou, returns an, otherwise a"""
+    if not word:
+        return ""
+    if word.startswith(("a ", "an ")):
+        return word
+    if word.startswith(('a', 'e', 'i', 'o', 'u')):
+        return "an " + word
+    return "a " + word
 
 
 def fullstop(sentence, punct="."):
+    """adds a fullstop to the end of a sentence if needed"""
     sentence = sentence.rstrip()
     if sentence[-1] not in "!?.,;:-=":
         return sentence + punct
@@ -78,9 +89,7 @@ def split(string):
     The quotes themselves are stripped out.
     """
     def removequotes(word):
-        if word.startswith(('"',"'")) and word.endswith(('"',"'")):
+        if word.startswith(('"', "'")) and word.endswith(('"', "'")):
             return word[1:-1].strip()
         return word
     return [removequotes(p) for p in re.split("( |\\\".*?\\\"|'.*?')", string) if p.strip()]
-
-

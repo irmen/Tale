@@ -103,12 +103,12 @@ class TestSoul(unittest.TestCase):
         player.location.livings = { mudlib.npc.NPC("max","m"), player }
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
         self.assertEqual("grin", verb)
-        self.assertTrue(len(who)==0)
+        self.assertTrue(len(who) == 0)
         self.assertEqual("You grin evilly.", player_msg)
         self.assertEqual("Julie grins evilly.", room_msg)
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin at max")
         self.assertEqual("grin", verb)
-        self.assertTrue(len(who)==1)
+        self.assertTrue(len(who) == 1)
         self.assertEqual("max", who[0].name)
         self.assertEqual("You grin evilly at max.", player_msg)
         self.assertEqual("Julie grins evilly at max.", room_msg)
@@ -232,7 +232,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("sickly", adverb)
         self.assertEqual("head", bodypart)
         self.assertEqual("", message)
-        self.assertTrue(len(who)==3)
+        self.assertTrue(len(who) == 3)
         self.assertTrue(all(type(x) is str for x in who), "parse must return only strings")
         self.assertEqual({"max","kate","the cat"}, who)
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "slap myself")
@@ -242,7 +242,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(None, adverb)
         self.assertEqual(None, bodypart)
         self.assertEqual("", message)
-        self.assertTrue(len(who)==1)
+        self.assertTrue(len(who) == 1)
         self.assertEqual({"julie"}, who)
 
     def testDEFA(self):
@@ -404,6 +404,3 @@ class TestSoul(unittest.TestCase):
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
-
-
-

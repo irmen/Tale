@@ -600,6 +600,8 @@ class Soul(object):
             message = [m.group(2).strip()]
             cmd = cmd[:m.start()] + cmd[m.end():]
 
+        if not cmd:
+            raise ParseException("What?")
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
             qualifier = words.pop(0)

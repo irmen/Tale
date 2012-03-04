@@ -155,7 +155,7 @@ class Location(Container):
             if short:
                 r.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
             else:
-                exits_seen=set()
+                exits_seen = set()
                 for exit_name in sorted(self.exits):
                     exit = self.exits[exit_name]
                     if exit not in exits_seen:
