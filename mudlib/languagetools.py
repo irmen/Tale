@@ -49,21 +49,21 @@ def reg_a_exceptions(exceptions):
 def fullstop(sentence, punct="."):
     """adds a fullstop to the end of a sentence if needed"""
     sentence = sentence.rstrip()
-    if sentence[-1] not in "!?.,;:-=":
-        return sentence + punct
-    else:
+    if sentence.endswith(('!', '?', '.', ';', ':', '-', '=')):
         return sentence
+    return sentence + punct
 
 
 # adverbs are stored in a datafile next to this module
 with open(os.path.join(os.path.dirname(__file__), "soul_adverbs.txt")) as adverbsfile:
-    ADVERB_LIST = adverbsfile.read().splitlines()     # keep the list for prefix search
+    ADVERB_LIST = sorted(adverbsfile.read().splitlines())     # keep the list for prefix search
     ADVERBS = frozenset(ADVERB_LIST)
 
 
 def adverb_by_prefix(prefix, amount=5):
     """
     Return a list of adverbs starting with the given prefix, up to the given amount
+    Uses binary search in the sorted adverbs list, O(log n)
     """
     i = bisect.bisect_left(ADVERB_LIST, prefix)
     if i >= len(ADVERB_LIST):

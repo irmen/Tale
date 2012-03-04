@@ -1,4 +1,3 @@
-acapella
 abjectly
 ably
 abnormally
@@ -15,6 +14,7 @@ abundantly
 abusively
 abysmally
 academically
+acapella
 acceptantly
 accidentally
 accordingly
