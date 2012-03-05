@@ -41,7 +41,13 @@ class Driver(object):
         self.player = None
 
     def start(self, args):
-        print "\nWelcome to '%s'." % mudlib.MUD_NAME
+        # print GPL 3.0 banner
+        print "\nSnakepit mud driver and mudlib. Copyright (C) 2012  Irmen de Jong."
+        print "This program comes with ABSOLUTELY NO WARRANTY. This is free software,"
+        print "and you are welcome to redistribute it under the terms and conditions"
+        print "of the GNU General Public License version 3. See the file LICENSE.txt"
+        # print MUD banner and initiate player creation
+        print "\n"+mudlib.MUD_BANNER+"\n"
         choice = raw_input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
         if choice == "w":
             player = create_default_wizard()
@@ -51,7 +57,8 @@ class Driver(object):
             player = create_player_from_info()
         self.player = player
         self.move_player_to_start_room()
-        print "\nWelcome, {}.\n{}\n\n{}\n".format(self.player.title, mudlib.MUD_BANNER, self.player.look())
+        print "\nWelcome to %s, %s.\n" % (mudlib.MUD_NAME, self.player.title)
+        print self.player.look()
         self.main_loop()
 
     def move_player_to_start_room(self):
