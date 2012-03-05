@@ -1,6 +1,7 @@
 import unittest
 import mudlib.races
 
+
 class TestRaces(unittest.TestCase):
     def test_attributes(self):
         human = mudlib.races.races["human"]

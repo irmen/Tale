@@ -221,9 +221,9 @@ class Location(Container):
     def search_living(self, name):
         """search for a living in this location by its name (and title, if no names match)"""
         name = name.lower()
-        result = [living for living in self.livings if living.name==name]
+        result = [living for living in self.livings if living.name == name]
         if not result:
-            result = [living for living in self.livings if living.title.lower()==name]
+            result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
     def enter(self, object):

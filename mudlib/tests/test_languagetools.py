@@ -65,12 +65,12 @@ class TestLanguagetools(unittest.TestCase):
     def testSplit(self):
         self.assertEqual([], mudlib.languagetools.split(""))
         self.assertEqual(["a"], mudlib.languagetools.split("a"))
-        self.assertEqual(["a","b","c"], mudlib.languagetools.split("a b c"))
-        self.assertEqual(["a","b","c"], mudlib.languagetools.split(" a   b  c    "))
-        self.assertEqual(["a","b c d","e"], mudlib.languagetools.split("a 'b c d' e"))
-        self.assertEqual(["a","b c d","e"], mudlib.languagetools.split("a  '  b c d '   e"))
-        self.assertEqual(["a","b c d","e","f g","h"], mudlib.languagetools.split("a 'b c d' e \"f g   \" h"))
-        self.assertEqual(["a","b c \"hi!\" d","e"], mudlib.languagetools.split("a  '  b c \"hi!\" d '   e"))
+        self.assertEqual(["a", "b", "c"], mudlib.languagetools.split("a b c"))
+        self.assertEqual(["a", "b", "c"], mudlib.languagetools.split(" a   b  c    "))
+        self.assertEqual(["a", "b c d", "e"], mudlib.languagetools.split("a 'b c d' e"))
+        self.assertEqual(["a", "b c d", "e"], mudlib.languagetools.split("a  '  b c d '   e"))
+        self.assertEqual(["a", "b c d", "e", "f g", "h"], mudlib.languagetools.split("a 'b c d' e \"f g   \" h"))
+        self.assertEqual(["a", "b c \"hi!\" d", "e"], mudlib.languagetools.split("a  '  b c \"hi!\" d '   e"))
         self.assertEqual(["a", "'b"], mudlib.languagetools.split("a 'b"))
         self.assertEqual(["a", "\"b"], mudlib.languagetools.split("a \"b"))
 

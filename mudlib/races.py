@@ -11,11 +11,11 @@ player_races = {'dwarf', 'elf', 'half-elf', 'half-orc', 'halfling', 'human', 'or
 # BODY_TYPES (every race has exactly one of the following body types)
 B_HUMANOID, B_QUADRUPED, B_BIPED, B_CHIROPTEROID, B_INSECTOID, B_TENTACLED, B_ARTHROPOD, B_CRUSTACEAN, B_PINNIPED, \
     B_CETACEAN, B_FISH, B_OCTOPOID, B_NEBULOUS, B_CHIMAERA, B_SNAKE, B_PLANT, B_TREE, B_SPECTRAL, B_GEOMETRIC, \
-    B_GELATINOUS, B_ORB, B_AVIAN, B_WINGED_MAN, B_SEMI_BIPEDAL, B_FLAT, B_GASTROPOD = range(1,27)
+    B_GELATINOUS, B_ORB, B_AVIAN, B_WINGED_MAN, B_SEMI_BIPEDAL, B_FLAT, B_GASTROPOD = range(1, 27)
 
 # SIZE TYPES (exactly one of the following, 7=human sized)
 S_MICROSCOPIC, S_MINISCULE, S_TINY, S_VERY_SMALL, S_SMALL, S_SOMEWHAT_SMALL, S_HUMAN_SIZED, \
-    S_SOMEWHAT_LARGE, S_LARGE, S_HUGE, S_GIGANTIC, S_VAST = range(1,13)
+    S_SOMEWHAT_LARGE, S_LARGE, S_HUGE, S_GIGANTIC, S_VAST = range(1, 13)
 
 sizes = {
     S_MICROSCOPIC: "microscopic",
@@ -55,8 +55,8 @@ bodytypes = {
     B_GELATINOUS: "gelatinous",
     B_ORB: "orb",
     B_AVIAN: "avian",
-    B_WINGED_MAN: "WINGED_man",
-    B_SEMI_BIPEDAL: "SEMI_bipedal",
+    B_WINGED_MAN: "winged man",
+    B_SEMI_BIPEDAL: "semi bipedal",
     B_FLAT: "flat",
     B_GASTROPOD: "gastropod"
 }

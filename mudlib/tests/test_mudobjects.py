@@ -21,11 +21,12 @@ hall.items += [ Item("table", "oak table",
                      """
                     a magazine from a university
                      """)]
-rat,julie = NPC("rat", "n", race="rodent"), NPC("julie", "f", "attractive Julie",
+rat, julie = NPC("rat", "n", race="rodent"), NPC("julie", "f", "attractive Julie",
                                  """
                                  She's quite the looker.
                                  """)
 hall.livings = { rat, julie }
+
 
 class TestLocations(unittest.TestCase):
     def test_look(self):
@@ -71,7 +72,7 @@ Present: rat"""
         rat = MsgTraceNPC("rat", "n", "rodent")
         julie = MsgTraceNPC("julie", "f", "human")
         hall = Location("hall")
-        hall.livings = [rat,julie]
+        hall.livings = [rat, julie]
         hall.tell("roommsg")
         self.assertEqual("roommsg", rat.msg)
         self.assertEqual("roommsg", julie.msg)
@@ -79,6 +80,7 @@ Present: rat"""
         hall.tell("roommsg", rat, [julie], "juliemsg")
         self.assertEqual(None, rat.msg)
         self.assertEqual("juliemsg", julie.msg)
+
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
@@ -98,7 +100,7 @@ class TestNPC(unittest.TestCase):
 
 class TestPlayer(unittest.TestCase):
     def test_init(self):
-        player = Player("fritz","m")
+        player = Player("fritz", "m")
         player.set_title("%s the great", includes_name_param=True)
         self.assertEqual("fritz", player.name)
         self.assertEqual("Fritz the great", player.title)
@@ -108,13 +110,13 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(set(), player.privileges)
         self.assertTrue(1 < player.stats["agi"] < 100)
     def test_tell(self):
-        player = Player("fritz","m")
+        player = Player("fritz", "m")
         player.tell("line1")
         player.tell("line2")
-        self.assertEquals(["line1","line2"], player.get_output_lines())
+        self.assertEquals(["line1", "line2"], player.get_output_lines())
         self.assertEquals([], player.get_output_lines())
     def test_look(self):
-        player = Player("fritz","m")
+        player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         self.assertEqual("You see nothing.", player.look())
         player.move(attic)

@@ -1,6 +1,7 @@
 from . import baseobjects, soul
 from . import languagetools as lang
 
+
 class Player(baseobjects.Living):
     """
     Player controlled entity.

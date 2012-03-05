@@ -144,8 +144,12 @@ class Driver(object):
             target = self.player
         gender = lang.GENDERS[target.gender]
         living_type = target.__class__.__name__.lower()
+        race = mudlib.races.races[target.race]
+        race_size = mudlib.races.sizes[race["size"]]
+        race_bodytype = mudlib.races.bodytypes[race["bodytype"]]
         self.player.tell(
             "%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type),
+            "%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]),
             ", ".join( "%s:%s" % (s[0],s[1]) for s in sorted(target.stats.items()) )
             )
 

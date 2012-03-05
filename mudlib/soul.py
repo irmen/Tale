@@ -15,9 +15,13 @@ from . import languagetools as lang
 class SoulException(Exception):
     """Internal error, should never happen. Not intended for user display."""
     pass
+
+
 class ParseException(SoulException):
     """Problem with parsing the user input. Should be shown to the user as a nice error message."""
     pass
+
+
 class UnknownVerbException(ParseException):
     """
     The soul doesn't recognise the verb that the user typed.
@@ -404,6 +408,7 @@ def poss_replacement(actor, target, observer):
 
 _message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
 _skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
+
 
 class Soul(object):
     """
