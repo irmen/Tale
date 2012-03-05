@@ -48,6 +48,11 @@ You see: key, magazine, table
 Exits: door, east, up
 Present: julie, rat"""
         self.assertEqual(expected, hall.look(short=True))
+        expected = """[Main hall]
+You see: key, magazine, table
+Exits: door, east, up
+Present: rat"""
+        self.assertEqual(expected, hall.look(exclude_living=julie, short=True))
 
     def test_search_living(self):
         self.assertEquals(None, hall.search_living("<notexisting>"))
@@ -71,7 +76,7 @@ Present: julie, rat"""
         self.assertEqual("roommsg", rat.msg)
         self.assertEqual("roommsg", julie.msg)
         rat.msg = julie.msg = None
-        hall.tell("roommsg", [rat], [julie], "juliemsg")
+        hall.tell("roommsg", rat, [julie], "juliemsg")
         self.assertEqual(None, rat.msg)
         self.assertEqual("juliemsg", julie.msg)
 
@@ -108,6 +113,15 @@ class TestPlayer(unittest.TestCase):
         player.tell("line2")
         self.assertEquals(["line1","line2"], player.get_output_lines())
         self.assertEquals([], player.get_output_lines())
+    def test_look(self):
+        player = Player("fritz","m")
+        attic = Location("Attic", "A dark attic.")
+        self.assertEqual("You see nothing.", player.look())
+        player.move(attic)
+        self.assertEqual("[Attic]", player.look(short=True))
+        julie = NPC("julie", "f")
+        julie.move(attic)
+        self.assertEqual("[Attic]\nPresent: julie", player.look(short=True))
 
 
 if __name__ == '__main__':

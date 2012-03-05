@@ -161,26 +161,24 @@ class Location(Container):
         self.items = []       # sequence of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
 
-    def tell(self, room_msg, exclude=None, specific_targets=None, specific_target_msg=""):
+    def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
-        Tells something to the livings in the room (excluding the livings given in exclude).
+        Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
         that based on this message string. That will make it quite hard because you need to
         parse the string again to figure out what happened...
         """
-        exclude = exclude or set()
         specific_targets = specific_targets or set()
         for living in self.livings:
-            if living in exclude:
+            if living == exclude_living:
                 continue
             if living in specific_targets:
                 living.tell(specific_target_msg)
             else:
                 living.tell(room_msg)
 
-    def look(self, short=False):
-        """returns a string describing the surroundings"""
-        # XXX bug: player itself is also listed in the output
+    def look(self, exclude_living=None, short=False):
+        """returns a string describing the surroundings, possibly excluding one living from the description list"""
         r = ["[" + self.name + "]"]
         if self.description:
             if not short:
@@ -206,16 +204,18 @@ class Location(Container):
                         r.append(exit.description)
         if self.livings:
             if short:
-                living_names = sorted(living.name for living in self.livings)
-                r.append("Present: " + ", ".join(living_names))
+                living_names = sorted(living.name for living in self.livings if living != exclude_living)
+                if living_names:
+                    r.append("Present: " + ", ".join(living_names))
             else:
-                titles = sorted(living.title for living in self.livings)
-                titles = lang.join(titles)
-                if len(self.livings) > 1:
-                    titles += " are here."
-                else:
-                    titles += " is here."
-                r.append(lang.capital(titles))
+                titles = sorted(living.title for living in self.livings if living != exclude_living)
+                if titles:
+                    titles = lang.join(titles)
+                    if len(self.livings) > 1:
+                        titles += " are here."
+                    else:
+                        titles += " is here."
+                    r.append(lang.capital(titles))
         return "\n".join(r)
 
     def search_living(self, name):

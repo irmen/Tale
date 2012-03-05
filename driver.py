@@ -51,7 +51,7 @@ class Driver(object):
             player = create_player_from_info()
         self.player = player
         self.move_player_to_start_room()
-        print "\nWelcome, {}.\n{}\n\n{}\n".format(self.player.title, mudlib.MUD_BANNER, self.player.location.look())
+        print "\nWelcome, {}.\n{}\n\n{}\n".format(self.player.title, mudlib.MUD_BANNER, self.player.look())
         self.main_loop()
 
     def move_player_to_start_room(self):
@@ -68,9 +68,9 @@ class Driver(object):
             try:
                 keepgoing = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
-                print "* The verb %s is unrecognised." % x.verb
+                self.player.tell("* The verb %s is unrecognised." % x.verb)
             except mudlib.soul.ParseException, x:
-                print "*",x.message
+                self.player.tell("* %s" % x.message)
             # print any buffered player output
             output = self.player.get_output_lines()
             if output:
@@ -78,7 +78,7 @@ class Driver(object):
             print
 
     def ask_player_input(self):
-        cmd = raw_input("> ")
+        cmd = raw_input(">> ").strip()
         verb, _, rest = cmd.partition(" ")
         # preprocess input special cases
         if verb.startswith("'"):
@@ -103,16 +103,26 @@ class Driver(object):
         player = self.player
         verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
         player.tell(player_message)
-        player.location.tell(room_message, None, who, target_message)
+        player.location.tell(room_message, player, who, target_message)
 
     def do_help(self, topic):
-        self.player.tell("* Builtin commands: ?/help, l/look, exa/examine, stats, quit.")
-        self.player.tell("* No further help available yet.")
+        if topic=="soul":
+            self.player.tell("* Soul verbs available:")
+            line = ""
+            for v in sorted(mudlib.soul.VERBS):
+                line += "  %-12s" % v
+                if len(line)>70:
+                    self.player.tell(line)
+                    line = ""
+        else:
+            self.player.tell("* Builtin commands: l/look, exa/examine, stats, quit.")
+            self.player.tell("* Help: ?/help with optional topic ('soul' for soul verb list).")
+            self.player.tell("* No further help available yet.")
 
     def do_look(self, arg):
         if arg:
             raise mudlib.soul.ParseException("Maybe you should examine that instead.")
-        self.player.tell(self.player.location.look())
+        self.player.tell(self.player.look())
 
     def do_examine(self, arg):
         if not arg:
@@ -127,6 +137,9 @@ class Driver(object):
     def do_stats(self, arg):
         if arg:
             target = self.player.location.search_living(arg)
+            if not target:
+                self.player.tell("* %s isn't here." % arg)
+                return
         else:
             target = self.player
         gender = lang.GENDERS[target.gender]

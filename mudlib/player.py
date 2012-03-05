@@ -37,3 +37,10 @@ class Player(baseobjects.Living):
         lines = self.__output
         self.__output = []
         return lines
+
+    def look(self, short=False):
+        """look around in your surroundings (exclude player from livings)"""
+        if self.location:
+            return self.location.look(exclude_living=self, short=short)
+        else:
+            return "You see nothing."

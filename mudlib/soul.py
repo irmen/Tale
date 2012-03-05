@@ -628,7 +628,7 @@ class Soul(object):
                 continue
             if word in ("them", "him", "her", "it"):
                 raise ParseException("It is not clear who you mean.")
-            elif word in ("me", "myself", "i", "I"):
+            elif word in ("me", "myself"):
                 if include_flag:
                     who.add(player.name)
                 elif player.name in who:
