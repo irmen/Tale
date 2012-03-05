@@ -1,5 +1,6 @@
 from . import baseobjects, soul
 from . import languagetools as lang
+from mudlib import util
 
 
 class Player(baseobjects.Living):
@@ -26,12 +27,15 @@ class Player(baseobjects.Living):
     def socialize_parsed(self, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
         return self.soul.process_verb_parsed(self, verb, who, adverb, message, bodypart, qualifier)
 
-    def tell(self, *msg):
+    def tell(self, msg):
         """
-        A message send to a player, this is meant to be printed on the screen.
+        A message sent to a player (or a list of messages). This is meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
         """
-        self.__output.extend(msg)
+        if type(msg) is list:
+            self.__output.extend(msg)
+        else:
+            self.__output.append(msg)
 
     def get_output_lines(self):
         """gets the accumulated output lines and clears the buffer"""
@@ -42,6 +46,9 @@ class Player(baseobjects.Living):
     def look(self, short=False):
         """look around in your surroundings (exclude player from livings)"""
         if self.location:
-            return self.location.look(exclude_living=self, short=short)
+            look = self.location.look(exclude_living=self, short=short)
+            if "wizard" in self.privileges:
+                return util.wizard_obj_info(self.location) + "\n" + look
+            return look
         else:
             return "You see nothing."

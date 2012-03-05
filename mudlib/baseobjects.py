@@ -2,6 +2,7 @@ import textwrap
 from .races import races
 from . import languagetools as lang
 
+
 """
 object hierarchy:
 
@@ -47,8 +48,7 @@ class MudObject(object):
         self.description = textwrap.dedent(description).strip() if description else ""
 
     def __repr__(self):
-        clazz = type(self).__name__
-        return "<%s '%s' (%s) at %s>" % (clazz, self.name, self.title, hex(id(self)))
+        return "<%s '%s' (%s) at %s>" % (self.__class__.__name__, self.name, self.title, hex(id(self)))
 
 
 class Item(MudObject):
@@ -85,7 +85,7 @@ class Living(MudObject):
     Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
     They are always inside a Location.
     """
-    def __init__(self, name, gender=None, title=None, description=None, race=None):
+    def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
@@ -107,7 +107,7 @@ class Living(MudObject):
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
 
-    def tell(self, *msg):
+    def tell(self, msg):
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
