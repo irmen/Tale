@@ -35,5 +35,3 @@ kitchen.exits["south"] = Exit(hall, "A door to the south leads back to the hall.
 
 attic.exits["down"] = Exit(hall, "A small ladder leads back down to the hall.")
 attic.exits["ladder"] = attic.exits["down"]
-
-print hall.look()

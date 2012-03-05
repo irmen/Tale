@@ -1,6 +1,6 @@
 import textwrap
-import mudlib.languagetools as lang
-from mudlib.races import races
+from .races import races
+from . import languagetools as lang
 
 """
 object hierarchy:
@@ -44,10 +44,7 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None):
         self.name = name
         self.title = title or name
-        if description:
-            self.description = textwrap.dedent(description).strip()
-        else:
-            self.description = self.title
+        self.description = textwrap.dedent(description).strip() if description else ""
 
     def __repr__(self):
         clazz = type(self).__name__
@@ -102,10 +99,30 @@ class Living(MudObject):
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
-        self.race = races[race]
+        self.race = race
+        # Make a copy of the race stats, because they can change dynamically.
+        # There's no need to copy the whole race data dict because it's available
+        # from mudlib.races, look it up by the race name.
         self.stats = {}
-        for stat_name, (stat_avg, stat_class) in self.race["stats"].items():
+        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
+
+    def tell(self, *msg):
+        """
+        Every living thing in the mud can receive one or more action messages.
+        For players this is usually printed to their screen, but for all other
+        livings the default is to do nothing.
+        They could react on it but this is not advisable because you will need
+        to parse the string again to figure out what happened...
+        """
+        pass
+
+    def move(self, target_location):
+        """leave the current location, enter the new location"""
+        if self.location:
+            self.location.leave(self)
+        target_location.enter(self)
+        self.location = target_location
 
 
 class Container(MudObject):
@@ -114,6 +131,14 @@ class Container(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Container, self).__init__(name, title, description)
+
+    def enter(self, object):
+        """something enters this container"""
+        pass
+
+    def leave(self, object):
+        """something leaves this container"""
+        pass
 
 
 class Bag(Item, Container):
@@ -132,12 +157,30 @@ class Location(Container):
     """
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
-        self.livings = set()  # set of livings
+        self.livings = set()  # set of livings in this location
         self.items = []       # sequence of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
 
+    def tell(self, room_msg, exclude=None, specific_targets=None, specific_target_msg=""):
+        """
+        Tells something to the livings in the room (excluding the livings given in exclude).
+        This is just the message string! If you want to react on events, consider not doing
+        that based on this message string. That will make it quite hard because you need to
+        parse the string again to figure out what happened...
+        """
+        exclude = exclude or set()
+        specific_targets = specific_targets or set()
+        for living in self.livings:
+            if living in exclude:
+                continue
+            if living in specific_targets:
+                living.tell(specific_target_msg)
+            else:
+                living.tell(room_msg)
+
     def look(self, short=False):
         """returns a string describing the surroundings"""
+        # XXX bug: player itself is also listed in the output
         r = ["[" + self.name + "]"]
         if self.description:
             if not short:
@@ -174,6 +217,24 @@ class Location(Container):
                     titles += " is here."
                 r.append(lang.capital(titles))
         return "\n".join(r)
+
+    def search_living(self, name):
+        """search for a living in this location by its name (and title, if no names match)"""
+        name = name.lower()
+        result = [living for living in self.livings if living.name==name]
+        if not result:
+            result = [living for living in self.livings if living.title.lower()==name]
+        return result[0] if result else None
+
+    def enter(self, object):
+        super(Location, self).enter(object)
+        if isinstance(object, Living):
+            self.livings.add(object)
+
+    def leave(self, object):
+        super(Location, self).leave(object)
+        if object in self.livings:
+            self.livings.remove(object)
 
 
 class Exit(object):

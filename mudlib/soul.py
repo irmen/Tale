@@ -9,7 +9,7 @@ The verb parsing and message generation have been rewritten.
 """
 
 import re
-import mudlib.languagetools as lang
+from . import languagetools as lang
 
 
 class SoulException(Exception):
@@ -436,7 +436,7 @@ class Soul(object):
         """
         This function takes a verb and the arguments given by the user
         and converts it to an internal representation: (targets-without-player, playermessage, roommessage, targetmessage)
-        who = sequence of actual mud objects (livings), not just player/npc names (strings)
+        who = set of actual mud objects (livings), not just player/npc names (strings)
         """
         if not player:
             raise SoulException("no player in process_verb_parsed")
@@ -444,7 +444,7 @@ class Soul(object):
         if not verbdata:
             raise UnknownVerbException(verb, None, qualifier)
         vtype = verbdata[0]
-        who = who or []
+        who = set(who or [])   # be sure to make this a set, to allow O(1) lookups later
         if not message and verbdata[1] and len(verbdata[1]) > 1:
             message = verbdata[1][1]  # get the message from the verbs table
         if message:
@@ -492,12 +492,13 @@ class Soul(object):
             target_msg = target_msg.replace(" \nMY", " " + player.objective)
             # fix up POSS, IS, SUBJ in the player and room messages
             if len(who) == 1:
+                only_living = list(who)[0]
                 player_msg = player_msg.replace(" \nIS", " is")
-                player_msg = player_msg.replace(" \nSUBJ", " " + who[0].subjective)
-                player_msg = player_msg.replace(" \nPOSS", " " + poss_replacement(player, who[0], player))
+                player_msg = player_msg.replace(" \nSUBJ", " " + only_living.subjective)
+                player_msg = player_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, player))
                 room_msg = room_msg.replace(" \nIS", " is")
-                room_msg = room_msg.replace(" \nSUBJ", " " + who[0].subjective)
-                room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, who[0], None))
+                room_msg = room_msg.replace(" \nSUBJ", " " + only_living.subjective)
+                room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, None))
             else:
                 targetnames_player = lang.join([poss_replacement(player, living, player) for living in who])
                 targetnames_room = lang.join([poss_replacement(player, living, None) for living in who])

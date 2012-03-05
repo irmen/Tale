@@ -79,12 +79,14 @@ class TestSoul(unittest.TestCase):
         targets = [mudlib.npc.NPC("max","m"), mudlib.npc.NPC("kate","f",title="Kate"), mudlib.npc.NPC("cat", "n", title="the hairy cat")]
         # peer
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "peer", targets)
-        self.assertEqual(targets, who)
-        self.assertEqual("You peer at max, Kate, and the hairy cat.", player_msg)
-        self.assertEqual("Julie peers at max, Kate, and the hairy cat.", room_msg)
+        self.assertEqual(set(targets), who)
+        self.assertTrue(player_msg.startswith("You peer at "))
+        self.assertTrue("max" in player_msg and "hairy cat" in player_msg and "Kate" in player_msg)
+        self.assertTrue(room_msg.startswith("Julie peers at "))
+        self.assertTrue("max" in room_msg and "hairy cat" in room_msg and "Kate" in room_msg)
         self.assertEqual("Julie peers at you.", target_msg)
         # all/everyone
-        player.location = mudlib.baseobjects.Location("somewhere")
+        player.move(mudlib.baseobjects.Location("somewhere"))
         livings = set(targets)
         livings.add(player)
         player.location.livings = livings
@@ -99,17 +101,19 @@ class TestSoul(unittest.TestCase):
     def testVerbTarget(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
-        player.location = mudlib.baseobjects.Location("somewhere")
+        player.move(mudlib.baseobjects.Location("somewhere"))
         player.location.livings = { mudlib.npc.NPC("max","m"), player }
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
         self.assertEqual("grin", verb)
         self.assertTrue(len(who) == 0)
+        self.assertIsInstance(who, set, "targets must be a set for O(1) lookups")
         self.assertEqual("You grin evilly.", player_msg)
         self.assertEqual("Julie grins evilly.", room_msg)
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin at max")
         self.assertEqual("grin", verb)
         self.assertTrue(len(who) == 1)
-        self.assertEqual("max", who[0].name)
+        self.assertIsInstance(who, set, "targets must be a set for O(1) lookups")
+        self.assertEqual("max", who.pop().name)
         self.assertEqual("You grin evilly at max.", player_msg)
         self.assertEqual("Julie grins evilly at max.", room_msg)
         self.assertEqual("Julie grins evilly at you.", target_msg)
@@ -129,7 +133,7 @@ class TestSoul(unittest.TestCase):
     def testMessageQuoteParse(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
-        player.location = mudlib.baseobjects.Location("somewhere")
+        player.move(mudlib.baseobjects.Location("somewhere"))
         player.location.livings = { mudlib.npc.NPC("max","m"), player }
         # whisper
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper \"hello there\"")
@@ -223,7 +227,7 @@ class TestSoul(unittest.TestCase):
     def testParse(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
-        player.location = mudlib.baseobjects.Location("somewhere")
+        player.move(mudlib.baseobjects.Location("somewhere"))
         targets = { mudlib.npc.NPC("max","m"), mudlib.npc.NPC("kate","f"), mudlib.npc.NPC("the cat", "n") }
         player.location.livings = targets
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "fail grin sickly at everyone head")
@@ -386,15 +390,17 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie watches you carefully.", target_msg)
         # ayt
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "ayt", targets)
-        self.assertEqual(targets, who)
+        self.assertEqual(set(targets), who)
         self.assertEqual("You wave your hand in front of max' face, is he there?", player_msg)
         self.assertEqual("Julie waves her hand in front of max' face, is he there?", room_msg)
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
         # ayt
         targets2 = [mudlib.npc.NPC("max","m"), player]
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "ayt", targets2)
-        self.assertEqual("You wave your hand in front of max' and your own face, are they there?", player_msg)
-        self.assertEqual("Julie waves her hand in front of max' and her own face, are they there?", room_msg)
+        self.assertTrue(player_msg.startswith("You wave your hand in front of "))
+        self.assertTrue("max'" in player_msg and "your own" in player_msg)
+        self.assertTrue(room_msg.startswith("Julie waves her hand in front of "))
+        self.assertTrue("max'" in room_msg and "her own" in room_msg)
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
 
     def testFULL(self):
