@@ -45,6 +45,8 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual(['nobly', 'nocturnally', 'noiselessly', 'noisily', 'nominally'], mudlib.languagetools.adverb_by_prefix("no", 5))
         self.assertEqual(['nobly'], mudlib.languagetools.adverb_by_prefix("no", 1))
         self.assertEqual(["abjectly"], mudlib.languagetools.adverb_by_prefix("a", 1))
+        self.assertEqual(["zonally","zoologically"], mudlib.languagetools.adverb_by_prefix("zo"))
+        self.assertEqual(["zoologically"], mudlib.languagetools.adverb_by_prefix("zoo"))
         self.assertEqual([], mudlib.languagetools.adverb_by_prefix("zzzzzzzzzz"))
 
     def testPossessive(self):

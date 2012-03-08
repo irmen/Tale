@@ -10,23 +10,15 @@ The verb parsing and message generation have been rewritten.
 
 import re
 from . import languagetools as lang
+from .errors import ParseException
 
 
 class SoulException(Exception):
     """Internal error, should never happen. Not intended for user display."""
-    def __init__(self, errormessage):
-        super(SoulException, self).__init__(errormessage)
-        self.errormessage = errormessage
+    pass
 
 
-class ParseException(SoulException):
-    """Problem with parsing the user input. Should be shown to the user as a nice error message."""
-    def __init__(self, errormessage):
-        super(ParseException, self).__init__(errormessage)
-        self.errormessage = errormessage
-
-
-class UnknownVerbException(ParseException):
+class UnknownVerbException(SoulException):
     """
     The soul doesn't recognise the verb that the user typed.
     The engine can and should search for other places that define this verb first.

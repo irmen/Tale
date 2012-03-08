@@ -71,6 +71,7 @@ def adverb_by_prefix(prefix, amount=5):
         return []
     elif ADVERB_LIST[i].startswith(prefix):
         j = i + 1
+        amount = min(amount, len(ADVERB_LIST) - i)   # avoid reading past the end of the list
         while amount > 1 and ADVERB_LIST[j].startswith(prefix):
             j += 1
             amount -= 1

@@ -9,6 +9,7 @@ import mudlib.soul
 import mudlib.util
 import mudlib.baseobjects
 import mudlib.languagetools as lang
+import mudlib.errors
 
 def create_player_from_info():
     while True:
@@ -83,8 +84,8 @@ class Driver(object):
                 keepgoing = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
                 print("* The verb %s is unrecognised." % x.verb)
-            except mudlib.soul.ParseException, x:
-                print("* %s" % x.errormessage)
+            except mudlib.errors.ParseException, x:
+                print("* %s" % str(x))
             except Exception:
                 import traceback
                 print("* Error:")
