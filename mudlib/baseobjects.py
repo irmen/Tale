@@ -77,63 +77,6 @@ class Armour(Item):
         super(Armour, self).__init__(name, title, description)
 
 
-class Living(MudObject):
-    """
-    Root class of the living entities in the mud world.
-    Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
-    They are always inside a Location.
-    They also have an inventory object.
-    """
-    def __init__(self, name, gender, title=None, description=None, race=None):
-        super(Living, self).__init__(name, title, description)
-        self.gender = gender
-        self.subjective = lang.SUBJECTIVE[self.gender]
-        self.possessive = lang.POSSESSIVE[self.gender]
-        self.objective = lang.OBJECTIVE[self.gender]
-        self.location = None
-        self.race = None
-        self.stats = {}
-        if race:
-            self.set_race(race)
-        self.inventory = set()
-
-    def set_race(self, race):
-        """set the race for this Living and copy the initial set of stats from that race"""
-        self.race = race
-        # Make a copy of the race stats, because they can change dynamically.
-        # There's no need to copy the whole race data dict because it's available
-        # from mudlib.races, look it up by the race name.
-        self.stats = {}
-        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
-            self.stats[stat_name] = stat_avg
-
-    def tell(self, *messages):
-        """
-        Every living thing in the mud can receive one or more action messages.
-        For players this is usually printed to their screen, but for all other
-        livings the default is to do nothing.
-        They could react on it but this is not advisable because you will need
-        to parse the string again to figure out what happened...
-        """
-        pass
-
-    def move(self, target_location):
-        """leave the current location, enter the new location"""
-        if self.location:
-            self.location.leave(self)
-        target_location.enter(self)
-        self.location = target_location
-
-
-class Bag(Item):
-    """
-    A bag-type container (i.e. an item that acts as a container)
-    """
-    def __init__(self, name, title=None, description=None):
-        super(Bag, self).__init__(name, title, description)
-        self.contents = set()
-
-
 class Location(MudObject):
     """
     A location in the mud world. Livings and Items are in it.
@@ -202,8 +145,11 @@ class Location(MudObject):
                     r.append(lang.capital(titles))
         return "\n".join(r)
 
-    def search_living(self, name):
-        """search for a living in this location by its name (and title, if no names match)"""
+    def search_living(self, name, suggest=False):   # @todo: unittest for suggest
+        """
+        Search for a living in this location by its name (and title, if no names match)
+        If there's more than one match, returns the first
+        """
         name = name.lower()
         result = [living for living in self.livings if living.name == name]
         if not result:
@@ -214,7 +160,8 @@ class Location(MudObject):
         self.livings.add(object)
 
     def leave(self, object):
-        self.livings.remove(object)
+        if object in self.livings:
+            self.livings.remove(object)
 
     def add_item(self, item):
         self.items.add(item)
@@ -246,6 +193,90 @@ class ExitStub(object):
             raise TypeError("target of ExitStub must be a str")
         self.target = target_location_name
         self.description = description
+
+
+class Living(MudObject):
+    """
+    Root class of the living entities in the mud world.
+    Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
+    They are always inside a Location (Limbo when not specified yet).
+    They also have an inventory object.
+    """
+    __Limbo = Location("Limbo", "The intermediate or transitional place or state. Livings end up here if they're not inside a proper location yet.")
+
+    def __init__(self, name, gender, title=None, description=None, race=None):
+        super(Living, self).__init__(name, title, description)
+        self.gender = gender
+        self.subjective = lang.SUBJECTIVE[self.gender]
+        self.possessive = lang.POSSESSIVE[self.gender]
+        self.objective = lang.OBJECTIVE[self.gender]
+        self.location = Living.__Limbo  # set transitional location
+        self.race = None
+        self.stats = {}
+        if race:
+            self.set_race(race)
+        self.inventory = set()
+
+    def set_race(self, race):
+        """set the race for this Living and copy the initial set of stats from that race"""
+        self.race = race
+        # Make a copy of the race stats, because they can change dynamically.
+        # There's no need to copy the whole race data dict because it's available
+        # from mudlib.races, look it up by the race name.
+        self.stats = {}
+        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
+            self.stats[stat_name] = stat_avg
+
+    def tell(self, *messages):
+        """
+        Every living thing in the mud can receive one or more action messages.
+        For players this is usually printed to their screen, but for all other
+        livings the default is to do nothing.
+        They could react on it but this is not advisable because you will need
+        to parse the string again to figure out what happened...
+        """
+        pass
+
+    def move(self, target_location):
+        """leave the current location, enter the new location"""
+        if self.location:
+            self.location.leave(self)
+        target_location.enter(self)
+        self.location = target_location
+
+    def search_item(self, name, include_inventory=True, include_location=True, suggest=False):     # @todo: unittest
+        """
+        Searches an item within the 'visible' world around the living including his inventory.
+        If there's more than one hit, just return the first.
+        """
+        name = name.lower()
+        matches = None
+        if include_inventory:
+            matches = [item for item in self.inventory if item.name == name] or \
+                      [item for item in self.inventory if item.title.lower() == name]
+        if not matches and include_location:
+            matches = [item for item in self.location.items if item.name == name] or \
+                      [item for item in self.location.items if item.title.lower() == name]
+        return matches[0] if matches else None
+
+    def search_name(self, name, suggest=False):    # @todo: unittest
+        """
+        Searches an object within the 'visible' world around the living including his inventory.
+        If there's more than one hit, just return the first.
+        """
+        name = name.lower()
+        if self.name == name or self.title.lower() == name:
+            return self
+        return self.search_item(name, suggest=suggest) or self.location.search_living(name, suggest) or None
+
+
+class Bag(Item):
+    """
+    A bag-type container (i.e. an item that acts as a container)
+    """
+    def __init__(self, name, title=None, description=None):
+        super(Bag, self).__init__(name, title, description)
+        self.contents = set()
 
 
 class Effect(object):

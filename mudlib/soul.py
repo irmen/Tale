@@ -14,12 +14,16 @@ from . import languagetools as lang
 
 class SoulException(Exception):
     """Internal error, should never happen. Not intended for user display."""
-    pass
+    def __init__(self, errormessage):
+        super(SoulException, self).__init__(errormessage)
+        self.errormessage = errormessage
 
 
 class ParseException(SoulException):
     """Problem with parsing the user input. Should be shown to the user as a nice error message."""
-    pass
+    def __init__(self, errormessage):
+        super(ParseException, self).__init__(errormessage)
+        self.errormessage = errormessage
 
 
 class UnknownVerbException(ParseException):
@@ -427,11 +431,7 @@ class Soul(object):
         qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
         if who:
             # translate the names to actual Livings objects
-            if player.location and player.location.livings:
-                all_livings = player.location.livings
-            else:
-                all_livings = [ player ]
-            who = [ living for living in all_livings if living.name in who ]
+            who = [ living for living in player.location.livings if living.name in who ]
         result = self.process_verb_parsed(player, verb, who, adverb, message, bodypart, qualifier)
         if qualifier:
             verb = qualifier + " " + verb
@@ -622,11 +622,7 @@ class Soul(object):
         collect_message = False
         verbdata = VERBS[verb][2]
         message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
-        if player.location and player.location.livings:
-            all_livings_names = { living.name for living in player.location.livings }
-        else:
-            # if the player is not in a sensible location, just make up a fake livings list
-            all_livings_names = [ player.name ]
+        all_livings_names = { living.name for living in player.location.livings }
         for word in words:
             if collect_message:
                 message.append(word)

@@ -84,7 +84,11 @@ class Driver(object):
             except mudlib.soul.UnknownVerbException, x:
                 print("* The verb %s is unrecognised." % x.verb)
             except mudlib.soul.ParseException, x:
-                print("* %s" % x.message)
+                print("* %s" % x.errormessage)
+            except Exception:
+                import traceback
+                print("* Error:")
+                print(traceback.format_exc())
 
     def write_output(self):
         # print any buffered player output
@@ -108,13 +112,22 @@ class Driver(object):
         elif verb == "stats":
             self.do_stats(rest)
         elif verb in ("i", "inv", "inventory"):
-            self.do_inventory()
+            self.do_inventory(rest)
+        elif verb == "drop":
+            self.do_drop(rest)
+        elif verb == "take":
+            self.do_take(rest)
+        elif verb == "pdb" and "wizard" in self.player.privileges:
+            import pdb
+            pdb.set_trace()   # @todo: remove this when going multiuser (can't debug anymore then)
         elif verb == "quit":
             return False
         elif verb == "ls" and "wizard" in self.player.privileges:
             self.do_ls(rest)
         elif verb == "clone" and "wizard" in self.player.privileges:
             self.do_clone(rest)
+        elif verb == "destroy" and "wizard" in self.player.privileges:
+            self.do_destroy(rest)
         else:
             self.do_command(cmd)
         return True
@@ -125,14 +138,69 @@ class Driver(object):
         player.tell(player_message)
         player.location.tell(room_message, player, who, target_message)
 
-    def do_inventory(self):
+    def do_inventory(self, arg):
         print = self.player.tell
-        if not self.player.inventory:
-            print("You are carrying nothing.")
+        if arg and "wizard" in self.player.privileges:
+            # show another living's inventory
+            living = self.player.location.search_living(arg)
+            if not living:
+                print("%s isn't here." % arg)
+            else:
+                if not living.inventory:
+                    print(living.name, "is carrying nothing.")
+                else:
+                    print(living.name, "is carrying:")
+                    for item in living.inventory:
+                        print("  " + item.title)
         else:
-            print("You are carrying:")
-            for item in self.player.inventory:
-                print("  " + item.title)
+            if not self.player.inventory:
+                print("You are carrying nothing.")
+            else:
+                print("You are carrying:")
+                for item in self.player.inventory:
+                    print("  " + item.title)
+
+    def do_destroy(self, arg):
+        # @todo: ask for confirmation
+        print = self.player.tell
+        item = self.player.search_item(arg)
+        if not item:
+            print("There's no %s here." % arg)
+        else:
+            if item in self.player.inventory:
+                self.player.inventory.remove(item)
+            else:
+                self.player.location.remove_item(item)
+            print("You destroyed %s." % mudlib.util.wizard_obj_info(item))
+            self.player.location.tell("{player} unmakes {item}: it's suddenly gone."
+                                      .format(player=lang.capital(self.player.title), item=lang.a(item.title)),
+                                      exclude_living=self.player)
+
+    def do_drop(self, arg):
+        print = self.player.tell
+        item = self.player.search_item(arg, include_location=False)
+        if not item:
+            print("You don't have %s." % lang.a(arg))
+        else:
+            self.player.inventory.remove(item)
+            self.player.location.add_item(item)
+            print("You drop %s on the floor." % lang.a(item.title))
+            self.player.location.tell("{player} drops {item} on the floor."
+                                  .format(player=lang.capital(self.player.title), item=lang.a(item.title)),
+                                  exclude_living=self.player)
+
+    def do_take(self, arg):
+        print = self.player.tell
+        item = self.player.search_item(arg, include_inventory=False)
+        if not item:
+            print("There's no %s here." % arg)
+        else:
+            self.player.location.remove_item(item)
+            self.player.inventory.add(item)
+            print("You take %s." % lang.a(item.title))
+            self.player.location.tell("{player} takes {item}."
+                                      .format(player=lang.capital(self.player.title), item=lang.a(item.title)),
+                                      exclude_living=self.player)
 
     def do_ls(self, path):
         print = self.player.tell
@@ -160,35 +228,38 @@ class Driver(object):
     def do_clone(self, path):
         print = self.player.tell
         if not path.startswith("."):
-            path = "." + path
-        path, objectname = path.rsplit(".", 1)
-        if not objectname:
-            print("* clone: invalid object path")
-            return
-        try:
-            module = __import__("mudlib" + path)
-        except (ImportError, ValueError):
-            print("* clone: there is no module named " + path)
-            return
-        if len(path) > 1:
-            for name in path.split(".")[1:]:
-                module = getattr(module, name)
-        object = getattr(module, objectname, None)
-        if object is None or not isinstance(object, mudlib.baseobjects.Item):
+            # clone an object from the inventory or the room
+            obj = self.player.search_item(path)
+        else:
+            # clone an item somewhere in a module path
+            path, objectname = path.rsplit(".", 1)
+            if not objectname:
+                print("* clone: invalid object path")
+                return
+            try:
+                module = __import__("mudlib" + path)
+            except (ImportError, ValueError):
+                print("* clone: there is no module named " + path)
+                return
+            if len(path) > 1:
+                for name in path.split(".")[1:]:
+                    module = getattr(module, name)
+            obj = getattr(module, objectname, None)
+        if obj is None or not isinstance(obj, mudlib.baseobjects.Item):
             print("* clone: object not found")
             return
-        item = copy.deepcopy(object)
+        item = copy.deepcopy(obj)
         self.player.inventory.add(item)
         print("* cloned: " + repr(item))
         self.player.location.tell("{player} conjures up {item}, and quickly pockets it."
-            .format(player = lang.capital(self.player.title), item = lang.a(item.title)),
-            exclude_living = self.player)
+            .format(player=lang.capital(self.player.title), item=lang.a(item.title)),
+            exclude_living=self.player)
 
     def do_help(self, topic):
         print = self.player.tell
         if topic == "soul":
             print("* Soul verbs available:")
-            lines = [""] * (len(mudlib.soul.VERBS)//5+1)
+            lines = [""] * (len(mudlib.soul.VERBS) // 5 + 1)
             index = 0
             for v in sorted(mudlib.soul.VERBS):
                 lines[index % len(lines)] += "  %-13s" % v
@@ -196,9 +267,8 @@ class Driver(object):
             for line in lines:
                 print(line)
         else:
-            print("* Builtin commands: l/look, exa/examine, stats, quit.")
+            print("* Builtin commands: l/look, exa/examine, stats, ls, clone, drop, take, inv, pdb, quit.")
             print("* Help: ?/help with optional topic ('soul' for soul verb list).")
-            print("* No further help available yet.")
 
     def do_look(self, arg):
         print = self.player.tell
@@ -211,24 +281,29 @@ class Driver(object):
         if not arg:
             raise mudlib.soul.ParseException("Examine what?")
         player = self.player
-        living = self.player.location.search_living(arg)
-        if living:
+        obj = player.search_name(arg, True)
+        if obj:
             if "wizard" in self.player.privileges:
-                print(mudlib.util.wizard_obj_info(living))
-            print("This is %s.\n%s" % (living.title, lang.fullstop(living.description)))
-            race = mudlib.races.races[living.race]
-            if living.race == "human":
-                # don't print as much info when dealing with mere humans
-                msg = lang.capital("%s speaks %s." % (lang.SUBJECTIVE[living.gender], race["language"]))
-                print(msg)
+                print(mudlib.util.wizard_obj_info(obj))
+            if isinstance(obj, mudlib.baseobjects.Living):
+                print("This is %s." % obj.title)
+                print(obj.description)
+                race = mudlib.races.races[obj.race]
+                if obj.race == "human":
+                    # don't print as much info when dealing with mere humans
+                    msg = lang.capital("%s speaks %s." % (lang.SUBJECTIVE[obj.gender], race["language"]))
+                    print(msg)
+                else:
+                    print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
+                        subj=lang.capital(lang.SUBJECTIVE[obj.gender]),
+                        size=mudlib.races.sizes[race["size"]],
+                        btype=mudlib.races.bodytypes[race["bodytype"]],
+                        race=obj.race,
+                        lang=race["language"]
+                        ))
             else:
-                print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                    subj=lang.capital(lang.SUBJECTIVE[living.gender]),
-                    size=mudlib.races.sizes[race["size"]],
-                    btype=mudlib.races.bodytypes[race["bodytype"]],
-                    race=living.race,
-                    lang=race["language"]
-                    ))
+                print("It's %s." % lang.a(obj.title))
+                print(obj.description)
         else:
             # @todo: suggest name, like soul does?
             print("* %s isn't here." % arg)
