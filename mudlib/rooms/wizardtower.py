@@ -8,8 +8,10 @@ hall = Location("Main hall of the Tower of Magic",
     The main hall of this ancient wizard tower sparkles with traces of magic.
     Everything seems to glow a little from within. You can hear a very faint hum.
     """)
-hall.items += [ Item("table", "oak table", "a large dark table with a lot of cracks in its surface"),
-                Item("key", "rusty key", "an old rusty key without a label") ]
+hall.items.update({
+    Item("table", "oak table", "a large dark table with a lot of cracks in its surface"),
+    Item("key", "rusty key", "an old rusty key without a label")
+    })
 
 attic = Location("Tower attic",
     """

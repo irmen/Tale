@@ -27,15 +27,15 @@ class Player(baseobjects.Living):
     def socialize_parsed(self, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
         return self.soul.process_verb_parsed(self, verb, who, adverb, message, bodypart, qualifier)
 
-    def tell(self, msg):
+    def tell(self, *messages):
         """
-        A message sent to a player (or a list of messages). This is meant to be printed on the screen.
+        A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
+        Notice that the signature and behavior of this method resembles that of the print() function,
+        which means you can easily do: print=player.tell, and use print(..) everywhere as usual.
         """
-        if type(msg) is list:
-            self.__output.extend(msg)
-        else:
-            self.__output.append(msg)
+        self.__output.append(" ".join(str(msg) for msg in messages))
+        self.__output.append("\n")
 
     def get_output_lines(self):
         """gets the accumulated output lines and clears the buffer"""

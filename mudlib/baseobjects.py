@@ -8,12 +8,15 @@ object hierarchy:
 
 MudObject
   |
+  +-- Location
+  |
   +-- Thing
   |     |
   |     +-- Item
   |           |
   |           +-- Weapon
   |           +-- Armour
+  |           +-- Bag
   |
   +-- Living
   |     |
@@ -21,11 +24,7 @@ MudObject
   |     +-- NPC
   |          |
   |          +-- Monster
-  |
-  +-- Container
-        |
-        +-- Bag
-        +-- Location
+
 
 Exit
 ExitStub
@@ -56,7 +55,6 @@ class Item(MudObject):
     Root class of all Items in the mud world. Items are physical objects.
     Items can usually be moved, carried, or put inside other items.
     They have a name and optional short and longer descriptions.
-    They are always inside a Container, or in an itemslot on another MudObject.
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
@@ -84,6 +82,7 @@ class Living(MudObject):
     Root class of the living entities in the mud world.
     Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
     They are always inside a Location.
+    They also have an inventory object.
     """
     def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
@@ -96,6 +95,7 @@ class Living(MudObject):
         self.stats = {}
         if race:
             self.set_race(race)
+        self.inventory = set()
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
@@ -107,7 +107,7 @@ class Living(MudObject):
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
 
-    def tell(self, msg):
+    def tell(self, *messages):
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
@@ -125,32 +125,16 @@ class Living(MudObject):
         self.location = target_location
 
 
-class Container(MudObject):
-    """
-    Root class for anything that can contain other MudObjects (in the most abstract sense)
-    """
-    def __init__(self, name, title=None, description=None):
-        super(Container, self).__init__(name, title, description)
-
-    def enter(self, object):
-        """something enters this container"""
-        pass
-
-    def leave(self, object):
-        """something leaves this container"""
-        pass
-
-
-class Bag(Item, Container):
+class Bag(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
-    This can be inside another Container by itself.
     """
     def __init__(self, name, title=None, description=None):
         super(Bag, self).__init__(name, title, description)
+        self.contents = set()
 
 
-class Location(Container):
+class Location(MudObject):
     """
     A location in the mud world. Livings and Items are in it.
     Has connections ('exits') to other Locations.
@@ -158,7 +142,7 @@ class Location(Container):
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
         self.livings = set()  # set of livings in this location
-        self.items = []       # sequence of all items in the room
+        self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
 
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
@@ -227,14 +211,16 @@ class Location(Container):
         return result[0] if result else None
 
     def enter(self, object):
-        super(Location, self).enter(object)
-        if isinstance(object, Living):
-            self.livings.add(object)
+        self.livings.add(object)
 
     def leave(self, object):
-        super(Location, self).leave(object)
-        if object in self.livings:
-            self.livings.remove(object)
+        self.livings.remove(object)
+
+    def add_item(self, item):
+        self.items.add(item)
+
+    def remove_item(self, item):
+        self.items.remove(item)
 
 
 class Exit(object):
