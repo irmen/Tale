@@ -47,7 +47,7 @@ class MudObject(object):
         self.description = textwrap.dedent(description).strip() if description else ""
 
     def __repr__(self):
-        return "<%s '%s' (%s) at %s>" % (self.__class__.__name__, self.name, self.title, hex(id(self)))
+        return "<%s.%s '%s' @ %s>" % (self.__class__.__module__, self.__class__.__name__, self.name, hex(id(self)))
 
 
 class Item(MudObject):

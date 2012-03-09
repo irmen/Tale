@@ -1,6 +1,5 @@
 from . import baseobjects, soul
 from . import languagetools as lang
-from mudlib import util
 
 
 class Player(baseobjects.Living):
@@ -14,6 +13,10 @@ class Player(baseobjects.Living):
         self.soul = soul.Soul()
         self.privileges = set()
         self.__output = []
+
+    def __repr__(self):
+        return "<%s.%s '%s' @ %s, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
+            self.name, hex(id(self)), ",".join(self.privileges) or "-")
 
     def set_title(self, title, includes_name_param=False):
         if includes_name_param:
@@ -48,7 +51,7 @@ class Player(baseobjects.Living):
         if self.location:
             look = self.location.look(exclude_living=self, short=short)
             if "wizard" in self.privileges:
-                return util.wizard_obj_info(self.location) + "\n" + look
+                return repr(self.location) + "\n" + look
             return look
         else:
             return "You see nothing."
