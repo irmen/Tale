@@ -4,26 +4,24 @@ from .. import languagetools
 from .. import soul
 from .. import baseobjects
 from .. import races
-from ..errors import ParseException
+from ..errors import ParseError
 
 all_commands = {}
 
 
-def cmd(command):
+def cmd(command, *aliases):
     """decorator to add the command to the global dictionary of commands"""
     def cmd2(func):
         if command in all_commands:
             raise ValueError("command defined more than once: "+command)
         all_commands[command] = func
+        for alias in aliases:
+            all_commands[alias] = func
         return func
     return cmd2
 
 
-#@cmd("fart2")
-#def fart2(player, verb, rest, **ctx):
-#    print = player.tell
-
-@cmd("inv")
+@cmd("inventory", "inv", "i")
 def do_inventory(player, verb, arg, **ctx):
     print = player.tell
     if arg and "wizard" in player.privileges:
@@ -50,6 +48,8 @@ def do_inventory(player, verb, arg, **ctx):
 @cmd("drop")
 def do_drop(player, verb, arg, **ctx):
     print = player.tell
+    if not arg:
+        raise ParseError("Drop what?")
     item = player.search_item(arg, include_location=False)
     if not item:
         print("You don't have %s." % languagetools.a(arg))
@@ -65,6 +65,8 @@ def do_drop(player, verb, arg, **ctx):
 @cmd("take")
 def do_take(player, verb, arg, **ctx):
     print = player.tell
+    if not arg:
+        raise ParseError("Take what?")
     item = player.search_item(arg, include_inventory=False)
     if not item:
         print("There's no %s here." % arg)
@@ -77,7 +79,7 @@ def do_take(player, verb, arg, **ctx):
                                   exclude_living=player)
 
 
-@cmd("help")
+@cmd("help", "?")
 def do_help(player, verb, topic, **ctx):
     print = player.tell
     if topic == "soul":
@@ -90,31 +92,22 @@ def do_help(player, verb, topic, **ctx):
         for line in lines:
             print(line)
     else:
-        cmds_per_privilege = {}
-        for (verb, value) in ctx["driver"].commands_processor.items():
-            func, privilege = value
-            cmds_per_privilege.setdefault(privilege, []).append(verb)
-        for privilege, cmd in cmds_per_privilege.items():
-            if privilege:
-                caption = "* %s commands:" % privilege
-            else:
-                caption = "* commands:"
-            print(caption, ", ".join(cmd))
+        print("* Available commands:", ", ".join(sorted(ctx["verbs"])))
 
 
-@cmd("look")
+@cmd("look", "l")
 def do_look(player, verb, arg, **ctx):
     print = player.tell
     if arg:
-        raise ParseException("Maybe you should examine that instead.")
+        raise ParseError("Maybe you should examine that instead.")
     print(player.look())
 
 
-@cmd("exa")
+@cmd("examine", "exa")
 def do_examine(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
-        raise ParseException("Examine what?")
+        raise ParseError("Examine what?")
     player = player
     obj = player.search_name(arg, True)
     if obj:
@@ -169,6 +162,6 @@ def do_stats(player, verb, arg, **ctx):
 
 @cmd("quit")
 def do_quit(player, verb, arg, **ctx):
-    # @todo: confirmation
+    # @todo: ask for confirmation (async)
     player.tell("Goodbye, %s." % player.title)
     return False

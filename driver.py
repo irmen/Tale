@@ -40,11 +40,24 @@ def create_default_player():
     return player
 
 
+class Commands(object):
+    def __init__(self):
+        self.commands_per_priv = { None: {} }
+    def add(self, verb, func, privilege):
+        self.commands_per_priv.setdefault(privilege, {})[verb] = func
+    def get(self, privileges):
+        result = self.commands_per_priv[None]  # always include the cmds for None
+        for priv in privileges:
+            if priv in self.commands_per_priv:
+                result.update(self.commands_per_priv[priv])
+        return result
+
+
 class Driver(object):
     def __init__(self):
         self.player = None
-        self.commands_processor = {}
-        mudlib.cmds.register_all(self.commands_processor)
+        self.commands = Commands()
+        mudlib.cmds.register_all(self.commands)
 
     def start(self, args):
         # print GPL 3.0 banner
@@ -84,7 +97,7 @@ class Driver(object):
                 keep_going = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
                 print("* The verb %s is unrecognised." % x.verb)
-            except mudlib.errors.ParseException, x:
+            except mudlib.errors.ParseError, x:
                 print("* %s" % str(x))
             except Exception:
                 import traceback
@@ -100,14 +113,15 @@ class Driver(object):
     def ask_player_input(self):
         cmd = raw_input(">> ").strip()
         verb, _, rest = cmd.partition(" ")
+        # determine available verbs for this player
+        player_verbs = self.commands.get(self.player.privileges)
         # pre-process input special cases
         if verb.startswith("'"):
             self.do_socialize("say " + cmd[1:])
             return True
-        elif verb in self.commands_processor:
-            func, privilege = self.commands_processor[verb]
-            # @todo check privilege
-            result = func(self.player, verb, rest, driver=self)
+        elif verb in player_verbs:
+            func = player_verbs[verb]
+            result = func(self.player, verb, rest, driver=self, verbs=player_verbs)
             return result != False
         else:
             self.do_socialize(cmd)

@@ -3,7 +3,7 @@ from __future__ import print_function
 import types
 import copy
 import functools
-from ..errors import SecurityViolation
+from ..errors import SecurityViolation, ParseError
 from .. import baseobjects
 from .. import languagetools
 
@@ -11,8 +11,8 @@ all_commands = {}
 
 
 def wizcmd(command):
+    """decorator to add the command to the global dictionary of commands, with a privilege check wrapper"""
     def wizcmd2(func):
-        """decorator that adds wizard privilege check to the command"""
         @functools.wraps(func)
         def makewizcmd(player, verb, rest, **ctx):
             if not "wizard" in player.privileges:
@@ -54,6 +54,8 @@ def do_ls(player, verb, path, **ctx):
 @wizcmd("clone")
 def do_clone(player, verb, path, **ctx):
     print = player.tell
+    if not path:
+        raise ParseError("Clone what?")
     if not path.startswith("."):
         # clone an object from the inventory or the room
         obj = player.search_item(path)
@@ -86,8 +88,10 @@ def do_clone(player, verb, path, **ctx):
 
 @wizcmd("destroy")
 def do_destroy(player, verb, arg, **ctx):
-    # @todo: ask for confirmation
+    # @todo: ask for confirmation (async)
     print = player.tell
+    if not arg:
+        raise ParseError("Destroy what?")
     item = player.search_item(arg)
     if not item:
         print("There's no %s here." % arg)
@@ -106,4 +110,4 @@ def do_destroy(player, verb, arg, **ctx):
 @wizcmd("pdb")
 def do_pdb(player, verb, rest, **ctx):
     import pdb
-    pdb.set_trace()   # @todo: remove this when going multiuser (can't debug anymore then)
+    pdb.set_trace()   # @todo: remove this when going multiuser (I don't think you can have a synchronous debug session anymore)

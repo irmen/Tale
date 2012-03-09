@@ -161,7 +161,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie triumphantly beeps max on the arm.", room_msg)
         self.assertEqual("Julie triumphantly beeps you on the arm.", target_msg)
         # check handling of more than one bodypart
-        with self.assertRaises(mudlib.soul.ParseException) as ex:
+        with self.assertRaises(mudlib.soul.ParseError) as ex:
             soul.process_verb(player, "kick max side knee")
         self.assertEqual("You can't do that both in the side and on the knee.", str(ex.exception))
 
@@ -206,7 +206,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
         # check handling of more than one adverb
-        with self.assertRaises(mudlib.soul.ParseException) as ex:
+        with self.assertRaises(mudlib.soul.ParseError) as ex:
             soul.process_verb(player, "cough sickly and noisily")
         self.assertEqual("You can't do that both sickly and noisily.", str(ex.exception))
         # check handling of adverb prefix where there is 1 unique result
@@ -214,14 +214,14 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You cough sickly.", player_msg)
         self.assertEqual("Julie coughs sickly.", room_msg)
         # check handling of adverb prefix where there are more results
-        with self.assertRaises(mudlib.soul.ParseException) as ex:
+        with self.assertRaises(mudlib.soul.ParseError) as ex:
             soul.process_verb(player, "cough si")
         self.assertEqual("What adverb did you mean: sickly, sideways, signally, significantly, or silently?", str(ex.exception))
 
     def testUnrecognisedWord(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
-        with self.assertRaises(mudlib.soul.ParseException):
+        with self.assertRaises(mudlib.soul.ParseError):
             soul.process_verb(player, "cough hubbabubba")
 
     def testParse(self):
@@ -283,7 +283,7 @@ class TestSoul(unittest.TestCase):
         player = mudlib.player.Player("julie", "f")
         targets = [mudlib.npc.NPC("max", "m")]
         # require person
-        with self.assertRaises(mudlib.errors.ParseException):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.process_verb_parsed(player, "bonk")
         # pounce
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "pounce", targets)

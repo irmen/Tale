@@ -249,6 +249,8 @@ class Living(MudObject):
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
         """
+        if not name:
+            raise ValueError("name must be given")
         name = name.lower()
         matches = None
         if include_inventory:
@@ -264,6 +266,8 @@ class Living(MudObject):
         Searches an object within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
         """
+        if not name:
+            raise ValueError("name must be given")
         name = name.lower()
         if self.name == name or self.title.lower() == name:
             return self

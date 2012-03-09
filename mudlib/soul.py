@@ -10,7 +10,7 @@ The verb parsing and message generation have been rewritten.
 
 import re
 from . import languagetools as lang
-from .errors import ParseException
+from .errors import ParseError
 
 
 class SoulException(Exception):
@@ -519,7 +519,7 @@ class Soul(object):
             action = verbdata[2]
             action_room = verbdata[3]
             if not check_person(action, who):
-                raise ParseException("The verb %s needs a person." % verb)
+                raise ParseError("The verb %s needs a person." % verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
             action = action.replace(" \nWHAT", message)
@@ -568,7 +568,7 @@ class Soul(object):
             action = action.replace(" \nAT", "")
 
         if not check_person(action, who):
-            raise ParseException("The verb %s needs a person." % verb)
+            raise ParseError("The verb %s needs a person." % verb)
 
         action = action.replace(" \nHOW", how)
         action = action.replace(" \nWHERE", where)
@@ -599,7 +599,7 @@ class Soul(object):
             cmd = cmd[:m.start()] + cmd[m.end():]
 
         if not cmd:
-            raise ParseException("What?")
+            raise ParseError("What?")
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
             qualifier = words.pop(0)
@@ -620,7 +620,7 @@ class Soul(object):
                 message.append(word)
                 continue
             if word in ("them", "him", "her", "it"):
-                raise ParseException("It is not clear who you mean.")
+                raise ParseError("It is not clear who you mean.")
             elif word in ("me", "myself"):
                 if include_flag:
                     who.add(player.name)
@@ -628,22 +628,22 @@ class Soul(object):
                     who.remove(player.name)
             elif word in BODY_PARTS:
                 if bodypart:
-                    raise ParseException("You can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
+                    raise ParseError("You can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
                 bodypart = word
             elif word in ("everyone", "everybody", "all"):
                 if include_flag:
                     if not all_livings_names:
-                        raise ParseException("There is nobody here.")
+                        raise ParseError("There is nobody here.")
                     who.update(all_livings_names)    # include everyone visible
                 else:
                     who.clear()
             elif word == "everything":
-                raise ParseException("You can't do something to everything around you, be more specific.")
+                raise ParseError("You can't do something to everything around you, be more specific.")
             elif word in ("except", "but"):
                 include_flag = not include_flag
             elif word in lang.ADVERBS:
                 if adverb:
-                    raise ParseException("You can't do that both %s and %s." % (adverb, word))
+                    raise ParseError("You can't do that both %s and %s." % (adverb, word))
                 adverb = word
             elif word in all_livings_names:
                 if include_flag:
@@ -660,23 +660,23 @@ class Soul(object):
                     if not who:
                         for name in all_livings_names:
                             if name.startswith(word):
-                                raise ParseException("Did you mean %s?" % name)
+                                raise ParseError("Did you mean %s?" % name)
                     # check if it is a prefix of an adverb, if so, suggest the adverbs
                     adverbs = lang.adverb_by_prefix(word)
                     if len(adverbs) == 1:
                         word = adverbs[0]
                         if adverb:
-                            raise ParseException("You can't do that both %s and %s." % (adverb, word))
+                            raise ParseError("You can't do that both %s and %s." % (adverb, word))
                         adverb = word
                         continue
                     elif len(adverbs) > 1:
-                        raise ParseException("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
+                        raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
                     if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
                         # in case of a misplaced verb, qualifier or bodypart give a little more specific error
-                        raise ParseException("The word %s makes no sense at that location." % word)
+                        raise ParseError("The word %s makes no sense at that location." % word)
                     else:
                         # no idea what the user typed, generic error
-                        raise ParseException("The word %s is unrecognized." % word)
+                        raise ParseError("The word %s is unrecognized." % word)
 
         message = " ".join(message)
         return qualifier, verb, who, adverb, message, bodypart

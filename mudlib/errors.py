@@ -6,6 +6,6 @@ class SecurityViolation(Exception):
     pass
 
 
-class ParseException(Exception):
+class ParseError(Exception):
     """Problem with parsing the user input. Should be shown to the user as a nice error message."""
     pass
