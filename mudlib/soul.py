@@ -382,7 +382,7 @@ def check_person(action, who):
 
 def spacify(string):
     """returns string prefixed with a space, if it has contents. If it is empty, prefix nothing"""
-    return " " + string.lstrip() if string else ""
+    return " " + string.lstrip(" \t") if string else ""
 
 
 def who_replacement(actor, target, observer):

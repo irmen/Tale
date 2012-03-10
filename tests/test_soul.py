@@ -12,6 +12,8 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(" abc", mudlib.soul.spacify("abc"))
         self.assertEqual(" abc", mudlib.soul.spacify(" abc"))
         self.assertEqual(" abc", mudlib.soul.spacify("  abc"))
+        self.assertEqual(" abc", mudlib.soul.spacify("  \t\tabc"))
+        self.assertEqual(" \nabc", mudlib.soul.spacify("  \nabc"))
 
     def testUnknownVerb(self):
         soul = mudlib.soul.Soul()
@@ -278,6 +280,11 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You tease max.", player_msg)
         self.assertEqual("Julie teases max.", room_msg)
         self.assertEqual("Julie teases you.", target_msg)
+        # turn
+        who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "turn", targets)
+        self.assertEqual("You turn your head towards max.", player_msg)
+        self.assertEqual("Julie turns her head towards max.", room_msg)
+        self.assertEqual("Julie turns her head towards you.", target_msg)
 
     def testPHYS(self):
         soul = mudlib.soul.Soul()
