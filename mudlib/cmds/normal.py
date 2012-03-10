@@ -7,6 +7,7 @@ from .. import races
 from ..errors import ParseError
 
 all_commands = {}
+abbreviations = {}   # will be injected
 
 
 def cmd(command, *aliases):
@@ -21,7 +22,7 @@ def cmd(command, *aliases):
     return cmd2
 
 
-@cmd("inventory", "inv", "i")
+@cmd("inventory", "inv")
 def do_inventory(player, verb, arg, **ctx):
     print = player.tell
     if arg and "wizard" in player.privileges:
@@ -113,7 +114,7 @@ def do_give(player, verb, arg, **ctx):
     player.tell("You gave %s %s." % (living.title, item_str))
 
 
-@cmd("help", "?")
+@cmd("help")
 def do_help(player, verb, topic, **ctx):
     print = player.tell
     if topic == "soul":
@@ -127,9 +128,10 @@ def do_help(player, verb, topic, **ctx):
             print(line)
     else:
         print("Available commands:", ", ".join(sorted(ctx["verbs"])))
+        print("Abbreviations:", ", ".join(sorted("%s=%s" % (a,v) for a,v in abbreviations.items())))
 
 
-@cmd("look", "l")
+@cmd("look")
 def do_look(player, verb, arg, **ctx):
     print = player.tell
     if arg:

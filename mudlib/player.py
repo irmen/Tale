@@ -62,19 +62,21 @@ class Player(baseobjects.Living):
     def create_wiretap(self, target):   # @todo: unittest wiretap
         if "wizard" not in self.privileges:
             raise SecurityViolation("wiretap requires wizard privilege")
-        class Wiretap(object):
-            def __init__(self, observer, target):
-                self.observer = observer
-                self.target_name = target.name
-                self.target_type = target.__class__.__name__
-
-            def __str__(self):
-                return "%s '%s'" % (self.target_type, self.target_name)
-
-            def tell(self, *messages):
-                for msg in messages:
-                    self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg))
-
         tap = Wiretap(self, target)
         self.installed_wiretaps.add(tap)  # hold on to the wiretap otherwise it's garbage collected immediately
         target.wiretaps.add(tap)  # install the wiretap on the target
+
+
+class Wiretap(object):
+    """wiretap that can be installed on a location or a living, to tap into the messages they're receiving"""
+    def __init__(self, observer, target):
+        self.observer = observer
+        self.target_name = target.name
+        self.target_type = target.__class__.__name__
+
+    def __str__(self):
+        return "%s '%s'" % (self.target_type, self.target_name)
+
+    def tell(self, *messages):
+        for msg in messages:
+            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg))

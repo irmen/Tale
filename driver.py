@@ -98,7 +98,10 @@ class Driver(object):
             try:
                 keep_going = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
-                print("The verb %s is unrecognised." % x.verb)
+                if x.verb in ("north", "east", "south", "west", "up", "down"):
+                    print("You can't go in that direction.")
+                else:
+                    print("The verb %s is unrecognised." % x.verb)
             except (mudlib.errors.ParseError, mudlib.errors.ActionRefused), x:
                 print(str(x))
             except Exception:
@@ -119,9 +122,14 @@ class Driver(object):
         player_verbs = self.commands.get(self.player.privileges)
         # pre-process input special cases
         if verb.startswith("'"):
-            self.do_socialize("say " + cmd[1:])
-            return True
-        elif verb in player_verbs:
+            verb = "say"
+            rest = cmd[1:]
+            cmd = "say "+rest
+        elif verb in mudlib.cmds.abbreviations:
+            verb = mudlib.cmds.abbreviations[verb]
+            cmd = verb+" "+rest
+        # execute
+        if verb in player_verbs:
             func = player_verbs[verb]
             result = func(self.player, verb, rest, driver=self, verbs=player_verbs)
             return result != False
@@ -145,3 +153,4 @@ class Driver(object):
 if __name__ == "__main__":
     driver = Driver()
     driver.start(sys.argv[1:])
+

@@ -161,14 +161,18 @@ class Location(MudObject):
             result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, object):
-        self.livings.add(object)
+    def enter(self, living):
+        assert isinstance(living, Living)
+        self.livings.add(living)
+        self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
 
-    def leave(self, object):
-        if object in self.livings:
-            self.livings.remove(object)
+    def leave(self, living):
+        if living in self.livings:
+            self.livings.remove(living)
+            self.tell("%s leaves." % lang.capital(living.title), exclude_living=living)
 
     def add_item(self, item):
+        assert isinstance(item, Item)
         self.items.add(item)
 
     def remove_item(self, item):
@@ -223,6 +227,7 @@ class Living(MudObject):
             self.set_race(race)
         self.inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
+        self.cpr()
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
@@ -233,6 +238,10 @@ class Living(MudObject):
         self.stats = {}
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
+
+    def cpr(self):
+        """(re)start the living's heartbeat"""
+        pass  # do nothing, for now
 
     def tell(self, *messages):
         """

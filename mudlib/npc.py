@@ -2,6 +2,7 @@ from . import baseobjects
 from . import languagetools
 from .errors import ActionRefused
 
+
 class NPC(baseobjects.Living):
     """
     Non-Player-Character: computer controlled entity.

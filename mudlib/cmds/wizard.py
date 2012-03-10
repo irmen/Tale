@@ -3,9 +3,11 @@ from __future__ import print_function
 import types
 import copy
 import functools
-from ..errors import SecurityViolation, ParseError
+from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import baseobjects
 from .. import languagetools
+from .. import npc
+
 
 all_commands = {}
 
@@ -16,10 +18,10 @@ def wizcmd(command):
         @functools.wraps(func)
         def makewizcmd(player, verb, rest, **ctx):
             if not "wizard" in player.privileges:
-                raise SecurityViolation("wizard privilege required for verb " + verb)
+                raise SecurityViolation("Wizard privilege required for verb " + verb)
             return func(player, verb, rest, **ctx)
         if command in all_commands:
-            raise ValueError("command defined more than once: "+command)
+            raise ValueError("Command defined more than once: "+command)
         all_commands[command] = makewizcmd
         return makewizcmd
     return wizcmd2
@@ -29,16 +31,14 @@ def wizcmd(command):
 def do_ls(player, verb, path, **ctx):
     print = player.tell
     if not path.startswith("."):
-        print("path must start with '.'")
-        return
+        raise ActionRefused("Path must start with '.'")
     try:
         module = __import__("mudlib" + path)
         for name in path.split("."):
             if name:
                 module = getattr(module, name)
     except (ImportError, ValueError):
-        print("here is no module named " + path)
-        return
+        raise ActionRefused("There's no module named " + path)
     print("<%s>" % path)
     modules = [x[0] for x in vars(module).items() if type(x[1]) is types.ModuleType]
     classes = [x[0] for x in vars(module).items() if type(x[1]) is type and issubclass(x[1], baseobjects.MudObject)]
@@ -59,34 +59,46 @@ def do_clone(player, verb, path, **ctx):
     print = player.tell
     if not path:
         raise ParseError("Clone what?")
-    if not path.startswith("."):
-        # clone an object from the inventory or the room
-        obj = player.search_item(path)
-    else:
-        # clone an item somewhere in a module path
+    if path.startswith("."):
+        # find an item somewhere in a module path
         path, objectname = path.rsplit(".", 1)
         if not objectname:
-            print("invalid object path")
-            return
+            raise ActionRefused("Invalid object path")
         try:
             module = __import__("mudlib" + path)
         except (ImportError, ValueError):
-            print("there is no module named " + path)
-            return
+            raise ActionRefused("There's no module named " + path)
         if len(path) > 1:
             for name in path.split(".")[1:]:
                 module = getattr(module, name)
         obj = getattr(module, objectname, None)
-    if obj is None or not isinstance(obj, baseobjects.Item):
-        print("object not found")
-        return
-    item = copy.deepcopy(obj)
-    player.inventory.add(item)
-    print("Cloned: " + repr(item))
-    player.location.tell("{player} conjures up {item}, and quickly pockets it."
-                         .format(player=languagetools.capital(player.title),
-                                 item=languagetools.a(item.title)),
-                         exclude_living=player)
+    else:
+        # find an object or living from the inventory or the room
+        obj = player.search_item(path)
+        if not obj:
+            obj = player.location.search_living(path)
+    # clone it
+    if not obj:
+        raise ActionRefused("Object not found")
+    elif isinstance(obj, baseobjects.Item):
+        item = copy.deepcopy(obj)
+        player.inventory.add(item)
+        print("Cloned: " + repr(item))
+        player.location.tell("{player} conjures up {item}, and quickly pockets it."
+                             .format(player=languagetools.capital(player.title),
+                                     item=languagetools.a(item.title)),
+                             exclude_living=player)
+    elif isinstance(obj, npc.NPC):
+        clone = copy.deepcopy(obj)
+        clone.cpr()  # (re)start heartbeat
+        print("Cloned: " + repr(clone))
+        player.location.tell("{player} summons {npc}."
+                             .format(player=languagetools.capital(player.title),
+                                     npc=languagetools.a(clone.title)),
+                             exclude_living=player)
+        player.location.enter(clone)
+    else:
+        raise ActionRefused("Can't clone "+languagetools.a(obj.__class__.__name__))
 
 
 @wizcmd("destroy")
@@ -97,7 +109,7 @@ def do_destroy(player, verb, arg, **ctx):
         raise ParseError("Destroy what?")
     item = player.search_item(arg)
     if not item:
-        print("There's no %s here." % arg)
+        raise ActionRefused("There's no %s here." % arg)
     else:
         if item in player.inventory:
             player.inventory.remove(item)
@@ -134,10 +146,8 @@ def do_wiretap(player, verb, arg, **ctx):
         living = player.location.search_living(arg)
         if living:
             if living is player:
-                print("Can't wiretap yourself.")
-                return
+                raise ActionRefused("Can't wiretap yourself.")
             player.create_wiretap(living)
             print("Wiretapped %s." % living.name)
         else:
-            print(arg, "isn't here.")
-            return
+            raise ActionRefused(arg, "isn't here.")

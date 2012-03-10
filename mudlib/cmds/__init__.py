@@ -13,3 +13,18 @@ def register_all(cmd_processor):
         cmd_processor.add(command, func, "wizard")
     for command, func in normal.all_commands.items():
         cmd_processor.add(command, func, None)
+
+abbreviations = {
+    "n": "north",
+    "e": "east",
+    "s": "south",
+    "w": "west",
+    "u": "up",
+    "d": "down",
+    "?": "help",
+    "i": "inventory",
+    "l": "look"
+    }
+
+normal.abbreviations = abbreviations    # used in 'help'
+
