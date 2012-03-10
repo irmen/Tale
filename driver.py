@@ -173,6 +173,12 @@ class Driver(object):
                 if living.aggressive:
                     living.start_attack(self.player)
 
+    def search_player(self, name):
+        """Look through all the logged in players for one with the given name"""
+        if self.player.name == name:
+            return self.player
+        return None
+
 
 if __name__ == "__main__":
     driver = Driver()

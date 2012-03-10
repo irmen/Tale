@@ -11,13 +11,11 @@ MudObject
   |
   +-- Location
   |
-  +-- Thing
+  +-- Item
   |     |
-  |     +-- Item
-  |           |
-  |           +-- Weapon
-  |           +-- Armour
-  |           +-- Bag
+  |     +-- Weapon
+  |     +-- Armour
+  |     +-- Bag
   |
   +-- Living
   |     |

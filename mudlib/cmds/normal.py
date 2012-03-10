@@ -215,9 +215,14 @@ def do_tell(player, verb, args, **ctx):
         # ask the driver if there's a player with that name (globally)
         living = ctx["driver"].search_player(name)
         if not living:
+            if name=="all":
+                raise ActionRefused("You can't tell something to everyone, only to individuals.")
             raise ActionRefused("%s isn't here." % name)
-    living.tell("%s tells you: %s" % (player.name, msg))
-    player.tell("Told %s." % name)
+    if living is player:
+        player.tell("You're talking to yourself...")
+    else:
+        living.tell("%s tells you: %s" % (player.name, msg))
+        player.tell("You told %s." % name)
 
 
 @cmd("quit")
