@@ -116,26 +116,50 @@ class Driver(object):
         print("".join(output))
 
     def ask_player_input(self):
-        cmd = raw_input(">> ").strip()
+        cmd = raw_input(">> ")
         verb, _, rest = cmd.partition(" ")
+        verb = verb.strip()
+        rest = rest.strip()
         # determine available verbs for this player
         player_verbs = self.commands.get(self.player.privileges)
         # pre-process input special cases
         if verb.startswith("'"):
             verb = "say"
-            rest = cmd[1:]
-            cmd = "say "+rest
+            rest = cmd[1:].strip()
+            cmd = "say " + rest
         elif verb in mudlib.cmds.abbreviations:
             verb = mudlib.cmds.abbreviations[verb]
-            cmd = verb+" "+rest
-        # execute
-        if verb in player_verbs:
+            cmd = verb + " " + rest
+        # Execute. First try directions, then the rest
+        if verb in self.player.location.exits:
+            self.do_move(verb)
+            return True
+        elif verb in player_verbs:
             func = player_verbs[verb]
             result = func(self.player, verb, rest, driver=self, verbs=player_verbs)
             return result != False
         else:
             self.do_socialize(cmd)
             return True
+
+    def do_move(self, direction):
+        exit = self.player.location.exits[direction]
+        if not exit.bound:
+            # resolve the location and replace with bound Exit
+            target_module, target_object = exit.target.rsplit(".", 1)
+            module = mudlib.rooms
+            for name in target_module.split("."):
+                module = getattr(module, name)
+            target = getattr(module, target_object)
+            # note: could be more than one occurrence for 1 exit (an alias)
+            #exits = [ d for d,e in self.player.location.exits.items() if e is exit ]
+            #exit = mudlib.baseobjects.Exit(target, exit.description)
+            #for d in exits:
+            #    self.player.location.exits[d] = exit
+            exit.bind(target)
+        exit.allow(self.player)
+        self.player.move(exit.target)
+        self.player.tell(self.player.look())
 
     def do_socialize(self, cmd):
         player = self.player
@@ -144,7 +168,7 @@ class Driver(object):
         player.location.tell(room_message, player, who, target_message)
         if verb in mudlib.soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
-            # other npc's may choose to attack or to ignore it
+            # other npcs may choose to attack or to ignore it
             for living in who:
                 if living.aggressive:
                     living.start_attack(self.player)
@@ -153,4 +177,3 @@ class Driver(object):
 if __name__ == "__main__":
     driver = Driver()
     driver.start(sys.argv[1:])
-

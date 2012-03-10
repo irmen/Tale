@@ -139,6 +139,7 @@ VERBS = {
 "melt":      ( PERS, ( "in front of",), "melt$ from the heat", "melt$ \nHOW \nWHO"),
 "hello":     ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
 "hi":        ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
+"wait":      ( SIMP, None, "wait$ \nHOW", ""),
 "grease":    ( SIMP, ("like in a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like in a shiatsu",), "oil$ \nWHO \nHOW"),
 "search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),

@@ -1,8 +1,8 @@
 import weakref
 import textwrap
-from .races import races
 from . import languagetools as lang
-
+from .races import races
+from .errors import ActionRefused
 
 """
 object hierarchy:
@@ -28,7 +28,6 @@ MudObject
 
 
 Exit
-ExitStub
 Effect
 
 """
@@ -150,7 +149,7 @@ class Location(MudObject):
                     r.append(lang.capital(titles_str))
         return "\n".join(r)
 
-    def search_living(self, name, suggest=False):   # @todo: unittest for suggest
+    def search_living(self, name):
         """
         Search for a living in this location by its name (and title, if no names match)
         If there's more than one match, returns the first
@@ -182,26 +181,28 @@ class Location(MudObject):
 class Exit(object):
     """
     An 'exit' that connects one location to another.
+    You can use a Location object as target, or a string designating the location
+    (for instance "town.square" means the square location object in mudlib.rooms.town).
+    If using a string, it will be retrieved and bound at runtime.
     """
     def __init__(self, target_location, description):
-        if type(target_location) is not Location:
-            raise TypeError("target of Exit must be a Location")
+        assert target_location is not None
+        assert isinstance(target_location, (Location, basestring)), "target must be a Location or a string"
         self.target = target_location
         self.description = description
+        self.bound = isinstance(target_location, Location)
 
+    def bind(self, target_location):
+        assert not self.bound and isinstance(target_location, Location)
+        self.target = target_location
+        self.bound = True
 
-class ExitStub(object):
-    """
-    An 'exit' that connects one location to another.
-    This one is a stub in the sense that the target location is not
-    the actual location, but a string path to it so that it can be
-    retrieved at runtime.
-    """
-    def __init__(self, target_location_name, description):
-        if not isinstance(target_location_name, basestring):
-            raise TypeError("target of ExitStub must be a str")
-        self.target = target_location_name
-        self.description = description
+    def allow(self, actor):
+        """
+        Should the actor be allowed through the exit?
+        If it's not, ActionRefused is raised.
+        """
+        assert self.bound
 
 
 class Living(MudObject):
@@ -256,13 +257,13 @@ class Living(MudObject):
             tap.tell(*messages)
 
     def move(self, target_location):
-        """leave the current location, enter the new location"""
+        """leave the current location, enter the new location """
         if self.location:
             self.location.leave(self)
         target_location.enter(self)
         self.location = target_location
 
-    def search_item(self, name, include_inventory=True, include_location=True, suggest=False):     # @todo: unittest
+    def search_item(self, name, include_inventory=True, include_location=True):     # @todo: unittest
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -279,7 +280,7 @@ class Living(MudObject):
                       [item for item in self.location.items if item.title.lower() == name]
         return matches[0] if matches else None
 
-    def search_name(self, name, suggest=False):    # @todo: unittest
+    def search_name(self, name):    # @todo: unittest
         """
         Searches an object within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -289,9 +290,9 @@ class Living(MudObject):
         name = name.lower()
         if self.name == name or self.title.lower() == name:
             return self
-        return self.search_item(name, suggest=suggest) or self.location.search_living(name, suggest) or None
+        return self.search_item(name) or self.location.search_living(name) or None
 
-    def accept(self, action, item, source):
+    def accept(self, action, item, actor):
         """
         Validates that this living accepts something from someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.

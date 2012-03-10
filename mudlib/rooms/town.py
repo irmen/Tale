@@ -1,8 +1,9 @@
 # The central town,
 # which is the place where mud players start/log in
 
-from ..baseobjects import Location, Exit, ExitStub, Item
+from ..baseobjects import Location, Exit, Item
 from ..npc import NPC, Monster
+from ..errors import ActionRefused
 
 square = Location("Essglen Town square",
     """
@@ -23,7 +24,16 @@ paper = Item("paper", "piece of paper", "A worn piece of paper with a few faded 
 square.add_item(paper)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
-lane.exits["west"] = ExitStub("wizardtower.hall", "To the west is the wizard's tower.")
+
+
+class WizardTowerEntry(Exit):
+    def allow(self, actor):
+        if "wizard" in actor.privileges:
+            actor.tell("You pass through the force-field.")
+        else:
+            raise ActionRefused("You can't go that way, the force-field is impenetrable.")
+
+lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
 
 towncrier = NPC("laish", "f", "Laish the town crier",
     """

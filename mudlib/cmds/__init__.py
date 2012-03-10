@@ -27,4 +27,3 @@ abbreviations = {
     }
 
 normal.abbreviations = abbreviations    # used in 'help'
-

@@ -11,7 +11,7 @@ class NPC(baseobjects.Living):
     def __init__(self, name, gender, title=None, description=None, race="human"):
         super(NPC, self).__init__(name, gender, title, description, race)
 
-    def accept(self, action, item, source):
+    def accept(self, action, item, actor):
         """
         Validates that this living accepts something from someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.

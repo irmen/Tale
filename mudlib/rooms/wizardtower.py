@@ -1,7 +1,7 @@
 # The Wizard Tower,
 # which is the place where mud Wizards start/log in
 
-from ..baseobjects import Location, Exit, ExitStub, Item
+from ..baseobjects import Location, Exit, Item
 from ..npc import Monster
 
 hall = Location("Main hall of the Tower of Magic",
@@ -37,7 +37,7 @@ kitchen = Location("Tower kitchen",
 
 hall.exits["up"] = Exit(attic, "A small ladder leads up through a hole in the ceiling.")
 hall.exits["ladder"] = hall.exits["up"]
-hall.exits["door"] = ExitStub("town.lane", "A heavy wooden door to the east blocks the noises from the street outside.")
+hall.exits["door"] = Exit("town.lane", "A heavy wooden door to the east blocks the noises from the street outside.")
 hall.exits["east"] = hall.exits["door"]
 hall.exits["north"] = Exit(kitchen, "A door to the north leads to the kitchen.")
 kitchen.exits["south"] = Exit(hall, "A door to the south leads back to the hall.")

@@ -4,7 +4,7 @@ from .. import languagetools
 from .. import soul
 from .. import baseobjects
 from .. import races
-from ..errors import ParseError
+from ..errors import ParseError, ActionRefused
 
 all_commands = {}
 abbreviations = {}   # will be injected
@@ -29,7 +29,7 @@ def do_inventory(player, verb, arg, **ctx):
         # show another living's inventory
         living = player.location.search_living(arg)
         if not living:
-            print("%s isn't here." % arg)
+            raise ActionRefused("%s isn't here." % arg)
         else:
             name = languagetools.capital(living.title)
             if not living.inventory:
@@ -98,11 +98,9 @@ def do_give(player, verb, arg, **ctx):
         if not item:
             print("You don't have that.")
             return
-    living = player.location.search_living(target_name, suggest=False)
+    living = player.location.search_living(target_name)
     if not living:
-        # @todo: suggest name, like soul does?
-        print(target_name, "isn't here.")
-        return
+        raise ActionRefused("%s isn't here." % target_name)
     living.accept("give", item, player)
     player.inventory.remove(item)
     living.inventory.add(item)
@@ -128,15 +126,21 @@ def do_help(player, verb, topic, **ctx):
             print(line)
     else:
         print("Available commands:", ", ".join(sorted(ctx["verbs"])))
-        print("Abbreviations:", ", ".join(sorted("%s=%s" % (a,v) for a,v in abbreviations.items())))
+        print("Abbreviations:", ", ".join(sorted("%s=%s" % (a, v) for a, v in abbreviations.items())))
 
 
 @cmd("look")
 def do_look(player, verb, arg, **ctx):
     print = player.tell
     if arg:
-        raise ParseError("Maybe you should examine that instead.")
-    print(player.look())
+        if arg in player.location.exits:
+            print(player.location.exits[arg].description)
+        elif arg in abbreviations and abbreviations[arg] in player.location.exits:
+            print(player.location.exits[abbreviations[arg]].description)
+        else:
+            raise ParseError("Maybe you should examine that instead.")
+    else:
+        print(player.look())
 
 
 @cmd("examine", "exa")
@@ -145,7 +149,7 @@ def do_examine(player, verb, arg, **ctx):
     if not arg:
         raise ParseError("Examine what?")
     player = player
-    obj = player.search_name(arg, True)
+    obj = player.search_name(arg)
     if obj:
         if "wizard" in player.privileges:
             print(repr(obj))
@@ -171,9 +175,12 @@ def do_examine(player, verb, arg, **ctx):
             else:
                 print("You see %s." % languagetools.a(obj.title))
             print(obj.description)
+    elif arg in player.location.exits:
+        print(player.location.exits[arg].description)
+    elif arg in abbreviations and abbreviations[arg] in player.location.exits:
+        print(player.location.exits[abbreviations[arg]].description)
     else:
-        # @todo: suggest name, like soul does?
-        print(arg, "isn't here.")
+        raise ActionRefused("%s isn't here." % arg)
 
 
 @cmd("stats")
@@ -182,8 +189,7 @@ def do_stats(player, verb, arg, **ctx):
     if arg:
         target = player.location.search_living(arg)
         if not target:
-            print(arg, "isn't here.")
-            return
+            raise ActionRefused("%s isn't here." % arg)
     else:
         target = player
     gender = languagetools.GENDERS[target.gender]
@@ -194,6 +200,24 @@ def do_stats(player, verb, arg, **ctx):
     print("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type))
     print("%s %s, speaks %s, weighs ~%s kg." % (languagetools.capital(race_size), race_bodytype, race["language"], race["mass"]))
     print(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
+
+
+@cmd("tell")
+def do_tell(player, verb, args, **ctx):
+    print = player.tell
+    name, _, msg = args.partition(" ")
+    msg = msg.strip()
+    if not name or not msg:
+        raise ActionRefused("Tell whom what?")
+    # first look for a living with the name
+    living = player.location.search_living(name)
+    if not living:
+        # ask the driver if there's a player with that name (globally)
+        living = ctx["driver"].search_player(name)
+        if not living:
+            raise ActionRefused("%s isn't here." % name)
+    living.tell("%s tells you: %s" % (player.name, msg))
+    player.tell("Told %s." % name)
 
 
 @cmd("quit")
