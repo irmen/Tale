@@ -194,7 +194,7 @@ class ExitStub(object):
     retrieved at runtime.
     """
     def __init__(self, target_location_name, description):
-        if type(target_location_name) is not str:
+        if not isinstance(target_location_name, basestring):
             raise TypeError("target of ExitStub must be a str")
         self.target = target_location_name
         self.description = description
