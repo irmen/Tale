@@ -1,17 +1,24 @@
 # The Wizard Tower,
 # which is the place where mud Wizards start/log in
 
-from mudlib.baseobjects import Location, Exit, ExitStub, Item
+from ..baseobjects import Location, Exit, ExitStub, Item
+from ..npc import Monster
 
 hall = Location("Main hall of the Tower of Magic",
     """
     The main hall of this ancient wizard tower sparkles with traces of magic.
     Everything seems to glow a little from within. You can hear a very faint hum.
     """)
-hall.items.update({
-    Item("table", "oak table", "A large dark table with a lot of cracks in its surface."),
-    Item("key", "rusty key", "An old rusty key without a label.")
-    })
+table = Item("table", "oak table", "A large dark table with a lot of cracks in its surface.")
+key = Item("key", "rusty key", "An old rusty key without a label.")
+hall.items.add(table)
+hall.items.add(key)
+
+drone = Monster("drone", "n", "bot", "mindless drone",
+              """
+              A stupid metallic drone. It just hovers here with no apparent reason.
+              """,)
+hall.enter(drone)
 
 attic = Location("Tower attic",
     """

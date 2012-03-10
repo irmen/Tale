@@ -56,8 +56,8 @@ def do_drop(player, verb, arg, **ctx):
     else:
         player.inventory.remove(item)
         player.location.add_item(item)
-        print("You drop %s on the floor." % languagetools.a(item.title))
-        player.location.tell("{player} drops {item} on the floor."
+        print("You drop %s." % languagetools.a(item.title))
+        player.location.tell("{player} drops {item}."
                                   .format(player=languagetools.capital(player.title), item=languagetools.a(item.title)),
                                   exclude_living=player)
 

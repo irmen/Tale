@@ -507,8 +507,8 @@ class Soul(object):
                 room_msg = room_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_room))
             # add fullstops at the end
             player_msg = lang.fullstop("You " + player_msg.strip())
-            room_msg = lang.fullstop(player.title + " " + room_msg.strip())
-            target_msg = lang.fullstop(player.title + " " + target_msg.strip())
+            room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg.strip()))
+            target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg.strip()))
             if player in who:
                 who.remove(player)  # the player should not be part of the targets
             return who, player_msg, room_msg, target_msg

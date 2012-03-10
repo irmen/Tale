@@ -101,6 +101,7 @@ class TestSoul(unittest.TestCase):
     def testVerbTarget(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
+        player.set_title("the great %s, destroyer of worlds", True)
         player.move(mudlib.baseobjects.Location("somewhere"))
         player.location.livings = { mudlib.npc.NPC("max", "m"), player }
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
@@ -108,15 +109,15 @@ class TestSoul(unittest.TestCase):
         self.assertTrue(len(who) == 0)
         self.assertIsInstance(who, set, "targets must be a set for O(1) lookups")
         self.assertEqual("You grin evilly.", player_msg)
-        self.assertEqual("Julie grins evilly.", room_msg)
+        self.assertEqual("The great Julie, destroyer of worlds grins evilly.", room_msg)
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin at max")
         self.assertEqual("grin", verb)
         self.assertTrue(len(who) == 1)
         self.assertIsInstance(who, set, "targets must be a set for O(1) lookups")
         self.assertEqual("max", who.pop().name)
         self.assertEqual("You grin evilly at max.", player_msg)
-        self.assertEqual("Julie grins evilly at max.", room_msg)
-        self.assertEqual("Julie grins evilly at you.", target_msg)
+        self.assertEqual("The great Julie, destroyer of worlds grins evilly at max.", room_msg)
+        self.assertEqual("The great Julie, destroyer of worlds grins evilly at you.", target_msg)
 
     def testMessageQuote(self):
         soul = mudlib.soul.Soul()

@@ -1,5 +1,6 @@
 from . import baseobjects, soul
 from . import languagetools as lang
+from .errors import SecurityViolation
 
 
 class Player(baseobjects.Living):
@@ -13,6 +14,7 @@ class Player(baseobjects.Living):
         self.soul = soul.Soul()
         self.privileges = set()
         self.__output = []
+        self.installed_wiretaps = set()
 
     def __repr__(self):
         return "<%s.%s '%s' @ %s, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
@@ -37,6 +39,7 @@ class Player(baseobjects.Living):
         Notice that the signature and behavior of this method resembles that of the print() function,
         which means you can easily do: print=player.tell, and use print(..) everywhere as usual.
         """
+        super(Player, self).tell(*messages)
         self.__output.append(" ".join(str(msg) for msg in messages))
         self.__output.append("\n")
 
@@ -55,3 +58,23 @@ class Player(baseobjects.Living):
             return look
         else:
             return "You see nothing."
+
+    def create_wiretap(self, target):   # @todo: unittest wiretap
+        if "wizard" not in self.privileges:
+            raise SecurityViolation("wiretap requires wizard privilege")
+        class Wiretap(object):
+            def __init__(self, observer, target):
+                self.observer = observer
+                self.target_name = target.name
+                self.target_type = target.__class__.__name__
+
+            def __str__(self):
+                return "%s '%s'" % (self.target_type, self.target_name)
+
+            def tell(self, *messages):
+                for msg in messages:
+                    self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg))
+
+        tap = Wiretap(self, target)
+        self.installed_wiretaps.add(tap)  # hold on to the wiretap otherwise it's garbage collected immediately
+        target.wiretaps.add(tap)  # install the wiretap on the target

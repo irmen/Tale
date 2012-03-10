@@ -43,10 +43,13 @@ def do_ls(player, verb, path, **ctx):
     modules = [x[0] for x in vars(module).items() if type(x[1]) is types.ModuleType]
     classes = [x[0] for x in vars(module).items() if type(x[1]) is type and issubclass(x[1], baseobjects.MudObject)]
     items = [x[0] for x in vars(module).items() if isinstance(x[1], baseobjects.Item)]
+    livings = [x[0] for x in vars(module).items() if isinstance(x[1], baseobjects.Living)]
     if modules:
         print("Modules: " + ", ".join(modules))
     if classes:
         print("Classes: " + ", ".join(classes))
+    if livings:
+        print("Livings: " + ", ".join(livings))
     if items:
         print("Items: " + ", ".join(items))
 
@@ -111,3 +114,30 @@ def do_destroy(player, verb, arg, **ctx):
 def do_pdb(player, verb, rest, **ctx):
     import pdb
     pdb.set_trace()   # @todo: remove this when going multiuser (I don't think you can have a synchronous debug session anymore)
+
+
+@wizcmd("wiretap")
+def do_wiretap(player, verb, arg, **ctx):
+    print = player.tell
+    if not arg:
+        print("* Installed wiretaps:", ", ".join(str(tap) for tap in player.installed_wiretaps) or "none")
+        print("* Use 'wiretap .' or 'wiretap living' to tap the room or a living.")
+        print("* Use 'wiretap -clear' to remove all your wiretaps.")
+        return
+    if arg == ".":
+        player.create_wiretap(player.location)
+        print("Wiretapped room '%s'." % player.location.name)
+    elif arg == "-clear":
+        player.installed_wiretaps.clear()
+        print("All wiretaps removed.")
+    else:
+        living = player.location.search_living(arg)
+        if living:
+            if living is player:
+                print("* Can't wiretap yourself.")
+                return
+            player.create_wiretap(living)
+            print("Wiretapped %s." % living.name)
+        else:
+            print("* %s isn't here." % arg)
+            return

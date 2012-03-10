@@ -1,3 +1,4 @@
+import weakref
 import textwrap
 from .races import races
 from . import languagetools as lang
@@ -87,6 +88,7 @@ class Location(MudObject):
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
+        self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
 
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
@@ -103,6 +105,9 @@ class Location(MudObject):
                 living.tell(specific_target_msg)
             else:
                 living.tell(room_msg)
+        if room_msg:
+            for tap in self.wiretaps:
+                tap.tell(room_msg)
 
     def look(self, exclude_living=None, short=False):
         """returns a string describing the surroundings, possibly excluding one living from the description list"""
@@ -137,12 +142,12 @@ class Location(MudObject):
             else:
                 titles = sorted(living.title for living in self.livings if living != exclude_living)
                 if titles:
-                    titles = lang.join(titles)
-                    if len(self.livings) > 1:
-                        titles += " are here."
+                    titles_str = lang.join(titles)
+                    if len(titles) > 1:
+                        titles_str += " are here."
                     else:
-                        titles += " is here."
-                    r.append(lang.capital(titles))
+                        titles_str += " is here."
+                    r.append(lang.capital(titles_str))
         return "\n".join(r)
 
     def search_living(self, name, suggest=False):   # @todo: unittest for suggest
@@ -216,6 +221,7 @@ class Living(MudObject):
         if race:
             self.set_race(race)
         self.inventory = set()
+        self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
@@ -231,11 +237,13 @@ class Living(MudObject):
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
-        livings the default is to do nothing.
+        livings the default is to do nothing (only distribute the messages to any
+        wiretaps that might be present).
         They could react on it but this is not advisable because you will need
         to parse the string again to figure out what happened...
         """
-        pass
+        for tap in self.wiretaps:
+            tap.tell(*messages)
 
     def move(self, target_location):
         """leave the current location, enter the new location"""

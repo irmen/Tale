@@ -30,6 +30,13 @@ A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
 Attractive Julie and rat are here."""
         self.assertEqual(expected, hall.look())
+        expected = """[Main hall]
+A very large hall.
+You see an oak table, a rusty key, and a university magazine.
+A heavy wooden door to the east blocks the noises from the street outside.
+A ladder leads up.
+Rat is here."""
+        self.assertEqual(expected, hall.look(exclude_living=julie))
         expected = """[Attic]
 A dark attic."""
         self.assertEqual(expected, attic.look())

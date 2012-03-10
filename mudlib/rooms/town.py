@@ -1,8 +1,8 @@
 # The central town,
 # which is the place where mud players start/log in
 
-from mudlib.baseobjects import Location, Exit, ExitStub
-from mudlib.npc import NPC, Monster
+from ..baseobjects import Location, Exit, ExitStub
+from ..npc import NPC, Monster
 
 square = Location("Essglen Town square",
     """

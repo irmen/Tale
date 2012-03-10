@@ -42,9 +42,11 @@ def create_default_player():
 
 class Commands(object):
     def __init__(self):
-        self.commands_per_priv = { None: {} }
+        self.commands_per_priv = {None: {}}
+
     def add(self, verb, func, privilege):
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
+
     def get(self, privileges):
         result = self.commands_per_priv[None]  # always include the cmds for None
         for priv in privileges:
