@@ -29,7 +29,7 @@ def wizcmd(command):
 def do_ls(player, verb, path, **ctx):
     print = player.tell
     if not path.startswith("."):
-        print("* ls: path must start with '.'")
+        print("path must start with '.'")
         return
     try:
         module = __import__("mudlib" + path)
@@ -37,7 +37,7 @@ def do_ls(player, verb, path, **ctx):
             if name:
                 module = getattr(module, name)
     except (ImportError, ValueError):
-        print("* ls: here is no module named " + path)
+        print("here is no module named " + path)
         return
     print("<%s>" % path)
     modules = [x[0] for x in vars(module).items() if type(x[1]) is types.ModuleType]
@@ -66,23 +66,23 @@ def do_clone(player, verb, path, **ctx):
         # clone an item somewhere in a module path
         path, objectname = path.rsplit(".", 1)
         if not objectname:
-            print("* clone: invalid object path")
+            print("invalid object path")
             return
         try:
             module = __import__("mudlib" + path)
         except (ImportError, ValueError):
-            print("* clone: there is no module named " + path)
+            print("there is no module named " + path)
             return
         if len(path) > 1:
             for name in path.split(".")[1:]:
                 module = getattr(module, name)
         obj = getattr(module, objectname, None)
     if obj is None or not isinstance(obj, baseobjects.Item):
-        print("* clone: object not found")
+        print("object not found")
         return
     item = copy.deepcopy(obj)
     player.inventory.add(item)
-    print("* cloned: " + repr(item))
+    print("Cloned: " + repr(item))
     player.location.tell("{player} conjures up {item}, and quickly pockets it."
                          .format(player=languagetools.capital(player.title),
                                  item=languagetools.a(item.title)),
@@ -120,9 +120,9 @@ def do_pdb(player, verb, rest, **ctx):
 def do_wiretap(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
-        print("* Installed wiretaps:", ", ".join(str(tap) for tap in player.installed_wiretaps) or "none")
-        print("* Use 'wiretap .' or 'wiretap living' to tap the room or a living.")
-        print("* Use 'wiretap -clear' to remove all your wiretaps.")
+        print("Installed wiretaps:", ", ".join(str(tap) for tap in player.installed_wiretaps) or "none")
+        print("Use 'wiretap .' or 'wiretap living' to tap the room or a living.")
+        print("Use 'wiretap -clear' to remove all your wiretaps.")
         return
     if arg == ".":
         player.create_wiretap(player.location)
@@ -134,10 +134,10 @@ def do_wiretap(player, verb, arg, **ctx):
         living = player.location.search_living(arg)
         if living:
             if living is player:
-                print("* Can't wiretap yourself.")
+                print("Can't wiretap yourself.")
                 return
             player.create_wiretap(living)
             print("Wiretapped %s." % living.name)
         else:
-            print("* %s isn't here." % arg)
+            print(arg, "isn't here.")
             return

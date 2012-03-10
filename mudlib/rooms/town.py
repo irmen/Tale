@@ -1,7 +1,7 @@
 # The central town,
 # which is the place where mud players start/log in
 
-from ..baseobjects import Location, Exit, ExitStub
+from ..baseobjects import Location, Exit, ExitStub, Item
 from ..npc import NPC, Monster
 
 square = Location("Essglen Town square",
@@ -18,6 +18,9 @@ lane = Location("Lane of Magicks",
 
 square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
 square.exits["lane"] = square.exits["north"]
+
+paper = Item("paper", "piece of paper", "A worn piece of paper with a few faded words written on it.")
+square.add_item(paper)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 lane.exits["west"] = ExitStub("wizardtower.hall", "To the west is the wizard's tower.")

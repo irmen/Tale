@@ -30,10 +30,11 @@ def do_inventory(player, verb, arg, **ctx):
         if not living:
             print("%s isn't here." % arg)
         else:
+            name = languagetools.capital(living.title)
             if not living.inventory:
-                print(living.name, "is carrying nothing.")
+                print(name, "is carrying nothing.")
             else:
-                print(living.name, "is carrying:")
+                print(name, "is carrying:")
                 for item in living.inventory:
                     print("  " + item.title)
     else:
@@ -79,11 +80,44 @@ def do_take(player, verb, arg, **ctx):
                                   exclude_living=player)
 
 
+@cmd("give")
+def do_give(player, verb, arg, **ctx):
+    print = player.tell
+    if not arg:
+        raise ParseError("Give what to whom?")
+    # support "give living [the] thing" and "give [the] thing [to] living"
+    args = [word for word in arg.split() if word not in ("the", "to")]
+    if len(args)!=2:
+        raise ParseError("Give what to whom?")
+    item_name, target_name = args
+    item = player.search_item(item_name, include_location=False)
+    if not item:
+        target_name, item_name = args
+        item = player.search_item(item_name, include_location=False)
+        if not item:
+            print("You don't have that.")
+            return
+    living = player.location.search_living(target_name, suggest=False)
+    if not living:
+        # @todo: suggest name, like soul does?
+        print(target_name, "isn't here.")
+        return
+    living.accept("give", item, player)
+    player.inventory.remove(item)
+    living.inventory.add(item)
+    item_str = languagetools.a(item.title)
+    player_str = languagetools.capital(player.title)
+    room_msg = "%s gave %s to %s." % (player_str, item_str, living.title)
+    target_msg = "%s gave you %s." % (player_str, item_str)
+    player.location.tell(room_msg, exclude_living=player, specific_targets=[living], specific_target_msg=target_msg)
+    player.tell("You gave %s %s." % (living.title, item_str))
+
+
 @cmd("help", "?")
 def do_help(player, verb, topic, **ctx):
     print = player.tell
     if topic == "soul":
-        print("* Soul verbs available:")
+        print("Soul verbs available:")
         lines = [""] * (len(soul.VERBS) // 5 + 1)
         index = 0
         for v in sorted(soul.VERBS):
@@ -92,7 +126,7 @@ def do_help(player, verb, topic, **ctx):
         for line in lines:
             print(line)
     else:
-        print("* Available commands:", ", ".join(sorted(ctx["verbs"])))
+        print("Available commands:", ", ".join(sorted(ctx["verbs"])))
 
 
 @cmd("look", "l")
@@ -119,11 +153,11 @@ def do_examine(player, verb, arg, **ctx):
             race = races.races[obj.race]
             if obj.race == "human":
                 # don't print as much info when dealing with mere humans
-                msg = languagetools.capital("%s speaks %s." % (languagetools.SUBJECTIVE[obj.gender], race["language"]))
+                msg = languagetools.capital("%s speaks %s." % (obj.subjective, race["language"]))
                 print(msg)
             else:
                 print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                    subj=languagetools.capital(languagetools.SUBJECTIVE[obj.gender]),
+                    subj=languagetools.capital(obj.subjective),
                     size=races.sizes[race["size"]],
                     btype=races.bodytypes[race["bodytype"]],
                     race=obj.race,
@@ -137,7 +171,7 @@ def do_examine(player, verb, arg, **ctx):
             print(obj.description)
     else:
         # @todo: suggest name, like soul does?
-        print("* %s isn't here." % arg)
+        print(arg, "isn't here.")
 
 
 @cmd("stats")
@@ -146,7 +180,7 @@ def do_stats(player, verb, arg, **ctx):
     if arg:
         target = player.location.search_living(arg)
         if not target:
-            print("* %s isn't here." % arg)
+            print(arg, "isn't here.")
             return
     else:
         target = player

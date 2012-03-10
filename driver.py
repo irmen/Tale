@@ -22,7 +22,7 @@ def create_player_from_info():
             break
         print("Unknown race, try again.")
     wizard = raw_input("Wizard y/n? ").strip() == "y"
-    description = "some random mud player"
+    description = "This is a random mud player."
     player = mudlib.player.Player(name, gender, race, description)
     if wizard:
         player.privileges.add("wizard")
@@ -98,12 +98,12 @@ class Driver(object):
             try:
                 keep_going = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
-                print("* The verb %s is unrecognised." % x.verb)
-            except mudlib.errors.ParseError, x:
-                print("* %s" % str(x))
+                print("The verb %s is unrecognised." % x.verb)
+            except (mudlib.errors.ParseError, mudlib.errors.ActionRefused), x:
+                print(str(x))
             except Exception:
                 import traceback
-                print("* Error:")
+                print("* internal error:")
                 print(traceback.format_exc())
         self.write_output()
 
@@ -134,6 +134,12 @@ class Driver(object):
         verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
         player.tell(player_message)
         player.location.tell(room_message, player, who, target_message)
+        if verb in mudlib.soul.AGGRESSIVE_VERBS:
+            # usually monsters immediately attack,
+            # other npc's may choose to attack or to ignore it
+            for living in who:
+                if living.aggressive:
+                    living.start_attack(self.player)
 
 
 if __name__ == "__main__":

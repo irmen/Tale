@@ -322,6 +322,17 @@ VERBS = {
 
 assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
 
+AGGRESSIVE_VERBS = {
+    "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "chase", "curse", "feel", "finger", "fondle", "french",
+    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "kick", "kiss", "knee",
+    "knock", "lick", "lift", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke",
+    "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "slap", "smooch", "sneer", "snigger",
+    "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",
+    "swing", "tackle", "tap", "taunt", "tease", "tickle", "tongue", "touch", "wiggle", "wobble", "wrinkle"
+}
+
+assert(AGGRESSIVE_VERBS.issubset(VERBS.keys()))
+
 ACTION_QUALIFIERS = {
     # qualifier -> (actionmsg, roommsg, use room actionstr)
     "suddenly": ("suddenly %s", "suddenly %s", True),

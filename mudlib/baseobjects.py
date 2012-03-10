@@ -216,6 +216,7 @@ class Living(MudObject):
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
         self.location = Living.__Limbo  # set transitional location
+        self.aggressive = False
         self.race = None
         self.stats = {}
         if race:
@@ -280,6 +281,20 @@ class Living(MudObject):
         if self.name == name or self.title.lower() == name:
             return self
         return self.search_item(name, suggest=suggest) or self.location.search_living(name, suggest) or None
+
+    def accept(self, action, item, source):
+        """
+        Validates that this living accepts something from someone, with a certain action (such as 'give').
+        Raises ActionRefused('message') if the intended action was refused.
+        """
+        pass
+
+    def start_attack(self, living):
+        """
+        Starts attacking the given living until death ensues on either side.
+        """
+        # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
+        pass
 
 
 class Bag(Item):
