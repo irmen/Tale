@@ -66,6 +66,12 @@ class Player(baseobjects.Living):
         self.installed_wiretaps.add(tap)  # hold on to the wiretap otherwise it's garbage collected immediately
         target.wiretaps.add(tap)  # install the wiretap on the target
 
+    def destroy(self, ctx):
+        super(Player, self).destroy(ctx)
+        self.installed_wiretaps.clear()
+        self.soul = None   # truly die ;-)
+        # @todo: remove heartbeat, deferred, etc.
+
 
 class Wiretap(object):
     """wiretap that can be installed on a location or a living, to tap into the messages they're receiving"""

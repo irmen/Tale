@@ -47,6 +47,9 @@ class MudObject(object):
     def __repr__(self):
         return "<%s.%s '%s' @ %s>" % (self.__class__.__module__, self.__class__.__name__, self.name, hex(id(self)))
 
+    def destroy(self, ctx):   # @todo unittest .destroy() on various objects
+        pass
+
 
 class Item(MudObject):
     """
@@ -86,6 +89,12 @@ class Location(MudObject):
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
+
+    def destroy(self, ctx):
+        self.livings.clear()
+        self.items.clear()
+        self.exits.clear()
+        self.wiretaps.clear()
 
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
@@ -158,14 +167,16 @@ class Location(MudObject):
             result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, living):
+    def enter(self, living):   # @todo: unittest enter
         assert isinstance(living, Living)
         self.livings.add(living)
+        living.location = self
         self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
 
-    def leave(self, living):
+    def leave(self, living):   # @todo: unittest leave
         if living in self.livings:
             self.livings.remove(living)
+            living.location = None
             self.tell("%s leaves." % lang.capital(living.title), exclude_living=living)
 
     def add_item(self, item):
@@ -210,7 +221,11 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object.
     """
-    __Limbo = Location("Limbo", "The intermediate or transitional place or state. Livings end up here if they're not inside a proper location yet.")
+    __Limbo = Location("Limbo",
+                     """
+                     The intermediate or transitional place or state. There's only nothingness.
+                     Livings end up here if they're not inside a proper location yet.
+                     """)
 
     def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
@@ -227,6 +242,14 @@ class Living(MudObject):
         self.inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
         self.cpr()
+
+    def destroy(self, ctx):
+        if self.location and self in self.location.livings:
+            self.location.livings.remove(self)
+        self.location = None
+        self.inventory.clear()
+        self.wiretaps.clear()
+        # @todo: remove heartbeat, deferred, attack status, etc.
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
@@ -254,12 +277,11 @@ class Living(MudObject):
         for tap in self.wiretaps:
             tap.tell(*messages)
 
-    def move(self, target_location):
-        """leave the current location, enter the new location """
+    def move(self, target_location):  # @todo: unittest move
+        """leave the current location, enter the new location"""
         if self.location:
             self.location.leave(self)
         target_location.enter(self)
-        self.location = target_location
 
     def search_item(self, name, include_inventory=True, include_location=True):     # @todo: unittest
         """

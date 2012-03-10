@@ -122,7 +122,7 @@ class TestPlayer(unittest.TestCase):
     def test_look(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
-        self.assertEqual("[Limbo]\nThe intermediate or transitional place or state. Livings end up here if they're not inside a proper location yet.", player.look())
+        self.assertEqual("[Limbo]\nThe intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.", player.look())
         player.move(attic)
         self.assertEqual("[Attic]", player.look(short=True))
         julie = NPC("julie", "f")

@@ -107,19 +107,29 @@ def do_destroy(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Destroy what?")
-    item = player.search_item(arg)
-    if not item:
-        raise ActionRefused("There's no %s here." % arg)
-    else:
-        if item in player.inventory:
-            player.inventory.remove(item)
+    victim = player.search_item(arg)
+    if victim:
+        if victim in player.inventory:
+            player.inventory.remove(victim)
         else:
-            player.location.remove_item(item)
-        print("You destroyed %r." % item)
-        player.location.tell("{player} unmakes {item}: it's suddenly gone."
-                             .format(player=languagetools.capital(player.title),
-                                     item=languagetools.a(item.title)),
-                             exclude_living=player)
+            player.location.remove_item(victim)
+        victim.destroy(ctx)
+    else:
+        # maybe there's a living here instead
+        victim = player.location.search_living(arg)
+        if victim:
+            if victim is player:
+                raise ActionRefused("You can't destroy yourself, are you insane?!")
+            victim.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % languagetools.capital(player.title))
+            victim.destroy(ctx)
+        else:
+            raise ActionRefused("There's no %s here." % arg)
+    print("You destroyed %r." % victim)
+    player.location.tell("{player} makes some gestures and a tiny black hole appears.\n"
+                         "{victim} disappears in it, and the black hole immediately vanishes."
+                         .format(player=languagetools.capital(player.title),
+                                 victim=languagetools.capital(victim.title)),
+                         exclude_living=player)
 
 
 @wizcmd("pdb")
