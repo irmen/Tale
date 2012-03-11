@@ -21,7 +21,7 @@ MudObject
   |     |
   |     +-- Weapon
   |     +-- Armour
-  |     +-- Bag
+  |     +-- Container
   |
   +-- Living
   |     |
@@ -36,8 +36,7 @@ Effect
 
 
 Every object that can hold other objects does so in its "inventory" attribute (a set).
-Except Location: it also has a "livings" attribute that holds the livings currently in the room.
-(they're *not* stored in the inventory attribute)
+Except Location: it separates the items and livings it contains internally. Use its enter/leave methods.
 """
 
 
@@ -97,19 +96,19 @@ class Location(MudObject):
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
         self.livings = set()  # set of livings in this location
-        self.inventory = set()  # set of all items in the room
+        self.items = set()  # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
 
     def __contains__(self, obj):
-        return obj in self.livings or obj in self.inventory
+        return obj in self.livings or obj in self.items
 
     def destroy(self, ctx):
         for living in self.livings:
             if living.location is self:
                 living.location = _Limbo
         self.livings.clear()
-        self.inventory.clear()
+        self.items.clear()
         self.exits.clear()
         self.wiretaps.clear()
 
@@ -138,14 +137,6 @@ class Location(MudObject):
         if self.description:
             if not short:
                 r.append(self.description)
-        if self.inventory:
-            if short:
-                item_names = sorted(item.name for item in self.inventory)
-                r.append("You see: " + ", ".join(item_names))
-            else:
-                titles = sorted(item.title for item in self.inventory)
-                titles = [lang.a(title) for title in titles]
-                r.append("You see " + lang.join(titles) + ".")
         if self.exits:
             # r.append("You can see the following exits:")
             if short:
@@ -157,6 +148,14 @@ class Location(MudObject):
                     if exit not in exits_seen:
                         exits_seen.add(exit)
                         r.append(exit.description)
+        if self.items:
+            if short:
+                item_names = sorted(item.name for item in self.items)
+                r.append("You see: " + ", ".join(item_names))
+            else:
+                titles = sorted(item.title for item in self.items)
+                titles = [lang.a(title) for title in titles]
+                r.append("You see " + lang.join(titles) + ".")
         if self.livings:
             if short:
                 living_names = sorted(living.name for living in self.livings if living != exclude_living)
@@ -184,26 +183,27 @@ class Location(MudObject):
             result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, living, force_and_silent=False):
-        assert isinstance(living, Living)
-        self.livings.add(living)
-        living.location = self
-        if not force_and_silent:
-            self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
-
-    def leave(self, living, force_and_silent=False):
-        if living in self.livings:
-            self.livings.remove(living)
-            living.location = None
+    def enter(self, obj, force_and_silent=False):
+        """Add obj to the contents of the location (either a Living or an Item)"""
+        if isinstance(obj, Living):
+            self.livings.add(obj)
+            obj.location = self
             if not force_and_silent:
-                self.tell("%s leaves." % lang.capital(living.title), exclude_living=living)
+                self.tell("%s arrives." % lang.capital(obj.title), exclude_living=obj)
+        elif isinstance(obj, Item):
+            self.items.add(obj)
+        else:
+            raise TypeError("can only contain Living and Item")
 
-    def add_item(self, item):
-        assert isinstance(item, Item)
-        self.inventory.add(item)
-
-    def remove_item(self, item):
-        self.inventory.remove(item)
+    def leave(self, obj, force_and_silent=False):
+        """Remove obj from this location (either a Living or an Item)"""
+        if obj in self.livings:
+            self.livings.remove(obj)
+            obj.location = None
+            if not force_and_silent:
+                self.tell("%s leaves." % lang.capital(obj.title), exclude_living=obj)
+        elif obj in self.items:
+            self.items.remove(obj)
 
 
 _Limbo = Location("Limbo",
@@ -211,6 +211,7 @@ _Limbo = Location("Limbo",
                      The intermediate or transitional place or state. There's only nothingness.
                      Livings end up here if they're not inside a proper location yet.
                      """)
+
 
 class Exit(object):
     """
@@ -318,8 +319,8 @@ class Living(MudObject):
             matches = [item for item in self.inventory if item.name == name] or \
                       [item for item in self.inventory if item.title.lower() == name]
         if not matches and include_location:
-            matches = [item for item in self.location.inventory if item.name == name] or \
-                      [item for item in self.location.inventory if item.title.lower() == name]
+            matches = [item for item in self.location.items if item.name == name] or \
+                      [item for item in self.location.items if item.title.lower() == name]
         return matches[0] if matches else None
 
     def accept(self, action, item, actor):
@@ -341,16 +342,26 @@ class Living(MudObject):
         pass
 
 
-class Bag(Item):
+class Container(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
     You can test for containment with 'in': item in bag
     """
     def __init__(self, name, title=None, description=None):
-        super(Bag, self).__init__(name, title, description)
+        super(Container, self).__init__(name, title, description)
         self.inventory = set()
+        self.public_inventory = True  # inventory is visible to all players when inspecting
+
     def __contains__(self, item):
         return item in self.inventory
+
+    def accept(self, item, actor):
+        """
+        Validates that this container accepts something from someone.
+        Raises ActionRefused('message') if the item is refused.
+        Make sure the message contains the name or title of the item.
+        """
+        pass
 
 
 class Effect(object):

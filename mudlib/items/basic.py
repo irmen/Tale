@@ -4,10 +4,10 @@ Basic items.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from ..baseobjects import Item
+from ..baseobjects import Item, Container
 
-trashcan = Item("trashcan", description="An aluminium trash can. The lid is closed, probably for the better.")
-newspaper = Item("newspaper", description="Yesterday's newspaper. It only contains obsolete stories. It smells... weird.")
+trashcan = Container("trashcan", "dented steel trashcan", description="A steel trash can, looking worn. The lid is closed, probably for the better.")
+newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells funky too.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful red gem.")
-pouch = Item("pouch", "small leather pouch", "It is closed with a leather strap.")
+pouch = Container("pouch", "small leather pouch", "It is closed with a leather strap.")

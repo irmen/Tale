@@ -9,10 +9,10 @@ import re
 import bisect
 
 # genders are m,f,n
-SUBJECTIVE = { "m": "he",  "f": "she", "n": "it"  }
-POSSESSIVE = { "m": "his", "f": "her", "n": "its" }
-OBJECTIVE  = { "m": "him", "f": "her", "n": "it"  }
-GENDERS    = { "m": "male", "f": "female", "n": "neuter"}
+SUBJECTIVE = {"m": "he", "f": "she", "n": "it"}
+POSSESSIVE = {"m": "his", "f": "her", "n": "its"}
+OBJECTIVE = {"m": "him", "f": "her", "n": "it"}
+GENDERS = {"m": "male", "f": "female", "n": "neuter"}
 
 
 def join(words, conj="and"):

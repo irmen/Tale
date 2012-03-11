@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
-from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Bag, Weapon
+from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon
 from mudlib.errors import SecurityViolation
 from mudlib.npc import NPC
 from mudlib.player import Player
@@ -31,7 +31,9 @@ class TestLocations(unittest.TestCase):
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label")
         self.magazine =Item ("magazine", "university magazine")
-        self.hall.inventory.update({self.table, self.key, self.magazine})
+        self.hall.enter(self.table)
+        self.hall.enter(self.key)
+        self.hall.enter(self.magazine)
         self.rat = NPC("rat", "n", race="rodent")
         self.julie = NPC("julie", "f", "attractive Julie",
                      """
@@ -54,16 +56,16 @@ class TestLocations(unittest.TestCase):
     def test_look(self):
         expected = """[Main hall]
 A very large hall.
-You see an oak table, a rusty key, and a university magazine.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
+You see an oak table, a rusty key, and a university magazine.
 Player, attractive Julie, and rat are here."""
         self.assertEqual(expected, self.hall.look())
         expected = """[Main hall]
 A very large hall.
-You see an oak table, a rusty key, and a university magazine.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
+You see an oak table, a rusty key, and a university magazine.
 Attractive Julie and rat are here."""
         self.assertEqual(expected, self.hall.look(exclude_living=self.player))
         expected = """[Attic]
@@ -74,13 +76,13 @@ A dark attic."""
         expected = """[Attic]"""
         self.assertEqual(expected, self.attic.look(short=True))
         expected = """[Main hall]
-You see: key, magazine, table
 Exits: door, east, up
+You see: key, magazine, table
 Present: julie, player, rat"""
         self.assertEqual(expected, self.hall.look(short=True))
         expected = """[Main hall]
-You see: key, magazine, table
 Exits: door, east, up
+You see: key, magazine, table
 Present: julie, rat"""
         self.assertEqual(expected, self.hall.look(exclude_living=self.player, short=True))
 
@@ -125,7 +127,7 @@ Present: julie, rat"""
         hall = Location("hall")
         rat1 = NPC("rat1", "n")
         rat2 = NPC("rat2", "n")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             hall.enter(12345)
         self.assertEqual(_Limbo, rat1.location)
         self.assertFalse(rat1 in hall.livings)
@@ -297,7 +299,7 @@ class TestDestroy(unittest.TestCase):
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat","n")
-        loc.add_item(i)
+        loc.enter(i)
         loc.enter(liv)
         loc.exits={"north": Exit("somehwere", "somewhere")}
         player = Player("julie","f")
@@ -305,7 +307,7 @@ class TestDestroy(unittest.TestCase):
         player.create_wiretap(loc)
         loc.enter(player)
         self.assertTrue(len(loc.exits)>0)
-        self.assertTrue(len(loc.inventory)>0)
+        self.assertTrue(len(loc.items)>0)
         self.assertTrue(len(loc.livings)>0)
         self.assertTrue(len(loc.wiretaps)>0)
         self.assertEqual(loc, player.location)
@@ -313,7 +315,7 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(player.installed_wiretaps)>0)
         loc.destroy(ctx)
         self.assertTrue(len(loc.exits)==0)
-        self.assertTrue(len(loc.inventory)==0)
+        self.assertTrue(len(loc.items)==0)
         self.assertTrue(len(loc.livings)==0)
         self.assertTrue(len(loc.wiretaps)==0)
         self.assertTrue(len(player.installed_wiretaps)>0, "wiretap object must remain on player")
@@ -341,11 +343,13 @@ class TestDestroy(unittest.TestCase):
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
 
 
-class TestBag(unittest.TestCase):
-    def test_bag_contains(self):
-        bag = Bag("bag")
+class TestContainer(unittest.TestCase):
+    def test_container_contains(self):
+        bag = Container("bag")
         key = Item("key")
         self.assertTrue(len(bag.inventory)==0)
+        npc = NPC("julie","f")
+        bag.accept(key, npc)
         bag.inventory.add(key)
         self.assertTrue(key in bag)
 

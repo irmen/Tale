@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 from ..baseobjects import Location, Exit, Item
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
+from ..items.basic import trashcan, newspaper
 
 square = Location("Essglen Town square",
     """
@@ -23,8 +24,8 @@ lane = Location("Lane of Magicks",
 square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
 square.exits["lane"] = square.exits["north"]
 
-paper = Item("paper", "piece of paper", "A worn piece of paper with a few faded words written on it.")
-square.add_item(paper)
+square.enter(newspaper)
+square.enter(trashcan)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 

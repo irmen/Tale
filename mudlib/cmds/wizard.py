@@ -122,7 +122,7 @@ def do_destroy(player, verb, arg, **ctx):
         if victim in player:
             player.inventory.remove(victim)
         else:
-            player.location.remove_item(victim)
+            player.location.leave(victim)
         victim.destroy(ctx)
     else:
         # maybe there's a living here instead
@@ -303,31 +303,23 @@ def do_move(player, verb, arg, **ctx):
                 raise ActionRefused("There's no %s here." % target_name)
     if thing is target:
         raise ActionRefused("You can't move things inside themselves.")
-    move_something(thing, thing_type, thing_container, thing_container_type, target, target_type)
+    move_something(thing, thing_container, thing_container_type, target, target_type)
     print("Moved %s (%s) from %s (%s) to %s (%s)." %
         (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
 
 
-def move_something(thing, thing_type, thing_container, thing_container_type, destination, destination_type):
-    if destination_type == "item" and not isinstance(destination, baseobjects.Bag):
+def move_something(thing, thing_container, thing_container_type, destination, destination_type):
+    if destination_type == "item" and not isinstance(destination, baseobjects.Container):
         raise ActionRefused("Destination item is not a bag/container and can't hold anything.")
     # remove the thing from where it is now
     if thing_container_type == "location":
-        if thing_type == "living":
-            thing_container.leave(thing, force_and_silent=True)
-        elif thing_type == "item":
-            thing_container.remove_item(thing)
-    elif thing_container_type == "living":
-        thing_container.inventory.remove(thing)
+        thing_container.leave(thing, force_and_silent=True)
+    else:
+        thing_container.inventory.remove(thing)  # all other types: just pop it from their inventory
     # move the thing to its destination
     if destination_type == "location":
-        if thing_type == "living":
-            destination.enter(thing, force_and_silent=True)
-        elif thing_type == "item":
-            destination.add_item(thing)
-    elif destination_type == "living":
-        destination.inventory.add(thing)
-    elif destination_type == "item":
-        destination.contents.add(thing)
+        destination.enter(thing, force_and_silent=True)
+    else:
+        destination.inventory.add(thing)  # all other types: just chuck it in their inventory
     # @todo: when moving livings, it screws up their location.
     # This needs a complex fix (hierarchic container lookup bubbling until we reach a Location object?)
