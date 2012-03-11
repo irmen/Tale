@@ -380,14 +380,10 @@ class TestSoul(unittest.TestCase):
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "die", adverb="suddenly")
         self.assertEqual("You suddenly fall down and play dead.", player_msg)
         self.assertEqual("Julie suddenly falls to the ground, dead.", room_msg)
-        # go1
-        who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "go", adverb="rudely", message="blurp")
-        self.assertEqual("You go 'blurp' rudely.", player_msg)
-        self.assertEqual("Julie goes 'blurp' rudely.", room_msg)
-        # go2
-        who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "go")
-        self.assertEqual("You go 'ah'.", player_msg)
-        self.assertEqual("Julie goes 'ah'.", room_msg)
+        # ah
+        who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "ah", adverb="rudely")
+        self.assertEqual("You go 'ah' rudely.", player_msg)
+        self.assertEqual("Julie goes 'ah' rudely.", room_msg)
 
     def testQUAD(self):
         soul = mudlib.soul.Soul()

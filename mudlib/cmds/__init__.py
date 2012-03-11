@@ -23,11 +23,19 @@ abbreviations = {
     "e": "east",
     "s": "south",
     "w": "west",
+    "ne": "northeast",
+    "nw": "northwest",
+    "se": "southeast",
+    "sw": "southwest",
     "u": "up",
     "d": "down",
     "?": "help",
     "i": "inventory",
-    "l": "look"
+    "l": "look",
+    "x": "examine",
+    "exa": "examine",
+    "inv": "inventory",
+    "'": "say"
     }
 
-normal.abbreviations = abbreviations    # used in 'help'
+normal.abbreviations = abbreviations    # used in help, look, examine

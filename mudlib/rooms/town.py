@@ -53,6 +53,9 @@ rat = Monster("rat", "n", "rodent", None,
     A filthy looking rat. Its whiskers tremble slightly as it peers back at you.
     """,)
 
+ant = NPC("ant", "n", race="insect")
+
 square.enter(towncrier)
 square.enter(idiot)
 square.enter(rat)
+square.enter(ant)

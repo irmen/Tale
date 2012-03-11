@@ -27,7 +27,7 @@ def cmd(command, *aliases):
     return cmd2
 
 
-@cmd("inventory", "inv")
+@cmd("inventory")
 def do_inventory(player, verb, arg, **ctx):
     print = player.tell
     if arg and "wizard" in player.privileges:
@@ -107,7 +107,17 @@ def do_take(player, verb, arg, **ctx):
     else:
         item = player.search_item(arg, include_inventory=False)
         if not item:
-            print("There's no %s here." % arg)
+            living = player.location.search_living(arg)
+            if living:
+                living_race = races.races[living.race]
+                player_race = races.races[player.race]
+                if player_race["size"] - living_race["size"] >=2:
+                    living.accept("take", None, player)  # @todo: do an agi/str/spd/luck check to see if we can pick it up
+                    print("Even though {0}'s small enough, you can't carry {1} with you.".format(living.subjective, living.objective))
+                else:
+                    print("You can't carry {0} with you, {1}'s too large.".format(living.objective, living.subjective))
+            else:
+                print("There's no %s here." % arg)
         else:
             take_stuff([item])
 
@@ -177,14 +187,32 @@ def do_help(player, verb, topic, **ctx):
         for line in lines:
             print(line)
     else:
-        print("Available commands:", ", ".join(sorted(ctx["verbs"])))
-        print("Abbreviations:", ", ".join(sorted("%s=%s" % (a, v) for a, v in abbreviations.items())))
+        verbs = ctx["verbs"]
+        verb_help = {}   # verb -> [list of abbrs]
+        for verb in verbs:
+            verb_help[verb] = []
+        abbrevs = dict(abbreviations)
+        for abbr, verb in abbreviations.items():
+            if verb in verb_help:
+                verb_help[verb].append(abbr)
+                del abbrevs[abbr]
+        cmds_help = []
+        for verb, abbrs in verb_help.items():
+            if abbrs:
+                verb += "/" + "/".join(abbrs)
+            cmds_help.append(verb)
+        print("Available commands:")
+        print(", ".join(cmds_help))
+        print("Abbreviations:")
+        print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
+        print("Pick up/put down are aliases for take/drop.")
 
 
 @cmd("look")
 def do_look(player, verb, arg, **ctx):
     print = player.tell
     if arg:
+        # look <direction> is the only thing we support, the rest should be done with examine
         if arg in player.location.exits:
             print(player.location.exits[arg].description)
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
@@ -195,7 +223,7 @@ def do_look(player, verb, arg, **ctx):
         print(player.look())
 
 
-@cmd("examine", "exa")
+@cmd("examine", "inspect")
 def do_examine(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
@@ -207,7 +235,8 @@ def do_examine(player, verb, arg, **ctx):
             print(repr(obj))
         if isinstance(obj, baseobjects.Living):
             print("This is %s." % obj.title)
-            print(obj.description)
+            if obj.description:
+                print(obj.description)
             race = races.races[obj.race]
             if obj.race == "human":
                 # don't print as much info when dealing with mere humans
@@ -228,8 +257,10 @@ def do_examine(player, verb, arg, **ctx):
                 print("You see %s." % languagetools.a(obj.title))
             print(obj.description)
     elif arg in player.location.exits:
+        print("It seems you can go there:")
         print(player.location.exits[arg].description)
     elif arg in abbreviations and abbreviations[arg] in player.location.exits:
+        print("It seems you can go there:")
         print(player.location.exits[abbreviations[arg]].description)
     else:
         raise ActionRefused("%s isn't here." % arg)

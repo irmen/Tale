@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 import weakref
 import textwrap
 from . import languagetools as lang
+from .errors import ActionRefused
 from .races import races
 
 """
@@ -172,17 +173,19 @@ class Location(MudObject):
             result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, living):   # @todo: unittest enter
+    def enter(self, living, force_and_silent=False):   # @todo: unittest enter
         assert isinstance(living, Living)
         self.livings.add(living)
         living.location = self
-        self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
+        if not force_and_silent:
+            self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
 
-    def leave(self, living):   # @todo: unittest leave
+    def leave(self, living, force_and_silent=False):   # @todo: unittest leave
         if living in self.livings:
             self.livings.remove(living)
             living.location = None
-            self.tell("%s leaves." % lang.capital(living.title), exclude_living=living)
+            if not force_and_silent:
+                self.tell("%s leaves." % lang.capital(living.title), exclude_living=living)
 
     def add_item(self, item):
         assert isinstance(item, Item)
@@ -282,11 +285,11 @@ class Living(MudObject):
         for tap in self.wiretaps:
             tap.tell(*messages)
 
-    def move(self, target_location):  # @todo: unittest move
+    def move(self, target_location, force_and_silent=False):  # @todo: unittest move
         """leave the current location, enter the new location"""
         if self.location:
-            self.location.leave(self)
-        target_location.enter(self)
+            self.location.leave(self, force_and_silent)
+        target_location.enter(self, force_and_silent)
 
     def search_item(self, name, include_inventory=True, include_location=True):     # @todo: unittest
         """
@@ -323,7 +326,10 @@ class Living(MudObject):
         Raises ActionRefused('message') if the intended action was refused.
         Make sure the message contains the name or title of the item.
         """
-        pass
+        if action == "take":
+            if self.aggressive:
+                self.start_attack(actor)
+                raise ActionRefused("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(self.objective))
 
     def start_attack(self, living):
         """

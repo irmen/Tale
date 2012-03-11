@@ -22,8 +22,11 @@ class NPC(baseobjects.Living):
         Validates that this living accepts something from someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.
         Make sure the message contains the name or title of the item.
-        By default, NPC refused every special action on them.
+        By default, NPC refused every special action on them, except 'take', which is handled in Living.
         """
+        super(NPC, self).accept(action, item, actor)
+        if action=="take":
+            return  # handled in base class
         if item:
             raise ActionRefused("You can't %s %s to %s." % (action, item.name, self.title))
         else:

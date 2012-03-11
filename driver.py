@@ -100,6 +100,7 @@ class Driver(object):
     def main_loop(self):
         print = self.player.tell
         keep_going = True
+        directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         while keep_going:
             mudlib.mud_context.driver = self
             mudlib.mud_context.player = self.player
@@ -107,7 +108,7 @@ class Driver(object):
             try:
                 keep_going = self.ask_player_input()
             except mudlib.soul.UnknownVerbException, x:
-                if x.verb in ("north", "east", "south", "west", "up", "down"):
+                if x.verb in directions:
                     print("You can't go in that direction.")
                 else:
                     print("The verb %s is unrecognised." % x.verb)
@@ -125,20 +126,26 @@ class Driver(object):
         print("".join(output))
 
     def ask_player_input(self):
-        cmd = raw_input(">> ")
+        cmd = raw_input(">> ").lstrip()
+        if cmd and cmd[0] in mudlib.cmds.abbreviations and not cmd[0].isalpha():
+            # insert a space to separate the first char such as ' or ?
+            cmd = cmd[0] + " " + cmd[1:]
         verb, _, rest = cmd.partition(" ")
         verb = verb.strip()
         rest = rest.strip()
         # determine available verbs for this player
         player_verbs = self.commands.get(self.player.privileges)
         # pre-process input special cases
-        if verb.startswith("'"):
-            verb = "say"
-            rest = cmd[1:].strip()
-            cmd = "say " + rest
+        if verb in ("pick", "put"):
+            # pick up->take, put down->drop
+            if rest == "up" or rest.startswith("up "):
+                verb = "take"
+                rest = rest[3:].lstrip()
+            elif rest == "down" or rest.startswith("down "):
+                verb = "drop"
+                rest = rest[5:].lstrip()
         elif verb in mudlib.cmds.abbreviations:
             verb = mudlib.cmds.abbreviations[verb]
-            cmd = verb + " " + rest
         # Execute. First try directions, then the rest
         if verb in self.player.location.exits:
             self.do_move(verb)
@@ -148,7 +155,7 @@ class Driver(object):
             result = func(self.player, verb, rest, driver=self, verbs=player_verbs)
             return result != False
         else:
-            self.do_socialize(cmd)
+            self.do_socialize(verb + " " + rest)
             return True
 
     def do_move(self, direction):

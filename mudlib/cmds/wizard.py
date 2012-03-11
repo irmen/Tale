@@ -228,10 +228,7 @@ def teleport_to(player, location):
                          languagetools.capital(player.title), exclude_living=player)
     player.location.tell("%s jumps into the portal, which quickly closes behind %s." %
                          (languagetools.capital(player.subjective), player.objective), exclude_living=player)
-    # Can't use player.move() because we want to override any access checks.
-    player.location.livings.remove(player)
-    player.location = location
-    location.livings.add(player)
+    player.move(location, force_and_silent=True)
     print("You've been teleported.")
     print(player.look())
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
@@ -244,9 +241,7 @@ def teleport_someone_to_player(who, player):
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (languagetools.capital(who.title), who.objective)
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
-    who.location.livings.remove(who)
-    who.location = player.location
-    player.location.livings.add(who)
+    who.move(player.location, force_and_silent=True)
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
                          languagetools.capital(player.title), exclude_living=who)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." %
