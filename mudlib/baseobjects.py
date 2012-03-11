@@ -53,7 +53,7 @@ class MudObject(object):
     def __repr__(self):
         return "<%s.%s '%s' @ %s>" % (self.__class__.__module__, self.__class__.__name__, self.name, hex(id(self)))
 
-    def destroy(self, ctx):   # @todo unittest .destroy() on various objects
+    def destroy(self, ctx):
         pass
 
 
@@ -97,6 +97,9 @@ class Location(MudObject):
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
 
     def destroy(self, ctx):
+        for living in self.livings:
+            if living.location is self:
+                living.location = _Limbo
         self.livings.clear()
         self.items.clear()
         self.exits.clear()
@@ -173,14 +176,14 @@ class Location(MudObject):
             result = [living for living in self.livings if living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, living, force_and_silent=False):   # @todo: unittest enter
+    def enter(self, living, force_and_silent=False):
         assert isinstance(living, Living)
         self.livings.add(living)
         living.location = self
         if not force_and_silent:
             self.tell("%s arrives." % lang.capital(living.title), exclude_living=living)
 
-    def leave(self, living, force_and_silent=False):   # @todo: unittest leave
+    def leave(self, living, force_and_silent=False):
         if living in self.livings:
             self.livings.remove(living)
             living.location = None
@@ -194,6 +197,12 @@ class Location(MudObject):
     def remove_item(self, item):
         self.items.remove(item)
 
+
+_Limbo = Location("Limbo",
+                     """
+                     The intermediate or transitional place or state. There's only nothingness.
+                     Livings end up here if they're not inside a proper location yet.
+                     """)
 
 class Exit(object):
     """
@@ -229,19 +238,13 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object.
     """
-    __Limbo = Location("Limbo",
-                     """
-                     The intermediate or transitional place or state. There's only nothingness.
-                     Livings end up here if they're not inside a proper location yet.
-                     """)
-
     def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
-        self.location = Living.__Limbo  # set transitional location
+        self.location = _Limbo  # set transitional location
         self.aggressive = False
         self.race = None
         self.stats = {}

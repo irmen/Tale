@@ -5,7 +5,8 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
-from mudlib.baseobjects import Location, Exit, Item
+from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo
+from mudlib.errors import SecurityViolation
 from mudlib.npc import NPC
 from mudlib.player import Player
 
@@ -90,6 +91,43 @@ Present: rat"""
         self.assertEqual([], rat.messages)
         self.assertEqual(["juliemsg"], julie.messages)
 
+    def test_enter_leave(self):
+        class Wiretap(object):
+            def __init__(self):
+                self.msgs=[]
+            def tell(self, msg):
+                self.msgs.append(msg)
+            def clear(self):
+                self.msgs=[]
+        hall = Location("hall")
+        rat1 = NPC("rat1", "n")
+        rat2 = NPC("rat2", "n")
+        with self.assertRaises(AssertionError):
+            hall.enter(12345)
+        self.assertEqual(_Limbo, rat1.location)
+        self.assertFalse(rat1 in hall.livings)
+        wiretap = Wiretap()
+        hall.wiretaps.add(wiretap)
+        hall.enter(rat1)
+        self.assertEqual(hall, rat1.location)
+        self.assertTrue(rat1 in hall.livings)
+        self.assertEqual(["Rat1 arrives."], wiretap.msgs)
+        hall.enter(rat2, force_and_silent=True)
+        self.assertTrue(rat2 in hall.livings)
+        self.assertEqual(["Rat1 arrives."], wiretap.msgs, "2nd rat should not be mentioned")
+        # now test leave
+        wiretap.clear()
+        hall.leave(rat1)
+        self.assertFalse(rat1 in hall.livings)
+        self.assertIsNone(rat1.location)
+        self.assertEqual(["Rat1 leaves."], wiretap.msgs)
+        hall.leave(rat2, force_and_silent=True)
+        self.assertFalse(rat2 in hall.livings)
+        self.assertEqual(["Rat1 leaves."], wiretap.msgs, "2nd rat should not be mentioned")
+        # test random leave
+        hall.leave(rat1)
+        hall.leave(12345)
+
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
@@ -134,6 +172,32 @@ class TestPlayer(unittest.TestCase):
         julie = NPC("julie", "f")
         julie.move(attic)
         self.assertEqual("[Attic]\nPresent: julie", player.look(short=True))
+    def test_wiretap(self):
+        attic = Location("Attic", "A dark attic.")
+        player = Player("fritz", "m")
+        julie = NPC("julie", "f")
+        julie.move(attic)
+        player.move(attic)
+        julie.tell("message for julie")
+        attic.tell("message for room")
+        self.assertEqual("message for room\n", "".join(player.get_output_lines()))
+        with self.assertRaises(SecurityViolation):
+            player.create_wiretap(julie)
+        player.privileges = {"wizard"}
+        player.create_wiretap(julie)
+        player.create_wiretap(attic)
+        julie.tell("message for julie")
+        attic.tell("message for room")
+        self.assertEqual("""[wiretap on 'julie': message for julie]
+message for room
+[wiretap on 'julie': message for room]
+[wiretap on 'Attic': message for room]
+""", "".join(player.get_output_lines()))
+        # test removing the wiretaps
+        player.installed_wiretaps.clear()
+        julie.tell("message for julie")
+        attic.tell("message for room")
+        self.assertEqual("message for room\n", "".join(player.get_output_lines()))
 
 
 class TestDescriptions(unittest.TestCase):
@@ -159,6 +223,60 @@ class TestDescriptions(unittest.TestCase):
         self.assertEquals("key", item.name)
         self.assertEquals("rusty old key", item.title)
         self.assertEquals("a very small, old key that's rusted", item.description)
+
+
+class TestDestroy(unittest.TestCase):
+    def test_destroy_base(self):
+        ctx = {}
+        o = MudObject("x")
+        o.destroy(ctx)
+    def test_destroy_loc(self):
+        ctx = {}
+        loc = Location("loc")
+        i = Item("item")
+        liv = Living("rat","n")
+        loc.add_item(i)
+        loc.enter(liv)
+        loc.exits={"north": Exit("somehwere", "somewhere")}
+        player = Player("julie","f")
+        player.privileges = {"wizard"}
+        player.create_wiretap(loc)
+        loc.enter(player)
+        self.assertTrue(len(loc.exits)>0)
+        self.assertTrue(len(loc.items)>0)
+        self.assertTrue(len(loc.livings)>0)
+        self.assertTrue(len(loc.wiretaps)>0)
+        self.assertEqual(loc, player.location)
+        self.assertEqual(loc, liv.location)
+        self.assertTrue(len(player.installed_wiretaps)>0)
+        loc.destroy(ctx)
+        self.assertTrue(len(loc.exits)==0)
+        self.assertTrue(len(loc.items)==0)
+        self.assertTrue(len(loc.livings)==0)
+        self.assertTrue(len(loc.wiretaps)==0)
+        self.assertTrue(len(player.installed_wiretaps)>0, "wiretap object must remain on player")
+        self.assertEqual(_Limbo, player.location)
+        self.assertEqual(_Limbo, liv.location)
+
+    def test_destroy_player(self):
+        ctx = {}
+        loc = Location("loc")
+        player = Player("julie","f")
+        player.privileges = {"wizard"}
+        player.create_wiretap(loc)
+        player.inventory.add(Item("key"))
+        loc.enter(player)
+        self.assertTrue(len(loc.wiretaps)>0)
+        self.assertEqual(loc, player.location)
+        self.assertTrue(len(player.installed_wiretaps)>0)
+        self.assertTrue(len(player.inventory)>0)
+        self.assertTrue(player in loc.livings)
+        player.destroy(ctx)
+        self.assertTrue(len(loc.wiretaps)==0)
+        self.assertTrue(len(player.installed_wiretaps)==0)
+        self.assertTrue(len(player.inventory)==0)
+        self.assertFalse(player in loc.livings)
+        self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
 
 
 if __name__ == '__main__':

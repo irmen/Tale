@@ -65,7 +65,7 @@ class Player(baseobjects.Living):
         else:
             return "You see nothing."
 
-    def create_wiretap(self, target):   # @todo: unittest wiretap
+    def create_wiretap(self, target):
         if "wizard" not in self.privileges:
             raise SecurityViolation("wiretap requires wizard privilege")
         tap = Wiretap(self, target)
