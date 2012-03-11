@@ -10,64 +10,95 @@ from mudlib.errors import SecurityViolation
 from mudlib.npc import NPC
 from mudlib.player import Player
 
-hall = Location("Main hall", "A very large hall.")
-attic = Location("Attic", "A dark attic.")
-street = Location("Street", "An endless street.")
-hall.exits["up"] = Exit(attic, "A ladder leads up.")
-hall.exits["door"] = Exit(street, "A heavy wooden door to the east blocks the noises from the street outside.")
-hall.exits["east"] = hall.exits["door"]
-hall.items.update({
-    Item("table", "oak table", "a large dark table with a lot of cracks in its surface"),
-    Item("key", "rusty key", "an old rusty key without a label"),
-    Item("magazine", "university magazine")
-    })
-rat, julie = NPC("rat", "n", race="rodent"), NPC("julie", "f", "attractive Julie",
-                                 """
-                                 She's quite the looker.
-                                 """)
-hall.livings = { rat, julie }
+
+class Wiretap(object):
+    def __init__(self):
+        self.msgs=[]
+    def tell(self, msg):
+        self.msgs.append(msg)
+    def clear(self):
+        self.msgs=[]
 
 
 class TestLocations(unittest.TestCase):
+    def setUp(self):
+        self.hall = Location("Main hall", "A very large hall.")
+        self.attic = Location("Attic", "A dark attic.")
+        self.street = Location("Street", "An endless street.")
+        self.hall.exits["up"] = Exit(self.attic, "A ladder leads up.")
+        self.hall.exits["door"] = Exit(self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
+        self.hall.exits["east"] = self.hall.exits["door"]
+        self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
+        self.key = Item("key", "rusty key", "an old rusty key without a label")
+        self.magazine =Item ("magazine", "university magazine")
+        self.hall.items.update({self.table, self.key, self.magazine})
+        self.rat = NPC("rat", "n", race="rodent")
+        self.julie = NPC("julie", "f", "attractive Julie",
+                     """
+                     She's quite the looker.
+                     """)
+        self.player = Player("player","m")
+        self.pencil = Item("pencil")
+        self.player.inventory.add(self.pencil)
+        self.hall.enter(self.rat)
+        self.hall.enter(self.julie)
+        self.hall.enter(self.player)
     def test_look(self):
         expected = """[Main hall]
 A very large hall.
 You see an oak table, a rusty key, and a university magazine.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
-Attractive Julie and rat are here."""
-        self.assertEqual(expected, hall.look())
+Player, attractive Julie, and rat are here."""
+        self.assertEqual(expected, self.hall.look())
         expected = """[Main hall]
 A very large hall.
 You see an oak table, a rusty key, and a university magazine.
 A heavy wooden door to the east blocks the noises from the street outside.
 A ladder leads up.
-Rat is here."""
-        self.assertEqual(expected, hall.look(exclude_living=julie))
+Attractive Julie and rat are here."""
+        self.assertEqual(expected, self.hall.look(exclude_living=self.player))
         expected = """[Attic]
 A dark attic."""
-        self.assertEqual(expected, attic.look())
+        self.assertEqual(expected, self.attic.look())
 
     def test_look_short(self):
         expected = """[Attic]"""
-        self.assertEqual(expected, attic.look(short=True))
+        self.assertEqual(expected, self.attic.look(short=True))
+        expected = """[Main hall]
+You see: key, magazine, table
+Exits: door, east, up
+Present: julie, player, rat"""
+        self.assertEqual(expected, self.hall.look(short=True))
         expected = """[Main hall]
 You see: key, magazine, table
 Exits: door, east, up
 Present: julie, rat"""
-        self.assertEqual(expected, hall.look(short=True))
-        expected = """[Main hall]
-You see: key, magazine, table
-Exits: door, east, up
-Present: rat"""
-        self.assertEqual(expected, hall.look(exclude_living=julie, short=True))
+        self.assertEqual(expected, self.hall.look(exclude_living=self.player, short=True))
 
     def test_search_living(self):
-        self.assertEquals(None, hall.search_living("<notexisting>"))
-        self.assertEquals(None, attic.search_living("<notexisting>"))
-        self.assertEquals(rat, hall.search_living("rat"))
-        self.assertEquals(julie, hall.search_living("Julie"))
-        self.assertEquals(julie, hall.search_living("attractive julie"))
+        self.assertEquals(None, self.hall.search_living("<notexisting>"))
+        self.assertEquals(None, self.attic.search_living("<notexisting>"))
+        self.assertEquals(self.rat, self.hall.search_living("rat"))
+        self.assertEquals(self.julie, self.hall.search_living("Julie"))
+        self.assertEquals(self.julie, self.hall.search_living("attractive julie"))
+
+    def test_search_item(self):
+        self.assertEquals(None, self.player.search_item("<notexisting>"))
+        self.assertEquals(self.pencil, self.player.search_item("pencil"))
+        self.assertEquals(None, self.player.search_item("pencil", include_inventory=False))
+        self.assertEquals(self.key, self.player.search_item("key"))
+        self.assertEquals(None, self.player.search_item("key", include_location=False))
+        self.assertEquals(self.key, self.player.search_item("KEY"), "should work case-insensitive")
+
+    def test_search_name(self):
+        self.assertEquals(None, self.player.search_name("<notexisting>"))
+        self.assertEquals(self.key, self.player.search_name("key"), "should also find items in inventory")
+        self.assertEquals(self.pencil, self.player.search_name("pencil"), "should also find items in the room")
+        self.assertEquals(self.julie, self.player.search_name("julie"), "should also find livings")
+        self.assertEquals(self.pencil, self.player.search_name("PENCIL"), "must work case-insensitive")
+        self.assertEquals(self.julie, self.player.search_name("JULIE"), "must work case-insensitive")
+        self.assertEquals(self.player, self.player.search_name("player"), "must also find the player himself")
 
     def test_tell(self):
         class MsgTraceNPC(NPC):
@@ -92,13 +123,6 @@ Present: rat"""
         self.assertEqual(["juliemsg"], julie.messages)
 
     def test_enter_leave(self):
-        class Wiretap(object):
-            def __init__(self):
-                self.msgs=[]
-            def tell(self, msg):
-                self.msgs.append(msg)
-            def clear(self):
-                self.msgs=[]
         hall = Location("hall")
         rat1 = NPC("rat1", "n")
         rat2 = NPC("rat2", "n")
@@ -128,9 +152,42 @@ Present: rat"""
         hall.leave(rat1)
         hall.leave(12345)
 
+    def test_move(self):
+        hall = Location("hall")
+        attic = Location("attic")
+        rat = Living("rat", "n")
+        hall.enter(rat)
+        wiretap_hall = Wiretap()
+        wiretap_attic = Wiretap()
+        hall.wiretaps.add(wiretap_hall)
+        attic.wiretaps.add(wiretap_attic)
+        self.assertTrue(rat in hall.livings)
+        self.assertFalse(rat in attic.livings)
+        self.assertEqual(hall, rat.location)
+        rat.move(attic)
+        self.assertTrue(rat in attic.livings)
+        self.assertFalse(rat in hall.livings)
+        self.assertEqual(attic, rat.location)
+        self.assertEqual(["Rat leaves."], wiretap_hall.msgs)
+        self.assertEqual(["Rat arrives."], wiretap_attic.msgs)
+        # now try silent
+        wiretap_attic.clear()
+        wiretap_hall.clear()
+        rat.move(hall, force_and_silent=True)
+        self.assertTrue(rat in hall.livings)
+        self.assertFalse(rat in attic.livings)
+        self.assertEqual(hall, rat.location)
+        self.assertEqual([], wiretap_hall.msgs)
+        self.assertEqual([], wiretap_attic.msgs)
+
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
+        rat = NPC("rat", "n", race="rodent")
+        julie = NPC("julie", "f", "attractive Julie",
+                    """
+                    She's quite the looker.
+                    """)
         self.assertEqual("julie", julie.name)
         self.assertEqual("attractive Julie", julie.title)
         self.assertEqual("She's quite the looker.", julie.description)
@@ -188,11 +245,9 @@ class TestPlayer(unittest.TestCase):
         player.create_wiretap(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
-        self.assertEqual("""[wiretap on 'julie': message for julie]
-message for room
-[wiretap on 'julie': message for room]
-[wiretap on 'Attic': message for room]
-""", "".join(player.get_output_lines()))
+        self.assertEqual(["\n","\n","\n","\n",
+            "[wiretap on 'Attic': message for room]","[wiretap on 'julie': message for julie]",
+            "[wiretap on 'julie': message for room]","message for room"], sorted(player.get_output_lines()))
         # test removing the wiretaps
         player.installed_wiretaps.clear()
         julie.tell("message for julie")

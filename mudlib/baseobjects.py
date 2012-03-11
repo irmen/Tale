@@ -288,13 +288,13 @@ class Living(MudObject):
         for tap in self.wiretaps:
             tap.tell(*messages)
 
-    def move(self, target_location, force_and_silent=False):  # @todo: unittest move
+    def move(self, target_location, force_and_silent=False):
         """leave the current location, enter the new location"""
         if self.location:
             self.location.leave(self, force_and_silent)
         target_location.enter(self, force_and_silent)
 
-    def search_item(self, name, include_inventory=True, include_location=True):     # @todo: unittest
+    def search_item(self, name, include_inventory=True, include_location=True):
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -311,9 +311,9 @@ class Living(MudObject):
                       [item for item in self.location.items if item.title.lower() == name]
         return matches[0] if matches else None
 
-    def search_name(self, name):    # @todo: unittest
+    def search_name(self, name):
         """
-        Searches an object within the 'visible' world around the living including his inventory.
+        Searches an object or living within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
         """
         if not name:

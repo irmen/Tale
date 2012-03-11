@@ -221,7 +221,7 @@ def do_teleport(player, verb, args, **ctx):
                 teleport_someone_to_player(target, player)
 
 
-def teleport_to(player, location):   # @todo unittest
+def teleport_to(player, location):
     """helper function for teleport command, to teleport the player somewhere"""
     print = player.tell
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
@@ -236,7 +236,7 @@ def teleport_to(player, location):   # @todo unittest
                   (languagetools.capital(player.title), player.objective), exclude_living=player)
 
 
-def teleport_someone_to_player(who, player):   # @todo unittest
+def teleport_someone_to_player(who, player):
     """helper function for teleport command, to teleport someone to the player"""
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (languagetools.capital(who.title), who.objective)
@@ -290,7 +290,7 @@ def do_move(player, verb, arg, **ctx):
     if not thing:
         raise ActionRefused("There's no %s here." % thing_name)
     if thing_type == "living":
-        raise ActionRefused("* move can't yet move livings around, it will screw up their location. Sorry.") # @todo fix moving livings
+        raise ActionRefused("* move can't yet move livings around, it will screw up their location. Sorry.")  # @todo fix moving livings
     if target_name == ".":
         # current room is the target
         target = player.location
@@ -310,7 +310,7 @@ def do_move(player, verb, arg, **ctx):
         (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
 
 
-def move_something(thing, thing_type, thing_container, thing_container_type, destination, destination_type):  # @todo: unittest
+def move_something(thing, thing_type, thing_container, thing_container_type, destination, destination_type):
     if destination_type == "item" and not isinstance(destination, baseobjects.Bag):
         raise ActionRefused("Destination item is not a bag/container and can't hold anything.")
     # remove the thing from where it is now
