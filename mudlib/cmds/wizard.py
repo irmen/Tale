@@ -221,7 +221,7 @@ def do_teleport(player, verb, args, **ctx):
                 teleport_someone_to_player(target, player)
 
 
-def teleport_to(player, location):
+def teleport_to(player, location):   # @todo unittest
     """helper function for teleport command, to teleport the player somewhere"""
     print = player.tell
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
@@ -236,7 +236,7 @@ def teleport_to(player, location):
                   (languagetools.capital(player.title), player.objective), exclude_living=player)
 
 
-def teleport_someone_to_player(who, player):
+def teleport_someone_to_player(who, player):   # @todo unittest
     """helper function for teleport command, to teleport someone to the player"""
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (languagetools.capital(who.title), who.objective)
@@ -246,3 +246,90 @@ def teleport_someone_to_player(who, player):
                          languagetools.capital(player.title), exclude_living=who)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." %
                          languagetools.capital(who.title), exclude_living=who)
+
+
+@wizcmd("reload")
+def do_reload(player, verb, path, **ctx):
+    print = player.tell
+    if not path.startswith("."):
+        raise ActionRefused("Path must start with '.'")
+    try:
+        module_name = "mudlib"
+        if len(path)>1:
+            module_name+=path
+        __import__(module_name)
+        module = sys.modules[module_name]
+    except (ImportError, ValueError):
+        raise ActionRefused("There's no module named " + path)
+    import imp
+    imp.reload(module)
+    print("Module has been reloaded:", module.__name__)
+
+
+@wizcmd("move")
+def do_move(player, verb, arg, **ctx):
+    print = player.tell
+    thing_name, _, target_name = arg.partition(" ")
+    target_name = target_name.strip()
+    if not thing_name or not target_name:
+        raise ParseError("Move what where?")
+    thing = player.search_item(thing_name, include_location=False)
+    thing_type = "item"
+    thing_container = player
+    thing_container_type = "living"
+    if not thing:
+        thing = player.search_item(thing_name, include_inventory=False, include_location=True)
+        thing_type = "item"
+        thing_container = player.location
+        thing_container_type = "location"
+    if not thing:
+        thing = player.location.search_living(thing_name)
+        thing_type = "living"
+        thing_container = player.location
+        thing_container_type = "location"
+    if not thing:
+        raise ActionRefused("There's no %s here." % thing_name)
+    if thing_type == "living":
+        raise ActionRefused("* move can't yet move livings around, it will screw up their location. Sorry.") # @todo fix moving livings
+    if target_name == ".":
+        # current room is the target
+        target = player.location
+        target_type = "location"
+    else:
+        target = player.search_item(target_name, include_location=True)
+        target_type = "item"
+        if not target:
+            target = player.location.search_living(target_name)
+            target_type = "living"
+            if not target:
+                raise ActionRefused("There's no %s here." % target_name)
+    if thing is target:
+        raise ActionRefused("You can't move things inside themselves.")
+    move_something(thing, thing_type, thing_container, thing_container_type, target, target_type)
+    print("Moved %s (%s) from %s (%s) to %s (%s)." %
+        (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
+
+
+def move_something(thing, thing_type, thing_container, thing_container_type, destination, destination_type):  # @todo: unittest
+    if destination_type == "item" and not isinstance(destination, baseobjects.Bag):
+        raise ActionRefused("Destination item is not a bag/container and can't hold anything.")
+    # remove the thing from where it is now
+    if thing_container_type == "location":
+        if thing_type == "living":
+            thing_container.leave(thing, force_and_silent=True)
+        elif thing_type == "item":
+            thing_container.remove_item(thing)
+    elif thing_container_type == "living":
+        thing_container.inventory.remove(thing)
+    # move the thing to its destination
+    if destination_type == "location":
+        if thing_type == "living":
+            destination.enter(thing, force_and_silent=True)
+        elif thing_type == "item":
+            destination.add_item(thing)
+    elif destination_type == "living":
+        destination.inventory.add(thing)
+    elif destination_type == "item":
+        destination.contents.add(thing)
+    # @todo: when moving livings, it screws up their location.
+    # This needs a complex fix (hierarchic container lookup bubbling until we reach a Location object?)
