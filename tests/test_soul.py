@@ -81,6 +81,29 @@ class TestSoul(unittest.TestCase):
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "stomp")
         self.assertEqual("Zyzzy stomps its foot.", room_msg)
 
+    def testIgnorewords(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("fritz", "m")
+        with self.assertRaises(mudlib.soul.ParseError):
+            soul.parse(player, "in")
+        with self.assertRaises(mudlib.soul.ParseError):
+            soul.parse(player, "and")
+        with self.assertRaises(mudlib.soul.ParseError):
+            soul.parse(player, "fail")
+        with self.assertRaises(mudlib.soul.ParseError):
+            soul.parse(player, "fail in")
+        with self.assertRaises(mudlib.soul.UnknownVerbException) as x:
+            soul.parse(player, "in fail")
+        self.assertEquals("fail", x.exception.verb)
+        qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "in sit")
+        self.assertIsNone(qualifier)
+        self.assertIsNone(adverb)
+        self.assertEquals("sit", verb)
+        qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "fail in sit")
+        self.assertEquals("fail", qualifier)
+        self.assertIsNone(adverb)
+        self.assertEquals("sit", verb)
+
     def testMultiTarget(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")

@@ -621,8 +621,11 @@ class Soul(object):
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
             qualifier = words.pop(0)
-        if words[0] in _skip_words:
+        if words and words[0] in _skip_words:
             words.pop(0)
+
+        if not words:
+            raise ParseError("What?")
         if words[0] in VERBS:
             verb = words.pop(0)
         else:
