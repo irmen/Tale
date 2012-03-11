@@ -91,15 +91,6 @@ Present: julie, rat"""
         self.assertEquals(None, self.player.search_item("key", include_location=False))
         self.assertEquals(self.key, self.player.search_item("KEY"), "should work case-insensitive")
 
-    def test_search_name(self):
-        self.assertEquals(None, self.player.search_name("<notexisting>"))
-        self.assertEquals(self.key, self.player.search_name("key"), "should also find items in inventory")
-        self.assertEquals(self.pencil, self.player.search_name("pencil"), "should also find items in the room")
-        self.assertEquals(self.julie, self.player.search_name("julie"), "should also find livings")
-        self.assertEquals(self.pencil, self.player.search_name("PENCIL"), "must work case-insensitive")
-        self.assertEquals(self.julie, self.player.search_name("JULIE"), "must work case-insensitive")
-        self.assertEquals(self.player, self.player.search_name("player"), "must also find the player himself")
-
     def test_tell(self):
         class MsgTraceNPC(NPC):
             def __init__(self, name, gender, race):

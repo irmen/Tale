@@ -86,9 +86,7 @@ def do_clone(player, verb, path, **ctx):
             raise ActionRefused("There's no module named " + path)
     else:
         # find an object or living from the inventory or the room
-        obj = player.search_item(path)
-        if not obj:
-            obj = player.location.search_living(path)
+        obj = player.search_item(path) or player.location.search_living(path)
     # clone it
     if not obj:
         raise ActionRefused("Object not found")

@@ -311,18 +311,6 @@ class Living(MudObject):
                       [item for item in self.location.items if item.title.lower() == name]
         return matches[0] if matches else None
 
-    def search_name(self, name):
-        """
-        Searches an object or living within the 'visible' world around the living including his inventory.
-        If there's more than one hit, just return the first.
-        """
-        if not name:
-            raise ValueError("name must be given")
-        name = name.lower()
-        if self.name == name or self.title.lower() == name:
-            return self
-        return self.search_item(name) or self.location.search_living(name) or None
-
     def accept(self, action, item, actor):
         """
         Validates that this living accepts something from someone, with a certain action (such as 'give').
