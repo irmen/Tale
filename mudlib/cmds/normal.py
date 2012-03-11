@@ -57,16 +57,29 @@ def do_drop(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Drop what?")
-    item = player.search_item(arg, include_location=False)
-    if not item:
-        print("You don't have %s." % languagetools.a(arg))
+
+    def drop_stuff(items):
+        items = list(items)
+        for item in items:
+            player.inventory.remove(item)
+            player.location.add_item(item)
+        items_str = languagetools.join(languagetools.a(item.title) for item in items)
+        print("You drop %s." % items_str)
+        player.location.tell("{player} drops {items}."
+                             .format(player=languagetools.capital(player.title), items=items_str),
+                             exclude_living=player)
+    if arg=="all":
+        if not player.inventory:
+            print("You're not carrying anything.")
+        else:
+            # @todo: ask confirmation to drop everything
+            drop_stuff(player.inventory)
     else:
-        player.inventory.remove(item)
-        player.location.add_item(item)
-        print("You drop %s." % languagetools.a(item.title))
-        player.location.tell("{player} drops {item}."
-                                  .format(player=languagetools.capital(player.title), item=languagetools.a(item.title)),
-                                  exclude_living=player)
+        item = player.search_item(arg, include_location=False)
+        if not item:
+            print("You don't have %s." % languagetools.a(arg))
+        else:
+            drop_stuff([item])
 
 
 @cmd("take")
@@ -74,16 +87,29 @@ def do_take(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Take what?")
-    item = player.search_item(arg, include_inventory=False)
-    if not item:
-        print("There's no %s here." % arg)
+
+    def take_stuff(items):
+        items = list(items)
+        for item in items:
+            player.location.remove_item(item)
+            player.inventory.add(item)
+        items_str = languagetools.join(languagetools.a(item.title) for item in items)
+        print("You take %s." % items_str)
+        player.location.tell("{player} takes {items}."
+                             .format(player=languagetools.capital(player.title), items=items_str),
+                             exclude_living=player)
+
+    if arg=="all":
+        if not player.location.items:
+            print("There's nothing here to take.")
+        else:
+            take_stuff(player.location.items)
     else:
-        player.location.remove_item(item)
-        player.inventory.add(item)
-        print("You take %s." % languagetools.a(item.title))
-        player.location.tell("{player} takes {item}."
-                                  .format(player=languagetools.capital(player.title), item=languagetools.a(item.title)),
-                                  exclude_living=player)
+        item = player.search_item(arg, include_inventory=False)
+        if not item:
+            print("There's no %s here." % arg)
+        else:
+            take_stuff([item])
 
 
 @cmd("give")
@@ -91,30 +117,51 @@ def do_give(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Give what to whom?")
+
+    def give_stuff(items, target_name):
+        target = player.location.search_living(target_name)
+        if not target:
+            raise ActionRefused("%s isn't here." % target_name)
+        items = list(items)
+        refused = []
+        for item in items:
+            try:
+                target.accept("give", item, player)
+                player.inventory.remove(item)
+                target.inventory.add(item)
+            except ActionRefused, x:
+                refused.append((item, str(x)))
+        for item, message in refused:
+            print(message)
+            items.remove(item)
+        if items:
+            items_str = languagetools.join(languagetools.a(item.title) for item in items)
+            player_str = languagetools.capital(player.title)
+            room_msg = "%s gave %s to %s." % (player_str, items_str, target.title)
+            target_msg = "%s gave you %s." % (player_str, items_str)
+            player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
+            print("You gave %s %s." % (target.title, items_str))
+        else:
+            print("You didn't give %s anything." % target.title)
+
     # support "give living [the] thing" and "give [the] thing [to] living"
     args = [word for word in arg.split() if word not in ("the", "to")]
     if len(args)!=2:
         raise ParseError("Give what to whom?")
     item_name, target_name = args
-    item = player.search_item(item_name, include_location=False)
-    if not item:
-        target_name, item_name = args
+    if item_name=="all":
+        give_stuff(player.inventory, target_name)
+    elif target_name=="all":
+        give_stuff(player.inventory, item_name)
+    else:
         item = player.search_item(item_name, include_location=False)
         if not item:
-            print("You don't have that.")
-            return
-    living = player.location.search_living(target_name)
-    if not living:
-        raise ActionRefused("%s isn't here." % target_name)
-    living.accept("give", item, player)
-    player.inventory.remove(item)
-    living.inventory.add(item)
-    item_str = languagetools.a(item.title)
-    player_str = languagetools.capital(player.title)
-    room_msg = "%s gave %s to %s." % (player_str, item_str, living.title)
-    target_msg = "%s gave you %s." % (player_str, item_str)
-    player.location.tell(room_msg, exclude_living=player, specific_targets=[living], specific_target_msg=target_msg)
-    player.tell("You gave %s %s." % (living.title, item_str))
+            target_name, item_name = args
+            item = player.search_item(item_name, include_location=False)
+            if not item:
+                print("You don't have that.")
+                return
+        give_stuff([item], target_name)
 
 
 @cmd("help")

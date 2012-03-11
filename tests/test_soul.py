@@ -58,14 +58,14 @@ class TestSoul(unittest.TestCase):
         harry = mudlib.baseobjects.Living("harry", "m")
         self.assertEqual("your own", mudlib.soul.poss_replacement(player, player, player))  # your own foot
         self.assertEqual("his own",  mudlib.soul.poss_replacement(player, player, julie))   # his own foot
-        self.assertEqual("harrys",   mudlib.soul.poss_replacement(player, harry, player))   # harrys foot
-        self.assertEqual("harrys",   mudlib.soul.poss_replacement(player, harry, julie))    # harrys foot
-        self.assertEqual("harrys",   mudlib.soul.poss_replacement(player, harry, None))     # harrys foot
+        self.assertEqual("harry's",   mudlib.soul.poss_replacement(player, harry, player))   # harrys foot
+        self.assertEqual("harry's",   mudlib.soul.poss_replacement(player, harry, julie))    # harrys foot
+        self.assertEqual("harry's",   mudlib.soul.poss_replacement(player, harry, None))     # harrys foot
         self.assertEqual("your",     mudlib.soul.poss_replacement(julie, player, player))   # your foot
-        self.assertEqual("Fritz'",   mudlib.soul.poss_replacement(julie, player, harry))    # fritz' foot
-        self.assertEqual("harrys",   mudlib.soul.poss_replacement(julie, harry, player))    # harrys foot
+        self.assertEqual("Fritz's",   mudlib.soul.poss_replacement(julie, player, harry))    # fritz' foot
+        self.assertEqual("harry's",   mudlib.soul.poss_replacement(julie, harry, player))    # harrys foot
         self.assertEqual("your",     mudlib.soul.poss_replacement(julie, harry, harry))     # your foot
-        self.assertEqual("harrys",   mudlib.soul.poss_replacement(julie, harry, None))      # harrys foot
+        self.assertEqual("harry's",   mudlib.soul.poss_replacement(julie, harry, None))      # harrys foot
 
     def testGender(self):
         soul = mudlib.soul.Soul()
@@ -405,16 +405,16 @@ class TestSoul(unittest.TestCase):
         # ayt
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "ayt", targets)
         self.assertEqual(set(targets), who)
-        self.assertEqual("You wave your hand in front of max' face, is he there?", player_msg)
-        self.assertEqual("Julie waves her hand in front of max' face, is he there?", room_msg)
+        self.assertEqual("You wave your hand in front of max's face, is he there?", player_msg)
+        self.assertEqual("Julie waves her hand in front of max's face, is he there?", room_msg)
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
         # ayt
         targets2 = [mudlib.npc.NPC("max", "m"), player]
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, "ayt", targets2)
         self.assertTrue(player_msg.startswith("You wave your hand in front of "))
-        self.assertTrue("max'" in player_msg and "your own" in player_msg)
+        self.assertTrue("max's" in player_msg and "your own" in player_msg)
         self.assertTrue(room_msg.startswith("Julie waves her hand in front of "))
-        self.assertTrue("max'" in room_msg and "her own" in room_msg)
+        self.assertTrue("max's" in room_msg and "her own" in room_msg)
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
 
     def testFULL(self):

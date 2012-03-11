@@ -19,6 +19,7 @@ def join(words, conj="and"):
     """join a list of words to 'a,b,c,d and e'"""
     if not words:
         return ""
+    words = list(words)
     if len(words) == 1:
         return words[0]
     if len(words) == 2:
@@ -90,11 +91,11 @@ def possessive_letter(name):
     if not name:
         return ""
     if name[-1] in ('s', 'z', 'x'):
-        return "'"        # tess' foot
+        return "'s"        # tess's foot
     elif name.endswith(" own"):
         return ""         # your own...
     else:
-        return "s"        # marks foot
+        return "'s"        # mark's foot
 
 
 def possessive(name):

@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function
-import types
+import inspect
 import copy
 import functools
 import sys
@@ -48,7 +48,7 @@ def do_ls(player, verb, path, **ctx):
         raise ActionRefused("There's no module named " + path)
     print("<%s>" % path)
     m_items = vars(module).items()
-    modules = [x[0] for x in m_items if type(x[1]) is types.ModuleType]
+    modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
     classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], baseobjects.MudObject)]
     items = [x[0] for x in m_items if isinstance(x[1], baseobjects.Item)]
     livings = [x[0] for x in m_items if isinstance(x[1], baseobjects.Living)]

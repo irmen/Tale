@@ -57,12 +57,12 @@ class TestLanguagetools(unittest.TestCase):
 
     def testPossessive(self):
         self.assertEqual("", mudlib.languagetools.possessive_letter(""))
-        self.assertEqual("s", mudlib.languagetools.possessive_letter("julie"))
-        self.assertEqual("'", mudlib.languagetools.possessive_letter("tess"))
+        self.assertEqual("'s", mudlib.languagetools.possessive_letter("julie"))
+        self.assertEqual("'s", mudlib.languagetools.possessive_letter("tess"))
         self.assertEqual("", mudlib.languagetools.possessive_letter("your own"))
         self.assertEqual("", mudlib.languagetools.possessive_letter(""))
-        self.assertEqual("julies", mudlib.languagetools.possessive("julie"))
-        self.assertEqual("tess'", mudlib.languagetools.possessive("tess"))
+        self.assertEqual("julie's", mudlib.languagetools.possessive("julie"))
+        self.assertEqual("tess's", mudlib.languagetools.possessive("tess"))
         self.assertEqual("your own", mudlib.languagetools.possessive("your own"))
 
     def testCapital(self):

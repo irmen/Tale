@@ -127,7 +127,7 @@ VERBS = {
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
 "headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
 "shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
-"stink":     ( DEUX, None, "smell \nYOUR armpits. Eeeww!", "smells \nYOUR armpits. Eeeww!" ),
+"stink":     ( PERS, None, "smell$ \nYOUR armpits. Eeeww!", "smell$ \nPOSS armpits. Eeeww!" ),
 "grimace":   ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
 "stomp":     ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
 "snigger":   ( DEFA, ( "jeeringly", ), "", "at" ),
@@ -145,6 +145,7 @@ VERBS = {
 "grease":    ( SIMP, ("like in a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like in a shiatsu",), "oil$ \nWHO \nHOW"),
 "search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),
+"sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 
 # Message-based verbs
 "curse":    ( PERS, None, "curse$ \nWHAT \nHOW", "curse$ \nWHO \nHOW" ),
@@ -194,6 +195,9 @@ VERBS = {
 "bonk":     ( PHYS, ( None, None, "on the head" ), "" ),
 "bop":      ( PHYS, ( None, None, "on the head" ), "" ),
 "stroke":   ( PHYS, ( None, None, "on the cheek" ), "" ),
+"shove":    ( PHYS, ( "briskly", None, "to the side" ), "" ),
+"push":     ( PHYS, ( None, None, "to the side" ), "" ),
+"pull":     ( SIMP, None, "pull$ at \nWHO" ),
 "rub":      ( PHYS, ( "gently", None, "on the back" ), "" ),
 "hold":     ( PHYS, ( None, None, "in \nYOUR arms" ), "" ),
 "embrace":  ( PHYS, ( None, None, "in \nYOUR arms" ), "" ),
@@ -283,7 +287,6 @@ VERBS = {
 "bounce":   ( SHRT, ( "up and down", ), "" ),
 "sulk":     ( SHRT, ( "in the corner", ), "" ),
 "strut":    ( SHRT, ( "proudly", ), "" ),
-"sniff":    ( SHRT, None, "" ),
 "snivel":   ( SHRT, ( "pathetically", ), "" ),
 "snore":    ( SHRT, None, "" ),
 "clue":     ( SIMP, None, "need$ a clue \nHOW" ),
@@ -328,8 +331,8 @@ assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier
 AGGRESSIVE_VERBS = {
     "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "chase", "curse", "feel", "finger", "fondle", "french",
     "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "kick", "kiss", "knee",
-    "knock", "lick", "lift", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke",
-    "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "slap", "smooch", "sneer", "snigger",
+    "knock", "lick", "lift", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
+    "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "shove", "slap", "smooch", "sneer", "snigger",
     "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",
     "swing", "tackle", "tap", "taunt", "tease", "tickle", "tongue", "touch", "wiggle", "wobble", "wrinkle"
 }

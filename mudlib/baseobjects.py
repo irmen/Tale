@@ -321,6 +321,7 @@ class Living(MudObject):
         """
         Validates that this living accepts something from someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.
+        Make sure the message contains the name or title of the item.
         """
         pass
 
