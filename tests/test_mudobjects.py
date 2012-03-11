@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
-from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo
+from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Bag, Weapon
 from mudlib.errors import SecurityViolation
 from mudlib.npc import NPC
 from mudlib.player import Player
@@ -31,7 +31,7 @@ class TestLocations(unittest.TestCase):
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label")
         self.magazine =Item ("magazine", "university magazine")
-        self.hall.items.update({self.table, self.key, self.magazine})
+        self.hall.inventory.update({self.table, self.key, self.magazine})
         self.rat = NPC("rat", "n", race="rodent")
         self.julie = NPC("julie", "f", "attractive Julie",
                      """
@@ -43,6 +43,14 @@ class TestLocations(unittest.TestCase):
         self.hall.enter(self.rat)
         self.hall.enter(self.julie)
         self.hall.enter(self.player)
+
+    def test_contains(self):
+        self.assertTrue(self.julie in self.hall)
+        self.assertTrue(self.magazine in self.hall)
+        self.assertFalse(self.pencil in self.hall)
+        self.assertFalse(self.magazine in self.attic)
+        self.assertFalse(self.julie in self.attic)
+
     def test_look(self):
         expected = """[Main hall]
 A very large hall.
@@ -172,6 +180,14 @@ Present: julie, rat"""
         self.assertEqual([], wiretap_attic.msgs)
 
 
+class TestLiving(unittest.TestCase):
+    def test_contains(self):
+        orc = Living("orc", "m")
+        axe = Weapon("axe")
+        orc.inventory.add(axe)
+        self.assertTrue(axe in orc)
+
+
 class TestNPC(unittest.TestCase):
     def test_init(self):
         rat = NPC("rat", "n", race="rodent")
@@ -289,7 +305,7 @@ class TestDestroy(unittest.TestCase):
         player.create_wiretap(loc)
         loc.enter(player)
         self.assertTrue(len(loc.exits)>0)
-        self.assertTrue(len(loc.items)>0)
+        self.assertTrue(len(loc.inventory)>0)
         self.assertTrue(len(loc.livings)>0)
         self.assertTrue(len(loc.wiretaps)>0)
         self.assertEqual(loc, player.location)
@@ -297,7 +313,7 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(player.installed_wiretaps)>0)
         loc.destroy(ctx)
         self.assertTrue(len(loc.exits)==0)
-        self.assertTrue(len(loc.items)==0)
+        self.assertTrue(len(loc.inventory)==0)
         self.assertTrue(len(loc.livings)==0)
         self.assertTrue(len(loc.wiretaps)==0)
         self.assertTrue(len(player.installed_wiretaps)>0, "wiretap object must remain on player")
@@ -323,6 +339,15 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(player.inventory)==0)
         self.assertFalse(player in loc.livings)
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
+
+
+class TestBag(unittest.TestCase):
+    def test_bag_contains(self):
+        bag = Bag("bag")
+        key = Item("key")
+        self.assertTrue(len(bag.inventory)==0)
+        bag.inventory.add(key)
+        self.assertTrue(key in bag)
 
 
 if __name__ == '__main__':

@@ -34,6 +34,10 @@ MudObject
 Exit
 Effect
 
+
+Every object that can hold other objects does so in its "inventory" attribute (a set).
+Except Location: it also has a "livings" attribute that holds the livings currently in the room.
+(they're *not* stored in the inventory attribute)
 """
 
 
@@ -88,20 +92,24 @@ class Location(MudObject):
     """
     A location in the mud world. Livings and Items are in it.
     Has connections ('exits') to other Locations.
+    You can test for containment with 'in': item in loc, npc in loc
     """
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
         self.livings = set()  # set of livings in this location
-        self.items = set()    # set of all items in the room
+        self.inventory = set()  # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
+
+    def __contains__(self, obj):
+        return obj in self.livings or obj in self.inventory
 
     def destroy(self, ctx):
         for living in self.livings:
             if living.location is self:
                 living.location = _Limbo
         self.livings.clear()
-        self.items.clear()
+        self.inventory.clear()
         self.exits.clear()
         self.wiretaps.clear()
 
@@ -130,12 +138,12 @@ class Location(MudObject):
         if self.description:
             if not short:
                 r.append(self.description)
-        if self.items:
+        if self.inventory:
             if short:
-                item_names = sorted(item.name for item in self.items)
+                item_names = sorted(item.name for item in self.inventory)
                 r.append("You see: " + ", ".join(item_names))
             else:
-                titles = sorted(item.title for item in self.items)
+                titles = sorted(item.title for item in self.inventory)
                 titles = [lang.a(title) for title in titles]
                 r.append("You see " + lang.join(titles) + ".")
         if self.exits:
@@ -192,10 +200,10 @@ class Location(MudObject):
 
     def add_item(self, item):
         assert isinstance(item, Item)
-        self.items.add(item)
+        self.inventory.add(item)
 
     def remove_item(self, item):
-        self.items.remove(item)
+        self.inventory.remove(item)
 
 
 _Limbo = Location("Limbo",
@@ -236,7 +244,7 @@ class Living(MudObject):
     Root class of the living entities in the mud world.
     Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
     They are always inside a Location (Limbo when not specified yet).
-    They also have an inventory object.
+    They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
@@ -253,6 +261,9 @@ class Living(MudObject):
         self.inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
         self.cpr()
+
+    def __contains__(self, item):
+        return item in self.inventory
 
     def destroy(self, ctx):
         if self.location and self in self.location.livings:
@@ -307,8 +318,8 @@ class Living(MudObject):
             matches = [item for item in self.inventory if item.name == name] or \
                       [item for item in self.inventory if item.title.lower() == name]
         if not matches and include_location:
-            matches = [item for item in self.location.items if item.name == name] or \
-                      [item for item in self.location.items if item.title.lower() == name]
+            matches = [item for item in self.location.inventory if item.name == name] or \
+                      [item for item in self.location.inventory if item.title.lower() == name]
         return matches[0] if matches else None
 
     def accept(self, action, item, actor):
@@ -333,10 +344,13 @@ class Living(MudObject):
 class Bag(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
+    You can test for containment with 'in': item in bag
     """
     def __init__(self, name, title=None, description=None):
         super(Bag, self).__init__(name, title, description)
-        self.contents = set()
+        self.inventory = set()
+    def __contains__(self, item):
+        return item in self.inventory
 
 
 class Effect(object):

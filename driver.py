@@ -167,11 +167,6 @@ class Driver(object):
             for name in target_module.split("."):
                 module = getattr(module, name)
             target = getattr(module, target_object)
-            # note: could be more than one occurrence for 1 exit (an alias)
-            #exits = [ d for d,e in self.player.location.exits.items() if e is exit ]
-            #exit = mudlib.baseobjects.Exit(target, exit.description)
-            #for d in exits:
-            #    self.player.location.exits[d] = exit
             exit.bind(target)
         exit.allow(self.player)
         self.player.move(exit.target)

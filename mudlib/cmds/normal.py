@@ -7,7 +7,6 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 from __future__ import print_function
 from .. import languagetools
 from .. import soul
-from .. import baseobjects
 from .. import races
 from ..errors import ParseError, ActionRefused
 
@@ -100,10 +99,10 @@ def do_take(player, verb, arg, **ctx):
                              exclude_living=player)
 
     if arg=="all":
-        if not player.location.items:
+        if not player.location.inventory:
             print("There's nothing here to take.")
         else:
-            take_stuff(player.location.items)
+            take_stuff(player.location.inventory)
     else:
         item = player.search_item(arg, include_inventory=False)
         if not item:
@@ -229,34 +228,38 @@ def do_examine(player, verb, arg, **ctx):
     if not arg:
         raise ParseError("Examine what?")
     player = player
-    obj = player.search_name(arg)
+    obj = player.location.search_living(arg)
     if obj:
         if "wizard" in player.privileges:
             print(repr(obj))
-        if isinstance(obj, baseobjects.Living):
-            print("This is %s." % obj.title)
-            if obj.description:
-                print(obj.description)
-            race = races.races[obj.race]
-            if obj.race == "human":
-                # don't print as much info when dealing with mere humans
-                msg = languagetools.capital("%s speaks %s." % (obj.subjective, race["language"]))
-                print(msg)
-            else:
-                print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                    subj=languagetools.capital(obj.subjective),
-                    size=races.sizes[race["size"]],
-                    btype=races.bodytypes[race["bodytype"]],
-                    race=obj.race,
-                    lang=race["language"]
-                ))
-        else:
-            if obj in player.inventory:
-                print("You're carrying %s." % languagetools.a(obj.title))
-            else:
-                print("You see %s." % languagetools.a(obj.title))
+        print("This is %s." % obj.title)
+        if obj.description:
             print(obj.description)
-    elif arg in player.location.exits:
+        race = races.races[obj.race]
+        if obj.race == "human":
+            # don't print as much info when dealing with mere humans
+            msg = languagetools.capital("%s speaks %s." % (obj.subjective, race["language"]))
+            print(msg)
+        else:
+            print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
+                subj=languagetools.capital(obj.subjective),
+                size=races.sizes[race["size"]],
+                btype=races.bodytypes[race["bodytype"]],
+                race=obj.race,
+                lang=race["language"]
+            ))
+        return
+    obj = player.search_item(arg)
+    if obj:
+        if "wizard" in player.privileges:
+            print(repr(obj))
+        if obj in player:
+            print("You're carrying %s." % languagetools.a(obj.title))
+        else:
+            print("You see %s." % languagetools.a(obj.title))
+        print(obj.description)
+        return
+    if arg in player.location.exits:
         print("It seems you can go there:")
         print(player.location.exits[arg].description)
     elif arg in abbreviations and abbreviations[arg] in player.location.exits:

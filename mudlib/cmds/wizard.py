@@ -119,7 +119,7 @@ def do_destroy(player, verb, arg, **ctx):
         raise ParseError("Destroy what?")
     victim = player.search_item(arg)
     if victim:
-        if victim in player.inventory:
+        if victim in player:
             player.inventory.remove(victim)
         else:
             player.location.remove_item(victim)
