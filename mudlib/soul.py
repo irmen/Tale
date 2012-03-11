@@ -6,6 +6,8 @@ Written by Irmen de Jong (irmen@razorvine.net)
 Based on ancient soul.c v1.2 written in LPC by profezzorn@nannymud (Fredrik Hübinette)
 Only the verb table is more or less intact (with some additions and fixes).
 The verb parsing and message generation have been rewritten.
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import re

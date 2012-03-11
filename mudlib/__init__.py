@@ -1,4 +1,9 @@
-# the actual mud world code lives in this package
+"""
+The actual mudlib 'world' code
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 import threading
 
 MUD_NAME = "Snakepit"

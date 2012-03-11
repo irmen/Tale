@@ -1,3 +1,9 @@
+"""
+Player code
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 from . import baseobjects, soul
 from . import languagetools as lang
 from .errors import SecurityViolation

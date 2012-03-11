@@ -1,3 +1,9 @@
+"""
+Basic items.
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 from ..baseobjects import Item
 
 trashcan = Item("trashcan", description="An aluminium trash can. The lid is closed, probably for the better.")

@@ -1,4 +1,8 @@
-# package containing the rooms of the mud
+"""
+Package containing the rooms of the mud.
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 
 from . import town
 from . import wizardtower

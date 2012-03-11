@@ -1,5 +1,8 @@
-# The Wizard Tower,
-# which is the place where mud Wizards start/log in
+"""
+The Wizard Tower, which is the place where Wizards start/log in
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 
 from ..baseobjects import Location, Exit, Item
 from ..npc import Monster

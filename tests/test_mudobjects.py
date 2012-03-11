@@ -1,3 +1,9 @@
+"""
+Unittests for Mud base objects
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 import unittest
 from mudlib.baseobjects import Location, Exit, Item
 from mudlib.npc import NPC

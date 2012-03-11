@@ -1,4 +1,8 @@
-# exceptions
+"""
+Exception classes
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 
 
 class SecurityViolation(Exception):

@@ -1,5 +1,8 @@
-# The central town,
-# which is the place where mud players start/log in
+"""
+The central town, which is the place where mud players start/log in
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 
 from ..baseobjects import Location, Exit, Item
 from ..npc import NPC, Monster

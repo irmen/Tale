@@ -1,8 +1,13 @@
+"""
+Mudlib base objects.
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 import weakref
 import textwrap
 from . import languagetools as lang
 from .races import races
-from .errors import ActionRefused
 
 """
 object hierarchy:

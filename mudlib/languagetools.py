@@ -1,3 +1,9 @@
+"""
+Language processing related operations.
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 import os
 import re
 import bisect

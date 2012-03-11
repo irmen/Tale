@@ -1,4 +1,8 @@
-# package for all mud commands (non-soul)
+"""
+Package for all mud commands (non-soul)
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 
 from . import wizard
 from . import normal

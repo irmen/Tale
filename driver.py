@@ -1,3 +1,9 @@
+"""
+Mud driver (server).
+
+Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
+
 from __future__ import print_function
 import sys
 import mudlib.rooms
@@ -8,6 +14,7 @@ import mudlib.util
 import mudlib.baseobjects
 import mudlib.errors
 import mudlib.cmds
+
 
 def create_player_from_info():
     while True:
@@ -29,11 +36,13 @@ def create_player_from_info():
         player.set_title("arch wizard %s", includes_name_param=True)
     return player
 
+
 def create_default_wizard():
     player = mudlib.player.Player("irmen", "m", "human", "This wizard looks very important.")
     player.privileges.add("wizard")
     player.set_title("arch wizard %s", includes_name_param=True)
     return player
+
 
 def create_default_player():
     player = mudlib.player.Player("irmen", "m", "human", "A regular person.")
