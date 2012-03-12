@@ -18,7 +18,7 @@ def cmd(command, *aliases):
     """decorator to add the command to the global dictionary of commands"""
     def cmd2(func):
         if command in all_commands:
-            raise ValueError("command defined more than once: "+command)
+            raise ValueError("command defined more than once: " + command)
         all_commands[command] = func
         for alias in aliases:
             all_commands[alias] = func
@@ -79,7 +79,7 @@ def do_drop(player, verb, arg, **ctx):
         player.location.tell("{player} drops {items}."
                              .format(player=languagetools.capital(player.title), items=items_str),
                              exclude_living=player)
-    if arg=="all":
+    if arg == "all":
         if not player.inventory:
             raise ActionRefused("You're not carrying anything.")
         else:
@@ -97,13 +97,13 @@ def do_drop(player, verb, arg, **ctx):
 def do_put(player, verb, args, **ctx):
     print = player.tell
     args = args.split()
-    if len(args)<2:
+    if len(args) < 2:
         raise ParseError("Put what where?")
-    if args[1]=="in":
+    if args[1] == "in":
         where_name = args[2]
     else:
         where_name = args[1]
-    if args[0]=="all":
+    if args[0] == "all":
         if not player.inventory:
             raise ActionRefused("You're not carrying anything.")
         # @todo: ask confirmation to put everything
@@ -140,7 +140,7 @@ def do_put(player, verb, args, **ctx):
                 print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
             if room_items:
                 items_msg = languagetools.join(languagetools.a(item.title) for item in room_items)
-                it_msg = "it" if len(inventory_items)<2 else "them"
+                it_msg = "it" if len(inventory_items) < 2 else "them"
                 player.location.tell("{player} takes {items}, and puts {it} in the {where}.".format(
                     player=languagetools.capital(player.title),
                     items=items_msg, it=it_msg, where=where.name), exclude_living=player)
@@ -151,49 +151,110 @@ def do_put(player, verb, args, **ctx):
     else:
         living = player.location.search_living(where_name)
         if living:
-            raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (living.name,living.objective))
+            raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (living.name, living.objective))
         else:
             raise ActionRefused("There's no %s here." % where_name)
 
 
 @cmd("take")
-def do_take(player, verb, arg, **ctx):
+def do_take(player, verb, args, **ctx):
+    """take thing|all , take thing|all [from] something"""
     print = player.tell
-    if not arg:
+    args = args.split()
+    if len(args) == 1:  # take thing|all
+        what = args[0]
+        where = None
+    elif len(args) in (2, 3):  # take X [from] something
+        what = args[0]
+        where = args[1]
+        if where == "from" and len(args) == 3:
+            where = args[2]
+    else:
         raise ParseError("Take what?")
 
-    def take_stuff(items):
+    def take_stuff(items, container, is_location, where_str=None):
+        if where_str:
+            player_msg = "You take {items} from the %s." % where_str
+            room_msg = "{player} takes {items} from the %s." % where_str
+        else:
+            player_msg = "You take {items}."
+            room_msg = "{player} takes {items}."
         items = list(items)
         for item in items:
-            player.location.leave(item)
+            if is_location:
+                container.leave(item)
+            else:
+                container.inventory.remove(item)
             player.inventory.add(item)
         items_str = languagetools.join(languagetools.a(item.title) for item in items)
-        print("You take %s." % items_str)
-        player.location.tell("{player} takes {items}."
-                             .format(player=languagetools.capital(player.title), items=items_str),
-                             exclude_living=player)
+        print(player_msg.format(items=items_str))
+        player.location.tell(room_msg.format(player=languagetools.capital(player.title), items=items_str), exclude_living=player)
 
-    if arg=="all":
-        if not player.location.items:
-            print("There's nothing here to take.")
-        else:
-            take_stuff(player.location.items)
-    else:
-        item = player.search_item(arg, include_inventory=False)
-        if not item:
-            living = player.location.search_living(arg)
-            if living:
-                living_race = races.races[living.race]
-                player_race = races.races[player.race]
-                if player_race["size"] - living_race["size"] >=2:
-                    living.accept("take", None, player)  # @todo: do an agi/str/spd/luck check to see if we can pick it up
-                    print("Even though {0}'s small enough, you can't carry {1} with you.".format(living.subjective, living.objective))
+    if what == "all":   # take ALL the things!
+        if where:
+            # take all stuff out of some container
+            container = player.search_item(where)
+            if container:
+                if getattr(container, "public_inventory", False):
+                    if container.inventory:
+                        return take_stuff(container.inventory, container, False, where)
+                    else:
+                        raise ActionRefused("There's nothing in there.")
                 else:
-                    print("You can't carry {0} with you, {1}'s too large.".format(living.objective, living.subjective))
-            else:
-                print("There's no %s here." % arg)
+                    raise ActionRefused("You can't take things from there.")
+            # no container, check if a living was targeted
+            living = player.location.search_living(where)
+            if living:
+                if living is player:
+                    raise ActionRefused("There's no reason to take things from yourself.")
+                player.location.tell("%s tries to steal things from %s." % (languagetools.capital(player.title), living.title), exclude_living=player)
+                if living.aggressive:
+                    living.start_attack(player)  # stealing stuff is hostile!
+                raise ActionRefused("You can't just steal stuff from %s!" % living.title)
+            raise ActionRefused("There's no %s here." % where)
+        if not player.location.items:
+            raise ActionRefused("There's nothing here to take.")
         else:
-            take_stuff([item])
+            # take all stuff out of the room
+            return take_stuff(player.location.items, player.location, True)
+    else:  # just a single item
+        if where:
+            # take specific item out of some container
+            container = player.search_item(where)
+            if container:
+                if getattr(container, "public_inventory", False):
+                    for item in container.inventory:
+                        if item.name == what:
+                            return take_stuff([item], container, False, where)
+                    raise ActionRefused("There's no %s in there." % what)
+                else:
+                    raise ActionRefused("You can't take things from there.")
+            # no container, check if a living was targeted
+            living = player.location.search_living(where)
+            if living:
+                if living is player:
+                    raise ActionRefused("There's no reason to take things from yourself.")
+                player.location.tell("%s tries to steal something from %s." % (languagetools.capital(player.title), living.title), exclude_living=player)
+                if living.aggressive:
+                    living.start_attack(player)  # stealing stuff is hostile!
+                raise ActionRefused("You can't just steal stuff from %s!" % living.title)
+            raise ActionRefused("There's no %s here." % where)
+        # no specific source provided, search in room
+        item = player.search_item(what, include_inventory=False)
+        if item:
+            return take_stuff([item], player.location, True)
+        # no item, check if attempt to take living
+        living = player.location.search_living(what)
+        if living:
+            living_race = races.races[living.race]
+            player_race = races.races[player.race]
+            if player_race["size"] - living_race["size"] >= 2:
+                living.accept("take", None, player)  # @todo: do an agi/str/spd/luck check to see if we can pick it up
+                print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+            else:
+                print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
+        else:
+            print("There's no %s here." % what)
 
 
 @cmd("give")
@@ -230,12 +291,12 @@ def do_give(player, verb, arg, **ctx):
 
     # support "give living [the] thing" and "give [the] thing [to] living"
     args = [word for word in arg.split() if word not in ("the", "to")]
-    if len(args)!=2:
+    if len(args) != 2:
         raise ParseError("Give what to whom?")
     item_name, target_name = args
-    if item_name=="all":
+    if item_name == "all":
         give_stuff(player.inventory, target_name)
-    elif target_name=="all":
+    elif target_name == "all":
         give_stuff(player.inventory, item_name)
     else:
         item = player.search_item(item_name, include_location=False)
@@ -336,9 +397,7 @@ def do_examine(player, verb, arg, **ctx):
             print(obj.description)
         if getattr(obj, "public_inventory", False):
             if obj.inventory:
-                print("It contains:")
-                for item in obj.inventory:
-                    print("  " + item.title)
+                print("It contains:", languagetools.join(item.title for item in obj.inventory))
             else:
                 print("It's empty.")
         return
@@ -384,7 +443,7 @@ def do_tell(player, verb, args, **ctx):
         # ask the driver if there's a player with that name (globally)
         living = ctx["driver"].search_player(name)
         if not living:
-            if name=="all":
+            if name == "all":
                 raise ActionRefused("You can't tell something to everyone, only to individuals.")
             raise ActionRefused("%s isn't here." % name)
     if living is player:

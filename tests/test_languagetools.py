@@ -38,8 +38,10 @@ class TestLanguagetools(unittest.TestCase):
 
     def testJoin(self):
         self.assertEqual("", mudlib.languagetools.join([]))
+        self.assertEqual("", mudlib.languagetools.join(x for x in []))
         self.assertEqual("a", mudlib.languagetools.join(["a"]))
         self.assertEqual("a and b", mudlib.languagetools.join(["a", "b"]))
+        self.assertEqual("a and b", mudlib.languagetools.join(x for x in ["a", "b"]))
         self.assertEqual("a, b, and c", mudlib.languagetools.join(["a", "b", "c"]))
         self.assertEqual("a, b, or c", mudlib.languagetools.join(["a", "b", "c"], conj="or"))
         self.assertEqual("c, b, or a", mudlib.languagetools.join(["c", "b", "a"], conj="or"))

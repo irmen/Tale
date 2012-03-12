@@ -25,7 +25,7 @@ class NPC(baseobjects.Living):
         By default, NPC refused every special action on them, except 'take', which is handled in Living.
         """
         super(NPC, self).accept(action, item, actor)
-        if action=="take":
+        if action == "take":
             return  # handled in base class
         if item:
             raise ActionRefused("You can't %s %s to %s." % (action, item.name, self.title))

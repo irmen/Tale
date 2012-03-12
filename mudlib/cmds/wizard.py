@@ -27,7 +27,7 @@ def wizcmd(command):
                 raise SecurityViolation("Wizard privilege required for verb " + verb)
             return func(player, verb, rest, **ctx)
         if command in all_commands:
-            raise ValueError("Command defined more than once: "+command)
+            raise ValueError("Command defined more than once: " + command)
         all_commands[command] = makewizcmd
         return makewizcmd
     return wizcmd2
@@ -40,8 +40,8 @@ def do_ls(player, verb, path, **ctx):
         raise ActionRefused("Path must start with '.'")
     try:
         module_name = "mudlib"
-        if len(path)>1:
-            module_name+=path
+        if len(path) > 1:
+            module_name += path
         __import__(module_name)
         module = sys.modules[module_name]
     except (ImportError, ValueError):
@@ -77,8 +77,8 @@ def do_clone(player, verb, path, **ctx):
             raise ActionRefused("Invalid object path")
         try:
             module_name = "mudlib"
-            if len(path)>1:
-                module_name+=path
+            if len(path) > 1:
+                module_name += path
             __import__(module_name)
             module = sys.modules[module_name]
             obj = getattr(module, objectname, None)
@@ -108,7 +108,7 @@ def do_clone(player, verb, path, **ctx):
                              exclude_living=player)
         player.location.enter(clone)
     else:
-        raise ActionRefused("Can't clone "+languagetools.a(obj.__class__.__name__))
+        raise ActionRefused("Can't clone " + languagetools.a(obj.__class__.__name__))
 
 
 @wizcmd("destroy")
@@ -188,7 +188,7 @@ def do_teleport(player, verb, args, **ctx):
             raise ActionRefused("Invalid object path")
         try:
             module_name = "mudlib"
-            if len(path)>1:
+            if len(path) > 1:
                 module_name += path
             __import__(module_name)
             module = sys.modules[module_name]
@@ -207,7 +207,7 @@ def do_teleport(player, verb, args, **ctx):
             teleport_someone_to_player(target, player)
     else:
         # target is a player (or @start - the wizard starting location)
-        if args=="@start":
+        if args == "@start":
             teleport_to(player, rooms.STARTLOCATION_WIZARD)
         else:
             target = ctx["driver"].search_player(args)
@@ -253,8 +253,8 @@ def do_reload(player, verb, path, **ctx):
         raise ActionRefused("Path must start with '.'")
     try:
         module_name = "mudlib"
-        if len(path)>1:
-            module_name+=path
+        if len(path) > 1:
+            module_name += path
         __import__(module_name)
         module = sys.modules[module_name]
     except (ImportError, ValueError):
