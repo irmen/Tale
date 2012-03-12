@@ -125,8 +125,8 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("smile", verb)
         self.assertEqual(3, len(who))
         self.assertEqual(set(targets), set(who), "player should not be in targets")
-        self.assertTrue("max" in player_msg and "the hairy cat" in player_msg and "Kate" in player_msg and "yourself" in player_msg)
-        self.assertTrue("max" in room_msg and "the hairy cat" in room_msg and "Kate" in room_msg and "herself" in room_msg)
+        self.assertTrue("max" in player_msg and "the hairy cat" in player_msg and "Kate" in player_msg and not "yourself" in player_msg)
+        self.assertTrue("max" in room_msg and "the hairy cat" in room_msg and "Kate" in room_msg and not "herself" in room_msg)
         self.assertEqual("Julie smiles confusedly at you.", target_msg)
 
     def testVerbTarget(self):
@@ -260,8 +260,9 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
         player.move(mudlib.baseobjects.Location("somewhere"))
-        targets = { mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("the cat", "n") }
+        targets = { mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("dinosaur", "n") }
         player.location.livings = targets
+        player.location.enter(mudlib.baseobjects.Item("newspaper"))
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "fail grin sickly at everyone head")
         self.assertEqual("fail", qualifier)
         self.assertEqual("grin", verb)
@@ -270,7 +271,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("", message)
         self.assertTrue(len(who) == 3)
         self.assertTrue(all(type(x) is str for x in who), "parse must return only strings")
-        self.assertEqual({"max", "kate", "the cat"}, who)
+        self.assertEqual({"max", "kate", "dinosaur"}, who)
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "slap myself")
         self.assertTrue(all(type(x) is str for x in who), "parse must return only strings")
         self.assertEqual(None, qualifier)
@@ -280,6 +281,27 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("", message)
         self.assertTrue(len(who) == 1)
         self.assertEqual({"julie"}, who)
+        qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "slap all")
+        self.assertEqual(None, qualifier)
+        self.assertEqual("slap", verb)
+        self.assertEqual(None, adverb)
+        self.assertEqual(None, bodypart)
+        self.assertEqual("", message)
+        self.assertEqual({"max", "kate", "dinosaur"}, who)
+        qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "slap all and myself")
+        self.assertEqual({"julie", "max", "kate", "dinosaur"}, who)
+        qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "slap newspaper")
+        self.assertEqual({"newspaper"}, who)
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.parse(player, "slap dino")
+        self.assertEquals("Did you mean dinosaur?", str(x.exception))
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.parse(player, "slap news")
+        self.assertEquals("Did you mean newspaper?", str(x.exception))
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.parse(player, "slap undefined")
+        self.assertEquals("The word undefined is unrecognized.", str(x.exception))
+
 
     def testDEFA(self):
         soul = mudlib.soul.Soul()

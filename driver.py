@@ -181,7 +181,7 @@ class Driver(object):
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
             for living in who:
-                if living.aggressive:
+                if getattr(living, "aggressive", False):   # if we get items back, they don't have aggressive attribute
                     living.start_attack(self.player)
 
     def search_player(self, name):

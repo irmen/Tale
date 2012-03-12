@@ -439,10 +439,19 @@ class Soul(object):
         Any action qualifier is added to the verb string if it is present ("fail kick").
         """
         qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
+        who_objects = set()
         if who:
-            # translate the names to actual Livings objects
-            who = [ living for living in player.location.livings if living.name in who ]
-        result = self.process_verb_parsed(player, verb, who, adverb, message, bodypart, qualifier)
+            # translate the names to actual Livings/items objects
+            for name in who:
+                living = [living for living in player.location.livings if living.name == name]
+                if living:
+                    who_objects.update(living)
+                else:
+                    # try an item
+                    item = player.search_item(name, include_containers_in_inventory=False)
+                    if item:
+                        who_objects.add(item)
+        result = self.process_verb_parsed(player, verb, who_objects, adverb, message, bodypart, qualifier)
         if qualifier:
             verb = qualifier + " " + verb
         return verb, result
@@ -508,11 +517,12 @@ class Soul(object):
             # fix up POSS, IS, SUBJ in the player and room messages
             if len(who) == 1:
                 only_living = list(who)[0]
+                subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
                 player_msg = player_msg.replace(" \nIS", " is")
-                player_msg = player_msg.replace(" \nSUBJ", " " + only_living.subjective)
+                player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
                 player_msg = player_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, player))
                 room_msg = room_msg.replace(" \nIS", " is")
-                room_msg = room_msg.replace(" \nSUBJ", " " + only_living.subjective)
+                room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
                 room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, None))
             else:
                 targetnames_player = lang.join([poss_replacement(player, living, player) for living in who])
@@ -635,7 +645,9 @@ class Soul(object):
         collect_message = False
         verbdata = VERBS[verb][2]
         message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
-        all_livings_names = { living.name for living in player.location.livings }
+        all_livings_names = {living.name for living in player.location.livings}
+        all_livings_names.update(item.name for item in player.location.items)
+        all_livings_names.update(item.name for item in player.inventory)
         for word in words:
             if collect_message:
                 message.append(word)
@@ -655,7 +667,8 @@ class Soul(object):
                 if include_flag:
                     if not all_livings_names:
                         raise ParseError("There is nobody here.")
-                    who.update(all_livings_names)    # include everyone visible
+                    # include every *living* thing visible, don't include items, and skip the player itself
+                    who.update({living.name for living in player.location.livings if living is not player})
                 else:
                     who.clear()
             elif word == "everything":
