@@ -306,22 +306,44 @@ class Living(MudObject):
             self.location.leave(self, force_and_silent)
         target_location.enter(self, force_and_silent)
 
-    def search_item(self, name, include_inventory=True, include_location=True):
+    def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
+        This is exactly the same as locate_item except it doesn't return the containing object.
         """
+        item, container = self.locate_item(name, include_inventory, include_location, include_containers_in_inventory)
+        return item  # skip the container
+
+    def locate_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
+        """
+        Searches an item within the 'visible' world around the living including his inventory.
+        If there's more than one hit, just return the first.
+        Returns (None,None) or (item, containing_object)
+        """
+        # @todo: unit test locate_item
         if not name:
             raise ValueError("name must be given")
         name = name.lower()
-        matches = None
+        matches = containing_object = None
         if include_inventory:
-            matches = [item for item in self.inventory if item.name == name] or \
+            containing_object = self
+            matches = [item for item in self.inventory if item.name == name] or\
                       [item for item in self.inventory if item.title.lower() == name]
         if not matches and include_location:
-            matches = [item for item in self.location.items if item.name == name] or \
+            containing_object = self.location
+            matches = [item for item in self.location.items if item.name == name] or\
                       [item for item in self.location.items if item.title.lower() == name]
-        return matches[0] if matches else None
+        if not matches and include_containers_in_inventory:
+            # check if an item in the inventory might contain it
+            for container in self.inventory:
+                if getattr(container, "public_inventory", False):
+                    containing_object = container
+                    matches = [item for item in container.inventory if item.name == name] or\
+                              [item for item in container.inventory if item.title.lower() == name]
+                    if matches:
+                        break
+        return (matches[0], containing_object) if matches else (None, None)
 
     def accept(self, action, item, actor):
         """

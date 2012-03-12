@@ -86,7 +86,7 @@ def do_clone(player, verb, path, **ctx):
             raise ActionRefused("There's no module named " + path)
     else:
         # find an object or living from the inventory or the room
-        obj = player.search_item(path) or player.location.search_living(path)
+        obj = player.search_item(path, include_containers_in_inventory=False) or player.location.search_living(path)
     # clone it
     if not obj:
         raise ActionRefused("Object not found")
@@ -113,11 +113,11 @@ def do_clone(player, verb, path, **ctx):
 
 @wizcmd("destroy")
 def do_destroy(player, verb, arg, **ctx):
-    # @todo: ask for confirmation (async)
     print = player.tell
     if not arg:
         raise ParseError("Destroy what?")
-    victim = player.search_item(arg)
+    # @todo: ask for confirmation (async)
+    victim = player.search_item(arg, include_containers_in_inventory=False)
     if victim:
         if victim in player:
             player.inventory.remove(victim)
@@ -271,7 +271,7 @@ def do_move(player, verb, arg, **ctx):
     target_name = target_name.strip()
     if not thing_name or not target_name:
         raise ParseError("Move what where?")
-    thing = player.search_item(thing_name, include_location=False)
+    thing = player.search_item(thing_name, include_location=False, include_containers_in_inventory=False)
     thing_type = "item"
     thing_container = player
     thing_container_type = "living"
@@ -294,7 +294,7 @@ def do_move(player, verb, arg, **ctx):
         target = player.location
         target_type = "location"
     else:
-        target = player.search_item(target_name, include_location=True)
+        target = player.search_item(target_name, include_location=True, include_containers_in_inventory=False)
         target_type = "item"
         if not target:
             target = player.location.search_living(target_name)

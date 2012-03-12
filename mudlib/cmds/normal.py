@@ -63,16 +63,39 @@ def do_inventory(player, verb, arg, **ctx):
                 print("  " + item.title)
 
 
+@cmd("locate")
+def do_locate(player, verb, name, **ctx):
+    print = player.tell
+    if not name:
+        raise ParseError("Locate what/who?")
+    print("You look around to see if you can locate %s." % name)
+    player.location.tell("%s looks around." % languagetools.capital(player.title), exclude_living=player)
+    item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
+    if item:
+        print_item_location(player, item, container, False)
+    living = player.location.search_living(name)
+    if living and living is not player:
+        print("%s is here next to you." % languagetools.capital(living.title))
+    player = ctx["driver"].search_player(name)  # global player search
+    if player:
+        print("%s is playing, %s is currently in '%s'." % (languagetools.capital(player.title), player.subjective, player.location.name))
+    else:
+        if not item and not living:
+            print("You can't seem to find that anywhere, and there's nobody here by that name.")
+
+
 @cmd("drop")
 def do_drop(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Drop what?")
 
-    def drop_stuff(items):
+    def drop_stuff(items, container):
         items = list(items)
         for item in items:
-            player.inventory.remove(item)
+            if container is not player and container in player:
+                print_item_removal(player, item, container)
+            container.inventory.remove(item)
             player.location.enter(item)
         items_str = languagetools.join(languagetools.a(item.title) for item in items)
         print("You drop %s." % items_str)
@@ -86,11 +109,12 @@ def do_drop(player, verb, arg, **ctx):
             # @todo: ask confirmation to drop everything
             drop_stuff(player.inventory)
     else:
-        item = player.search_item(arg, include_location=False)
+        item, container = player.locate_item(arg, include_location=False)
         if not item:
             raise ActionRefused("You don't have %s." % languagetools.a(arg))
         else:
-            drop_stuff([item])
+            print_item_location(player, item, container)
+            drop_stuff([item], container)
 
 
 @cmd("put")
@@ -458,3 +482,35 @@ def do_quit(player, verb, arg, **ctx):
     # @todo: ask for confirmation (async)
     player.tell("Goodbye, %s." % player.title)
     return False
+
+
+def print_item_location(player, item, container, print_braces=True):
+    if container in player:
+        if print_braces:
+            player.tell("(%s was found in %s, in your inventory)" % (item.name, container.title))
+        else:
+            player.tell("%s was found in %s, in your inventory." % (languagetools.capital(item.name), container.title))
+    elif container is player.location:
+        if print_braces:
+            player.tell("(%s was found in your current location)" % item.name)
+        else:
+            player.tell("%s was found in your current location." % languagetools.capital(item.name))
+    elif container is player:
+        if print_braces:
+            player.tell("(%s was found in your inventory)" % item.name)
+        else:
+            player.tell("%s was found in your inventory." % languagetools.capital(item.name))
+    else:
+        if print_braces:
+            player.tell("(%s was found in %s)" % (item.name, container.name))
+        else:
+            player.tell("%s was found in %s." % (languagetools.capital(item.name), container.name))
+
+
+def print_item_removal(player, item, container, print_braces=True):
+    if print_braces:
+        player.tell("(you take the %s from the %s)" % (item.name, container.name))
+    else:
+        player.tell("You take the %s from the %s." % (item.name, container.name))
+    player.location.tell("{player} takes the {item} from the {container}.".format(
+        player=languagetools.capital(player.title), item=item.name, container=container.name), exclude_living=player)
