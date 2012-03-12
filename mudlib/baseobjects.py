@@ -321,7 +321,6 @@ class Living(MudObject):
         If there's more than one hit, just return the first.
         Returns (None,None) or (item, containing_object)
         """
-        # @todo: unit test locate_item
         if not name:
             raise ValueError("name must be given")
         name = name.lower()

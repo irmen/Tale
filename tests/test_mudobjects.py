@@ -41,7 +41,11 @@ class TestLocations(unittest.TestCase):
                      """)
         self.player = Player("player","m")
         self.pencil = Item("pencil")
+        self.bag = Container("bag")
+        self.notebook_in_bag = Item("notebook")
+        self.bag.inventory.add(self.notebook_in_bag)
         self.player.inventory.add(self.pencil)
+        self.player.inventory.add(self.bag)
         self.hall.enter(self.rat)
         self.hall.enter(self.julie)
         self.hall.enter(self.player)
@@ -94,12 +98,35 @@ Present: julie, rat"""
         self.assertEquals(self.julie, self.hall.search_living("attractive julie"))
 
     def test_search_item(self):
+        # almost identical to locate_item so only do a few basic tests
         self.assertEquals(None, self.player.search_item("<notexisting>"))
         self.assertEquals(self.pencil, self.player.search_item("pencil"))
-        self.assertEquals(None, self.player.search_item("pencil", include_inventory=False))
-        self.assertEquals(self.key, self.player.search_item("key"))
-        self.assertEquals(None, self.player.search_item("key", include_location=False))
-        self.assertEquals(self.key, self.player.search_item("KEY"), "should work case-insensitive")
+
+    def test_locate_item(self):
+        item, container = self.player.locate_item("<notexisting>")
+        self.assertEquals(None, item)
+        self.assertEquals(None, container)
+        item, container = self.player.locate_item("pencil")
+        self.assertEquals(self.pencil, item)
+        self.assertEquals(self.player, container)
+        item, container = self.player.locate_item("pencil", include_inventory=False)
+        self.assertEquals(None, item)
+        self.assertEquals(None, container)
+        item, container = self.player.locate_item("key")
+        self.assertEquals(self.key, item)
+        self.assertEquals(self.hall, container)
+        item, container = self.player.locate_item("key", include_location=False)
+        self.assertEquals(None, item)
+        self.assertEquals(None, container)
+        item, container = self.player.locate_item("KEY")
+        self.assertEquals(self.key, item, "should work case-insensitive")
+        self.assertEquals(self.hall, container, "should work case-insensitive")
+        item, container = self.player.locate_item("notebook")
+        self.assertEquals(self.notebook_in_bag, item)
+        self.assertEquals(self.bag, container, "should search in bags in inventory")
+        item, container = self.player.locate_item("notebook", include_containers_in_inventory=False)
+        self.assertEquals(None, item)
+        self.assertEquals(None, container, "should not search in bags in inventory")
 
     def test_tell(self):
         class MsgTraceNPC(NPC):
