@@ -107,7 +107,7 @@ def do_drop(player, verb, arg, **ctx):
             raise ActionRefused("You're not carrying anything.")
         else:
             # @todo: ask confirmation to drop everything
-            drop_stuff(player.inventory)
+            drop_stuff(player.inventory, player)
     else:
         item, container = player.locate_item(arg, include_location=False)
         if not item:

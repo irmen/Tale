@@ -204,6 +204,8 @@ def do_teleport(player, verb, args, **ctx):
                 raise ActionRefused("Can't determine location to teleport to.")
             teleport_to(player, target)
         else:
+            if isinstance(target, baseobjects.Location):
+                raise ActionRefused("Can't teleport a room here, maybe you wanted to teleport TO somewhere?")
             teleport_someone_to_player(target, player)
     else:
         # target is a player (or @start - the wizard starting location)
