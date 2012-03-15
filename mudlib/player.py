@@ -4,6 +4,7 @@ Player code
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division
 from . import baseobjects, soul
 from . import languagetools as lang
 from .errors import SecurityViolation

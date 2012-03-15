@@ -10,6 +10,7 @@ The verb parsing and message generation have been rewritten.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division
 import re
 from . import languagetools as lang
 from .errors import ParseError
@@ -327,7 +328,7 @@ VERBS = {
 
 }
 
-assert not any(type(v[1]) == str for v in VERBS.itervalues()), "Second specifier in verb list must be None or tuple, not str"
+assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second specifier in verb list must be None or tuple, not str"
 
 AGGRESSIVE_VERBS = {
     "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "chase", "curse", "feel", "finger", "fondle", "french",

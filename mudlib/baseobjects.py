@@ -4,11 +4,18 @@ Mudlib base objects.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division
+import sys
 import weakref
 import textwrap
 from . import languagetools as lang
 from .errors import ActionRefused
 from .races import races
+
+if sys.version_info < (3, 0):
+    basestring_type = basestring
+else:
+    basestring_type = str
 
 """
 object hierarchy:
@@ -222,7 +229,7 @@ class Exit(object):
     """
     def __init__(self, target_location, description):
         assert target_location is not None
-        assert isinstance(target_location, (Location, basestring)), "target must be a Location or a string"
+        assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.description = description
         self.bound = isinstance(target_location, Location)

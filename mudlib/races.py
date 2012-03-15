@@ -5,6 +5,8 @@ Races adapted from Dark Souls mudlib (a superset of the races from Nightmare mud
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division
+
 flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin', 'insect', 'pegasus', 'vehicle', 'wraith'}
 limbless_combat_races = {'android', 'blob', 'bot', 'elemental', 'fish', 'god', 'mech', 'plant', 'slug', 'snake', 'strider', 'tree', 'vehicle', 'viper'}
 limbless_races = {'blob', 'elemental', 'fish', 'slug', 'snake', 'viper'}

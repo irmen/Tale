@@ -4,7 +4,7 @@ Normal player commands.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 from .. import languagetools
 from .. import soul
 from .. import races
@@ -298,7 +298,7 @@ def do_give(player, verb, arg, **ctx):
                 target.accept("give", item, player)
                 player.inventory.remove(item)
                 target.inventory.add(item)
-            except ActionRefused, x:
+            except ActionRefused as x:
                 refused.append((item, str(x)))
         for item, message in refused:
             print(message)

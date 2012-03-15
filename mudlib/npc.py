@@ -4,6 +4,7 @@ Non-Player-Character classes
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division
 from . import baseobjects
 from . import languagetools
 from .errors import ActionRefused

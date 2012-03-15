@@ -4,7 +4,7 @@ Wizard commands.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 import inspect
 import copy
 import functools

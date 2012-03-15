@@ -4,7 +4,7 @@ Mud driver (server).
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 import sys
 import mudlib.rooms
 import mudlib.player
@@ -16,19 +16,23 @@ import mudlib.errors
 import mudlib.cmds
 
 
+if sys.version_info < (3, 0):
+    input = raw_input
+
+
 def create_player_from_info():
     while True:
-        name = raw_input("Name? ").strip()
+        name = input("Name? ").strip()
         if name:
             break
-    gender = raw_input("Gender m/f/n? ").strip()[0]
+    gender = input("Gender m/f/n? ").strip()[0]
     while True:
         print("Player races:", ", ".join(mudlib.races.player_races))
-        race = raw_input("Race? ").strip()
+        race = input("Race? ").strip()
         if race in mudlib.races.player_races:
             break
         print("Unknown race, try again.")
-    wizard = raw_input("Wizard y/n? ").strip() == "y"
+    wizard = input("Wizard y/n? ").strip() == "y"
     description = "This is a random mud player."
     player = mudlib.player.Player(name, gender, race, description)
     if wizard:
@@ -78,7 +82,7 @@ class Driver(object):
         print("of the GNU General Public License version 3. See the file LICENSE.txt")
         # print MUD banner and initiate player creation
         print("\n" + mudlib.MUD_BANNER + "\n")
-        choice = raw_input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
+        choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
         if choice == "w":
             player = create_default_wizard()
         elif choice == "p":
@@ -107,12 +111,12 @@ class Driver(object):
             self.write_output()
             try:
                 keep_going = self.ask_player_input()
-            except mudlib.soul.UnknownVerbException, x:
+            except mudlib.soul.UnknownVerbException as x:
                 if x.verb in directions:
                     print("You can't go in that direction.")
                 else:
                     print("The verb %s is unrecognised." % x.verb)
-            except (mudlib.errors.ParseError, mudlib.errors.ActionRefused), x:
+            except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
                 print(str(x))
             except Exception:
                 import traceback
@@ -126,7 +130,7 @@ class Driver(object):
         print("".join(output))
 
     def ask_player_input(self):
-        cmd = raw_input(">> ").lstrip()
+        cmd = input(">> ").lstrip()
         if cmd and cmd[0] in mudlib.cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
             cmd = cmd[0] + " " + cmd[1:]

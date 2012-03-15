@@ -94,15 +94,15 @@ class TestSoul(unittest.TestCase):
             soul.parse(player, "fail in")
         with self.assertRaises(mudlib.soul.UnknownVerbException) as x:
             soul.parse(player, "in fail")
-        self.assertEquals("fail", x.exception.verb)
+        self.assertEqual("fail", x.exception.verb)
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "in sit")
         self.assertIsNone(qualifier)
         self.assertIsNone(adverb)
-        self.assertEquals("sit", verb)
+        self.assertEqual("sit", verb)
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "fail in sit")
-        self.assertEquals("fail", qualifier)
+        self.assertEqual("fail", qualifier)
         self.assertIsNone(adverb)
-        self.assertEquals("sit", verb)
+        self.assertEqual("sit", verb)
 
     def testMultiTarget(self):
         soul = mudlib.soul.Soul()
@@ -294,13 +294,13 @@ class TestSoul(unittest.TestCase):
         self.assertEqual({"newspaper"}, who)
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap dino")
-        self.assertEquals("Did you mean dinosaur?", str(x.exception))
+        self.assertEqual("Did you mean dinosaur?", str(x.exception))
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap news")
-        self.assertEquals("Did you mean newspaper?", str(x.exception))
+        self.assertEqual("Did you mean newspaper?", str(x.exception))
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap undefined")
-        self.assertEquals("The word undefined is unrecognized.", str(x.exception))
+        self.assertEqual("The word undefined is unrecognized.", str(x.exception))
 
 
     def testDEFA(self):
