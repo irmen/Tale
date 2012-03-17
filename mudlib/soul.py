@@ -331,7 +331,7 @@ VERBS = {
 assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second specifier in verb list must be None or tuple, not str"
 
 AGGRESSIVE_VERBS = {
-    "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "chase", "curse", "feel", "finger", "fondle", "french",
+    "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "finger", "fondle", "french",
     "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "kick", "kiss", "knee",
     "knock", "lick", "lift", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
     "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "shove", "slap", "smooch", "sneer", "snigger",
@@ -448,10 +448,15 @@ class Soul(object):
                 if living:
                     who_objects.update(living)
                 else:
-                    # try an item
+                    # try an item (or alias of item)
                     item = player.search_item(name, include_containers_in_inventory=False)
                     if item:
                         who_objects.add(item)
+                    else:
+                        # try alias of livings
+                        living = [living for living in player.location.livings if name in living.aliases]
+                        if living:
+                            who_objects.update(living)
         result = self.process_verb_parsed(player, verb, who_objects, adverb, message, bodypart, qualifier)
         if qualifier:
             verb = qualifier + " " + verb
@@ -646,9 +651,16 @@ class Soul(object):
         collect_message = False
         verbdata = VERBS[verb][2]
         message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
-        all_livings_names = {living.name for living in player.location.livings}
-        all_livings_names.update(item.name for item in player.location.items)
-        all_livings_names.update(item.name for item in player.inventory)
+        all_livings_names = set()
+        for living in player.location.livings:
+            all_livings_names.add(living.name)
+            all_livings_names.update(living.aliases)
+        for item in player.location.items:
+            all_livings_names.add(item.name)
+            all_livings_names.update(item.aliases)
+        for item in player.inventory:
+            all_livings_names.add(item.name)
+            all_livings_names.update(item.aliases)
         for word in words:
             if collect_message:
                 message.append(word)

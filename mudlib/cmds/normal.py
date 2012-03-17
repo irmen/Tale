@@ -118,7 +118,8 @@ def do_drop(player, verb, arg, **ctx):
         if not item:
             raise ActionRefused("You don't have %s." % languagetools.a(arg))
         else:
-            util.print_object_location(player, item, container)
+            if container is not player:
+                util.print_object_location(player, item, container)
             drop_stuff([item], container)
 
 
@@ -208,15 +209,27 @@ def do_take(player, verb, args, **ctx):
             player_msg = "You take {items}."
             room_msg = "{player} takes {items}."
         items = list(items)
+        refused = []
         for item in items:
-            if is_location:
-                container.leave(item)
+            try:
+                item.allow("take", None, player)
+            except ActionRefused as x:
+                refused.append((item, str(x)))
             else:
-                container.inventory.remove(item)
-            player.inventory.add(item)
-        items_str = languagetools.join(languagetools.a(item.title) for item in items)
-        print(player_msg.format(items=items_str))
-        player.location.tell(room_msg.format(player=languagetools.capital(player.title), items=items_str), exclude_living=player)
+                if is_location:
+                    container.leave(item)
+                else:
+                    container.inventory.remove(item)
+                player.inventory.add(item)
+        for item, message in refused:
+            print(message)
+            items.remove(item)
+        if items:
+            items_str = languagetools.join(languagetools.a(item.title) for item in items)
+            print(player_msg.format(items=items_str))
+            player.location.tell(room_msg.format(player=languagetools.capital(player.title), items=items_str), exclude_living=player)
+        else:
+            print("You didn't take anything.")
 
     if what == "all":   # take ALL the things!
         if where:
@@ -368,7 +381,7 @@ def do_help(player, verb, topic, **ctx):
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
         print("Available commands:")
-        print(", ".join(cmds_help))
+        print(", ".join(sorted(cmds_help)))
         print("Abbreviations:")
         print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
         print("Pick up/put down are aliases for take/drop.")
@@ -461,6 +474,8 @@ def do_stats(player, verb, arg, **ctx):
     race_bodytype = races.bodytypes[race["bodytype"]]
     print("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type))
     print("%s %s, speaks %s, weighs ~%s kg." % (languagetools.capital(race_size), race_bodytype, race["language"], race["mass"]))
+    if target.aggressive:
+        print("%s looks aggressive." % languagetools.capital(target.subjective))
     print(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
 
 

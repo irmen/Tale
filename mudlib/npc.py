@@ -19,14 +19,7 @@ class NPC(baseobjects.Living):
         super(NPC, self).__init__(name, gender, title, description, race)
 
     def allow(self, action, item, actor):
-        """
-        Validates that this living allows something to happen by someone, with a certain action (such as 'give').
-        Raises ActionRefused('message') if the intended action was refused.
-        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
-        By default, NPC refuse every special action on them.
-        Recognised action types:
-        - give (give it something)
-        """
+        """By default, NPC refuse every special action on them."""
         super(NPC, self).allow(action, item, actor)
         if action == "give" and item:
             raise ActionRefused("%s doesn't want %s." % (languagetools.capital(self.title), item.title))

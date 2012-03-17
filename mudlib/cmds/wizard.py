@@ -291,7 +291,7 @@ def do_move(player, verb, arg, **ctx):
     if not thing:
         raise ActionRefused("There's no %s here." % thing_name)
     if thing_type == "living":
-        raise ActionRefused("* move can't yet move livings around, it will screw up their location. Sorry.")  # @todo fix moving livings
+        raise ActionRefused("* use 'teleport' instead to move livings around.")
     if target_name == ".":
         # current room is the target
         target = player.location
@@ -309,6 +309,8 @@ def do_move(player, verb, arg, **ctx):
     move_something(thing, thing_container, thing_container_type, target, target_type)
     print("Moved %s (%s) from %s (%s) to %s (%s)." %
         (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
+    player.location.tell("%s moved %s into %s." %
+        (languagetools.capital(player.title), thing.title, target.title), exclude_living=player)
 
 
 def move_something(thing, thing_container, thing_container_type, destination, destination_type):
@@ -324,8 +326,6 @@ def move_something(thing, thing_container, thing_container_type, destination, de
         destination.enter(thing, force_and_silent=True)
     else:
         destination.inventory.add(thing)  # all other types: just chuck it in their inventory
-    # @todo: when moving livings, it screws up their location.
-    # This needs a complex fix (hierarchic container lookup bubbling until we reach a Location object?)
 
 
 @wizcmd("debug")
@@ -344,5 +344,31 @@ def do_debug(player, verb, name, **ctx):
     print(repr(obj))
     if container:
         util.print_object_location(player, obj, container, False)
-    for varname, value in vars(obj).items():
+    for varname, value in sorted(vars(obj).items()):
         print(".%s: %r" % (varname, value))
+
+
+@wizcmd("set")
+def do_set(player, verb, args, **ctx):
+    print = player.tell
+    args = args.split("=")
+    if len(args) != 2:
+        raise ParseError("Set what? (usage: set xxx.fieldname=expression)")
+    name, field = args[0].split(".")
+    if name == ".":
+        obj = player.location
+    else:
+        obj = player.search_item(name, include_inventory=True, include_location=True)
+    if not obj:
+        obj = player.location.search_living(name)
+    if not obj:
+        raise ActionRefused("Can't find %s." % name)
+    print(repr(obj))
+    import ast
+    value = ast.literal_eval(args[1])
+    expected_type = type(getattr(obj, field))
+    if expected_type is type(value):
+        setattr(obj, field, value)
+        print("Field set: %s.%s = %r" % (name, field, value))
+    else:
+        raise ActionRefused("Data type mismatch, expected %s." % expected_type)

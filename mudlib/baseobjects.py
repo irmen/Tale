@@ -67,6 +67,20 @@ class MudObject(object):
     def destroy(self, ctx):
         pass
 
+    def allow(self, action, item, actor):
+        """
+        Validates that this object allows something to happen to it, by someone, with a certain action (such as 'give').
+        Raises ActionRefused('message') if the intended action was refused.
+        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
+        (This base implementation simply allows everything)
+        Recognised standard action types:
+        - give (give it an item)
+        - take (pick it up)
+        - add (put item into it)
+        - remove (remove item from it)
+        """
+        pass
+
 
 class Item(MudObject):
     """
@@ -358,15 +372,6 @@ class Living(MudObject):
                     if matches:
                         break
         return (matches[0], containing_object) if matches else (None, None)
-
-    def allow(self, action, item, actor):
-        """
-        Validates that this living allows something to happen by someone, with a certain action (such as 'give').
-        Raises ActionRefused('message') if the intended action was refused.
-        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
-        (This base implementation simply allows everything)
-        """
-        pass
 
     def start_attack(self, living):
         """
