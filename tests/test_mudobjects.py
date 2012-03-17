@@ -39,8 +39,10 @@ class TestLocations(unittest.TestCase):
                      """
                      She's quite the looker.
                      """)
+        self.julie.aliases = {"chick"}
         self.player = Player("player","m")
-        self.pencil = Item("pencil")
+        self.pencil = Item("pencil", title="fountain pen")
+        self.pencil.aliases = {"pen"}
         self.bag = Container("bag")
         self.notebook_in_bag = Item("notebook")
         self.bag.inventory.add(self.notebook_in_bag)
@@ -96,6 +98,8 @@ Present: julie, rat"""
         self.assertEqual(self.rat, self.hall.search_living("rat"))
         self.assertEqual(self.julie, self.hall.search_living("Julie"))
         self.assertEqual(self.julie, self.hall.search_living("attractive julie"))
+        self.assertEqual(self.julie, self.hall.search_living("chick"))
+        self.assertEqual(None, self.hall.search_living("bloke"))
 
     def test_search_item(self):
         # almost identical to locate_item so only do a few basic tests
@@ -109,6 +113,10 @@ Present: julie, rat"""
         item, container = self.player.locate_item("pencil")
         self.assertEqual(self.pencil, item)
         self.assertEqual(self.player, container)
+        item, container = self.player.locate_item("fountain pen")
+        self.assertEqual(self.pencil, item, "need to find the title")
+        item, container = self.player.locate_item("pen")
+        self.assertEqual(self.pencil, item, "need to find the alias")
         item, container = self.player.locate_item("pencil", include_inventory=False)
         self.assertEqual(None, item)
         self.assertEqual(None, container)

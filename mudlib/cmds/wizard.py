@@ -14,6 +14,7 @@ from .. import baseobjects
 from .. import languagetools
 from .. import npc
 from .. import rooms
+from .. import util
 
 all_commands = {}
 
@@ -325,3 +326,23 @@ def move_something(thing, thing_container, thing_container_type, destination, de
         destination.inventory.add(thing)  # all other types: just chuck it in their inventory
     # @todo: when moving livings, it screws up their location.
     # This needs a complex fix (hierarchic container lookup bubbling until we reach a Location object?)
+
+
+@wizcmd("debug")
+def do_debug(player, verb, name, **ctx):
+    print = player.tell
+    if not name:
+        raise ParseError("Debug what?")
+    if name == ".":
+        obj, container = player.location, None
+    else:
+        obj, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
+    if not obj:
+        obj, container = player.location.search_living(name), player.location
+    if not obj:
+        raise ActionRefused("Can't find %s." % name)
+    print(repr(obj))
+    if container:
+        util.print_object_location(player, obj, container, False)
+    for varname, value in vars(obj).items():
+        print(".%s: %r" % (varname, value))

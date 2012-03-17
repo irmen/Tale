@@ -8,6 +8,7 @@ from __future__ import print_function, division
 from .. import languagetools
 from .. import soul
 from .. import races
+from .. import util
 from ..errors import ParseError, ActionRefused
 
 all_commands = {}
@@ -72,8 +73,12 @@ def do_locate(player, verb, name, **ctx):
     player.location.tell("%s looks around." % languagetools.capital(player.title), exclude_living=player)
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:
-        print_item_location(player, item, container, False)
+        if item.name.lower() != name.lower() and name.lower() in item.aliases:
+            print("(by %s you probably mean %s)" % (name, item.name))
+        util.print_object_location(player, item, container, False)
     living = player.location.search_living(name)
+    if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
+        print("(by %s you probably mean %s)" % (name, living.name))
     if living and living is not player:
         print("%s is here next to you." % languagetools.capital(living.title))
     player = ctx["driver"].search_player(name)  # global player search
@@ -113,7 +118,7 @@ def do_drop(player, verb, arg, **ctx):
         if not item:
             raise ActionRefused("You don't have %s." % languagetools.a(arg))
         else:
-            print_item_location(player, item, container)
+            util.print_object_location(player, item, container)
             drop_stuff([item], container)
 
 
@@ -387,7 +392,6 @@ def do_examine(player, verb, arg, **ctx):
     print = player.tell
     if not arg:
         raise ParseError("Examine what?")
-    player = player
     obj = player.location.search_living(arg)
     if obj:
         if "wizard" in player.privileges:
@@ -484,31 +488,8 @@ def do_quit(player, verb, arg, **ctx):
     return False
 
 
-def print_item_location(player, item, container, print_braces=True):
-    if container in player:
-        if print_braces:
-            player.tell("(%s was found in %s, in your inventory)" % (item.name, container.title))
-        else:
-            player.tell("%s was found in %s, in your inventory." % (languagetools.capital(item.name), container.title))
-    elif container is player.location:
-        if print_braces:
-            player.tell("(%s was found in your current location)" % item.name)
-        else:
-            player.tell("%s was found in your current location." % languagetools.capital(item.name))
-    elif container is player:
-        if print_braces:
-            player.tell("(%s was found in your inventory)" % item.name)
-        else:
-            player.tell("%s was found in your inventory." % languagetools.capital(item.name))
-    else:
-        if print_braces:
-            player.tell("(%s was found in %s)" % (item.name, container.name))
-        else:
-            player.tell("%s was found in %s." % (languagetools.capital(item.name), container.name))
-
-
-def print_item_removal(player, item, container, print_braces=True):
-    if print_braces:
+def print_item_removal(player, item, container, print_parentheses=True):
+    if print_parentheses:
         player.tell("(you take the %s from the %s)" % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))

@@ -4,6 +4,7 @@ The central town, which is the place where mud players start/log in
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+import copy
 from ..baseobjects import Location, Exit, Item
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
@@ -24,7 +25,9 @@ lane = Location("Lane of Magicks",
 square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
 square.exits["lane"] = square.exits["north"]
 
-square.enter(newspaper)
+paper = copy.copy(newspaper)
+paper.aliases = {"paper"}
+square.enter(paper)
 square.enter(trashcan)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
@@ -43,6 +46,7 @@ towncrier = NPC("laish", "f", "Laish the town crier",
     """
     The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.
     """)
+towncrier.aliases = {"crier"}
 idiot = NPC("idiot", "m", "blubbering idiot",
     """
     This person's engine is running but there is nobody behind the wheel.

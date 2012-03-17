@@ -57,6 +57,7 @@ class MudObject(object):
     """
     def __init__(self, name, title=None, description=None):
         self.name = name
+        self.aliases = []
         self.title = title or name
         self.description = textwrap.dedent(description).strip() if description else ""
 
@@ -187,7 +188,8 @@ class Location(MudObject):
         name = name.lower()
         result = [living for living in self.livings if living.name == name]
         if not result:
-            result = [living for living in self.livings if living.title.lower() == name]
+            # try titles an aliases
+            result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
     def enter(self, obj, force_and_silent=False):
@@ -334,19 +336,25 @@ class Living(MudObject):
         matches = containing_object = None
         if include_inventory:
             containing_object = self
-            matches = [item for item in self.inventory if item.name == name] or\
-                      [item for item in self.inventory if item.title.lower() == name]
+            matches = [item for item in self.inventory if item.name == name]
+            if not matches:
+                # try the aliases or titles
+                matches = [item for item in self.inventory if name in item.aliases or item.title.lower() == name]
         if not matches and include_location:
             containing_object = self.location
-            matches = [item for item in self.location.items if item.name == name] or\
-                      [item for item in self.location.items if item.title.lower() == name]
+            matches = [item for item in self.location.items if item.name == name]
+            if not matches:
+                # try the aliases or titles
+                matches = [item for item in self.location.items if name in item.aliases or item.title.lower() == name]
         if not matches and include_containers_in_inventory:
             # check if an item in the inventory might contain it
             for container in self.inventory:
                 if getattr(container, "public_inventory", False):
                     containing_object = container
-                    matches = [item for item in container.inventory if item.name == name] or\
-                              [item for item in container.inventory if item.title.lower() == name]
+                    matches = [item for item in container.inventory if item.name == name]
+                    if not matches:
+                        # try the aliases or titles
+                        matches = [item for item in container.inventory if name in item.aliases or item.title.lower() == name]
                     if matches:
                         break
         return (matches[0], containing_object) if matches else (None, None)
