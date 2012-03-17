@@ -194,6 +194,10 @@ class Driver(object):
             return self.player
         return None
 
+    def all_players(self):
+        """return all players"""
+        return [self.player]
+
 
 if __name__ == "__main__":
     driver = Driver()

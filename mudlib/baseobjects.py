@@ -359,16 +359,14 @@ class Living(MudObject):
                         break
         return (matches[0], containing_object) if matches else (None, None)
 
-    def accept(self, action, item, actor):
+    def allow(self, action, item, actor):
         """
-        Validates that this living accepts something from someone, with a certain action (such as 'give').
+        Validates that this living allows something to happen by someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.
-        Make sure the message contains the name or title of the item.
+        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
+        (This base implementation simply allows everything)
         """
-        if action == "take":
-            if self.aggressive:
-                self.start_attack(actor)
-                raise ActionRefused("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(self.objective))
+        pass
 
     def start_attack(self, living):
         """
@@ -390,14 +388,6 @@ class Container(Item):
 
     def __contains__(self, item):
         return item in self.inventory
-
-    def accept(self, item, actor):
-        """
-        Validates that this container accepts something from someone.
-        Raises ActionRefused('message') if the item is refused.
-        Make sure the message contains the name or title of the item.
-        """
-        pass
 
 
 class Effect(object):

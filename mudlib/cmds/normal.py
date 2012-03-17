@@ -83,7 +83,7 @@ def do_locate(player, verb, name, **ctx):
         print("%s is here next to you." % languagetools.capital(living.title))
     player = ctx["driver"].search_player(name)  # global player search
     if player:
-        print("%s is playing, %s is currently in '%s'." % (languagetools.capital(player.title), player.subjective, player.location.name))
+        print_player_info(player)
     else:
         if not item and not living:
             print("You can't seem to find that anywhere, and there's nobody here by that name.")
@@ -159,7 +159,6 @@ def do_put(player, verb, args, **ctx):
                     # take the item from the room
                     player.location.leave(item)
                     room_items.append(item)
-                where.accept(item, player)
                 where.inventory.add(item)
             if inventory_items:
                 items_msg = languagetools.join(languagetools.a(item.title) for item in inventory_items)
@@ -278,8 +277,11 @@ def do_take(player, verb, args, **ctx):
             living_race = races.races[living.race]
             player_race = races.races[player.race]
             if player_race["size"] - living_race["size"] >= 2:
-                living.accept("take", None, player)  # @todo: do an agi/str/spd/luck check to see if we can pick it up
+                # @todo: do an agi/str/spd/luck check to see if we can pick it up
                 print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+                if living.aggressive:
+                    living.start_attack(player)
+                    raise ActionRefused("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
             else:
                 print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
         else:
@@ -300,7 +302,7 @@ def do_give(player, verb, arg, **ctx):
         refused = []
         for item in items:
             try:
-                target.accept("give", item, player)
+                target.allow("give", item, player)
                 player.inventory.remove(item)
                 target.inventory.add(item)
             except ActionRefused as x:
@@ -311,10 +313,10 @@ def do_give(player, verb, arg, **ctx):
         if items:
             items_str = languagetools.join(languagetools.a(item.title) for item in items)
             player_str = languagetools.capital(player.title)
-            room_msg = "%s gave %s to %s." % (player_str, items_str, target.title)
-            target_msg = "%s gave you %s." % (player_str, items_str)
+            room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
+            target_msg = "%s gives you %s." % (player_str, items_str)
             player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
-            print("You gave %s %s." % (target.title, items_str))
+            print("You give %s %s." % (target.title, items_str))
         else:
             print("You didn't give %s anything." % target.title)
 
@@ -388,55 +390,59 @@ def do_look(player, verb, arg, **ctx):
 
 
 @cmd("examine", "inspect")
-def do_examine(player, verb, arg, **ctx):
+def do_examine(player, verb, name, **ctx):
     print = player.tell
-    if not arg:
-        raise ParseError("Examine what?")
-    obj = player.location.search_living(arg)
-    if obj:
+    if not name:
+        raise ParseError("Examine what or who?")
+    living = player.location.search_living(name)
+    if living:
         if "wizard" in player.privileges:
-            print(repr(obj))
-        print("This is %s." % obj.title)
-        if obj.description:
-            print(obj.description)
-        race = races.races[obj.race]
-        if obj.race == "human":
+            print(repr(living))
+        if living.name.lower() != name.lower() and name.lower() in living.aliases:
+            print("(by %s you probably mean %s)" % (name, living.name))
+        print("This is %s." % living.title)
+        if living.description:
+            print(living.description)
+        race = races.races[living.race]
+        if living.race == "human":
             # don't print as much info when dealing with mere humans
-            msg = languagetools.capital("%s speaks %s." % (obj.subjective, race["language"]))
+            msg = languagetools.capital("%s speaks %s." % (living.subjective, race["language"]))
             print(msg)
         else:
             print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                subj=languagetools.capital(obj.subjective),
+                subj=languagetools.capital(living.subjective),
                 size=races.sizes[race["size"]],
                 btype=races.bodytypes[race["bodytype"]],
-                race=obj.race,
+                race=living.race,
                 lang=race["language"]
             ))
         return
-    obj = player.search_item(arg)
-    if obj:
+    item = player.search_item(name)
+    if item:
         if "wizard" in player.privileges:
-            print(repr(obj))
-        if obj in player:
-            print("You're carrying %s." % languagetools.a(obj.title))
+            print(repr(item))
+        if item.name.lower() != name.lower() and name.lower() in item.aliases:
+            print("(by %s you probably mean %s)" % (name, item.name))
+        if item in player:
+            print("You're carrying %s." % languagetools.a(item.title))
         else:
-            print("You see %s." % languagetools.a(obj.title))
-        if obj.description:
-            print(obj.description)
-        if getattr(obj, "public_inventory", False):
-            if obj.inventory:
-                print("It contains:", languagetools.join(item.title for item in obj.inventory))
+            print("You see %s." % languagetools.a(item.title))
+        if item.description:
+            print(item.description)
+        if getattr(item, "public_inventory", False):
+            if item.inventory:
+                print("It contains:", languagetools.join(subitem.title for subitem in item.inventory))
             else:
                 print("It's empty.")
         return
-    if arg in player.location.exits:
+    if name in player.location.exits:
         print("It seems you can go there:")
-        print(player.location.exits[arg].description)
-    elif arg in abbreviations and abbreviations[arg] in player.location.exits:
+        print(player.location.exits[name].description)
+    elif name in abbreviations and abbreviations[name] in player.location.exits:
         print("It seems you can go there:")
-        print(player.location.exits[abbreviations[arg]].description)
+        print(player.location.exits[abbreviations[name]].description)
     else:
-        raise ActionRefused("%s isn't here." % arg)
+        raise ActionRefused("%s isn't here." % name)
 
 
 @cmd("stats")
@@ -495,3 +501,22 @@ def print_item_removal(player, item, container, print_parentheses=True):
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.location.tell("{player} takes the {item} from the {container}.".format(
         player=languagetools.capital(player.title), item=item.name, container=container.name), exclude_living=player)
+
+
+@cmd("who")
+def do_who(player, verb, name, **ctx):
+    print = player.tell
+    if name:
+        player = ctx["driver"].search_player(name)  # global player search
+        if player:
+            print_player_info(player)
+        else:
+            print("Right now, there's nobody online with that name.")
+    else:
+        # print all players
+        for player in ctx["driver"].all_players():  # list of all players
+            print_player_info(player)
+
+
+def print_player_info(player):
+    player.tell("%s is playing, %s is currently in '%s'." % (languagetools.capital(player.title), player.subjective, player.location.name))

@@ -6,7 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 import unittest
 from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon
-from mudlib.errors import SecurityViolation
+from mudlib.errors import SecurityViolation, ActionRefused
 from mudlib.npc import NPC
 from mudlib.player import Player
 
@@ -223,6 +223,13 @@ class TestLiving(unittest.TestCase):
         axe = Weapon("axe")
         orc.inventory.add(axe)
         self.assertTrue(axe in orc)
+    def test_allow(self):
+        orc = Living("orc", "m")
+        player = Player("julie", "f")
+        axe = Weapon("axe")
+        orc.allow("give", axe, player)      # should be fine, no checks on Ligin
+        orc.allow("take", axe, player)      # should be fine as well
+        orc.allow("bogus", None, None)
 
 
 class TestNPC(unittest.TestCase):
@@ -244,6 +251,19 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
+    def test_allow(self):
+        orc = NPC("orc", "m", "stinky orc")
+        player = Player("julie", "f")
+        axe = Weapon("axe", "sharp axe")
+        with self.assertRaises(ActionRefused) as x:
+            orc.allow("give", axe, player)
+        self.assertEqual("Stinky orc doesn't want sharp axe.", str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            orc.allow("bogus", axe, player)
+        self.assertEqual("You can't do that.", str(x.exception), "generic error for unrecognised actions")
+        with self.assertRaises(ActionRefused) as x:
+            orc.allow("bogus", None, None)
+        self.assertEqual("You can't do that.", str(x.exception), "generic error for unrecognised actions")
 
 
 class TestPlayer(unittest.TestCase):
@@ -384,7 +404,6 @@ class TestContainer(unittest.TestCase):
         key = Item("key")
         self.assertTrue(len(bag.inventory)==0)
         npc = NPC("julie","f")
-        bag.accept(key, npc)
         bag.inventory.add(key)
         self.assertTrue(key in bag)
 

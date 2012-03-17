@@ -18,20 +18,19 @@ class NPC(baseobjects.Living):
     def __init__(self, name, gender, title=None, description=None, race="human"):
         super(NPC, self).__init__(name, gender, title, description, race)
 
-    def accept(self, action, item, actor):
+    def allow(self, action, item, actor):
         """
-        Validates that this living accepts something from someone, with a certain action (such as 'give').
+        Validates that this living allows something to happen by someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.
-        Make sure the message contains the name or title of the item.
-        By default, NPC refused every special action on them, except 'take', which is handled in Living.
+        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
+        By default, NPC refuse every special action on them.
+        Recognised action types:
+        - give (give it something)
         """
-        super(NPC, self).accept(action, item, actor)
-        if action == "take":
-            return  # handled in base class
-        if item:
-            raise ActionRefused("You can't %s %s to %s." % (action, item.name, self.title))
-        else:
-            raise ActionRefused("You can't do that.")
+        super(NPC, self).allow(action, item, actor)
+        if action == "give" and item:
+            raise ActionRefused("%s doesn't want %s." % (languagetools.capital(self.title), item.title))
+        raise ActionRefused("You can't do that.")
 
 
 class Monster(NPC):
