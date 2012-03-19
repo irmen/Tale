@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import copy
-from ..baseobjects import Location, Exit, Item
+from ..baseobjects import Location, Exit, Door
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper
@@ -64,3 +64,15 @@ square.enter(towncrier)
 square.enter(idiot)
 square.enter(rat)
 square.enter(ant)
+
+
+alley = Location("Alley of doors", "An alley filled with doors.")
+door1 = Door(alley, "door1 (unlocked and open)", direction="door1", locked=False, open=True)
+door2 = Door(alley, "door2 (locked and open)", direction="door2", locked=True, open=True)
+door3 = Door(alley, "door3 (unlocked and closed)", direction="door3", locked=False, open=False)
+door4 = Door(alley, "door4 (locked and closed)", direction="door4", locked=True, open=False)
+
+alley.add_exits([door1, door2, door3, door4])
+alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
+square.exits["alley"] = Exit(alley, "There's an alley to the south.")
+square.exits["south"] = square.exits["alley"]

@@ -10,8 +10,13 @@ from ..errors import ActionRefused
 
 class FixedItem(Container):  # something that cannot be picked up
     def allow(self, action, item, actor):
-        if action == "take" and not item:
-            raise ActionRefused("You can't pick up %s." % self.title)
+        if action == "take":
+            if item:
+                return      # taking something from the container is ok
+            else:
+                raise ActionRefused("You can't pick up %s." % self.title)
+        else:
+            super(FixedItem, self).allow(action, item, actor)
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells funky too.")

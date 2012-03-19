@@ -24,8 +24,8 @@ class Player(baseobjects.Living):
         self.installed_wiretaps = set()
 
     def __repr__(self):
-        return "<%s.%s '%s' @ %s, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
-            self.name, hex(id(self)), ",".join(self.privileges) or "-")
+        return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
+            self.name, id(self), ",".join(self.privileges) or "-")
 
     def set_title(self, title, includes_name_param=False):
         if includes_name_param:

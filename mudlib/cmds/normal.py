@@ -535,3 +535,52 @@ def do_who(player, verb, name, **ctx):
 
 def print_player_info(player):
     player.tell("%s is playing, %s is currently in '%s'." % (languagetools.capital(player.title), player.subjective, player.location.name))
+
+
+@cmd("open", "close", "lock", "unlock")
+def do_open(player, verb, args, **ctx):
+    print = player.tell
+    args = args.split()
+    if len(args) == 0:
+        raise ParseError("%s what? With what?" % languagetools.capital(verb))
+    what_name = args[0]
+    with_item_name = None
+    with_item = None
+    is_exit = False
+    if len(args) > 1:
+        if args[1]=="with" and len(args) > 2:
+            with_item_name = args[2]
+        else:
+            with_item_name = args[1]
+    what = player.search_item(what_name, include_inventory=True, include_location=True, include_containers_in_inventory=False)
+    if not what:
+        if what_name in player.location.exits:
+            what = player.location.exits[what_name]
+            is_exit = True
+    if what:
+        if with_item_name:
+            with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
+            if not with_item:
+                raise ActionRefused("You don't have %s." % languagetools.a(with_item_name))
+        what.allow(verb, with_item, player)
+        # @todo implement proper action code.....
+        if is_exit:
+            if verb == "open":
+                print("You opened it.")
+            elif verb == "close":
+                print("You closed it.")
+            elif verb == "lock":
+                print("You locked it.")
+            elif verb == "unlock":
+                print("You unlocked it.")
+        else:
+            if verb == "open":
+                print("You opened the %s." % what.title)
+            elif verb == "close":
+                print("You closed the %s." % what.title)
+            elif verb == "lock":
+                print("You locked the %s." % what.title)
+            elif verb == "unlock":
+                print("You unlocked the %s." % what.title)
+    else:
+        raise ActionRefused("You don't see %s." % languagetools.a(what_name))

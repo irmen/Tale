@@ -39,6 +39,9 @@ MudObject
 
 
 Exit
+  |
+  +-- Door
+
 Effect
 
 
@@ -62,7 +65,7 @@ class MudObject(object):
         self.description = textwrap.dedent(description).strip() if description else ""
 
     def __repr__(self):
-        return "<%s.%s '%s' @ %s>" % (self.__class__.__module__, self.__class__.__name__, self.name, hex(id(self)))
+        return "<%s.%s '%s' @ 0x%x>" % (self.__class__.__module__, self.__class__.__name__, self.name, id(self))
 
     def destroy(self, ctx):
         pass
@@ -72,14 +75,16 @@ class MudObject(object):
         Validates that this object allows something to happen to it, by someone, with a certain action (such as 'give').
         Raises ActionRefused('message') if the intended action was refused.
         Make sure the message contains the name or title of the item: it is meant to be shown to the player.
-        (This base implementation simply allows everything)
         Recognised standard action types:
         - give (give it an item)
         - take (pick it up)
         - add (put item into it)
         - remove (remove item from it)
+        - open (open an item) - default:refused
+        - close (close an item) - default:refused
         """
-        pass
+        if action in ("open", "close"):
+            raise ActionRefused("You can't do that.")
 
 
 class Item(MudObject):
@@ -133,6 +138,17 @@ class Location(MudObject):
         self.items.clear()
         self.exits.clear()
         self.wiretaps.clear()
+
+    def add_exits(self, exits):
+        """
+        Adds every exit from the sequence as an exit to this room.
+        It is required that the exits have their direction attribute set.
+        """
+        for exit in exits:
+            if exit.direction:
+                self.exits[exit.direction] = exit
+            else:
+                raise ValueError("exit.direction must be specified: " + str(exit))
 
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
@@ -242,25 +258,38 @@ class Exit(object):
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in mudlib.rooms.town).
     If using a string, it will be retrieved and bound at runtime.
+    Supplying a direction on the exit is optional. It is meant to make adding multiple
+    exits on a location easier by using Location.add_exits().
     """
-    def __init__(self, target_location, description):
+    def __init__(self, target_location, description, direction=None):
         assert target_location is not None
         assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.description = description
         self.bound = isinstance(target_location, Location)
+        self.direction = direction
+
+    def __repr__(self):
+        targetname = self.target.name if self.bound else self.target
+        return "<baseobjects.Exit '%s'->'%s' @ 0x%x>" % (self.direction, targetname, id(self))
 
     def bind(self, target_location):
+        """
+        Binds the exit to the actual target_location object.
+        Usually called by a movement action on a non-bound exit.
+        """
         assert not self.bound and isinstance(target_location, Location)
         self.target = target_location
         self.bound = True
 
-    def allow(self, actor):
+    def allow(self, action, item, actor):
         """
         Should the actor be allowed through the exit?
         If it's not, ActionRefused is raised.
+        action = "move", item = n/a. More complex actions (open/close/lock/unlock) are supported by Door.
         """
         assert self.bound
+        assert action == "move"
 
 
 class Living(MudObject):
@@ -403,3 +432,75 @@ class Effect(object):
     def __init__(self, name, description=None):
         self.name = name
         self.description = description
+
+
+class Door(Exit):
+    """
+    A special exit that connects one location to another but which can be closed or even locked.
+    """
+    def __init__(self, target_location, description, direction=None, locked=False, open=True):
+        super(Door, self).__init__(target_location, description, direction)
+        self.locked = locked
+        self.open = open
+
+    def __repr__(self):
+        target = self.target.name if self.bound else self.target
+        locked = "locked" if self.locked else "open"
+        return "<baseobjects.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
+
+    def allow(self, action, item, actor):
+        """
+        Should the actor be allowed through the exit, or do something with it?
+        If it's not, ActionRefused is raised.
+        action = 'move', 'open', 'unlock' (with optional item), 'close', 'lock' (with optional item)
+        By default, unlock fails (if the door is locked). Override allow_unlock to change this.
+        By default, lock fails (if the door is unlocked). Override allow_lock to change this.
+        Open and close work as normal and they check if the door's locked or not.
+        Move simply checks if the door is open (lock/unlock status don't matter if it's open).
+        NOTE that the open/locked status isn't changed here! You need to do that yourself!
+        """
+        assert self.bound
+        if action == "move":
+            if not self.open:
+                raise ActionRefused("You can't go there; it's closed.")
+        elif action == "open":
+            if self.open:
+                raise ActionRefused("It's already open.")
+            elif self.locked:
+                raise ActionRefused("You can't open it; it's locked.")
+            else:
+                actor.tell("You opened it.")
+                who = lang.capital(actor.title)
+                if self.direction:
+                    actor.location.tell("%s opened the exit %s." % (who, self.direction))
+                else:
+                    actor.location.tell("%s opened an exit." % who)
+        elif action == "close":
+            if not self.open:
+                raise ActionRefused("It's already closed.")
+            actor.tell("You closed it.")
+            who = lang.capital(actor.title)
+            if self.direction:
+                actor.location.tell("%s closed the exit %s." % (who, self.direction))
+            else:
+                actor.location.tell("%s closed an exit." % who)
+        elif action == "unlock":
+            if self.locked:
+                return self.allow_unlock(item, actor)
+            else:
+                raise ActionRefused("It's not locked.")
+        elif action == "lock":
+            if self.locked:
+                raise ActionRefused("It's already locked.")
+            else:
+                return self.allow_lock(item, actor)
+        else:
+            raise ValueError("invalid door action: " + action)
+
+    def allow_lock(self, item, actor):
+        """override this in subclass"""
+        raise ActionRefused("You can't lock it.")
+
+    def allow_unlock(self, item, actor):
+        """override this in subclass"""
+        raise ActionRefused("You can't unlock it.")

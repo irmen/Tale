@@ -103,6 +103,7 @@ def chat(client):
 #       Main
 #------------------------------------------------------------------------------
 
+
 if __name__ == '__main__':
 
     ## Simple chat server to demonstrate connection handling via the
@@ -122,6 +123,9 @@ if __name__ == '__main__':
 
     print(">> Listening for connections on port %d.  CTRL-C to break."
           % telnet_server.port)
+
+
+    def serverCoroutine():
 
     ## Server Loop
     while SERVER_RUN:

@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
-from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon
+from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from mudlib.errors import SecurityViolation, ActionRefused
 from mudlib.npc import NPC
 from mudlib.player import Player
@@ -215,6 +215,71 @@ Present: julie, rat"""
         self.assertEqual(hall, rat.location)
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
+
+
+class TestDoorsExits(unittest.TestCase):
+    def test_allow(self):
+        player = Player("julie", "f")
+        hall = Location("hall")
+        attic = Location("attic")
+        unbound_exit = Exit("foo.bar", "a random exit")
+        with self.assertRaises(StandardError):
+            self.assertFalse(unbound_exit.allow("foobar",None,player))  # should fail because not bound
+        exit1 = Exit(attic, "first ladder to attic")
+        with self.assertRaises(StandardError):
+            self.assertFalse(exit1.allow("foobar",None,player))  # invalid action
+        exit1.allow("move",None,player)
+
+        door = Door(hall, "open unlocked door", "north", locked=False, open=True)
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("open", None, player)  # fail, it's already open
+        self.assertTrue("already" in str(x.exception))
+        door.allow("close", None, player)
+        self.assertTrue(door.open, "must still be open")
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("lock", None, player)  # default door can't be locked
+        self.assertTrue("can't" in str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("unlock", None, player)  # fail, it's not locked
+        self.assertTrue("not" in str(x.exception))
+
+        door = Door(hall, "open locked door", "north", locked=True, open=True)
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("open", None, player)  # fail, it's already open
+        self.assertTrue("already" in str(x.exception))
+        door.allow("close", None, player)
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("lock", None, player)  # it's already locked
+        self.assertTrue("already" in str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("unlock", None, player)  # you can't unlock it
+        self.assertTrue("can't" in str(x.exception))
+
+        door = Door(hall, "closed unlocked door", "north", locked=False, open=False)
+        door.allow("open", None, player)
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("close", None, player)  # it's already closed
+        self.assertTrue("already" in str(x.exception))
+
+        door = Door(hall, "closed locked door", "north", locked=True, open=False)
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("open", None, player)  # can't open it, it's locked
+        self.assertTrue("can't" in str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            door.allow("close", None, player)  # it's already closed
+        self.assertTrue("already" in str(x.exception))
+
+    def test_exits(self):
+        hall = Location("hall")
+        attic = Location("attic")
+        exit1 = Exit(attic, "first ladder to attic")
+        exit2 = Exit(attic, "second ladder to attic", "up")
+        exit3 = Exit(attic, "third ladder to attic", "ladder")
+        with self.assertRaises(ValueError):
+            hall.add_exits([exit1])    # direction must be specified
+        hall.add_exits([exit2, exit3])
+        self.assertTrue(hall.exits["up"] is exit2)
+        self.assertTrue(hall.exits["ladder"] is exit3)
 
 
 class TestLiving(unittest.TestCase):

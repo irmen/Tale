@@ -135,6 +135,8 @@ class Driver(object):
             # insert a space to separate the first char such as ' or ?
             cmd = cmd[0] + " " + cmd[1:]
         verb, _, rest = cmd.partition(" ")
+        if not verb:
+            return True
         verb = verb.strip()
         rest = rest.strip()
         # determine available verbs for this player
@@ -172,7 +174,7 @@ class Driver(object):
                 module = getattr(module, name)
             target = getattr(module, target_object)
             exit.bind(target)
-        exit.allow(self.player)
+        exit.allow("move", None, self.player)
         self.player.move(exit.target)
         self.player.tell(self.player.look())
 
