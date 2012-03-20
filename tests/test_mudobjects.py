@@ -216,57 +216,65 @@ Present: julie, rat"""
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
 
+    def test_allow(self):
+        hall = Location("hall")
+        item = Item("thingy")
+        player = Player("julie", "f")
+        with self.assertRaises(StandardError):
+            hall.allow_remove(None, player)
+        hall.allow_remove(item, player)
 
 class TestDoorsExits(unittest.TestCase):
-    def test_allow(self):
+    def test_actions(self):
         player = Player("julie", "f")
         hall = Location("hall")
         attic = Location("attic")
         unbound_exit = Exit("foo.bar", "a random exit")
         with self.assertRaises(StandardError):
-            self.assertFalse(unbound_exit.allow("foobar",None,player))  # should fail because not bound
+            self.assertFalse(unbound_exit.allow_move(player))  # should fail because not bound
         exit1 = Exit(attic, "first ladder to attic")
-        with self.assertRaises(StandardError):
-            self.assertFalse(exit1.allow("foobar",None,player))  # invalid action
-        exit1.allow("move",None,player)
+        exit1.allow_move(player)
 
-        door = Door(hall, "open unlocked door", "north", locked=False, open=True)
+        door = Door(hall, "open unlocked door", "north", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
-            door.allow("open", None, player)  # fail, it's already open
+            door.open(None, player)  # fail, it's already open
         self.assertTrue("already" in str(x.exception))
-        door.allow("close", None, player)
-        self.assertTrue(door.open, "must still be open")
+        door.close(None, player)
+        self.assertFalse(door.opened, "must be closed")
         with self.assertRaises(ActionRefused) as x:
-            door.allow("lock", None, player)  # default door can't be locked
+            door.lock(None, player)  # default door can't be locked
         self.assertTrue("can't" in str(x.exception))
         with self.assertRaises(ActionRefused) as x:
-            door.allow("unlock", None, player)  # fail, it's not locked
+            door.unlock(None, player)  # fail, it's not locked
         self.assertTrue("not" in str(x.exception))
 
-        door = Door(hall, "open locked door", "north", locked=True, open=True)
+        door = Door(hall, "open locked door", "north", locked=True, opened=True)
         with self.assertRaises(ActionRefused) as x:
-            door.allow("open", None, player)  # fail, it's already open
+            door.open(None, player)  # fail, it's already open
         self.assertTrue("already" in str(x.exception))
-        door.allow("close", None, player)
+        door.close(None, player)
         with self.assertRaises(ActionRefused) as x:
-            door.allow("lock", None, player)  # it's already locked
+            door.lock(None, player)  # it's already locked
         self.assertTrue("already" in str(x.exception))
         with self.assertRaises(ActionRefused) as x:
-            door.allow("unlock", None, player)  # you can't unlock it
+            door.unlock(None, player)  # you can't unlock it
         self.assertTrue("can't" in str(x.exception))
 
-        door = Door(hall, "closed unlocked door", "north", locked=False, open=False)
-        door.allow("open", None, player)
+        door = Door(hall, "closed unlocked door", "north", locked=False, opened=False)
+        door.open(None, player)
+        self.assertTrue(door.opened)
+        door.close(None, player)
+        self.assertFalse(door.opened)
         with self.assertRaises(ActionRefused) as x:
-            door.allow("close", None, player)  # it's already closed
+            door.close(None, player)  # it's already closed
         self.assertTrue("already" in str(x.exception))
 
-        door = Door(hall, "closed locked door", "north", locked=True, open=False)
+        door = Door(hall, "closed locked door", "north", locked=True, opened=False)
         with self.assertRaises(ActionRefused) as x:
-            door.allow("open", None, player)  # can't open it, it's locked
+            door.open(None, player)  # can't open it, it's locked
         self.assertTrue("can't" in str(x.exception))
         with self.assertRaises(ActionRefused) as x:
-            door.allow("close", None, player)  # it's already closed
+            door.close(None, player)  # it's already closed
         self.assertTrue("already" in str(x.exception))
 
     def test_exits(self):
@@ -290,11 +298,15 @@ class TestLiving(unittest.TestCase):
         self.assertTrue(axe in orc)
     def test_allow(self):
         orc = Living("orc", "m")
+        idiot = NPC("idiot", "m")
         player = Player("julie", "f")
         axe = Weapon("axe")
-        orc.allow("give", axe, player)      # should be fine, no checks on Ligin
-        orc.allow("take", axe, player)      # should be fine as well
-        orc.allow("bogus", None, None)
+        with self.assertRaises(ActionRefused) as x:
+            orc.allow_give(axe, player)
+        self.assertTrue("can't do that" in str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            idiot.allow_give(axe, player)
+        self.assertTrue("doesn't want" in str(x.exception))
 
 
 class TestNPC(unittest.TestCase):
@@ -316,19 +328,13 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
-    def test_allow(self):
+    def test_allow_give(self):
         orc = NPC("orc", "m", "stinky orc")
         player = Player("julie", "f")
         axe = Weapon("axe", "sharp axe")
         with self.assertRaises(ActionRefused) as x:
-            orc.allow("give", axe, player)
+            orc.allow_give(axe, player)
         self.assertEqual("Stinky orc doesn't want sharp axe.", str(x.exception))
-        with self.assertRaises(ActionRefused) as x:
-            orc.allow("bogus", axe, player)
-        self.assertEqual("You can't do that.", str(x.exception), "generic error for unrecognised actions")
-        with self.assertRaises(ActionRefused) as x:
-            orc.allow("bogus", None, None)
-        self.assertEqual("You can't do that.", str(x.exception), "generic error for unrecognised actions")
 
 
 class TestPlayer(unittest.TestCase):
@@ -382,6 +388,12 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual("message for room\n", "".join(player.get_output_lines()))
+    def test_allow(self):
+        player = Player("fritz", "m")
+        item = Item("gizmo")
+        with self.assertRaises(StandardError):
+            player.allow_give(None, player)
+        player.allow_give(item, player)
 
 
 class TestDescriptions(unittest.TestCase):
@@ -471,6 +483,35 @@ class TestContainer(unittest.TestCase):
         npc = NPC("julie","f")
         bag.inventory.add(key)
         self.assertTrue(key in bag)
+    def test_allow(self):
+        bag = Container("bag")
+        key = Item("key")
+        player = Player("julie", "f")
+        with self.assertRaises(StandardError):
+            bag.allow_remove(None, player)
+        bag.allow_remove(key, player)
+        with self.assertRaises(StandardError):
+            bag.allow_insert(None, player)
+        bag.allow_insert(key, player)
+        bag.allow_put(key, player)
+        bag.allow_take(player)
+
+
+class TestItem(unittest.TestCase):
+    def test_allow(self):
+        key = Item("key")
+        thing = Item("gizmo")
+        player = Player("julie", "f")
+        with self.assertRaises(ActionRefused):
+            key.allow_remove(None, player)
+        with self.assertRaises(ActionRefused):
+            key.allow_remove(thing, player)
+        with self.assertRaises(ActionRefused):
+            key.allow_insert(None, player)
+        with self.assertRaises(ActionRefused):
+            key.allow_insert(thing, player)
+        key.allow_put(thing, player)
+        key.allow_take(player)
 
 
 if __name__ == '__main__':

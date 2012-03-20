@@ -70,22 +70,6 @@ class MudObject(object):
     def destroy(self, ctx):
         pass
 
-    def allow(self, action, item, actor):
-        """
-        Validates that this object allows something to happen to it, by someone, with a certain action (such as 'give').
-        Raises ActionRefused('message') if the intended action was refused.
-        Make sure the message contains the name or title of the item: it is meant to be shown to the player.
-        Recognised standard action types:
-        - give (give it an item)
-        - take (pick it up)
-        - add (put item into it)
-        - remove (remove item from it)
-        - open (open an item) - default:refused
-        - close (close an item) - default:refused
-        """
-        if action in ("open", "close"):
-            raise ActionRefused("You can't do that.")
-
 
 class Item(MudObject):
     """
@@ -95,6 +79,34 @@ class Item(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
+
+    def allow_take(self, actor):
+        """Does this item allow to be taken? Raise ActionRefused if not"""
+        pass
+
+    def allow_put(self, target, actor):
+        """Does the item allow to be put inside something else? Raise ActionRefused if not"""
+        pass
+
+    def allow_remove(self, item, actor):
+        """Does this item allow something to be taken out of it? Raise ActionRefused if not"""
+        raise ActionRefused("You can't take things from there.")
+
+    def allow_insert(self, item, actor):
+        """Does this item allow something to be inserted into it? Raise ActionRefused if not"""
+        raise ActionRefused("You can't put things in there.")
+
+    def open(self, item, actor):
+        raise ActionRefused("You can't open that.")
+
+    def close(self, item, actor):
+        raise ActionRefused("You can't close that.")
+
+    def lock(self, item, actor):
+        raise ActionRefused("You can't lock that.")
+
+    def unlock(self, item, actor):
+        raise ActionRefused("You can't unlock that.")
 
 
 class Weapon(Item):
@@ -244,6 +256,10 @@ class Location(MudObject):
         elif obj in self.items:
             self.items.remove(obj)
 
+    def allow_remove(self, item, actor):
+        """Allow an item to be taken by an actor? Raise ActionRefused if not"""
+        assert item
+
 
 _Limbo = Location("Limbo",
                      """
@@ -282,14 +298,21 @@ class Exit(object):
         self.target = target_location
         self.bound = True
 
-    def allow(self, action, item, actor):
-        """
-        Should the actor be allowed through the exit?
-        If it's not, ActionRefused is raised.
-        action = "move", item = n/a. More complex actions (open/close/lock/unlock) are supported by Door.
-        """
+    def allow_move(self, actor):
+        """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
-        assert action == "move"
+
+    def open(self, item, actor):
+        raise ActionRefused("You can't open that.")
+
+    def close(self, item, actor):
+        raise ActionRefused("You can't close that.")
+
+    def lock(self, item, actor):
+        raise ActionRefused("You can't lock that.")
+
+    def unlock(self, item, actor):
+        raise ActionRefused("You can't unlock that.")
 
 
 class Living(MudObject):
@@ -403,11 +426,14 @@ class Living(MudObject):
         return (matches[0], containing_object) if matches else (None, None)
 
     def start_attack(self, living):
-        """
-        Starts attacking the given living until death ensues on either side.
-        """
+        """Starts attacking the given living until death ensues on either side."""
         # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
         pass
+
+    def allow_give(self, item, actor):
+        """Does this creature allow the actor to give it an item?"""
+        assert item
+        raise ActionRefused("You can't do that.")
 
 
 class Container(Item):
@@ -422,6 +448,12 @@ class Container(Item):
 
     def __contains__(self, item):
         return item in self.inventory
+
+    def allow_remove(self, item, actor):
+        assert item
+
+    def allow_insert(self, item, actor):
+        assert item
 
 
 class Effect(object):
@@ -438,69 +470,59 @@ class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, target_location, description, direction=None, locked=False, open=True):
+    def __init__(self, target_location, description, direction=None, locked=False, opened=True):
         super(Door, self).__init__(target_location, description, direction)
         self.locked = locked
-        self.open = open
+        self.opened = opened
 
     def __repr__(self):
         target = self.target.name if self.bound else self.target
         locked = "locked" if self.locked else "open"
         return "<baseobjects.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
 
-    def allow(self, action, item, actor):
-        """
-        Should the actor be allowed through the exit, or do something with it?
-        If it's not, ActionRefused is raised.
-        action = 'move', 'open', 'unlock' (with optional item), 'close', 'lock' (with optional item)
-        By default, unlock fails (if the door is locked). Override allow_unlock to change this.
-        By default, lock fails (if the door is unlocked). Override allow_lock to change this.
-        Open and close work as normal and they check if the door's locked or not.
-        Move simply checks if the door is open (lock/unlock status don't matter if it's open).
-        NOTE that the open/locked status isn't changed here! You need to do that yourself!
-        """
+    def allow_move(self, actor):
+        """Is the actor allowed to move through this door?"""
         assert self.bound
-        if action == "move":
-            if not self.open:
-                raise ActionRefused("You can't go there; it's closed.")
-        elif action == "open":
-            if self.open:
-                raise ActionRefused("It's already open.")
-            elif self.locked:
-                raise ActionRefused("You can't open it; it's locked.")
-            else:
-                actor.tell("You opened it.")
-                who = lang.capital(actor.title)
-                if self.direction:
-                    actor.location.tell("%s opened the exit %s." % (who, self.direction))
-                else:
-                    actor.location.tell("%s opened an exit." % who)
-        elif action == "close":
-            if not self.open:
-                raise ActionRefused("It's already closed.")
-            actor.tell("You closed it.")
+        if not self.opened:
+            raise ActionRefused("You can't go there; it's closed.")
+
+    def open(self, item, actor):
+        """Open the door with optional item"""
+        if self.opened:
+            raise ActionRefused("It's already open.")
+        elif self.locked:
+            raise ActionRefused("You can't open it; it's locked.")
+        else:
+            self.opened = True
+            actor.tell("You opened it.")
             who = lang.capital(actor.title)
             if self.direction:
-                actor.location.tell("%s closed the exit %s." % (who, self.direction))
+                actor.location.tell("%s opened the exit %s." % (who, self.direction))
             else:
-                actor.location.tell("%s closed an exit." % who)
-        elif action == "unlock":
-            if self.locked:
-                return self.allow_unlock(item, actor)
-            else:
-                raise ActionRefused("It's not locked.")
-        elif action == "lock":
-            if self.locked:
-                raise ActionRefused("It's already locked.")
-            else:
-                return self.allow_lock(item, actor)
+                actor.location.tell("%s opened an exit." % who)
+
+    def close(self, item, actor):
+        """Close the door with optional item"""
+        if not self.opened:
+            raise ActionRefused("It's already closed.")
+        self.opened = False
+        actor.tell("You closed it.")
+        who = lang.capital(actor.title)
+        if self.direction:
+            actor.location.tell("%s closed the exit %s." % (who, self.direction))
         else:
-            raise ValueError("invalid door action: " + action)
+            actor.location.tell("%s closed an exit." % who)
 
-    def allow_lock(self, item, actor):
-        """override this in subclass"""
-        raise ActionRefused("You can't lock it.")
+    def lock(self, item, actor):
+        """Lock the door with something, default is to not allow locking (override in subclass)"""
+        if self.locked:
+            raise ActionRefused("It's already locked.")
+        else:
+            raise ActionRefused("You can't lock it.")
 
-    def allow_unlock(self, item, actor):
-        """override this in subclass"""
-        raise ActionRefused("You can't unlock it.")
+    def unlock(self, item, actor):
+        """Unlock the door with something, default is to not allow unlocking (override in subclass)"""
+        if self.locked:
+            raise ActionRefused("You can't unlock it.")
+        else:
+            raise ActionRefused("It's not locked.")

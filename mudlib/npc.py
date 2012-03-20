@@ -18,12 +18,10 @@ class NPC(baseobjects.Living):
     def __init__(self, name, gender, title=None, description=None, race="human"):
         super(NPC, self).__init__(name, gender, title, description, race)
 
-    def allow(self, action, item, actor):
-        """By default, NPC refuse every special action on them."""
-        super(NPC, self).allow(action, item, actor)
-        if action == "give" and item:
-            raise ActionRefused("%s doesn't want %s." % (languagetools.capital(self.title), item.title))
-        raise ActionRefused("You can't do that.")
+    def allow_give(self, item, actor):
+        """NPC have a bit nicer refusal message when giving items to them."""
+        assert item
+        raise ActionRefused("%s doesn't want %s." % (languagetools.capital(self.title), item.title))
 
 
 class Monster(NPC):

@@ -152,6 +152,9 @@ def do_put(player, verb, args, **ctx):
                 if item is where:
                     print("You can't put %s in itself." % item.title)
                     continue
+                # @todo add items to error list, just like take cmd
+                where.allow_insert(item, player)  # does the target allow putting an item in it?
+                item.allow_put(where, player)  # doe the item allow being put into something?
                 if item in player:
                     # simply use the item from the player's inventory
                     player.inventory.remove(item)
@@ -176,7 +179,7 @@ def do_put(player, verb, args, **ctx):
                 print("You take {items}, and put {it} in the {where}.".format(
                     items=items_msg, it=it_msg, where=where.name))
         else:
-            raise ActionRefused("You can't put that in there.")
+            raise ActionRefused("You can't put things in there.")
     else:
         living = player.location.search_living(where_name)
         if living:
@@ -212,7 +215,8 @@ def do_take(player, verb, args, **ctx):
         refused = []
         for item in items:
             try:
-                item.allow("take", None, player)
+                item.allow_take(player)  # does item allow to be picked up?
+                container.allow_remove(item, player)  # does container allow item to be removed?
             except ActionRefused as x:
                 refused.append((item, str(x)))
             else:
@@ -311,15 +315,18 @@ def do_give(player, verb, arg, **ctx):
         target = player.location.search_living(target_name)
         if not target:
             raise ActionRefused("%s isn't here." % target_name)
+        if target is player:
+            raise ActionRefused("There's no reason to give things to yourself.")
         items = list(items)
         refused = []
         for item in items:
             try:
-                target.allow("give", item, player)
-                player.inventory.remove(item)
-                target.inventory.add(item)
+                target.allow_give(item, player)     # does the target allow player to give it an item?
             except ActionRefused as x:
                 refused.append((item, str(x)))
+            else:
+                player.inventory.remove(item)
+                target.inventory.add(item)
         for item, message in refused:
             print(message)
             items.remove(item)
@@ -539,14 +546,12 @@ def print_player_info(player):
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, verb, args, **ctx):
-    print = player.tell
     args = args.split()
     if len(args) == 0:
         raise ParseError("%s what? With what?" % languagetools.capital(verb))
     what_name = args[0]
     with_item_name = None
     with_item = None
-    is_exit = False
     if len(args) > 1:
         if args[1]=="with" and len(args) > 2:
             with_item_name = args[2]
@@ -556,31 +561,11 @@ def do_open(player, verb, args, **ctx):
     if not what:
         if what_name in player.location.exits:
             what = player.location.exits[what_name]
-            is_exit = True
     if what:
         if with_item_name:
             with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
                 raise ActionRefused("You don't have %s." % languagetools.a(with_item_name))
-        what.allow(verb, with_item, player)
-        # @todo implement proper action code.....
-        if is_exit:
-            if verb == "open":
-                print("You opened it.")
-            elif verb == "close":
-                print("You closed it.")
-            elif verb == "lock":
-                print("You locked it.")
-            elif verb == "unlock":
-                print("You unlocked it.")
-        else:
-            if verb == "open":
-                print("You opened the %s." % what.title)
-            elif verb == "close":
-                print("You closed the %s." % what.title)
-            elif verb == "lock":
-                print("You locked the %s." % what.title)
-            elif verb == "unlock":
-                print("You unlocked the %s." % what.title)
+        getattr(what, verb)(with_item, player)
     else:
         raise ActionRefused("You don't see %s." % languagetools.a(what_name))

@@ -174,7 +174,7 @@ class Driver(object):
                 module = getattr(module, name)
             target = getattr(module, target_object)
             exit.bind(target)
-        exit.allow("move", None, self.player)
+        exit.allow_move(self.player)
         self.player.move(exit.target)
         self.player.tell(self.player.look())
 

@@ -34,7 +34,7 @@ lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
 class WizardTowerEntry(Exit):
-    def allow(self, actor):
+    def allow(self, actor):  # @todo fix this forcefield
         if "wizard" in actor.privileges:
             actor.tell("You pass through the force-field.")
         else:
@@ -67,10 +67,10 @@ square.enter(ant)
 
 
 alley = Location("Alley of doors", "An alley filled with doors.")
-door1 = Door(alley, "door1 (unlocked and open)", direction="door1", locked=False, open=True)
-door2 = Door(alley, "door2 (locked and open)", direction="door2", locked=True, open=True)
-door3 = Door(alley, "door3 (unlocked and closed)", direction="door3", locked=False, open=False)
-door4 = Door(alley, "door4 (locked and closed)", direction="door4", locked=True, open=False)
+door1 = Door(alley, "door1 (unlocked and open)", direction="door1", locked=False, opened=True)
+door2 = Door(alley, "door2 (locked and open)", direction="door2", locked=True, opened=True)
+door3 = Door(alley, "door3 (unlocked and closed)", direction="door3", locked=False, opened=False)
+door4 = Door(alley, "door4 (locked and closed)", direction="door4", locked=True, opened=False)
 
 alley.add_exits([door1, door2, door3, door4])
 alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
