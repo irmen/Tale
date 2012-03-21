@@ -6,7 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 from . import baseobjects
-from . import languagetools
+from . import lang
 from .errors import ActionRefused
 
 
@@ -21,7 +21,7 @@ class NPC(baseobjects.Living):
     def allow_give(self, item, actor):
         """NPC have a bit nicer refusal message when giving items to them."""
         assert item
-        raise ActionRefused("%s doesn't want %s." % (languagetools.capital(self.title), item.title))
+        raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
 
 class Monster(NPC):
@@ -37,7 +37,7 @@ class Monster(NPC):
         """
         Starts attacking the given living until death ensues on either side
         """
-        name = languagetools.capital(self.title)
+        name = lang.capital(self.title)
         room_msg = "%s starts attacking %s!" % (name, victim.title)
         victim_msg = "%s starts attacking you!" % name
         attacker_msg = "You start attacking %s!" % victim.title

@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
-from .. import languagetools
+from .. import lang
 from .. import soul
 from .. import races
 from .. import util
@@ -35,7 +35,7 @@ def do_inventory(player, verb, arg, **ctx):
         living = player.location.search_living(arg)
         if living:
             # show another living's inventory
-            name = languagetools.capital(living.title)
+            name = lang.capital(living.title)
             if not living.inventory:
                 print(name, "is carrying nothing.")
             else:
@@ -70,7 +70,7 @@ def do_locate(player, verb, name, **ctx):
     if not name:
         raise ParseError("Locate what/who?")
     print("You look around to see if you can locate %s." % name)
-    player.location.tell("%s looks around." % languagetools.capital(player.title), exclude_living=player)
+    player.location.tell("%s looks around." % lang.capital(player.title), exclude_living=player)
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
@@ -80,7 +80,7 @@ def do_locate(player, verb, name, **ctx):
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
         print("(by %s you probably mean %s)" % (name, living.name))
     if living and living is not player:
-        print("%s is here next to you." % languagetools.capital(living.title))
+        print("%s is here next to you." % lang.capital(living.title))
     player = ctx["driver"].search_player(name)  # global player search
     if player:
         print_player_info(player)
@@ -113,10 +113,10 @@ def do_drop(player, verb, arg, **ctx):
         for item, message in refused:
             items.remove(item)
             print(message)
-        items_str = languagetools.join(languagetools.a(item.title) for item in items)
+        items_str = lang.join(lang.a(item.title) for item in items)
         print("You drop %s." % items_str)
         player.location.tell("{player} drops {items}."
-                             .format(player=languagetools.capital(player.title), items=items_str),
+                             .format(player=lang.capital(player.title), items=items_str),
                              exclude_living=player)
 
     if arg == "all":
@@ -128,7 +128,7 @@ def do_drop(player, verb, arg, **ctx):
     else:
         item, container = player.locate_item(arg, include_location=False)
         if not item:
-            raise ActionRefused("You don't have %s." % languagetools.a(arg))
+            raise ActionRefused("You don't have %s." % lang.a(arg))
         else:
             if container is not player:
                 util.print_object_location(player, item, container)
@@ -154,7 +154,7 @@ def do_put(player, verb, args, **ctx):
     else:
         what = player.search_item(args[0], include_location=True)
         if not what:
-            raise ActionRefused("You don't see %s." % languagetools.a(args[0]))
+            raise ActionRefused("You don't see %s." % lang.a(args[0]))
         what = [what]
     where = player.search_item(where_name)
     if where:
@@ -185,16 +185,16 @@ def do_put(player, verb, args, **ctx):
         for item, message in refused:
             print(message)
         if inventory_items:
-            items_msg = languagetools.join(languagetools.a(item.title) for item in inventory_items)
+            items_msg = lang.join(lang.a(item.title) for item in inventory_items)
             player.location.tell("{player} puts {items} in the {where}.".format(
-                player=languagetools.capital(player.title),
+                player=lang.capital(player.title),
                 items=items_msg, where=where.name), exclude_living=player)
             print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
         if room_items:
-            items_msg = languagetools.join(languagetools.a(item.title) for item in room_items)
+            items_msg = lang.join(lang.a(item.title) for item in room_items)
             it_msg = "it" if len(inventory_items) < 2 else "them"
             player.location.tell("{player} takes {items}, and puts {it} in the {where}.".format(
-                player=languagetools.capital(player.title),
+                player=lang.capital(player.title),
                 items=items_msg, it=it_msg, where=where.name), exclude_living=player)
             print("You take {items}, and put {it} in the {where}.".format(
                 items=items_msg, it=it_msg, where=where.name))
@@ -247,9 +247,9 @@ def do_take(player, verb, args, **ctx):
             print(message)
             items.remove(item)
         if items:
-            items_str = languagetools.join(languagetools.a(item.title) for item in items)
+            items_str = lang.join(lang.a(item.title) for item in items)
             print(player_msg.format(items=items_str))
-            player.location.tell(room_msg.format(player=languagetools.capital(player.title), items=items_str), exclude_living=player)
+            player.location.tell(room_msg.format(player=lang.capital(player.title), items=items_str), exclude_living=player)
         else:
             print("You didn't take anything.")
 
@@ -272,7 +272,7 @@ def do_take(player, verb, args, **ctx):
             if living:
                 if living is player:
                     raise ActionRefused("There's no reason to take things from yourself.")
-                player.location.tell("%s tries to steal things from %s." % (languagetools.capital(player.title), living.title), exclude_living=player)
+                player.location.tell("%s tries to steal things from %s." % (lang.capital(player.title), living.title), exclude_living=player)
                 if living.aggressive:
                     living.start_attack(player)  # stealing stuff is hostile!
                 raise ActionRefused("You can't just steal stuff from %s!" % living.title)
@@ -301,7 +301,7 @@ def do_take(player, verb, args, **ctx):
             if living:
                 if living is player:
                     raise ActionRefused("There's no reason to take things from yourself.")
-                player.location.tell("%s tries to steal something from %s." % (languagetools.capital(player.title), living.title), exclude_living=player)
+                player.location.tell("%s tries to steal something from %s." % (lang.capital(player.title), living.title), exclude_living=player)
                 if living.aggressive:
                     living.start_attack(player)  # stealing stuff is hostile!
                 raise ActionRefused("You can't just steal stuff from %s!" % living.title)
@@ -353,8 +353,8 @@ def do_give(player, verb, arg, **ctx):
             print(message)
             items.remove(item)
         if items:
-            items_str = languagetools.join(languagetools.a(item.title) for item in items)
-            player_str = languagetools.capital(player.title)
+            items_str = lang.join(lang.a(item.title) for item in items)
+            player_str = lang.capital(player.title)
             room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
             target_msg = "%s gives you %s." % (player_str, items_str)
             player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
@@ -448,11 +448,11 @@ def do_examine(player, verb, name, **ctx):
         race = races.races[living.race]
         if living.race == "human":
             # don't print as much info when dealing with mere humans
-            msg = languagetools.capital("%s speaks %s." % (living.subjective, race["language"]))
+            msg = lang.capital("%s speaks %s." % (living.subjective, race["language"]))
             print(msg)
         else:
             print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                subj=languagetools.capital(living.subjective),
+                subj=lang.capital(living.subjective),
                 size=races.sizes[race["size"]],
                 btype=races.bodytypes[race["bodytype"]],
                 race=living.race,
@@ -466,9 +466,9 @@ def do_examine(player, verb, name, **ctx):
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
             print("(by %s you probably mean %s)" % (name, item.name))
         if item in player:
-            print("You're carrying %s." % languagetools.a(item.title))
+            print("You're carrying %s." % lang.a(item.title))
         else:
-            print("You see %s." % languagetools.a(item.title))
+            print("You see %s." % lang.a(item.title))
         if item.description:
             print(item.description)
         try:
@@ -477,7 +477,7 @@ def do_examine(player, verb, name, **ctx):
             return
         else:
             if item.inventory:
-                print("It contains: %s." % languagetools.join(subitem.title for subitem in item.inventory))
+                print("It contains: %s." % lang.join(subitem.title for subitem in item.inventory))
             else:
                 print("It's empty.")
             return
@@ -500,15 +500,15 @@ def do_stats(player, verb, arg, **ctx):
             raise ActionRefused("%s isn't here." % arg)
     else:
         target = player
-    gender = languagetools.GENDERS[target.gender]
+    gender = lang.GENDERS[target.gender]
     living_type = target.__class__.__name__.lower()
     race = races.races[target.race]
     race_size = races.sizes[race["size"]]
     race_bodytype = races.bodytypes[race["bodytype"]]
     print("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type))
-    print("%s %s, speaks %s, weighs ~%s kg." % (languagetools.capital(race_size), race_bodytype, race["language"], race["mass"]))
+    print("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]))
     if target.aggressive:
-        print("%s looks aggressive." % languagetools.capital(target.subjective))
+        print("%s looks aggressive." % lang.capital(target.subjective))
     print(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
 
 
@@ -548,7 +548,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.location.tell("{player} takes the {item} from the {container}.".format(
-        player=languagetools.capital(player.title), item=item.name, container=container.name), exclude_living=player)
+        player=lang.capital(player.title), item=item.name, container=container.name), exclude_living=player)
 
 
 @cmd("who")
@@ -567,14 +567,14 @@ def do_who(player, verb, name, **ctx):
 
 
 def print_player_info(player):
-    player.tell("%s is playing, %s is currently in '%s'." % (languagetools.capital(player.title), player.subjective, player.location.name))
+    player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(player.title), player.subjective, player.location.name))
 
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, verb, args, **ctx):
     args = args.split()
     if len(args) == 0:
-        raise ParseError("%s what? With what?" % languagetools.capital(verb))
+        raise ParseError("%s what? With what?" % lang.capital(verb))
     what_name = args[0]
     with_item_name = None
     with_item = None
@@ -591,7 +591,7 @@ def do_open(player, verb, args, **ctx):
         if with_item_name:
             with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
-                raise ActionRefused("You don't have %s." % languagetools.a(with_item_name))
+                raise ActionRefused("You don't have %s." % lang.a(with_item_name))
         getattr(what, verb)(with_item, player)
     else:
-        raise ActionRefused("You don't see %s." % languagetools.a(what_name))
+        raise ActionRefused("You don't see %s." % lang.a(what_name))

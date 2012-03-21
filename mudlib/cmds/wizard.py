@@ -11,7 +11,7 @@ import functools
 import sys
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import baseobjects
-from .. import languagetools
+from .. import lang
 from .. import npc
 from .. import rooms
 from .. import util
@@ -96,20 +96,20 @@ def do_clone(player, verb, path, **ctx):
         player.inventory.add(item)
         print("Cloned: " + repr(item))
         player.location.tell("{player} conjures up {item}, and quickly pockets it."
-                             .format(player=languagetools.capital(player.title),
-                                     item=languagetools.a(item.title)),
+                             .format(player=lang.capital(player.title),
+                                     item=lang.a(item.title)),
                              exclude_living=player)
     elif isinstance(obj, npc.NPC):
         clone = copy.deepcopy(obj)
         clone.cpr()  # (re)start heartbeat
         print("Cloned: " + repr(clone))
         player.location.tell("{player} summons {npc}."
-                             .format(player=languagetools.capital(player.title),
-                                     npc=languagetools.a(clone.title)),
+                             .format(player=lang.capital(player.title),
+                                     npc=lang.a(clone.title)),
                              exclude_living=player)
         player.location.enter(clone)
     else:
-        raise ActionRefused("Can't clone " + languagetools.a(obj.__class__.__name__))
+        raise ActionRefused("Can't clone " + lang.a(obj.__class__.__name__))
 
 
 @wizcmd("destroy")
@@ -131,15 +131,15 @@ def do_destroy(player, verb, arg, **ctx):
         if victim:
             if victim is player:
                 raise ActionRefused("You can't destroy yourself, are you insane?!")
-            victim.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % languagetools.capital(player.title))
+            victim.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % lang.capital(player.title))
             victim.destroy(ctx)
         else:
             raise ActionRefused("There's no %s here." % arg)
     print("You destroyed %r." % victim)
     player.location.tell("{player} makes some gestures and a tiny black hole appears.\n"
                          "{victim} disappears in it, and the black hole immediately vanishes."
-                         .format(player=languagetools.capital(player.title),
-                                 victim=languagetools.capital(victim.title)),
+                         .format(player=lang.capital(player.title),
+                                 victim=lang.capital(victim.title)),
                          exclude_living=player)
 
 
@@ -226,27 +226,27 @@ def teleport_to(player, location):
     """helper function for teleport command, to teleport the player somewhere"""
     print = player.tell
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
-                         languagetools.capital(player.title), exclude_living=player)
+                         lang.capital(player.title), exclude_living=player)
     player.location.tell("%s jumps into the portal, which quickly closes behind %s." %
-                         (languagetools.capital(player.subjective), player.objective), exclude_living=player)
+                         (lang.capital(player.subjective), player.objective), exclude_living=player)
     player.move(location, force_and_silent=True)
     print("You've been teleported.")
     print(player.look())
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
     location.tell("%s jumps out, and the portal quickly closes behind %s." %
-                  (languagetools.capital(player.title), player.objective), exclude_living=player)
+                  (lang.capital(player.title), player.objective), exclude_living=player)
 
 
 def teleport_someone_to_player(who, player):
     """helper function for teleport command, to teleport someone to the player"""
     who.location.tell("Suddenly, a shimmering portal opens!")
-    room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (languagetools.capital(who.title), who.objective)
+    room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
     who.move(player.location, force_and_silent=True)
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
-                         languagetools.capital(player.title), exclude_living=who)
+                         lang.capital(player.title), exclude_living=who)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." %
-                         languagetools.capital(who.title), exclude_living=who)
+                         lang.capital(who.title), exclude_living=who)
 
 
 @wizcmd("reload")
@@ -310,7 +310,7 @@ def do_move(player, verb, arg, **ctx):
     print("Moved %s (%s) from %s (%s) to %s (%s)." %
         (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
     player.location.tell("%s moved %s into %s." %
-        (languagetools.capital(player.title), thing.title, target.title), exclude_living=player)
+        (lang.capital(player.title), thing.title, target.title), exclude_living=player)
 
 
 def move_something(thing, thing_container, thing_container_type, destination, destination_type):

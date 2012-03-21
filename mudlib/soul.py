@@ -12,7 +12,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 import re
-from . import languagetools as lang
+from . import lang
 from .errors import ParseError
 
 
