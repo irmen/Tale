@@ -5,10 +5,10 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import copy
-from ..baseobjects import Location, Exit, Door, Item
+from ..baseobjects import Location, Exit, Door, Item, Container
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
-from ..items.basic import trashcan, newspaper
+from ..items.basic import trashcan, newspaper, gem
 
 square = Location("Essglen Town square",
     """
@@ -33,10 +33,27 @@ class CursedGem(Item):
     def allow_put(self, target, actor):
         raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
 
+
+class InsertOnlyBox(Container):
+    def allow_remove(self, item, actor):
+        raise ActionRefused("The box is cursed! You can't take anything out of it!")
+
+
+class RemoveOnlyBox(Container):
+    def allow_insert(self, item, actor):
+        raise ActionRefused("No matter how hard you try, you can't fit %s in the box." % item.title)
+
+insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
+removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
+normal_gem = copy.copy(gem)
+removeonly_box.inventory.add(normal_gem)
+
 cursed_gem = CursedGem("gem", "a dark gem")
 square.enter(cursed_gem)
 square.enter(paper)
 square.enter(trashcan)
+square.enter(insertonly_box)
+square.enter(removeonly_box)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 

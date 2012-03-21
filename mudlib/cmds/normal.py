@@ -343,7 +343,9 @@ def do_give(player, verb, arg, **ctx):
         refused = []
         for item in items:
             try:
-                target.allow_give(item, player)     # does the target allow player to give it an item?
+                item.allow_put(target, player)     # does the item allow the player to give it to target?
+                target.allow_give(item, player)    # does the target allow player to give it an item?
+                player.allow_remove(item, player)  # allowed to take it from inventory?
             except ActionRefused as x:
                 refused.append((item, str(x)))
             else:
