@@ -97,16 +97,28 @@ def do_drop(player, verb, arg, **ctx):
 
     def drop_stuff(items, container):
         items = list(items)
+        refused = []
         for item in items:
-            if container is not player and container in player:
-                print_item_removal(player, item, container)
-            container.inventory.remove(item)
-            player.location.enter(item)
+            try:
+                item.allow_put(player.location, player)  # does the item allow to be dropped in the room?
+                player.location.allow_insert(item, player)  # does the room accept the item?
+                container.allow_remove(item, player)  # does the current container accept removal?
+            except ActionRefused as x:
+                refused.append((item, str(x)))
+            else:
+                if container is not player and container in player:
+                    print_item_removal(player, item, container)
+                container.inventory.remove(item)
+                player.location.enter(item)
+        for item, message in refused:
+            items.remove(item)
+            print(message)
         items_str = languagetools.join(languagetools.a(item.title) for item in items)
         print("You drop %s." % items_str)
         player.location.tell("{player} drops {items}."
                              .format(player=languagetools.capital(player.title), items=items_str),
                              exclude_living=player)
+
     if arg == "all":
         if not player.inventory:
             raise ActionRefused("You're not carrying anything.")
@@ -125,6 +137,7 @@ def do_drop(player, verb, arg, **ctx):
 
 @cmd("put")
 def do_put(player, verb, args, **ctx):
+    """put = take (if not in inventory) + place into somewhere else"""
     print = player.tell
     args = args.split()
     if len(args) < 2:
@@ -145,14 +158,14 @@ def do_put(player, verb, args, **ctx):
         what = [what]
     where = player.search_item(where_name)
     if where:
-        if getattr(where, "public_inventory", False):
-            room_items = []
-            inventory_items = []
-            for item in what:
-                if item is where:
-                    print("You can't put %s in itself." % item.title)
-                    continue
-                # @todo add items to error list, just like take cmd
+        room_items = []
+        inventory_items = []
+        refused = []
+        for item in what:
+            if item is where:
+                print("You can't put %s in itself." % item.title)
+                continue
+            try:
                 where.allow_insert(item, player)  # does the target allow putting an item in it?
                 item.allow_put(where, player)  # doe the item allow being put into something?
                 if item in player:
@@ -161,25 +174,30 @@ def do_put(player, verb, args, **ctx):
                     inventory_items.append(item)
                 elif item in player.location:
                     # take the item from the room
+                    item.allow_take(player)  # does item allow to be picked up?
+                    player.location.allow_remove(item, player)  # allowed to remove it from the room?
                     player.location.leave(item)
                     room_items.append(item)
+            except ActionRefused as x:
+                refused.append((item, str(x)))
+            else:
                 where.inventory.add(item)
-            if inventory_items:
-                items_msg = languagetools.join(languagetools.a(item.title) for item in inventory_items)
-                player.location.tell("{player} puts {items} in the {where}.".format(
-                    player=languagetools.capital(player.title),
-                    items=items_msg, where=where.name), exclude_living=player)
-                print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
-            if room_items:
-                items_msg = languagetools.join(languagetools.a(item.title) for item in room_items)
-                it_msg = "it" if len(inventory_items) < 2 else "them"
-                player.location.tell("{player} takes {items}, and puts {it} in the {where}.".format(
-                    player=languagetools.capital(player.title),
-                    items=items_msg, it=it_msg, where=where.name), exclude_living=player)
-                print("You take {items}, and put {it} in the {where}.".format(
-                    items=items_msg, it=it_msg, where=where.name))
-        else:
-            raise ActionRefused("You can't put things in there.")
+        for item, message in refused:
+            print(message)
+        if inventory_items:
+            items_msg = languagetools.join(languagetools.a(item.title) for item in inventory_items)
+            player.location.tell("{player} puts {items} in the {where}.".format(
+                player=languagetools.capital(player.title),
+                items=items_msg, where=where.name), exclude_living=player)
+            print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
+        if room_items:
+            items_msg = languagetools.join(languagetools.a(item.title) for item in room_items)
+            it_msg = "it" if len(inventory_items) < 2 else "them"
+            player.location.tell("{player} takes {items}, and puts {it} in the {where}.".format(
+                player=languagetools.capital(player.title),
+                items=items_msg, it=it_msg, where=where.name), exclude_living=player)
+            print("You take {items}, and put {it} in the {where}.".format(
+                items=items_msg, it=it_msg, where=where.name))
     else:
         living = player.location.search_living(where_name)
         if living:
@@ -240,13 +258,15 @@ def do_take(player, verb, args, **ctx):
             # take all stuff out of some container
             container = player.search_item(where)
             if container:
-                if getattr(container, "public_inventory", False):
+                try:
+                    container.allow_examine_inventory(player)
+                except ActionRefused:
+                    raise ActionRefused("You can't take things from there.")
+                else:
                     if container.inventory:
                         return take_stuff(container.inventory, container, False, where)
                     else:
                         raise ActionRefused("There's nothing in there.")
-                else:
-                    raise ActionRefused("You can't take things from there.")
             # no container, check if a living was targeted
             living = player.location.search_living(where)
             if living:
@@ -267,13 +287,15 @@ def do_take(player, verb, args, **ctx):
             # take specific item out of some container
             container = player.search_item(where)
             if container:
-                if getattr(container, "public_inventory", False):
+                try:
+                    container.allow_examine_inventory(player)
+                except ActionRefused:
+                    raise ActionRefused("You can't take things from there.")
+                else:
                     for item in container.inventory:
                         if item.name == what:
                             return take_stuff([item], container, False, where)
                     raise ActionRefused("There's no %s in there." % what)
-                else:
-                    raise ActionRefused("You can't take things from there.")
             # no container, check if a living was targeted
             living = player.location.search_living(where)
             if living:
@@ -449,12 +471,16 @@ def do_examine(player, verb, name, **ctx):
             print("You see %s." % languagetools.a(item.title))
         if item.description:
             print(item.description)
-        if getattr(item, "public_inventory", False):
+        try:
+            item.allow_examine_inventory(player)
+        except ActionRefused:
+            return
+        else:
             if item.inventory:
-                print("It contains:", languagetools.join(subitem.title for subitem in item.inventory))
+                print("It contains: %s." % languagetools.join(subitem.title for subitem in item.inventory))
             else:
                 print("It's empty.")
-        return
+            return
     if name in player.location.exits:
         print("It seems you can go there:")
         print(player.location.exits[name].description)
@@ -553,7 +579,7 @@ def do_open(player, verb, args, **ctx):
     with_item_name = None
     with_item = None
     if len(args) > 1:
-        if args[1]=="with" and len(args) > 2:
+        if args[1] == "with" and len(args) > 2:
             with_item_name = args[2]
         else:
             with_item_name = args[1]

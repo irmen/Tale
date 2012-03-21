@@ -223,6 +223,7 @@ Present: julie, rat"""
         with self.assertRaises(StandardError):
             hall.allow_remove(None, player)
         hall.allow_remove(item, player)
+        hall.allow_insert(item, player)
 
 class TestDoorsExits(unittest.TestCase):
     def test_actions(self):
@@ -307,6 +308,10 @@ class TestLiving(unittest.TestCase):
         with self.assertRaises(ActionRefused) as x:
             idiot.allow_give(axe, player)
         self.assertTrue("doesn't want" in str(x.exception))
+        orc.allow_remove(axe, orc)
+        with self.assertRaises(ActionRefused) as x:
+            orc.allow_remove(axe, player)
+        self.assertTrue("can't take" in str(x.exception))
 
 
 class TestNPC(unittest.TestCase):
@@ -495,6 +500,23 @@ class TestContainer(unittest.TestCase):
         bag.allow_insert(key, player)
         bag.allow_put(key, player)
         bag.allow_take(player)
+        with self.assertRaises(ActionRefused):
+            key.allow_insert(bag, player)
+        with self.assertRaises(ActionRefused):
+            key.allow_remove(bag, player)
+        bag.allow_examine_inventory(player)
+        with self.assertRaises(ActionRefused):
+            key.allow_examine_inventory(player)
+    def test_inventory(self):
+        bag = Container("bag")
+        key = Item("key")
+        thing = Item("gizmo")
+        self.assertFalse(thing in key)
+        self.assertFalse(thing in bag)
+        with self.assertRaises(AttributeError):
+            key.inventory.add(thing)  # can't add stuf to an Item
+        bag.inventory.add(thing)
+        self.assertTrue(thing in bag)
 
 
 class TestItem(unittest.TestCase):

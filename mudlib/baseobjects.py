@@ -76,24 +76,34 @@ class Item(MudObject):
     Root class of all Items in the mud world. Items are physical objects.
     Items can usually be moved, carried, or put inside other items.
     They have a name and optional short and longer descriptions.
+    You can test for containment with 'in': item in bag (but the containment
+    is always empty and so it will always return False for a regular Item)
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
+        self.inventory = frozenset()   # override this with set() to allow inventory modification
+
+    def __contains__(self, item):
+        return item in self.inventory
 
     def allow_take(self, actor):
-        """Does this item allow to be taken? Raise ActionRefused if not"""
+        """Does it allow to be taken? (yes, no ActionRefused raised)"""
         pass
 
     def allow_put(self, target, actor):
-        """Does the item allow to be put inside something else? Raise ActionRefused if not"""
+        """Does it allow to be put inside something else? (yes, ActionRefused not raised)"""
         pass
 
+    def allow_examine_inventory(self, actor):
+        """Does it allow someone to look inside its inventory/contents? (no, raises ActionRefused)"""
+        raise ActionRefused("You can't see what's in there.")
+
     def allow_remove(self, item, actor):
-        """Does this item allow something to be taken out of it? Raise ActionRefused if not"""
+        """Does it allow something to be taken out of it? (no, raises ActionRefused)"""
         raise ActionRefused("You can't take things from there.")
 
     def allow_insert(self, item, actor):
-        """Does this item allow something to be inserted into it? Raise ActionRefused if not"""
+        """Does it allow something to be inserted into it? (no, raises ActionRefused)"""
         raise ActionRefused("You can't put things in there.")
 
     def open(self, item, actor):
@@ -257,7 +267,11 @@ class Location(MudObject):
             self.items.remove(obj)
 
     def allow_remove(self, item, actor):
-        """Allow an item to be taken by an actor? Raise ActionRefused if not"""
+        """Allow an item to be taken by an actor? (yes, ActionRefused not raised)"""
+        assert item
+
+    def allow_insert(self, item, actor):
+        """Does this location allow something to be inserted into it? (yes, ActionRefused not raised)"""
         assert item
 
 
@@ -415,14 +429,13 @@ class Living(MudObject):
         if not matches and include_containers_in_inventory:
             # check if an item in the inventory might contain it
             for container in self.inventory:
-                if getattr(container, "public_inventory", False):
-                    containing_object = container
-                    matches = [item for item in container.inventory if item.name == name]
-                    if not matches:
-                        # try the aliases or titles
-                        matches = [item for item in container.inventory if name in item.aliases or item.title.lower() == name]
-                    if matches:
-                        break
+                containing_object = container
+                matches = [item for item in container.inventory if item.name == name]
+                if not matches:
+                    # try the aliases or titles
+                    matches = [item for item in container.inventory if name in item.aliases or item.title.lower() == name]
+                if matches:
+                    break
         return (matches[0], containing_object) if matches else (None, None)
 
     def start_attack(self, living):
@@ -435,19 +448,27 @@ class Living(MudObject):
         assert item
         raise ActionRefused("You can't do that.")
 
+    def allow_remove(self, item, actor):
+        """Does this creature allow the actor to remove something from its inventory?"""
+        if actor is self:
+            pass
+        else:
+            raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
+
 
 class Container(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
+    Allows insert and remove, and examine its contents, as opposed to an Item
     You can test for containment with 'in': item in bag
     """
     def __init__(self, name, title=None, description=None):
         super(Container, self).__init__(name, title, description)
-        self.inventory = set()
-        self.public_inventory = True  # inventory is visible to all players when inspecting
+        self.inventory = set()  # override the frozenset() from Item to allow true containment here
 
-    def __contains__(self, item):
-        return item in self.inventory
+    def allow_examine_inventory(self, actor):
+        """Does it allow someone to look inside its inventory/contents? (yes, no ActionRefused raised)"""
+        pass
 
     def allow_remove(self, item, actor):
         assert item

@@ -314,18 +314,20 @@ def do_move(player, verb, arg, **ctx):
 
 
 def move_something(thing, thing_container, thing_container_type, destination, destination_type):
-    if destination_type == "item" and not isinstance(destination, baseobjects.Container):
-        raise ActionRefused("Destination item is not a bag/container and can't hold anything.")
-    # remove the thing from where it is now
-    if thing_container_type == "location":
-        thing_container.leave(thing, force_and_silent=True)
+    try:
+        # move the thing to its destination first (if this fails, everything is just as it was)
+        if destination_type == "location":
+            destination.enter(thing, force_and_silent=True)
+        else:
+            destination.inventory.add(thing)  # all other types: just chuck it in their inventory
+    except Exception as x:
+        raise ActionRefused("Couldn't move it, destination can't hold objects? (%s)" % x)
     else:
-        thing_container.inventory.remove(thing)  # all other types: just pop it from their inventory
-    # move the thing to its destination
-    if destination_type == "location":
-        destination.enter(thing, force_and_silent=True)
-    else:
-        destination.inventory.add(thing)  # all other types: just chuck it in their inventory
+        # remove the thing from where it is now
+        if thing_container_type == "location":
+            thing_container.leave(thing, force_and_silent=True)
+        else:
+            thing_container.inventory.remove(thing)  # all other types: just pop it from their inventory
 
 
 @wizcmd("debug")

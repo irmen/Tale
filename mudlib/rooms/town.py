@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import copy
-from ..baseobjects import Location, Exit, Door
+from ..baseobjects import Location, Exit, Door, Item
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper
@@ -27,6 +27,14 @@ square.exits["lane"] = square.exits["north"]
 
 paper = copy.copy(newspaper)
 paper.aliases = {"paper"}
+
+
+class CursedGem(Item):
+    def allow_put(self, target, actor):
+        raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
+
+cursed_gem = CursedGem("gem", "a dark gem")
+square.enter(cursed_gem)
 square.enter(paper)
 square.enter(trashcan)
 
@@ -34,7 +42,7 @@ lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
 class WizardTowerEntry(Exit):
-    def allow(self, actor):  # @todo fix this forcefield
+    def allow_move(self, actor):
         if "wizard" in actor.privileges:
             actor.tell("You pass through the force-field.")
         else:
