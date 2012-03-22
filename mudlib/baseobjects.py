@@ -518,9 +518,9 @@ class Door(Exit):
             actor.tell("You opened it.")
             who = lang.capital(actor.title)
             if self.direction:
-                actor.location.tell("%s opened the exit %s." % (who, self.direction))
+                actor.location.tell("%s opened the exit %s." % (who, self.direction), exclude_living=actor)
             else:
-                actor.location.tell("%s opened an exit." % who)
+                actor.location.tell("%s opened an exit." % who, exclude_living=actor)
 
     def close(self, item, actor):
         """Close the door with optional item"""
@@ -530,9 +530,9 @@ class Door(Exit):
         actor.tell("You closed it.")
         who = lang.capital(actor.title)
         if self.direction:
-            actor.location.tell("%s closed the exit %s." % (who, self.direction))
+            actor.location.tell("%s closed the exit %s." % (who, self.direction), exclude_living=actor)
         else:
-            actor.location.tell("%s closed an exit." % who)
+            actor.location.tell("%s closed an exit." % who, exclude_living=actor)
 
     def lock(self, item, actor):
         """Lock the door with something, default is to not allow locking (override in subclass)"""

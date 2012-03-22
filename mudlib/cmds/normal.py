@@ -113,12 +113,14 @@ def do_drop(player, verb, arg, **ctx):
         for item, message in refused:
             items.remove(item)
             print(message)
-        items_str = lang.join(lang.a(item.title) for item in items)
-        print("You drop %s." % items_str)
-        player.location.tell("{player} drops {items}."
-                             .format(player=lang.capital(player.title), items=items_str),
-                             exclude_living=player)
-
+        if items:
+            items_str = lang.join(lang.a(item.title) for item in items)
+            print("You drop %s." % items_str)
+            player.location.tell("{player} drops {items}."
+                                 .format(player=lang.capital(player.title), items=items_str),
+                                 exclude_living=player)
+        else:
+            print("You didn't drop anything.")
     if arg == "all":
         if not player.inventory:
             raise ActionRefused("You're not carrying anything.")
