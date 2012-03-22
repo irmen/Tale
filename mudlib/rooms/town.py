@@ -35,18 +35,18 @@ class CursedGem(Item):
 
 
 class InsertOnlyBox(Container):
-    def allow_remove(self, item, actor):
+    def __isub__(self, item):
         raise ActionRefused("The box is cursed! You can't take anything out of it!")
 
 
 class RemoveOnlyBox(Container):
-    def allow_insert(self, item, actor):
+    def __iadd__(self, item):
         raise ActionRefused("No matter how hard you try, you can't fit %s in the box." % item.title)
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
 normal_gem = copy.copy(gem)
-removeonly_box.inventory.add(normal_gem)
+removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("gem", "a dark gem")
 square.enter(cursed_gem)

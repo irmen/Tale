@@ -45,7 +45,8 @@ Exit
 Effect
 
 
-Every object that can hold other objects does so in its "inventory" attribute (a set).
+Every object that can hold other objects does so in its "inventory" (a set).
+You can't access it directly, object.inventory() returns a frozenset copy of it.
 Except Location: it separates the items and livings it contains internally. Use its enter/leave methods.
 """
 
@@ -81,10 +82,21 @@ class Item(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
-        self.inventory = frozenset()   # override this with set() to allow inventory modification
 
     def __contains__(self, item):
-        return item in self.inventory
+        raise ActionRefused("You can't look inside of that.")
+
+    def inventory(self):
+        raise ActionRefused("You can't look inside of that.")
+
+    def inventory_size(self):
+        raise ActionRefused("You can't look inside of that.")
+
+    def __iadd__(self, item):
+        raise ActionRefused("You can't put things in there.")
+
+    def __isub__(self, item):
+        raise ActionRefused("You can't take things from there.")
 
     def allow_take(self, actor):
         """Does it allow to be taken? (yes, no ActionRefused raised)"""
@@ -93,18 +105,6 @@ class Item(MudObject):
     def allow_put(self, target, actor):
         """Does it allow to be put inside something else? (yes, ActionRefused not raised)"""
         pass
-
-    def allow_examine_inventory(self, actor):
-        """Does it allow someone to look inside its inventory/contents? (no, raises ActionRefused)"""
-        raise ActionRefused("You can't see what's in there.")
-
-    def allow_remove(self, item, actor):
-        """Does it allow something to be taken out of it? (no, raises ActionRefused)"""
-        raise ActionRefused("You can't take things from there.")
-
-    def allow_insert(self, item, actor):
-        """Does it allow something to be inserted into it? (no, raises ActionRefused)"""
-        raise ActionRefused("You can't put things in there.")
 
     def open(self, item, actor):
         raise ActionRefused("You can't open that.")
@@ -266,14 +266,6 @@ class Location(MudObject):
         elif obj in self.items:
             self.items.remove(obj)
 
-    def allow_remove(self, item, actor):
-        """Allow an item to be taken by an actor? (yes, ActionRefused not raised)"""
-        assert item
-
-    def allow_insert(self, item, actor):
-        """Does this location allow something to be inserted into it? (yes, ActionRefused not raised)"""
-        assert item
-
 
 _Limbo = Location("Limbo",
                      """
@@ -348,18 +340,32 @@ class Living(MudObject):
         self.stats = {}
         if race:
             self.set_race(race)
-        self.inventory = set()
+        self.__inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
         self.cpr()
 
     def __contains__(self, item):
-        return item in self.inventory
+        return item in self.__inventory
+
+    def inventory_size(self):
+        return len(self.__inventory)
+
+    def inventory(self):
+        return frozenset(self.__inventory)
+
+    def __iadd__(self, item):
+        assert isinstance(item, MudObject)
+        self.__inventory.add(item)
+        return self
+
+    def __isub__(self, item):
+        raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
     def destroy(self, ctx):
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
         self.location = None
-        self.inventory.clear()
+        self.__inventory.clear()
         self.wiretaps.clear()
         # @todo: remove heartbeat, deferred, attack status, etc.
 
@@ -416,10 +422,10 @@ class Living(MudObject):
         matches = containing_object = None
         if include_inventory:
             containing_object = self
-            matches = [item for item in self.inventory if item.name == name]
+            matches = [item for item in self.__inventory if item.name == name]
             if not matches:
                 # try the aliases or titles
-                matches = [item for item in self.inventory if name in item.aliases or item.title.lower() == name]
+                matches = [item for item in self.__inventory if name in item.aliases or item.title.lower() == name]
         if not matches and include_location:
             containing_object = self.location
             matches = [item for item in self.location.items if item.name == name]
@@ -428,14 +434,19 @@ class Living(MudObject):
                 matches = [item for item in self.location.items if name in item.aliases or item.title.lower() == name]
         if not matches and include_containers_in_inventory:
             # check if an item in the inventory might contain it
-            for container in self.inventory:
+            for container in self.__inventory:
                 containing_object = container
-                matches = [item for item in container.inventory if item.name == name]
-                if not matches:
-                    # try the aliases or titles
-                    matches = [item for item in container.inventory if name in item.aliases or item.title.lower() == name]
-                if matches:
-                    break
+                try:
+                    inventory = container.inventory()
+                except ActionRefused:
+                    continue    # no access to inventory, just skip this item silently
+                else:
+                    matches = [item for item in inventory if item.name == name]
+                    if not matches:
+                        # try the aliases or titles
+                        matches = [item for item in inventory if name in item.aliases or item.title.lower() == name]
+                    if matches:
+                        break
         return (matches[0], containing_object) if matches else (None, None)
 
     def start_attack(self, living):
@@ -443,38 +454,42 @@ class Living(MudObject):
         # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
         pass
 
-    def allow_give(self, item, actor):
-        """Does this creature allow the actor to give it an item?"""
-        assert item
-        raise ActionRefused("You can't do that.")
-
-    def allow_remove(self, item, actor):
-        """Does this creature allow the actor to remove something from its inventory?"""
-        if actor is self:
-            pass
-        else:
-            raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
-
 
 class Container(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
     Allows insert and remove, and examine its contents, as opposed to an Item
-    You can test for containment with 'in': item in bag
+    You can test for containment with 'in': item in bag,
+    size with inventory_size(),
+    add stuff with container += thing,
+    remove stuff with container -= thing.
     """
     def __init__(self, name, title=None, description=None):
         super(Container, self).__init__(name, title, description)
-        self.inventory = set()  # override the frozenset() from Item to allow true containment here
+        self.__inventory = set()  # override the frozenset() from Item to allow true containment here
 
-    def allow_examine_inventory(self, actor):
-        """Does it allow someone to look inside its inventory/contents? (yes, no ActionRefused raised)"""
-        pass
+    def init_inventory(self, items):
+        """Set the container's initial inventory"""
+        assert len(self.__inventory) == 0
+        self.__inventory = set(items)
 
-    def allow_remove(self, item, actor):
-        assert item
+    def inventory(self):
+        return frozenset(self.__inventory)
 
-    def allow_insert(self, item, actor):
-        assert item
+    def inventory_size(self):
+        return len(self.__inventory)
+
+    def __contains__(self, item):
+        return item in self.__inventory
+
+    def __iadd__(self, item):
+        assert isinstance(item, MudObject)
+        self.__inventory.add(item)
+        return self
+
+    def __isub__(self, item):
+        self.__inventory.remove(item)
+        return self
 
 
 class Effect(object):

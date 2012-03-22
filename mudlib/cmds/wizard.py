@@ -93,7 +93,7 @@ def do_clone(player, verb, path, **ctx):
         raise ActionRefused("Object not found")
     elif isinstance(obj, baseobjects.Item):
         item = copy.deepcopy(obj)
-        player.inventory.add(item)
+        player += item
         print("Cloned: " + repr(item))
         player.location.tell("{player} conjures up {item}, and quickly pockets it."
                              .format(player=lang.capital(player.title),
@@ -121,7 +121,7 @@ def do_destroy(player, verb, arg, **ctx):
     victim = player.search_item(arg, include_containers_in_inventory=False)
     if victim:
         if victim in player:
-            player.inventory.remove(victim)
+            player -= victim
         else:
             player.location.leave(victim)
         victim.destroy(ctx)
@@ -319,7 +319,7 @@ def move_something(thing, thing_container, thing_container_type, destination, de
         if destination_type == "location":
             destination.enter(thing, force_and_silent=True)
         else:
-            destination.inventory.add(thing)  # all other types: just chuck it in their inventory
+            destination += thing  # all other types: just chuck it in their inventory
     except Exception as x:
         raise ActionRefused("Couldn't move it, destination can't hold objects? (%s)" % x)
     else:
@@ -327,7 +327,7 @@ def move_something(thing, thing_container, thing_container_type, destination, de
         if thing_container_type == "location":
             thing_container.leave(thing, force_and_silent=True)
         else:
-            thing_container.inventory.remove(thing)  # all other types: just pop it from their inventory
+            thing_container -= thing  # all other types: just pop it from their inventory
 
 
 @wizcmd("debug")

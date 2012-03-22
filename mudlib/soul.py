@@ -658,7 +658,7 @@ class Soul(object):
         for item in player.location.items:
             all_livings_names.add(item.name)
             all_livings_names.update(item.aliases)
-        for item in player.inventory:
+        for item in player.inventory():
             all_livings_names.add(item.name)
             all_livings_names.update(item.aliases)
         for word in words:

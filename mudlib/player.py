@@ -33,10 +33,6 @@ class Player(baseobjects.Living):
         else:
             self.title = title
 
-    def allow_give(self, item, actor):
-        """Players usually accept stuff to be given to them."""
-        assert item
-
     def socialize(self, commandstring):
         return self.soul.process_verb(self, commandstring)
 

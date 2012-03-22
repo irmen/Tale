@@ -15,8 +15,8 @@ class TestUtil(unittest.TestCase):
         key = Item("key")
         bag = Container("bag")
         room = Location("room")
-        bag.inventory.add(key)
-        p.inventory.add(bag)
+        bag+=key
+        p+=bag
         room.enter(p)
         with self.assertRaises(StandardError):
             mudlib.util.print_object_location(p, None, None)

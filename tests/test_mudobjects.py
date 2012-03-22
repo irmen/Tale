@@ -45,9 +45,9 @@ class TestLocations(unittest.TestCase):
         self.pencil.aliases = {"pen"}
         self.bag = Container("bag")
         self.notebook_in_bag = Item("notebook")
-        self.bag.inventory.add(self.notebook_in_bag)
-        self.player.inventory.add(self.pencil)
-        self.player.inventory.add(self.bag)
+        self.bag += self.notebook_in_bag
+        self.player += self.pencil
+        self.player += self.bag
         self.hall.enter(self.rat)
         self.hall.enter(self.julie)
         self.hall.enter(self.player)
@@ -216,14 +216,6 @@ Present: julie, rat"""
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
 
-    def test_allow(self):
-        hall = Location("hall")
-        item = Item("thingy")
-        player = Player("julie", "f")
-        with self.assertRaises(StandardError):
-            hall.allow_remove(None, player)
-        hall.allow_remove(item, player)
-        hall.allow_insert(item, player)
 
 class TestDoorsExits(unittest.TestCase):
     def test_actions(self):
@@ -295,22 +287,18 @@ class TestLiving(unittest.TestCase):
     def test_contains(self):
         orc = Living("orc", "m")
         axe = Weapon("axe")
-        orc.inventory.add(axe)
+        orc += axe
         self.assertTrue(axe in orc)
-    def test_allow(self):
+        self.assertTrue(axe in orc.inventory())
+        self.assertEqual(1, orc.inventory_size())
+        self.assertEqual(1, len(orc.inventory()))
+    def test_allowance(self):
         orc = Living("orc", "m")
         idiot = NPC("idiot", "m")
         player = Player("julie", "f")
         axe = Weapon("axe")
         with self.assertRaises(ActionRefused) as x:
-            orc.allow_give(axe, player)
-        self.assertTrue("can't do that" in str(x.exception))
-        with self.assertRaises(ActionRefused) as x:
-            idiot.allow_give(axe, player)
-        self.assertTrue("doesn't want" in str(x.exception))
-        orc.allow_remove(axe, orc)
-        with self.assertRaises(ActionRefused) as x:
-            orc.allow_remove(axe, player)
+            orc -= axe
         self.assertTrue("can't take" in str(x.exception))
 
 
@@ -333,13 +321,6 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
-    def test_allow_give(self):
-        orc = NPC("orc", "m", "stinky orc")
-        player = Player("julie", "f")
-        axe = Weapon("axe", "sharp axe")
-        with self.assertRaises(ActionRefused) as x:
-            orc.allow_give(axe, player)
-        self.assertEqual("Stinky orc doesn't want sharp axe.", str(x.exception))
 
 
 class TestPlayer(unittest.TestCase):
@@ -393,12 +374,6 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual("message for room\n", "".join(player.get_output_lines()))
-    def test_allow(self):
-        player = Player("fritz", "m")
-        item = Item("gizmo")
-        with self.assertRaises(StandardError):
-            player.allow_give(None, player)
-        player.allow_give(item, player)
 
 
 class TestDescriptions(unittest.TestCase):
@@ -465,17 +440,17 @@ class TestDestroy(unittest.TestCase):
         player = Player("julie","f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)
-        player.inventory.add(Item("key"))
+        player += Item("key")
         loc.enter(player)
         self.assertTrue(len(loc.wiretaps)>0)
         self.assertEqual(loc, player.location)
         self.assertTrue(len(player.installed_wiretaps)>0)
-        self.assertTrue(len(player.inventory)>0)
+        self.assertTrue(len(player.inventory())>0)
         self.assertTrue(player in loc.livings)
         player.destroy(ctx)
         self.assertTrue(len(loc.wiretaps)==0)
         self.assertTrue(len(player.installed_wiretaps)==0)
-        self.assertTrue(len(player.inventory)==0)
+        self.assertTrue(len(player.inventory())==0)
         self.assertFalse(player in loc.livings)
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
 
@@ -484,56 +459,68 @@ class TestContainer(unittest.TestCase):
     def test_container_contains(self):
         bag = Container("bag")
         key = Item("key")
-        self.assertTrue(len(bag.inventory)==0)
+        self.assertEqual(0, len(bag.inventory()))
+        self.assertEqual(0, bag.inventory_size())
         npc = NPC("julie","f")
-        bag.inventory.add(key)
+        bag+=key
         self.assertTrue(key in bag)
-    def test_allow(self):
+        self.assertEqual(1, bag.inventory_size())
+        bag-=key
+        self.assertEqual(0, bag.inventory_size())
+        self.assertFalse(key in bag)
+        with self.assertRaises(KeyError):
+            bag-="not_existing"
+    def test_allowance(self):
         bag = Container("bag")
         key = Item("key")
         player = Player("julie", "f")
         with self.assertRaises(StandardError):
-            bag.allow_remove(None, player)
-        bag.allow_remove(key, player)
-        with self.assertRaises(StandardError):
-            bag.allow_insert(None, player)
-        bag.allow_insert(key, player)
+            bag += None
+        bag += key
+        with self.assertRaises(KeyError):
+            bag -= None
+        bag -= key
         bag.allow_put(key, player)
         bag.allow_take(player)
         with self.assertRaises(ActionRefused):
-            key.allow_insert(bag, player)
+            key += bag
         with self.assertRaises(ActionRefused):
-            key.allow_remove(bag, player)
-        bag.allow_examine_inventory(player)
+            key -= bag
+        self.assertFalse(key in bag)
         with self.assertRaises(ActionRefused):
-            key.allow_examine_inventory(player)
+            bag in key
     def test_inventory(self):
         bag = Container("bag")
         key = Item("key")
         thing = Item("gizmo")
-        self.assertFalse(thing in key)
+        with self.assertRaises(ActionRefused):
+            thing in key  # can't check for containment in an Item
         self.assertFalse(thing in bag)
-        with self.assertRaises(AttributeError):
-            key.inventory.add(thing)  # can't add stuf to an Item
-        bag.inventory.add(thing)
+        with self.assertRaises(ActionRefused):
+            key += thing  # can't add stuf to an Item
+        bag += thing
         self.assertTrue(thing in bag)
 
 
 class TestItem(unittest.TestCase):
-    def test_allow(self):
+    def test_insertremove(self):
         key = Item("key")
         thing = Item("gizmo")
         player = Player("julie", "f")
         with self.assertRaises(ActionRefused):
-            key.allow_remove(None, player)
+            key -= None
         with self.assertRaises(ActionRefused):
-            key.allow_remove(thing, player)
+            key -= thing
         with self.assertRaises(ActionRefused):
-            key.allow_insert(None, player)
+            key += None
         with self.assertRaises(ActionRefused):
-            key.allow_insert(thing, player)
+            key += thing
         key.allow_put(thing, player)
         key.allow_take(player)
+        with self.assertRaises(ActionRefused):
+            key.inventory()
+        with self.assertRaises(ActionRefused):
+            key.inventory_size()
 
 
 if __name__ == '__main__':
