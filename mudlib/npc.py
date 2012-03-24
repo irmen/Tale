@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 from __future__ import print_function, division
 from . import base
 from . import lang
+from .errors import ActionRefused
 
 
 class NPC(base.Living):
@@ -17,6 +18,10 @@ class NPC(base.Living):
     def __init__(self, name, gender, title=None, description=None, race="human"):
         super(NPC, self).__init__(name, gender, title, description, race)
 
+    def insert(self, item, actor):
+        """NPC have a bit nicer refuse message when giving items to them."""
+        raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
+
 
 class Monster(NPC):
     """
@@ -26,6 +31,10 @@ class Monster(NPC):
     def __init__(self, name, gender, race, title=None, description=None):
         super(Monster, self).__init__(name, gender, title, description, race)
         self.aggressive = True
+
+    def insert(self, item, actor):
+        """Giving stuff to a monster is... unwise."""
+        raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
 
     def start_attack(self, victim):
         """

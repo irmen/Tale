@@ -103,6 +103,7 @@ class Item(MudObject):
         Leave the source container, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
         """
+        self.allow_move(actor)
         source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
@@ -111,8 +112,8 @@ class Item(MudObject):
             source_container.insert(self, actor)
             raise
 
-    def allow_take(self, actor):
-        """Does it allow to be taken? (yes, no ActionRefused raised)"""
+    def allow_move(self, actor):
+        """Does it allow to be moved by someone? (yes, no ActionRefused raised)"""
         pass
 
     def open(self, item, actor):
@@ -322,7 +323,7 @@ class Exit(object):
         self.target = target_location
         self.bound = True
 
-    def allow_move(self, actor):
+    def allow_passage(self, actor):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
 
@@ -372,9 +373,12 @@ class Living(MudObject):
         return frozenset(self.__inventory)
 
     def insert(self, item, actor):
-        """add an item to the inventory"""
-        assert isinstance(item, MudObject)
-        self.__inventory.add(item)
+        """Add an item to the inventory."""
+        if actor is self:
+            assert isinstance(item, MudObject)
+            self.__inventory.add(item)
+        else:
+            raise ActionRefused("You can't do that.")
 
     def remove(self, item, actor):
         """remove an item from the inventory"""
@@ -438,7 +442,6 @@ class Living(MudObject):
             target_location.insert(self, actor)
         if not silent:
             target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
-
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """
@@ -552,7 +555,7 @@ class Door(Exit):
         locked = "locked" if self.locked else "open"
         return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
 
-    def allow_move(self, actor):
+    def allow_passage(self, actor):
         """Is the actor allowed to move through this door?"""
         assert self.bound
         if not self.opened:

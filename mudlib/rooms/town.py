@@ -56,7 +56,7 @@ lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
 class WizardTowerEntry(Exit):
-    def allow_move(self, actor):
+    def allow_passage(self, actor):
         if "wizard" in actor.privileges:
             actor.tell("You pass through the force-field.")
         else:

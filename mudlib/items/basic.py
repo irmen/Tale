@@ -9,8 +9,8 @@ from ..errors import ActionRefused
 
 
 class FixedItem(Container):  # something that cannot be picked up
-    def allow_take(self, actor):
-        raise ActionRefused("You can't pick up %s." % self.title)
+    def allow_move(self, actor):
+        raise ActionRefused("You can't move %s." % self.title)
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells funky too.")

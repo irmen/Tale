@@ -157,7 +157,6 @@ def do_put(player, verb, args, **ctx):
         what = [what]
     where = player.search_item(where_name)
     if where:
-        room_items = []
         inventory_items = []
         refused = []
         for item in what:
@@ -170,9 +169,13 @@ def do_put(player, verb, args, **ctx):
                     item.move(player, where, player)
                     inventory_items.append(item)
                 elif item in player.location:
-                    # take the item from the room
-                    item.move(player.location, where, player)
-                    room_items.append(item)
+                    # first take the item from the room, then move it to the target location
+                    item.move(player.location, player, player)
+                    print("You take %s." % item.title)
+                    player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
+                    item.move(player, where, player)
+                    print("You put it in the %s." % where.name)
+                    player.location.tell("%s puts it in the %s." % (lang.capital(player.subjective), where.name), exclude_living=player)
             except ActionRefused as x:
                 refused.append((item, str(x)))
         for item, message in refused:
@@ -183,14 +186,6 @@ def do_put(player, verb, args, **ctx):
                 player=lang.capital(player.title),
                 items=items_msg, where=where.name), exclude_living=player)
             print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
-        if room_items:
-            items_msg = lang.join(lang.a(item.title) for item in room_items)
-            it_msg = "it" if len(inventory_items) < 2 else "them"
-            player.location.tell("{player} takes {items}, and puts {it} in the {where}.".format(
-                player=lang.capital(player.title),
-                items=items_msg, it=it_msg, where=where.name), exclude_living=player)
-            print("You take {items}, and put {it} in the {where}.".format(
-                items=items_msg, it=it_msg, where=where.name))
     else:
         living = player.location.search_living(where_name)
         if living:
@@ -199,7 +194,7 @@ def do_put(player, verb, args, **ctx):
             raise ActionRefused("There's no %s here." % where_name)
 
 
-@cmd("take")
+@cmd("take", "get")
 def do_take(player, verb, args, **ctx):
     """take thing|all , take thing|all [from] something"""
     print = player.tell
@@ -226,12 +221,9 @@ def do_take(player, verb, args, **ctx):
         refused = []
         for item in items:
             try:
-                item.allow_take(player)  # does item allow to be picked up?
+                item.move(container, player, player)
             except ActionRefused as x:
                 refused.append((item, str(x)))
-            else:
-                container.remove(item, player)
-                player.insert(item, player)
         for item, message in refused:
             print(message)
             items.remove(item)
