@@ -624,6 +624,18 @@ For more general help, try the 'help' command first."""
         found = True
         _, playermessage, roommessage, _ = player.socialize_parsed("smile", qualifier=name)
         print("It is a qualifier for something. %s smile -> %s" % (name, playermessage))
+    if name in lang.ADVERBS:
+        found = True
+        _, playermessage, roommessage, _ = player.socialize_parsed("smile", adverb=name)
+        print("That's an adverb you can use with the soul emote commands.")
+        print("smile %s -> %s" % (name, playermessage))
+    if name in races.races:
+        found = True
+        race = races.races[name]
+        size_msg = races.sizes[race["size"]]
+        body_msg = races.bodytypes[race["bodytype"]]
+        lang_msg = race["language"]
+        print("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
     # is it a command?
     if name in ctx["verbs"]:
         found = True
@@ -668,6 +680,15 @@ For more general help, try the 'help' command first."""
         print("They usually are just for socialization or fun and are not normally considered")
         print("considered to be a command to actually do something or interact with things.")
         print("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
+        print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
+        print("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
+        print("There are all sorts of emote possibilities, for instance:")
+        print("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.")
+        print("  pat max on the back  ->  You pat Max on the back.")
+        print("  reply max sure thing  ->  You reply to Max: sure thing.")
+        print("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)")
+        print("  slap all  ->  You slap X, Y and Z in the face.")
+        print("  slap all and me  ->  You slap yourself, X, Y and Z in the face.")
     if name == "emotes":
         # if player asks about the emotes, print all soul emote verbs
         found = True
@@ -679,6 +700,21 @@ For more general help, try the 'help' command first."""
             index += 1
         for line in lines:
             print(line)
+    if name in ("adverb", "averbs"):
+        found = True
+        print("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
+        print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
+        print("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
+    if name in ("bodypart", "bodyparts"):
+        found = True
+        print("You can sometimes use a specific body part with certain soul emotes.")
+        print("For instance, 'hit max knee' -> You hit Max on the knee.")
+        print("Recognised body parts:", ", ".join(soul.BODY_PARTS))
+    if name in ("qualifier", "qualifiers"):
+        found = True
+        print("You can use an action qualifier to change the meaning of a soul emote.")
+        print("For instance, 'fail stand' -> You try to stand up, but fail miserably.")
+        print("Recognised qualifiers:", ", ".join(soul.ACTION_QUALIFIERS))
     if name in ("that", "this", "they", "them", "it"):
         raise ActionRefused("Be more specific.")
     if not found:
