@@ -229,7 +229,7 @@ def teleport_to(player, location):
                          lang.capital(player.title), exclude_living=player)
     player.location.tell("%s jumps into the portal, which quickly closes behind %s." %
                          (lang.capital(player.subjective), player.objective), exclude_living=player)
-    player.move(location, force_and_silent=True)
+    player.move(location)
     print("You've been teleported.")
     print(player.look())
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
@@ -242,7 +242,7 @@ def teleport_someone_to_player(who, player):
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
-    who.move(player.location, force_and_silent=True)
+    who.move(player.location)
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
                          lang.capital(player.title), exclude_living=who)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." %

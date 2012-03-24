@@ -98,12 +98,21 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
+    def move(self, source_container, target_container, actor):
+        """
+        Leave the source container, enter the target container (transactional).
+        Because items can move on various occasions, there's no message being printed.
+        """
+        source_container.remove(self, actor)
+        try:
+            target_container.insert(self, actor)
+        except:
+            # insert in target failed, put back in original location
+            source_container.insert(self, actor)
+            raise
+
     def allow_take(self, actor):
         """Does it allow to be taken? (yes, no ActionRefused raised)"""
-        pass
-
-    def allow_put(self, target, actor):
-        """Does it allow to be put inside something else? (yes, ActionRefused not raised)"""
         pass
 
     def open(self, item, actor):
@@ -408,11 +417,28 @@ class Living(MudObject):
         for tap in self.wiretaps:
             tap.tell(*messages)
 
-    def move(self, target_location, force_and_silent=False):
-        """leave the current location, enter the new location"""
+    def move(self, target_location, actor=None, silent=False):
+        """
+        Leave the current location, enter the new location (transactional).
+        Messages are being printed to the locations if the move was succesful.
+        """
+        actor = actor or self
         if self.location:
-            self.location.remove(self, self)
-        target_location.insert(self, self)
+            original_location = self.location
+            self.location.remove(self, actor)
+            try:
+                target_location.insert(self, actor)
+            except:
+                # insert in target failed, put back in original location
+                original_location.insert(self, actor)
+                raise
+            if not silent:
+                original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
+        else:
+            target_location.insert(self, actor)
+        if not silent:
+            target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
+
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """

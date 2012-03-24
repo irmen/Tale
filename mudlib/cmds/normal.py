@@ -102,14 +102,11 @@ def do_drop(player, verb, arg, **ctx):
         refused = []
         for item in items:
             try:
-                item.allow_put(player.location, player)  # does the item allow to be dropped in the room?
-            except ActionRefused as x:
-                refused.append((item, str(x)))
-            else:
+                item.move(container, player.location, player)
                 if container is not player and container in player:
                     print_item_removal(player, item, container)
-                container.remove(item, player)
-                player.location.insert(item, player)
+            except ActionRefused as x:
+                refused.append((item, str(x)))
         for item, message in refused:
             items.remove(item)
             print(message)
@@ -168,20 +165,16 @@ def do_put(player, verb, args, **ctx):
                 print("You can't put %s in itself." % item.title)
                 continue
             try:
-                item.allow_put(where, player)  # doe the item allow being put into something?
                 if item in player:
                     # simply use the item from the player's inventory
-                    player.remove(item, player)
+                    item.move(player, where, player)
                     inventory_items.append(item)
                 elif item in player.location:
                     # take the item from the room
-                    item.allow_take(player)  # does item allow to be picked up?
-                    player.location.remove(item, player)
+                    item.move(player.location, where, player)
                     room_items.append(item)
             except ActionRefused as x:
                 refused.append((item, str(x)))
-            else:
-                where.insert(item, player)
         for item, message in refused:
             print(message)
         if inventory_items:
@@ -329,12 +322,9 @@ def do_give(player, verb, arg, **ctx):
         refused = []
         for item in items:
             try:
-                item.allow_put(target, player)     # does the item allow the player to give it to target?
+                item.move(player, target, player)
             except ActionRefused as x:
                 refused.append((item, str(x)))
-            else:
-                player.remove(item, player)
-                target.insert(item, player)
         for item, message in refused:
             print(message)
             items.remove(item)
