@@ -8,7 +8,7 @@ import unittest
 import mudlib.player
 import mudlib.npc
 import mudlib.soul
-import mudlib.baseobjects
+import mudlib.base
 import mudlib.errors
 
 class TestSoul(unittest.TestCase):
@@ -39,8 +39,8 @@ class TestSoul(unittest.TestCase):
 
     def testWho(self):
         player = mudlib.player.Player("fritz", "m")
-        julie = mudlib.baseobjects.Living("julie", "f")
-        harry = mudlib.baseobjects.Living("harry", "m")
+        julie = mudlib.base.Living("julie", "f")
+        harry = mudlib.base.Living("harry", "m")
         self.assertEqual("yourself", mudlib.soul.who_replacement(player, player, player))  # you kick yourself
         self.assertEqual("himself",  mudlib.soul.who_replacement(player, player, julie))   # fritz kicks himself
         self.assertEqual("harry",    mudlib.soul.who_replacement(player, harry, player))   # you kick harry
@@ -54,8 +54,8 @@ class TestSoul(unittest.TestCase):
 
     def testPoss(self):
         player = mudlib.player.Player("fritz", "m")
-        julie = mudlib.baseobjects.Living("julie", "f")
-        harry = mudlib.baseobjects.Living("harry", "m")
+        julie = mudlib.base.Living("julie", "f")
+        harry = mudlib.base.Living("harry", "m")
         self.assertEqual("your own", mudlib.soul.poss_replacement(player, player, player))  # your own foot
         self.assertEqual("his own",  mudlib.soul.poss_replacement(player, player, julie))   # his own foot
         self.assertEqual("harry's",   mudlib.soul.poss_replacement(player, harry, player))   # harrys foot
@@ -117,7 +117,7 @@ class TestSoul(unittest.TestCase):
         self.assertTrue("max" in room_msg and "hairy cat" in room_msg and "Kate" in room_msg)
         self.assertEqual("Julie peers at you.", target_msg)
         # all/everyone
-        player.move(mudlib.baseobjects.Location("somewhere"))
+        player.move(mudlib.base.Location("somewhere"))
         livings = set(targets)
         livings.add(player)
         player.location.livings = livings
@@ -133,7 +133,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
         player.set_title("the great %s, destroyer of worlds", True)
-        player.move(mudlib.baseobjects.Location("somewhere"))
+        player.move(mudlib.base.Location("somewhere"))
         player.location.livings = { mudlib.npc.NPC("max", "m"), player }
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
         self.assertEqual("grin", verb)
@@ -165,7 +165,7 @@ class TestSoul(unittest.TestCase):
     def testMessageQuoteParse(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
-        player.move(mudlib.baseobjects.Location("somewhere"))
+        player.move(mudlib.base.Location("somewhere"))
         player.location.livings = { mudlib.npc.NPC("max", "m"), player }
         # whisper
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper \"hello there\"")
@@ -259,10 +259,10 @@ class TestSoul(unittest.TestCase):
     def testParse(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
-        player.move(mudlib.baseobjects.Location("somewhere"))
+        player.move(mudlib.base.Location("somewhere"))
         targets = { mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("dinosaur", "n") }
         player.location.livings = targets
-        player.location.enter(mudlib.baseobjects.Item("newspaper"))
+        player.location.insert(mudlib.base.Item("newspaper"), player)
         qualifier, verb, who, adverb, message, bodypart = soul.parse(player, "fail grin sickly at everyone head")
         self.assertEqual("fail", qualifier)
         self.assertEqual("grin", verb)

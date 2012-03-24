@@ -5,9 +5,9 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
-from mudlib.baseobjects import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
+from mudlib.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from mudlib.errors import SecurityViolation, ActionRefused
-from mudlib.npc import NPC
+from mudlib.npc import NPC, Monster
 from mudlib.player import Player
 
 
@@ -31,9 +31,6 @@ class TestLocations(unittest.TestCase):
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label")
         self.magazine =Item ("magazine", "university magazine")
-        self.hall.enter(self.table)
-        self.hall.enter(self.key)
-        self.hall.enter(self.magazine)
         self.rat = NPC("rat", "n", race="rodent")
         self.julie = NPC("julie", "f", "attractive Julie",
                      """
@@ -45,12 +42,10 @@ class TestLocations(unittest.TestCase):
         self.pencil.aliases = {"pen"}
         self.bag = Container("bag")
         self.notebook_in_bag = Item("notebook")
-        self.bag += self.notebook_in_bag
-        self.player += self.pencil
-        self.player += self.bag
-        self.hall.enter(self.rat)
-        self.hall.enter(self.julie)
-        self.hall.enter(self.player)
+        self.bag.insert(self.notebook_in_bag, self.player)
+        self.player.insert(self.pencil, self.player)
+        self.player.insert(self.bag, self.player)
+        self.hall.init_inventory([self.table, self.key, self.magazine, self.rat, self.julie, self.player])
 
     def test_contains(self):
         self.assertTrue(self.julie in self.hall)
@@ -162,59 +157,32 @@ Present: julie, rat"""
         hall = Location("hall")
         rat1 = NPC("rat1", "n")
         rat2 = NPC("rat2", "n")
+        julie = NPC("julie", "f")
         with self.assertRaises(TypeError):
-            hall.enter(12345)
+            hall.insert(12345, julie)
         self.assertEqual(_Limbo, rat1.location)
         self.assertFalse(rat1 in hall.livings)
         wiretap = Wiretap()
         hall.wiretaps.add(wiretap)
-        hall.enter(rat1)
+        hall.insert(rat1, julie)
         self.assertEqual(hall, rat1.location)
         self.assertTrue(rat1 in hall.livings)
-        self.assertEqual(["Rat1 arrives."], wiretap.msgs)
-        hall.enter(rat2, force_and_silent=True)
+        self.assertEqual([], wiretap.msgs, "insert shouldn't produce arrival messages")
+        hall.insert(rat2, julie)
         self.assertTrue(rat2 in hall.livings)
-        self.assertEqual(["Rat1 arrives."], wiretap.msgs, "2nd rat should not be mentioned")
+        self.assertEqual([], wiretap.msgs, "insert shouldn't produce arrival messages")
         # now test leave
         wiretap.clear()
-        hall.leave(rat1)
+        hall.remove(rat1, julie)
         self.assertFalse(rat1 in hall.livings)
         self.assertIsNone(rat1.location)
-        self.assertEqual(["Rat1 leaves."], wiretap.msgs)
-        hall.leave(rat2, force_and_silent=True)
+        self.assertEqual([], wiretap.msgs, "remove shouldn't produce exit message")
+        hall.remove(rat2, julie)
         self.assertFalse(rat2 in hall.livings)
-        self.assertEqual(["Rat1 leaves."], wiretap.msgs, "2nd rat should not be mentioned")
+        self.assertEqual([], wiretap.msgs, "remove shouldn't produce exit message")
         # test random leave
-        hall.leave(rat1)
-        hall.leave(12345)
-
-    def test_move(self):
-        hall = Location("hall")
-        attic = Location("attic")
-        rat = Living("rat", "n")
-        hall.enter(rat)
-        wiretap_hall = Wiretap()
-        wiretap_attic = Wiretap()
-        hall.wiretaps.add(wiretap_hall)
-        attic.wiretaps.add(wiretap_attic)
-        self.assertTrue(rat in hall.livings)
-        self.assertFalse(rat in attic.livings)
-        self.assertEqual(hall, rat.location)
-        rat.move(attic)
-        self.assertTrue(rat in attic.livings)
-        self.assertFalse(rat in hall.livings)
-        self.assertEqual(attic, rat.location)
-        self.assertEqual(["Rat leaves."], wiretap_hall.msgs)
-        self.assertEqual(["Rat arrives."], wiretap_attic.msgs)
-        # now try silent
-        wiretap_attic.clear()
-        wiretap_hall.clear()
-        rat.move(hall, force_and_silent=True)
-        self.assertTrue(rat in hall.livings)
-        self.assertFalse(rat in attic.livings)
-        self.assertEqual(hall, rat.location)
-        self.assertEqual([], wiretap_hall.msgs)
-        self.assertEqual([], wiretap_attic.msgs)
+        hall.remove(rat1, julie)
+        hall.remove(12345, julie)
 
 
 class TestDoorsExits(unittest.TestCase):
@@ -224,9 +192,9 @@ class TestDoorsExits(unittest.TestCase):
         attic = Location("attic")
         unbound_exit = Exit("foo.bar", "a random exit")
         with self.assertRaises(StandardError):
-            self.assertFalse(unbound_exit.allow_move(player))  # should fail because not bound
+            self.assertFalse(unbound_exit.allow_passage(player))  # should fail because not bound
         exit1 = Exit(attic, "first ladder to attic")
-        exit1.allow_move(player)
+        exit1.allow_passage(player)
 
         door = Door(hall, "open unlocked door", "north", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
@@ -287,7 +255,7 @@ class TestLiving(unittest.TestCase):
     def test_contains(self):
         orc = Living("orc", "m")
         axe = Weapon("axe")
-        orc += axe
+        orc.insert(axe, orc)
         self.assertTrue(axe in orc)
         self.assertTrue(axe in orc.inventory())
         self.assertEqual(1, orc.inventory_size())
@@ -297,10 +265,40 @@ class TestLiving(unittest.TestCase):
         idiot = NPC("idiot", "m")
         player = Player("julie", "f")
         axe = Weapon("axe")
+        orc.insert(axe, orc)
+        self.assertTrue(axe in orc)
         with self.assertRaises(ActionRefused) as x:
-            orc -= axe
+            orc.remove(axe, None)
         self.assertTrue("can't take" in str(x.exception))
-
+        orc.remove(axe, orc)
+        self.assertFalse(axe in orc)
+    def test_move(self):
+        hall = Location("hall")
+        attic = Location("attic")
+        rat = Living("rat", "n")
+        hall.init_inventory([rat])
+        wiretap_hall = Wiretap()
+        wiretap_attic = Wiretap()
+        hall.wiretaps.add(wiretap_hall)
+        attic.wiretaps.add(wiretap_attic)
+        self.assertTrue(rat in hall.livings)
+        self.assertFalse(rat in attic.livings)
+        self.assertEqual(hall, rat.location)
+        rat.move(attic)
+        self.assertTrue(rat in attic.livings)
+        self.assertFalse(rat in hall.livings)
+        self.assertEqual(attic, rat.location)
+        self.assertEqual(["Rat leaves."], wiretap_hall.msgs)
+        self.assertEqual(["Rat arrives."], wiretap_attic.msgs)
+        # now try silent
+        wiretap_attic.clear()
+        wiretap_hall.clear()
+        rat.move(hall, silent=True)
+        self.assertTrue(rat in hall.livings)
+        self.assertFalse(rat in attic.livings)
+        self.assertEqual(hall, rat.location)
+        self.assertEqual([], wiretap_hall.msgs)
+        self.assertEqual([], wiretap_attic.msgs)
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
@@ -411,13 +409,11 @@ class TestDestroy(unittest.TestCase):
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat","n")
-        loc.enter(i)
-        loc.enter(liv)
         loc.exits={"north": Exit("somehwere", "somewhere")}
         player = Player("julie","f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)
-        loc.enter(player)
+        loc.init_inventory([i, liv, player])
         self.assertTrue(len(loc.exits)>0)
         self.assertTrue(len(loc.items)>0)
         self.assertTrue(len(loc.livings)>0)
@@ -440,8 +436,8 @@ class TestDestroy(unittest.TestCase):
         player = Player("julie","f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)
-        player += Item("key")
-        loc.enter(player)
+        player.insert(Item("key"), player)
+        loc.init_inventory([player])
         self.assertTrue(len(loc.wiretaps)>0)
         self.assertEqual(loc, player.location)
         self.assertTrue(len(player.installed_wiretaps)>0)
@@ -462,30 +458,29 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(0, len(bag.inventory()))
         self.assertEqual(0, bag.inventory_size())
         npc = NPC("julie","f")
-        bag+=key
+        bag.insert(key, npc)
         self.assertTrue(key in bag)
         self.assertEqual(1, bag.inventory_size())
-        bag-=key
+        bag.remove(key, npc)
         self.assertEqual(0, bag.inventory_size())
         self.assertFalse(key in bag)
         with self.assertRaises(KeyError):
-            bag-="not_existing"
+            bag.remove("not_existing", npc)
     def test_allowance(self):
         bag = Container("bag")
         key = Item("key")
         player = Player("julie", "f")
         with self.assertRaises(StandardError):
-            bag += None
-        bag += key
+            bag.insert(None, player)
+        bag.insert(key, player)
         with self.assertRaises(KeyError):
-            bag -= None
-        bag -= key
-        bag.allow_put(key, player)
-        bag.allow_take(player)
+            bag.remove(None, player)
+        bag.remove(key, player)
+        bag.allow_move(player)
         with self.assertRaises(ActionRefused):
-            key += bag
+            key.insert(bag, player)
         with self.assertRaises(ActionRefused):
-            key -= bag
+            key.remove(bag, player)
         self.assertFalse(key in bag)
         with self.assertRaises(ActionRefused):
             bag in key
@@ -493,12 +488,13 @@ class TestContainer(unittest.TestCase):
         bag = Container("bag")
         key = Item("key")
         thing = Item("gizmo")
+        player = Player("julie", "f")
         with self.assertRaises(ActionRefused):
             thing in key  # can't check for containment in an Item
         self.assertFalse(thing in bag)
         with self.assertRaises(ActionRefused):
-            key += thing  # can't add stuf to an Item
-        bag += thing
+            key.insert(thing, player)  # can't add stuf to an Item
+        bag.insert(thing, player)
         self.assertTrue(thing in bag)
 
 
@@ -508,20 +504,40 @@ class TestItem(unittest.TestCase):
         thing = Item("gizmo")
         player = Player("julie", "f")
         with self.assertRaises(ActionRefused):
-            key -= None
+            key.remove(None, player)
         with self.assertRaises(ActionRefused):
-            key -= thing
+            key.remove(thing, player)
         with self.assertRaises(ActionRefused):
-            key += None
+            key.insert(None, player)
         with self.assertRaises(ActionRefused):
-            key += thing
-        key.allow_put(thing, player)
-        key.allow_take(player)
+            key.insert(thing, player)
+        key.allow_move(player)
         with self.assertRaises(ActionRefused):
             key.inventory()
         with self.assertRaises(ActionRefused):
             key.inventory_size()
-
+    def test_move(self):
+        hall = Location("hall")
+        person = Living("person", "m")
+        monster = Monster("dragon", "f", "dragon")
+        key = Item("key")
+        hall.init_inventory([person, key])
+        wiretap_hall = Wiretap()
+        wiretap_person = Wiretap()
+        hall.wiretaps.add(wiretap_hall)
+        person.wiretaps.add(wiretap_person)
+        self.assertTrue(person in hall)
+        self.assertTrue(key in hall)
+        with self.assertRaises(KeyError):
+            key.move(person, person, person)
+        key.move(hall, person, person)
+        self.assertFalse(key in hall)
+        self.assertTrue(key in person)
+        self.assertEqual([], wiretap_hall.msgs, "item.move() should be silent")
+        self.assertEqual([], wiretap_person.msgs, "item.move() should be silent")
+        with self.assertRaises(ActionRefused) as x:
+            key.move(hall, monster, person)
+        self.assertTrue("not a good idea" in str(x.exception))
 
 if __name__ == '__main__':
     unittest.main()

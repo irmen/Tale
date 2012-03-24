@@ -424,7 +424,7 @@ class Living(MudObject):
     def move(self, target_location, actor=None, silent=False):
         """
         Leave the current location, enter the new location (transactional).
-        Messages are being printed to the locations if the move was succesful.
+        Messages are being printed to the locations if the move was successful.
         """
         actor = actor or self
         if self.location:

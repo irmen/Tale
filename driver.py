@@ -11,7 +11,7 @@ import mudlib.player
 import mudlib.races
 import mudlib.soul
 import mudlib.util
-import mudlib.baseobjects
+import mudlib.base
 import mudlib.errors
 import mudlib.cmds
 
@@ -177,7 +177,7 @@ class Driver(object):
                 module = getattr(module, name)
             target = getattr(module, target_object)
             exit.bind(target)
-        exit.allow_move(self.player)
+        exit.allow_passage(self.player)
         self.player.move(exit.target)
         self.player.tell(self.player.look())
 

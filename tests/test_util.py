@@ -6,7 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 import unittest
 import mudlib.util
-from mudlib.baseobjects import Item, Container, Location
+from mudlib.base import Item, Container, Location
 from mudlib.player import Player
 
 class TestUtil(unittest.TestCase):
@@ -15,9 +15,9 @@ class TestUtil(unittest.TestCase):
         key = Item("key")
         bag = Container("bag")
         room = Location("room")
-        bag+=key
-        p+=bag
-        room.enter(p)
+        bag.insert(key, p)
+        p.insert(bag, p)
+        room.insert(p, p)
         with self.assertRaises(StandardError):
             mudlib.util.print_object_location(p, None, None)
         mudlib.util.print_object_location(p, key, None)
