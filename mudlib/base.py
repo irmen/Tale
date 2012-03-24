@@ -62,8 +62,14 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None):
         self.name = name
         self.aliases = []
-        self.title = title or name
-        self.description = textwrap.dedent(description).strip() if description else ""
+        try:
+            self.title = title or name
+        except AttributeError:
+            pass  # this can occur if someone made title into a property
+        try:
+            self.description = textwrap.dedent(description).strip() if description else ""
+        except AttributeError:
+            pass   # this can occur if someone made description into a property
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x>" % (self.__class__.__module__, self.__class__.__name__, self.name, id(self))

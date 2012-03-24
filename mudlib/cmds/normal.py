@@ -353,15 +353,8 @@ def do_give(player, verb, arg, **ctx):
 @cmd("help")
 def do_help(player, verb, topic, **ctx):
     print = player.tell
-    if topic == "soul":
-        print("Soul verbs available:")
-        lines = [""] * (len(soul.VERBS) // 5 + 1)
-        index = 0
-        for v in sorted(soul.VERBS):
-            lines[index % len(lines)] += "  %-13s" % v
-            index += 1
-        for line in lines:
-            print(line)
+    if topic:
+        do_what(player, verb, topic, **ctx)
     else:
         verbs = ctx["verbs"]
         verb_help = {}   # verb -> [list of abbrs]
@@ -381,7 +374,7 @@ def do_help(player, verb, topic, **ctx):
         print(", ".join(sorted(cmds_help)))
         print("Abbreviations:")
         print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
-        print("Pick up/put down are aliases for take/drop.")
+        print("You can get a bit more info by asking about certain objects/commands/topics.")
 
 
 @cmd("look")
@@ -519,14 +512,28 @@ def print_item_removal(player, item, container, print_parentheses=True):
 
 
 @cmd("who")
-def do_who(player, verb, name, **ctx):
+def do_who(player, verb, args, **ctx):
     print = player.tell
-    if name:
-        player = ctx["driver"].search_player(name)  # global player search
-        if player:
-            print_player_info(player)
-        else:
-            print("Right now, there's nobody online with that name.")
+    args = args.split(None, 1)
+    if args:
+        if args[0] == "are":
+            raise ActionRefused("Be more specific.")
+        elif args[0] == "is":
+            if len(args) >= 2:
+                del args[0]   # skip 'is'
+            else:
+                raise ActionRefused("Who do you mean?")
+        name = args[0].rstrip("?")
+        found = False
+        otherplayer = ctx["driver"].search_player(name)  # global player search
+        if otherplayer:
+            found = True
+            print_player_info(otherplayer)
+        living = player.location.search_living(name)
+        if living and living != otherplayer:
+            return do_examine(player, verb, name, **ctx)
+        if not found:
+            print("Right now, there's nobody here or playing with that name.")
     else:
         # print all players
         for player in ctx["driver"].all_players():  # list of all players
@@ -539,7 +546,7 @@ def print_player_info(player):
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, verb, args, **ctx):
-    args = args.split()
+    args = args.split(None, 2)
     if len(args) == 0:
         raise ParseError("%s what? With what?" % lang.capital(verb))
     what_name = args[0]
@@ -562,3 +569,98 @@ def do_open(player, verb, args, **ctx):
         getattr(what, verb)(with_item, player)
     else:
         raise ActionRefused("You don't see %s." % lang.a(what_name))
+
+
+@cmd("what")
+def do_what(player, verb, args, **ctx):
+    print = player.tell
+    args = args.split(None, 1)
+    if not args:
+        raise ParseError("What do you mean?")
+    if args[0] == "are":
+        raise ActionRefused("Be more specific.")
+    if len(args) >= 2 and args[0] == "is":
+        del args[0]
+    name = args[0].rstrip("?")
+    if not name:
+        raise ActionRefused("What do you mean?")
+    found = False
+    # is it an abbreviation?
+    if name in abbreviations:
+        name = abbreviations[name]
+        print("It's an abbreviation for %s." % name)
+    # is it a verb?
+    if name in soul.VERBS:
+        found = True
+        if name == "emote":
+            _, playermessage, roommessage, _ = player.socialize_parsed("emote", who={player}, message="goes wild.")
+            name = "emote goes wild"
+        else:
+            _, playermessage, roommessage, _ = player.socialize_parsed(name, who={player})
+        print("It is a soul emote you can do. %s: %s" % (name, playermessage))
+        if name in soul.AGGRESSIVE_VERBS:
+            print("It might be regarded as offensive to certain people or beings.")
+    if name in soul.BODY_PARTS:
+        found = True
+        _, playermessage, roommessage, _ = player.socialize_parsed("pat", who={player}, bodypart=name, message="hi")
+        print("It denotes a body part. pat myself %s -> %s" % (name, playermessage))
+    if name in soul.ACTION_QUALIFIERS:
+        found = True
+        _, playermessage, roommessage, _ = player.socialize_parsed("smile", qualifier=name)
+        print("It is a qualifier for something. %s smile -> %s" % (name, playermessage))
+    # is it a command?
+    if name in ctx["verbs"]:
+        found = True
+        print("It is a command that you can use to perform some action.")
+        doc = ctx["verbs"][name].__doc__
+        if doc:
+            print(doc)
+    # is it an exit in the current room?
+    if name in player.location.exits:
+        found = True
+        print("It's a possible way to leave your current location: %s" % player.location.exits[name].description)
+    # is it a npc here?
+    living = player.location.search_living(name)
+    if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
+        print("(by %s you probably mean %s)" % (name, living.name))
+    if living:
+        found = True
+        if living is player:
+            print("That's you.")
+        else:
+            title = lang.capital(living.title)
+            gender = lang.GENDERS[living.gender]
+            subj = lang.capital(living.subjective)
+            if type(living) is type(player):
+                print("%s is a %s %s (player). %s's here." % (title, gender, living.race, subj))
+            else:
+                print("%s is a %s %s. %s's here." % (title, gender, living.race, subj))
+    # is it an item somewhere?
+    item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
+    if item:
+        found = True
+        if item.name.lower() != name.lower() and name.lower() in item.aliases:
+            print("(by %s you probably mean %s)" % (name, item.name))
+        print("It's an item in your vicinity. You should perhaps try to examine it.")
+    if name == "soul":
+        # if player is asking about the soul, give some general info
+        found = True
+        print("Your soul provides a large amount of 'emotes' or 'verbs' that you can do.")
+        print("An emote is a command that you can do to perform something, or tell something.")
+        print("They usually are just for socialization or fun and are not normally considered")
+        print("considered to be a command to actually do something or interact with things.")
+        print("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
+    if name == "emotes":
+        # if player asks about the emotes, print all soul emote verbs
+        found = True
+        print("All available soul verbs (emotes):")
+        lines = [""] * (len(soul.VERBS) // 5 + 1)
+        index = 0
+        for v in sorted(soul.VERBS):
+            lines[index % len(lines)] += "  %-13s" % v
+            index += 1
+        for line in lines:
+            print(line)
+    if not found:
+        # too bad, no help available :)
+        print("Sorry, there is no information available about that.")

@@ -398,6 +398,23 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("rusty old key", item.title)
         self.assertEqual("a very small, old key that's rusted", item.description)
 
+    def test_dynamic_description_by_using_property(self):
+        import time
+        class DynamicThing(Item):
+            @property
+            def description(self):
+                return "The watch shows %f" % time.time()
+            @property
+            def title(self):
+                return "a watch showing %f" % time.time()
+        watch = DynamicThing("watch")
+        title1 = watch.title
+        descr1 = watch.description
+        self.assertTrue(descr1.startswith("The watch shows "))
+        self.assertTrue(title1.startswith("a watch showing "))
+        time.sleep(0.02)
+        self.assertNotEqual(title1, watch.title)
+        self.assertNotEqual(descr1, watch.description)
 
 class TestDestroy(unittest.TestCase):
     def test_destroy_base(self):
