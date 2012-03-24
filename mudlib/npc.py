@@ -5,12 +5,11 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
-from . import baseobjects
+from . import base
 from . import lang
-from .errors import ActionRefused
 
 
-class NPC(baseobjects.Living):
+class NPC(base.Living):
     """
     Non-Player-Character: computer controlled entity.
     These are neutral or friendly, aggressive NPCs should be Monsters.

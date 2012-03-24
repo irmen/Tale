@@ -5,12 +5,12 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
-from . import baseobjects, soul
+from . import base, soul
 from . import lang
 from .errors import SecurityViolation
 
 
-class Player(baseobjects.Living):
+class Player(base.Living):
     """
     Player controlled entity.
     Has a Soul for social interaction.

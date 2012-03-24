@@ -311,7 +311,7 @@ class Exit(object):
 
     def __repr__(self):
         targetname = self.target.name if self.bound else self.target
-        return "<baseobjects.Exit '%s'->'%s' @ 0x%x>" % (self.direction, targetname, id(self))
+        return "<base.Exit '%s'->'%s' @ 0x%x>" % (self.direction, targetname, id(self))
 
     def bind(self, target_location):
         """
@@ -550,7 +550,7 @@ class Door(Exit):
     def __repr__(self):
         target = self.target.name if self.bound else self.target
         locked = "locked" if self.locked else "open"
-        return "<baseobjects.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
+        return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
 
     def allow_move(self, actor):
         """Is the actor allowed to move through this door?"""

@@ -4,7 +4,7 @@ Basic items.
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from ..baseobjects import Item, Container
+from ..base import Item, Container
 from ..errors import ActionRefused
 
 

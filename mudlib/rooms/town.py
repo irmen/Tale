@@ -5,7 +5,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import copy
-from ..baseobjects import Location, Exit, Door, Item, Container
+from ..base import Location, Exit, Door, Item, Container
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper, gem

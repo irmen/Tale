@@ -4,7 +4,7 @@ The Wizard Tower, which is the place where Wizards start/log in
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from ..baseobjects import Location, Exit, Item
+from ..base import Location, Exit, Item
 from ..npc import Monster
 
 hall = Location("Main hall of the Tower of Magic",

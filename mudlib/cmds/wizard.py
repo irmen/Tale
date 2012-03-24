@@ -10,7 +10,7 @@ import copy
 import functools
 import sys
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import baseobjects
+from .. import base
 from .. import lang
 from .. import npc
 from .. import rooms
@@ -50,10 +50,10 @@ def do_ls(player, verb, path, **ctx):
     print("<%s>" % path)
     m_items = vars(module).items()
     modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
-    classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], baseobjects.MudObject)]
-    items = [x[0] for x in m_items if isinstance(x[1], baseobjects.Item)]
-    livings = [x[0] for x in m_items if isinstance(x[1], baseobjects.Living)]
-    locations = [x[0] for x in m_items if isinstance(x[1], baseobjects.Location)]
+    classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], base.MudObject)]
+    items = [x[0] for x in m_items if isinstance(x[1], base.Item)]
+    livings = [x[0] for x in m_items if isinstance(x[1], base.Living)]
+    locations = [x[0] for x in m_items if isinstance(x[1], base.Location)]
     if locations:
         print("Locations: " + ", ".join(locations))
     if livings:
@@ -91,7 +91,7 @@ def do_clone(player, verb, path, **ctx):
     # clone it
     if not obj:
         raise ActionRefused("Object not found")
-    elif isinstance(obj, baseobjects.Item):
+    elif isinstance(obj, base.Item):
         item = copy.deepcopy(obj)
         player.insert(item, player)
         print("Cloned: " + repr(item))
@@ -199,13 +199,13 @@ def do_teleport(player, verb, args, **ctx):
         if not target:
             raise ActionRefused("Object not found")
         if teleport_self:
-            if isinstance(target, baseobjects.Living):
+            if isinstance(target, base.Living):
                 target = target.location  # teleport to target living's location
-            if not isinstance(target, baseobjects.Location):
+            if not isinstance(target, base.Location):
                 raise ActionRefused("Can't determine location to teleport to.")
             teleport_to(player, target)
         else:
-            if isinstance(target, baseobjects.Location):
+            if isinstance(target, base.Location):
                 raise ActionRefused("Can't teleport a room here, maybe you wanted to teleport TO somewhere?")
             teleport_someone_to_player(target, player)
     else:
