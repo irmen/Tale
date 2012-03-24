@@ -29,6 +29,7 @@ def cmd(command, *aliases):
 
 @cmd("inventory")
 def do_inventory(player, verb, arg, **ctx):
+    """Show the items you are carrying."""
     print = player.tell
     if arg and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
@@ -68,6 +69,7 @@ def do_inventory(player, verb, arg, **ctx):
 
 @cmd("locate")
 def do_locate(player, verb, name, **ctx):
+    """Try to locate a specific item or creature."""
     print = player.tell
     if not name:
         raise ParseError("Locate what/who?")
@@ -93,6 +95,7 @@ def do_locate(player, verb, name, **ctx):
 
 @cmd("drop")
 def do_drop(player, verb, arg, **ctx):
+    """Drop an item (or all items) you are carrying."""
     print = player.tell
     if not arg:
         raise ParseError("Drop what?")
@@ -136,7 +139,8 @@ def do_drop(player, verb, arg, **ctx):
 
 @cmd("put")
 def do_put(player, verb, args, **ctx):
-    """put = take (if not in inventory) + place into somewhere else"""
+    """Put an item (or all items) into something else.
+If you're not carrying the item, you will first pick it up."""
     print = player.tell
     args = args.split()
     if len(args) < 2:
@@ -196,7 +200,7 @@ def do_put(player, verb, args, **ctx):
 
 @cmd("take", "get")
 def do_take(player, verb, args, **ctx):
-    """take thing|all , take thing|all [from] something"""
+    """Take something (or all things) from something or someone else."""
     print = player.tell
     args = args.split()
     if len(args) == 1:  # take thing|all
@@ -300,6 +304,7 @@ def do_take(player, verb, args, **ctx):
 
 @cmd("give")
 def do_give(player, verb, arg, **ctx):
+    """Give something (or all things) you are carrying to someone else."""
     print = player.tell
     if not arg:
         raise ParseError("Give what to whom?")
@@ -336,6 +341,7 @@ def do_give(player, verb, arg, **ctx):
         raise ParseError("Give what to whom?")
     item_name, target_name = args
     if item_name == "all":
+        # @todo ask for confirmation to give all
         give_stuff(player, player.inventory(), target_name)
     elif target_name == "all":
         give_stuff(player, player.inventory(), item_name)
@@ -352,6 +358,7 @@ def do_give(player, verb, arg, **ctx):
 
 @cmd("help")
 def do_help(player, verb, topic, **ctx):
+    """Provides some helpful information about different aspects of the game."""
     print = player.tell
     if topic:
         do_what(player, verb, topic, **ctx)
@@ -374,11 +381,12 @@ def do_help(player, verb, topic, **ctx):
         print(", ".join(sorted(cmds_help)))
         print("Abbreviations:")
         print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
-        print("You can get a bit more info by asking about certain objects/commands/topics.")
+        print("You can get more info about all kinds of stuff by asking 'what is <topic>'.")
 
 
 @cmd("look")
 def do_look(player, verb, arg, **ctx):
+    """Look around to see where you are and what's around you."""
     print = player.tell
     if arg:
         # look <direction> is the only thing we support, the rest should be done with examine
@@ -394,6 +402,7 @@ def do_look(player, verb, arg, **ctx):
 
 @cmd("examine", "inspect")
 def do_examine(player, verb, name, **ctx):
+    """Examine something or someone thoroughly."""
     print = player.tell
     if not name:
         raise ParseError("Examine what or who?")
@@ -453,6 +462,7 @@ def do_examine(player, verb, name, **ctx):
 
 @cmd("stats")
 def do_stats(player, verb, arg, **ctx):
+    """Prints the gender, race and stats information of yourself, or another creature or player."""
     print = player.tell
     if arg:
         target = player.location.search_living(arg)
@@ -474,7 +484,7 @@ def do_stats(player, verb, arg, **ctx):
 
 @cmd("tell")
 def do_tell(player, verb, args, **ctx):
-    print = player.tell
+    """Pass a message to another player or creature that nobody else can hear."""
     name, _, msg = args.partition(" ")
     msg = msg.strip()
     if not name or not msg:
@@ -497,6 +507,7 @@ def do_tell(player, verb, args, **ctx):
 
 @cmd("quit")
 def do_quit(player, verb, arg, **ctx):
+    """Quit the game."""
     # @todo: ask for confirmation (async)
     player.tell("Goodbye, %s." % player.title)
     return False
@@ -513,6 +524,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
 
 @cmd("who")
 def do_who(player, verb, args, **ctx):
+    """Search for all players, a specific player or creature, and shows some information about them."""
     print = player.tell
     args = args.split(None, 1)
     if args:
@@ -546,6 +558,7 @@ def print_player_info(player):
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, verb, args, **ctx):
+    """Do something with a door or exit, possibly by using an item."""
     args = args.split(None, 2)
     if len(args) == 0:
         raise ParseError("%s what? With what?" % lang.capital(verb))
@@ -573,6 +586,9 @@ def do_open(player, verb, args, **ctx):
 
 @cmd("what")
 def do_what(player, verb, args, **ctx):
+    """Tries to answer your question about what something is.
+The topics range from game commands to location exits to creature and items.
+For more general help, try the 'help' command first."""
     print = player.tell
     args = args.split(None, 1)
     if not args:
@@ -611,10 +627,12 @@ def do_what(player, verb, args, **ctx):
     # is it a command?
     if name in ctx["verbs"]:
         found = True
-        print("It is a command that you can use to perform some action.")
-        doc = ctx["verbs"][name].__doc__
+        doc = ctx["verbs"][name].__doc__ or ""
+        doc = doc.strip()
         if doc:
             print(doc)
+        else:
+            print("It is a command that you can use to perform some action.")
     # is it an exit in the current room?
     if name in player.location.exits:
         found = True
@@ -661,6 +679,21 @@ def do_what(player, verb, args, **ctx):
             index += 1
         for line in lines:
             print(line)
+    if name in ("that", "this", "they", "them", "it"):
+        raise ActionRefused("Be more specific.")
     if not found:
         # too bad, no help available :)
         print("Sorry, there is no information available about that.")
+
+
+@cmd("exits")
+def do_exits(player, verb, arg, **ctx):
+    """Provides a tiny clue about possible exits from your current location."""
+    player.tell("If you want to know about the possible exits from your location,")
+    player.tell("look around the room. Usually the exits are easily visible.")
+    if len(player.location.exits) == 1:
+        player.tell("Your current location seems to have a possible exit.")
+    elif len(player.location.exits) > 1:
+        player.tell("Your current location seems to have some possible exits.")
+    else:
+        player.tell("Your current location doesn't seem to have obvious exits.")

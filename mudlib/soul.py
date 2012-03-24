@@ -224,7 +224,7 @@ VERBS = {
 "hit":      ( PHYS, ( None, None, "in the face" ), "" ),
 "kick":     ( PHYS, ( "hard", ), "" ),
 "tackle":   ( SIMP, None, "tackle$ \nWHO \nHOW", "" ),
-"tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),
+# "tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),     # tell is replaced by a real command
 "spank":    ( PHYS, ( None, None, "on the butt" ), "" ),
 "pat":      ( PHYS, ( None, None, "on the head" ), "" ),
 "punch":    ( DEUX, ( None, None, "in the eye" ), "punch \nWHO \nHOW \nWHERE", "punches \nWHO \nHOW \nWHERE" ),

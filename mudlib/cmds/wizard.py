@@ -36,6 +36,7 @@ def wizcmd(command):
 
 @wizcmd("ls")
 def do_ls(player, verb, path, **ctx):
+    """List the contents of a module path under the mudlib tree (try .items.basic)"""
     print = player.tell
     if not path.startswith("."):
         raise ActionRefused("Path must start with '.'")
@@ -68,6 +69,7 @@ def do_ls(player, verb, path, **ctx):
 
 @wizcmd("clone")
 def do_clone(player, verb, path, **ctx):
+    """Clone an item or living directly from the room or inventory, or from an object in the module path"""
     print = player.tell
     if not path:
         raise ParseError("Clone what?")
@@ -114,6 +116,7 @@ def do_clone(player, verb, path, **ctx):
 
 @wizcmd("destroy")
 def do_destroy(player, verb, arg, **ctx):
+    """Destroys an object or creature."""
     print = player.tell
     if not arg:
         raise ParseError("Destroy what?")
@@ -145,17 +148,19 @@ def do_destroy(player, verb, arg, **ctx):
 
 @wizcmd("pdb")
 def do_pdb(player, verb, rest, **ctx):
+    """Starts a Python debugging session."""
     import pdb
     pdb.set_trace()   # @todo: remove this when going multiuser (I don't think you can have a synchronous debug session anymore)
 
 
 @wizcmd("wiretap")
 def do_wiretap(player, verb, arg, **ctx):
+    """Adds a wiretap to something to overhear the messages they receive.
+'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
+'wiretap' shows all your taps, 'wiretap -clear' gets rid of all taps."""
     print = player.tell
     if not arg:
         print("Installed wiretaps:", ", ".join(str(tap) for tap in player.installed_wiretaps) or "none")
-        print("Use 'wiretap .' or 'wiretap living' to tap the room or a living.")
-        print("Use 'wiretap -clear' to remove all your wiretaps.")
         return
     if arg == ".":
         player.create_wiretap(player.location)
@@ -171,13 +176,17 @@ def do_wiretap(player, verb, arg, **ctx):
             player.create_wiretap(living)
             print("Wiretapped %s." % living.name)
         else:
-            raise ActionRefused(arg, "isn't here.")
+            raise ActionRefused(arg + " isn't here.")
 
 
 @wizcmd("teleport")
 def do_teleport(player, verb, args, **ctx):
+    """Teleport to a location or creature, or teleport a creature to you.
+'teleport [to] .module.path.to.object' teleports [to] that object (location or creature)
+'teleport [to] playername' teleports [to] that player,
+'teleport [to] @start' teleports you to the starting location for wizards."""
     if not args:
-        raise ActionRefused("Usage: teleport [to] [.module.path.to.object | playername | @start]")
+        raise ActionRefused("Teleport what to where?")
     teleport_self = False
     if args.startswith("to "):
         teleport_self = True
@@ -251,6 +260,7 @@ def teleport_someone_to_player(who, player):
 
 @wizcmd("reload")
 def do_reload(player, verb, path, **ctx):
+    """Reload the given module (Python)."""
     print = player.tell
     if not path.startswith("."):
         raise ActionRefused("Path must start with '.'")
@@ -269,6 +279,10 @@ def do_reload(player, verb, path, **ctx):
 
 @wizcmd("move")
 def do_move(player, verb, arg, **ctx):
+    """Move something or someone to another location or creature.
+This may work around possible restrictions that could prevent stuff
+to be moved around normally. For instance you could use it to pick up
+items that are normally fixed in place (move item to playername)."""
     print = player.tell
     thing_name, _, target_name = arg.partition(" ")
     target_name = target_name.strip()
@@ -322,6 +336,7 @@ def do_move(player, verb, arg, **ctx):
 
 @wizcmd("debug")
 def do_debug(player, verb, name, **ctx):
+    """Dumps the internal attribute values of a location (.), item or creature."""
     print = player.tell
     if not name:
         raise ParseError("Debug what?")
@@ -342,10 +357,12 @@ def do_debug(player, verb, name, **ctx):
 
 @wizcmd("set")
 def do_set(player, verb, args, **ctx):
+    """Set an internal attribute of a location (.), object or creature to a new value.
+Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     print = player.tell
     args = args.split("=")
     if len(args) != 2:
-        raise ParseError("Set what? (usage: set xxx.fieldname=expression)")
+        raise ParseError("Set what? (usage: set xxx.fieldname=value)")
     name, field = args[0].split(".")
     if name == ".":
         obj = player.location
