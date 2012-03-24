@@ -14,14 +14,13 @@ hall = Location("Main hall of the Tower of Magic",
     """)
 table = Item("table", "oak table", "A large dark table with a lot of cracks in its surface.")
 key = Item("key", "rusty key", "An old rusty key without a label.")
-hall.enter(table)
-hall.enter(key)
+
 
 drone = Monster("drone", "n", "bot", "mindless drone",
               """
               A stupid metallic drone. It just hovers here with no apparent reason.
               """,)
-hall.enter(drone)
+hall.init_inventory([table, key, drone])
 
 attic = Location("Tower attic",
     """

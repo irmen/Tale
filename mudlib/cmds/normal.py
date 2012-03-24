@@ -108,8 +108,8 @@ def do_drop(player, verb, arg, **ctx):
             else:
                 if container is not player and container in player:
                     print_item_removal(player, item, container)
-                container -= item
-                player.location.enter(item)
+                container.remove(item, player)
+                player.location.insert(item, player)
         for item, message in refused:
             items.remove(item)
             print(message)
@@ -171,17 +171,17 @@ def do_put(player, verb, args, **ctx):
                 item.allow_put(where, player)  # doe the item allow being put into something?
                 if item in player:
                     # simply use the item from the player's inventory
-                    player -= item
+                    player.remove(item, player)
                     inventory_items.append(item)
                 elif item in player.location:
                     # take the item from the room
                     item.allow_take(player)  # does item allow to be picked up?
-                    player.location.leave(item)
+                    player.location.remove(item, player)
                     room_items.append(item)
             except ActionRefused as x:
                 refused.append((item, str(x)))
             else:
-                where += item
+                where.insert(item, player)
         for item, message in refused:
             print(message)
         if inventory_items:
@@ -237,11 +237,8 @@ def do_take(player, verb, args, **ctx):
             except ActionRefused as x:
                 refused.append((item, str(x)))
             else:
-                if is_location:
-                    container.leave(item)
-                else:
-                    container -= item
-                player += item
+                container.remove(item, player)
+                player.insert(item, player)
         for item, message in refused:
             print(message)
             items.remove(item)
@@ -336,8 +333,8 @@ def do_give(player, verb, arg, **ctx):
             except ActionRefused as x:
                 refused.append((item, str(x)))
             else:
-                player -= item
-                target += item
+                player.remove(item, player)
+                target.insert(item, player)
         for item, message in refused:
             print(message)
             items.remove(item)

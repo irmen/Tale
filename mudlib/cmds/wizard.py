@@ -93,7 +93,7 @@ def do_clone(player, verb, path, **ctx):
         raise ActionRefused("Object not found")
     elif isinstance(obj, baseobjects.Item):
         item = copy.deepcopy(obj)
-        player += item
+        player.insert(item, player)
         print("Cloned: " + repr(item))
         player.location.tell("{player} conjures up {item}, and quickly pockets it."
                              .format(player=lang.capital(player.title),
@@ -107,7 +107,7 @@ def do_clone(player, verb, path, **ctx):
                              .format(player=lang.capital(player.title),
                                      npc=lang.a(clone.title)),
                              exclude_living=player)
-        player.location.enter(clone)
+        player.location.insert(clone, player)
     else:
         raise ActionRefused("Can't clone " + lang.a(obj.__class__.__name__))
 
@@ -121,9 +121,9 @@ def do_destroy(player, verb, arg, **ctx):
     victim = player.search_item(arg, include_containers_in_inventory=False)
     if victim:
         if victim in player:
-            player -= victim
+            player.remove(victim, player)
         else:
-            player.location.leave(victim)
+            player.location.remove(victim, player)
         victim.destroy(ctx)
     else:
         # maybe there's a living here instead
@@ -306,28 +306,18 @@ def do_move(player, verb, arg, **ctx):
                 raise ActionRefused("There's no %s here." % target_name)
     if thing is target:
         raise ActionRefused("You can't move things inside themselves.")
-    move_something(thing, thing_container, thing_container_type, target, target_type)
-    print("Moved %s (%s) from %s (%s) to %s (%s)." %
-        (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
-    player.location.tell("%s moved %s into %s." %
-        (lang.capital(player.title), thing.title, target.title), exclude_living=player)
-
-
-def move_something(thing, thing_container, thing_container_type, destination, destination_type):
     try:
         # move the thing to its destination first (if this fails, everything is just as it was)
-        if destination_type == "location":
-            destination.enter(thing, force_and_silent=True)
-        else:
-            destination += thing  # all other types: just chuck it in their inventory
+        target.insert(thing, player)
     except Exception as x:
         raise ActionRefused("Couldn't move it, destination can't hold objects? (%s)" % x)
     else:
         # remove the thing from where it is now
-        if thing_container_type == "location":
-            thing_container.leave(thing, force_and_silent=True)
-        else:
-            thing_container -= thing  # all other types: just pop it from their inventory
+        thing_container.remove(thing, player)
+        print("Moved %s (%s) from %s (%s) to %s (%s)." %
+            (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
+        player.location.tell("%s moved %s into %s." %
+            (lang.capital(player.title), thing.title, target.title), exclude_living=player)
 
 
 @wizcmd("debug")

@@ -35,12 +35,12 @@ class CursedGem(Item):
 
 
 class InsertOnlyBox(Container):
-    def __isub__(self, item):
+    def remove(self, item, actor):
         raise ActionRefused("The box is cursed! You can't take anything out of it!")
 
 
 class RemoveOnlyBox(Container):
-    def __iadd__(self, item):
+    def insert(self, item, actor):
         raise ActionRefused("No matter how hard you try, you can't fit %s in the box." % item.title)
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
@@ -49,11 +49,6 @@ normal_gem = copy.copy(gem)
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("gem", "a dark gem")
-square.enter(cursed_gem)
-square.enter(paper)
-square.enter(trashcan)
-square.enter(insertonly_box)
-square.enter(removeonly_box)
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
@@ -85,11 +80,7 @@ rat = Monster("rat", "n", "rodent", None,
 
 ant = NPC("ant", "n", race="insect")
 
-square.enter(towncrier)
-square.enter(idiot)
-square.enter(rat)
-square.enter(ant)
-
+square.init_inventory([cursed_gem, paper, trashcan, insertonly_box, removeonly_box, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
 door1 = Door(alley, "door1 (unlocked and open)", direction="door1", locked=False, opened=True)

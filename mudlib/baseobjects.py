@@ -92,10 +92,10 @@ class Item(MudObject):
     def inventory_size(self):
         raise ActionRefused("You can't look inside of that.")
 
-    def __iadd__(self, item):
+    def insert(self, item, actor):
         raise ActionRefused("You can't put things in there.")
 
-    def __isub__(self, item):
+    def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
     def allow_take(self, actor):
@@ -151,6 +151,19 @@ class Location(MudObject):
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
+
+    def init_inventory(self, objects):
+        """Set the location's initial item and livings 'inventory'"""
+        assert len(self.items) == 0
+        assert len(self.livings) == 0
+        for obj in objects:
+            if isinstance(obj, Living):
+                self.livings.add(obj)
+                obj.location = self
+            elif isinstance(obj, Item):
+                self.items.add(obj)
+            else:
+                raise TypeError("can only add Living or Item")
 
     def destroy(self, ctx):
         for living in self.livings:
@@ -244,25 +257,21 @@ class Location(MudObject):
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
-    def enter(self, obj, force_and_silent=False):
+    def insert(self, obj, actor):
         """Add obj to the contents of the location (either a Living or an Item)"""
         if isinstance(obj, Living):
             self.livings.add(obj)
             obj.location = self
-            if not force_and_silent:
-                self.tell("%s arrives." % lang.capital(obj.title), exclude_living=obj)
         elif isinstance(obj, Item):
             self.items.add(obj)
         else:
-            raise TypeError("can only contain Living and Item")
+            raise TypeError("can only add Living or Item")
 
-    def leave(self, obj, force_and_silent=False):
+    def remove(self, obj, actor):
         """Remove obj from this location (either a Living or an Item)"""
         if obj in self.livings:
             self.livings.remove(obj)
             obj.location = None
-            if not force_and_silent:
-                self.tell("%s leaves." % lang.capital(obj.title), exclude_living=obj)
         elif obj in self.items:
             self.items.remove(obj)
 
@@ -353,13 +362,17 @@ class Living(MudObject):
     def inventory(self):
         return frozenset(self.__inventory)
 
-    def __iadd__(self, item):
+    def insert(self, item, actor):
+        """add an item to the inventory"""
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
-        return self
 
-    def __isub__(self, item):
-        raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
+    def remove(self, item, actor):
+        """remove an item from the inventory"""
+        if actor is self:
+            self.__inventory.remove(item)
+        else:
+            raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
     def destroy(self, ctx):
         if self.location and self in self.location.livings:
@@ -398,8 +411,8 @@ class Living(MudObject):
     def move(self, target_location, force_and_silent=False):
         """leave the current location, enter the new location"""
         if self.location:
-            self.location.leave(self, force_and_silent)
-        target_location.enter(self, force_and_silent)
+            self.location.remove(self, self)
+        target_location.insert(self, self)
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """
@@ -459,10 +472,7 @@ class Container(Item):
     """
     A bag-type container (i.e. an item that acts as a container)
     Allows insert and remove, and examine its contents, as opposed to an Item
-    You can test for containment with 'in': item in bag,
-    size with inventory_size(),
-    add stuff with container += thing,
-    remove stuff with container -= thing.
+    You can test for containment with 'in': item in bag
     """
     def __init__(self, name, title=None, description=None):
         super(Container, self).__init__(name, title, description)
@@ -482,12 +492,12 @@ class Container(Item):
     def __contains__(self, item):
         return item in self.__inventory
 
-    def __iadd__(self, item):
+    def insert(self, item, actor):
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
         return self
 
-    def __isub__(self, item):
+    def remove(self, item, actor):
         self.__inventory.remove(item)
         return self
 
