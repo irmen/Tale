@@ -19,7 +19,6 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
-        self.privileges = set()
         self.__output = []
         self.installed_wiretaps = set()
 

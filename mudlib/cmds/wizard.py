@@ -320,18 +320,11 @@ items that are normally fixed in place (move item to playername)."""
                 raise ActionRefused("There's no %s here." % target_name)
     if thing is target:
         raise ActionRefused("You can't move things inside themselves.")
-    try:
-        # move the thing to its destination first (if this fails, everything is just as it was)
-        target.insert(thing, player)
-    except Exception as x:
-        raise ActionRefused("Couldn't move it, destination can't hold objects? (%s)" % x)
-    else:
-        # remove the thing from where it is now
-        thing_container.remove(thing, player)
-        print("Moved %s (%s) from %s (%s) to %s (%s)." %
-            (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
-        player.location.tell("%s moved %s into %s." %
-            (lang.capital(player.title), thing.title, target.title), exclude_living=player)
+    thing.move(thing_container, target, player, wiz_force=True)
+    print("Moved %s (%s) from %s (%s) to %s (%s)." %
+        (thing.name, thing_type, thing_container.name, thing_container_type, target.name, target_type))
+    player.location.tell("%s moved %s into %s." %
+        (lang.capital(player.title), thing.title, target.title), exclude_living=player)
 
 
 @wizcmd("debug")

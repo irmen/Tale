@@ -104,12 +104,14 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, source_container, target_container, actor):
+    def move(self, source_container, target_container, actor, wiz_force=False):
         """
         Leave the source container, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
+        If wiz_force is True, it overrides certain allowance checks (but not all)
         """
-        self.allow_move(actor)
+        if not wiz_force or "wizard" not in actor.privileges:
+            self.allow_move(actor)
         source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
@@ -360,6 +362,7 @@ class Living(MudObject):
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
         self.location = _Limbo  # set transitional location
+        self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.race = None
         self.stats = {}

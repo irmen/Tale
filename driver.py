@@ -118,9 +118,6 @@ class Driver(object):
                     print("The verb %s is unrecognised." % x.verb)
             except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
                 print(str(x))
-                import traceback    # @todo remove debug stacktrace
-                print("* debug stacktrace:")
-                print(traceback.format_exc())
             except Exception:
                 import traceback
                 print("* internal error:")
