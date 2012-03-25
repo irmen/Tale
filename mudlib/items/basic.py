@@ -15,6 +15,11 @@ class FixedItem(Container):  # something that cannot be picked up
 
 class TrashCan(FixedItem):
     @property
+    def title(self):
+        if self.inventory():
+            return "filled trashcan"
+        return "empty trashcan"
+    @property
     def description(self):
         if self.inventory():
             return "It is a stinking trash can, maybe there's something rotten in it?"
