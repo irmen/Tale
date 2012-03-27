@@ -32,11 +32,13 @@ class Player(base.Living):
         else:
             self.title = title
 
-    def socialize(self, commandstring):
-        return self.soul.process_verb(self, commandstring)
+    def parse(self, commandline):
+        """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
+        return self.soul.parse(self, commandline)
 
-    def socialize_parsed(self, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
-        return self.soul.process_verb_parsed(self, verb, who, adverb, message, bodypart, qualifier)
+    def socialize_parsed(self, parsed):
+        """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
+        return self.soul.process_verb_parsed(self, parsed)
 
     def tell(self, *messages):
         """

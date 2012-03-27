@@ -179,16 +179,18 @@ class Driver(object):
         self.player.tell(self.player.look())
 
     def do_socialize(self, cmd):
-        player = self.player
-        verb, (who, player_message, room_message, target_message) = player.socialize(cmd)
-        player.tell(player_message)
-        player.location.tell(room_message, player, who, target_message)
-        if verb in mudlib.soul.AGGRESSIVE_VERBS:
+        parsed = self.player.parse(cmd)
+        who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
+        self.player.tell(player_message)
+        self.player.location.tell(room_message, self.player, who, target_message)
+        if parsed.verb in mudlib.soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
-            for living in who:
-                if getattr(living, "aggressive", False):   # if we get items back, they don't have aggressive attribute
-                    living.start_attack(self.player)
+            # We need to check the qualifier, it might void the actual action :)
+            if parsed.qualifier not in ("fail", "pretend", "don't", "attempt"):
+                for living in who:
+                    if getattr(living, "aggressive", False):
+                        living.start_attack(self.player)
 
     def search_player(self, name):
         """Look through all the logged in players for one with the given name"""

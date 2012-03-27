@@ -608,25 +608,32 @@ For more general help, try the 'help' command first."""
     # is it a verb?
     if name in soul.VERBS:
         found = True
+        parsed = soul.ParseResults(name)
         if name == "emote":
-            _, playermessage, roommessage, _ = player.socialize_parsed("emote", who={player}, message="goes wild.")
+            parsed.who = {player}
+            parsed.message = "goes wild."
+            _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
             name = "emote goes wild"
         else:
-            _, playermessage, roommessage, _ = player.socialize_parsed(name, who={player})
+            parsed.who = {player}
+            _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("It is a soul emote you can do. %s: %s" % (name, playermessage))
         if name in soul.AGGRESSIVE_VERBS:
             print("It might be regarded as offensive to certain people or beings.")
     if name in soul.BODY_PARTS:
         found = True
-        _, playermessage, roommessage, _ = player.socialize_parsed("pat", who={player}, bodypart=name, message="hi")
+        parsed = soul.ParseResults("pat", who={player}, bodypart=name, message="hi")
+        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("It denotes a body part. pat myself %s -> %s" % (name, playermessage))
     if name in soul.ACTION_QUALIFIERS:
         found = True
-        _, playermessage, roommessage, _ = player.socialize_parsed("smile", qualifier=name)
+        parsed = soul.ParseResults("smile", qualifier=name)
+        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("It is a qualifier for something. %s smile -> %s" % (name, playermessage))
     if name in lang.ADVERBS:
         found = True
-        _, playermessage, roommessage, _ = player.socialize_parsed("smile", adverb=name)
+        parsed = soul.ParseResults("smile", adverb=name)
+        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("That's an adverb you can use with the soul emote commands.")
         print("smile %s -> %s" % (name, playermessage))
     if name in races.races:

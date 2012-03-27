@@ -462,8 +462,9 @@ class Soul(object):
 
     def process_verb_parsed(self, player, parsed):
         """
-        This function takes a verb and the arguments given by the user
-        and converts it to an internal representation: (targets-without-player, playermessage, roommessage, targetmessage)
+        This function takes a verb and the arguments given by the user,
+        creates various display messages that can be sent to the players and room,
+        and returns a tuple: (targets-without-player, playermessage, roommessage, targetmessage)
         """
         if not player:
             raise SoulException("no player in process_verb_parsed")
