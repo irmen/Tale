@@ -19,10 +19,11 @@ class TrashCan(FixedItem):
         if self.inventory():
             return "filled trashcan"
         return "empty trashcan"
+
     @property
     def description(self):
         if self.inventory():
-            return "It is a stinking trash can, maybe there's something rotten in it?"
+            return "It is a stinking trash can, maybe there's something rotting inside?"
         return "It looks worn and rusty."
 
 

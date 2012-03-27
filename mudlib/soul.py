@@ -425,6 +425,19 @@ _message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
 _skip_words = {"and", "&", "at", "to", "before", "in", "on", "the", "with"}
 
 
+class ParseResults(object):
+    __slots__ = ("verb", "who", "adverb", "message", "bodypart", "qualifier")
+
+    def __init__(self, verb, who=None, adverb=None, message=None, bodypart=None, qualifier=None):
+        self.verb = verb
+        self.who = who or set()
+        self.adverb = adverb
+        self.message = message
+        self.bodypart = bodypart
+        self.qualifier = qualifier
+        assert type(self.who) in (set, frozenset)
+
+
 class Soul(object):
     """
     The 'soul' of a Player. Handles the high level verb actions and allows for social player interaction.
@@ -439,42 +452,30 @@ class Soul(object):
         and another tuple containing the targets of the action and the various action messages.
         Any action qualifier is added to the verb string if it is present ("fail kick").
         """
-        qualifier, verb, who, adverb, message, bodypart = self.parse(player, commandstring)
-        who_objects = set()
-        if who:
-            # translate the names to actual Livings/items objects
-            for name in who:
-                living = [living for living in player.location.livings if living.name == name]
-                if living:
-                    who_objects.update(living)
-                else:
-                    # try an item (or alias of item)
-                    item = player.search_item(name, include_containers_in_inventory=False)
-                    if item:
-                        who_objects.add(item)
-                    else:
-                        # try alias of livings
-                        living = [living for living in player.location.livings if name in living.aliases]
-                        if living:
-                            who_objects.update(living)
-        result = self.process_verb_parsed(player, verb, who_objects, adverb, message, bodypart, qualifier)
-        if qualifier:
-            verb = qualifier + " " + verb
+        parsed = self.parse(player, commandstring)
+        result = self.process_verb_parsed(player, parsed)
+        if parsed.qualifier:
+            verb = parsed.qualifier + " " + parsed.verb
+        else:
+            verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, verb, who=None, adverb=None, message="", bodypart=None, qualifier=None):
+    def process_verb_parsed(self, player, parsed):
         """
         This function takes a verb and the arguments given by the user
         and converts it to an internal representation: (targets-without-player, playermessage, roommessage, targetmessage)
-        who = set of actual mud objects (livings), not just player/npc names (strings)
         """
         if not player:
             raise SoulException("no player in process_verb_parsed")
-        verbdata = VERBS.get(verb)
+        verbdata = VERBS.get(parsed.verb)
         if not verbdata:
-            raise UnknownVerbException(verb, None, qualifier)
+            raise UnknownVerbException(parsed.verb, None, parsed.qualifier)
+
+        assert type(parsed.who) in (set, frozenset)
+        message = parsed.message
+        adverb = parsed.adverb
+
         vtype = verbdata[0]
-        who = set(who or [])   # be sure to make this a set, to allow O(1) lookups later
         if not message and verbdata[1] and len(verbdata[1]) > 1:
             message = verbdata[1][1]  # get the message from the verbs table
         if message:
@@ -492,24 +493,24 @@ class Soul(object):
             else:
                 adverb = ""
         where = ""
-        if bodypart:
-            where = " " + BODY_PARTS[bodypart]
-        elif not bodypart and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
+        if parsed.bodypart:
+            where = " " + BODY_PARTS[parsed.bodypart]
+        elif not parsed.bodypart and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = spacify(adverb)
 
         def result_messages(action, action_room):
-            if qualifier:
-                qual_action, qual_room, use_room_default = ACTION_QUALIFIERS[qualifier]
+            if parsed.qualifier:
+                qual_action, qual_room, use_room_default = ACTION_QUALIFIERS[parsed.qualifier]
                 action_room = qual_room % action_room if use_room_default else qual_room % action
                 action = qual_action % action
             # construct message seen by player
-            targetnames = [ who_replacement(player, target, player) for target in who ]
+            targetnames = [ who_replacement(player, target, player) for target in parsed.who ]
             player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
             player_msg = player_msg.replace(" \nYOUR", " your")
             player_msg = player_msg.replace(" \nMY", " your")
             # construct message seen by room
-            targetnames = [ who_replacement(player, target, None) for target in who ]
+            targetnames = [ who_replacement(player, target, None) for target in parsed.who ]
             room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
             room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
             room_msg = room_msg.replace(" \nMY", " " + player.objective)
@@ -521,8 +522,8 @@ class Soul(object):
             target_msg = target_msg.replace(" \nSUBJ", " you")
             target_msg = target_msg.replace(" \nMY", " " + player.objective)
             # fix up POSS, IS, SUBJ in the player and room messages
-            if len(who) == 1:
-                only_living = list(who)[0]
+            if len(parsed.who) == 1:
+                only_living = list(parsed.who)[0]
                 subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
                 player_msg = player_msg.replace(" \nIS", " is")
                 player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
@@ -531,8 +532,8 @@ class Soul(object):
                 room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
                 room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, None))
             else:
-                targetnames_player = lang.join([poss_replacement(player, living, player) for living in who])
-                targetnames_room = lang.join([poss_replacement(player, living, None) for living in who])
+                targetnames_player = lang.join([poss_replacement(player, living, player) for living in parsed.who])
+                targetnames_room = lang.join([poss_replacement(player, living, None) for living in parsed.who])
                 player_msg = player_msg.replace(" \nIS", " are")
                 player_msg = player_msg.replace(" \nSUBJ", " they")
                 player_msg = player_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_player))
@@ -543,16 +544,19 @@ class Soul(object):
             player_msg = lang.fullstop("You " + player_msg.strip())
             room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg.strip()))
             target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg.strip()))
-            if player in who:
-                who.remove(player)  # the player should not be part of the targets
-            return who, player_msg, room_msg, target_msg
+            if player in parsed.who:
+                who = set(parsed.who)
+                who.remove(player)  # the player should not be part of the remaining targets.
+            else:
+                who = parsed.who
+            return frozenset(who), player_msg, room_msg, target_msg
 
         # construct the action string
         action = None
         if vtype == DEUX:
             action = verbdata[2]
             action_room = verbdata[3]
-            if not check_person(action, who):
+            if not check_person(action, parsed.who):
                 raise ParseError("The verb %s needs a person." % verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
@@ -564,7 +568,7 @@ class Soul(object):
             action_room = action_room.replace(" \nHOW", how)
             return result_messages(action, action_room)
         elif vtype == QUAD:
-            if not who:
+            if not parsed.who:
                 action = verbdata[2]
                 action_room = verbdata[3]
             else:
@@ -582,27 +586,27 @@ class Soul(object):
         elif vtype == FULL:
             raise SoulException("vtype FULL")  # doesn't matter, FULL is not used yet anyway
         elif vtype == DEFA:
-            action = verb + "$ \nHOW \nAT"
+            action = parsed.verb + "$ \nHOW \nAT"
         elif vtype == PREV:
-            action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW"
+            action = parsed.verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW"
         elif vtype == PHYS:
-            action = verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
+            action = parsed.verb + "$" + spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
         elif vtype == SHRT:
-            action = verb + "$" + spacify(verbdata[2]) + " \nHOW"
+            action = parsed.verb + "$" + spacify(verbdata[2]) + " \nHOW"
         elif vtype == PERS:
-            action = verbdata[3] if who else verbdata[2]
+            action = verbdata[3] if parsed.who else verbdata[2]
         elif vtype == SIMP:
             action = verbdata[2]
         else:
             raise SoulException("invalid vtype " + vtype)
 
-        if who and len(verbdata) > 3:
+        if parsed.who and len(verbdata) > 3:
             action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
         else:
             action = action.replace(" \nAT", "")
 
-        if not check_person(action, who):
-            raise ParseError("The verb %s needs a person." % verb)
+        if not check_person(action, parsed.who):
+            raise ParseError("The verb %s needs a person." % parsed.verb)
 
         action = action.replace(" \nHOW", how)
         action = action.replace(" \nWHERE", where)
@@ -614,11 +618,7 @@ class Soul(object):
         return result_messages(action, action_room)
 
     def parse(self, player, cmd):
-        """
-        Parse a command string into the following tuple:
-        qualifier, verb, who, adverb, message, bodypart
-        who = a set of player/npc names (only strings (names) are returned, not the corresponding player objects)
-        """
+        """Parse a command string, returns a ParseResults object."""
         qualifier = None
         verb = None
         adverb = None
@@ -637,6 +637,8 @@ class Soul(object):
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
             qualifier = words.pop(0)
+            if qualifier == "dont":
+                qualifier = "don't"  # little spelling suggestion
         if words and words[0] in _skip_words:
             words.pop(0)
 
@@ -726,4 +728,30 @@ class Soul(object):
                         raise ParseError("The word %s is unrecognized." % word)
 
         message = " ".join(message)
-        return qualifier, verb, who, adverb, message, bodypart
+        # construct the parse result
+        result = ParseResults(verb)
+        result.qualifier = qualifier
+        result.adverb = adverb
+        result.message = message
+        result.bodypart = bodypart
+        """translate the names to actual Livings/items objects"""
+        who_objs = set()
+        for name in who:
+            assert type(name) is str
+            if name == player.name:
+                who_objs.add(player)
+            else:
+                living = [living for living in player.location.livings if living.name == name]
+                if living:
+                    who_objs.update(living)
+                else:
+                    # try an item (or alias of item)
+                    item = player.search_item(name, include_containers_in_inventory=False)
+                    if item:
+                        who_objs.add(item)
+                    else:
+                        # try alias of livings
+                        living = [living for living in player.location.livings if name in living.aliases]
+                        who_objs.update(living)
+        result.who = frozenset(who_objs)
+        return result
