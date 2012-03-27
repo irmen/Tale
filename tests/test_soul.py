@@ -263,6 +263,10 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You don't scream 'I have no idea' loudly.", player_msg)
         self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", room_msg)
         self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", target_msg)
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "fail say")
+        self.assertEqual("fail say", verb)
+        self.assertEqual("You try to say nothing, but fail miserably.", player_msg)
+        self.assertEqual("Julie tries to say nothing, but fails miserably.", room_msg)
 
     def testAdverbs(self):
         soul = mudlib.soul.Soul()

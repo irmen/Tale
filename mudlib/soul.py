@@ -500,6 +500,8 @@ class Soul(object):
         how = spacify(adverb)
 
         def result_messages(action, action_room):
+            action = action.strip()
+            action_room = action_room.strip()
             if parsed.qualifier:
                 qual_action, qual_room, use_room_default = ACTION_QUALIFIERS[parsed.qualifier]
                 action_room = qual_room % action_room if use_room_default else qual_room % action
@@ -541,9 +543,9 @@ class Soul(object):
                 room_msg = room_msg.replace(" \nSUBJ", " they")
                 room_msg = room_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_room))
             # add fullstops at the end
-            player_msg = lang.fullstop("You " + player_msg.strip())
-            room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg.strip()))
-            target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg.strip()))
+            player_msg = lang.fullstop("You " + player_msg)
+            room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg))
+            target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg))
             if player in parsed.who:
                 who = set(parsed.who)
                 who.remove(player)  # the player should not be part of the remaining targets.
@@ -734,7 +736,7 @@ class Soul(object):
         result.adverb = adverb
         result.message = message
         result.bodypart = bodypart
-        """translate the names to actual Livings/items objects"""
+        # translate the names to actual Livings/items objects  @todo optimize this, we already know the objects above don't we????
         who_objs = set()
         for name in who:
             assert type(name) is str
