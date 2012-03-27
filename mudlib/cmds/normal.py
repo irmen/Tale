@@ -9,7 +9,7 @@ from .. import lang
 from .. import soul
 from .. import races
 from .. import util
-from ..errors import ParseError, ActionRefused
+from ..errors import ParseError, ActionRefused, SessionExit
 
 all_commands = {}
 abbreviations = {}   # will be injected
@@ -510,7 +510,7 @@ def do_quit(player, verb, arg, **ctx):
     """Quit the game."""
     # @todo: ask for confirmation (async)
     player.tell("Goodbye, %s." % player.title)
-    return False
+    raise SessionExit()
 
 
 def print_item_removal(player, item, container, print_parentheses=True):

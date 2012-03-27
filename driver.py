@@ -105,19 +105,21 @@ class Driver(object):
         print = self.player.tell
         keep_going = True
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
-        while keep_going:
+        while True:
             mudlib.mud_context.driver = self
             mudlib.mud_context.player = self.player
             self.write_output()
             try:
-                keep_going = self.ask_player_input()
+                self.ask_player_input()
             except mudlib.soul.UnknownVerbException as x:
                 if x.verb in directions:
                     print("You can't go in that direction.")
                 else:
-                    print("The verb %s is unrecognised." % x.verb)
+                    print("The verb %s is unrecognized." % x.verb)
             except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
                 print(str(x))
+            except mudlib.errors.SessionExit:
+                break
             except Exception:
                 import traceback
                 print("* internal error:")
@@ -131,38 +133,41 @@ class Driver(object):
 
     def ask_player_input(self):
         cmd = input(">> ").lstrip()
+        if not cmd:
+            return True
         if cmd and cmd[0] in mudlib.cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
             cmd = cmd[0] + " " + cmd[1:]
-        verb, _, rest = cmd.partition(" ")
-        if not verb:
-            return True
-        verb = verb.strip()
-        rest = rest.strip()
-        # determine available verbs for this player
+        # check for an abbreviation, replace it with the full verb if present
+        _verb, _sep, _rest = cmd.partition(" ")
+        if _verb in mudlib.cmds.abbreviations:
+            _verb = mudlib.cmds.abbreviations[_verb]
+            cmd = "".join([_verb, _sep, _rest])
+
+        # Parse the command by using the soul.
+        # We pass in all 'external verbs' (non-soul verbs) so it will do the
+        # parsing for us even if it's a verb the soul doesn't recognise by itself.
         player_verbs = self.commands.get(self.player.privileges)
-        # pre-process input special cases
-        if verb in ("pick", "put"):
-            # pick up->take, put down->drop
-            if rest == "up" or rest.startswith("up "):
-                verb = "take"
-                rest = rest[3:].lstrip()
-            elif rest == "down" or rest.startswith("down "):
-                verb = "drop"
-                rest = rest[5:].lstrip()
-        elif verb in mudlib.cmds.abbreviations:
-            verb = mudlib.cmds.abbreviations[verb]
-        # Execute. First try directions, then the rest
-        if verb in self.player.location.exits:
-            self.do_move(verb)
-            return True
-        elif verb in player_verbs:
-            func = player_verbs[verb]
-            result = func(self.player, verb, rest, driver=self, verbs=player_verbs)
-            return result != False
-        else:
-            self.do_socialize(verb + " " + rest)
-            return True
+        external_verbs = frozenset(player_verbs) | frozenset(self.player.location.exits)
+        try:
+            parsed = self.player.parse(cmd, external_verbs)
+            # If parsing went without errors, it's a soul verb, handle it as a socialize action
+            self.do_socialize(parsed)
+            return
+        except mudlib.soul.NonSoulVerb as x:
+            print("NONSOULVERB!", x.parsed)  # XXX
+            parsed = x.parsed
+            # Execute non-soul verb. First try directions, then the rest
+            if parsed.verb in self.player.location.exits:
+                self.do_move(parsed.verb)
+                return True
+            elif parsed.verb in player_verbs:
+                func = player_verbs[parsed.verb]
+                _, _, rest = cmd.partition(" ")  # @todo rest = deprecated, use parsed instead
+                func(self.player, parsed.verb, rest, driver=self, verbs=player_verbs)
+                return
+            else:
+                raise mudlib.soul.ParseError("failed to parse the command line correctly")
 
     def do_move(self, direction):
         exit = self.player.location.exits[direction]
@@ -178,8 +183,7 @@ class Driver(object):
         self.player.move(exit.target)
         self.player.tell(self.player.look())
 
-    def do_socialize(self, cmd):
-        parsed = self.player.parse(cmd)
+    def do_socialize(self, parsed):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
         self.player.tell(player_message)
         self.player.location.tell(room_message, self.player, who, target_message)

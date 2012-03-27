@@ -38,6 +38,36 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(["_unknown_verb_", "herp", "derp"], ex.exception.words)
         self.assertEqual("fail", ex.exception.qualifier)
 
+    def testExternalVerbs(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        with self.assertRaises(mudlib.soul.UnknownVerbException):
+            soul.process_verb(player, "externalverb")
+        verb, _ = soul.process_verb(player, "sit", external_verbs=set())
+        self.assertEqual("sit", verb)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.process_verb(player, "sit", external_verbs={"sit"})
+        self.assertEqual("sit", str(x.exception))
+        self.assertEqual("sit", x.exception.parsed.verb)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.process_verb(player, "externalverb", external_verbs={"externalverb"})
+        self.assertIsInstance(x.exception.parsed, mudlib.soul.ParseResults)
+        self.assertEqual("externalverb", x.exception.parsed.verb)
+
+    def testExternalVerbUnknownWords(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.process_verb(player, "sit door1")
+        self.assertEqual("The word door1 is unrecognized.", str(x.exception))
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.process_verb(player, "sit door1 zen", external_verbs={"sit"})
+        parsed=x.exception.parsed
+        print parsed
+        self.assertEqual("sit", parsed.verb)
+        self.assertEqual(["sit", "door1", "zen-likely"], parsed.parsed)
+        self.assertEqual(["door1"], parsed.unrecognized)
+
     def testWho(self):
         player = mudlib.player.Player("fritz", "m")
         julie = mudlib.base.Living("julie", "f")

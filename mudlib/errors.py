@@ -18,3 +18,8 @@ class ParseError(Exception):
 class ActionRefused(Exception):
     """The action that was tried was refused by the situation or target object"""
     pass
+
+
+class SessionExit(Exception):
+    """Player session ends."""
+    pass
