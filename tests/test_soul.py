@@ -328,10 +328,10 @@ class TestSoul(unittest.TestCase):
         self.assertEqual({newspaper}, parsed.who, "must be able to perform soul verb on item")
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap dino")
-        self.assertEqual("Did you mean dinosaur?", str(x.exception))
+        self.assertEqual("Perhaps you meant dinosaur?", str(x.exception), "must suggest living with prefix")
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap news")
-        self.assertEqual("Did you mean newspaper?", str(x.exception))
+        self.assertEqual("Perhaps you meant newspaper?", str(x.exception), "must suggest item with prefix")
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap undefined")
         self.assertEqual("The word undefined is unrecognized.", str(x.exception))

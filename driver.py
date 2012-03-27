@@ -187,7 +187,7 @@ class Driver(object):
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
             # We need to check the qualifier, it might void the actual action :)
-            if parsed.qualifier not in ("fail", "pretend", "don't", "attempt"):
+            if parsed.qualifier not in mudlib.soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
                         living.start_attack(self.player)

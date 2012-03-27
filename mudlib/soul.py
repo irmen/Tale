@@ -339,7 +339,7 @@ AGGRESSIVE_VERBS = {
     "swing", "tackle", "tap", "taunt", "tease", "tickle", "tongue", "touch", "wiggle", "wobble", "wrinkle"
 }
 
-assert(AGGRESSIVE_VERBS.issubset(VERBS.keys()))
+assert AGGRESSIVE_VERBS.issubset(VERBS.keys())
 
 ACTION_QUALIFIERS = {
     # qualifier -> (actionmsg, roommsg, use room actionstr)
@@ -351,6 +351,10 @@ ACTION_QUALIFIERS = {
     "don't": ("don't %s", "doesn't %s", False),
     "attempt": ("attempt to %s, without much success", "attempts to %s, without much success", False)
 }
+
+NEGATING_QUALIFIERS = {"fail", "pretend", "dont", "don't", "attempt"}
+
+assert NEGATING_QUALIFIERS.issubset(ACTION_QUALIFIERS.keys())
 
 BODY_PARTS = {
         "hand": "on the hand",
@@ -656,16 +660,20 @@ class Soul(object):
         collect_message = False
         verbdata = VERBS[verb][2]
         message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
-        all_livings_names = set()
+        all_livings = {}  # livings in the room (including player) by name + aliases
+        all_items = {}  # all items in the room or player's inventory, by name + aliases
         for living in player.location.livings:
-            all_livings_names.add(living.name)
-            all_livings_names.update(living.aliases)
+            all_livings[living.name] = living
+            for alias in living.aliases:
+                all_livings[alias] = living
         for item in player.location.items:
-            all_livings_names.add(item.name)
-            all_livings_names.update(item.aliases)
+            all_items[item.name] = item
+            for alias in item.aliases:
+                all_items[alias] = item
         for item in player.inventory():
-            all_livings_names.add(item.name)
-            all_livings_names.update(item.aliases)
+            all_items[item.name] = item
+            for alias in item.aliases:
+                all_items[alias] = item
         for word in words:
             if collect_message:
                 message.append(word)
@@ -674,19 +682,19 @@ class Soul(object):
                 raise ParseError("It is not clear who you mean.")
             elif word in ("me", "myself"):
                 if include_flag:
-                    who.add(player.name)
+                    who.add(player)
                 elif player.name in who:
-                    who.remove(player.name)
+                    who.remove(player)
             elif word in BODY_PARTS:
                 if bodypart:
                     raise ParseError("You can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
                 bodypart = word
             elif word in ("everyone", "everybody", "all"):
                 if include_flag:
-                    if not all_livings_names:
+                    if not all_livings:
                         raise ParseError("There is nobody here.")
                     # include every *living* thing visible, don't include items, and skip the player itself
-                    who.update({living.name for living in player.location.livings if living is not player})
+                    who.update({living for living in player.location.livings if living is not player})
                 else:
                     who.clear()
             elif word == "everything":
@@ -697,23 +705,32 @@ class Soul(object):
                 if adverb:
                     raise ParseError("You can't do that both %s and %s." % (adverb, word))
                 adverb = word
-            elif word in all_livings_names:
+            elif word in all_livings:
+                living = all_livings[word]
                 if include_flag:
-                    who.add(word)
-                elif word in who:
-                    who.remove(word)
+                    who.add(living)
+                elif living in who:
+                    who.remove(living)
+            elif word in all_items:
+                item = all_items[word]
+                if include_flag:
+                    who.add(item)
+                elif item in who:
+                    who.remove(item)
             else:
                 if message_verb and not message:
                     collect_message = True
                     message.append(word)
                 elif word not in _skip_words:
-                    # unrecognised word.
-                    # check if it could be a person's name
+                    # unrecognised word, check if it could be a person's name or an item. (prefix)
                     if not who:
-                        for name in all_livings_names:
+                        for name in all_livings:
                             if name.startswith(word):
-                                raise ParseError("Did you mean %s?" % name)
-                    # check if it is a prefix of an adverb, if so, suggest the adverbs
+                                raise ParseError("Perhaps you meant %s?" % name)
+                        for name in all_items:
+                            if name.startswith(word):
+                                raise ParseError("Perhaps you meant %s?" % name)
+                    # check if it is a prefix of an adverb, if so, suggest a few adverbs
                     adverbs = lang.adverb_by_prefix(word)
                     if len(adverbs) == 1:
                         word = adverbs[0]
@@ -732,29 +749,5 @@ class Soul(object):
 
         message = " ".join(message)
         # construct the parse result
-        result = ParseResults(verb)
-        result.qualifier = qualifier
-        result.adverb = adverb
-        result.message = message
-        result.bodypart = bodypart
-        # translate the names to actual Livings/items objects  @todo optimize this, we already know the objects above don't we????
-        who_objs = set()
-        for name in who:
-            assert type(name) is str
-            if name == player.name:
-                who_objs.add(player)
-            else:
-                living = [living for living in player.location.livings if living.name == name]
-                if living:
-                    who_objs.update(living)
-                else:
-                    # try an item (or alias of item)
-                    item = player.search_item(name, include_containers_in_inventory=False)
-                    if item:
-                        who_objs.add(item)
-                    else:
-                        # try alias of livings
-                        living = [living for living in player.location.livings if name in living.aliases]
-                        who_objs.update(living)
-        result.who = frozenset(who_objs)
-        return result
+        return ParseResults(verb, who=frozenset(who), adverb=adverb, message=message,
+                            bodypart=bodypart, qualifier=qualifier)
