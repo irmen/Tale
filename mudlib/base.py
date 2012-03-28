@@ -307,8 +307,8 @@ class Exit(object):
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in mudlib.rooms.town).
     If using a string, it will be retrieved and bound at runtime.
-    Supplying a direction on the exit is optional. It is meant to make adding multiple
-    exits on a location easier by using Location.add_exits().
+    Supplying a direction on the exit is optional. It is only required when adding multiple
+    exits on a location by using Location.add_exits().
     """
     def __init__(self, target_location, description, direction=None):
         assert target_location is not None

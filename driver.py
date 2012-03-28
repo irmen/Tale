@@ -163,8 +163,7 @@ class Driver(object):
                 return True
             elif parsed.verb in player_verbs:
                 func = player_verbs[parsed.verb]
-                _, _, rest = cmd.partition(" ")  # @todo rest = deprecated, use parsed instead
-                func(self.player, parsed.verb, rest, driver=self, verbs=player_verbs)
+                func(self.player, parsed, driver=self, verbs=player_verbs)
                 return
             else:
                 raise mudlib.soul.ParseError("failed to parse the command line correctly")
