@@ -32,14 +32,14 @@ class Player(base.Living):
         else:
             self.title = title
 
-    def parse(self, commandline, external_verbs):   # @todo unittest
+    def parse(self, commandline, external_verbs=frozenset()):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
         parsed = self.soul.parse(self, commandline, external_verbs)
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
         return parsed
 
-    def socialize_parsed(self, parsed):  # @todo unittest
+    def socialize_parsed(self, parsed):
         """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
         return self.soul.process_verb_parsed(self, parsed)
 

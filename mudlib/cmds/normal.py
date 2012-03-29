@@ -414,7 +414,7 @@ def do_examine(player, parsed, **ctx):
     print = player.tell
     if not parsed.args:
         raise ParseError("Examine what or who?")
-    name = parsed.args[0]    # @todo rewrite this to use parsed properly
+    name = parsed.args[0]
     living = player.location.search_living(name)
     if living:
         if "wizard" in player.privileges:

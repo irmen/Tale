@@ -9,6 +9,7 @@ from mudlib.base import Location, Exit, Item, Living, MudObject, _Limbo, Contain
 from mudlib.errors import SecurityViolation, ActionRefused
 from mudlib.npc import NPC, Monster
 from mudlib.player import Player
+from mudlib.soul import UnknownVerbException, NonSoulVerb
 
 
 class Wiretap(object):
@@ -372,6 +373,25 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual("message for room\n", "".join(player.get_output_lines()))
+    def testSocialize(self):
+        player = Player("fritz", "m")
+        attic = Location("Attic", "A dark attic.")
+        julie = NPC("julie", "f")
+        julie.move(attic)
+        player.move(attic)
+        parsed = player.parse("wave all")
+        self.assertEqual("wave", parsed.verb)
+        self.assertEqual({julie}, parsed.who)
+        who, playermsg, roommsg, targetmsg = player.socialize_parsed(parsed)
+        self.assertEqual({julie}, who)
+        self.assertEqual("You wave happily at julie.", playermsg)
+        with self.assertRaises(UnknownVerbException):
+            player.parse("befrotzificate all and me")
+        with self.assertRaises(NonSoulVerb) as x:
+            player.parse("befrotzificate all and me", external_verbs={"befrotzificate"})
+        parsed = x.exception.parsed
+        self.assertEqual("befrotzificate", parsed.verb)
+        self.assertEqual({julie, player}, parsed.who)
 
 
 class TestDescriptions(unittest.TestCase):
