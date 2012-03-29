@@ -76,35 +76,50 @@ def do_inventory(player, parsed, **ctx):
 
 @cmd("locate")
 def do_locate(player, parsed, **ctx):
-    """Try to locate a specific item or creature."""
+    """Try to locate a specific item, creature or player."""
     print = player.tell
-    if not name:
+    if not parsed.args:
         raise ParseError("Locate what/who?")
+    name = parsed.args[0]
     print("You look around to see if you can locate %s." % name)
     player.location.tell("%s looks around." % lang.capital(player.title), exclude_living=player)
-    item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
-    if item:
-        if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            print("(by %s you probably mean %s)" % (name, item.name))
-        util.print_object_location(player, item, container, False)
-    living = player.location.search_living(name)
-    if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        print("(by %s you probably mean %s)" % (name, living.name))
-    if living and living is not player:
-        print("%s is here next to you." % lang.capital(living.title))
-    player = ctx["driver"].search_player(name)  # global player search
-    if player:
-        print_player_info(player)
+    if parsed.who:
+        thing = parsed.who.pop()
+        if thing is player:
+            print("You are here, in %s." % player.location.name)
+            return
+        if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
+            print("(by %s you probably mean %s)" % (name, thing.name))
+        if thing in player.location:
+            if isinstance(thing, base.Living):
+                print("%s is here next to you." % lang.capital(thing.title))
+            else:
+                util.print_object_location(player, thing, player.location, False)
+        elif thing in player:
+            util.print_object_location(player, thing, player, False)
+        else:
+            print("You can't find that.")
     else:
-        if not item and not living:
-            print("You can't seem to find that anywhere, and there's nobody here by that name.")
+        # The default parser checks inventory and location, but it didn't find anything.
+        # Check inside containers in the player's inventory instead.
+        item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
+        if item:
+            if item.name.lower() != name.lower() and name.lower() in item.aliases:
+                print("(by %s you probably mean %s)" % (name, item.name))
+            util.print_object_location(player, item, container, False)
+        else:
+            player = ctx["driver"].search_player(name)  # global player search
+            if player:
+                print_player_info(player)
+            else:
+                print("You can't find that.")
 
 
 @cmd("drop")
 def do_drop(player, parsed, **ctx):
     """Drop an item (or all items) you are carrying."""
     print = player.tell
-    if not arg:
+    if not parsed.args:
         raise ParseError("Drop what?")
 
     def drop_stuff(items, container):
@@ -128,6 +143,8 @@ def do_drop(player, parsed, **ctx):
                                  exclude_living=player)
         else:
             print("You didn't drop anything.")
+
+    arg = parsed.args[0]
     if arg == "all":
         if player.inventory_size() == 0:
             raise ActionRefused("You're not carrying anything.")
@@ -135,13 +152,21 @@ def do_drop(player, parsed, **ctx):
             # @todo: ask confirmation to drop everything
             drop_stuff(player.inventory(), player)
     else:
-        item, container = player.locate_item(arg, include_location=False)
-        if not item:
-            raise ActionRefused("You don't have %s." % lang.a(arg))
+        # drop a single item from the inventory (or a container in the inventory)
+        if parsed.who:
+            item = parsed.who.pop()
+            if item in player:
+                drop_stuff([item], player)
+            else:
+                raise ActionRefused("You can't drop that.")
         else:
-            if container is not player:
-                util.print_object_location(player, item, container)
-            drop_stuff([item], container)
+            item, container = player.locate_item(arg, include_location=False)
+            if item:
+                if container is not player:
+                    util.print_object_location(player, item, container)
+                drop_stuff([item], container)
+            else:
+                raise ActionRefused("You don't have %s." % lang.a(arg))
 
 
 @cmd("put")
@@ -149,23 +174,20 @@ def do_put(player, parsed, **ctx):
     """Put an item (or all items) into something else.
 If you're not carrying the item, you will first pick it up."""
     print = player.tell
-    args = args.split()
-    if len(args) < 2:
+    if len(parsed.args) != 2:
         raise ParseError("Put what where?")
-    if args[1] == "in":
-        where_name = args[2]
-    else:
-        where_name = args[1]
-    if args[0] == "all":
+    where_name = parsed.args[1]
+    if parsed.args[0] == "all":
         if player.inventory_size() == 0:
             raise ActionRefused("You're not carrying anything.")
         # @todo: ask confirmation to put everything
         what = list(player.inventory())
     else:
-        what = player.search_item(args[0], include_location=True)
+        what = player.search_item(parsed.args[0], include_location=True)
         if not what:
-            raise ActionRefused("You don't see %s." % lang.a(args[0]))
+            raise ActionRefused("You don't see %s." % lang.a(parsed.args[0]))
         what = [what]
+    # @todo fix this for parsed instead of arg names
     where = player.search_item(where_name)
     if where:
         inventory_items = []
