@@ -226,104 +226,113 @@ If you're not carrying the item, you will first pick it up."""
 def do_take(player, parsed, **ctx):
     """Take something (or all things) from something or someone else."""
     print = player.tell
-    args = args.split()
-    if len(args) == 1:  # take thing|all
-        what = args[0]
-        where = None
-    elif len(args) in (2, 3):  # take X [from] something
-        what = args[0]
-        where = args[1]
-        if where == "from" and len(args) == 3:
-            where = args[2]
-    else:
+    if len(parsed.args) == 0:
         raise ParseError("Take what?")
-
-    def take_stuff(player, items, container, is_location, where_str=None):
-        if where_str:
-            player_msg = "You take {items} from the %s." % where_str
-            room_msg = "{player} takes {items} from the %s." % where_str
+    if len(parsed.args) == 1:  # take thing|all
+        what_names = parsed.args
+        where = None
+    else:
+        last_obj = parsed.who_order[-1]
+        if parsed.who_info[last_obj].previous_word == "from":
+            # take x[,y and z] from something
+            what_names = parsed.args[:-1]
+            where = last_obj
         else:
-            player_msg = "You take {items}."
-            room_msg = "{player} takes {items}."
-        items = list(items)
-        refused = []
-        for item in items:
-            try:
-                item.move(container, player, player)
-            except ActionRefused as x:
-                refused.append((item, str(x)))
-        for item, message in refused:
-            print(message)
-            items.remove(item)
-        if items:
-            items_str = lang.join(lang.a(item.title) for item in items)
-            print(player_msg.format(items=items_str))
-            player.location.tell(room_msg.format(player=lang.capital(player.title), items=items_str), exclude_living=player)
-        else:
-            print("You didn't take anything.")
-
-    if what == "all":   # take ALL the things!
+            # take x[,y and z]
+            what_names = parsed.args
+            where = None
+    if where is player:
+        raise ActionRefused("There's no reason to take things from yourself.")
+    if isinstance(where, base.Living):
+        player.location.tell("%s tries to steal things from %s." % (lang.capital(player.title), where.title), exclude_living=player)
+        if where.aggressive:
+            where.start_attack(player)  # stealing stuff is hostile!
+        raise ActionRefused("You can't just steal stuff from %s!" % where.title)
+    if what_names == ["all"]:   # take ALL the things!
         if where:
             # take all stuff out of some container
-            container = player.search_item(where)
-            if container:
-                if container.inventory_size() > 0:
-                    return take_stuff(player, container.inventory(), container, False, where)
+            if where in player or where in player.location:
+                # take all stuff from a bag that the player is carrying, or from a bag in the room.
+                if where.inventory_size() > 0:
+                    return take_stuff(player, where.inventory(), where, where.title)
                 else:
                     raise ActionRefused("There's nothing in there.")
-            # no container, check if a living was targeted
-            living = player.location.search_living(where)
-            if living:
-                if living is player:
-                    raise ActionRefused("There's no reason to take things from yourself.")
-                player.location.tell("%s tries to steal things from %s." % (lang.capital(player.title), living.title), exclude_living=player)
-                if living.aggressive:
-                    living.start_attack(player)  # stealing stuff is hostile!
-                raise ActionRefused("You can't just steal stuff from %s!" % living.title)
-            raise ActionRefused("There's no %s here." % where)
-        if not player.location.items:
-            raise ActionRefused("There's nothing here to take.")
+            raise ActionRefused("Take what?")
         else:
             # take all stuff out of the room
-            return take_stuff(player, player.location.items, player.location, True)
-    else:  # just a single item
-        if where:
-            # take specific item out of some container
-            container = player.search_item(where)
-            if container:
-                for item in container.inventory():
-                    if item.name == what:
-                        return take_stuff(player, [item], container, False, where)
-                raise ActionRefused("There's no %s in there." % what)
-            # no container, check if a living was targeted
-            living = player.location.search_living(where)
-            if living:
-                if living is player:
-                    raise ActionRefused("There's no reason to take things from yourself.")
-                player.location.tell("%s tries to steal something from %s." % (lang.capital(player.title), living.title), exclude_living=player)
-                if living.aggressive:
-                    living.start_attack(player)  # stealing stuff is hostile!
-                raise ActionRefused("You can't just steal stuff from %s!" % living.title)
-            raise ActionRefused("There's no %s here." % where)
-        # no specific source provided, search in room
-        item = player.search_item(what, include_inventory=False)
-        if item:
-            return take_stuff(player, [item], player.location, True)
-        # no item, check if attempt to take living
-        living = player.location.search_living(what)
-        if living:
-            living_race = races.races[living.race]
-            player_race = races.races[player.race]
-            if player_race["size"] - living_race["size"] >= 2:
-                # @todo: do an agi/str/spd/luck check to see if we can pick it up
-                print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
-                if living.aggressive:
-                    living.start_attack(player)
-                    raise ActionRefused("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
+            if not player.location.items:
+                raise ActionRefused("There's nothing here to take.")
             else:
-                print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
+                return take_stuff(player, player.location.items, player.location)
+    else:   # take one or more specific items
+        if parsed.unrecognized:
+            print("You don't see %s." % lang.join(parsed.unrecognized))
+        if where:
+            if where in player or where in player.location:
+                # take specific items out of some container
+                items_by_name = { item.name: item for item in where.inventory() }
+                items_to_take = []
+                for name in what_names:
+                    if name in items_by_name:
+                        items_to_take.append(items_by_name[name])
+                    else:
+                        print("There's no %s in there." % name)
+                return take_stuff(player, items_to_take, where, where.title)
         else:
-            print("There's no %s here." % what)
+            # take things from the room
+            livings = [item for item in parsed.who if item in player.location.livings]
+            for living in livings:
+                try_pick_up_living(player, living)
+            if not player.location.items:
+                raise ActionRefused("There's nothing here to take.")
+            else:
+                items_to_take = []
+                for item in parsed.who:
+                    if item in player.location.items:
+                        items_to_take.append(item)
+                    elif item not in player.location.livings:
+                        print("There's no %s here." % item.name)
+                return take_stuff(player, items_to_take, player.location)
+
+
+def take_stuff(player, items, container, where_str=None):
+    print = player.tell
+    if where_str:
+        player_msg = "You take {items} from the %s." % where_str
+        room_msg = "{player} takes {items} from the %s." % where_str
+    else:
+        player_msg = "You take {items}."
+        room_msg = "{player} takes {items}."
+    items = list(items)
+    refused = []
+    for item in items:
+        try:
+            item.move(container, player, player)
+        except ActionRefused as x:
+            refused.append((item, str(x)))
+    for item, message in refused:
+        print(message)
+        items.remove(item)
+    if items:
+        items_str = lang.join(lang.a(item.title) for item in items)
+        print(player_msg.format(items=items_str))
+        player.location.tell(room_msg.format(player=lang.capital(player.title), items=items_str), exclude_living=player)
+    else:
+        print("You didn't take anything.")
+
+
+def try_pick_up_living(player, living):
+    print = player.tell
+    living_race = races.races[living.race]
+    player_race = races.races[player.race]
+    if player_race["size"] - living_race["size"] >= 2:
+        # @todo: do an agi/str/spd/luck check to see if we can pick it up
+        print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+        if living.aggressive:
+            living.start_attack(player)
+            print("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
+    else:
+        print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
 
 
 @cmd("give")

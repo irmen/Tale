@@ -439,7 +439,7 @@ def poss_replacement(actor, target, observer):
 
 
 _message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
-_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "onto", "the", "with", "after", "before", "under", "above", "next"}
+_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "onto", "the", "with", "from", "after", "before", "under", "above", "next"}
 
 
 class WhoInfo(object):
