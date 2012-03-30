@@ -53,6 +53,10 @@ class TestSoul(unittest.TestCase):
             soul.process_verb(player, "externalverb", external_verbs={"externalverb"})
         self.assertIsInstance(x.exception.parsed, mudlib.soul.ParseResults)
         self.assertEqual("externalverb", x.exception.parsed.verb)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.process_verb(player, "who who", external_verbs={"who"})
+        self.assertEqual("who", x.exception.parsed.verb, "who as external verb needs to be processed as normal arg, not as adverb")
+        self.assertEqual(["who"], x.exception.parsed.args, "who as external verb needs to be processed as normal arg, not as adverb")
 
     def testExternalVerbUnknownWords(self):
         soul = mudlib.soul.Soul()
@@ -64,8 +68,8 @@ class TestSoul(unittest.TestCase):
             soul.process_verb(player, "sit door1 zen", external_verbs={"sit"})
         parsed=x.exception.parsed
         self.assertEqual("sit", parsed.verb)
-        self.assertEqual(["door1", "zen-likely"], parsed.args)
-        self.assertEqual(["door1"], parsed.unrecognized)
+        self.assertEqual(["door1", "zen"], parsed.args)
+        self.assertEqual(["door1", "zen"], parsed.unrecognized)
 
     def testWho(self):
         player = mudlib.player.Player("fritz", "m")

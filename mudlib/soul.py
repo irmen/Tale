@@ -828,18 +828,19 @@ class Soul(object):
                         for name in all_items:
                             if name.startswith(word):
                                 raise ParseError("Perhaps you meant %s?" % name)
-                    # check if it is a prefix of an adverb, if so, suggest a few adverbs
-                    adverbs = lang.adverb_by_prefix(word)
-                    if len(adverbs) == 1:
-                        word = adverbs[0]
-                        if adverb:
-                            raise ParseError("You can't do that both %s and %s." % (adverb, word))
-                        adverb = word
-                        arg_words.append(word)
-                        previous_word = word
-                        continue
-                    elif len(adverbs) > 1:
-                        raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
+                    if not external_verb:
+                        # check if it is a prefix of an adverb, if so, suggest a few adverbs
+                        adverbs = lang.adverb_by_prefix(word)
+                        if len(adverbs) == 1:
+                            word = adverbs[0]
+                            if adverb:
+                                raise ParseError("You can't do that both %s and %s." % (adverb, word))
+                            adverb = word
+                            arg_words.append(word)
+                            previous_word = word
+                            continue
+                        elif len(adverbs) > 1:
+                            raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
 
                     if external_verb:
                         arg_words.append(word)

@@ -108,9 +108,9 @@ def do_locate(player, parsed, **ctx):
                 print("(by %s you probably mean %s)" % (name, item.name))
             util.print_object_location(player, item, container, False)
         else:
-            player = ctx["driver"].search_player(name)  # global player search
-            if player:
-                print_player_info(player)
+            otherplayer = ctx["driver"].search_player(name)  # global player search
+            if otherplayer:
+                player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
                 print("You can't find that.")
 
@@ -338,6 +338,7 @@ def try_pick_up_living(player, living):
 @cmd("give")
 def do_give(player, parsed, **ctx):
     """Give something (or all things) you are carrying to someone else."""
+    # @todo fix for parsed
     print = player.tell
     if not arg:
         raise ParseError("Give what to whom?")
@@ -498,6 +499,7 @@ def do_examine(player, parsed, **ctx):
 @cmd("stats")
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
+    # @todo fix for parsed
     print = player.tell
     if arg:
         target = player.location.search_living(arg)
@@ -520,6 +522,7 @@ def do_stats(player, parsed, **ctx):
 @cmd("tell")
 def do_tell(player, parsed, **ctx):
     """Pass a message to another player or creature that nobody else can hear."""
+    # @todo fix for parsed
     name, _, msg = args.partition(" ")
     msg = msg.strip()
     if not name or not msg:
@@ -574,7 +577,7 @@ def do_who(player, parsed, **ctx):
         otherplayer = ctx["driver"].search_player(name)  # global player search
         if otherplayer:
             found = True
-            print_player_info(otherplayer)
+            player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
         try:
             do_examine(player, parsed, **ctx)
         except ActionRefused:
@@ -583,17 +586,15 @@ def do_who(player, parsed, **ctx):
             print("Right now, there's nobody here or playing with that name.")
     else:
         # print all players
+        print("All players currently in the game:")
         for player in ctx["driver"].all_players():  # list of all players
-            print_player_info(player)
-
-
-def print_player_info(player):
-    player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(player.title), player.subjective, player.location.name))
+            player.tell("%s (%s): currently in '%s'." % (lang.capital(player.name), player.title, player.location.name))
 
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, parsed, **ctx):
     """Do something with a door or exit, possibly by using an item."""
+    # @todo fix for parsed
     args = args.split(None, 2)
     if len(args) == 0:
         raise ParseError("%s what? With what?" % lang.capital(verb))
