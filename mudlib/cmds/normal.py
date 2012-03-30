@@ -174,57 +174,52 @@ def do_put(player, parsed, **ctx):
     """Put an item (or all items) into something else.
 If you're not carrying the item, you will first pick it up."""
     print = player.tell
-    if len(parsed.args) != 2:
+    if len(parsed.args) < 2:
         raise ParseError("Put what where?")
-    where_name = parsed.args[1]
     if parsed.args[0] == "all":
         if player.inventory_size() == 0:
             raise ActionRefused("You're not carrying anything.")
+        if len(parsed.args) != 2:
+            raise ParseError("Put what where?")
         # @todo: ask confirmation to put everything
         what = list(player.inventory())
+        where = parsed.who_order[-1]   # last object is where to put the stuff
+    elif parsed.unrecognized:
+        raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
     else:
-        what = player.search_item(parsed.args[0], include_location=True)
-        if not what:
-            raise ActionRefused("You don't see %s." % lang.a(parsed.args[0]))
-        what = [what]
-    # @todo fix this for parsed instead of arg names
-    where = player.search_item(where_name)
-    if where:
-        inventory_items = []
-        refused = []
-        for item in what:
-            if item is where:
-                print("You can't put %s in itself." % item.title)
-                continue
-            try:
-                if item in player:
-                    # simply use the item from the player's inventory
-                    item.move(player, where, player)
-                    inventory_items.append(item)
-                elif item in player.location:
-                    # first take the item from the room, then move it to the target location
-                    item.move(player.location, player, player)
-                    print("You take %s." % item.title)
-                    player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
-                    item.move(player, where, player)
-                    print("You put it in the %s." % where.name)
-                    player.location.tell("%s puts it in the %s." % (lang.capital(player.subjective), where.name), exclude_living=player)
-            except ActionRefused as x:
-                refused.append((item, str(x)))
-        for item, message in refused:
-            print(message)
-        if inventory_items:
-            items_msg = lang.join(lang.a(item.title) for item in inventory_items)
-            player.location.tell("{player} puts {items} in the {where}.".format(
-                player=lang.capital(player.title),
-                items=items_msg, where=where.name), exclude_living=player)
-            print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
-    else:
-        living = player.location.search_living(where_name)
-        if living:
-            raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (living.name, living.objective))
-        else:
-            raise ActionRefused("There's no %s here." % where_name)
+        what = parsed.who_order[:-1]
+        where = parsed.who_order[-1]
+    if isinstance(where, base.Living):
+        raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (where.name, where.objective))
+    inventory_items = []
+    refused = []
+    for item in what:
+        if item is where:
+            print("You can't put %s in itself." % item.title)
+            continue
+        try:
+            if item in player:
+                # simply use the item from the player's inventory
+                item.move(player, where, player)
+                inventory_items.append(item)
+            elif item in player.location:
+                # first take the item from the room, then move it to the target location
+                item.move(player.location, player, player)
+                print("You take %s." % item.title)
+                player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
+                item.move(player, where, player)
+                print("You put it in the %s." % where.name)
+                player.location.tell("%s puts it in the %s." % (lang.capital(player.subjective), where.name), exclude_living=player)
+        except ActionRefused as x:
+            refused.append((item, str(x)))
+    for item, message in refused:
+        print(message)
+    if inventory_items:
+        items_msg = lang.join(lang.a(item.title) for item in inventory_items)
+        player.location.tell("{player} puts {items} in the {where}.".format(
+            player=lang.capital(player.title),
+            items=items_msg, where=where.name), exclude_living=player)
+        print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
 
 
 @cmd("take", "get")
