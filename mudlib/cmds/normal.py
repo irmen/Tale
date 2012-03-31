@@ -628,13 +628,7 @@ Example: open door,  unlock chest with key"""
             if not with_item:
                 raise ActionRefused("You don't have %s." % lang.a(with_item_name))
         getattr(what, parsed.verb)(with_item, player)
-        verb = parsed.verb
-        if verb == "close":
-            verb += "d"
-        else:
-            verb += "ed"
-        player.tell("You %s the %s." % (verb, what.title))
-        player.location.tell("%s %s the %s." % (lang.capital(player.title), verb, what.title), exclude_living=player)
+        # no need to tell the player or the room, because the verb handler already did this
     else:
         raise ActionRefused("You don't see %s." % lang.a(what_name))
 

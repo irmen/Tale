@@ -593,7 +593,7 @@ class Door(Exit):
             raise ActionRefused("You can't go there; it's closed.")
 
     def open(self, item, actor):
-        """Open the door with optional item"""
+        """Open the door with optional item. Notifies actor and room of this event."""
         if self.opened:
             raise ActionRefused("It's already open.")
         elif self.locked:
@@ -608,7 +608,7 @@ class Door(Exit):
                 actor.location.tell("%s opened an exit." % who, exclude_living=actor)
 
     def close(self, item, actor):
-        """Close the door with optional item"""
+        """Close the door with optional item. Notifies actor and room of this event."""
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False

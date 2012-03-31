@@ -6,6 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from ..base import Item, Container
 from ..errors import ActionRefused
+from .. import lang
 
 
 class FixedItem(Container):  # something that cannot be picked up
@@ -40,23 +41,27 @@ class TrashCan(FixedItem):
         if self.opened:
             raise ActionRefused("It's already open.")
         self.opened = True
+        actor.tell("You opened the %s." % self.title)
+        actor.location.tell("%s opened the %s." % (lang.capital(actor.title), self.title), exclude_living=actor)
 
     def close(self, item, actor):
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False
+        actor.tell("You closed the %s." % self.title)
+        actor.location.tell("%s closed the %s." % (lang.capital(actor.title), self.title), exclude_living=actor)
 
     def inventory(self):
         if self.opened:
             return super(TrashCan, self).inventory()
         else:
-            raise ActionRefused("You can't peek into it, maybe you should open it first?")
+            raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     def inventory_size(self):
         if self.opened:
             return super(TrashCan, self).inventory_size()
         else:
-            raise ActionRefused("You can't peek into it, maybe you should open it first?")
+            raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     def insert(self, item, actor):
         if self.opened:
