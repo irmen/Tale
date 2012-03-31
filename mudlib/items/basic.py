@@ -67,13 +67,13 @@ class TrashCan(FixedItem):
         if self.opened:
             super(TrashCan, self).insert(item, actor)
         else:
-            raise ActionRefused("You should open it first.")
+            raise ActionRefused("You can't put things in the trashcan: you should open it first.")
 
     def remove(self, item, actor):
         if self.opened:
             super(TrashCan, self).remove(item, actor)
         else:
-            raise ActionRefused("You should open it first.")
+            raise ActionRefused("You can't take things from the trashcan: you should open it first.")
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells funky too.")
