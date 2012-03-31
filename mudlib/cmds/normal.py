@@ -338,56 +338,66 @@ def try_pick_up_living(player, living):
 @cmd("give")
 def do_give(player, parsed, **ctx):
     """Give something (or all things) you are carrying to someone else."""
-    # @todo fix for parsed
-    print = player.tell
-    if not arg:
+    if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
-
-    def give_stuff(player, items, target_name):
-        target = player.location.search_living(target_name)
-        if not target:
-            raise ActionRefused("%s isn't here." % target_name)
-        if target is player:
-            raise ActionRefused("There's no reason to give things to yourself.")
-        items = list(items)
-        refused = []
-        for item in items:
-            try:
-                item.move(player, target, player)
-            except ActionRefused as x:
-                refused.append((item, str(x)))
-        for item, message in refused:
-            print(message)
-            items.remove(item)
-        if items:
-            items_str = lang.join(lang.a(item.title) for item in items)
-            player_str = lang.capital(player.title)
-            room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
-            target_msg = "%s gives you %s." % (player_str, items_str)
-            player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
-            print("You give %s %s." % (target.title, items_str))
-        else:
-            print("You didn't give %s anything." % target.title)
-
-    # support "give living [the] thing" and "give [the] thing [to] living"
-    args = [word for word in arg.split() if word not in ("the", "to")]
-    if len(args) != 2:
-        raise ParseError("Give what to whom?")
-    item_name, target_name = args
-    if item_name == "all":
+    if parsed.unrecognized:
+        raise ParseError("You don't have %s." % lang.join(parsed.unrecognized))
+    if player.inventory_size() == 0:
+        raise ActionRefused("You're not carrying anything.")
+    # check for "all"
+    if "all" in parsed.args:
         # @todo ask for confirmation to give all
-        give_stuff(player, player.inventory(), target_name)
-    elif target_name == "all":
-        give_stuff(player, player.inventory(), item_name)
+        if len(parsed.args) != 2:
+            raise ParseError("Give all to who?")
+        what = player.inventory()
+        if parsed.args[0] == "all":
+            # give all [to] living
+            return give_stuff(player, what, parsed.args[1])
+        else:
+            # give living all
+            return give_stuff(player, what, parsed.args[0])
+
+    # give one or more specific items.
+    if  len([who for who in parsed.who if isinstance(who, base.Living)]) > 1:
+        # if there's more than one living, it's not clear who to give stuff to
+        raise ActionRefused("It's not clear who you want to give things to.")
+    if isinstance(parsed.who_order[0], base.Living):
+        # if the first is a living, assume "give living [the] thing(s)"
+        what = parsed.who_order[1:]
+        return give_stuff(player, what, target=parsed.who_order[0])
+    elif isinstance(parsed.who_order[-1], base.Living):
+        # if the last is a living, assume "give thing(s) [to] living"
+        what = parsed.who_order[:-1]
+        return give_stuff(player, what, target=parsed.who_order[-1])
+
+
+def give_stuff(player, items, target_name, target=None):
+    print = player.tell
+    if not target:
+        target = player.location.search_living(target_name)
+    if not target:
+        raise ActionRefused("%s isn't here." % target_name)
+    if target is player:
+        raise ActionRefused("There's no reason to give things to yourself.")
+    items = list(items)
+    refused = []
+    for item in items:
+        try:
+            item.move(player, target, player)
+        except ActionRefused as x:
+            refused.append((item, str(x)))
+    for item, message in refused:
+        print(message)
+        items.remove(item)
+    if items:
+        items_str = lang.join(lang.a(item.title) for item in items)
+        player_str = lang.capital(player.title)
+        room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
+        target_msg = "%s gives you %s." % (player_str, items_str)
+        player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
+        print("You give %s %s." % (target.title, items_str))
     else:
-        item = player.search_item(item_name, include_location=False)
-        if not item:
-            target_name, item_name = args
-            item = player.search_item(item_name, include_location=False)
-            if not item:
-                print("You don't have that.")
-                return
-        give_stuff(player, [item], target_name)
+        print("You didn't give %s anything." % target.title)
 
 
 @cmd("help")
