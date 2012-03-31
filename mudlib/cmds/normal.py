@@ -436,9 +436,12 @@ def do_look(player, parsed, **ctx):
         arg = parsed.args[0]
         # look <direction> is the only thing we support, the rest should be done with examine
         if arg in player.location.exits:
-            print(player.location.exits[arg].description)
+            exit = player.location.exits[arg]
+            print(exit.short_description)
+            if exit.short_description != exit.long_description:
+                print("Maybe you should examine it?")
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
-            print(player.location.exits[abbreviations[arg]].description)
+            print(player.location.exits[abbreviations[arg]].short_description)
         else:
             raise ParseError("Maybe you should examine that instead.")
     else:
@@ -498,10 +501,10 @@ def do_examine(player, parsed, **ctx):
                 print("It's empty.")
     elif name in player.location.exits:
         print("It seems you can go there:")
-        print(player.location.exits[name].description)
+        print(player.location.exits[name].long_description)
     elif name in abbreviations and abbreviations[name] in player.location.exits:
         print("It seems you can go there:")
-        print(player.location.exits[abbreviations[name]].description)
+        print(player.location.exits[abbreviations[name]].long_description)
     else:
         raise ActionRefused("%s isn't here." % name)
 
@@ -509,14 +512,13 @@ def do_examine(player, parsed, **ctx):
 @cmd("stats")
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
-    # @todo fix for parsed
     print = player.tell
-    if arg:
-        target = player.location.search_living(arg)
-        if not target:
-            raise ActionRefused("%s isn't here." % arg)
-    else:
+    if not parsed.args:
         target = player
+    elif len(parsed.who) == 1:
+        target = parsed.who.pop()
+    else:
+        raise ActionRefused("Show stats from who?")
     gender = lang.GENDERS[target.gender]
     living_type = target.__class__.__name__.lower()
     race = races.races[target.race]
@@ -531,13 +533,14 @@ def do_stats(player, parsed, **ctx):
 
 @cmd("tell")
 def do_tell(player, parsed, **ctx):
-    """Pass a message to another player or creature that nobody else can hear."""
-    # @todo fix for parsed
-    name, _, msg = args.partition(" ")
-    msg = msg.strip()
-    if not name or not msg:
+    """Pass a message to another player or creature that nobody else can hear.
+You'll have to enclose the message in quotes: tell Joe 'yes we can do that'"""
+    if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
+    if not parsed.message:
+        raise ParseError("You'll need to enclose the message in quotes.")
     # first look for a living with the name
+    name = parsed.args[0]
     living = player.location.search_living(name)
     if not living:
         # ask the driver if there's a player with that name (globally)
@@ -549,7 +552,7 @@ def do_tell(player, parsed, **ctx):
     if living is player:
         player.tell("You're talking to yourself...")
     else:
-        living.tell("%s tells you: %s" % (player.name, msg))
+        living.tell("%s tells you: %s" % (player.name, parsed.message))
         player.tell("You told %s." % name)
 
 
@@ -603,19 +606,18 @@ def do_who(player, parsed, **ctx):
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, parsed, **ctx):
-    """Do something with a door or exit, possibly by using an item."""
-    # @todo fix for parsed
-    args = args.split(None, 2)
-    if len(args) == 0:
-        raise ParseError("%s what? With what?" % lang.capital(verb))
-    what_name = args[0]
+    """Do something with a door, exit or item, possibly by using something.
+Example: open door,  unlock chest with key"""
+    if len(parsed.args) not in (1, 2) or parsed.unrecognized:
+        raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
+    if parsed.who:
+        if isinstance(parsed.who_order[0], base.Living):
+            raise ActionRefused("You can't do that with %s." % parsed.who_order[0].title)
+    what_name = parsed.args[0]
     with_item_name = None
     with_item = None
-    if len(args) > 1:
-        if args[1] == "with" and len(args) > 2:
-            with_item_name = args[2]
-        else:
-            with_item_name = args[1]
+    if len(parsed.args) == 2:
+        with_item_name = parsed.args[1]
     what = player.search_item(what_name, include_inventory=True, include_location=True, include_containers_in_inventory=False)
     if not what:
         if what_name in player.location.exits:
@@ -625,7 +627,7 @@ def do_open(player, parsed, **ctx):
             with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
                 raise ActionRefused("You don't have %s." % lang.a(with_item_name))
-        getattr(what, verb)(with_item, player)
+        getattr(what, parsed.verb)(with_item, player)
     else:
         raise ActionRefused("You don't see %s." % lang.a(what_name))
 
@@ -700,7 +702,7 @@ For more general help, try the 'help' command first."""
     # is it an exit in the current room?
     if name in player.location.exits:
         found = True
-        print("It's a possible way to leave your current location: %s" % player.location.exits[name].description)
+        print("It's a possible way to leave your current location: %s" % player.location.exits[name].short_description)
     # is it a npc here?
     living = player.location.search_living(name)
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:

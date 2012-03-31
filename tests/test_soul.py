@@ -357,7 +357,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
         room = mudlib.base.Location("somewhere")
-        room.add_exits([mudlib.base.Exit(room, "a door to the south", "south")])
+        room.add_exits([mudlib.base.Exit(room, "a door to the south", direction="south")])
         player.move(room)
         targets = { mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("dinosaur", "n") }
         targets_with_player = set(targets) | {player}

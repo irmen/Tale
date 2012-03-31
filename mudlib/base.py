@@ -238,7 +238,7 @@ class Location(MudObject):
                     exit = self.exits[exit_name]
                     if exit not in exits_seen:
                         exits_seen.add(exit)
-                        r.append(exit.description)
+                        r.append(exit.short_description)
         if self.items:
             if short:
                 item_names = sorted(item.name for item in self.items)
@@ -307,16 +307,25 @@ class Exit(object):
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in mudlib.rooms.town).
     If using a string, it will be retrieved and bound at runtime.
+    Short_description will be shown when the player looks around the room.
+    Long_description is optional and will be shown instead if the player examines the exit.
     Supplying a direction on the exit is optional. It is only required when adding multiple
     exits on a location by using Location.add_exits().
     """
-    def __init__(self, target_location, description, direction=None):
+    def __init__(self, target_location, short_description, long_description=None, direction=None):
         assert target_location is not None
         assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
         self.target = target_location
-        self.description = description
         self.bound = isinstance(target_location, Location)
         self.direction = direction
+        try:
+            self.short_description = short_description
+        except AttributeError:
+            pass   # this can occur if someone made it into a property
+        try:
+            self.long_description = long_description or self.short_description
+        except AttributeError:
+            pass   # this can occur if someone made it into a property
 
     def __repr__(self):
         targetname = self.target.name if self.bound else self.target
@@ -554,10 +563,23 @@ class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, target_location, description, direction=None, locked=False, opened=True):
-        super(Door, self).__init__(target_location, description, direction)
+    def __init__(self, target_location, short_description, long_description=None, direction=None, locked=False, opened=True):
+        super(Door, self).__init__(target_location, short_description, long_description, direction)
         self.locked = locked
         self.opened = opened
+        self.__long_description_prefix = long_description or short_description
+
+    @property
+    def long_description(self):
+        if self.opened:
+            status = "It is open "
+        else:
+            status = "It is closed "
+        if self.locked:
+            status += "and locked."
+        else:
+            status += "and unlocked."
+        return self.__long_description_prefix + " " + status
 
     def __repr__(self):
         target = self.target.name if self.bound else self.target

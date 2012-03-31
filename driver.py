@@ -155,7 +155,6 @@ class Driver(object):
             self.do_socialize(parsed)
             return
         except mudlib.soul.NonSoulVerb as x:
-            print("NONSOULVERB!", x.parsed)  # XXX
             parsed = x.parsed
             # Execute non-soul verb. First try directions, then the rest
             if parsed.verb in self.player.location.exits:
