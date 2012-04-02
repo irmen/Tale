@@ -509,7 +509,7 @@ def do_examine(player, parsed, **ctx):
                 lang=race["language"]
             ))
         return
-    item = player.search_item(name)
+    item, container = player.locate_item(name)
     if item:
         if "wizard" in player.privileges:
             print(repr(item))
@@ -517,6 +517,8 @@ def do_examine(player, parsed, **ctx):
             print("(by %s you probably mean %s)" % (name, item.name))
         if item in player:
             print("You're carrying %s." % lang.a(item.title))
+        elif container and container in player:
+            util.print_object_location(player, item, container)
         else:
             print("You see %s." % lang.a(item.title))
         if item.description:
