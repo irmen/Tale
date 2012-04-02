@@ -50,7 +50,8 @@ removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
 normal_gem = copy.deepcopy(gem)
 removeonly_box.init_inventory([normal_gem])
 
-cursed_gem = CursedGem("gem", "a dark gem")
+cursed_gem = CursedGem("black gem", "a black gem")
+normal_gem = Item("blue gem", "a blue gem")
 
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
@@ -82,15 +83,19 @@ rat = Monster("rat", "n", "rodent", None,
 
 ant = NPC("ant", "n", race="insect")
 
-square.init_inventory([cursed_gem, paper, trashcan, insertonly_box, removeonly_box, towncrier, idiot, rat, ant])
+square.init_inventory([cursed_gem, normal_gem, paper, trashcan, insertonly_box, removeonly_box, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
-door1 = Door(alley, "Door one.", direction="door1", locked=False, opened=True)
-door2 = Door(alley, "Door two.", direction="door2", locked=True, opened=True)
-door3 = Door(alley, "Door three.", direction="door3", locked=False, opened=False)
-door4 = Door(alley, "Door four.", direction="door4", locked=True, opened=False)
+door1 = Door(alley, "Door one.", direction="door one", locked=False, opened=True)
+door2 = Door(alley, "Door two.", direction="door two", locked=True, opened=True)
+door3 = Door(alley, "Door three.", direction="door three", locked=False, opened=False)
+door4 = Door(alley, "Door four.", direction="door four", locked=True, opened=False)
 
 alley.add_exits([door1, door2, door3, door4])
+alley.exits["first door"] = alley.exits["door one"]
+alley.exits["second door"] = alley.exits["door two"]
+alley.exits["third door"] = alley.exits["door three"]
+alley.exits["fourth door"] = alley.exits["door four"]
 alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
 square.exits["alley"] = Exit(alley, "There's an alley to the south.")
 square.exits["south"] = square.exits["alley"]

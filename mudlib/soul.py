@@ -12,9 +12,17 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 import re
+import sys
 from collections import defaultdict
 from . import lang
 from .errors import ParseError
+
+if sys.version_info >= (3, 0):
+    def next_iter(iterable):
+        return next(iterable)
+else:
+    def next_iter(iterable):
+        return iterable.next()
 
 
 class SoulException(Exception):
@@ -487,6 +495,22 @@ class ParseResults(object):
         return "\n".join(s)
 
 
+def check_name_with_spaces(words, index, all_livings, all_items):
+    wordcount = 1
+    name = words[index]
+    try:
+        while wordcount < 6:    # an upper bound for the number of words to concatenate to avoid long runtime
+            if name in all_livings:
+                return all_livings[name], name, wordcount
+            if name in all_items:
+                return all_items[name], name, wordcount
+            name = name + " " + words[index + wordcount]
+            wordcount += 1
+    except IndexError:
+        pass
+    return None, None, 0
+
+
 class Soul(object):
     """
     The 'soul' of a Player. Handles the high level verb actions and allows for social player interaction.
@@ -671,7 +695,7 @@ class Soul(object):
         action_room = action_room.replace("$", "s")
         return result_messages(action, action_room)
 
-    def parse(self, player, cmd, external_verbs=frozenset()):
+    def parse(self, player, cmd, external_verbs=frozenset(), room_exits=None):
         """Parse a command string, returns a ParseResults object."""
         qualifier = None
         message_verb = False  # does the verb expect a message?
@@ -685,6 +709,7 @@ class Soul(object):
         who_info = defaultdict(WhoInfo)
         who_order = []
         who_sequence = 0
+        room_exits = room_exits or {}
 
         # a substring enclosed in quotes will be extracted as the message
         m = _message_regex.search(cmd)
@@ -714,6 +739,17 @@ class Soul(object):
             verbdata = VERBS[verb][2]
             message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
             # note: don't add verb to arg_words
+        elif room_exits:
+            # check if the words are the name of a room exit.
+            if words[0] in {"enter", "climb", "crawl", "go"}:
+                words.pop(0)
+            exit, exit_name, wordcount = check_name_with_spaces(words, 0, room_exits, {})
+            if exit:
+                if wordcount != len(words):
+                    raise ParseError("What do you want to do with that?")
+                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}))
+            else:
+                raise UnknownVerbException(words[0], words, qualifier)
         else:
             raise UnknownVerbException(words[0], words, qualifier)
 
@@ -734,7 +770,8 @@ class Soul(object):
             for alias in item.aliases:
                 all_items[alias] = item
         previous_word = None
-        for word in words:
+        words_enumerator = enumerate(words)
+        for index, word in words_enumerator:
             if collect_message:
                 message.append(word)
                 arg_words.append(word)
@@ -744,7 +781,7 @@ class Soul(object):
                 word = word.rstrip(",")
             if word in ("them", "him", "her", "it"):
                 raise ParseError("It is not clear who you mean.")
-            elif word in ("me", "myself"):
+            if word in ("me", "myself"):
                 if include_flag:
                     who.add(player)
                     who_info[player].sequence = who_sequence
@@ -755,12 +792,14 @@ class Soul(object):
                     who.remove(player)
                     del who_info[player]
                 arg_words.append(word)
-            elif word in BODY_PARTS:
+                continue
+            if word in BODY_PARTS:
                 if bodypart:
                     raise ParseError("You can't do that both %s and %s." % (BODY_PARTS[bodypart], BODY_PARTS[word]))
                 bodypart = word
                 arg_words.append(word)
-            elif word in ("everyone", "everybody", "all"):
+                continue
+            if word in ("everyone", "everybody", "all"):
                 if include_flag:
                     if not all_livings:
                         raise ParseError("There is nobody here.")
@@ -778,17 +817,20 @@ class Soul(object):
                     who_sequence = 0
                     who_order = []
                 arg_words.append(word)
-            elif word == "everything":
+                continue
+            if word == "everything":
                 raise ParseError("You can't do something to everything around you, be more specific.")
-            elif word in ("except", "but"):
+            if word in ("except", "but"):
                 include_flag = not include_flag
                 arg_words.append(word)
-            elif word in lang.ADVERBS:
+                continue
+            if word in lang.ADVERBS:
                 if adverb:
                     raise ParseError("You can't do that both %s and %s." % (adverb, word))
                 adverb = word
                 arg_words.append(word)
-            elif word in all_livings:
+                continue
+            if word in all_livings:
                 living = all_livings[word]
                 if include_flag:
                     who.add(living)
@@ -800,7 +842,8 @@ class Soul(object):
                     who.remove(living)
                     del who_info[living]
                 arg_words.append(word)
-            elif word in all_items:
+                continue
+            if word in all_items:
                 item = all_items[word]
                 if include_flag:
                     who.add(item)
@@ -812,46 +855,70 @@ class Soul(object):
                     who.remove(item)
                     del who_info[item]
                 arg_words.append(word)
-            elif player.location and word in player.location.exits:
-                arg_words.append(word)  # it's an exit in the player's current location
-            else:
-                if message_verb and not message:
-                    collect_message = True
-                    message.append(word)
-                    arg_words.append(word)
-                elif word not in _skip_words:
-                    # unrecognized word, check if it could be a person's name or an item. (prefix)
-                    if not who:
-                        for name in all_livings:
-                            if name.startswith(word):
-                                raise ParseError("Perhaps you meant %s?" % name)
-                        for name in all_items:
-                            if name.startswith(word):
-                                raise ParseError("Perhaps you meant %s?" % name)
-                    if not external_verb:
-                        # check if it is a prefix of an adverb, if so, suggest a few adverbs
-                        adverbs = lang.adverb_by_prefix(word)
-                        if len(adverbs) == 1:
-                            word = adverbs[0]
-                            if adverb:
-                                raise ParseError("You can't do that both %s and %s." % (adverb, word))
-                            adverb = word
-                            arg_words.append(word)
-                            previous_word = word
-                            continue
-                        elif len(adverbs) > 1:
-                            raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
-
-                    if external_verb:
+                continue
+            if player.location:
+                exit, exit_name, wordcount = check_name_with_spaces(words, index, player.location.exits, {})
+                if exit:
+                    who.add(exit)
+                    arg_words.append(exit_name)
+                    while wordcount > 1:
+                        next_iter(words_enumerator)
+                        wordcount -= 1
+                    continue
+            item, full_name, wordcount = check_name_with_spaces(words, index, all_livings, all_items)
+            if item:
+                while wordcount > 1:
+                    next_iter(words_enumerator)
+                    wordcount -= 1
+                if include_flag:
+                    who.add(item)
+                    who_info[item].sequence = who_sequence
+                    who_info[item].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(item)
+                elif item in who:
+                    who.remove(item)
+                    del who_info[item]
+                arg_words.append(full_name)
+                continue
+            if message_verb and not message:
+                collect_message = True
+                message.append(word)
+                arg_words.append(word)
+                continue
+            if word not in _skip_words:
+                # unrecognized word, check if it could be a person's name or an item. (prefix)
+                if not who:
+                    for name in all_livings:
+                        if name.startswith(word):
+                            raise ParseError("Perhaps you meant %s?" % name)
+                    for name in all_items:
+                        if name.startswith(word):
+                            raise ParseError("Perhaps you meant %s?" % name)
+                if not external_verb:
+                    # check if it is a prefix of an adverb, if so, suggest a few adverbs
+                    adverbs = lang.adverb_by_prefix(word)
+                    if len(adverbs) == 1:
+                        word = adverbs[0]
+                        if adverb:
+                            raise ParseError("You can't do that both %s and %s." % (adverb, word))
+                        adverb = word
                         arg_words.append(word)
-                        unrecognized_words.append(word)
+                        previous_word = word
+                        continue
+                    elif len(adverbs) > 1:
+                        raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
+
+                if external_verb:
+                    arg_words.append(word)
+                    unrecognized_words.append(word)
+                else:
+                    if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
+                        # in case of a misplaced verb, qualifier or bodypart give a little more specific error
+                        raise ParseError("The word %s makes no sense at that location." % word)
                     else:
-                        if word in VERBS or word in ACTION_QUALIFIERS or word in BODY_PARTS:
-                            # in case of a misplaced verb, qualifier or bodypart give a little more specific error
-                            raise ParseError("The word %s makes no sense at that location." % word)
-                        else:
-                            # no idea what the user typed, generic error
-                            raise ParseError("The word %s is unrecognized." % word)
+                        # no idea what the user typed, generic error
+                        raise ParseError("It's not clear what you mean by %s." % word)
             previous_word = word
 
         message = " ".join(message)

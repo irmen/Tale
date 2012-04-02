@@ -63,7 +63,7 @@ class TestSoul(unittest.TestCase):
         player = mudlib.player.Player("julie", "f")
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.process_verb(player, "sit door1")
-        self.assertEqual("The word door1 is unrecognized.", str(x.exception))
+        self.assertEqual("It's not clear what you mean by door1.", str(x.exception))
         with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
             soul.process_verb(player, "sit door1 zen", external_verbs={"sit"})
         parsed=x.exception.parsed
@@ -353,6 +353,97 @@ class TestSoul(unittest.TestCase):
         with self.assertRaises(mudlib.soul.ParseError):
             soul.process_verb(player, "cough hubbabubba")
 
+    def testCheckNameWithSpaces(self):
+        livings = {"rat": "RAT", "brown bird": "BROWN BIRD"}
+        items = {"paper": "PAPER", "blue gem": "BLUE GEM", "dark red crystal": "DARK RED CRYSTAL"}
+        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 0, livings, items)
+        self.assertEqual((None,None,0), result)
+        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 1, livings, items)
+        self.assertEqual((None,None,0), result)
+        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 4, livings, items)
+        self.assertEqual((None,None,0), result)
+        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 2, livings, items)
+        self.assertEqual(("BLUE GEM","blue gem",2), result)
+        result = mudlib.soul.check_name_with_spaces(["give","the","dark","red","crystal", "to","rat"], 2, livings, items)
+        self.assertEqual(("DARK RED CRYSTAL","dark red crystal",3), result)
+        result = mudlib.soul.check_name_with_spaces(["give","the","dark","red","paper", "to","rat"], 2, livings, items)
+        self.assertEqual((None,None,0), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "paper", "to","brown", "bird"], 3, livings, items)
+        self.assertEqual(("BROWN BIRD","brown bird",2), result)
+
+    def testCheckNamesWithSpacesParsing(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        bird = mudlib.npc.NPC("brown bird", "f")
+        room = mudlib.base.Location("somewhere")
+        gate = mudlib.base.Exit(room, "the gate", direction="gate")
+        door1 = mudlib.base.Exit(room, "door number one", direction="door one")
+        door2 = mudlib.base.Exit(room, "door number two", direction="door two")
+        room.add_exits([gate,door1,door2])
+        bird.move(room)
+        player.move(room)
+        with self.assertRaises(mudlib.errors.ParseError) as x:
+            soul.parse(player, "hug bird")
+        self.assertEqual("It's not clear what you mean by bird.", str(x.exception))
+        parsed=soul.parse(player, "hug brown bird affection")
+        self.assertEqual("hug", parsed.verb)
+        self.assertEqual("affectionately", parsed.adverb)
+        self.assertEqual({bird}, parsed.who)
+        # check spaces in exit names
+        parsed = soul.parse(player, "gate", external_verbs=frozenset(room.exits))
+        self.assertEqual("gate", parsed.verb)
+        parsed = soul.parse(player, "enter gate", external_verbs={"enter"}, room_exits=player.location.exits)
+        self.assertEqual("enter", parsed.verb)
+        self.assertEqual(["gate"], parsed.args)
+        self.assertEqual({gate}, parsed.who)
+        with self.assertRaises(mudlib.soul.UnknownVerbException):
+            soul.parse(player, "door", room_exits=player.location.exits)
+        parsed = soul.parse(player, "enter door two", external_verbs={"enter"}, room_exits=player.location.exits)
+        self.assertEqual("enter", parsed.verb)
+        self.assertEqual(["door two"], parsed.args)
+        self.assertEqual({door2}, parsed.who)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "door one", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("door one", parsed.verb)
+        self.assertEqual({door1}, parsed.who)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "door two", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("door two", parsed.verb)
+        self.assertEqual({door2}, parsed.who)
+
+    def testEnterExits(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f")
+        room = mudlib.base.Location("somewhere")
+        gate = mudlib.base.Exit(room, "gate", direction="gate")
+        east = mudlib.base.Exit(room, "east", direction="east")
+        door1 = mudlib.base.Exit(room, "door number one", direction="door one")
+        room.add_exits([gate,door1,east])
+        player.move(room)
+        # known actions: enter/go/climb/crawl
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "enter door one", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("door one", parsed.verb)
+        self.assertEqual({door1}, parsed.who)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "climb gate", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("gate", parsed.verb)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "go east", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("east", parsed.verb)
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "crawl east", room_exits=player.location.exits)
+        parsed = x.exception.parsed
+        self.assertEqual("east", parsed.verb)
+        parsed = soul.parse(player, "jump west", room_exits=player.location.exits)
+        self.assertEqual("jump", parsed.verb)
+        self.assertEqual("westwards", parsed.adverb)
+
     def testParse(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
@@ -399,7 +490,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Perhaps you meant newspaper?", str(x.exception), "must suggest item with prefix")
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "slap undefined")
-        self.assertEqual("The word undefined is unrecognized.", str(x.exception))
+        self.assertEqual("It's not clear what you mean by undefined.", str(x.exception))
         parsed = soul.parse(player, "smile west")
         self.assertEqual("westwards", parsed.adverb)
         with self.assertRaises(mudlib.soul.ParseError) as x:

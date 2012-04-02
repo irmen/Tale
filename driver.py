@@ -148,9 +148,8 @@ class Driver(object):
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
         player_verbs = self.commands.get(self.player.privileges)
-        external_verbs = frozenset(player_verbs) | frozenset(self.player.location.exits)
         try:
-            parsed = self.player.parse(cmd, external_verbs)
+            parsed = self.player.parse(cmd, external_verbs=frozenset(player_verbs), room_exits=self.player.location.exits)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
             return

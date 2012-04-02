@@ -32,9 +32,9 @@ class Player(base.Living):
         else:
             self.title = title
 
-    def parse(self, commandline, external_verbs=frozenset()):
+    def parse(self, commandline, external_verbs=frozenset(), room_exits=None):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
-        parsed = self.soul.parse(self, commandline, external_verbs)
+        parsed = self.soul.parse(self, commandline, external_verbs, room_exits)
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
         return parsed
