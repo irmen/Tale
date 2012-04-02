@@ -52,6 +52,7 @@ def do_inventory(player, parsed, **ctx):
                     print("  " + item.title)
             else:
                 print(name, "is carrying nothing.")
+            print("Money in possession:", util.money_display(other.money))
             return
         elif isinstance(other, base.Item):
             # show item's inventory
@@ -72,6 +73,7 @@ def do_inventory(player, parsed, **ctx):
                 print("  " + item.title)
         else:
             print("You are carrying nothing.")
+        print("Money in possession:", util.money_display(player.money))
 
 
 @cmd("locate")
@@ -340,6 +342,13 @@ def do_give(player, parsed, **ctx):
     """Give something (or all things) you are carrying to someone else."""
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
+    if len(parsed.who) == 1:
+        try:
+            # first try if the first one or two words can be interpreted as an amount of money
+            money = util.words_to_money(parsed.unrecognized)
+            return give_money(player, money, parsed.who_order[0])
+        except (ValueError, ParseError):
+            pass
     if parsed.unrecognized:
         raise ParseError("You don't have %s." % lang.join(parsed.unrecognized))
     if player.inventory_size() == 0:
@@ -364,11 +373,13 @@ def do_give(player, parsed, **ctx):
     if isinstance(parsed.who_order[0], base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
         what = parsed.who_order[1:]
-        return give_stuff(player, what, target=parsed.who_order[0])
+        return give_stuff(player, what, None, target=parsed.who_order[0])
     elif isinstance(parsed.who_order[-1], base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
         what = parsed.who_order[:-1]
-        return give_stuff(player, what, target=parsed.who_order[-1])
+        return give_stuff(player, what, None, target=parsed.who_order[-1])
+    else:
+        raise ActionRefused("It's not clear who you want to give things to.")
 
 
 def give_stuff(player, items, target_name, target=None):
@@ -398,6 +409,26 @@ def give_stuff(player, items, target_name, target=None):
         print("You give %s %s." % (target.title, items_str))
     else:
         print("You didn't give %s anything." % target.title)
+
+
+def give_money(player, amount, recipient):
+    if not recipient:
+        raise ActionRefused("Give it to whom?")
+    if not isinstance(recipient, base.Living):
+        raise ActionRefused("You can't do that.")
+    if recipient is player:
+        raise ActionRefused("There's no reason to give it to yourself.")
+    if amount <= 0:
+        player.tell("You don't give away anything.")
+    elif player.money < amount:
+        player.tell("You don't have that amount of wealth.")
+    else:
+        #@ todo ask for confirmation to give away money
+        recipient.allow_give_money(player, amount)
+        player.money -= money
+        recipient.money += money
+        player.tell("You gave %s %s." % (recipient.title, util.money_display(money)))
+        player.location.tell("%s gave %s some money." % (lang.capital(player.title), recipient.title), exclude_living=player)
 
 
 @cmd("help")

@@ -9,15 +9,13 @@ from ..errors import ActionRefused
 from .. import lang
 
 
-class FixedItem(Container):  # something that cannot be picked up
-    def allow_move(self, actor):
-        raise ActionRefused("You can't move %s." % self.title)
-
-
-class TrashCan(FixedItem):
+class TrashCan(Container):
     def __init__(self, name, title=None, description=None):
         super(TrashCan, self).__init__(name, title, description)
         self.opened = False
+
+    def allow_move(self, actor):
+        raise ActionRefused("You can't move %s." % self.title)
 
     @property
     def title(self):
@@ -76,7 +74,7 @@ class TrashCan(FixedItem):
             raise ActionRefused("You can't take things from the trashcan: you should open it first.")
 
 
-newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells funky too.")
+newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful red gem.")
 pouch = Container("pouch", "small leather pouch", "It is closed with a leather strap.")

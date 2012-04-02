@@ -373,6 +373,7 @@ class Living(MudObject):
         self.location = _Limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
+        self.money = 0.0  # the currency is determined by util.money_display
         self.race = None
         self.stats = {}
         if race:
@@ -513,6 +514,10 @@ class Living(MudObject):
         """Starts attacking the given living until death ensues on either side."""
         # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
         pass
+
+    def allow_give_money(self, actor, amount):
+        """Do we accept money?"""
+        raise ActionRefused("You can't do that.")
 
 
 class Container(Item):

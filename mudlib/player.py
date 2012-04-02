@@ -83,6 +83,10 @@ class Player(base.Living):
         self.soul = None   # truly die ;-)
         # @todo: remove heartbeat, deferred, etc.
 
+    def allow_give_money(self, actor, amount):
+        """Do we accept money?"""
+        pass
+
 
 class Wiretap(object):
     """wiretap that can be installed on a location or a living, to tap into the messages they're receiving"""

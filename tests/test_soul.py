@@ -403,7 +403,7 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "smile west")
         self.assertEqual("westwards", parsed.adverb)
         with self.assertRaises(mudlib.soul.ParseError) as x:
-            print soul.parse(player, "smile north")
+            soul.parse(player, "smile north")
         self.assertEqual("What adverb did you mean: northeastwards, northwards, or northwestwards?", str(x.exception))
         parsed = soul.parse(player, "smile south")
         self.assertEqual(["south"], parsed.args, "south must be parsed as a normal arg because it's an exit in the room")

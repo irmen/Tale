@@ -192,7 +192,7 @@ class TestDoorsExits(unittest.TestCase):
         hall = Location("hall")
         attic = Location("attic")
         unbound_exit = Exit("foo.bar", "a random exit")
-        with self.assertRaises(StandardError):
+        with self.assertRaises(Exception):
             self.assertFalse(unbound_exit.allow_passage(player))  # should fail because not bound
         exit1 = Exit(attic, "first ladder to attic")
         exit1.allow_passage(player)
@@ -522,7 +522,7 @@ class TestContainer(unittest.TestCase):
         bag = Container("bag")
         key = Item("key")
         player = Player("julie", "f")
-        with self.assertRaises(StandardError):
+        with self.assertRaises(Exception):
             bag.insert(None, player)
         bag.insert(key, player)
         with self.assertRaises(KeyError):

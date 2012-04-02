@@ -25,7 +25,7 @@ lane = Location("Lane of Magicks",
 square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
 square.exits["lane"] = square.exits["north"]
 
-paper = copy.copy(newspaper)
+paper = copy.deepcopy(newspaper)
 paper.aliases = {"paper"}
 
 
@@ -47,7 +47,7 @@ class RemoveOnlyBox(Container):
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
-normal_gem = copy.copy(gem)
+normal_gem = copy.deepcopy(gem)
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("gem", "a dark gem")

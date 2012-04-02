@@ -17,7 +17,7 @@ GENDERS = {"m": "male", "f": "female", "n": "neuter"}
 
 
 def join(words, conj="and"):
-    """join a list of words to 'a,b,c,d and e'"""
+    """join a list of words to 'a,b,c, and e'"""
     words = list(words)
     if not words:
         return ""
