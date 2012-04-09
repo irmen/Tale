@@ -122,7 +122,7 @@ VERBS = {
 "leer":      ( DEFA, None, "", "at" ),
 "agree":     ( DEFA, None, "", "with" ),
 "believe":   ( PERS, None, "believe$ in \nMYself \nHOW", "believe$ \nWHO \nHOW" ),
-"understand": ( PERS, ( "now", ), "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
+"understand":( PERS, None, "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
 "disagree":  ( DEFA, None, "", "with" ),
 "fart":      ( DEFA, None, "", "at" ),
 "dance":     ( DEFA, None, "", "with" ),
@@ -236,7 +236,7 @@ VERBS = {
 "fondle":   ( PREV, None, "" ),
 "nominate": ( PREV, None, "" ),
 "startle":  ( PREV, None, "" ),
-"lift":     ( PREV, ( "from the floor", ), "" ),
+#"lift":     ( PREV, ( "from the floor", ), "" ),
 "turn":     ( PREV, None, "\nYOUR head towards" ),
 "squeeze":  ( PREV, ( "fondly", ), "" ),
 "comfort":  ( PREV, None, "" ),
@@ -354,13 +354,31 @@ assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second
 AGGRESSIVE_VERBS = {
     "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "finger", "fondle", "french",
     "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "kick", "kiss", "knee",
-    "knock", "lick", "lift", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
+    "knock", "lick", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
     "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "shove", "slap", "smooch", "sneer", "snigger",
     "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",
     "swing", "tackle", "tap", "taunt", "tease", "tickle", "tongue", "touch", "wiggle", "wobble", "wrinkle"
 }
 
 assert AGGRESSIVE_VERBS.issubset(VERBS.keys())
+
+NONLIVING_OK_VERBS = {
+    "admire", "adore", "answer", "argh", "ask", "babble", "barf", "bark", "beam",
+    "bite", "blink", "bow", "breathe", "bump", "cackle", "caper", "capitulate",
+    "chuckle", "complain", "cuddle", "curse", "drool", "embrace", "eye", "fear",
+    "feel", "finger", "fondle", "giggle", "glare", "grimace", "grin", "groan",
+    "grope", "growl", "grunt", "guffaw", "hate", "headshake", "hide", "hiss",
+    "hmm", "ignore", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
+    "love", "lust", "meow", "moan", "mumble", "murmur", "mutter", "nod", "nominate",
+    "ogle", "peer", "point", "puke", "pull", "push", "purr", "puzzle", "quote",
+    "raise", "recoil", "reply", "rotate", "say", "scowl", "scream", "shake",
+    "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "sniff",
+    "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
+    "swing", "tongue", "touch", "trust", "turn", "understand", "utter", "want",
+    "watch", "wave", "wiggle", "wobble", "worship", "wrinkle", "yawn", "yell"
+}
+
+assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
 
 ACTION_QUALIFIERS = {
     # qualifier -> (actionmsg, roommsg, use room actionstr)
