@@ -317,7 +317,7 @@ class Exit(object):
         assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.bound = isinstance(target_location, Location)
-        self.direction = direction
+        self.direction = self.name = direction
         try:
             self.short_description = short_description
         except AttributeError:

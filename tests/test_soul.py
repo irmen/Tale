@@ -147,7 +147,7 @@ class TestSoul(unittest.TestCase):
         cat = mudlib.npc.NPC("cat", "n", title="the hairy cat")
         targets = {philip, kate, cat}
         # peer
-        parsed = mudlib.soul.ParseResults("peer", who=targets)
+        parsed = mudlib.soul.ParseResults("peer", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual(set(targets), who)
         self.assertTrue(player_msg.startswith("You peer at "))
@@ -268,7 +268,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
         targets = {mudlib.npc.NPC("max", "m")}
-        parsed = mudlib.soul.ParseResults("beep", who=targets)
+        parsed = mudlib.soul.ParseResults("beep", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You triumphantly beep max on the nose.", player_msg)
         self.assertEqual("Julie triumphantly beeps max on the nose.", room_msg)
@@ -287,7 +287,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
         targets = {mudlib.npc.NPC("max", "m")}
-        parsed = mudlib.soul.ParseResults("tickle", who=targets, qualifier="fail")
+        parsed = mudlib.soul.ParseResults("tickle", who=targets, qualifier="fail", who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You try to tickle max, but fail miserably.", player_msg)
         self.assertEqual("Julie tries to tickle max, but fails miserably.", room_msg)
@@ -392,8 +392,8 @@ class TestSoul(unittest.TestCase):
         # check spaces in exit names
         parsed = soul.parse(player, "gate", external_verbs=frozenset(room.exits))
         self.assertEqual("gate", parsed.verb)
-        parsed = soul.parse(player, "enter gate", external_verbs={"enter"}, room_exits=player.location.exits)
-        self.assertEqual("enter", parsed.verb)
+        parsed = soul.parse(player, "frobnizz gate", external_verbs={"frobnizz"}, room_exits=player.location.exits)
+        self.assertEqual("frobnizz", parsed.verb)
         self.assertEqual(["gate"], parsed.args)
         self.assertEqual({gate}, parsed.who)
         with self.assertRaises(mudlib.soul.UnknownVerbException):
@@ -511,6 +511,8 @@ class TestSoul(unittest.TestCase):
             soul.parse(player, "crawl south", room_exits=player.location.exits)
         self.assertEqual("south", x.exception.parsed.verb, "just the exit is the verb, not the movement action")
         self.assertEqual({south_exit}, x.exception.parsed.who, "exit must be in the who set")
+        parsed_str = str(x.exception.parsed)
+        self.assertTrue("verb=south" in parsed_str)
         with self.assertRaises(mudlib.soul.ParseError) as x:
             soul.parse(player, "crawl somewherenotexisting", room_exits=player.location.exits)
         self.assertEqual("You can't crawl there.", str(x.exception))
@@ -530,7 +532,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You grin evilly.", player_msg)
         self.assertEqual("Julie grins evilly.", room_msg)
         # drool
-        parsed = mudlib.soul.ParseResults("drool", who=targets)
+        parsed = mudlib.soul.ParseResults("drool", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You drool on max.", player_msg)
         self.assertEqual("Julie drools on max.", room_msg)
@@ -541,19 +543,19 @@ class TestSoul(unittest.TestCase):
         player = mudlib.player.Player("julie", "f")
         targets = {mudlib.npc.NPC("max", "m")}
         # peer
-        parsed = mudlib.soul.ParseResults("peer", who=targets)
+        parsed = mudlib.soul.ParseResults("peer", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You peer at max.", player_msg)
         self.assertEqual("Julie peers at max.", room_msg)
         self.assertEqual("Julie peers at you.", target_msg)
         # tease
-        parsed = mudlib.soul.ParseResults("tease", who=targets)
+        parsed = mudlib.soul.ParseResults("tease", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You tease max.", player_msg)
         self.assertEqual("Julie teases max.", room_msg)
         self.assertEqual("Julie teases you.", target_msg)
         # turn
-        parsed = mudlib.soul.ParseResults("turn", who=targets)
+        parsed = mudlib.soul.ParseResults("turn", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You turn your head towards max.", player_msg)
         self.assertEqual("Julie turns her head towards max.", room_msg)
@@ -568,13 +570,13 @@ class TestSoul(unittest.TestCase):
             parsed = mudlib.soul.ParseResults("bonk")
             soul.process_verb_parsed(player, parsed)
         # pounce
-        parsed = mudlib.soul.ParseResults("pounce", who=targets)
+        parsed = mudlib.soul.ParseResults("pounce", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You pounce max playfully.", player_msg)
         self.assertEqual("Julie pounces max playfully.", room_msg)
         self.assertEqual("Julie pounces you playfully.", target_msg)
         # hold
-        parsed = mudlib.soul.ParseResults("hold", who=targets)
+        parsed = mudlib.soul.ParseResults("hold", who=targets, who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You hold max in your arms.", player_msg)
         self.assertEqual("Julie holds max in her arms.", room_msg)
@@ -629,7 +631,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie yells 'why' angrily at max.", room_msg)
         self.assertEqual("Julie yells 'why' angrily at you.", target_msg)
         # ask
-        parsed = mudlib.soul.ParseResults("ask", who=targets, message="are you happy")
+        parsed = mudlib.soul.ParseResults("ask", who=targets, message="are you happy", who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You ask max: are you happy?", player_msg)
         self.assertEqual("Julie asks max: are you happy?", room_msg)

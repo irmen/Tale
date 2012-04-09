@@ -40,7 +40,7 @@ def print_object_location(player, obj, container, print_parentheses=True):
             player.tell("%s was found in %s." % (lang.capital(obj.name), container.name))
 
 
-def money_display_fantasy(amount, short=False):
+def money_display_fantasy(amount, short=False, zero_msg="nothing"):
     """
     Display amount of money in gold/silver/copper units,
     base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
@@ -59,10 +59,10 @@ def money_display_fantasy(amount, short=False):
         result.append("%d copper" % copper)
     if result:
         return lang.join(result)
-    return "nothing"
+    return zero_msg
 
 
-def money_display_modern(amount, short=False):
+def money_display_modern(amount, short=False, zero_msg="nothing"):
     """
     Display amount of money in modern currency (dollars/cents).
     """
@@ -77,7 +77,7 @@ def money_display_modern(amount, short=False):
         result.append("%d cent" % cents)
     if result:
         return lang.join(result)
-    return "nothing"
+    return zero_msg
 
 
 def money_to_float_fantasy(coins):

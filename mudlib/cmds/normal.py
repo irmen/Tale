@@ -52,7 +52,7 @@ def do_inventory(player, parsed, **ctx):
                     print("  " + item.title)
             else:
                 print(name, "is carrying nothing.")
-            print("Money in possession:", util.money_display(other.money))
+            print("Money in possession: %s." % util.money_display(other.money))
             return
         elif isinstance(other, base.Item):
             # show item's inventory
@@ -73,7 +73,7 @@ def do_inventory(player, parsed, **ctx):
                 print("  " + item.title)
         else:
             print("You are carrying nothing.")
-        print("Money in possession:", util.money_display(player.money))
+        print("Money in possession: %s." % util.money_display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate")

@@ -37,6 +37,7 @@ class TestUtil(unittest.TestCase):
 
     def test_moneydisplay(self):
         self.assertEqual("nothing", util.money_display_fantasy(0))
+        self.assertEqual("zilch", util.money_display_fantasy(0, zero_msg="zilch"))
         self.assertEqual("nothing", util.money_display_fantasy(0.01))
         self.assertEqual("1 copper", util.money_display_fantasy(0.06))
         self.assertEqual("12 gold, 3 silver, and 2 copper", util.money_display_fantasy(123.24))
@@ -45,6 +46,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("12g/3s/2c", util.money_display_fantasy(123.24, True))
         self.assertEqual("12g/3s/3c", util.money_display_fantasy(123.26, True))
         self.assertEqual("nothing", util.money_display_modern(0))
+        self.assertEqual("zilch", util.money_display_modern(0, zero_msg="zilch"))
         self.assertEqual("nothing", util.money_display_modern(0.001))
         self.assertEqual("1 cent", util.money_display_modern(0.006))
         self.assertEqual("5 cent", util.money_display_modern(0.05))

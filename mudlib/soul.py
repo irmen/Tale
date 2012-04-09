@@ -453,8 +453,8 @@ _skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "onto", "th
 class WhoInfo(object):
     __slots__ = ("sequence", "previous_word")
 
-    def __init__(self):
-        self.sequence = 0
+    def __init__(self, sequence=0):
+        self.sequence = sequence
         self.previous_word = None
 
     def __str__(self):
@@ -476,6 +476,11 @@ class ParseResults(object):
         self.args = args or []
         self.unrecognized = unrecognized or []
         assert type(self.who) in (set, frozenset)
+        if self.who_order and not self.who_info:
+            for sequence, who in enumerate(self.who_order):
+                self.who_info[who] = WhoInfo(sequence)
+        if self.who:
+            assert len(self.who_info) == len(self.who) and len(self.who_order) > 0
 
     def __str__(self):
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]
@@ -750,7 +755,7 @@ class Soul(object):
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
-                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}))
+                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit]))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -865,6 +870,10 @@ class Soul(object):
                 exit, exit_name, wordcount = check_name_with_spaces(words, index, player.location.exits, {})
                 if exit:
                     who.add(exit)
+                    who_info[exit].sequence = who_sequence
+                    who_info[exit].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(exit)
                     arg_words.append(exit_name)
                     while wordcount > 1:
                         next_iter(words_enumerator)
