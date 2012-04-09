@@ -635,7 +635,7 @@ class Soul(object):
             action = verbdata[2]
             action_room = verbdata[3]
             if not check_person(action, parsed.who):
-                raise ParseError("The verb %s needs a person." % verb)
+                raise ParseError("The verb %s needs a person." % parsed.verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
             action = action.replace(" \nWHAT", message)

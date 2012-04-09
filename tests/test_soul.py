@@ -654,6 +654,10 @@ class TestSoul(unittest.TestCase):
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You go 'ah' rudely.", player_msg)
         self.assertEqual("Julie goes 'ah' rudely.", room_msg)
+        # verb needs a person
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.process_verb(player, "touch")
+        self.assertEqual("The verb touch needs a person.", str(x.exception))
 
     def testQUAD(self):
         soul = mudlib.soul.Soul()
