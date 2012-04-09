@@ -448,7 +448,9 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
         room = mudlib.base.Location("somewhere")
-        room.add_exits([mudlib.base.Exit(room, "a door to the south", direction="south")])
+        south_exit = mudlib.base.Exit(room, "a door to the south", direction="south")
+        east_exit = mudlib.base.Exit(room, "a door to the east", direction="east")
+        room.add_exits([east_exit, south_exit])
         player.move(room)
         targets = { mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("dinosaur", "n") }
         targets_with_player = set(targets) | {player}
@@ -504,6 +506,19 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "reply kate ofcourse,  darling.")
         self.assertEqual(["kate", "ofcourse,", "darling."], parsed.args, "must be able to skip comma")
         self.assertEqual(1, len(parsed.who))
+        # check movement parsing for room exits
+        with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
+            soul.parse(player, "crawl south", room_exits=player.location.exits)
+        self.assertEqual("south", x.exception.parsed.verb, "just the exit is the verb, not the movement action")
+        self.assertEqual({south_exit}, x.exception.parsed.who, "exit must be in the who set")
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.parse(player, "crawl somewherenotexisting", room_exits=player.location.exits)
+        self.assertEqual("You can't crawl there.", str(x.exception))
+        with self.assertRaises(mudlib.soul.ParseError) as x:
+            soul.parse(player, "crawl", room_exits=player.location.exits)
+        self.assertEqual("Crawl where?", str(x.exception))
+        with self.assertRaises(mudlib.soul.UnknownVerbException):
+            soul.parse(player, "crawl", room_exits=[])   # must raise unknownverb if there are no exits in the room
 
     def testDEFA(self):
         soul = mudlib.soul.Soul()

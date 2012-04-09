@@ -1,0 +1,15 @@
+Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
+Bulletin boards.
+Language system: speak/understand different languages
+Pets: tame/befriend/abandon (charisma/luck)
+Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
+Follow other creatures: follow/evade
+Party: team up with other players and share quest and combat experience
+Time: 1 action = 1 minute game time except when in combat, then every action doesn't advance time. It might cost one or more rounds of attack though.
+Skills: stealth, lockpicking, ...
+Vendors and shops: stock, sell stuff, buy stuff, haggle?
+
+DAMAGE TYPES
+------------
+blunt | blade | knife | water | shock | cold | heat | gas | acid | magic | poison | disease | trauma | pierce | psionic | anoxia | deathray | emotional | sonic | emp | other | karma | drama | overpressure | underpressure | inertia
+

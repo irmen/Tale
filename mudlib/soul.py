@@ -741,13 +741,18 @@ class Soul(object):
             # note: don't add verb to arg_words
         elif room_exits:
             # check if the words are the name of a room exit.
+            move_action = None
             if words[0] in {"enter", "climb", "crawl", "go"}:
-                words.pop(0)
+                move_action = words.pop(0)
+                if not words:
+                    raise ParseError("%s where?" % lang.capital(move_action))
             exit, exit_name, wordcount = check_name_with_spaces(words, 0, room_exits, {})
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
                 raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}))
+            elif move_action:
+                raise ParseError("You can't %s there." % move_action)
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         else:
