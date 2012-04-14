@@ -103,7 +103,6 @@ class Driver(object):
 
     def main_loop(self):
         print = self.player.tell
-        keep_going = True
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         while True:
             mudlib.mud_context.driver = self
@@ -111,6 +110,8 @@ class Driver(object):
             self.write_output()
             try:
                 self.ask_player_input()
+            except KeyboardInterrupt:
+                print("\n* break: Use <quit> if you want to quit.")
             except mudlib.soul.UnknownVerbException as x:
                 if x.verb in directions:
                     print("You can't go in that direction.")
@@ -156,17 +157,21 @@ class Driver(object):
         except mudlib.soul.NonSoulVerb as x:
             parsed = x.parsed
             # Execute non-soul verb. First try directions, then the rest
-            if parsed.verb in self.player.location.exits:
-                self.do_move(parsed.verb)
-                return True
-            elif parsed.verb in player_verbs:
-                func = player_verbs[parsed.verb]
-                func(self.player, parsed, driver=self, verbs=player_verbs)
-                return
-            else:
-                raise mudlib.soul.ParseError("failed to parse the command line correctly")
+            try:
+                if parsed.verb in self.player.location.exits:
+                    self.go_through_exit(parsed.verb)
+                    return True
+                elif parsed.verb in player_verbs:
+                    func = player_verbs[parsed.verb]
+                    func(self.player, parsed, driver=self, verbs=player_verbs)
+                    return
+                else:
+                    raise mudlib.soul.ParseError("That doesn't make much sense.")
+            except mudlib.errors.RetrySoulVerb as x:
+                # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
+                self.do_socialize(parsed)
 
-    def do_move(self, direction):
+    def go_through_exit(self, direction):
         exit = self.player.location.exits[direction]
         if not exit.bound:
             # resolve the location and replace with bound Exit

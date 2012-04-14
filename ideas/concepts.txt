@@ -9,6 +9,13 @@ Time: 1 action = 1 minute game time except when in combat, then every action doe
 Skills: stealth, lockpicking, ...
 Vendors and shops: stock, sell stuff, buy stuff, haggle?
 
+Wiretaps: as soon as invisible objects and room message notifications are implemented, replace the
+    wiretap attribute on Location by a real wiretap object that's placed in the room. It relays the
+    messages it receives to the owner.  (needs to auto-destruct if the owner is gone)
+    Wiretaps on livings are a bit harder to replace by a normal object because they need
+    to intercept the stuff thats told to the living, and there's no regular game mechanic to do that.
+
+
 DAMAGE TYPES
 ------------
 blunt | blade | knife | water | shock | cold | heat | gas | acid | magic | poison | disease | trauma | pierce | psionic | anoxia | deathray | emotional | sonic | emp | other | karma | drama | overpressure | underpressure | inertia

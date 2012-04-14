@@ -37,6 +37,10 @@ class Player(base.Living):
         parsed = self.soul.parse(self, commandline, external_verbs, room_exits)
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
+        if parsed.verb not in soul.NONLIVING_OK_VERBS:
+            # check if any of the targeted objects is a non-living
+            if not all(isinstance(who, base.Living) for who in parsed.who):
+                raise soul.NonSoulVerb(parsed)
         return parsed
 
     def socialize_parsed(self, parsed):

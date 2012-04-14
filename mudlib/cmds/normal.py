@@ -550,6 +550,8 @@ def do_stats(player, parsed, **ctx):
         target = player
     elif len(parsed.who) == 1:
         target = parsed.who.pop()
+        if not isinstance(target, base.Living):
+            raise ActionRefused("That doesn't have stats.")
     else:
         raise ActionRefused("Show stats from who?")
     gender = lang.GENDERS[target.gender]

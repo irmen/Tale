@@ -23,3 +23,8 @@ class ActionRefused(Exception):
 class SessionExit(Exception):
     """Player session ends."""
     pass
+
+
+class RetrySoulVerb(Exception):
+    """Retry a command as soul verb instead."""
+    pass

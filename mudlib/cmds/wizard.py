@@ -9,7 +9,7 @@ import inspect
 import copy
 import functools
 import sys
-from ..errors import SecurityViolation, ParseError, ActionRefused
+from ..errors import SecurityViolation, ParseError, ActionRefused, RetrySoulVerb
 from .. import base
 from .. import lang
 from .. import rooms

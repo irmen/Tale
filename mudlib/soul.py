@@ -166,8 +166,8 @@ VERBS = {
 "hello":     ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
 "hi":        ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
 "wait":      ( SIMP, None, "wait$ \nHOW", ""),
-"grease":    ( SIMP, ("like in a shiatsu",), "grease$ \nWHO \nHOW"),
-"oil":       ( SIMP, ("like in a shiatsu",), "oil$ \nWHO \nHOW"),
+"grease":    ( SIMP, ("like a shiatsu",), "grease$ \nWHO \nHOW"),
+"oil":       ( SIMP, ("like a shiatsu",), "oil$ \nWHO \nHOW"),
 "search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),
 "sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 
