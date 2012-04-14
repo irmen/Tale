@@ -24,8 +24,6 @@ return
     send someone back to their last location after a teleport
 wizlist
     shows list of all known active wizard users
-roll
-    roll a die (XdY)
 zap
     deal a massive amount of damage to a creature
     
@@ -40,7 +38,7 @@ yell
 block, unblock
     block messages from someone
 equipment
-    show the items you are wearing
+    show the armor items you are wearing
 flee
     flee from combat in a random direction
 kills
@@ -57,13 +55,13 @@ skills
     the skills you have
 spells
     the spells you know
-attack, stop attack
+attack, stop attack[ing]/stop combat
     start/stop combat
 cast
     cast a spell on a creature or an object
 learn
     learn an ability, skill or spell from someone or something
-news
+motd
     replay login news
 stealth
     toggle stealth, if you possess that skill. (too low stamina -> too tired.)
@@ -93,7 +91,9 @@ drink
     drink something
 eat
     eat something
-    
+hunger/thirst
+    show hunger/thirst status
+
 empty
     remove all items from a container
     remove substance from a vessel

@@ -98,6 +98,16 @@ class TestUtil(unittest.TestCase):
         self.assertAlmostEqual(46.15, util.words_to_money(["$ 46.15"], money_to_float=tf, money_words=mw), places=4)
         self.assertAlmostEqual(46.15, util.words_to_money(["$", "46.15"], money_to_float=tf, money_words=mw), places=4)
 
+    def test_roll_die(self):
+        total, values = util.roll_die()
+        self.assertTrue(1<=total<=6)
+        self.assertEqual(1, len(values))
+        self.assertEqual(total, values[0])
+        total, values = util.roll_die(20, 10)   # 20d10
+        self.assertEqual(20, len(values))
+        with self.assertRaises(AssertionError):
+            util.roll_die(21, 10)
+
 
 if __name__ == '__main__':
     unittest.main()

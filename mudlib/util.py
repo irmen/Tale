@@ -7,8 +7,16 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 # there's nothing her so far
 
 from __future__ import print_function, division
+import random
 from . import lang
 from .errors import ParseError
+
+
+def roll_die(number=1, sides=6):
+    """rolls a number (max 20) of dice with configurable number of sides"""
+    assert 1 <= number <= 20
+    values = [random.randint(1, sides) for _ in range(number)]
+    return sum(values), values
 
 
 def print_object_location(player, obj, container, print_parentheses=True):

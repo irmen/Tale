@@ -11,7 +11,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from ..errors import ParseError, ActionRefused, SessionExit
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
 abbreviations = {}   # will be injected
@@ -823,3 +823,58 @@ def do_exits(player, parsed, **ctx):
         player.tell("Your current location seems to have some possible exits.")
     else:
         player.tell("Your current location doesn't seem to have obvious exits.")
+
+
+@cmd("use")
+def do_use(player, parsed, **ctx):
+    """General object use. Most of the time, you'll need to be more specific to say exactly what you want to do with it."""
+    if not parsed.who:
+        raise ActionRefused("Use what?")
+    if len(parsed.who) > 1:
+        subj = "them"
+    else:
+        who = parsed.who.pop()
+        if isinstance(who, base.Living):
+            if who is player:
+                raise ActionRefused("Please be more specific: what do you want to do?")
+            subj = who.objective
+        else:
+            subj = "it"
+    raise ActionRefused("Please be more specific: what do you want to do with %s?" % subj)
+
+
+@cmd("dice", "roll")
+def do_dice(player, parsed, **ctx):
+    """Roll a 6-sided die. Use the familiar '3d6' argument style if you want to roll multiple dice."""
+    print = player.tell
+    if not parsed.args:
+        if parsed.verb == "roll":
+            raise RetrySoulVerb
+        number = 1
+        sides = 6
+    else:
+        try:
+            n, _, s = parsed.args[0].partition("d")
+            number, sides = int(n), int(s)
+        except ValueError:
+            raise ActionRefused("What kind of dice do you want to roll (such as 3d6)?")
+    if not (1 <= number <= 20 and sides >= 2):
+        raise ActionRefused("Please try a bit more sensible values.")
+    total, values = util.roll_die(number, sides)
+    die = "a die"
+    if (number, sides) != (1, 6):
+        die = "%dd%d" % (number, sides)
+    print("You roll %s. The result is: %d" % (die, total))
+    player.location.tell("%s rolls %s. The result is: %d" % (lang.capital(player.title), die, total), exclude_living=player)
+    if number > 1:
+        print("The individual rolls were:", values)
+        player.location.tell("The individual rolls were: %s" % values, exclude_living=player)
+
+
+@cmd("coin")
+def do_coin(player, parsed, **ctx):
+    """Toss a coin."""
+    number, _ = util.roll_die(sides=2)
+    result = ["heads", "tails"][number - 1]
+    player.tell("You toss a coin. The result is: %s!" % result)
+    player.location.tell("%s tosses a coin. The result is: %s!" % (lang.capital(player.title), result), exclude_living=player)
