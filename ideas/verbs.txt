@@ -100,9 +100,6 @@ light, burn
 extinguish, douse
     extinguish a light source
     
-listen, hear
-    listen for sounds
-
 move, shove, swivel, shift, manipulate, turn, rotate, press, poke
     move an object around (or shove it) -> manipulate something
     (maybe a few types of manipulation?  move, rotate, press, pull, unspecified (everything else) )
@@ -119,6 +116,3 @@ wear, unwear, remove
 
 wield, unwield, remove
     wield/remove weapon
-
-show
-    show an object to someone else

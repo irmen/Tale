@@ -23,7 +23,7 @@ def wizcmd(command, *aliases):
     Decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
     Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
     """
-    command = "!wer" + command
+    command = "!" + command
     aliases = ["!" + alias for alias in aliases]
 
     def wizcmd2(func):

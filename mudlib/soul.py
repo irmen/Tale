@@ -136,6 +136,7 @@ VERBS = {
 "pet":       ( SIMP, None, "pet$ \nWHO \nHOW \nWHERE" ),
 "barf":      ( DEFA, None, "", "on" ),
 "listen":    ( DEFA, None, "", "to" ),
+"hear":      ( SIMP, None, "listen$ \nAT \nHOW", "to" ),        # the same effect as listen
 "purr":      ( DEFA, None, "", "at" ),
 "curtsy":    ( DEFA, None, "", "before" ),
 "puzzle":    ( SIMP, None, "look$ \nHOW puzzled \nAT", "at" ),
