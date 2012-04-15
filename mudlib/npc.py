@@ -20,7 +20,10 @@ class NPC(base.Living):
 
     def insert(self, item, actor):
         """NPC have a bit nicer refuse message when giving items to them."""
-        raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
+        if actor is not None and "wizard" in actor.privileges:
+            super(NPC, self).insert(item, actor)
+        else:
+            raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
 
 class Monster(NPC):
@@ -34,7 +37,10 @@ class Monster(NPC):
 
     def insert(self, item, actor):
         """Giving stuff to a monster is... unwise."""
-        raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
+        if actor is not None and "wizard" in actor.privileges:
+            super(Monster, self).insert(item, actor)
+        else:
+            raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
 
     def start_attack(self, victim):
         """

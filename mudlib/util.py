@@ -8,6 +8,8 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 import random
+import os
+import time
 from . import lang
 from .errors import ParseError
 
@@ -171,3 +173,26 @@ def words_to_money(words, money_to_float=money_to_float, money_words=MONEY_WORDS
                         raise ParseError("What amount?")
             return money_to_float(coins)
     raise ParseError("That is not an amount of money.")
+
+
+def get_motd():
+    """Read the MOTD and return it and its modification timestamp, if it's not there, return None for both"""
+    try:
+        with open(os.path.join(os.path.dirname(__file__), "messages", "motd.txt")) as motd:
+            message = motd.read().rstrip()
+            if not message:
+                return None, None
+            mtime = os.fstat(motd.fileno()).st_mtime
+            mtime = time.asctime(time.localtime(mtime))
+            return message, mtime
+    except IOError:
+        return None, None
+
+
+def get_banner():
+    """Read the banner message, returns None if it's not there"""
+    try:
+        with open(os.path.join(os.path.dirname(__file__), "messages", "banner.txt")) as banner:
+            return banner.read().rstrip() or None
+    except IOError:
+        return None

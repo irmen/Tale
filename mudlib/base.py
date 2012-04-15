@@ -356,7 +356,7 @@ class Exit(object):
 
     def __repr__(self):
         targetname = self.target.name if self.bound else self.target
-        return "<base.Exit '%s'->'%s' @ 0x%x>" % (self.direction, targetname, id(self))
+        return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
 
     def bind(self, target_location):
         """
@@ -421,7 +421,7 @@ class Living(MudObject):
 
     def insert(self, item, actor):
         """Add an item to the inventory."""
-        if actor is self:
+        if actor is self or actor is not None and "wizard" in actor.privileges:
             assert isinstance(item, Item)
             self.__inventory.add(item)
             item.contained_in = self
@@ -430,7 +430,7 @@ class Living(MudObject):
 
     def remove(self, item, actor):
         """remove an item from the inventory"""
-        if actor is self:
+        if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
             item.contained_in = None
         else:
@@ -440,6 +440,8 @@ class Living(MudObject):
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
         self.location = None
+        for item in self.__inventory:
+            item.destroy(ctx)
         self.__inventory.clear()
         self.wiretaps.clear()
         # @todo: remove heartbeat, deferred, attack status, etc.
@@ -569,6 +571,11 @@ class Container(Item):
 
     def __contains__(self, item):
         return item in self.__inventory
+
+    def destroy(self, ctx):
+        for item in self.__inventory:
+            item.destroy(ctx)
+        self.__inventory.clear()
 
     def insert(self, item, actor):
         assert isinstance(item, MudObject)

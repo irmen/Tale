@@ -6,10 +6,6 @@ server
     gets running stats from the server
 anchor, unanchor
     anchor something so that it cannot leave its location
-clean
-    clean out inventory of something (destroy all objects)
-exits
-    lists all exits in detail.
 godmode
     god mode on/off (can't take damage)
 invis, vis
@@ -34,7 +30,7 @@ PLAYER STUFF
 shout
     shout a message to all players in the mud
 yell
-    shout a message to everyone in your current location and nearby locations
+    shout a message to everyone in your current location (and nearby locations?)
 block, unblock
     block messages from someone
 equipment
@@ -61,8 +57,6 @@ cast
     cast a spell on a creature or an object
 learn
     learn an ability, skill or spell from someone or something
-motd
-    replay login news
 stealth
     toggle stealth, if you possess that skill. (too low stamina -> too tired.)
 teach
@@ -76,6 +70,7 @@ activate, deactivate
 turn on, turn off
 switch on, switch off
     activate an object, deactivate it again
+    -> notify_activate()/notify_deactivate()
 
 attach, apply, install, use X on Y
     use something on something else
@@ -95,7 +90,7 @@ hunger/thirst
     show hunger/thirst status
 
 empty
-    remove all items from a container
+    remove all items from a container (move them to inventory)
     remove substance from a vessel
 fill
     fill a vessel with a substance
@@ -109,7 +104,9 @@ listen, hear
     listen for sounds
 
 move, shove, swivel, shift, manipulate, turn, rotate, press, poke
-    move an object around (or shove it) -> manipulate something (maybe a few types of manipulation?)
+    move an object around (or shove it) -> manipulate something
+    (maybe a few types of manipulation?  move, rotate, press, pull, unspecified (everything else) )
+    -> notify_manipulate(type)
 
 lockpick
     open a lock with force or with a tool

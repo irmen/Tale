@@ -13,12 +13,19 @@ from ..errors import SecurityViolation, ParseError, ActionRefused, RetrySoulVerb
 from .. import base
 from .. import lang
 from .. import rooms
+from ..player import Player
 
 all_commands = {}
 
 
 def wizcmd(command, *aliases):
-    """decorator to add the command to the global dictionary of commands, with a privilege check wrapper"""
+    """
+    Decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
+    Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
+    """
+    command = "!wer" + command
+    aliases = ["!" + alias for alias in aliases]
+
     def wizcmd2(func):
         @functools.wraps(func)
         def makewizcmd(player, parsed, **ctx):
@@ -151,6 +158,40 @@ def do_destroy(player, parsed, **ctx):
                              .format(player=lang.capital(player.title),
                                      victim=lang.capital(victim.title)),
                              exclude_living=player)
+
+
+@wizcmd("clean")
+def do_clean(player, parsed, **ctx):
+    """Destroys all objects contained in something or someones inventory, or the current location (.)"""
+    print = player.tell
+    print(parsed)
+    if parsed.args and parsed.args[0] == '.':
+        # clean the current location
+        print("Cleaning the stuff in your environment.")
+        player.location.tell("%s cleans out the environment." % lang.capital(player.title), exclude_living=player)
+        for item in set(player.location.items):
+            player.location.remove(item, player)
+            item.destroy(ctx)
+        for living in set(player.location.livings):
+            if not isinstance(living, Player):
+                player.location.remove(living, player)
+                living.destroy(ctx)
+        if player.location.items:
+            print("Some items refused to be destroyed!")
+    else:
+        if len(parsed.who) != 1:
+            raise ParseError("Clean what or who?")
+        victim = parsed.who.pop()
+        # @todo: ask for confirmation (async)
+        print("Cleaning inventory of",victim)
+        player.location.tell("%s cleans out the inventory of %s." % (lang.capital(player.title), victim.title), exclude_living=player)
+        items = victim.inventory()
+        for item in items:
+            victim.remove(item, player)
+            item.destroy(ctx)
+            print("destroyed",item)
+        if victim.inventory_size():
+            print("Some items refused to be destroyed!")
 
 
 @wizcmd("pdb")

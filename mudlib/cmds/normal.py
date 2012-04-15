@@ -848,14 +848,22 @@ For more general help, try the 'help' command first."""
 @cmd("exits")
 def do_exits(player, parsed, **ctx):
     """Provides a tiny clue about possible exits from your current location."""
-    player.tell("If you want to know about the possible exits from your location,")
-    player.tell("look around the room. Usually the exits are easily visible.")
-    if len(player.location.exits) == 1:
-        player.tell("Your current location seems to have a possible exit.")
-    elif len(player.location.exits) > 1:
-        player.tell("Your current location seems to have some possible exits.")
+    if "wizard" in player.privileges:
+        player.tell("The following exits are defined for your current location:")
+        for direction, exit in player.location.exits.items():
+            if exit.bound:
+                player.tell("Exit: %s -> %s" % (direction, exit.target.name))
+            else:
+                player.tell("Exit: %s -> %s (unbound)" % (direction, exit.target))
     else:
-        player.tell("Your current location doesn't seem to have obvious exits.")
+        player.tell("If you want to know about the possible exits from your location,")
+        player.tell("look around the room. Usually the exits are easily visible.")
+        if len(player.location.exits) == 1:
+            player.tell("Your current location seems to have a possible exit.")
+        elif len(player.location.exits) > 1:
+            player.tell("Your current location seems to have some possible exits.")
+        else:
+            player.tell("Your current location doesn't seem to have obvious exits.")
 
 
 @cmd("use")
@@ -911,3 +919,14 @@ def do_coin(player, parsed, **ctx):
     result = ["heads", "tails"][number - 1]
     player.tell("You toss a coin. The result is: %s!" % result)
     player.location.tell("%s tosses a coin. The result is: %s!" % (lang.capital(player.title), result), exclude_living=player)
+
+
+@cmd("motd")
+def do_motd(player, parsed, **ctx):
+    """Show the message-of-the-day again."""
+    motd, mtime = util.get_motd()
+    if motd:
+        player.tell("Message-of-the-day, last modified on %s:" % mtime)
+        player.tell(motd)
+    else:
+        player.tell("There's currently no message-of-the-day.")

@@ -81,7 +81,9 @@ class Driver(object):
         print("and you are welcome to redistribute it under the terms and conditions")
         print("of the GNU General Public License version 3. See the file LICENSE.txt")
         # print MUD banner and initiate player creation
-        print("\n" + mudlib.MUD_BANNER + "\n")
+        banner = mudlib.util.get_banner()
+        if banner:
+            print("\n" + banner + "\n\n")
         choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
         if choice == "w":
             player = create_default_wizard()
@@ -91,7 +93,11 @@ class Driver(object):
             player = create_player_from_info()
         self.player = player
         self.move_player_to_start_room()
-        self.player.tell("\nWelcome to %s, %s.\n\n" % (mudlib.MUD_NAME, self.player.title))
+        self.player.tell("\nWelcome, %s.\n" % self.player.title)
+        motd, mtime = mudlib.util.get_motd()
+        if motd:
+            self.player.tell("Message-of-the-day, last modified on %s:" % mtime)
+            self.player.tell(motd + "\n\n")
         self.player.tell(self.player.look())
         self.main_loop()
 
