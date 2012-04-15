@@ -112,6 +112,8 @@ class Driver(object):
                 self.ask_player_input()
             except KeyboardInterrupt:
                 print("\n* break: Use <quit> if you want to quit.")
+            except EOFError:
+                continue
             except mudlib.soul.UnknownVerbException as x:
                 if x.verb in directions:
                     print("You can't go in that direction.")

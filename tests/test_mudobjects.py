@@ -315,6 +315,23 @@ class TestLiving(unittest.TestCase):
         self.assertEqual(hall, rat.location)
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
+    def test_lang(self):
+        living = Living("julie", "f")
+        self.assertEqual("her", living.objective)
+        self.assertEqual("her", living.possessive)
+        self.assertEqual("she", living.subjective)
+        self.assertEqual("f", living.gender)
+        living = Living("max", "m")
+        self.assertEqual("him", living.objective)
+        self.assertEqual("his", living.possessive)
+        self.assertEqual("he", living.subjective)
+        self.assertEqual("m", living.gender)
+        living = Living("herp", "n")
+        self.assertEqual("it", living.objective)
+        self.assertEqual("its", living.possessive)
+        self.assertEqual("it", living.subjective)
+        self.assertEqual("n", living.gender)
+
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
@@ -590,6 +607,12 @@ class TestItem(unittest.TestCase):
         with self.assertRaises(ActionRefused) as x:
             key.move(hall, monster, person)
         self.assertTrue("not a good idea" in str(x.exception))
+    def test_lang(self):
+        thing = Item("thing")
+        self.assertEqual("it", thing.objective)
+        self.assertEqual("its", thing.possessive)
+        self.assertEqual("it", thing.subjective)
+        self.assertEqual("n", thing.gender)
 
 if __name__ == '__main__':
     unittest.main()

@@ -59,6 +59,11 @@ class MudObject(object):
     and an optional longer description (shown when explicitly 'examined').
     The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
     """
+    subjective = "it"
+    possessive = "its"
+    objective = "it"
+    gender = "n"
+
     def __init__(self, name, title=None, description=None):
         self.name = name
         self.aliases = []
@@ -90,9 +95,6 @@ class Item(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
-        self.subjective = "it"
-        self.possessive = "its"
-        self.objective = "it"
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")
@@ -371,10 +373,12 @@ class Living(MudObject):
     """
     def __init__(self, name, gender, title=None, description=None, race=None):
         super(Living, self).__init__(name, title, description)
+        # override the language help attributes inherited from the base object:
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
+        # other stuff:
         self.location = _Limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False

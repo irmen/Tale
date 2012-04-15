@@ -254,7 +254,7 @@ Stealing and robbing is frowned upon, to say the least."""
     if isinstance(where, base.Living):
         player.location.tell("%s tries to steal things from %s." % (lang.capital(player.title), where.title), exclude_living=player)
         if where.aggressive:
-            where.start_attack(player)  # stealing stuff is hostile!
+            where.start_attack(player)  # stealing stuff is a hostile act!
         raise ActionRefused("You can't just steal stuff from %s!" % where.title)
     elif parsed.verb == "steal" or parsed.verb == "rob":
         if where is None:
