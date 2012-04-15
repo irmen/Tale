@@ -112,7 +112,6 @@ def do_clone(player, parsed, **ctx):
                              exclude_living=player)
     elif isinstance(obj, base.Living):
         clone = copy.deepcopy(obj)
-        clone.cpr()  # (re)start heartbeat
         print("Cloned: " + repr(clone))
         player.location.tell("{player} summons {npc}."
                              .format(player=lang.capital(player.title),

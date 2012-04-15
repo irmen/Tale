@@ -95,9 +95,25 @@ class Item(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
+        self.contained_in = None
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")
+
+    @property
+    def location(self):
+        if not self.contained_in:
+            return None
+        if isinstance(self.contained_in, Location):
+            return self.contained_in
+        return self.contained_in.location
+
+    @location.setter
+    def location(self, value):
+        if value is None or isinstance(value, Location):
+            self.contained_in = value
+        else:
+            raise TypeError("can only set item's location to a Location, for other container types use item.contained_in")
 
     def inventory(self):
         raise ActionRefused("You can't look inside of that.")
@@ -119,6 +135,7 @@ class Item(MudObject):
         """
         if not wiz_force or "wizard" not in actor.privileges:
             self.allow_move(actor)
+        assert source_container is self.contained_in
         source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
@@ -187,6 +204,7 @@ class Location(MudObject):
                 obj.location = self
             elif isinstance(obj, Item):
                 self.items.add(obj)
+                obj.location = self
             else:
                 raise TypeError("can only add Living or Item")
 
@@ -289,6 +307,7 @@ class Location(MudObject):
             obj.location = self
         elif isinstance(obj, Item):
             self.items.add(obj)
+            obj.location = self
         else:
             raise TypeError("can only add Living or Item")
 
@@ -299,6 +318,7 @@ class Location(MudObject):
             obj.location = None
         elif obj in self.items:
             self.items.remove(obj)
+            obj.location = None
 
 
 _Limbo = Location("Limbo",
@@ -389,7 +409,6 @@ class Living(MudObject):
             self.set_race(race)
         self.__inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
-        self.cpr()
 
     def __contains__(self, item):
         return item in self.__inventory
@@ -403,8 +422,9 @@ class Living(MudObject):
     def insert(self, item, actor):
         """Add an item to the inventory."""
         if actor is self:
-            assert isinstance(item, MudObject)
+            assert isinstance(item, Item)
             self.__inventory.add(item)
+            item.contained_in = self
         else:
             raise ActionRefused("You can't do that.")
 
@@ -412,6 +432,7 @@ class Living(MudObject):
         """remove an item from the inventory"""
         if actor is self:
             self.__inventory.remove(item)
+            item.contained_in = None
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
@@ -432,10 +453,6 @@ class Living(MudObject):
         self.stats = {}
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
-
-    def cpr(self):
-        """(re)start the living's heartbeat"""
-        pass  # do nothing, for now
 
     def tell(self, *messages):
         """
@@ -556,10 +573,12 @@ class Container(Item):
     def insert(self, item, actor):
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
+        item.contained_in = self
         return self
 
     def remove(self, item, actor):
         self.__inventory.remove(item)
+        item.contained_in = None
         return self
 
 

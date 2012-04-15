@@ -597,15 +597,19 @@ class TestItem(unittest.TestCase):
         person.wiretaps.add(wiretap_person)
         self.assertTrue(person in hall)
         self.assertTrue(key in hall)
+        with self.assertRaises(AssertionError):
+            key.move(person, person, person)
+        key.contained_in = person   # hack to force move to actually check the source container
         with self.assertRaises(KeyError):
             key.move(person, person, person)
+        key.contained_in = hall   # put it back as it was
         key.move(hall, person, person)
         self.assertFalse(key in hall)
         self.assertTrue(key in person)
         self.assertEqual([], wiretap_hall.msgs, "item.move() should be silent")
         self.assertEqual([], wiretap_person.msgs, "item.move() should be silent")
         with self.assertRaises(ActionRefused) as x:
-            key.move(hall, monster, person)
+            key.move(person, monster, person)
         self.assertTrue("not a good idea" in str(x.exception))
     def test_lang(self):
         thing = Item("thing")
@@ -613,6 +617,31 @@ class TestItem(unittest.TestCase):
         self.assertEqual("its", thing.possessive)
         self.assertEqual("it", thing.subjective)
         self.assertEqual("n", thing.gender)
+    def test_location(self):
+        thingy = Item("thing")
+        with self.assertRaises(TypeError):
+            thingy.location = "foobar"
+        hall = Location("hall")
+        thingy.location=hall
+        self.assertEqual(hall, thingy.contained_in)
+        self.assertEqual(hall, thingy.location)
+        person = Living("person", "m")
+        key = Item("key")
+        backpack = Container("backpack")
+        person.insert(backpack, person)
+        self.assertIsNone(key.contained_in)
+        self.assertIsNone(key.location)
+        self.assertTrue(backpack in person)
+        self.assertEqual(person, backpack.contained_in)
+        self.assertEqual(_Limbo, backpack.location)
+        hall.init_inventory([person, key])
+        self.assertEqual(hall, key.contained_in)
+        self.assertEqual(hall, key.location)
+        self.assertEqual(hall, backpack.location)
+        key.move(hall, backpack, person)
+        self.assertEqual(backpack, key.contained_in)
+        self.assertEqual(hall, key.location)
+
 
 if __name__ == '__main__':
     unittest.main()
