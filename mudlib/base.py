@@ -62,6 +62,8 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None):
         self.name = name
         self.aliases = []
+        if title:
+            assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
         try:
             self.title = title or name
         except AttributeError:
@@ -88,6 +90,9 @@ class Item(MudObject):
     """
     def __init__(self, name, title=None, description=None):
         super(Item, self).__init__(name, title, description)
+        self.subjective = "it"
+        self.possessive = "its"
+        self.objective = "it"
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")

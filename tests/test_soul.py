@@ -144,7 +144,7 @@ class TestSoul(unittest.TestCase):
         player = mudlib.player.Player("julie", "f")
         philip = mudlib.npc.NPC("philip", "m")
         kate = mudlib.npc.NPC("kate", "f", title="Kate")
-        cat = mudlib.npc.NPC("cat", "n", title="the hairy cat")
+        cat = mudlib.npc.NPC("cat", "n", title="hairy cat")
         targets = {philip, kate, cat}
         # peer
         parsed = mudlib.soul.ParseResults("peer", who=targets, who_order=list(targets))
@@ -164,15 +164,15 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("smile", verb)
         self.assertEqual(3, len(who))
         self.assertEqual(set(targets), set(who), "player should not be in targets")
-        self.assertTrue("philip" in player_msg and "the hairy cat" in player_msg and "Kate" in player_msg and not "yourself" in player_msg)
-        self.assertTrue("philip" in room_msg and "the hairy cat" in room_msg and "Kate" in room_msg and not "herself" in room_msg)
+        self.assertTrue("philip" in player_msg and "hairy cat" in player_msg and "Kate" in player_msg and not "yourself" in player_msg)
+        self.assertTrue("philip" in room_msg and "hairy cat" in room_msg and "Kate" in room_msg and not "herself" in room_msg)
         self.assertEqual("Julie smiles confusedly at you.", target_msg)
 
     def testWhoInfo(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
         kate = mudlib.npc.NPC("kate", "f", title="Kate")
-        cat = mudlib.npc.NPC("cat", "n", title="the hairy cat")
+        cat = mudlib.npc.NPC("cat", "n", title="hairy cat")
         player.move(mudlib.base.Location("somewhere"))
         cat.move(player.location)
         kate.move(player.location)

@@ -76,12 +76,14 @@ def do_inventory(player, parsed, **ctx):
         print("Money in possession: %s." % util.money_display(player.money, zero_msg="you are broke"))
 
 
-@cmd("locate")
+@cmd("locate", "search")
 def do_locate(player, parsed, **ctx):
     """Try to locate a specific item, creature or player."""
     print = player.tell
     if not parsed.args:
         raise ParseError("Locate what/who?")
+    if len(parsed.args) > 1 or len(parsed.who) > 1:
+        raise ParseError("Can only search for one thing at a time.")
     name = parsed.args[0]
     print("You look around to see if you can locate %s." % name)
     player.location.tell("%s looks around." % lang.capital(player.title), exclude_living=player)
@@ -171,7 +173,7 @@ def do_drop(player, parsed, **ctx):
                 raise ActionRefused("You don't have %s." % lang.a(arg))
 
 
-@cmd("put")
+@cmd("put", "place")
 def do_put(player, parsed, **ctx):
     """Put an item (or all items) into something else.
 If you're not carrying the item, you will first pick it up."""
@@ -195,9 +197,12 @@ If you're not carrying the item, you will first pick it up."""
         raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (where.name, where.objective))
     inventory_items = []
     refused = []
+    word_before = parsed.who_info[where].previous_word or "in"
+    if word_before != "in" and word_before != "into":
+        raise ActionRefused("You can't do that.")  # only supports put X in Y
     for item in what:
         if item is where:
-            print("You can't put %s in itself." % item.title)
+            print("You can't put %s %s itself." % (item.title, word_before))
             continue
         try:
             if item in player:
@@ -224,9 +229,10 @@ If you're not carrying the item, you will first pick it up."""
         print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
 
 
-@cmd("take", "get")
+@cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, **ctx):
-    """Take something (or all things) from something or someone else."""
+    """Take something (or all things) from something or someone else.
+Stealing and robbing is frowned upon, to say the least."""
     print = player.tell
     if len(parsed.args) == 0:
         raise ParseError("Take what?")
@@ -250,6 +256,10 @@ def do_take(player, parsed, **ctx):
         if where.aggressive:
             where.start_attack(player)  # stealing stuff is hostile!
         raise ActionRefused("You can't just steal stuff from %s!" % where.title)
+    elif parsed.verb == "steal" or parsed.verb == "rob":
+        if where is None:
+            raise ActionRefused("Steal what from whom?")
+        raise ActionRefused("You can't steal stuff from an object. Try taking it instead.")
     if what_names == ["all"]:   # take ALL the things!
         if where:
             # take all stuff out of some container
@@ -331,10 +341,33 @@ def try_pick_up_living(player, living):
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
         print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
-            living.start_attack(player)
             print("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
+            living.start_attack(player)
     else:
         print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
+
+
+@cmd("throw")
+def do_throw(player, parsed, **ctx):
+    """Throw something you are carrying at someone or something.
+If you don't have it yet, you will first pick it up."""
+    print = player.tell
+    if len(parsed.who) != 2:
+        raise ParseError("Throw what where?")
+    item, where = parsed.who_order[0], parsed.who_order[1]
+    if isinstance(item, base.Living):
+        raise ActionRefused("You can't throw that.")
+    if item in player.location:
+        # first take the item from the room
+        item.move(player.location, player, player)
+        print("You take %s." % item.title)
+        player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
+    # throw the item back into the room, missing the target by a hair. Possibly start combat.
+    item.move(player, player.location, player)
+    print("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
+    player.location.tell("%s throws the %s at %s, missing %s by a hair." % (lang.capital(player.title), item.title, where.title, where.objective), exclude_living=player)
+    if isinstance(where, base.Living) and where.aggressive:
+        where.start_attack(player)
 
 
 @cmd("give")

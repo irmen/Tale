@@ -150,6 +150,7 @@ VERBS = {
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
 "headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
 "shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
+"jiggle":    ( SIMP, ( "like a bowlful of jello", ), "jiggle$ \nAT \nHOW", "" ),
 "stink":     ( PERS, None, "smell$ \nYOUR armpits. Eeeww!", "smell$ \nPOSS armpits. Eeeww!" ),
 "grimace":   ( SIMP, None, " \nHOW make$ an awful face \nAT", "at" ),
 "stomp":     ( PERS, None, "stomp$ \nYOUR foot \nHOW", "stomp$ on \nPOSS foot \nHOW" ),
@@ -168,8 +169,9 @@ VERBS = {
 "wait":      ( SIMP, None, "wait$ \nHOW", ""),
 "grease":    ( SIMP, ("like a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like a shiatsu",), "oil$ \nWHO \nHOW"),
-"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),
+#"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),
 "sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
+"smell":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 
 # Message-based verbs
 "curse":    ( PERS, None, "curse$ \nWHAT \nHOW", "curse$ \nWHO \nHOW" ),
@@ -202,6 +204,7 @@ VERBS = {
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
 "finger":   ( SIMP, None, "give$ \nWHO the finger" ),
 "mercy":    ( SIMP, None, "beg$ \nWHO for mercy" ),
+"jerk":     ( SIMP, ( "briskly", ), "jerk$ \nWHO \nHOW", "" ),
 "gripe":    ( PREV, None, "to" ),
 "peer":     ( PREV, None, "at" ),
 "chase":    ( PREV, ("angrily",), "after" ),
@@ -353,9 +356,9 @@ assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second
 
 AGGRESSIVE_VERBS = {
     "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "finger", "fondle", "french",
-    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "kick", "kiss", "knee",
+    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "jerk", "jiggle", "kick", "kiss", "knee",
     "knock", "lick", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
-    "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "search", "shake", "shove", "slap", "smooch", "sneer", "snigger",
+    "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "shake", "shove", "slap", "smooch", "sneer", "snigger",
     "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",
     "swing", "tackle", "tap", "taunt", "tease", "tickle", "tongue", "touch", "wiggle", "wobble", "wrinkle"
 }
@@ -368,17 +371,19 @@ NONLIVING_OK_VERBS = {
     "chuckle", "complain", "cuddle", "curse", "drool", "embrace", "eye", "fear",
     "feel", "finger", "fondle", "giggle", "glare", "grimace", "grin", "groan",
     "grope", "growl", "grunt", "guffaw", "hate", "headshake", "hide", "hiss",
-    "hmm", "ignore", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
+    "hmm", "ignore", "jerk", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
     "love", "lust", "meow", "moan", "mumble", "murmur", "mutter", "nod", "nominate",
     "ogle", "peer", "point", "puke", "pull", "push", "purr", "puzzle", "quote",
     "raise", "recoil", "reply", "rotate", "say", "scowl", "scream", "shake",
-    "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "sniff",
+    "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "smell", "sniff",
     "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
     "swing", "tongue", "touch", "trust", "turn", "understand", "utter", "want",
     "watch", "wave", "wiggle", "wobble", "worship", "wrinkle", "yawn", "yell"
 }
 
 assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
+
+MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run"}     # used to move through an exit
 
 ACTION_QUALIFIERS = {
     # qualifier -> (actionmsg, roommsg, use room actionstr)
@@ -765,7 +770,7 @@ class Soul(object):
         elif room_exits:
             # check if the words are the name of a room exit.
             move_action = None
-            if words[0] in {"enter", "climb", "crawl", "go"}:
+            if words[0] in MOVEMENT_VERBS:
                 move_action = words.pop(0)
                 if not words:
                     raise ParseError("%s where?" % lang.capital(move_action))
