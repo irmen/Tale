@@ -334,7 +334,7 @@ to be moved around normally. For instance you could use it to pick up
 items that are normally fixed in place (move item to playername)."""
     print = player.tell
     if len(parsed.args) != 2 or len(parsed.who_order) < 1:
-        raise RetrySoulVerb   # try it as a soul emote instead, this cmd can only deal with exactly 2 args
+        raise ActionRefused("Move what where?")
     thing = parsed.who_order[0]
     if isinstance(thing, base.Living):
         raise ActionRefused("* use 'teleport' instead to move livings around.")

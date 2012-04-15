@@ -69,6 +69,10 @@ FULL = 9  # not used yet
 # adverbs tuple: (adverb, message, where)
 # if message starts with a ' (single quote), it will appear *without quotes*.
 
+# Note: several verbs here are commented out because they are replaced by
+# real commands or don't fit the game mechanics very well. It doesn't cause problems
+# because they're just emotes, but it causes less confusion to disable them here.
+
 VERBS = {
 "flex":      ( DEUX, None, "flex \nYOUR muscles \nHOW", "flexes \nYOUR muscles \nHOW" ),
 "snort":     ( SIMP, None, "snort$ \nHOW \nAT", "at" ),
@@ -170,7 +174,7 @@ VERBS = {
 "wait":      ( SIMP, None, "wait$ \nHOW", ""),
 "grease":    ( SIMP, ("like a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like a shiatsu",), "oil$ \nWHO \nHOW"),
-#"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),
+#"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),    # replaced by a command
 "sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 "smell":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 
@@ -240,7 +244,7 @@ VERBS = {
 "fondle":   ( PREV, None, "" ),
 "nominate": ( PREV, None, "" ),
 "startle":  ( PREV, None, "" ),
-#"lift":     ( PREV, ( "from the floor", ), "" ),
+#"lift":     ( PREV, ( "from the floor", ), "" ),   # doesn't fit game mechanics
 "turn":     ( PREV, None, "\nYOUR head towards" ),
 "squeeze":  ( PREV, ( "fondly", ), "" ),
 "comfort":  ( PREV, None, "" ),
@@ -249,7 +253,7 @@ VERBS = {
 "hit":      ( PHYS, ( None, None, "in the face" ), "" ),
 "kick":     ( PHYS, ( "hard", ), "" ),
 "tackle":   ( SIMP, None, "tackle$ \nWHO \nHOW", "" ),
-# "tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),     # tell is replaced by a real command
+#"tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),     # replaced by a command
 "spank":    ( PHYS, ( None, None, "on the butt" ), "" ),
 "pat":      ( PHYS, ( None, None, "on the head" ), "" ),
 "punch":    ( DEUX, ( None, None, "in the eye" ), "punch \nWHO \nHOW \nWHERE", "punches \nWHO \nHOW \nWHERE" ),

@@ -72,7 +72,7 @@ switch on, switch off
     activate an object, deactivate it again
     -> notify_activate()/notify_deactivate()
 
-attach, apply, install, use X on Y
+attach, apply, install, use X on/with Y
     use something on something else
 uninstall, unattach, remove
     break stuff apart again (remove X = remove weapon/armour, remove X from Y = unattach stuff)
@@ -90,7 +90,6 @@ hunger/thirst
     show hunger/thirst status
 
 empty
-    remove all items from a container (move them to inventory)
     remove substance from a vessel
 fill
     fill a vessel with a substance
@@ -102,7 +101,7 @@ extinguish, douse
     
 move, shove, swivel, shift, manipulate, turn, rotate, press, poke
     move an object around (or shove it) -> manipulate something
-    (maybe a few types of manipulation?  move, rotate, press, pull, unspecified (everything else) )
+    (maybe a few types of manipulation?  move, rotate, push, pull, unspecified (everything else) )
     -> notify_manipulate(type)
 
 lockpick

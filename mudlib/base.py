@@ -562,6 +562,8 @@ class Container(Item):
         """Set the container's initial inventory"""
         assert len(self.__inventory) == 0
         self.__inventory = set(items)
+        for item in items:
+            item.contained_in = self
 
     def inventory(self):
         return frozenset(self.__inventory)

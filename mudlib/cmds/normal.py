@@ -173,6 +173,44 @@ def do_drop(player, parsed, **ctx):
                 raise ActionRefused("You don't have %s." % lang.a(arg))
 
 
+@cmd("empty")
+def do_empty(player, parsed, **ctx):
+    """Remove the contents from an object."""
+    print = player.tell
+    if len(parsed.args) != 1:
+        raise ParseError("Empty what?")
+    if len(parsed.who) > 1:
+        raise ParseError("Please be more specific, only empty one thing at a time.")
+    container = parsed.who.pop()
+    if not isinstance(container, base.Container):
+        raise ActionRefused("You can't take anything from %s." % container.title)
+    if container in player.location:
+        # move the contents to the room
+        target = player.location
+        action = "dropped"
+    elif container in player:
+        # move the contents to the player's inventory
+        target = player
+        action = "took"
+    else:
+        raise ParseError("You can't seem to empty that.")
+    items_moved = []
+    for item in container.inventory():
+        try:
+            item.allow_move(player)
+        except ActionRefused as x:
+            print(str(x))
+        else:
+            item.move(container, target, player)
+            items_moved.append(item.title)
+    if items_moved:
+        itemnames = lang.join(items_moved)
+        print("You %s: %s." % (action, itemnames))
+        player.location.tell("%s %s: %s." % (lang.capital(player.title), action, itemnames))
+    else:
+        print("You %s nothing." % action)
+
+
 @cmd("put", "place")
 def do_put(player, parsed, **ctx):
     """Put an item (or all items) into something else.
@@ -240,13 +278,18 @@ Stealing and robbing is frowned upon, to say the least."""
         what_names = parsed.args
         where = None
     else:
-        last_obj = parsed.who_order[-1]
-        if parsed.who_info[last_obj].previous_word == "from":
-            # take x[,y and z] from something
-            what_names = parsed.args[:-1]
-            where = last_obj
+        if parsed.who:
+            last_obj = parsed.who_order[-1]
+            if parsed.who_info[last_obj].previous_word == "from":
+                # take x[,y and z] from something
+                what_names = parsed.args[:-1]
+                where = last_obj
+            else:
+                # take x[,y and z]
+                what_names = parsed.args
+                where = None
         else:
-            # take x[,y and z]
+            # take x[,y and z] - unrecognised names
             what_names = parsed.args
             where = None
     if where is player:
@@ -266,7 +309,8 @@ Stealing and robbing is frowned upon, to say the least."""
             if where in player or where in player.location:
                 # take all stuff from a bag that the player is carrying, or from a bag in the room.
                 if where.inventory_size() > 0:
-                    return take_stuff(player, where.inventory(), where, where.title)
+                    take_stuff(player, where.inventory(), where, where.title)
+                    return
                 else:
                     raise ActionRefused("There's nothing in there.")
             raise ActionRefused("Take what?")
@@ -275,10 +319,9 @@ Stealing and robbing is frowned upon, to say the least."""
             if not player.location.items:
                 raise ActionRefused("There's nothing here to take.")
             else:
-                return take_stuff(player, player.location.items, player.location)
+                take_stuff(player, player.location.items, player.location)
+                return
     else:   # take one or more specific items
-        if parsed.unrecognized:
-            print("You don't see %s." % lang.join(parsed.unrecognized))
         if where:
             if where in player or where in player.location:
                 # take specific items out of some container
@@ -289,9 +332,12 @@ Stealing and robbing is frowned upon, to say the least."""
                         items_to_take.append(items_by_name[name])
                     else:
                         print("There's no %s in there." % name)
-                return take_stuff(player, items_to_take, where, where.title)
+                take_stuff(player, items_to_take, where, where.title)
+                return
         else:
             # take things from the room
+            if parsed.unrecognized:
+                print("You don't see %s." % lang.join(parsed.unrecognized))
             livings = [item for item in parsed.who if item in player.location.livings]
             for living in livings:
                 try_pick_up_living(player, living)
@@ -304,10 +350,14 @@ Stealing and robbing is frowned upon, to say the least."""
                         items_to_take.append(item)
                     elif item not in player.location.livings:
                         print("There's no %s here." % item.name)
-                return take_stuff(player, items_to_take, player.location)
+                take_stuff(player, items_to_take, player.location)
+                return
 
 
 def take_stuff(player, items, container, where_str=None):
+    """Takes stuff and returns the number of items taken"""
+    if not items:
+        return 0
     print = player.tell
     if where_str:
         player_msg = "You take {items} from the %s." % where_str
@@ -329,8 +379,9 @@ def take_stuff(player, items, container, where_str=None):
         items_str = lang.join(lang.a(item.title) for item in items)
         print(player_msg.format(items=items_str))
         player.location.tell(room_msg.format(player=lang.capital(player.title), items=items_str), exclude_living=player)
+        return len(items)
     else:
-        print("You didn't take anything.")
+        return 0
 
 
 def try_pick_up_living(player, living):
