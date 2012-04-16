@@ -58,6 +58,9 @@ class Commands(object):
         self.commands_per_priv = {None: {}}
 
     def add(self, verb, func, privilege):
+        for commands in self.commands_per_priv.values():
+            if verb in commands:
+                raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
 
     def get(self, privileges):
