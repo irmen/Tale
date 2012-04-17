@@ -326,10 +326,10 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You don't scream 'I have no idea' loudly.", player_msg)
         self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", room_msg)
         self.assertEqual("Julie doesn't scream 'I have no idea' loudly.", target_msg)
-        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "fail say")
-        self.assertEqual("fail say", verb)
-        self.assertEqual("You try to say nothing, but fail miserably.", player_msg)
-        self.assertEqual("Julie tries to say nothing, but fails miserably.", room_msg)
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "fail sit")
+        self.assertEqual("fail sit", verb)
+        self.assertEqual("You try to sit down, but fail miserably.", player_msg)
+        self.assertEqual("Julie tries to sit down, but fails miserably.", room_msg)
 
     def testAdverbs(self):
         soul = mudlib.soul.Soul()
@@ -617,19 +617,19 @@ class TestSoul(unittest.TestCase):
         player = mudlib.player.Player("julie", "f")
         targets = {mudlib.npc.NPC("max", "m")}
 
-        # yell 1
-        parsed = mudlib.soul.ParseResults("yell")
+        # scream 1
+        parsed = mudlib.soul.ParseResults("scream")
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
-        self.assertEqual("You yell in a high pitched voice.", player_msg)
-        self.assertEqual("Julie yells in a high pitched voice.", room_msg)
-        # yell 2
+        self.assertEqual("You scream loudly.", player_msg)
+        self.assertEqual("Julie screams loudly.", room_msg)
+        # scream 2
         parsed.who = targets
         parsed.adverb = "angrily"
         parsed.message = "why"
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
-        self.assertEqual("You yell 'why' angrily at max.", player_msg)
-        self.assertEqual("Julie yells 'why' angrily at max.", room_msg)
-        self.assertEqual("Julie yells 'why' angrily at you.", target_msg)
+        self.assertEqual("You scream 'why' angrily at max.", player_msg)
+        self.assertEqual("Julie screams 'why' angrily at max.", room_msg)
+        self.assertEqual("Julie screams 'why' angrily at you.", target_msg)
         # ask
         parsed = mudlib.soul.ParseResults("ask", who=targets, message="are you happy", who_order=list(targets))
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
