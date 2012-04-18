@@ -10,6 +10,7 @@ from mudlib.errors import SecurityViolation, ActionRefused
 from mudlib.npc import NPC, Monster
 from mudlib.player import Player
 from mudlib.soul import UnknownVerbException, NonSoulVerb
+import mudlib.rooms
 
 
 class Wiretap(object):
@@ -266,6 +267,13 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual("third ladder to attic", exit3.long_description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.long_description)
 
+    def test_bind_exit(self):
+        exit=Exit("town.square", "someplace")
+        self.assertFalse(exit.bound)
+        exit.bind(mudlib.rooms)
+        self.assertTrue(exit.bound)
+        self.assertEqual(mudlib.rooms.town.square, exit.target)
+        exit.bind(mudlib.rooms)
 
 class TestLiving(unittest.TestCase):
     def test_contains(self):

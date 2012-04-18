@@ -11,6 +11,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .. import rooms
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
@@ -673,6 +674,47 @@ You'll have to enclose the message in quotes: tell Joe 'yes we can do that'"""
     else:
         living.tell("%s tells you: %s" % (player.name, parsed.message))
         player.tell("You told %s." % name)
+
+
+@cmd("yell")
+def do_yell(player, parsed, **ctx):
+    """Yell something. People in nearby locations will also be able to hear you."""
+    # note: we don't use parsed.message, rather we use parsed.unparsed.
+    # this allows to user to just type the words he wants to say without the need
+    # to enclose them in quotes
+    print = player.tell
+    if parsed.qualifier:
+        raise ParseError("This action doesn't support qualifiers.")
+    if not parsed.unparsed:
+        raise ActionRefused("Yell what?")
+    punctuation = "" if parsed.unparsed.endswith((".", "!", "?")) else "!"
+    print("You yell: %s%s" % (parsed.unparsed, punctuation))
+    player.location.tell("%s yells: %s%s" % (lang.capital(player.title), parsed.unparsed, punctuation), exclude_living=player)
+    # yell this to adjacent locations as well:
+    if player.location.exits:
+        nearby_message = "Someone nearby is yelling: %s%s" % (parsed.unparsed, punctuation)
+        yelled_locations = set()
+        for exit in player.location.exits.values():
+            if exit.target in yelled_locations:
+                continue
+            exit.bind(rooms)
+            if exit.target is not player.location:
+                exit.target.tell(nearby_message)
+                yelled_locations.add(exit.target)
+                for direction, return_exit in exit.target.exits.items():
+                    if return_exit.target is player.location:
+                        if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "left", "right", "front", "back"}:
+                            direction = "the " + direction
+                        elif direction in {"up", "above", "upstairs"}:
+                            direction = "above"
+                        elif direction in {"down", "below", "downstairs"}:
+                            direction = "below"
+                        else:
+                            continue  # no direction description possible for this exit
+                        exit.target.tell("The sound is coming from %s." % direction)
+                        break
+                else:
+                    exit.target.tell("You can't hear where the sound is coming from.")
 
 
 @cmd("quit")

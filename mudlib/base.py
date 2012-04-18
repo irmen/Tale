@@ -358,14 +358,21 @@ class Exit(object):
         targetname = self.target.name if self.bound else self.target
         return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
 
-    def bind(self, target_location):
+    def bind(self, mudlib_rooms_module):
         """
         Binds the exit to the actual target_location object.
         Usually called by a movement action on a non-bound exit.
+        The caller needs to pass in the root module of the mudlib rooms.
         """
-        assert not self.bound and isinstance(target_location, Location)
-        self.target = target_location
-        self.bound = True
+        if not self.bound:
+            target_module, target_object = self.target.rsplit(".", 1)
+            module = mudlib_rooms_module
+            for name in target_module.split("."):
+                module = getattr(module, name)
+            target = getattr(module, target_object)
+            assert isinstance(target, Location)
+            self.target = target
+            self.bound = True
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""

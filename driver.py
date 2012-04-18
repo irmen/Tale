@@ -184,14 +184,7 @@ class Driver(object):
 
     def go_through_exit(self, direction):
         exit = self.player.location.exits[direction]
-        if not exit.bound:
-            # resolve the location and replace with bound Exit
-            target_module, target_object = exit.target.rsplit(".", 1)
-            module = mudlib.rooms
-            for name in target_module.split("."):
-                module = getattr(module, name)
-            target = getattr(module, target_object)
-            exit.bind(target)
+        exit.bind(mudlib.rooms)
         exit.allow_passage(self.player)
         self.player.move(exit.target)
         self.player.tell(self.player.look())

@@ -522,6 +522,30 @@ class TestSoul(unittest.TestCase):
         with self.assertRaises(mudlib.soul.UnknownVerbException):
             soul.parse(player, "crawl", room_exits=[])   # must raise unknownverb if there are no exits in the room
 
+    def testUnparsed(self):
+        soul = mudlib.soul.Soul()
+        player = mudlib.player.Player("julie", "f", "human")
+        parsed = soul.parse(player, "fart")
+        self.assertEqual("", parsed.unparsed)
+        parsed = soul.parse(player, "grin sadistically")
+        self.assertEqual("sadistically", parsed.unparsed)
+        parsed = soul.parse(player, "fail sit zen")
+        self.assertEqual("zen", parsed.unparsed)
+        parsed = soul.parse(player, "pat myself comfortingly on the shoulder")
+        self.assertEqual("myself comfortingly on the shoulder", parsed.unparsed)
+        parsed = soul.parse(player, "take the watch and the key from the box", external_verbs={"take"})
+        self.assertEqual("the watch and the key from the box", parsed.unparsed)
+        parsed = soul.parse(player, "fail to _undefined_verb_ on the floor", external_verbs={"_undefined_verb_"})
+        self.assertEqual("on the floor", parsed.unparsed)
+        parsed = soul.parse(player, "say 'red or blue'", external_verbs={"say"})
+        self.assertEqual("'red or blue'", parsed.unparsed)
+        parsed = soul.parse(player, "say red or blue", external_verbs={"say"})
+        self.assertEqual("red or blue", parsed.unparsed)
+        parsed = soul.parse(player, "say hastily red or blue", external_verbs={"say"})
+        self.assertEqual("hastily red or blue", parsed.unparsed)
+        parsed = soul.parse(player, "fail say hastily red or blue on your head", external_verbs={"say"})
+        self.assertEqual("hastily red or blue on your head", parsed.unparsed)
+
     def testDEFA(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")

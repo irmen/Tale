@@ -184,7 +184,7 @@ VERBS = {
 "criticize": ( PERS, None, "criticize$ \nWHAT \nHOW", "criticize$ \nWHO \nHOW" ),
 "lie":      ( PERS, None, "lie$ \nMSG \nHOW", "lie$ to \nWHO \nHOW" ),
 "mutter":   ( PERS, None, "mutter$ \nMSG \nHOW", "mutter$ \nMSG to \nWHO \nHOW" ),
-"say":      ( SIMP, ( None, "'nothing" ), " \nHOW say$ \nMSG \nAT", "to" ),
+"say":      ( SIMP, ( None, "'nothing" ), " say$ \nWHAT \nAT", "to" ),
 "babble":   ( SIMP, ( "incoherently", "'something" ), "babble$ \nMSG \nHOW \nAT", "to" ),
 "chant":    ( SIMP, ( None, "Hare Krishna Krishna Hare Hare" ), " \nHOW chant$: \nWHAT", "" ),
 "sing":     ( SIMP, None, "sing$ \nWHAT \nHOW \nAT", "to" ),
@@ -199,7 +199,7 @@ VERBS = {
 "mumble":   ( SIMP, None, "mumble$ \nMSG \nHOW \nAT", "to" ),
 "murmur":   ( SIMP, None, "murmur$ \nMSG \nHOW \nAT", "to" ),
 "scream":   ( SIMP, ( "loudly", ), "scream$ \nMSG \nHOW \nAT", "at" ),
-"yell":     ( SIMP, ( "in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at" ),
+# "yell":     ( SIMP, ( "in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at" ),    # replaced by a command
 "command":  ( SIMP, (None, "follow orders"), "command$ \nWHO \nHOW to \nWHAT" ),
 "utter":    ( SIMP, None, " \nHOW utter$ \nMSG \nAT", "to" ),
 "whisper":  ( SIMP, None, "whisper$ \nMSG \nHOW \nAT", "to" ),
@@ -383,7 +383,7 @@ NONLIVING_OK_VERBS = {
     "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "smell", "sniff",
     "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
     "swing", "tongue", "touch", "trust", "turn", "understand", "utter", "want",
-    "watch", "wave", "wiggle", "wobble", "worship", "wrinkle", "yawn", "yell"
+    "watch", "wave", "wiggle", "wobble", "worship", "wrinkle", "yawn"
 }
 
 assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
@@ -490,9 +490,9 @@ class WhoInfo(object):
 
 
 class ParseResults(object):
-    __slots__ = ("verb", "who", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized")
+    __slots__ = ("verb", "who", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized", "unparsed")
 
-    def __init__(self, verb, who=None, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None):
+    def __init__(self, verb, who=None, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None, unparsed=""):
         self.verb = verb
         self.who = who or set()
         self.adverb = adverb
@@ -503,6 +503,7 @@ class ParseResults(object):
         self.who_order = who_order or []
         self.args = args or []
         self.unrecognized = unrecognized or []
+        self.unparsed = unparsed
         assert type(self.who) in (set, frozenset)
         if self.who_order and not self.who_info:
             for sequence, who in enumerate(self.who_order):
@@ -523,7 +524,8 @@ class ParseResults(object):
             " unrecognized=%s" % self.unrecognized,
             " who=%s" % self.who,
             " who_info=%s" % "\n   ".join(who_info_str),
-            " who_order=%s" % self.who_order
+            " who_order=%s" % self.who_order,
+            " unparsed=%s" % self.unparsed
             ]
         return "\n".join(s)
 
@@ -743,6 +745,7 @@ class Soul(object):
         who_order = []
         who_sequence = 0
         room_exits = room_exits or {}
+        unparsed = cmd
 
         # a substring enclosed in quotes will be extracted as the message
         m = _message_regex.search(cmd)
@@ -755,11 +758,13 @@ class Soul(object):
         words = cmd.split()
         if words[0] in ACTION_QUALIFIERS:     # suddenly, fail, ...
             qualifier = words.pop(0)
+            unparsed = unparsed[len(qualifier):].lstrip()
             if qualifier == "dont":
                 qualifier = "don't"  # little spelling suggestion
             # note: don't add qualifier to arg_words
         if words and words[0] in _skip_words:
-            words.pop(0)
+            skipword = words.pop(0)
+            unparsed = unparsed[len(skipword):].lstrip()
 
         if not words:
             raise ParseError("What?")
@@ -783,7 +788,8 @@ class Soul(object):
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
-                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit]))
+                unparsed = unparsed[len(exit_name):].lstrip()
+                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit], unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -791,6 +797,7 @@ class Soul(object):
         else:
             raise UnknownVerbException(words[0], words, qualifier)
 
+        unparsed = unparsed[len(verb):].lstrip()
         include_flag = True
         collect_message = False
         all_livings = {}  # livings in the room (including player) by name + aliases
@@ -968,4 +975,4 @@ class Soul(object):
         return ParseResults(verb, who=who, who_info=who_info, who_order=who_order,
                             adverb=adverb, message=message,
                             bodypart=bodypart, qualifier=qualifier,
-                            args=arg_words, unrecognized=unrecognized_words)
+                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
