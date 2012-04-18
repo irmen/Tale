@@ -837,6 +837,7 @@ class Soul(object):
                     who.remove(player)
                     del who_info[player]
                 arg_words.append(word)
+                previous_word = None
                 continue
             if word in BODY_PARTS:
                 if bodypart:
@@ -862,6 +863,7 @@ class Soul(object):
                     who_sequence = 0
                     who_order = []
                 arg_words.append(word)
+                previous_word = None
                 continue
             if word == "everything":
                 raise ParseError("You can't do something to everything around you, be more specific.")
@@ -887,6 +889,7 @@ class Soul(object):
                     who.remove(living)
                     del who_info[living]
                 arg_words.append(word)
+                previous_word = None
                 continue
             if word in all_items:
                 item = all_items[word]
@@ -900,6 +903,7 @@ class Soul(object):
                     who.remove(item)
                     del who_info[item]
                 arg_words.append(word)
+                previous_word = None
                 continue
             if player.location:
                 exit, exit_name, wordcount = check_name_with_spaces(words, index, player.location.exits, {})
@@ -907,6 +911,7 @@ class Soul(object):
                     who.add(exit)
                     who_info[exit].sequence = who_sequence
                     who_info[exit].previous_word = previous_word
+                    previous_word = None
                     who_sequence += 1
                     who_order.append(exit)
                     arg_words.append(exit_name)
@@ -929,6 +934,7 @@ class Soul(object):
                     who.remove(item)
                     del who_info[item]
                 arg_words.append(full_name)
+                previous_word = None
                 continue
             if message_verb and not message:
                 collect_message = True

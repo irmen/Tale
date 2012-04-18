@@ -194,6 +194,10 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "smile at kate, cat and cat")
         self.assertEqual(["kate", "cat", "cat"], parsed.args, "deal with multiple occurences")
         self.assertEqual([kate, cat, cat], parsed.who_order, "deal with multiple occurrences")
+        parsed = soul.parse(player, "smile at kate cat myself")
+        self.assertEqual("at", parsed.who_info[kate].previous_word, "ony kate has a previous word")
+        self.assertEqual(None, parsed.who_info[cat].previous_word, "cat doesn't have a previous word")
+        self.assertEqual(None, parsed.who_info[player].previous_word, "player doesn't have a previous word")
 
     def testVerbTarget(self):
         soul = mudlib.soul.Soul()
