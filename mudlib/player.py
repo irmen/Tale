@@ -5,6 +5,12 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
+import sys
+if sys.version_info < (3, 0):
+    import Queue as queue
+else:
+    import queue
+from threading import Event
 from . import base, soul
 from . import lang
 from .errors import SecurityViolation
@@ -19,8 +25,10 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
-        self.__output = []
         self.installed_wiretaps = set()
+        self.__output = []
+        self.__input = queue.Queue()
+        self.input_is_available = Event()
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
@@ -90,6 +98,19 @@ class Player(base.Living):
     def allow_give_money(self, actor, amount):
         """Do we accept money?"""
         pass
+
+    def get_pending_input(self):
+        result = []
+        self.input_is_available.clear()
+        try:
+            while True:
+                result.append(self.__input.get_nowait())
+        except queue.Empty:
+            return result
+
+    def input(self, cmd):
+        self.__input.put(cmd)
+        self.input_is_available.set()
 
 
 class Wiretap(object):

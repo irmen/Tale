@@ -29,8 +29,6 @@ PLAYER STUFF
 
 shout
     shout a message to all players in the mud
-yell
-    shout a message to everyone in your current location (and nearby locations?)
 block, unblock
     block messages from someone
 equipment

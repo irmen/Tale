@@ -8,7 +8,7 @@ import copy
 from ..base import Location, Exit, Door, Item, Container
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
-from ..items.basic import trashcan, newspaper, gem
+from ..items.basic import trashcan, newspaper, gem, worldclock
 
 square = Location("Essglen Town square",
     """
@@ -52,7 +52,7 @@ removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("black gem", "a black gem")
 normal_gem = Item("blue gem", "a blue gem")
-
+clock = copy.deepcopy(worldclock)
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
@@ -83,7 +83,7 @@ rat = Monster("rat", "n", "rodent", None,
 
 ant = NPC("ant", "n", race="insect")
 
-square.init_inventory([cursed_gem, normal_gem, paper, trashcan, insertonly_box, removeonly_box, towncrier, idiot, rat, ant])
+square.init_inventory([cursed_gem, normal_gem, paper, trashcan, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
 door1 = Door(alley, "Door one.", direction="door one", locked=False, opened=True)

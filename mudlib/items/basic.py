@@ -6,7 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from ..base import Item, Container
 from ..errors import ActionRefused
-from .. import lang
+from .. import lang, mud_context
 
 
 class TrashCan(Container):
@@ -74,8 +74,15 @@ class TrashCan(Container):
             raise ActionRefused("You can't take things from the trashcan: you should open it first.")
 
 
+class WorldClock(Item):
+    @property
+    def description(self):
+        return "The clock reads " + str(mud_context.world_clock)
+
+
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful red gem.")
 pouch = Container("pouch", "small leather pouch", "It is closed with a leather strap.")
 trashcan = TrashCan("trashcan", "dented steel trashcan")
+worldclock = WorldClock("clock")

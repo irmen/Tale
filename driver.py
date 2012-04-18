@@ -5,7 +5,10 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
+import datetime
 import sys
+import time
+import threading
 import mudlib.rooms
 import mudlib.player
 import mudlib.races
@@ -72,6 +75,10 @@ class Commands(object):
 
 
 class Driver(object):
+    SERVER_TICK_TIME = 1.0    # in seconds
+    WORLDTIME_SECONDS_PER_TICK = 5
+    WORLDTIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
+
     def __init__(self):
         self.player = None
         self.commands = Commands()
@@ -102,6 +109,12 @@ class Driver(object):
             self.player.tell("Message-of-the-day, last modified on %s:" % mtime)
             self.player.tell(motd + "\n\n")
         self.player.tell(self.player.look())
+        self.write_output()
+        self.player_input_allowed = threading.Event()
+        self.player_input_thread = PlayerInputThread(player, self.player_input_allowed)
+        self.player_input_thread.setDaemon(True)
+        self.player_input_thread.start()
+        self.world_clock = self.WORLDTIME_EPOCH
         self.main_loop()
 
     def move_player_to_start_room(self):
@@ -113,40 +126,66 @@ class Driver(object):
     def main_loop(self):
         print = self.player.tell
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
+        last_loop_time = last_server_tick = time.time()
+        mudlib.mud_context.driver = self
+        mudlib.mud_context.player = self.player
+        mudlib.mud_context.world_clock = self.world_clock
         while True:
-            mudlib.mud_context.driver = self
-            mudlib.mud_context.player = self.player
             self.write_output()
+            self.player_input_allowed.set()
+            if time.time() - last_server_tick >= self.SERVER_TICK_TIME:
+                last_server_tick = time.time()
+                self.server_tick()
+            loop_duration = time.time() - last_loop_time
+            # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
             try:
-                self.ask_player_input()
+                has_input = self.player.input_is_available.wait(max(0.01, self.SERVER_TICK_TIME - loop_duration))
             except KeyboardInterrupt:
                 print("\n* break: Use <quit> if you want to quit.")
-            except EOFError:
                 continue
-            except mudlib.soul.UnknownVerbException as x:
-                if x.verb in directions:
-                    print("You can't go in that direction.")
-                else:
-                    print("The verb %s is unrecognized." % x.verb)
-            except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
-                print(str(x))
-            except mudlib.errors.SessionExit:
-                break
-            except Exception:
-                import traceback
-                print("* internal error:")
-                print(traceback.format_exc())
+            last_loop_time = time.time()
+            if has_input:
+                try:
+                    for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
+                        try:
+                            self.process_player_input(cmd)
+                        except mudlib.soul.UnknownVerbException as x:
+                            if x.verb in directions:
+                                print("You can't go in that direction.")
+                            else:
+                                print("The verb %s is unrecognized." % x.verb)
+                        except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
+                            print(str(x))
+                except KeyboardInterrupt:
+                    print("\n* break: Use <quit> if you want to quit.")
+                except EOFError:
+                    continue
+                except mudlib.errors.SessionExit:
+                    print("Exiting...")
+                    self.player_input_thread.join()
+                    break
+                except Exception:
+                    import traceback
+                    print("* internal error:")
+                    print(traceback.format_exc())
+        self.write_output()  # flush pending output at server shutdown.
+
+    def server_tick(self):
+        # do everything that the server needs to do every tick
+        self.world_clock += datetime.timedelta(seconds=self.WORLDTIME_SECONDS_PER_TICK)
+        mudlib.mud_context.world_clock = self.world_clock
         self.write_output()
 
     def write_output(self):
         # print any buffered player output
         output = self.player.get_output_lines()
-        print("".join(output))
+        if output:
+            print("".join(output))
+            sys.stdout.flush()
 
-    def ask_player_input(self):
-        cmd = input(">> ").lstrip()
+    def process_player_input(self, cmd):
         if not cmd:
-            return True
+            return
         if cmd and cmd[0] in mudlib.cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
             cmd = cmd[0] + " " + cmd[1:]
@@ -177,7 +216,7 @@ class Driver(object):
                     return True
                 elif parsed.verb in player_verbs:
                     func = player_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=player_verbs)
+                    func(self.player, parsed, driver=self, verbs=player_verbs, world_time=self.world_clock)
                     return
                 else:
                     raise mudlib.soul.ParseError("That doesn't make much sense.")
@@ -214,6 +253,28 @@ class Driver(object):
     def all_players(self):
         """return all players"""
         return [self.player]
+
+
+class PlayerInputThread(threading.Thread):
+    def __init__(self, player, input_allowed):
+        super(PlayerInputThread, self).__init__()
+        self.player = player
+        self.input_allowed = input_allowed
+
+    def run(self):
+        while True:
+            try:
+                self.input_allowed.wait()
+                sys.stdout.flush()
+                cmd = input(">> ").lstrip()
+                self.input_allowed.clear()
+                self.player.input(cmd)
+                if cmd == "quit":
+                    break
+            except KeyboardInterrupt:
+                self.player.tell("\n* break: Use <quit> if you want to quit.")
+            except EOFError:
+                pass
 
 
 if __name__ == "__main__":
