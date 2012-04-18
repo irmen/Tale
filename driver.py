@@ -167,7 +167,10 @@ class Driver(object):
             return
         except mudlib.soul.NonSoulVerb as x:
             parsed = x.parsed
-            # Execute non-soul verb. First try directions, then the rest
+            if parsed.qualifier:
+                # for now, qualifiers are only supported on soul-verbs (emotes).
+                raise mudlib.soul.ParseError("That action doesn't support qualifiers.")
+            # Execute non-soul verb. First try directions, then the rest.
             try:
                 if parsed.verb in self.player.location.exits:
                     self.go_through_exit(parsed.verb)

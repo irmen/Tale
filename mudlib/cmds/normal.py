@@ -683,8 +683,6 @@ def do_yell(player, parsed, **ctx):
     # this allows to user to just type the words he wants to say without the need
     # to enclose them in quotes
     print = player.tell
-    if parsed.qualifier:
-        raise ParseError("This action doesn't support qualifiers.")
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
     punctuation = "" if parsed.unparsed.endswith((".", "!", "?")) else "!"

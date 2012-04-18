@@ -789,7 +789,7 @@ class Soul(object):
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
                 unparsed = unparsed[len(exit_name):].lstrip()
-                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit], unparsed=unparsed))
+                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
