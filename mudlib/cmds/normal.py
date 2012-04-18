@@ -654,17 +654,15 @@ def do_stats(player, parsed, **ctx):
 @cmd("tell")
 def do_tell(player, parsed, **ctx):
     """Pass a message to another player or creature that nobody else can hear.
-You'll have to enclose the message in quotes: tell Joe 'yes we can do that'"""
+The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
-    if not parsed.message:
-        raise ParseError("You'll need to enclose the message in quotes.")
-    # first look for a living with the name
+    # we can't use parsed.who directly, because the message could be directed to a player
+    # that is not in the same location (and hence will not appear in parsed.who)
     name = parsed.args[0]
     living = player.location.search_living(name)
     if not living:
-        # ask the driver if there's a player with that name (globally)
-        living = ctx["driver"].search_player(name)
+        living = ctx["driver"].search_player(name)   # is there a player around with this name?
         if not living:
             if name == "all":
                 raise ActionRefused("You can't tell something to everyone, only to individuals.")
@@ -672,16 +670,32 @@ You'll have to enclose the message in quotes: tell Joe 'yes we can do that'"""
     if living is player:
         player.tell("You're talking to yourself...")
     else:
-        living.tell("%s tells you: %s" % (player.name, parsed.message))
-        player.tell("You told %s." % name)
+        unparsed = parsed.unparsed[len(name):].lstrip()
+        if unparsed:
+            living.tell("%s tells you: %s" % (player.name, unparsed))
+            player.tell("You told %s." % name)
+        else:
+            player.tell("Tell %s what?" % living.objective)
+
+
+@cmd("emote")
+def do_emote(player, parsed, **ctx):
+    """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
+    if not parsed.unparsed:
+        raise ParseError("Emote what message?")
+    emote_msg = lang.capital(player.title) + " " + parsed.unparsed
+    if not parsed.unparsed.endswith(("!", "?", ".")):
+        emote_msg += "."
+    player.tell("You emote: %s" % emote_msg)
+    player.location.tell(emote_msg, exclude_living=player)
 
 
 @cmd("yell")
 def do_yell(player, parsed, **ctx):
     """Yell something. People in nearby locations will also be able to hear you."""
-    # note: we don't use parsed.message, rather we use parsed.unparsed.
+    # note: we don't use parsed.message, we use parsed.unparsed instead.
     # this allows to user to just type the words he wants to say without the need
-    # to enclose them in quotes
+    # to enclose them in quotes.
     print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")

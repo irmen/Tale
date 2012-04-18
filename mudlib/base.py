@@ -296,7 +296,7 @@ class Location(MudObject):
         name = name.lower()
         result = [living for living in self.livings if living.name == name]
         if not result:
-            # try titles an aliases
+            # try titles and aliases
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 

@@ -203,7 +203,7 @@ VERBS = {
 "command":  ( SIMP, (None, "follow orders"), "command$ \nWHO \nHOW to \nWHAT" ),
 "utter":    ( SIMP, None, " \nHOW utter$ \nMSG \nAT", "to" ),
 "whisper":  ( SIMP, None, "whisper$ \nMSG \nHOW \nAT", "to" ),
-"emote":    ( DEUX, None, "emote: player \nWHAT", " \nWHAT"),
+# "emote":    ( DEUX, None, "emote: player \nWHAT", " \nWHAT"),   # replaced by a command
 
 # Verbs that require a person
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
