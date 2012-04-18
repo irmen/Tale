@@ -184,7 +184,7 @@ VERBS = {
 "criticize": ( PERS, None, "criticize$ \nWHAT \nHOW", "criticize$ \nWHO \nHOW" ),
 "lie":      ( PERS, None, "lie$ \nMSG \nHOW", "lie$ to \nWHO \nHOW" ),
 "mutter":   ( PERS, None, "mutter$ \nMSG \nHOW", "mutter$ \nMSG to \nWHO \nHOW" ),
-"say":      ( SIMP, ( None, "'nothing" ), " say$ \nWHAT \nAT", "to" ),
+# "say":      ( SIMP, ( None, "'nothing" ), " say$ \nAT: \nWHAT", "to" ),    # replaced by a command
 "babble":   ( SIMP, ( "incoherently", "'something" ), "babble$ \nMSG \nHOW \nAT", "to" ),
 "chant":    ( SIMP, ( None, "Hare Krishna Krishna Hare Hare" ), " \nHOW chant$: \nWHAT", "" ),
 "sing":     ( SIMP, None, "sing$ \nWHAT \nHOW \nAT", "to" ),
@@ -379,7 +379,7 @@ NONLIVING_OK_VERBS = {
     "hmm", "ignore", "jerk", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
     "love", "lust", "meow", "moan", "mumble", "murmur", "mutter", "nod", "nominate",
     "ogle", "peer", "point", "puke", "pull", "push", "purr", "puzzle", "quote",
-    "raise", "recoil", "reply", "rotate", "say", "scowl", "scream", "shake",
+    "raise", "recoil", "reply", "rotate", "scowl", "scream", "shake",
     "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "smell", "sniff",
     "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
     "swing", "tongue", "touch", "trust", "turn", "understand", "utter", "want",

@@ -703,6 +703,27 @@ def do_yell(player, parsed, **ctx):
     util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
 
 
+@cmd("say")
+def do_say(player, parsed, **ctx):
+    """Say something."""
+    print = player.tell
+    if not parsed.unparsed:
+        raise ActionRefused("Say what?")
+    message = parsed.unparsed
+    if not parsed.unparsed.endswith((".", "!", "?")):
+        message += "."
+    target = ""
+    if parsed.who:
+        possible_target = parsed.who_order[0]
+        if parsed.who_info[possible_target].previous_word == "to":
+            if parsed.args[0] in (possible_target.name, possible_target.title) or parsed.args[0] in possible_target.aliases:
+                target = " to " + possible_target.title
+                _, _, message = message.partition(parsed.args[0])
+                message = message.lstrip()
+    print("You say%s: %s" % (target, message))
+    player.location.tell("%s says%s: %s" % (lang.capital(player.title), target, message), exclude_living=player)
+
+
 @cmd("quit")
 def do_quit(player, parsed, **ctx):
     """Quit the game."""
