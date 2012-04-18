@@ -11,7 +11,6 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from .. import rooms
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
@@ -699,34 +698,12 @@ def do_yell(player, parsed, **ctx):
     print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
-    punctuation = "" if parsed.unparsed.endswith((".", "!", "?")) else "!"
-    print("You yell: %s%s" % (parsed.unparsed, punctuation))
-    player.location.tell("%s yells: %s%s" % (lang.capital(player.title), parsed.unparsed, punctuation), exclude_living=player)
-    # yell this to adjacent locations as well:
-    if player.location.exits:
-        nearby_message = "Someone nearby is yelling: %s%s" % (parsed.unparsed, punctuation)
-        yelled_locations = set()
-        for exit in player.location.exits.values():
-            if exit.target in yelled_locations:
-                continue
-            exit.bind(rooms)
-            if exit.target is not player.location:
-                exit.target.tell(nearby_message)
-                yelled_locations.add(exit.target)
-                for direction, return_exit in exit.target.exits.items():
-                    if return_exit.target is player.location:
-                        if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "left", "right", "front", "back"}:
-                            direction = "the " + direction
-                        elif direction in {"up", "above", "upstairs"}:
-                            direction = "above"
-                        elif direction in {"down", "below", "downstairs"}:
-                            direction = "below"
-                        else:
-                            continue  # no direction description possible for this exit
-                        exit.target.tell("The sound is coming from %s." % direction)
-                        break
-                else:
-                    exit.target.tell("You can't hear where the sound is coming from.")
+    message = parsed.unparsed
+    if not parsed.unparsed.endswith((".", "!", "?")):
+        message += "!"
+    print("You yell: %s" % message)
+    player.location.tell("%s yells: %s" % (lang.capital(player.title), message), exclude_living=player)
+    util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
 
 
 @cmd("quit")

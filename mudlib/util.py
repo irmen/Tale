@@ -12,6 +12,7 @@ import os
 import time
 from . import lang
 from .errors import ParseError
+from . import rooms
 
 
 def roll_die(number=1, sides=6):
@@ -196,3 +197,32 @@ def get_banner():
             return banner.read().rstrip() or None
     except IOError:
         return None
+
+
+def yell_to_nearby_locations(source_location, message):
+    """Yells a message to adjacent locations."""
+    if source_location.exits:
+        nearby_message = "Someone nearby is yelling: %s" % message
+        yelled_locations = set()
+        for exit in source_location.exits.values():
+            if exit.target in yelled_locations:
+                continue
+            exit.bind(rooms)
+            if exit.target is not source_location:
+                exit.target.tell(nearby_message)
+                yelled_locations.add(exit.target)
+                for direction, return_exit in exit.target.exits.items():
+                    if return_exit.target is source_location:
+                        if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast",
+                                         "southwest", "left", "right", "front", "back"}:
+                            direction = "the " + direction
+                        elif direction in {"up", "above", "upstairs"}:
+                            direction = "above"
+                        elif direction in {"down", "below", "downstairs"}:
+                            direction = "below"
+                        else:
+                            continue  # no direction description possible for this exit
+                        exit.target.tell("The sound is coming from %s." % direction)
+                        break
+                else:
+                    exit.target.tell("You can't hear where the sound is coming from.")
