@@ -692,16 +692,13 @@ def do_emote(player, parsed, **ctx):
 @cmd("yell")
 def do_yell(player, parsed, **ctx):
     """Yell something. People in nearby locations will also be able to hear you."""
-    # note: we don't use parsed.message, we use parsed.unparsed instead.
-    # this allows to user to just type the words he wants to say without the need
-    # to enclose them in quotes.
     print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
     message = parsed.unparsed
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
-    print("You yell: %s" % message)
+    print("You yell:", message)
     player.location.tell("%s yells: %s" % (lang.capital(player.title), message), exclude_living=player)
     util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
 

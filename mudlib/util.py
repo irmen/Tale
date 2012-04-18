@@ -92,7 +92,7 @@ def money_display_modern(amount, short=False, zero_msg="nothing"):
 
 
 def money_to_float_fantasy(coins):
-    """Either a dictionary containing the values per cointype, or a string '11g22s33c' is converted to float."""
+    """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
     if type(coins) is str:
         if not coins:
             raise ValueError("That's not an amount of money.")
@@ -119,7 +119,7 @@ def money_to_float_fantasy(coins):
 
 
 def money_to_float_modern(coins):
-    """Either a dictionary containing the values per cointype, or a string '$1234.55' is converted to float."""
+    """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
     if type(coins) is str:
         if coins.startswith("$"):
             return float(coins[1:])
@@ -202,11 +202,11 @@ def get_banner():
 def yell_to_nearby_locations(source_location, message):
     """Yells a message to adjacent locations."""
     if source_location.exits:
-        nearby_message = "Someone nearby is yelling: %s" % message
+        nearby_message = "Someone nearby is yelling: " + message
         yelled_locations = set()
         for exit in source_location.exits.values():
             if exit.target in yelled_locations:
-                continue
+                continue   # skip double locations (possible because there can be multiple exits to the same location)
             exit.bind(rooms)
             if exit.target is not source_location:
                 exit.target.tell(nearby_message)
