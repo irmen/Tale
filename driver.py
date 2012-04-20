@@ -8,6 +8,7 @@ from __future__ import print_function, division
 import datetime
 import sys
 import time
+import os
 import threading
 import mudlib.rooms
 import mudlib.player
@@ -17,6 +18,20 @@ import mudlib.util
 import mudlib.base
 import mudlib.errors
 import mudlib.cmds
+try:
+    import readline
+    history = os.path.expanduser("~/.snakepit_history")
+    readline.parse_and_bind("tab: complete")
+    try:
+        readline.read_history_file(history)
+    except IOError:
+        pass
+    import atexit
+    def save_history(historyfile):
+        readline.write_history_file(historyfile)
+    atexit.register(save_history, history)
+except ImportError:
+    pass
 
 
 if sys.version_info < (3, 0):
