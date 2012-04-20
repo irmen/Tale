@@ -3,7 +3,7 @@ Unit tests for util functions
 
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-
+import datetime
 import unittest
 from mudlib import util
 from mudlib.errors import ParseError
@@ -107,6 +107,35 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(20, len(values))
         with self.assertRaises(AssertionError):
             util.roll_die(21, 10)
+
+    def test_parse_duration(self):
+        duration = util.parse_duration(["1","hour","1","minute","1","second"])
+        self.assertEqual(datetime.timedelta(hours=1, minutes=1, seconds=1), duration)
+        duration = util.parse_duration(["3","hours","2","minutes","5","seconds"])
+        self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
+        duration = util.parse_duration(["3","h","2","min","5","sec"])
+        self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
+        duration = util.parse_duration(["3","h","2","m","5","s"])
+        self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
+        duration = util.parse_duration(["3h","2m","5s"])
+        self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
+        duration = util.parse_duration(["2.5","min"])
+        self.assertEqual(datetime.timedelta(minutes=2, seconds=30), duration)
+        with self.assertRaises(ParseError):
+            util.parse_duration(None)
+        with self.assertRaises(ParseError):
+            util.parse_duration(["1","2","3"])
+        with self.assertRaises(ParseError):
+            util.parse_duration(["1","apple"])
+        with self.assertRaises(ParseError):
+            util.parse_duration(["seconds","2"])
+
+    def test_duration_display(self):
+        self.assertEqual("no time at all", util.duration_display(datetime.timedelta(0)))
+        self.assertEqual("1 hour, 1 minute, and 1 second", util.duration_display(datetime.timedelta(hours=1, minutes=1, seconds=1)))
+        self.assertEqual("2 hours, 3 minutes, and 4 seconds", util.duration_display(datetime.timedelta(hours=2, minutes=3, seconds=4)))
+        self.assertEqual("2 minutes", util.duration_display(datetime.timedelta(minutes=2)))
+        self.assertEqual("2 minutes and 1 second", util.duration_display(datetime.timedelta(minutes=2, seconds=1)))
 
 
 if __name__ == '__main__':

@@ -27,8 +27,10 @@ try:
     except IOError:
         pass
     import atexit
+
     def save_history(historyfile):
         readline.write_history_file(historyfile)
+
     atexit.register(save_history, history)
 except ImportError:
     pass
@@ -91,8 +93,8 @@ class Commands(object):
 
 class Driver(object):
     SERVER_TICK_TIME = 1.0    # in seconds
-    WORLDTIME_SECONDS_PER_TICK = 5
-    WORLDTIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
+    GAMETIME_TO_REALTIME = 5    # meaning: game time is X times the speed of real time
+    GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
 
     def __init__(self):
         self.player = None
@@ -129,7 +131,7 @@ class Driver(object):
         self.player_input_thread = PlayerInputThread(player, self.player_input_allowed)
         self.player_input_thread.setDaemon(True)
         self.player_input_thread.start()
-        self.world_clock = self.WORLDTIME_EPOCH
+        self.world_clock = self.GAMETIME_EPOCH
         self.main_loop()
 
     def move_player_to_start_room(self):
@@ -187,7 +189,7 @@ class Driver(object):
 
     def server_tick(self):
         # do everything that the server needs to do every tick
-        self.world_clock += datetime.timedelta(seconds=self.WORLDTIME_SECONDS_PER_TICK)
+        self.world_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
         mudlib.mud_context.world_clock = self.world_clock
         self.write_output()
 
@@ -268,6 +270,17 @@ class Driver(object):
     def all_players(self):
         """return all players"""
         return [self.player]
+
+    def do_wait(self, duration):
+        # let time pass, duration is in game time (not real time).
+        # We do let the game tick for the correct number of times,
+        # however @todo: be able to detect if something happened during the wait
+        num_tics = int(duration.seconds / self.GAMETIME_TO_REALTIME / self.SERVER_TICK_TIME)
+        if num_tics < 1:
+            return False, "It's no use waiting such a short while."
+        for _ in range(num_tics):
+            self.server_tick()
+        return True, None     # wait was uneventful. (@todo return False if something happened)
 
 
 class PlayerInputThread(threading.Thread):

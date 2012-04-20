@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 # there's nothing her so far
 
 from __future__ import print_function, division
+import datetime
 import random
 import os
 import time
@@ -226,3 +227,64 @@ def yell_to_nearby_locations(source_location, message):
                         break
                 else:
                     exit.target.tell("You can't hear where the sound is coming from.")
+
+
+def parse_duration(args):
+    """parses a duration from args like: 1 hour 20 minutes 15 seconds (hour/h, minutes/min/m, seconds/sec/s)"""
+    hours = minutes = seconds = 0
+    if args:
+        number = None
+        for arg in args:
+            if len(arg) >= 2 and arg.endswith(("h", "m", "s")):
+                try:
+                    if arg[-1] == "h":
+                        hours = int(arg[:-1])
+                    elif arg[-1] == "m":
+                        minutes = int(arg[:-1])
+                    elif arg[-1] == "s":
+                        seconds = int(arg[:-1])
+                    continue
+                except ValueError:
+                    pass
+            if arg in ("hours", "hour", "h"):
+                hours = number
+                number = None
+            elif arg in ("minutes", "minute", "min", "m"):
+                minutes = number
+                number = None
+            elif arg in ("seconds", "second", "sec", "s"):
+                seconds = number
+                number = None
+            else:
+                try:
+                    number = float(arg)
+                except ValueError:
+                    raise ParseError("It's not clear what duration you mean.")
+    if hours == minutes == seconds == 0:
+        raise ParseError("It's not clear what duration you mean.")
+    try:
+        return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    except TypeError:
+        raise ParseError("It's not clear what duration you mean.")
+
+
+def duration_display(duration):
+    secs = duration.total_seconds()
+    if secs == 0:
+        return "no time at all"
+    hours, secs = divmod(secs, 3600)
+    minutes, secs = divmod(secs, 60)
+    result = []
+    if hours == 1:
+        result.append("1 hour")
+    elif hours > 1:
+        result.append("%d hours" % hours)
+    if minutes == 1:
+        result.append("1 minute")
+    elif minutes > 1:
+        result.append("%d minutes" % minutes)
+    if secs == 1:
+        result.append("1 second")
+    elif secs > 1:
+        result.append("%d seconds" % secs)
+    return lang.join(result)

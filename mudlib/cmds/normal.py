@@ -6,6 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 import inspect
+import datetime
 from .. import lang
 from .. import soul
 from .. import races
@@ -722,6 +723,28 @@ def do_say(player, parsed, **ctx):
                 message = message.lstrip()
     print("You say%s: %s" % (target, message))
     player.location.tell("%s says%s: %s" % (lang.capital(player.title), target, message), exclude_living=player)
+
+
+@cmd("wait")
+def do_wait(player, parsed, **ctx):
+    """Let time pass. You can specify how long you want to wait."""
+    print = player.tell
+    if parsed.who:
+        who = lang.join(who.title for who in parsed.who)
+        print("You wait for %s." % who)
+        player.location.tell("%s waits for %s." % (lang.capital(player.title), who), exclude_living=player)
+        return
+    if parsed.args:
+        duration = util.parse_duration(parsed.args)
+    else:
+        duration = datetime.timedelta(minutes=10)
+    if duration.total_seconds() / 3600 > 2:
+        raise ActionRefused("You can't wait more than two hours at once.")
+    ok, message = ctx["driver"].do_wait(duration)
+    if ok:
+        print("Time passes. You've waited %s." % util.duration_display(duration))
+    else:
+        print(message)
 
 
 @cmd("quit")
