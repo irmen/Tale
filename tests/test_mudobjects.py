@@ -8,10 +8,13 @@ import unittest
 
 class DummyDriver(object):
     heartbeats = set()
+    exits = []
     def register_heartbeat(self, obj):
         self.heartbeats.add(obj)
     def unregister_heartbeat(self, obj):
         self.heartbeats.discard(obj)
+    def register_exit(self, exit):
+        self.exits.append(exit)
 
 from mudlib.globals import mud_context
 mud_context.driver = DummyDriver()

@@ -373,6 +373,7 @@ class Exit(object):
             self.long_description = long_description or self.short_description
         except AttributeError:
             pass   # this can occur if someone made it into a property
+        mud_context.driver.register_exit(self)
 
     def __repr__(self):
         targetname = self.target.name if self.bound else self.target
@@ -381,8 +382,8 @@ class Exit(object):
     def bind(self, mudlib_rooms_module):
         """
         Binds the exit to the actual target_location object.
-        Usually called by a movement action on a non-bound exit.
-        The caller needs to pass in the root module of the mudlib rooms.
+        Usually called by the driver before it starts player interaction.
+        The caller needs to pass in the root module of the mudlib rooms (to avoid circular import dependencies)
         """
         if not self.bound:
             target_module, target_object = self.target.rsplit(".", 1)

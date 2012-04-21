@@ -199,7 +199,7 @@ def get_banner():
         return None
 
 
-def yell_to_nearby_locations(source_location, message, mudlib_rooms):
+def yell_to_nearby_locations(source_location, message):
     """Yells a message to adjacent locations."""
     if source_location.exits:
         nearby_message = "Someone nearby is yelling: " + message
@@ -207,7 +207,6 @@ def yell_to_nearby_locations(source_location, message, mudlib_rooms):
         for exit in source_location.exits.values():
             if exit.target in yelled_locations:
                 continue   # skip double locations (possible because there can be multiple exits to the same location)
-            exit.bind(mudlib_rooms)
             if exit.target is not source_location:
                 exit.target.tell(nearby_message)
                 yelled_locations.add(exit.target)

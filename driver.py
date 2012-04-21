@@ -104,12 +104,19 @@ class Driver(object):
 
     def __init__(self):
         self.heartbeat_objects = set()
+        self.unbound_exits = []
         self.server_started = datetime.datetime.now()
         self.player = None
         self.commands = Commands()
         mudlib.globals.mud_context.driver = self
         delayed_imports()
         mudlib.cmds.register_all(self.commands)
+        self.bind_exits()
+
+    def bind_exits(self):
+        for exit in self.unbound_exits:
+            exit.bind(mudlib.rooms)
+        del self.unbound_exits
 
     def start(self, args):
         # print GPL 3.0 banner
@@ -255,7 +262,6 @@ class Driver(object):
 
     def go_through_exit(self, direction):
         exit = self.player.location.exits[direction]
-        exit.bind(mudlib.rooms)
         exit.allow_passage(self.player)
         self.player.move(exit.target)
         self.player.tell(self.player.look())
@@ -299,6 +305,10 @@ class Driver(object):
 
     def unregister_heartbeat(self, mudobj):
         self.heartbeat_objects.discard(mudobj)
+
+    def register_exit(self, exit):
+        if not exit.bound:
+            self.unbound_exits.append(exit)
 
 
 class PlayerInputThread(threading.Thread):

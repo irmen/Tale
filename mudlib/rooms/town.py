@@ -78,7 +78,7 @@ class TownCrier(NPC):
         if self.beats_before_cry <= 0:
             self.beats_before_cry = random.randint(10, 20)
             self.tell_others("{Title} yells: welcome everyone!")
-            yell_to_nearby_locations(self.location, "welcome everyone!", None)
+            yell_to_nearby_locations(self.location, "welcome everyone!")
 
 
 towncrier = TownCrier("laish", "f", "Laish the town crier",

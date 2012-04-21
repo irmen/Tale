@@ -12,7 +12,6 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from .. import rooms
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
@@ -698,7 +697,7 @@ def do_yell(player, parsed, **ctx):
         message += "!"
     print("You yell:", message)
     player.tell_others("{Title} yells: %s" % message)
-    util.yell_to_nearby_locations(player.location, message, rooms)  # yell this to adjacent locations as well
+    util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
 
 
 @cmd("say")
