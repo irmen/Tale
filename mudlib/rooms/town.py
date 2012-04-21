@@ -47,6 +47,7 @@ class RemoveOnlyBox(Container):
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
+bag = Container("bag")
 normal_gem = copy.deepcopy(gem)
 removeonly_box.init_inventory([normal_gem])
 
@@ -83,7 +84,7 @@ rat = Monster("rat", "n", "rodent", None,
 
 ant = NPC("ant", "n", race="insect")
 
-square.init_inventory([cursed_gem, normal_gem, paper, trashcan, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
+square.init_inventory([cursed_gem, normal_gem, paper, trashcan, bag, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
 door1 = Door(alley, "Door one.", direction="door one", locked=False, opened=True)

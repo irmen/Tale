@@ -40,14 +40,14 @@ class TrashCan(Container):
             raise ActionRefused("It's already open.")
         self.opened = True
         actor.tell("You opened the %s." % self.title)
-        actor.location.tell("%s opened the %s." % (lang.capital(actor.title), self.title), exclude_living=actor)
+        actor.tell_others("{Title} opened the %s." % self.title)
 
     def close(self, item, actor):
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False
         actor.tell("You closed the %s." % self.title)
-        actor.location.tell("%s closed the %s." % (lang.capital(actor.title), self.title), exclude_living=actor)
+        actor.tell_others("{Title} closed the %s." % self.title)
 
     def inventory(self):
         if self.opened:

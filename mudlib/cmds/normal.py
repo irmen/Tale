@@ -87,7 +87,7 @@ def do_locate(player, parsed, **ctx):
         raise ParseError("Can only search for one thing at a time.")
     name = parsed.args[0]
     print("You look around to see if you can locate %s." % name)
-    player.location.tell("%s looks around." % lang.capital(player.title), exclude_living=player)
+    player.tell_others("{Title} looks around.")
     if parsed.who:
         thing = parsed.who.pop()
         if thing is player:
@@ -143,9 +143,7 @@ def do_drop(player, parsed, **ctx):
         if items:
             items_str = lang.join(lang.a(item.title) for item in items)
             print("You drop %s." % items_str)
-            player.location.tell("{player} drops {items}."
-                                 .format(player=lang.capital(player.title), items=items_str),
-                                 exclude_living=player)
+            player.tell_others("{Title} drops %s." % items_str)
         else:
             print("You didn't drop anything.")
 
@@ -207,7 +205,7 @@ def do_empty(player, parsed, **ctx):
     if items_moved:
         itemnames = lang.join(items_moved)
         print("You %s: %s." % (action, itemnames))
-        player.location.tell("%s %s: %s." % (lang.capital(player.title), action, itemnames))
+        player.tell_others("{Title} %s: %s." % (action, itemnames))
     else:
         print("You %s nothing." % action)
 
@@ -252,19 +250,17 @@ If you're not carrying the item, you will first pick it up."""
                 # first take the item from the room, then move it to the target location
                 item.move(player.location, player, player)
                 print("You take %s." % item.title)
-                player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
+                player.tell_others("{Title} takes %s." % item.title)
                 item.move(player, where, player)
                 print("You put it in the %s." % where.name)
-                player.location.tell("%s puts it in the %s." % (lang.capital(player.subjective), where.name), exclude_living=player)
+                player.tell_others("{Title} puts it in the %s." % where.name)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
         print(message)
     if inventory_items:
         items_msg = lang.join(lang.a(item.title) for item in inventory_items)
-        player.location.tell("{player} puts {items} in the {where}.".format(
-            player=lang.capital(player.title),
-            items=items_msg, where=where.name), exclude_living=player)
+        player.tell_others("{Title} puts %s in the %s." % (items_msg, where.name))
         print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
 
 
@@ -296,7 +292,7 @@ Stealing and robbing is frowned upon, to say the least."""
     if where is player:
         raise ActionRefused("There's no reason to take things from yourself.")
     if isinstance(where, base.Living):
-        player.location.tell("%s tries to steal things from %s." % (lang.capital(player.title), where.title), exclude_living=player)
+        player.tell_others("{Title} tries to steal things from %s." % where.title)
         if where.aggressive:
             where.start_attack(player)  # stealing stuff is a hostile act!
         raise ActionRefused("You can't just steal stuff from %s!" % where.title)
@@ -362,10 +358,10 @@ def take_stuff(player, items, container, where_str=None):
     print = player.tell
     if where_str:
         player_msg = "You take {items} from the %s." % where_str
-        room_msg = "{player} takes {items} from the %s." % where_str
+        room_msg = "{{Title}} takes {items} from the %s." % where_str
     else:
         player_msg = "You take {items}."
-        room_msg = "{player} takes {items}."
+        room_msg = "{{Title}} takes {items}."
     items = list(items)
     refused = []
     for item in items:
@@ -379,7 +375,7 @@ def take_stuff(player, items, container, where_str=None):
     if items:
         items_str = lang.join(lang.a(item.title) for item in items)
         print(player_msg.format(items=items_str))
-        player.location.tell(room_msg.format(player=lang.capital(player.title), items=items_str), exclude_living=player)
+        player.tell_others(room_msg.format(items=items_str))
         return len(items)
     else:
         return 0
@@ -413,11 +409,11 @@ If you don't have it yet, you will first pick it up."""
         # first take the item from the room
         item.move(player.location, player, player)
         print("You take %s." % item.title)
-        player.location.tell("%s takes %s." % (lang.capital(player.title), item.title), exclude_living=player)
+        player.tell_others("{Title} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
     item.move(player, player.location, player)
     print("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
-    player.location.tell("%s throws the %s at %s, missing %s by a hair." % (lang.capital(player.title), item.title, where.title, where.objective), exclude_living=player)
+    player.tell_others("{Title} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:
         where.start_attack(player)
 
@@ -513,7 +509,7 @@ def give_money(player, amount, recipient):
         player.money -= money
         recipient.money += money
         player.tell("You gave %s %s." % (recipient.title, util.money_display(money)))
-        player.location.tell("%s gave %s some money." % (lang.capital(player.title), recipient.title), exclude_living=player)
+        player.tell_others("{Title} gave %s some money." % recipient.title)
 
 
 @cmd("help")
@@ -687,7 +683,7 @@ def do_emote(player, parsed, **ctx):
     if not parsed.unparsed.endswith(("!", "?", ".")):
         emote_msg += "."
     player.tell("You emote: %s" % emote_msg)
-    player.location.tell(emote_msg, exclude_living=player)
+    player.tell_others(emote_msg)
 
 
 @cmd("yell")
@@ -700,7 +696,7 @@ def do_yell(player, parsed, **ctx):
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
     print("You yell:", message)
-    player.location.tell("%s yells: %s" % (lang.capital(player.title), message), exclude_living=player)
+    player.tell_others("{Title} yells: %s" % message)
     util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
 
 
@@ -722,7 +718,7 @@ def do_say(player, parsed, **ctx):
                 _, _, message = message.partition(parsed.args[0])
                 message = message.lstrip()
     print("You say%s: %s" % (target, message))
-    player.location.tell("%s says%s: %s" % (lang.capital(player.title), target, message), exclude_living=player)
+    player.tell_others("{Title} says%s: %s" % (target, message))
 
 
 @cmd("wait")
@@ -732,7 +728,7 @@ def do_wait(player, parsed, **ctx):
     if parsed.who:
         who = lang.join(who.title for who in parsed.who)
         print("You wait for %s." % who)
-        player.location.tell("%s waits for %s." % (lang.capital(player.title), who), exclude_living=player)
+        player.tell_others("{Title} waits for %s." % who)
         return
     if parsed.args:
         duration = util.parse_duration(parsed.args)
@@ -760,8 +756,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
         player.tell("(you take the %s from the %s)" % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
-    player.location.tell("{player} takes the {item} from the {container}.".format(
-        player=lang.capital(player.title), item=item.name, container=container.name), exclude_living=player)
+    player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
 
 
 @cmd("who")
@@ -1029,10 +1024,9 @@ def do_dice(player, parsed, **ctx):
     if (number, sides) != (1, 6):
         die = "%dd%d" % (number, sides)
     print("You roll %s. The result is: %d" % (die, total))
-    player.location.tell("%s rolls %s. The result is: %d" % (lang.capital(player.title), die, total), exclude_living=player)
+    player.tell_others("{Title} rolls %s. The result is: %d" % (die, total))
     if number > 1:
-        print("The individual rolls were:", values)
-        player.location.tell("The individual rolls were: %s" % values, exclude_living=player)
+        player.location.tell("The individual rolls were: %s" % values)
 
 
 @cmd("coin")
@@ -1041,7 +1035,7 @@ def do_coin(player, parsed, **ctx):
     number, _ = util.roll_die(sides=2)
     result = ["heads", "tails"][number - 1]
     player.tell("You toss a coin. The result is: %s!" % result)
-    player.location.tell("%s tosses a coin. The result is: %s!" % (lang.capital(player.title), result), exclude_living=player)
+    player.tell_others("{Title} tosses a coin. The result is: %s!" % result)
 
 
 @cmd("motd")

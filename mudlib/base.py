@@ -475,6 +475,18 @@ class Living(MudObject):
         for tap in self.wiretaps:
             tap.tell(*messages)
 
+    def tell_others(self, *messages):
+        """
+        Message(s) sent to the other livings in the location, but not to self.
+        There are a few formatting strings for easy shorthands:
+        {title}/{Title} = the living's title, and the title with a capital letter.
+        If you need even more tweaks with telling stuff, use living.location.tell directly.
+        """
+        formats = {"title": self.title, "Title": lang.capital(self.title)}
+        for msg in messages:
+            msg = msg.format_map(formats)
+            self.location.tell(msg, exclude_living=self)
+
     def move(self, target_location, actor=None, silent=False):
         """
         Leave the current location, enter the new location (transactional).
@@ -652,9 +664,9 @@ class Door(Exit):
             actor.tell("You opened it.")
             who = lang.capital(actor.title)
             if self.direction:
-                actor.location.tell("%s opened the exit %s." % (who, self.direction), exclude_living=actor)
+                actor.tell_others("{Title} opened the exit %s." % self.direction)
             else:
-                actor.location.tell("%s opened an exit." % who, exclude_living=actor)
+                actor.tell_others("{Title} opened an exit.")
 
     def close(self, item, actor):
         """Close the door with optional item. Notifies actor and room of this event."""
@@ -664,9 +676,9 @@ class Door(Exit):
         actor.tell("You closed it.")
         who = lang.capital(actor.title)
         if self.direction:
-            actor.location.tell("%s closed the exit %s." % (who, self.direction), exclude_living=actor)
+            actor.tell_others("{Title} closed the exit %s." % self.direction)
         else:
-            actor.location.tell("%s closed an exit." % who, exclude_living=actor)
+            actor.tell_others("{Title} closed an exit.")
 
     def lock(self, item, actor):
         """Lock the door with something, default is to not allow locking (override in subclass)"""

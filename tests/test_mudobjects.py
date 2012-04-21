@@ -22,6 +22,16 @@ class Wiretap(object):
         self.msgs=[]
 
 
+class MsgTraceNPC(NPC):
+    def __init__(self, name, gender, race):
+        super(MsgTraceNPC, self).__init__(name, gender, race=race)
+        self.clearmessages()
+    def clearmessages(self):
+        self.messages = []
+    def tell(self, *messages):
+        self.messages.extend(messages)
+
+
 class TestLocations(unittest.TestCase):
     def setUp(self):
         self.hall = Location("Main hall", "A very large hall.")
@@ -134,14 +144,6 @@ Present: julie, rat"""
         self.assertEqual(None, container, "should not search in bags in inventory")
 
     def test_tell(self):
-        class MsgTraceNPC(NPC):
-            def __init__(self, name, gender, race):
-                super(MsgTraceNPC, self).__init__(name, gender, race=race)
-                self.clearmessages()
-            def clearmessages(self):
-                self.messages = []
-            def tell(self, *messages):
-                self.messages.extend(messages)
         rat = MsgTraceNPC("rat", "n", "rodent")
         julie = MsgTraceNPC("julie", "f", "human")
         hall = Location("hall")
@@ -389,6 +391,24 @@ class TestPlayer(unittest.TestCase):
         julie = NPC("julie", "f")
         julie.move(attic)
         self.assertEqual("[Attic]\nPresent: julie", player.look(short=True))
+    def test_others(self):
+        attic = Location("Attic", "A dark attic.")
+        player = Player("merlin", "m")
+        player.set_title("wizard merlin")
+        julie = MsgTraceNPC("julie", "f", "human")
+        fritz = MsgTraceNPC("fritz", "m", "human")
+        julie.move(attic, silent=True)
+        fritz.move(attic, silent=True)
+        player.move(attic, silent=True)
+        player.tell_others("one", "two", "three")
+        self.assertEqual([], player.get_output_lines())
+        self.assertEqual(["one","two","three"], fritz.messages)
+        self.assertEqual(["one","two","three"], julie.messages)
+        fritz.clearmessages()
+        julie.clearmessages()
+        player.tell_others("{title} and {Title}")
+        self.assertEqual(["wizard merlin and Wizard merlin"], fritz.messages)
+
     def test_wiretap(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("fritz", "m")

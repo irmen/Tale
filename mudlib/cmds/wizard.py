@@ -116,17 +116,11 @@ def do_clone(player, parsed, **ctx):
         item = copy.deepcopy(obj)
         player.insert(item, player)
         print("Cloned: " + repr(item))
-        player.location.tell("{player} conjures up {item}, and quickly pockets it."
-                             .format(player=lang.capital(player.title),
-                                     item=lang.a(item.title)),
-                             exclude_living=player)
+        player.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
     elif isinstance(obj, base.Living):
         clone = copy.deepcopy(obj)
         print("Cloned: " + repr(clone))
-        player.location.tell("{player} summons {npc}."
-                             .format(player=lang.capital(player.title),
-                                     npc=lang.a(clone.title)),
-                             exclude_living=player)
+        player.tell_others("{Title} summons %s." % lang.a(clone.title))
         player.location.insert(clone, player)
     else:
         raise ActionRefused("Can't clone " + lang.a(obj.__class__.__name__))
@@ -156,11 +150,8 @@ def do_destroy(player, parsed, **ctx):
         else:
             raise ActionRefused("Can't destroy " + lang.a(victim.__class__.__name__))
         print("You destroyed %r." % victim)
-        player.location.tell("{player} makes some gestures and a tiny black hole appears.\n"
-                             "{victim} disappears in it, and the black hole immediately vanishes."
-                             .format(player=lang.capital(player.title),
-                                     victim=lang.capital(victim.title)),
-                             exclude_living=player)
+        player.tell_others("{Title} makes some gestures and a tiny black hole appears.\n"
+                             "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))
 
 
 @wizcmd("clean")
@@ -171,7 +162,7 @@ def do_clean(player, parsed, **ctx):
     if parsed.args and parsed.args[0] == '.':
         # clean the current location
         print("Cleaning the stuff in your environment.")
-        player.location.tell("%s cleans out the environment." % lang.capital(player.title), exclude_living=player)
+        player.tell_others("{Title} cleans out the environment.")
         for item in set(player.location.items):
             player.location.remove(item, player)
             item.destroy(ctx)
@@ -187,7 +178,7 @@ def do_clean(player, parsed, **ctx):
         victim = parsed.who.pop()
         # @todo: ask for confirmation (async)
         print("Cleaning inventory of",victim)
-        player.location.tell("%s cleans out the inventory of %s." % (lang.capital(player.title), victim.title), exclude_living=player)
+        player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
         items = victim.inventory()
         for item in items:
             victim.remove(item, player)
@@ -283,10 +274,8 @@ def do_teleport(player, parsed, **ctx):
 def teleport_to(player, location):
     """helper function for teleport command, to teleport the player somewhere"""
     print = player.tell
-    player.location.tell("%s makes some gestures and a portal suddenly opens." %
-                         lang.capital(player.title), exclude_living=player)
-    player.location.tell("%s jumps into the portal, which quickly closes behind %s." %
-                         (lang.capital(player.subjective), player.objective), exclude_living=player)
+    player.tell_others("{Title} makes some gestures and a portal suddenly opens.")
+    player.tell_others("%s jumps into the portal, which quickly closes behind %s." % (lang.capital(player.subjective), player.objective))
     player.teleported_from = player.location  # used for the 'return' command
     player.move(location, silent=True)
     print("You've been teleported.")
@@ -303,10 +292,8 @@ def teleport_someone_to_player(who, player):
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
     who.teleported_from = who.location  # used for the 'return' command
     who.move(player.location, silent=True)
-    player.location.tell("%s makes some gestures and a portal suddenly opens." %
-                         lang.capital(player.title), exclude_living=who)
-    player.location.tell("%s tumbles out of it, and the portal quickly closes again." %
-                         lang.capital(who.title), exclude_living=who)
+    player.location.tell("%s makes some gestures and a portal suddenly opens." % lang.capital(player.title), exclude_living=who)
+    player.location.tell("%s tumbles out of it, and the portal quickly closes again." % lang.capital(who.title), exclude_living=who)
 
 
 @wizcmd("return")
@@ -325,9 +312,8 @@ def do_return(player, parsed, **ctx):
         who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
         del who.teleported_from
         who.move(previous_location, silent=True)
-        who.location.tell("Suddenly, a shimmering portal opens!", exclude_living=who)
-        who.location.tell("%s tumbles out of it, and the portal quickly closes again." %
-                      lang.capital(who.title), exclude_living=who)
+        who.tell_others("Suddenly, a shimmering portal opens!")
+        who.tell_others("{Title} tumbles out of it, and the portal quickly closes again.")
     else:
         print("Can't determine %s's previous location." % who.name)
 
@@ -384,8 +370,7 @@ items that are normally fixed in place (move item to playername)."""
         raise ParseError("There seems to be no %s here." % thing.name)
     thing.move(thing_container, target, player, wiz_force=True)
     print("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
-    player.location.tell("%s moved %s into %s." %
-        (lang.capital(player.title), thing.title, target.title), exclude_living=player)
+    player.tell_others("{Title} moved %s into %s." % (thing.title, target.title))
 
 
 @wizcmd("debug")
