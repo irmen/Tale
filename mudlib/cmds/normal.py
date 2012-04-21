@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 from __future__ import print_function, division
 import inspect
 import datetime
+import random
 from .. import lang
 from .. import soul
 from .. import races
@@ -1047,3 +1048,35 @@ def do_motd(player, parsed, **ctx):
         player.tell(motd)
     else:
         player.tell("There's currently no message-of-the-day.")
+
+
+@cmd("flee")
+def do_flee(player, parsed, **ctx):
+    """Flee in a random or given direction, possibly escaping a combat situation."""
+    print = player.tell
+    exit = None
+    if len(parsed.who) == 1:
+        exit = parsed.who_order[0]
+        if not isinstance(exit, base.Exit):
+            raise ParseError("You can't flee there.")
+        exit.allow_passage(player)
+    elif parsed.args:
+        raise ParseError("Flee where?")
+    if not exit:
+        # choose a random exit direction
+        if not player.location.exits:
+            raise ActionRefused("You can't flee anywhere!")
+        exit = random.choice(list(player.location.exits.values()))
+    exits_to_try = list(player.location.exits.values())
+    exits_to_try.insert(0, exit)
+    for exit in exits_to_try:
+        try:
+            exit.allow_passage(player)
+            print("You flee!")
+            # @todo stop combat
+            player.move(exit.target)
+            player.tell(player.look())
+            return
+        except ActionRefused:
+            pass
+    raise ActionRefused("You can't flee anywhere!")

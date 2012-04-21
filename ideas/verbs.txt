@@ -29,8 +29,6 @@ block, unblock
     block messages from someone
 equipment
     show the armor items you are wearing
-flee
-    flee from combat in a random direction
 kills
     shows a list of your victories
 pvp

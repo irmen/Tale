@@ -12,17 +12,10 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from __future__ import print_function, division
 import re
-import sys
 from collections import defaultdict
 from . import lang
 from .errors import ParseError
-
-if sys.version_info >= (3, 0):
-    def next_iter(iterable):
-        return next(iterable)
-else:
-    def next_iter(iterable):
-        return iterable.next()
+from .util import next_iter
 
 
 class SoulException(Exception):

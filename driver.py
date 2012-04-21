@@ -263,7 +263,7 @@ class Driver(object):
             # Execute non-soul verb. First try directions, then the rest.
             try:
                 if parsed.verb in self.player.location.exits:
-                    self.go_through_exit(parsed.verb)
+                    self.go_through_exit(self.player, parsed.verb)
                     return True
                 elif parsed.verb in player_verbs:
                     func = player_verbs[parsed.verb]
@@ -275,11 +275,11 @@ class Driver(object):
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.do_socialize(parsed)
 
-    def go_through_exit(self, direction):
-        exit = self.player.location.exits[direction]
-        exit.allow_passage(self.player)
-        self.player.move(exit.target)
-        self.player.tell(self.player.look())
+    def go_through_exit(self, player, direction):
+        exit = player.location.exits[direction]
+        exit.allow_passage(player)
+        player.move(exit.target)
+        player.tell(player.look())
 
     def do_socialize(self, parsed):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)

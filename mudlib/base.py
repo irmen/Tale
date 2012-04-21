@@ -5,18 +5,13 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
-import sys
 import weakref
 import textwrap
 from . import lang
 from .errors import ActionRefused
 from .races import races
 from .globals import mud_context
-
-if sys.version_info < (3, 0):
-    basestring_type = basestring
-else:
-    basestring_type = str
+from .util import basestring_type
 
 """
 object hierarchy:
