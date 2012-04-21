@@ -14,8 +14,6 @@ reset
     reset an object to initial state
 resurrect
     return a dead person or creature to the land of the living
-return
-    send someone back to their last location after a teleport
 wizlist
     shows list of all known active wizard users
 zap

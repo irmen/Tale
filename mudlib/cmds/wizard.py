@@ -241,7 +241,7 @@ def do_teleport(player, parsed, **ctx):
     args = parsed.args
     teleport_self = parsed.verb == "teleport_to"
     if args[0].startswith("."):
-        # teleport player to a location somewhere in a module path
+        # teleport the wizard to a location somewhere in a module path
         path, objectname = args[0].rsplit(".", 1)
         if not objectname:
             raise ActionRefused("Invalid object path")
@@ -287,7 +287,8 @@ def teleport_to(player, location):
                          lang.capital(player.title), exclude_living=player)
     player.location.tell("%s jumps into the portal, which quickly closes behind %s." %
                          (lang.capital(player.subjective), player.objective), exclude_living=player)
-    player.move(location)
+    player.teleported_from = player.location  # used for the 'return' command
+    player.move(location, silent=True)
     print("You've been teleported.")
     print(player.look())
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
@@ -300,11 +301,35 @@ def teleport_someone_to_player(who, player):
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
-    who.move(player.location)
+    who.teleported_from = who.location  # used for the 'return' command
+    who.move(player.location, silent=True)
     player.location.tell("%s makes some gestures and a portal suddenly opens." %
                          lang.capital(player.title), exclude_living=who)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." %
                          lang.capital(who.title), exclude_living=who)
+
+
+@wizcmd("return")
+def do_return(player, parsed, **ctx):
+    """Return a player to the location where they were before a teleport."""
+    print = player.tell
+    if len(parsed.who) == 1:
+        who = parsed.who_order[0]
+    elif len(parsed.who) == 0:
+        who = player
+    previous_location = getattr(who, "teleported_from", None)
+    if previous_location:
+        print("returning", who, "to", previous_location)  # XXX
+        who.location.tell("Suddenly, a shimmering portal opens!")
+        room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
+        who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
+        del who.teleported_from
+        who.move(previous_location, silent=True)
+        who.location.tell("Suddenly, a shimmering portal opens!", exclude_living=who)
+        who.location.tell("%s tumbles out of it, and the portal quickly closes again." %
+                      lang.capital(who.title), exclude_living=who)
+    else:
+        print("Can't determine %s's previous location." % who.name)
 
 
 @wizcmd("reload")
