@@ -16,16 +16,14 @@ hall = Location("Main hall of the Tower of Magic",
 table = Item("table", "oak table", "A large dark table with a lot of cracks in its surface.")
 key = Item("key", "rusty key", "An old rusty key without a label.")
 
+
 @heartbeat
 class Drone(Monster):
     def heartbeat(self, ctx):
         if random.random() < 0.1:
             self.location.tell("The drone hums softly.")
 
-drone = Drone("drone", "n", "mindless drone", race="bot", description=
-              """
-              A stupid metallic drone. It just hovers here with no apparent reason.
-              """,)
+drone = Drone("drone", "n", "mindless drone", race="bot", description="A stupid metallic drone. It just hovers here with no apparent reason.")
 hall.init_inventory([table, key, drone])
 
 attic = Location("Tower attic",

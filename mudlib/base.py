@@ -106,7 +106,6 @@ class MudObject(object):
         pass
 
 
-
 class Item(MudObject):
     """
     Root class of all Items in the mud world. Items are physical objects.
@@ -415,7 +414,7 @@ class Exit(object):
 class Living(MudObject):
     """
     Root class of the living entities in the mud world.
-    Livings tend to have a heart beat 'tick' that makes them interact with the world (or a callback).
+    Livings sometimes have a heart beat 'tick' that makes them interact with the world.
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
@@ -718,6 +717,11 @@ class Door(Exit):
 
 
 def heartbeat(klass):
-    """decorator to use on a class to make it have a heartbeat"""
+    """
+    Decorator to use on a class to make it have a heartbeat.
+    Use sparingly as it is less efficient than using a deferred, because the driver
+    has to call all heartbeats every tick even though they do nothing yet.
+    With deferreds, the driver only calls a deferred at the time it is needed.
+    """
     klass._register_heartbeat = True
     return klass

@@ -5,16 +5,20 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
+import datetime
 
 class DummyDriver(object):
     heartbeats = set()
     exits = []
+    game_clock = datetime.datetime.now()
     def register_heartbeat(self, obj):
         self.heartbeats.add(obj)
     def unregister_heartbeat(self, obj):
         self.heartbeats.discard(obj)
     def register_exit(self, exit):
         self.exits.append(exit)
+    def deferred(self, activate, deferred, *vargs, **kwargs):
+        pass
 
 from mudlib.globals import mud_context
 mud_context.driver = DummyDriver()

@@ -431,15 +431,16 @@ def do_server(player, parsed, **ctx):
     print = player.tell
     driver = ctx["driver"]
     print("Server information:")
-    print("Python version: ", sys.version)
-    print("sys.maxsize: %d     sys.platform: %s" % (sys.maxsize, sys.platform))
-    print("Number of GC objects:", len(gc.get_objects()), "   gc counts:", gc.get_count())
-    print("Active threads:", threading.active_count(), "   Active players:", len(ctx["driver"].all_players()))
-    print("Heartbeat objects:", len(driver.heartbeat_objects))  # @todo: number of callouts?
-    started = driver.server_started
-    uptime = datetime.datetime.now() - started
+    realtime = datetime.datetime.now()
+    realtime = realtime.replace(microsecond=0)
+    uptime = realtime - driver.server_started
     hours, seconds = divmod(uptime.total_seconds(), 3600)
     minutes, seconds = divmod(seconds, 60)
-    print("Started:", driver.server_started.ctime(), "   uptime: %d:%02d:%02d" % (hours, minutes, seconds))
-    print("Game time:", driver.game_clock, "  Real time:", datetime.datetime.now())
-    print("Tick time: %.1f sec" % driver.SERVER_TICK_TIME, "  Game time vs real time: %.1fx" % driver.GAMETIME_TO_REALTIME)
+    sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
+    print("Python version: %d.%d.%d" % sys.version_info[:3], sixtyfour, "on", sys.platform)
+    print("Real time:", realtime, "  Uptime: %d:%02d:%02d" % (hours, minutes, seconds))
+    print("Game time:", driver.game_clock, "  (%.1fx real time)" % driver.GAMETIME_TO_REALTIME)
+    print("Number of GC objects:", len(gc.get_objects()), "  GC counts:", gc.get_count())
+    print("Threads:", threading.active_count(), "  Players:", len(ctx["driver"].all_players()), "  Heartbeats:", len(driver.heartbeat_objects), "  Deferreds:", len(driver.deferreds))
+    avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
+    print("Server loop tick: %.1f sec" % driver.SERVER_TICK_TIME, "  Duration: %.2f sec." % avg_loop_duration)

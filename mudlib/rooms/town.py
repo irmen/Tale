@@ -6,11 +6,13 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 import copy
 import random
+import datetime
 from ..base import Location, Exit, Door, Item, Container, heartbeat
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper, gem, worldclock
 from ..util import yell_to_nearby_locations
+from ..globals import mud_context
 from .. import lang
 
 square = Location("Essglen Town square",
@@ -69,16 +71,19 @@ class WizardTowerEntry(Exit):
 
 lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
 
-@heartbeat
+
 class TownCrier(NPC):
     def init(self):
-        self.beats_before_cry = 3
-    def heartbeat(self, ctx):
-        self.beats_before_cry -= 1
-        if self.beats_before_cry <= 0:
-            self.beats_before_cry = random.randint(10, 20)
-            self.tell_others("{Title} yells: welcome everyone!")
-            yell_to_nearby_locations(self.location, "welcome everyone!")
+        # note: this npc uses the deferred feature to yell stuff at certain moments/
+        # the blubbering idiot NPC uses a heartbeat mechanism (less efficient)
+        activate = mud_context.driver.game_clock + datetime.timedelta(seconds=5)
+        mud_context.driver.deferred(activate, self.do_cry, driver=mud_context.driver)
+
+    def do_cry(self, driver=None):
+        self.tell_others("{Title} yells: welcome everyone!")
+        yell_to_nearby_locations(self.location, "welcome everyone!")
+        activate = driver.game_clock + datetime.timedelta(seconds=random.randint(10,20) * driver.GAMETIME_TO_REALTIME)
+        driver.deferred(activate, self.do_cry, driver=driver)
 
 
 towncrier = TownCrier("laish", "f", "Laish the town crier",
@@ -87,11 +92,16 @@ towncrier = TownCrier("laish", "f", "Laish the town crier",
     """)
 towncrier.aliases = {"crier"}
 
+
 @heartbeat
 class VillageIdiot(NPC):
     def init(self):
         self.beats_before_drool = 4
+
     def heartbeat(self, ctx):
+        # note: this village idiot NPC uses a heartbeat mechanism to drool at certain moments.
+        # This is less efficient than using a deferred (as the town crier NPC does) because
+        # the driver has to call all heartbeats every tick even though they do nothing yet.
         self.beats_before_drool -= 1
         if self.beats_before_drool <= 0:
             self.beats_before_drool = random.randint(10, 20)
@@ -103,6 +113,7 @@ class VillageIdiot(NPC):
                 self.location.tell("%s drools on %s." % (title, target.title),
                     specific_targets={target}, specific_target_msg="%s drools on you." % title)
 
+
 idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     """
     This person's engine is running but there is nobody behind the wheel.
@@ -110,10 +121,7 @@ idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
     """)
 
-rat = Monster("rat", "n", race="rodent", description=
-    """
-    A filthy looking rat. Its whiskers tremble slightly as it peers back at you.
-    """,)
+rat = Monster("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
 
 ant = NPC("ant", "n", race="insect")
 

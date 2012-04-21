@@ -5,11 +5,13 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
+import collections
 import datetime
 import sys
 import time
 import os
 import threading
+import heapq
 import mudlib.globals       # don't import anything else from mudlib, see delayed_imports()
 try:
     import readline
@@ -105,9 +107,13 @@ class Driver(object):
     def __init__(self):
         self.heartbeat_objects = set()
         self.unbound_exits = []
-        self.server_started = datetime.datetime.now()
+        self.deferreds = []  # heapq
+        server_started = datetime.datetime.now()
+        self.server_started = server_started.replace(microsecond=0)
         self.player = None
         self.commands = Commands()
+        self.game_clock = self.GAMETIME_EPOCH
+        self.server_loop_durations = collections.deque(maxlen=10)
         mudlib.globals.mud_context.driver = self
         delayed_imports()
         mudlib.cmds.register_all(self.commands)
@@ -162,15 +168,17 @@ class Driver(object):
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         last_loop_time = last_server_tick = time.time()
         mudlib.globals.mud_context.player = self.player
-        mudlib.globals.mud_context.game_clock = self.game_clock
         while True:
             self.write_output()
             self.player_input_allowed.set()
             if time.time() - last_server_tick >= self.SERVER_TICK_TIME:
+                # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
                 self.server_tick()
-            loop_duration = time.time() - last_loop_time
-            # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
+                loop_duration_with_server_tick = time.time() - last_loop_time
+                self.server_loop_durations.append(loop_duration_with_server_tick)
+            else:
+                loop_duration = time.time() - last_loop_time
             try:
                 has_input = self.player.input_is_available.wait(max(0.01, self.SERVER_TICK_TIME - loop_duration))
             except KeyboardInterrupt:
@@ -204,12 +212,19 @@ class Driver(object):
         self.write_output()  # flush pending output at server shutdown.
 
     def server_tick(self):
-        # do everything that the server needs to do every tick
+        # Do everything that the server needs to do every tick.
         self.game_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
-        mudlib.globals.mud_context.game_clock = self.game_clock
+        # heartbeats
         ctx = {"driver": self, "game_clock": self.game_clock}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
+        # deferreds
+        if self.deferreds:
+            activation = self.deferreds[0][0]
+            if activation <= self.game_clock:
+                activation, deferred, vargs, kwargs = heapq.heappop(self.deferreds)
+                deferred(*vargs, **kwargs)
+        # buffered output
         self.write_output()
 
     def write_output(self):
@@ -309,6 +324,15 @@ class Driver(object):
     def register_exit(self, exit):
         if not exit.bound:
             self.unbound_exits.append(exit)
+
+    def deferred(self, activation, deferred, *vargs, **kwargs):
+        """
+        Register a deferred callable (optionally with arguments).
+        Note that the activation is time datetime.datetime *in game time*
+        (not real time!) when the deferred should trigger.
+        """
+        assert isinstance(activation, datetime.datetime)
+        heapq.heappush(self.deferreds, (activation, deferred, vargs, kwargs))
 
 
 class PlayerInputThread(threading.Thread):
