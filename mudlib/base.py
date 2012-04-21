@@ -11,6 +11,7 @@ import textwrap
 from . import lang
 from .errors import ActionRefused
 from .races import races
+from .globals import mud_context
 
 if sys.version_info < (3, 0):
     basestring_type = basestring
@@ -77,12 +78,33 @@ class MudObject(object):
             self.description = textwrap.dedent(description).strip() if description else ""
         except AttributeError:
             pass   # this can occur if someone made description into a property
+        if getattr(self, "_register_heartbeat", False):
+            # one way of setting this attribute is by using the @heartbeat decorator
+            self.register_heartbeat()
+        self.init()
+
+    def init(self):
+        """Secondary initialization/customization. You can easily override this in a subclass."""
+        pass
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x>" % (self.__class__.__module__, self.__class__.__name__, self.name, id(self))
 
     def destroy(self, ctx):
+        self.unregister_heartbeat()
+
+    def register_heartbeat(self):
+        """register this object with the driver to receive heartbeats"""
+        mud_context.driver.register_heartbeat(self)
+
+    def unregister_heartbeat(self):
+        """tell the driver to forget about this object for heartbeats"""
+        mud_context.driver.unregister_heartbeat(self)
+
+    def heartbeat(self, ctx):
+        # not automatically called, only if your object registered with the driver
         pass
+
 
 
 class Item(MudObject):
@@ -209,6 +231,7 @@ class Location(MudObject):
                 raise TypeError("can only add Living or Item")
 
     def destroy(self, ctx):
+        super(Location, self).destroy(ctx)
         for living in self.livings:
             if living.location is self:
                 living.location = _Limbo
@@ -444,6 +467,7 @@ class Living(MudObject):
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
     def destroy(self, ctx):
+        super(Living, self).destroy(ctx)
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
         self.location = None
@@ -451,7 +475,7 @@ class Living(MudObject):
             item.destroy(ctx)
         self.__inventory.clear()
         self.wiretaps.clear()
-        # @todo: remove heartbeat, deferred, attack status, etc.
+        # @todo: remove deferreds, attack status, etc.
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
@@ -594,6 +618,7 @@ class Container(Item):
         return item in self.__inventory
 
     def destroy(self, ctx):
+        super(Container, self).destroy(ctx)
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
@@ -693,3 +718,9 @@ class Door(Exit):
             raise ActionRefused("You can't unlock it.")
         else:
             raise ActionRefused("It's not locked.")
+
+
+def heartbeat(klass):
+    """decorator to use on a class to make it have a heartbeat"""
+    klass._register_heartbeat = True
+    return klass

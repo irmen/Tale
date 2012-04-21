@@ -4,7 +4,8 @@ The Wizard Tower, which is the place where Wizards start/log in
 Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from ..base import Location, Exit, Item
+import random
+from ..base import Location, Exit, Item, heartbeat
 from ..npc import Monster
 
 hall = Location("Main hall of the Tower of Magic",
@@ -15,8 +16,13 @@ hall = Location("Main hall of the Tower of Magic",
 table = Item("table", "oak table", "A large dark table with a lot of cracks in its surface.")
 key = Item("key", "rusty key", "An old rusty key without a label.")
 
+@heartbeat
+class Drone(Monster):
+    def heartbeat(self, ctx):
+        if random.random() < 0.1:
+            self.location.tell("The drone hums softly.")
 
-drone = Monster("drone", "n", "bot", "mindless drone",
+drone = Drone("drone", "n", "bot", "mindless drone",
               """
               A stupid metallic drone. It just hovers here with no apparent reason.
               """,)

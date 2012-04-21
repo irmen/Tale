@@ -5,10 +5,13 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import copy
-from ..base import Location, Exit, Door, Item, Container
+import random
+from ..base import Location, Exit, Door, Item, Container, heartbeat
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper, gem, worldclock
+from ..util import yell_to_nearby_locations
+from .. import lang
 
 square = Location("Essglen Town square",
     """
@@ -66,17 +69,47 @@ class WizardTowerEntry(Exit):
 
 lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
 
-towncrier = NPC("laish", "f", "Laish the town crier",
+@heartbeat
+class TownCrier(NPC):
+    def init(self):
+        self.beats_before_cry = 3
+    def heartbeat(self, ctx):
+        self.beats_before_cry -= 1
+        if self.beats_before_cry <= 0:
+            self.beats_before_cry = random.randint(10, 20)
+            self.tell_others("{Title} yells: welcome everyone!")
+            yell_to_nearby_locations(self.location, "welcome everyone!", None)
+
+
+towncrier = TownCrier("laish", "f", "Laish the town crier",
     """
     The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.
     """)
 towncrier.aliases = {"crier"}
-idiot = NPC("idiot", "m", "blubbering idiot",
+
+@heartbeat
+class VillageIdiot(NPC):
+    def init(self):
+        self.beats_before_drool = 4
+    def heartbeat(self, ctx):
+        self.beats_before_drool -= 1
+        if self.beats_before_drool <= 0:
+            self.beats_before_drool = random.randint(10, 20)
+            target = random.choice(list(self.location.livings))
+            if target is self:
+                self.location.tell("%s drools on %sself." % (lang.capital(self.title), self.objective))
+            else:
+                title = lang.capital(self.title)
+                self.location.tell("%s drools on %s." % (title, target.title),
+                    specific_targets={target}, specific_target_msg="%s drools on you." % title)
+
+idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     """
     This person's engine is running but there is nobody behind the wheel.
     He is a few beers short of a six-pack. Three ice bricks shy of an igloo.
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
     """)
+
 rat = Monster("rat", "n", "rodent", None,
     """
     A filthy looking rat. Its whiskers tremble slightly as it peers back at you.

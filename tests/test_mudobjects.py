@@ -5,6 +5,17 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
+
+class DummyDriver(object):
+    heartbeats = set()
+    def register_heartbeat(self, obj):
+        self.heartbeats.add(obj)
+    def unregister_heartbeat(self, obj):
+        self.heartbeats.discard(obj)
+
+from mudlib.globals import mud_context
+mud_context.driver = DummyDriver()
+
 from mudlib.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from mudlib.errors import SecurityViolation, ActionRefused
 from mudlib.npc import NPC, Monster
@@ -495,6 +506,7 @@ class TestDescriptions(unittest.TestCase):
         time.sleep(0.02)
         self.assertNotEqual(title1, watch.title)
         self.assertNotEqual(descr1, watch.description)
+
 
 class TestDestroy(unittest.TestCase):
     def test_destroy_base(self):

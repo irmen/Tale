@@ -103,11 +103,12 @@ class Driver(object):
     GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
 
     def __init__(self):
-        mudlib.globals.mud_context.driver = self
-        delayed_imports()
+        self.heartbeat_objects = set()
         self.server_started = datetime.datetime.now()
         self.player = None
         self.commands = Commands()
+        mudlib.globals.mud_context.driver = self
+        delayed_imports()
         mudlib.cmds.register_all(self.commands)
 
     def start(self, args):
@@ -199,6 +200,9 @@ class Driver(object):
         # do everything that the server needs to do every tick
         self.game_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
         mudlib.globals.mud_context.game_clock = self.game_clock
+        ctx = {"driver": self, "game_clock": self.game_clock}
+        for object in self.heartbeat_objects:
+            object.heartbeat(ctx)
         self.write_output()
 
     def write_output(self):
@@ -241,7 +245,7 @@ class Driver(object):
                     return True
                 elif parsed.verb in player_verbs:
                     func = player_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=player_verbs, world_time=self.game_clock)
+                    func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock)
                     return
                 else:
                     raise mudlib.soul.ParseError("That doesn't make much sense.")
@@ -289,6 +293,12 @@ class Driver(object):
         for _ in range(num_tics):
             self.server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
+
+    def register_heartbeat(self, mudobj):
+        self.heartbeat_objects.add(mudobj)
+
+    def unregister_heartbeat(self, mudobj):
+        self.heartbeat_objects.discard(mudobj)
 
 
 class PlayerInputThread(threading.Thread):

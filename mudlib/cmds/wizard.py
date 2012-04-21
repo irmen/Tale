@@ -427,18 +427,17 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 def do_server(player, parsed, **ctx):
     """Dump some server information."""
     print = player.tell
+    driver = ctx["driver"]
     print("Server information:")
     print("Python version: ", sys.version)
     print("sys.maxsize: %d     sys.platform: %s" % (sys.maxsize, sys.platform))
     print("Number of GC objects:", len(gc.get_objects()), "   gc counts:", gc.get_count())
     print("Active threads:", threading.active_count(), "   Active players:", len(ctx["driver"].all_players()))
-    started = ctx["driver"].server_started
+    print("Heartbeat objects:", len(driver.heartbeat_objects))  # @todo: number of callouts?
+    started = driver.server_started
     uptime = datetime.datetime.now() - started
     hours, seconds = divmod(uptime.total_seconds(), 3600)
     minutes, seconds = divmod(seconds, 60)
-    print("Started:", ctx["driver"].server_started.ctime(), "   uptime: %d:%02d:%02d" % (hours, minutes, seconds))
-    print("Game time:", ctx["driver"].game_clock, "  Real time:", datetime.datetime.now())
-    print("Tick time: %.1f sec" % ctx["driver"].SERVER_TICK_TIME, "  Game time vs real time: %.1fx" % ctx["driver"].GAMETIME_TO_REALTIME)
-
-    # ... number of heartbeat objects
-    # ... number of callouts
+    print("Started:", driver.server_started.ctime(), "   uptime: %d:%02d:%02d" % (hours, minutes, seconds))
+    print("Game time:", driver.game_clock, "  Real time:", datetime.datetime.now())
+    print("Tick time: %.1f sec" % driver.SERVER_TICK_TIME, "  Game time vs real time: %.1fx" % driver.GAMETIME_TO_REALTIME)
