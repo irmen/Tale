@@ -12,7 +12,7 @@ import functools
 import sys
 import threading
 import gc
-from ..errors import SecurityViolation, ParseError, ActionRefused, RetrySoulVerb
+from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import base
 from .. import lang
 from .. import rooms
@@ -33,7 +33,7 @@ def wizcmd(command, *aliases):
         @functools.wraps(func)
         def makewizcmd(player, parsed, **ctx):
             if not "wizard" in player.privileges:
-                raise SecurityViolation("Wizard privilege required for verb " + verb)
+                raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, **ctx)
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
@@ -304,9 +304,11 @@ def do_return(player, parsed, **ctx):
         who = parsed.who_order[0]
     elif len(parsed.who) == 0:
         who = player
+    else:
+        raise ActionRefused("You can only return one person at a time.")
     previous_location = getattr(who, "teleported_from", None)
     if previous_location:
-        print("returning", who, "to", previous_location)  # XXX
+        print("Returning", who.name, "to", previous_location.name)
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
         who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")

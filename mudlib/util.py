@@ -13,7 +13,6 @@ import os
 import time
 from . import lang
 from .errors import ParseError
-from . import rooms
 
 
 def roll_die(number=1, sides=6):
@@ -200,7 +199,7 @@ def get_banner():
         return None
 
 
-def yell_to_nearby_locations(source_location, message):
+def yell_to_nearby_locations(source_location, message, mudlib_rooms):
     """Yells a message to adjacent locations."""
     if source_location.exits:
         nearby_message = "Someone nearby is yelling: " + message
@@ -208,7 +207,7 @@ def yell_to_nearby_locations(source_location, message):
         for exit in source_location.exits.values():
             if exit.target in yelled_locations:
                 continue   # skip double locations (possible because there can be multiple exits to the same location)
-            exit.bind(rooms)
+            exit.bind(mudlib_rooms)
             if exit.target is not source_location:
                 exit.target.tell(nearby_message)
                 yelled_locations.add(exit.target)

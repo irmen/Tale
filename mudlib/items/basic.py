@@ -6,7 +6,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 
 from ..base import Item, Container
 from ..errors import ActionRefused
-from .. import lang, mud_context
+from ..globals import mud_context
 
 
 class TrashCan(Container):

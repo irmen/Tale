@@ -12,6 +12,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .. import rooms
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
@@ -505,10 +506,10 @@ def give_money(player, amount, recipient):
         player.tell("You don't have that amount of wealth.")
     else:
         #@ todo ask for confirmation to give away money
-        recipient.allow_give_money(player, amount)
-        player.money -= money
-        recipient.money += money
-        player.tell("You gave %s %s." % (recipient.title, util.money_display(money)))
+        #recipient.allow_give_money(player, amount)
+        player.money -= amount
+        recipient.money += amount
+        player.tell("You gave %s %s." % (recipient.title, util.money_display(amount)))
         player.tell_others("{Title} gave %s some money." % recipient.title)
 
 
@@ -697,7 +698,7 @@ def do_yell(player, parsed, **ctx):
         message += "!"
     print("You yell:", message)
     player.tell_others("{Title} yells: %s" % message)
-    util.yell_to_nearby_locations(player.location, message)  # yell this to adjacent locations as well
+    util.yell_to_nearby_locations(player.location, message, rooms)  # yell this to adjacent locations as well
 
 
 @cmd("say")

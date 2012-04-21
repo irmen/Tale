@@ -10,16 +10,12 @@ import sys
 import time
 import os
 import threading
-import mudlib.rooms
-import mudlib.player
-import mudlib.races
-import mudlib.soul
-import mudlib.util
-import mudlib.base
-import mudlib.errors
-import mudlib.cmds
+import mudlib.globals       # don't import anything else from mudlib, see delayed_imports()
 try:
     import readline
+except ImportError:
+    pass
+else:
     history = os.path.expanduser("~/.snakepit_history")
     readline.parse_and_bind("tab: complete")
     try:
@@ -32,12 +28,22 @@ try:
         readline.write_history_file(historyfile)
 
     atexit.register(save_history, history)
-except ImportError:
-    pass
 
 
 if sys.version_info < (3, 0):
     input = raw_input
+
+
+def delayed_imports():
+    # we can't do these imports in global scope because first,
+    # the global driver object in mudlib.globals.mud_context needs to be set.
+    import mudlib.errors
+    import mudlib.cmds
+    import mudlib.rooms
+    import mudlib.soul
+    import mudlib.races
+    import mudlib.player
+    import mudlib.util
 
 
 def create_player_from_info():
@@ -97,6 +103,8 @@ class Driver(object):
     GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
 
     def __init__(self):
+        mudlib.globals.mud_context.driver = self
+        delayed_imports()
         self.server_started = datetime.datetime.now()
         self.player = None
         self.commands = Commands()
@@ -145,9 +153,8 @@ class Driver(object):
         print = self.player.tell
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         last_loop_time = last_server_tick = time.time()
-        mudlib.mud_context.driver = self
-        mudlib.mud_context.player = self.player
-        mudlib.mud_context.game_clock = self.game_clock
+        mudlib.globals.mud_context.player = self.player
+        mudlib.globals.mud_context.game_clock = self.game_clock
         while True:
             self.write_output()
             self.player_input_allowed.set()
@@ -191,7 +198,7 @@ class Driver(object):
     def server_tick(self):
         # do everything that the server needs to do every tick
         self.game_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
-        mudlib.mud_context.game_clock = self.game_clock
+        mudlib.globals.mud_context.game_clock = self.game_clock
         self.write_output()
 
     def write_output(self):
