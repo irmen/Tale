@@ -115,8 +115,7 @@ class Item(MudObject):
     You can test for containment with 'in': item in bag (but the containment
     is always empty and so it will always return False for a regular Item)
     """
-    def __init__(self, name, title=None, description=None):
-        super(Item, self).__init__(name, title, description)
+    def init(self):
         self.contained_in = None
 
     def __contains__(self, item):
@@ -188,16 +187,14 @@ class Weapon(Item):
     An item that can be wielded by a Living (i.e. present in a weapon itemslot),
     and that can be used to attack another Living.
     """
-    def __init__(self, name, title=None, description=None):
-        super(Weapon, self).__init__(name, title, description)
+    pass
 
 
 class Armour(Item):
     """
     An item that can be worn by a Living (i.e. present in an armour itemslot)
     """
-    def __init__(self, name, title=None, description=None):
-        super(Armour, self).__init__(name, title, description)
+    pass
 
 
 class Location(MudObject):
@@ -597,8 +594,7 @@ class Container(Item):
     Allows insert and remove, and examine its contents, as opposed to an Item
     You can test for containment with 'in': item in bag
     """
-    def __init__(self, name, title=None, description=None):
-        super(Container, self).__init__(name, title, description)
+    def init(self):
         self.__inventory = set()  # override the frozenset() from Item to allow true containment here
 
     def init_inventory(self, items):

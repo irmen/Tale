@@ -31,8 +31,7 @@ class Monster(NPC):
     Special kind of NPC: a monster can be hostile and attack other Livings.
     Usually has Weapons, Armour, and attack actions.
     """
-    def __init__(self, name, gender, race, title=None, description=None):
-        super(Monster, self).__init__(name, gender, title, description, race)
+    def init(self):
         self.aggressive = True
 
     def insert(self, item, actor):

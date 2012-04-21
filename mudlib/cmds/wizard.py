@@ -391,6 +391,8 @@ def do_debug(player, parsed, **ctx):
     print(repr(obj))
     for varname, value in sorted(vars(obj).items()):
         print(".%s: %r" % (varname, value))
+    if obj in ctx["driver"].heartbeat_objects:
+        print("%s receives heartbeats." % obj.name)
 
 
 @wizcmd("set")

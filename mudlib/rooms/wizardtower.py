@@ -22,7 +22,7 @@ class Drone(Monster):
         if random.random() < 0.1:
             self.location.tell("The drone hums softly.")
 
-drone = Drone("drone", "n", "bot", "mindless drone",
+drone = Drone("drone", "n", "mindless drone", race="bot", description=
               """
               A stupid metallic drone. It just hovers here with no apparent reason.
               """,)

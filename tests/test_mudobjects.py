@@ -34,8 +34,8 @@ class Wiretap(object):
 
 
 class MsgTraceNPC(NPC):
-    def __init__(self, name, gender, race):
-        super(MsgTraceNPC, self).__init__(name, gender, race=race)
+    def init(self):
+        self._init_called=True
         self.clearmessages()
     def clearmessages(self):
         self.messages = []
@@ -156,6 +156,7 @@ Present: julie, rat"""
 
     def test_tell(self):
         rat = MsgTraceNPC("rat", "n", "rodent")
+        self.assertTrue(rat._init_called, "init() must be called from __init__")
         julie = MsgTraceNPC("julie", "f", "human")
         hall = Location("hall")
         hall.livings = [rat, julie]
@@ -628,7 +629,7 @@ class TestItem(unittest.TestCase):
     def test_move(self):
         hall = Location("hall")
         person = Living("person", "m")
-        monster = Monster("dragon", "f", "dragon")
+        monster = Monster("dragon", "f", race="dragon")
         key = Item("key")
         hall.init_inventory([person, key])
         wiretap_hall = Wiretap()

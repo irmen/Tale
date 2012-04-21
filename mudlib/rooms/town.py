@@ -110,7 +110,7 @@ idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
     """)
 
-rat = Monster("rat", "n", "rodent", None,
+rat = Monster("rat", "n", race="rodent", description=
     """
     A filthy looking rat. Its whiskers tremble slightly as it peers back at you.
     """,)

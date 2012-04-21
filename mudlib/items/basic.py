@@ -10,8 +10,7 @@ from ..globals import mud_context
 
 
 class TrashCan(Container):
-    def __init__(self, name, title=None, description=None):
-        super(TrashCan, self).__init__(name, title, description)
+    def init(self):
         self.opened = False
 
     def allow_move(self, actor):
