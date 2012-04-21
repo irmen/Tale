@@ -77,7 +77,7 @@ class TrashCan(Container):
 class WorldClock(Item):
     @property
     def description(self):
-        return "The clock reads " + str(mud_context.world_clock)
+        return "The clock reads " + str(mud_context.game_clock)
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")

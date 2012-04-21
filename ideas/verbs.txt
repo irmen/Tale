@@ -2,8 +2,6 @@ ADMIN STUFF
 -----------
 broadcast
     like shout, except overrides all blocking
-server
-    gets running stats from the server
 anchor, unanchor
     anchor something so that it cannot leave its location
 godmode

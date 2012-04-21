@@ -5,10 +5,13 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 from __future__ import print_function, division
+import datetime
 import inspect
 import copy
 import functools
 import sys
+import threading
+import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused, RetrySoulVerb
 from .. import base
 from .. import lang
@@ -406,3 +409,24 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
         print("Field set: %s.%s = %r" % (name, field, value))
     else:
         raise ActionRefused("Data type mismatch, expected %s." % expected_type)
+
+
+@wizcmd("server")
+def do_server(player, parsed, **ctx):
+    """Dump some server information."""
+    print = player.tell
+    print("Server information:")
+    print("Python version: ", sys.version)
+    print("sys.maxsize: %d     sys.platform: %s" % (sys.maxsize, sys.platform))
+    print("Number of GC objects:", len(gc.get_objects()), "   gc counts:", gc.get_count())
+    print("Active threads:", threading.active_count(), "   Active players:", len(ctx["driver"].all_players()))
+    started = ctx["driver"].server_started
+    uptime = datetime.datetime.now() - started
+    hours, seconds = divmod(uptime.total_seconds(), 3600)
+    minutes, seconds = divmod(seconds, 60)
+    print("Started:", ctx["driver"].server_started.ctime(), "   uptime: %d:%02d:%02d" % (hours, minutes, seconds))
+    print("Game time:", ctx["driver"].game_clock, "  Real time:", datetime.datetime.now())
+    print("Tick time: %.1f sec" % ctx["driver"].SERVER_TICK_TIME, "  Game time vs real time: %.1fx" % ctx["driver"].GAMETIME_TO_REALTIME)
+
+    # ... number of heartbeat objects
+    # ... number of callouts

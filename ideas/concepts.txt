@@ -1,12 +1,18 @@
+Concepts for single player IF (and possibly MUD):
+-------------------------------------------------
+Quests / Tasks / To-do list.
+
+
+
+Concepts that could be implemented for a MUD (but not really for single player IF):
+-----------------------------------------------------------------------------------
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
 Bulletin boards.
 Language system: speak/understand different languages
 Pets: tame/befriend/abandon (charisma/luck)
 Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
-Follow other creatures: follow/evade
+Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
 Party: team up with other players and share quest and combat experience
-Time: 1 second real time = 5 seconds game clock time
-Time: 1 action = 1 minute game time except when in combat, then every action doesn't advance time. It might cost one or more rounds of attack though.
 Skills: stealth, lockpicking, ...
 Vendors and shops: stock, sell stuff, buy stuff, haggle?
 
@@ -19,5 +25,7 @@ Wiretaps: as soon as invisible objects and room message notifications are implem
 
 DAMAGE TYPES
 ------------
-blunt | blade | knife | water | shock | cold | heat | gas | acid | magic | poison | disease | trauma | pierce | psionic | anoxia | deathray | emotional | sonic | emp | other | karma | drama | overpressure | underpressure | inertia
+blunt, blade, knife, water, shock, cold, heat, gas, acid, magic, poison,
+disease, trauma, pierce, psionic, anoxia, deathray, emotional, sonic,
+emp, other, karma, drama, overpressure, underpressure, inertia
 

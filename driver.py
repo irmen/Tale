@@ -97,6 +97,7 @@ class Driver(object):
     GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
 
     def __init__(self):
+        self.server_started = datetime.datetime.now()
         self.player = None
         self.commands = Commands()
         mudlib.cmds.register_all(self.commands)
@@ -131,7 +132,7 @@ class Driver(object):
         self.player_input_thread = PlayerInputThread(player, self.player_input_allowed)
         self.player_input_thread.setDaemon(True)
         self.player_input_thread.start()
-        self.world_clock = self.GAMETIME_EPOCH
+        self.game_clock = self.GAMETIME_EPOCH
         self.main_loop()
 
     def move_player_to_start_room(self):
@@ -146,7 +147,7 @@ class Driver(object):
         last_loop_time = last_server_tick = time.time()
         mudlib.mud_context.driver = self
         mudlib.mud_context.player = self.player
-        mudlib.mud_context.world_clock = self.world_clock
+        mudlib.mud_context.game_clock = self.game_clock
         while True:
             self.write_output()
             self.player_input_allowed.set()
@@ -189,8 +190,8 @@ class Driver(object):
 
     def server_tick(self):
         # do everything that the server needs to do every tick
-        self.world_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
-        mudlib.mud_context.world_clock = self.world_clock
+        self.game_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
+        mudlib.mud_context.game_clock = self.game_clock
         self.write_output()
 
     def write_output(self):
@@ -233,7 +234,7 @@ class Driver(object):
                     return True
                 elif parsed.verb in player_verbs:
                     func = player_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=player_verbs, world_time=self.world_clock)
+                    func(self.player, parsed, driver=self, verbs=player_verbs, world_time=self.game_clock)
                     return
                 else:
                     raise mudlib.soul.ParseError("That doesn't make much sense.")
