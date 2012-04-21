@@ -484,7 +484,7 @@ class Living(MudObject):
         """
         formats = {"title": self.title, "Title": lang.capital(self.title)}
         for msg in messages:
-            msg = msg.format_map(formats)
+            msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
     def move(self, target_location, actor=None, silent=False):
