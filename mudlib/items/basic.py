@@ -11,6 +11,7 @@ from ..globals import mud_context
 
 class TrashCan(Container):
     def init(self):
+        super(TrashCan, self).init()
         self.opened = False
 
     def allow_move(self, actor):
