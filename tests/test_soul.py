@@ -5,11 +5,28 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 """
 
 import unittest
+import datetime
 import mudlib.player
 import mudlib.npc
 import mudlib.soul
 import mudlib.base
 import mudlib.errors
+import mudlib.globals
+
+class DummyDriver(object):
+    heartbeats = set()
+    exits = []
+    game_clock = datetime.datetime.now()
+    def register_heartbeat(self, obj):
+        self.heartbeats.add(obj)
+    def unregister_heartbeat(self, obj):
+        self.heartbeats.discard(obj)
+    def register_exit(self, exit):
+        self.exits.append(exit)
+    def defer(self, due, owner, callable, *vargs, **kwargs):
+        pass
+
+mudlib.globals.mud_context.driver = DummyDriver()
 
 class TestSoul(unittest.TestCase):
     def testSpacify(self):

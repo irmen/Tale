@@ -369,6 +369,7 @@ class TestNPC(unittest.TestCase):
                     """
                     She's quite the looker.
                     """)
+        self.assertFalse(julie.aggressive)
         self.assertEqual("julie", julie.name)
         self.assertEqual("attractive Julie", julie.title)
         self.assertEqual("She's quite the looker.", julie.description)
@@ -381,6 +382,8 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
+        dragon = Monster("dragon","f",race="dragon")
+        self.assertTrue(dragon. aggressive)
 
 
 class TestPlayer(unittest.TestCase):

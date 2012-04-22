@@ -38,8 +38,6 @@ Exit
   |
   +-- Door
 
-Effect
-
 
 Every object that can hold other objects does so in its "inventory" (a set).
 You can't access it directly, object.inventory() returns a frozenset copy of it.
@@ -206,6 +204,17 @@ class Location(MudObject):
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
+
+    def __getstate__(self):
+        # can't serialize the wiretaps because it's a weakset. Too bad, just skip them.
+        state = dict(self.__dict__)
+        del state["wiretaps"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        # restore the wireteaps to an empty weakset
+        self.wiretaps = weakref.WeakSet()
 
     def init_inventory(self, objects):
         """Set the location's initial item and livings 'inventory'"""
@@ -414,7 +423,6 @@ class Living(MudObject):
     They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name, gender, title=None, description=None, race=None):
-        super(Living, self).__init__(name, title, description)
         # override the language help attributes inherited from the base object:
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
@@ -431,6 +439,18 @@ class Living(MudObject):
             self.set_race(race)
         self.__inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
+        super(Living, self).__init__(name, title, description)
+
+    def __getstate__(self):
+        # can't serialize the wiretaps because it's a weakset. Too bad, just skip them.
+        state = dict(self.__dict__)
+        del state["wiretaps"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        # restore the wireteaps to an empty weakset
+        self.wiretaps = weakref.WeakSet()
 
     def __contains__(self, item):
         return item in self.__inventory
@@ -624,16 +644,6 @@ class Container(Item):
         self.__inventory.remove(item)
         item.contained_in = None
         return self
-
-
-class Effect(object):
-    """
-    An abstract effect or alteration that is present on or in another object.
-    This could be a curse or buff, or some other spell effect such as darkness.
-    """
-    def __init__(self, name, description=None):
-        self.name = name
-        self.description = description
 
 
 class Door(Exit):

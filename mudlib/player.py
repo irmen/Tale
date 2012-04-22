@@ -25,14 +25,30 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
+        self.init_nonserializables()
+
+    def init_nonserializables(self):
         self.installed_wiretaps = set()
-        self.__output = []
-        self.__input = queue.Queue()
+        self._output = []
+        self._input = queue.Queue()
         self.input_is_available = Event()
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
             self.name, id(self), ",".join(self.privileges) or "-")
+
+    def __getstate__(self):
+        state = super(Player, self).__getstate__()
+        # skip all non-serializable things
+        del state["installed_wiretaps"]
+        del state["_output"]
+        del state["_input"]
+        del state["input_is_available"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        self.init_nonserializables()
 
     def set_title(self, title, includes_name_param=False):
         if includes_name_param:
@@ -63,13 +79,13 @@ class Player(base.Living):
         which means you can easily do: print=player.tell, and use print(..) everywhere as usual.
         """
         super(Player, self).tell(*messages)
-        self.__output.append(" ".join(str(msg) for msg in messages))
-        self.__output.append("\n")
+        self._output.append(" ".join(str(msg) for msg in messages))
+        self._output.append("\n")
 
     def get_output_lines(self):
         """gets the accumulated output lines and clears the buffer"""
-        lines = self.__output
-        self.__output = []
+        lines = self._output
+        self._output = []
         return lines
 
     def look(self, short=False):
@@ -104,12 +120,12 @@ class Player(base.Living):
         self.input_is_available.clear()
         try:
             while True:
-                result.append(self.__input.get_nowait())
+                result.append(self._input.get_nowait())
         except queue.Empty:
             return result
 
     def input(self, cmd):
-        self.__input.put(cmd)
+        self._input.put(cmd)
         self.input_is_available.set()
 
 
