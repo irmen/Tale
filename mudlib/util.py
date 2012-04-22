@@ -211,16 +211,15 @@ def get_banner():
         return None
 
 
-def yell_to_nearby_locations(source_location, message):
+def message_nearby_locations(source_location, message):
     """Yells a message to adjacent locations."""
     if source_location.exits:
-        nearby_message = "Someone nearby is yelling: " + message
         yelled_locations = set()
         for exit in source_location.exits.values():
             if exit.target in yelled_locations:
                 continue   # skip double locations (possible because there can be multiple exits to the same location)
             if exit.target is not source_location:
-                exit.target.tell(nearby_message)
+                exit.target.tell(message)
                 yelled_locations.add(exit.target)
                 for direction, return_exit in exit.target.exits.items():
                     if return_exit.target is source_location:

@@ -7,8 +7,18 @@ import datetime
 import unittest
 from mudlib import util
 from mudlib.errors import ParseError
-from mudlib.base import Item, Container, Location
+from mudlib.base import Item, Container, Location, Exit
 from mudlib.player import Player
+
+
+class Wiretap(object):
+    def __init__(self):
+        self.msgs=[]
+    def tell(self, msg):
+        self.msgs.append(msg)
+    def clear(self):
+        self.msgs=[]
+
 
 class TestUtil(unittest.TestCase):
     def test_print_location(self):
@@ -136,6 +146,31 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("2 hours, 3 minutes, and 4 seconds", util.duration_display(datetime.timedelta(hours=2, minutes=3, seconds=4)))
         self.assertEqual("2 minutes", util.duration_display(datetime.timedelta(minutes=2)))
         self.assertEqual("2 minutes and 1 second", util.duration_display(datetime.timedelta(minutes=2, seconds=1)))
+
+    def test_message_nearby_location(self):
+        plaza = Location("plaza")
+        road = Location("road")
+        house = Location("house")
+        attic = Location("attic")
+        plaza.exits["north"] = Exit(road, "road leads north")
+        road.exits["south"] = Exit(plaza, "plaza to the south")
+        plaza.exits["door"] = Exit(house, "door to a house")
+        house.exits["door"] = Exit(plaza, "door to the plaza")
+        house.exits["ladder"] = Exit(attic, "dusty attic")
+        attic.exits["ladder"] = Exit(house, "the house")
+        wt_plaza = Wiretap()
+        wt_road = Wiretap()
+        wt_house = Wiretap()
+        wt_attic = Wiretap()
+        plaza.wiretaps.add(wt_plaza)
+        road.wiretaps.add(wt_road)
+        house.wiretaps.add(wt_house)
+        attic.wiretaps.add(wt_attic)
+        util.message_nearby_locations(plaza, "boing")
+        self.assertEqual([], wt_plaza.msgs, "location self shouldn't get the broadcast message")
+        self.assertEqual(["boing", "The sound is coming from the south."], wt_road.msgs, "road should give sound direction")
+        self.assertEqual(["boing", "You can't hear where the sound is coming from."], wt_house.msgs, "in the house you can't locate the sound direction")
+        self.assertEqual([], wt_attic.msgs, "the attic is too far away to receive msgs")
 
 
 if __name__ == '__main__':

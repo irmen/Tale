@@ -11,7 +11,7 @@ from ..base import Location, Exit, Door, Item, Container, heartbeat
 from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper, gem, worldclock
-from ..util import yell_to_nearby_locations
+from ..util import message_nearby_locations
 from ..globals import mud_context
 from .. import lang
 
@@ -81,7 +81,7 @@ class TownCrier(NPC):
 
     def do_cry(self, driver=None):
         self.tell_others("{Title} yells: welcome everyone!")
-        yell_to_nearby_locations(self.location, "welcome everyone!")
+        message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
         due = driver.game_clock + datetime.timedelta(seconds=random.randint(10,20) * driver.GAMETIME_TO_REALTIME)
         mud_context.driver.defer(due, self, self.do_cry)
 
