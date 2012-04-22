@@ -336,6 +336,7 @@ class Driver(object):
 
     def do_save(self, player):
         state = {
+            "version": mudlib.globals.GAME_VERSION,
             "player": self.player,
             "deferreds": self.deferreds,
             "game_clock": self.game_clock,
@@ -359,6 +360,10 @@ class Driver(object):
             print(type(x).__name__, x)
             raise SystemExit(10)
         else:
+            if state["version"] != mudlib.globals.GAME_VERSION:
+                print("This saved game data was from a different version of the game and cannot be used.")
+                print("(Current game version: %s  Saved game data version: %s)" % (mudlib.globals.GAME_VERSION, state["version"]))
+                raise SystemExit(10)
             self.player = state["player"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["game_clock"]
