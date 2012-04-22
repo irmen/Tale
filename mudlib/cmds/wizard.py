@@ -444,3 +444,20 @@ def do_server(player, parsed, **ctx):
     print("Threads:", threading.active_count(), "  Players:", len(ctx["driver"].all_players()), "  Heartbeats:", len(driver.heartbeat_objects), "  Deferreds:", len(driver.deferreds))
     avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
     print("Server loop tick: %.1f sec" % driver.SERVER_TICK_TIME, "  Duration: %.2f sec." % avg_loop_duration)
+
+
+@wizcmd("events")
+def do_events(player, parsed, **ctx):
+    """Dump pending events."""
+    print = player.tell
+    driver = ctx["driver"]
+    print("Pending events overview. Server tick is %.1f sec." % driver.SERVER_TICK_TIME)
+    print("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
+    for hb in driver.heartbeat_objects:
+        print(" ", hb)
+    print()
+    print("Deferreds (%d):" % len(driver.deferreds), "   (server tick: %.1f sec)" % driver.SERVER_TICK_TIME)
+    print("  due     | function         | owner")
+    for d in driver.deferreds:
+        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / driver.GAMETIME_TO_REALTIME))
+        print("  %-7s | %-16s | %s" % (due, d.callable.__name__, d.owner))

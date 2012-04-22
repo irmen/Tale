@@ -35,6 +35,8 @@ else:
 if sys.version_info < (3, 0):
     input = raw_input
 
+Deferred = collections.namedtuple("Deferred", "due,owner,callable,vargs,kwargs")
+
 
 def delayed_imports():
     # we can't do these imports in global scope because first,
@@ -220,10 +222,10 @@ class Driver(object):
             object.heartbeat(ctx)
         # deferreds
         if self.deferreds:
-            activation = self.deferreds[0][0]
-            if activation <= self.game_clock:
-                activation, deferred, vargs, kwargs = heapq.heappop(self.deferreds)
-                deferred(*vargs, **kwargs)
+            deferred = self.deferreds[0]
+            if deferred.due <= self.game_clock:
+                deferred = heapq.heappop(self.deferreds)
+                deferred.callable(*deferred.vargs, **deferred.kwargs)
         # buffered output
         self.write_output()
 
@@ -325,14 +327,15 @@ class Driver(object):
         if not exit.bound:
             self.unbound_exits.append(exit)
 
-    def deferred(self, activation, deferred, *vargs, **kwargs):
+    def defer(self, due, owner, callable, *vargs, **kwargs):
         """
         Register a deferred callable (optionally with arguments).
-        Note that the activation is time datetime.datetime *in game time*
+        Note that the due time is time datetime.datetime *in game time*
         (not real time!) when the deferred should trigger.
         """
-        assert isinstance(activation, datetime.datetime)
-        heapq.heappush(self.deferreds, (activation, deferred, vargs, kwargs))
+        assert isinstance(due, datetime.datetime)
+        assert due >= self.game_clock
+        heapq.heappush(self.deferreds, Deferred(due, owner, callable, vargs, kwargs))
 
 
 class PlayerInputThread(threading.Thread):

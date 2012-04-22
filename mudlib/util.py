@@ -17,10 +17,12 @@ from .errors import ParseError
 
 if sys.version_info < (3, 0):
     basestring_type = basestring
+
     def next_iter(iterable):
         return iterable.next()
 else:
     basestring_type = str
+
     def next_iter(iterable):
         return next(iterable)
 
@@ -296,5 +298,3 @@ def duration_display(duration):
     elif secs > 1:
         result.append("%d seconds" % secs)
     return lang.join(result)
-
-

@@ -17,7 +17,7 @@ class DummyDriver(object):
         self.heartbeats.discard(obj)
     def register_exit(self, exit):
         self.exits.append(exit)
-    def deferred(self, activate, deferred, *vargs, **kwargs):
+    def defer(self, due, owner, callable, *vargs, **kwargs):
         pass
 
 from mudlib.globals import mud_context
