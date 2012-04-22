@@ -107,6 +107,7 @@ class TestSerializing(unittest.TestCase):
         x=serializecycle(m)
         self.assert_base_attrs(x)
         self.assertTrue(x.aggressive)
+        self.assertIsNotNone(x.wiretaps)
     def test_player_and_soul(self):
         o=soul.Soul()
         x=serializecycle(o)
@@ -117,6 +118,7 @@ class TestSerializing(unittest.TestCase):
         x=serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42,x.money)
+        self.assertIsNotNone(x.wiretaps)
 
 
 if __name__ == '__main__':

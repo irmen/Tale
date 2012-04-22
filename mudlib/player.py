@@ -47,7 +47,7 @@ class Player(base.Living):
         return state
 
     def __setstate__(self, state):
-        self.__dict__ = state
+        super(Player, self).__setstate__(state)
         self.init_nonserializables()
 
     def set_title(self, title, includes_name_param=False):

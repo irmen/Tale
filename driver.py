@@ -140,27 +140,32 @@ class Driver(object):
         banner = mudlib.util.get_banner()
         if banner:
             print("\n" + banner + "\n\n")
-        choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
-        if choice == "w":
-            player = create_default_wizard()
-        elif choice == "p":
-            player = create_default_player()
+        choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
+        if choice == "y":
+            self.load_saved_game()
+            self.player.tell(self.player.look())
         else:
-            player = create_player_from_info()
-        self.player = player
-        self.move_player_to_start_room()
-        self.player.tell("\nWelcome, %s.\n" % self.player.title)
-        motd, mtime = mudlib.util.get_motd()
-        if motd:
-            self.player.tell("Message-of-the-day, last modified on %s:" % mtime)
-            self.player.tell(motd + "\n\n")
-        self.player.tell(self.player.look())
+            choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
+            if choice == "w":
+                player = create_default_wizard()
+            elif choice == "p":
+                player = create_default_player()
+            else:
+                player = create_player_from_info()
+            self.game_clock = self.GAMETIME_EPOCH
+            self.player = player
+            self.move_player_to_start_room()
+            self.player.tell("\nWelcome, %s.\n" % self.player.title)
+            motd, mtime = mudlib.util.get_motd()
+            if motd:
+                self.player.tell("Message-of-the-day, last modified on %s:" % mtime)
+                self.player.tell(motd + "\n\n")
+            self.player.tell(self.player.look())
         self.write_output()
         self.player_input_allowed = threading.Event()
-        self.player_input_thread = PlayerInputThread(player, self.player_input_allowed)
+        self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
         self.player_input_thread.setDaemon(True)
         self.player_input_thread.start()
-        self.game_clock = self.GAMETIME_EPOCH
         self.main_loop()
 
     def move_player_to_start_room(self):
@@ -170,11 +175,10 @@ class Driver(object):
             self.player.move(mudlib.rooms.STARTLOCATION_PLAYER)
 
     def main_loop(self):
-        print = self.player.tell
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         last_loop_time = last_server_tick = time.time()
-        mudlib.globals.mud_context.player = self.player
         while True:
+            mudlib.globals.mud_context.player = self.player
             self.write_output()
             self.player_input_allowed.set()
             if time.time() - last_server_tick >= self.SERVER_TICK_TIME:
@@ -188,7 +192,7 @@ class Driver(object):
             try:
                 has_input = self.player.input_is_available.wait(max(0.01, self.SERVER_TICK_TIME - loop_duration))
             except KeyboardInterrupt:
-                print("\n* break: Use <quit> if you want to quit.")
+                self.player.tell("\n* break: Use <quit> if you want to quit.")
                 continue
             last_loop_time = time.time()
             if has_input:
@@ -198,23 +202,26 @@ class Driver(object):
                             self.process_player_input(cmd)
                         except mudlib.soul.UnknownVerbException as x:
                             if x.verb in directions:
-                                print("You can't go in that direction.")
+                                self.player.tell("You can't go in that direction.")
                             else:
-                                print("The verb %s is unrecognized." % x.verb)
+                                self.player.tell("The verb %s is unrecognized." % x.verb)
                         except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
-                            print(str(x))
+                            self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    print("\n* break: Use <quit> if you want to quit.")
+                    self.player.tell("\n* break: Use <quit> if you want to quit.")
                 except EOFError:
                     continue
                 except mudlib.errors.SessionExit:
-                    print("Exiting...")
+                    self.player.tell("Exiting...")
                     self.player_input_thread.join()
+                    choice = input("Would you like to save your progress? ").strip()
+                    if choice in ("y", "yes"):
+                        self.do_save(self.player)
                     break
                 except Exception:
                     import traceback
-                    print("* internal error:")
-                    print(traceback.format_exc())
+                    self.player.tell("* internal error:")
+                    self.player.tell(traceback.format_exc())
         self.write_output()  # flush pending output at server shutdown.
 
     def server_tick(self):
@@ -341,6 +348,26 @@ class Driver(object):
         with open("snakepit_savegame.bin", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
         player.tell("Game saved. Game time:", self.game_clock)
+
+    def load_saved_game(self):
+        try:
+            with open("snakepit_savegame.bin", "rb") as savegame:
+                state = pickle.load(savegame)
+        except (IOError, pickle.PickleError) as x:
+            print("There was a problem loading the saved game data:")
+            print(type(x).__name__, x)
+            raise SystemExit(10)
+        else:
+            self.player = state["player"]
+            self.deferreds = state["deferreds"]
+            self.game_clock = state["game_clock"]
+            self.GAMETIME_EPOCH = state["gametime_epoch"]
+            self.GAMETIME_TO_REALTIME = state["gametime_to_rt"]
+            self.heartbeat_objects = state["heartbeats"]
+            self.SERVER_TICK_TIME = state["server_tick_time"]
+            mudlib.rooms.STARTLOCATION_PLAYER = state["start_player"]
+            mudlib.rooms.STARTLOCATION_WIZARD = state["start_wizard"]
+            self.player.tell("Game loaded. Game time:", self.game_clock)
 
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)

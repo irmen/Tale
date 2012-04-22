@@ -1086,3 +1086,9 @@ def do_flee(player, parsed, **ctx):
 def do_save(player, parsed, **ctx):
     """Save your game."""
     ctx["driver"].do_save(player)
+
+@cmd("load")
+def do_load(player, parsed, **ctx):
+    """Load a previously saved game."""
+    player.tell("If you want to reload a previously saved game, please quit and restart")
+    player.tell("the game. During startup, select the option to start from a saved game.")
