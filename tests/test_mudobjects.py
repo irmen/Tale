@@ -648,19 +648,17 @@ class TestItem(unittest.TestCase):
         person.wiretaps.add(wiretap_person)
         self.assertTrue(person in hall)
         self.assertTrue(key in hall)
-        with self.assertRaises(AssertionError):
-            key.move(person, person, person)
         key.contained_in = person   # hack to force move to actually check the source container
         with self.assertRaises(KeyError):
-            key.move(person, person, person)
+            key.move(person, person)
         key.contained_in = hall   # put it back as it was
-        key.move(hall, person, person)
+        key.move(person, person)
         self.assertFalse(key in hall)
         self.assertTrue(key in person)
         self.assertEqual([], wiretap_hall.msgs, "item.move() should be silent")
         self.assertEqual([], wiretap_person.msgs, "item.move() should be silent")
         with self.assertRaises(ActionRefused) as x:
-            key.move(person, monster, person)
+            key.move(monster, person)
         self.assertTrue("not a good idea" in str(x.exception))
     def test_lang(self):
         thing = Item("thing")
@@ -689,7 +687,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(hall, key.contained_in)
         self.assertEqual(hall, key.location)
         self.assertEqual(hall, backpack.location)
-        key.move(hall, backpack, person)
+        key.move(backpack, person)
         self.assertEqual(backpack, key.contained_in)
         self.assertEqual(hall, key.location)
 

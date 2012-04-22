@@ -25,11 +25,13 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
+        self._output = []
+        self.score = 0
+        self.turns = 0
         self.init_nonserializables()
 
     def init_nonserializables(self):
         self.installed_wiretaps = set()
-        self._output = []
         self._input = queue.Queue()
         self.input_is_available = Event()
 
@@ -41,7 +43,6 @@ class Player(base.Living):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things
         del state["installed_wiretaps"]
-        del state["_output"]
         del state["_input"]
         del state["input_is_available"]
         return state
@@ -127,6 +128,7 @@ class Player(base.Living):
     def input(self, cmd):
         self._input.put(cmd)
         self.input_is_available.set()
+        self.turns += 1
 
 
 class Wiretap(object):

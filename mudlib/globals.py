@@ -24,3 +24,5 @@ class __MudContextProxy(object):
 
 
 mud_context = __MudContextProxy()
+
+MUD_MAX_SCORE = 100  # arbitrary

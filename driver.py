@@ -143,6 +143,7 @@ class Driver(object):
         choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
         if choice == "y":
             self.load_saved_game()
+            self.player.tell("")
             self.player.tell(self.player.look())
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()

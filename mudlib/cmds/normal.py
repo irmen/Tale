@@ -14,6 +14,7 @@ from .. import races
 from .. import util
 from .. import base
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
+from ..globals import MUD_MAX_SCORE
 
 all_commands = {}
 abbreviations = {}   # will be injected
@@ -133,7 +134,7 @@ def do_drop(player, parsed, **ctx):
         refused = []
         for item in items:
             try:
-                item.move(container, player.location, player)
+                item.move(player.location, player)
                 if container is not player and container in player:
                     print_item_removal(player, item, container)
             except ActionRefused as x:
@@ -201,7 +202,7 @@ def do_empty(player, parsed, **ctx):
         except ActionRefused as x:
             print(str(x))
         else:
-            item.move(container, target, player)
+            item.move(target, player)
             items_moved.append(item.title)
     if items_moved:
         itemnames = lang.join(items_moved)
@@ -245,14 +246,14 @@ If you're not carrying the item, you will first pick it up."""
         try:
             if item in player:
                 # simply use the item from the player's inventory
-                item.move(player, where, player)
+                item.move(where, player)
                 inventory_items.append(item)
             elif item in player.location:
                 # first take the item from the room, then move it to the target location
-                item.move(player.location, player, player)
+                item.move(player, player)
                 print("You take %s." % item.title)
                 player.tell_others("{Title} takes %s." % item.title)
-                item.move(player, where, player)
+                item.move(where, player)
                 print("You put it in the %s." % where.name)
                 player.tell_others("{Title} puts it in the %s." % where.name)
         except ActionRefused as x:
@@ -367,7 +368,7 @@ def take_stuff(player, items, container, where_str=None):
     refused = []
     for item in items:
         try:
-            item.move(container, player, player)
+            item.move(player, player)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
@@ -408,11 +409,11 @@ If you don't have it yet, you will first pick it up."""
         raise ActionRefused("You can't throw that.")
     if item in player.location:
         # first take the item from the room
-        item.move(player.location, player, player)
+        item.move(player, player)
         print("You take %s." % item.title)
         player.tell_others("{Title} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
-    item.move(player, player.location, player)
+    item.move(player.location, player)
     print("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     player.tell_others("{Title} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:
@@ -476,7 +477,7 @@ def give_stuff(player, items, target_name, target=None):
     refused = []
     for item in items:
         try:
-            item.move(player, target, player)
+            item.move(target, player)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
@@ -1087,8 +1088,15 @@ def do_save(player, parsed, **ctx):
     """Save your game."""
     ctx["driver"].do_save(player)
 
+
 @cmd("load")
 def do_load(player, parsed, **ctx):
     """Load a previously saved game."""
     player.tell("If you want to reload a previously saved game, please quit and restart")
     player.tell("the game. During startup, select the option to start from a saved game.")
+
+
+@cmd("score")
+def do_score(player, parsed, **ctx):
+    """Displays your current score in the game."""
+    player.tell("Your score is %d out of a possible %d. (in %s turns)" % (player.score, MUD_MAX_SCORE, player.turns))

@@ -140,15 +140,15 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, source_container, target_container, actor, wiz_force=False):
+    def move(self, target_container, actor, wiz_force=False):
         """
-        Leave the source container, enter the target container (transactional).
+        Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
         If wiz_force is True, it overrides certain allowance checks (but not all)
         """
         if not wiz_force or "wizard" not in actor.privileges:
             self.allow_move(actor)
-        assert source_container is self.contained_in
+        source_container = self.contained_in
         source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
