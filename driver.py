@@ -12,6 +12,7 @@ import time
 import os
 import threading
 import heapq
+import inspect
 import mudlib.globals       # don't import anything else from mudlib, see delayed_imports()
 try:
     import readline
@@ -34,6 +35,9 @@ else:
 
 if sys.version_info < (3, 0):
     input = raw_input
+    import cPickle as pickle
+else:
+    import pickle
 
 Deferred = collections.namedtuple("Deferred", "due,owner,callable,vargs,kwargs")
 
@@ -225,7 +229,12 @@ class Driver(object):
             deferred = self.deferreds[0]
             if deferred.due <= self.game_clock:
                 deferred = heapq.heappop(self.deferreds)
-                deferred.callable(*deferred.vargs, **deferred.kwargs)
+                kwargs = deferred.kwargs
+                kwargs["driver"] = self  # always add a 'driver' keyword argument for convenience
+                # deferred callable is stored as a name, so we need to obtain the actual function:
+                callable = getattr(deferred.owner, deferred.callable, None)
+                if callable:
+                    callable(*deferred.vargs, **kwargs)
         # buffered output
         self.write_output()
 
@@ -317,6 +326,22 @@ class Driver(object):
             self.server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
+    def do_save(self, player):
+        state = {
+            "player": self.player,
+            "deferreds": self.deferreds,
+            "game_clock": self.game_clock,
+            "gametime_epoch": self.GAMETIME_EPOCH,
+            "gametime_to_rt": self.GAMETIME_TO_REALTIME,
+            "heartbeats": self.heartbeat_objects,
+            "server_tick_time": self.SERVER_TICK_TIME,
+            "start_player": mudlib.rooms.STARTLOCATION_PLAYER,
+            "start_wizard": mudlib.rooms.STARTLOCATION_WIZARD
+        }
+        with open("snakepit_savegame.bin", "wb") as out:
+            pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
+        player.tell("Game saved. Game time:", self.game_clock)
+
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)
 
@@ -330,12 +355,28 @@ class Driver(object):
     def defer(self, due, owner, callable, *vargs, **kwargs):
         """
         Register a deferred callable (optionally with arguments).
+        The owner object, the vargs and the kwargs all must be serializable.
         Note that the due time is time datetime.datetime *in game time*
         (not real time!) when the deferred should trigger.
+        Also note that the deferred *always* gets a kwarg 'driver' set to the driver object
+        (this makes it easy to register a new deferred on the driver without the need to
+        access the global driver object)
         """
         assert isinstance(due, datetime.datetime)
         assert due >= self.game_clock
-        heapq.heappush(self.deferreds, Deferred(due, owner, callable, vargs, kwargs))
+        # to be able to serialize this, we don't store the actual callable object.
+        # instead we store its name.
+        if not isinstance(callable, mudlib.util.basestring_type):
+            callable = callable.__name__
+        # check that callable is in fact a function on the owner object
+        func = getattr(owner, callable, None)
+        if func:
+            assert inspect.ismethod(func) or inspect.isfunction(func)
+            deferred = Deferred(due, owner, callable, vargs, kwargs)
+            pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
+            heapq.heappush(self.deferreds, deferred)
+            return
+        raise ValueError("unknown callable on owner object")
 
 
 class PlayerInputThread(threading.Thread):

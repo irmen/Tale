@@ -1080,3 +1080,9 @@ def do_flee(player, parsed, **ctx):
         except ActionRefused:
             pass
     raise ActionRefused("You can't flee anywhere!")
+
+
+@cmd("save")
+def do_save(player, parsed, **ctx):
+    """Save your game."""
+    ctx["driver"].do_save(player)
