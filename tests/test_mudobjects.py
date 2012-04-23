@@ -24,10 +24,10 @@ from mudlib.globals import mud_context
 mud_context.driver = DummyDriver()
 
 from mudlib.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
-from mudlib.errors import SecurityViolation, ActionRefused
+from mudlib.errors import SecurityViolation, ActionRefused, ParseError
 from mudlib.npc import NPC, Monster
 from mudlib.player import Player
-from mudlib.soul import UnknownVerbException, NonSoulVerb
+from mudlib.soul import NonSoulVerb
 import mudlib.rooms
 
 
@@ -467,7 +467,7 @@ class TestPlayer(unittest.TestCase):
         who, playermsg, roommsg, targetmsg = player.socialize_parsed(parsed)
         self.assertEqual({julie}, who)
         self.assertEqual("You wave happily at julie.", playermsg)
-        with self.assertRaises(UnknownVerbException):
+        with self.assertRaises(ParseError):
             player.parse("befrotzificate all and me")
         with self.assertRaises(NonSoulVerb) as x:
             player.parse("befrotzificate all and me", external_verbs={"befrotzificate"})

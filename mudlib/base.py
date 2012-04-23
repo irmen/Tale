@@ -109,6 +109,7 @@ class Item(MudObject):
     """
     def init(self):
         self.contained_in = None
+        self.default_verb = "examine"
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")
@@ -435,6 +436,7 @@ class Living(MudObject):
         self.money = 0.0  # the currency is determined by util.money_display
         self.race = None
         self.stats = {}
+        self.default_verb = "examine"
         if race:
             self.set_race(race)
         self.__inventory = set()
@@ -610,6 +612,7 @@ class Container(Item):
     You can test for containment with 'in': item in bag
     """
     def init(self):
+        super(Container, self).init()
         self.__inventory = set()  # override the frozenset() from Item to allow true containment here
 
     def init_inventory(self, items):

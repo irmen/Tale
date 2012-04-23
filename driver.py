@@ -278,7 +278,7 @@ class Driver(object):
             parsed = x.parsed
             if parsed.qualifier:
                 # for now, qualifiers are only supported on soul-verbs (emotes).
-                raise mudlib.soul.ParseError("That action doesn't support qualifiers.")
+                raise mudlib.errors.ParseError("That action doesn't support qualifiers.")
             # Execute non-soul verb. First try directions, then the rest.
             try:
                 if parsed.verb in self.player.location.exits:
@@ -289,7 +289,7 @@ class Driver(object):
                     func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock)
                     return
                 else:
-                    raise mudlib.soul.ParseError("That doesn't make much sense.")
+                    raise mudlib.errors.ParseError("That doesn't make much sense.")
             except mudlib.errors.RetrySoulVerb as x:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.do_socialize(parsed)

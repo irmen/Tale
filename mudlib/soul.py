@@ -764,6 +764,7 @@ class Soul(object):
 
         if not words:
             raise ParseError("What?")
+        verb = None
         if words[0] in external_verbs:    # external verbs have priority above soul verbs
             verb = words.pop(0)
             external_verb = True
@@ -789,11 +790,14 @@ class Soul(object):
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
-                raise UnknownVerbException(words[0], words, qualifier)
+                # can't determine verb at this point, just continue with verb=None
+                pass
         else:
-            raise UnknownVerbException(words[0], words, qualifier)
+            # can't determine verb at this point, just continue with verb=None
+            pass
 
-        unparsed = unparsed[len(verb):].lstrip()
+        if verb:
+            unparsed = unparsed[len(verb):].lstrip()
         include_flag = True
         collect_message = False
         all_livings = {}  # livings in the room (including player) by name + aliases
@@ -973,7 +977,14 @@ class Soul(object):
             previous_word = word
 
         message = " ".join(message)
-        # construct the parse result
+        if not verb:
+            # This is interesting: there's no verb.
+            # but maybe the thing the user typed refers to an object or creature.
+            # In that case, set the verb to that object's default verb.
+            if len(who) == 1:
+                verb = who_order[0].default_verb
+            else:
+                raise UnknownVerbException(words[0], words, qualifier)
         return ParseResults(verb, who=who, who_info=who_info, who_order=who_order,
                             adverb=adverb, message=message,
                             bodypart=bodypart, qualifier=qualifier,

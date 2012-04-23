@@ -48,17 +48,14 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("_unknown_verb_", ex.exception.verb)
         self.assertEqual(None, ex.exception.words)
         self.assertEqual(None, ex.exception.qualifier)
-        with self.assertRaises(mudlib.soul.UnknownVerbException) as ex:
+        with self.assertRaises(mudlib.errors.ParseError) as ex:
             soul.process_verb(player, "fail _unknown_verb_ herp derp")
-        self.assertEqual("_unknown_verb_", str(ex.exception))
-        self.assertEqual("_unknown_verb_", ex.exception.verb)
-        self.assertEqual(["_unknown_verb_", "herp", "derp"], ex.exception.words)
-        self.assertEqual("fail", ex.exception.qualifier)
+        self.assertEqual("It's not clear what you mean by _unknown_verb_.", str(ex.exception))
 
     def testExternalVerbs(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
-        with self.assertRaises(mudlib.soul.UnknownVerbException):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.process_verb(player, "externalverb")
         verb, _ = soul.process_verb(player, "sit", external_verbs=set())
         self.assertEqual("sit", verb)
@@ -136,17 +133,16 @@ class TestSoul(unittest.TestCase):
     def testIgnorewords(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("fritz", "m")
-        with self.assertRaises(mudlib.soul.ParseError):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "in")
-        with self.assertRaises(mudlib.soul.ParseError):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "and")
-        with self.assertRaises(mudlib.soul.ParseError):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "fail")
-        with self.assertRaises(mudlib.soul.ParseError):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "fail in")
-        with self.assertRaises(mudlib.soul.UnknownVerbException) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "in fail")
-        self.assertEqual("fail", x.exception.verb)
         parsed = soul.parse(player, "in sit")
         self.assertIsNone(parsed.qualifier)
         self.assertIsNone(parsed.adverb)
@@ -300,7 +296,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie triumphantly beeps max on the arm.", room_msg)
         self.assertEqual("Julie triumphantly beeps you on the arm.", target_msg)
         # check handling of more than one bodypart
-        with self.assertRaises(mudlib.soul.ParseError) as ex:
+        with self.assertRaises(mudlib.errors.ParseError) as ex:
             soul.process_verb(player, "kick max side knee")
         self.assertEqual("You can't do that both in the side and on the knee.", str(ex.exception))
 
@@ -356,7 +352,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
         # check handling of more than one adverb
-        with self.assertRaises(mudlib.soul.ParseError) as ex:
+        with self.assertRaises(mudlib.errors.ParseError) as ex:
             soul.process_verb(player, "cough sickly and noisily")
         self.assertEqual("You can't do that both sickly and noisily.", str(ex.exception))
         # check handling of adverb prefix where there is 1 unique result
@@ -364,14 +360,14 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You cough sickly.", player_msg)
         self.assertEqual("Julie coughs sickly.", room_msg)
         # check handling of adverb prefix where there are more results
-        with self.assertRaises(mudlib.soul.ParseError) as ex:
+        with self.assertRaises(mudlib.errors.ParseError) as ex:
             soul.process_verb(player, "cough si")
         self.assertEqual("What adverb did you mean: sickly, sideways, signally, significantly, or silently?", str(ex.exception))
 
     def testUnrecognisedWord(self):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f", "human")
-        with self.assertRaises(mudlib.soul.ParseError):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.process_verb(player, "cough hubbabubba")
 
     def testCheckNameWithSpaces(self):
@@ -417,7 +413,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("frobnizz", parsed.verb)
         self.assertEqual(["gate"], parsed.args)
         self.assertEqual({gate}, parsed.who)
-        with self.assertRaises(mudlib.soul.UnknownVerbException):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "door", room_exits=player.location.exits)
         parsed = soul.parse(player, "enter door two", external_verbs={"enter"}, room_exits=player.location.exits)
         self.assertEqual("enter", parsed.verb)
@@ -505,18 +501,18 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(targets_with_player, parsed.who, "all and myself should include player")
         parsed = soul.parse(player, "slap newspaper")
         self.assertEqual({newspaper}, parsed.who, "must be able to perform soul verb on item")
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "slap dino")
         self.assertEqual("Perhaps you meant dinosaur?", str(x.exception), "must suggest living with prefix")
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "slap news")
         self.assertEqual("Perhaps you meant newspaper?", str(x.exception), "must suggest item with prefix")
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "slap undefined")
         self.assertEqual("It's not clear what you mean by undefined.", str(x.exception))
         parsed = soul.parse(player, "smile west")
         self.assertEqual("westwards", parsed.adverb)
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "smile north")
         self.assertEqual("What adverb did you mean: northeastwards, northwards, or northwestwards?", str(x.exception))
         parsed = soul.parse(player, "smile south")
@@ -534,13 +530,13 @@ class TestSoul(unittest.TestCase):
         self.assertEqual({south_exit}, x.exception.parsed.who, "exit must be in the who set")
         parsed_str = str(x.exception.parsed)
         self.assertTrue("verb=south" in parsed_str)
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "crawl somewherenotexisting", room_exits=player.location.exits)
         self.assertEqual("You can't crawl there.", str(x.exception))
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "crawl", room_exits=player.location.exits)
         self.assertEqual("Crawl where?", str(x.exception))
-        with self.assertRaises(mudlib.soul.UnknownVerbException):
+        with self.assertRaises(mudlib.errors.ParseError):
             soul.parse(player, "crawl", room_exits=[])   # must raise unknownverb if there are no exits in the room
 
     def testUnparsed(self):
@@ -717,7 +713,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You go 'ah' rudely.", player_msg)
         self.assertEqual("Julie goes 'ah' rudely.", room_msg)
         # verb needs a person
-        with self.assertRaises(mudlib.soul.ParseError) as x:
+        with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.process_verb(player, "touch")
         self.assertEqual("The verb touch needs a person.", str(x.exception))
 
