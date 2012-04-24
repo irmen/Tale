@@ -141,6 +141,7 @@ VERBS = {
 "tongue":    ( SIMP, None, "stick$ \nYOUR tongue out \nHOW \nAT", "at" ),
 "swing":     ( SIMP, ( "wildly", ), "swing$ \nYOUR arms \nHOW \nAT", "at" ),
 "apologize": ( DEFA, None, "", "to" ),
+"sorry":     ( SIMP, None, "apologize$ \nAT \nHOW", "to" ),
 "complain":  ( DEFA, None, "", "about" ),
 "rotate":    ( PERS, None, "rotate$ \nHOW", "rotate$ \nWHO \nHOW" ),
 "excuse":    ( PERS, None, " \nHOW excuse$ \nMYself", " \nHOW excuse$ \nMYself to \nWHO" ),

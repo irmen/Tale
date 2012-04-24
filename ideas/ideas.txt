@@ -1,0 +1,74 @@
+Concepts for single player Interactive Fiction (and perhaps MUD):
+-----------------------------------------------------------------
+Quests / Tasks / To-do list.
+Disable certain commands and features that might break immersion (such as 'stats').
+Transcript. (save game session to a file. command + command line option.)
+Undo? (undo the last move, needs a lot of work: every state-altering action needs
+to register an appropriate action to undo the alteration)
+
+Concepts that could be implemented for a MUD (but perhaps not for single player IF):
+------------------------------------------------------------------------------------
+Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
+Bulletin boards.
+Language system: speak/understand different languages
+Pets: tame/befriend/abandon (charisma/luck)
+Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
+Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
+Party: team up with other players and share quest and combat experience
+Skills: stealth, lockpicking, ...
+Vendors and shops: stock, sell stuff, buy stuff, haggle?
+World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
+
+Do something with the circlemud xml data:
+  http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+
+
+General ideas/TODO's:
+---------------------
+Let objects register non-standard verbs with the location they're in.
+For instance a computer might register 'hack' and 'type'.
+
+Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
+
+Parser: allow simple question/answer dialog. 'no/yes' verbs? Or use continuations?
+There's also some work to be done to add a confirmation question to certain verbs,
+such as 'drop all'.
+
+Invisible objects (only visible to a wizard.) Perhaps easiest by setting name, title and description to None?
+
+Wiretaps: as soon as invisible objects and room message notifications are implemented, replace the
+    wiretap attribute on Location by a real wiretap object that's placed in the room?
+    This could then replay the messages it receives to the owner.
+    It needs to auto-destruct if the owner is gone.
+    Wiretaps on livings are a bit harder to replace by a normal object because they need
+    to intercept the stuff thats told to the living, and there's no regular game mechanic to do that.
+
+use lang.a more?
+less use of isinstance?
+prototypes to extend items/npc instead of inheritance
+testing when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
+test with multiple items of same name in room, in inventory, in bag
+
+NOTIFICATIONS:
+notify_mentioned: every object/living in the environment gets notified if it's mentioned in an action
+notify_tell: object/living gets notified of a message directed directly at them (target includes self) or a normal room message directed at others (target doesn't include self)
+
+Change living location logic so that livings can sit inside a container item too.
+Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
++ take <living> actually working! (take ant, trap rabbit in cage, ...)
+
+DAMAGE TYPES
+------------
+blunt, blade, knife, water, shock, cold, heat, gas, acid, magic, poison,
+disease, trauma, pierce, psionic, anoxia, deathray, emotional, sonic,
+emp, other, karma, drama, overpressure, underpressure, inertia
+
+
+Light/Dark
+----------
+light level in rooms: dark/light? or three states?  (0=pitch black, 0.5=dark/dusk, 1=normal daylight)
+darkness in locations -> can't see location/exits/items/players (unless they're fluorescent, or unless you explicitly examine <direction>?)
+if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit.
+ Conditional location description (light/dark etc)
+
+

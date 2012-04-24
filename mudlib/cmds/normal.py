@@ -1089,7 +1089,7 @@ def do_save(player, parsed, **ctx):
     ctx["driver"].do_save(player)
 
 
-@cmd("load")
+@cmd("load", "reload", "restore")
 def do_load(player, parsed, **ctx):
     """Load a previously saved game."""
     player.tell("If you want to reload a previously saved game, please quit and restart")

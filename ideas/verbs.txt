@@ -22,7 +22,15 @@ zap
 
 PLAYER STUFF
 ------------
-
+insult
+    insult someone
+show X to Y
+    shows something to someone
+hint/hints
+    provide a clue about what to do next
+    (whereas 'help' just gives general instructions on how to play)
+again
+    repeat the last command
 shout
     shout a message to all players in the mud
 block, unblock
@@ -31,6 +39,7 @@ equipment
     show the armor items you are wearing
 kills
     shows a list of your victories
+    (hmm, could be part of the existing score command?)
 pvp
     toggle pvp
 prompt
@@ -102,7 +111,7 @@ lockpick
 read
     read something
 
-wear, unwear, remove
+wear, put on, unwear, remove
     wear/remove armor
 
 wield, unwield, remove
