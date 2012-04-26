@@ -22,8 +22,6 @@ zap
 
 PLAYER STUFF
 ------------
-show X to Y
-    shows something to someone
 hint/hints
     provide a clue about what to do next
     (whereas 'help' just gives general instructions on how to play)

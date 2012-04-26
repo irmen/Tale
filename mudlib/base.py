@@ -260,6 +260,7 @@ class Location(MudObject):
         parse the string again to figure out what happened...
         """
         specific_targets = specific_targets or set()
+        assert isinstance(specific_targets, (frozenset, set, list, tuple))
         for living in self.livings:
             if living == exclude_living:
                 continue

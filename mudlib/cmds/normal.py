@@ -539,7 +539,9 @@ def do_help(player, parsed, **ctx):
         print(", ".join(sorted(cmds_help)))
         print("Abbreviations:")
         print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
-        print("You can get more info about all kinds of stuff by asking 'what is <topic>'.")
+        print("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
+        print("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
+        print("To see all possible verbs ask 'what is emotes' (?emotes).")
 
 
 @cmd("look")
@@ -918,7 +920,7 @@ For more general help, try the 'help' command first."""
     if name == "soul":
         # if player is asking about the soul, give some general info
         found = True
-        print("Your soul provides a large amount of 'emotes' or 'verbs' that you can do.")
+        print("Your soul provides a large amount of 'emotes' or 'verbs' that you can perform.")
         print("An emote is a command that you can do to perform something, or tell something.")
         print("They usually are just for socialization or fun and are not normally considered")
         print("considered to be a command to actually do something or interact with things.")
@@ -1111,3 +1113,18 @@ def do_transcript(player, parsed, **ctx):
         player.activate_transcript(None)
     else:
         player.activate_transcript(parsed.args[0])
+
+
+@cmd("show")
+def do_show(player, parsed, **ctx):
+    """Shows something to someone else."""
+    if len(parsed.who) != 2:
+        raise ParseError("Show what to whom?")
+    shown = parsed.who_order[0]
+    if shown not in player:
+        raise ActionRefused("You don't have %s." % lang.a(shown.title))
+    target = parsed.who_order[1]
+    player.tell("You show the %s to %s." % (shown.title, target.title))
+    room_msg = "%s shows %s to %s." % (lang.capital(player.title), lang.a(shown.title), target.title)
+    target_msg = "%s shows you %s." % (lang.capital(player.title), lang.a(shown.title))
+    player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets=[target])
