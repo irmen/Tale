@@ -29,6 +29,7 @@ class Player(base.Living):
         self._output = []
         self.score = 0
         self.turns = 0
+        self.previous_commandline = None
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -62,6 +63,14 @@ class Player(base.Living):
 
     def parse(self, commandline, external_verbs=frozenset(), room_exits=None):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
+        if commandline == "again":
+            # special case, repeat previous command
+            if self.previous_commandline:
+                commandline = self.previous_commandline
+                self.tell("(repeat: %s)" % commandline)
+            else:
+                raise ActionRefused("Can't repeat your previous action.")
+        self.previous_commandline = commandline
         parsed = self.soul.parse(self, commandline, external_verbs, room_exits)
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)

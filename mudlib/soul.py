@@ -204,6 +204,7 @@ VERBS = {
 "finger":   ( SIMP, None, "give$ \nWHO the finger" ),
 "mercy":    ( SIMP, None, "beg$ \nWHO for mercy" ),
 "jerk":     ( SIMP, ( "briskly", ), "jerk$ \nWHO \nHOW", "" ),
+"insult":   ( SIMP, ( "angrily", ), " \nHOW spew$ profanities at \nWHO" ),
 "gripe":    ( PREV, None, "to" ),
 "peer":     ( PREV, None, "at" ),
 "chase":    ( PREV, ("angrily",), "after" ),
@@ -358,7 +359,7 @@ assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second
 
 AGGRESSIVE_VERBS = {
     "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "finger", "fondle", "french",
-    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "jerk", "jiggle", "kick", "kiss", "knee",
+    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "insult", "jerk", "jiggle", "kick", "kiss", "knee",
     "knock", "lick", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
     "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "shake", "shove", "slap", "smooch", "sneer", "snigger",
     "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",

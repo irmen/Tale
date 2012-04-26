@@ -11,7 +11,7 @@ invis, vis
 quell, peace  (unquell, unpeace)
     stop all fights in your environment   (resume fights)
 reset
-    reset an object to initial state
+    reset an object to initial state (....how? where do we store initial state?)
 resurrect
     return a dead person or creature to the land of the living
 wizlist
@@ -22,17 +22,13 @@ zap
 
 PLAYER STUFF
 ------------
-insult
-    insult someone
 show X to Y
     shows something to someone
 hint/hints
     provide a clue about what to do next
     (whereas 'help' just gives general instructions on how to play)
-again
-    repeat the last command
 shout
-    shout a message to all players in the mud
+    shout a message to all players in the mud (doesn't matter where they are)
 block, unblock
     block messages from someone
 equipment
@@ -46,8 +42,6 @@ prompt
     customize your prompt
 quests
     show a list of the quests you have completed
-save
-    save your character to disk
 skills
     the skills you have
 spells
