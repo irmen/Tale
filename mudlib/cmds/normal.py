@@ -1100,3 +1100,14 @@ def do_load(player, parsed, **ctx):
 def do_score(player, parsed, **ctx):
     """Displays your current score in the game."""
     player.tell("Your score is %d out of a possible %d. (in %s turns)" % (player.score, MUD_MAX_SCORE, player.turns))
+
+
+@cmd("transcript")
+def do_transcript(player, parsed, **ctx):
+    """Makes a transcript of your game session to the specified file, or switches transcript off again."""
+    if not parsed.args:
+        raise ParseError("Transcript to what file? (or off)")
+    if parsed.args[0] == "off":
+        player.activate_transcript(None)
+    else:
+        player.activate_transcript(parsed.args[0])

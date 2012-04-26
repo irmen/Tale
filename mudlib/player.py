@@ -11,9 +11,10 @@ if sys.version_info < (3, 0):
 else:
     import queue
 from threading import Event
+import time
 from . import base, soul
 from . import lang
-from .errors import SecurityViolation
+from .errors import SecurityViolation, ActionRefused
 
 
 class Player(base.Living):
@@ -34,6 +35,7 @@ class Player(base.Living):
         self.installed_wiretaps = set()
         self._input = queue.Queue()
         self.input_is_available = Event()
+        self.transcript = None
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
@@ -45,6 +47,7 @@ class Player(base.Living):
         del state["installed_wiretaps"]
         del state["_input"]
         del state["input_is_available"]
+        del state["transcript"]
         return state
 
     def __setstate__(self, state):
@@ -87,6 +90,8 @@ class Player(base.Living):
         """gets the accumulated output lines and clears the buffer"""
         lines = self._output
         self._output = []
+        if self.transcript:
+            self.transcript.writelines(lines)
         return lines
 
     def look(self, short=False):
@@ -107,6 +112,7 @@ class Player(base.Living):
         target.wiretaps.add(tap)  # install the wiretap on the target
 
     def destroy(self, ctx):
+        self.activate_transcript(False)
         super(Player, self).destroy(ctx)
         self.installed_wiretaps.clear()  # the references from within the observed are cleared by means of weakrefs
         self.soul = None   # truly die ;-)
@@ -127,8 +133,24 @@ class Player(base.Living):
 
     def input(self, cmd):
         self._input.put(cmd)
+        if self.transcript:
+            self.transcript.write("\n>> %s\n\n" % cmd)
         self.input_is_available.set()
         self.turns += 1
+
+    def activate_transcript(self, file):
+        if file:
+            if self.transcript:
+                raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
+            self.transcript = open(file, "a")
+            self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
+            self.tell("Transcript is being written to", file)
+        else:
+            if self.transcript:
+                self.transcript.write("\n*Transcript ending at %s*\n\n" % time.ctime())
+                self.transcript.close()
+                self.transcript = None
+            self.tell("Transcript ended.")
 
 
 class Wiretap(object):

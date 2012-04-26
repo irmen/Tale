@@ -2,7 +2,6 @@ Concepts for single player Interactive Fiction (and perhaps MUD):
 -----------------------------------------------------------------
 Quests / Tasks / To-do list.
 Disable certain commands and features that might break immersion (such as 'stats').
-Transcript. (save game session to a file. command + command line option.)
 Undo? (undo the last move, needs a lot of work: every state-altering action needs
 to register an appropriate action to undo the alteration)
 

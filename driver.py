@@ -13,6 +13,7 @@ import os
 import threading
 import heapq
 import inspect
+import argparse
 import mudlib.globals       # don't import anything else from mudlib, see delayed_imports()
 try:
     import readline
@@ -131,11 +132,17 @@ class Driver(object):
         del self.unbound_exits
 
     def start(self, args):
+        # parse args
+        parser = argparse.ArgumentParser(description='Parse driver arguments.')
+        parser.add_argument('--transcript', type=str, help='transcript filename')
+        args = parser.parse_args()
+
         # print GPL 3.0 banner
         print("\nSnakepit mud driver and mudlib. Copyright (C) 2012  Irmen de Jong.")
         print("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
         print("and you are welcome to redistribute it under the terms and conditions")
         print("of the GNU General Public License version 3. See the file LICENSE.txt")
+
         # print MUD banner and initiate player creation
         banner = mudlib.util.get_banner()
         if banner:
@@ -143,6 +150,8 @@ class Driver(object):
         choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
         if choice == "y":
             self.load_saved_game()
+            if args.transcript:
+                self.player.activate_transcript(args.transcript)
             self.player.tell("")
             self.player.tell(self.player.look())
         else:
@@ -153,6 +162,8 @@ class Driver(object):
                 player = create_default_player()
             else:
                 player = create_player_from_info()
+            if args.transcript:
+                player.activate_transcript(args.transcript)
             self.game_clock = self.GAMETIME_EPOCH
             self.player = player
             self.move_player_to_start_room()
@@ -223,6 +234,7 @@ class Driver(object):
                     import traceback
                     self.player.tell("* internal error:")
                     self.player.tell(traceback.format_exc())
+        self.player.destroy({"driver": self})
         self.write_output()  # flush pending output at server shutdown.
 
     def server_tick(self):
@@ -406,7 +418,8 @@ class Driver(object):
         if func:
             assert inspect.ismethod(func) or inspect.isfunction(func)
             deferred = Deferred(due, owner, callable, vargs, kwargs)
-            pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
+            # we skip the pickle check because it is extremely inefficient.....:
+            # pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
             heapq.heappush(self.deferreds, deferred)
             return
         raise ValueError("unknown callable on owner object")
