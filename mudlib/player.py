@@ -159,7 +159,7 @@ class Player(base.Living):
                 self.transcript.write("\n*Transcript ending at %s*\n\n" % time.ctime())
                 self.transcript.close()
                 self.transcript = None
-            self.tell("Transcript ended.")
+                self.tell("Transcript ended.")
 
 
 class Wiretap(object):
