@@ -76,7 +76,7 @@ class Player(base.Living):
             raise soul.NonSoulVerb(parsed)
         if parsed.verb not in soul.NONLIVING_OK_VERBS:
             # check if any of the targeted objects is a non-living
-            if not all(isinstance(who, base.Living) for who in parsed.who):
+            if not all(isinstance(who, base.Living) for who in parsed.who_order):
                 raise soul.NonSoulVerb(parsed)
         return parsed
 

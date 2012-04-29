@@ -488,11 +488,10 @@ class WhoInfo(object):
 
 
 class ParseResults(object):
-    __slots__ = ("verb", "who", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized", "unparsed")
+    __slots__ = ("verb", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized", "unparsed")
 
-    def __init__(self, verb, who=None, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None, unparsed=""):
+    def __init__(self, verb, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None, unparsed=""):
         self.verb = verb
-        self.who = who or set()
         self.adverb = adverb
         self.message = message
         self.bodypart = bodypart
@@ -502,12 +501,13 @@ class ParseResults(object):
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
-        assert type(self.who) in (set, frozenset)
         if self.who_order and not self.who_info:
-            for sequence, who in enumerate(self.who_order):
-                self.who_info[who] = WhoInfo(sequence)
-        if self.who:
-            assert len(self.who_info) == len(self.who) and len(self.who_order) > 0
+            self.recalc_who_info()
+
+    def recalc_who_info(self):
+        self.who_info = {}
+        for sequence, who in enumerate(self.who_order):
+            self.who_info[who] = WhoInfo(sequence)
 
     def __str__(self):
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]
@@ -520,7 +520,6 @@ class ParseResults(object):
             " message=%s" % self.message,
             " args=%s" % self.args,
             " unrecognized=%s" % self.unrecognized,
-            " who=%s" % self.who,
             " who_info=%s" % "\n   ".join(who_info_str),
             " who_order=%s" % self.who_order,
             " unparsed=%s" % self.unparsed
@@ -580,7 +579,6 @@ class Soul(object):
         if not verbdata:
             raise UnknownVerbException(parsed.verb, None, parsed.qualifier)
 
-        assert type(parsed.who) in (set, frozenset)
         message = parsed.message
         adverb = parsed.adverb
 
@@ -616,12 +614,12 @@ class Soul(object):
                 action_room = qual_room % action_room if use_room_default else qual_room % action
                 action = qual_action % action
             # construct message seen by player
-            targetnames = [ who_replacement(player, target, player) for target in parsed.who ]
+            targetnames = [ who_replacement(player, target, player) for target in parsed.who_order ]
             player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
             player_msg = player_msg.replace(" \nYOUR", " your")
             player_msg = player_msg.replace(" \nMY", " your")
             # construct message seen by room
-            targetnames = [ who_replacement(player, target, None) for target in parsed.who ]
+            targetnames = [ who_replacement(player, target, None) for target in parsed.who_order ]
             room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
             room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
             room_msg = room_msg.replace(" \nMY", " " + player.objective)
@@ -633,8 +631,8 @@ class Soul(object):
             target_msg = target_msg.replace(" \nSUBJ", " you")
             target_msg = target_msg.replace(" \nMY", " " + player.objective)
             # fix up POSS, IS, SUBJ in the player and room messages
-            if len(parsed.who) == 1:
-                only_living = list(parsed.who)[0]
+            if len(parsed.who_order) == 1:
+                only_living = parsed.who_order[0]
                 subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
                 player_msg = player_msg.replace(" \nIS", " is")
                 player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
@@ -643,8 +641,8 @@ class Soul(object):
                 room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
                 room_msg = room_msg.replace(" \nPOSS", " " + poss_replacement(player, only_living, None))
             else:
-                targetnames_player = lang.join([poss_replacement(player, living, player) for living in parsed.who])
-                targetnames_room = lang.join([poss_replacement(player, living, None) for living in parsed.who])
+                targetnames_player = lang.join([poss_replacement(player, living, player) for living in parsed.who_order])
+                targetnames_room = lang.join([poss_replacement(player, living, None) for living in parsed.who_order])
                 player_msg = player_msg.replace(" \nIS", " are")
                 player_msg = player_msg.replace(" \nSUBJ", " they")
                 player_msg = player_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_player))
@@ -655,19 +653,20 @@ class Soul(object):
             player_msg = lang.fullstop("You " + player_msg)
             room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg))
             target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg))
-            if player in parsed.who:
-                who = set(parsed.who)
+            if player in parsed.who_info:
+                who = set(parsed.who_info)
                 who.remove(player)  # the player should not be part of the remaining targets.
+                who = frozenset(who)
             else:
-                who = parsed.who
-            return frozenset(who), player_msg, room_msg, target_msg
+                who = frozenset(parsed.who_info)
+            return who, player_msg, room_msg, target_msg
 
         # construct the action string
         action = None
         if vtype == DEUX:
             action = verbdata[2]
             action_room = verbdata[3]
-            if not check_person(action, parsed.who):
+            if not check_person(action, parsed.who_order):
                 raise ParseError("The verb %s needs a person." % parsed.verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
@@ -679,12 +678,12 @@ class Soul(object):
             action_room = action_room.replace(" \nHOW", how)
             return result_messages(action, action_room)
         elif vtype == QUAD:
-            if not parsed.who:
-                action = verbdata[2]
-                action_room = verbdata[3]
-            else:
+            if parsed.who_info:
                 action = verbdata[4]
                 action_room = verbdata[5]
+            else:
+                action = verbdata[2]
+                action_room = verbdata[3]
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
             action = action.replace(" \nWHAT", message)
@@ -705,18 +704,18 @@ class Soul(object):
         elif vtype == SHRT:
             action = parsed.verb + "$" + spacify(verbdata[2]) + " \nHOW"
         elif vtype == PERS:
-            action = verbdata[3] if parsed.who else verbdata[2]
+            action = verbdata[3] if parsed.who_order else verbdata[2]
         elif vtype == SIMP:
             action = verbdata[2]
         else:
             raise SoulException("invalid vtype " + vtype)
 
-        if parsed.who and len(verbdata) > 3:
+        if parsed.who_info and len(verbdata) > 3:
             action = action.replace(" \nAT", spacify(verbdata[3]) + " \nWHO")
         else:
             action = action.replace(" \nAT", "")
 
-        if not check_person(action, parsed.who):
+        if not check_person(action, parsed.who_order):
             raise ParseError("The verb %s needs a person." % parsed.verb)
 
         action = action.replace(" \nHOW", how)
@@ -734,7 +733,6 @@ class Soul(object):
         message_verb = False  # does the verb expect a message?
         external_verb = False  # is it a non-soul verb?
         adverb = None
-        who = set()
         message = []
         bodypart = None
         arg_words = []
@@ -788,7 +786,7 @@ class Soul(object):
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
                 unparsed = unparsed[len(exit_name):].lstrip()
-                raise NonSoulVerb(ParseResults(verb=exit_name, who={exit}, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
+                raise NonSoulVerb(ParseResults(verb=exit_name, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -830,13 +828,11 @@ class Soul(object):
                 raise ParseError("It is not clear who you mean.")
             if word in ("me", "myself"):
                 if include_flag:
-                    who.add(player)
                     who_info[player].sequence = who_sequence
                     who_info[player].previous_word = previous_word
                     who_sequence += 1
                     who_order.append(player)
-                elif player.name in who:
-                    who.remove(player)
+                elif player in who_info:
                     del who_info[player]
                 arg_words.append(word)
                 previous_word = None
@@ -854,16 +850,14 @@ class Soul(object):
                     # include every *living* thing visible, don't include items, and skip the player itself
                     for living in player.location.livings:
                         if living is not player:
-                            who.add(living)
                             who_info[living].sequence = who_sequence
                             who_info[living].previous_word = previous_word
                             who_sequence += 1
                             who_order.append(living)
                 else:
-                    who.clear()
-                    who_info.clear()
-                    who_sequence = 0
+                    who_info = {}
                     who_order = []
+                    who_sequence = 0
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -882,13 +876,11 @@ class Soul(object):
             if word in all_livings:
                 living = all_livings[word]
                 if include_flag:
-                    who.add(living)
                     who_info[living].sequence = who_sequence
                     who_info[living].previous_word = previous_word
                     who_sequence += 1
                     who_order.append(living)
-                elif living in who:
-                    who.remove(living)
+                elif living in who_info:
                     del who_info[living]
                 arg_words.append(word)
                 previous_word = None
@@ -896,13 +888,11 @@ class Soul(object):
             if word in all_items:
                 item = all_items[word]
                 if include_flag:
-                    who.add(item)
                     who_info[item].sequence = who_sequence
                     who_info[item].previous_word = previous_word
                     who_sequence += 1
                     who_order.append(item)
-                elif item in who:
-                    who.remove(item)
+                elif item in who_info:
                     del who_info[item]
                 arg_words.append(word)
                 previous_word = None
@@ -910,7 +900,6 @@ class Soul(object):
             if player.location:
                 exit, exit_name, wordcount = check_name_with_spaces(words, index, player.location.exits, {})
                 if exit:
-                    who.add(exit)
                     who_info[exit].sequence = who_sequence
                     who_info[exit].previous_word = previous_word
                     previous_word = None
@@ -927,13 +916,11 @@ class Soul(object):
                     next_iter(words_enumerator)
                     wordcount -= 1
                 if include_flag:
-                    who.add(item)
                     who_info[item].sequence = who_sequence
                     who_info[item].previous_word = previous_word
                     who_sequence += 1
                     who_order.append(item)
-                elif item in who:
-                    who.remove(item)
+                elif item in who_info:
                     del who_info[item]
                 arg_words.append(full_name)
                 previous_word = None
@@ -945,7 +932,7 @@ class Soul(object):
                 continue
             if word not in _skip_words:
                 # unrecognized word, check if it could be a person's name or an item. (prefix)
-                if not who:
+                if not who_order:
                     for name in all_livings:
                         if name.startswith(word):
                             raise ParseError("Perhaps you meant %s?" % name)
@@ -983,11 +970,11 @@ class Soul(object):
             # This is interesting: there's no verb.
             # but maybe the thing the user typed refers to an object or creature.
             # In that case, set the verb to that object's default verb.
-            if len(who) == 1:
+            if len(who_order) == 1:
                 verb = who_order[0].default_verb
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
-        return ParseResults(verb, who=who, who_info=who_info, who_order=who_order,
+        return ParseResults(verb, who_info=who_info, who_order=who_order,
                             adverb=adverb, message=message,
                             bodypart=bodypart, qualifier=qualifier,
                             args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)

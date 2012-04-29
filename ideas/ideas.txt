@@ -24,8 +24,6 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-!! simplify parsed.who/who_info/who_order -> just who_info and who_order !!
-
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
 

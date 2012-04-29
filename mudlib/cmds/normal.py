@@ -847,14 +847,8 @@ For more general help, try the 'help' command first."""
     if name in soul.VERBS:
         found = True
         parsed = soul.ParseResults(name)
-        if name == "emote":
-            parsed.who = {player}
-            parsed.message = "goes wild."
-            _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
-            name = "emote goes wild"
-        else:
-            parsed.who = {player}
-            _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
+        parsed.who_order = [player]
+        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("It is a soul emote you can do. %s: %s" % (name, playermessage))
         if name in soul.AGGRESSIVE_VERBS:
             print("It might be regarded as offensive to certain people or beings.")

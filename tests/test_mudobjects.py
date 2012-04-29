@@ -463,7 +463,7 @@ class TestPlayer(unittest.TestCase):
         player.move(attic)
         parsed = player.parse("wave all")
         self.assertEqual("wave", parsed.verb)
-        self.assertEqual({julie}, parsed.who)
+        self.assertEqual([julie], parsed.who_order)
         who, playermsg, roommsg, targetmsg = player.socialize_parsed(parsed)
         self.assertEqual({julie}, who)
         self.assertEqual("You wave happily at julie.", playermsg)
@@ -473,7 +473,7 @@ class TestPlayer(unittest.TestCase):
             player.parse("befrotzificate all and me", external_verbs={"befrotzificate"})
         parsed = x.exception.parsed
         self.assertEqual("befrotzificate", parsed.verb)
-        self.assertEqual({julie, player}, parsed.who)
+        self.assertEqual([julie, player], parsed.who_order)
 
 
 class TestDescriptions(unittest.TestCase):
