@@ -66,11 +66,14 @@ class MudObject(object):
         try:
             self.title = title or name
         except AttributeError:
-            pass  # this can occur if someone made title into a property
+            # this can occur if someone made title into a property
+            self._title = title or name
+        descr = textwrap.dedent(description).strip() if description else ""
         try:
-            self.description = textwrap.dedent(description).strip() if description else ""
+            self.description = descr
         except AttributeError:
-            pass   # this can occur if someone made description into a property
+            # this can occur if someone made description into a property
+            self._description = descr
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -150,7 +153,8 @@ class Item(MudObject):
         if not wiz_force or "wizard" not in actor.privileges:
             self.allow_move(actor)
         source_container = self.contained_in
-        source_container.remove(self, actor)
+        if source_container:
+            source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
         except:
@@ -622,6 +626,15 @@ class Container(Item):
         self.__inventory = set(items)
         for item in items:
             item.contained_in = self
+
+    @property
+    def title(self):
+        if isinstance(self.contained_in, Living):
+            if self.__inventory:
+                return self._title + " (containing things)"
+            else:
+                return self._title + " (empty)"
+        return self._title
 
     def inventory(self):
         return frozenset(self.__inventory)

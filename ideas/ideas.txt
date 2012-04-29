@@ -24,7 +24,6 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-!! container items show (empty) or (containing some things) in their description, if they are in the player's inventory!!
 !! simplify parsed.who/who_info/who_order -> just who_info and who_order !!
 
 Let objects register non-standard verbs with the location they're in.
@@ -43,7 +42,11 @@ Wiretaps: as soon as invisible objects and room message notifications are implem
     This could then replay the messages it receives to the owner.
     It needs to auto-destruct if the owner is gone.
     Wiretaps on livings are a bit harder to replace by a normal object because they need
-    to intercept the stuff thats told to the living, and there's no regular game mechanic to do that.
+    to intercept the stuff that's told to the living, and there's no regular game mechanic to do that,
+    unless Living.tell() is going to broadcast to all items in its inventory... (also nested in bags!)
+    Maybe implement it all as a special Effect object that is stored in Object.effects?
+    Or just leave it be, the wiretap logic isn't that complex to keep around as separate attributes.
+
 
 use lang.a more?
 less use of isinstance?

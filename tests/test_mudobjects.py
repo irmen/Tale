@@ -616,7 +616,21 @@ class TestContainer(unittest.TestCase):
             key.insert(thing, player)  # can't add stuf to an Item
         bag.insert(thing, player)
         self.assertTrue(thing in bag)
-
+    def test_title(self):
+        bag = Container("bag", "leather bag", "a small leather bag")
+        stone = Item("stone")
+        player = Player("julie", "f")
+        self.assertEqual("bag", bag.name)
+        self.assertEqual("leather bag", bag.title)
+        self.assertEqual("a small leather bag", bag.description)
+        bag.move(player, player)
+        self.assertEqual("bag", bag.name)
+        self.assertEqual("leather bag (empty)", bag.title)
+        self.assertEqual("a small leather bag", bag.description)
+        stone.move(bag, player)
+        self.assertEqual("bag", bag.name)
+        self.assertEqual("leather bag (containing things)", bag.title)
+        self.assertEqual("a small leather bag", bag.description)
 
 class TestItem(unittest.TestCase):
     def test_insertremove(self):
@@ -641,7 +655,9 @@ class TestItem(unittest.TestCase):
         person = Living("person", "m")
         monster = Monster("dragon", "f", race="dragon")
         key = Item("key")
+        stone = Item("stone")
         hall.init_inventory([person, key])
+        stone.move(hall, person)
         wiretap_hall = Wiretap()
         wiretap_person = Wiretap()
         hall.wiretaps.add(wiretap_hall)
