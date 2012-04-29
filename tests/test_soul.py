@@ -469,7 +469,10 @@ class TestSoul(unittest.TestCase):
         east_exit = mudlib.base.Exit(room, "a door to the east", direction="east")
         room.add_exits([east_exit, south_exit])
         player.move(room)
-        targets = [ mudlib.npc.NPC("max", "m"), mudlib.npc.NPC("kate", "f"), mudlib.npc.NPC("dinosaur", "n") ]
+        max_npc = mudlib.npc.NPC("max", "m")
+        kate_npc = mudlib.npc.NPC("kate", "f")
+        dino_npc = mudlib.npc.NPC("dinosaur", "n")
+        targets = [ max_npc, kate_npc, dino_npc ]
         targets_with_player = targets + [player]
         player.location.livings = targets
         newspaper = mudlib.base.Item("newspaper")
@@ -496,7 +499,11 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(None, parsed.adverb)
         self.assertEqual(None, parsed.bodypart)
         self.assertEqual("", parsed.message)
+        self.assertEqual(3, len(parsed.who_info), "all should not include player")
         self.assertEqual(targets, parsed.who_order, "all should not include player")
+        parsed = soul.parse(player, "slap all but kate")
+        self.assertEqual(2, len(parsed.who_info), "all but kate should only be max and the dino")
+        self.assertEqual([max_npc, dino_npc], parsed.who_order, "all but kate should only be max and the dino")
         parsed = soul.parse(player, "slap all and myself")
         self.assertEqual(targets_with_player, parsed.who_order, "all and myself should include player")
         parsed = soul.parse(player, "slap newspaper")

@@ -834,6 +834,7 @@ class Soul(object):
                     who_order.append(player)
                 elif player in who_info:
                     del who_info[player]
+                    who_order.remove(player)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -882,6 +883,7 @@ class Soul(object):
                     who_order.append(living)
                 elif living in who_info:
                     del who_info[living]
+                    who_order.remove(living)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -894,6 +896,7 @@ class Soul(object):
                     who_order.append(item)
                 elif item in who_info:
                     del who_info[item]
+                    who_order.remove(item)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -922,6 +925,7 @@ class Soul(object):
                     who_order.append(item)
                 elif item in who_info:
                     del who_info[item]
+                    who_order.remove(item)
                 arg_words.append(full_name)
                 previous_word = None
                 continue
