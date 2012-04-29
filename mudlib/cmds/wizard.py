@@ -107,8 +107,8 @@ def do_clone(player, parsed, **ctx):
             obj = getattr(module, objectname, None)
         except (ImportError, ValueError):
             raise ActionRefused("There's no module named " + path)
-    elif parsed.who:
-        obj = parsed.who.pop()
+    elif parsed.who_order:
+        obj = parsed.who_order[0]
     else:
         raise ActionRefused("Object not found")
     # clone it
@@ -130,12 +130,12 @@ def do_clone(player, parsed, **ctx):
 def do_destroy(player, parsed, **ctx):
     """Destroys an object or creature."""
     print = player.tell
-    if not parsed.who:
+    if not parsed.who_order:
         raise ParseError("Destroy what or who?")
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     # @todo: ask for confirmation (async)
-    for victim in parsed.who:
+    for victim in parsed.who_info:
         if isinstance(victim, base.Item):
             if victim in player:
                 player.remove(victim, player)
@@ -173,9 +173,9 @@ def do_clean(player, parsed, **ctx):
         if player.location.items:
             print("Some items refused to be destroyed!")
     else:
-        if len(parsed.who) != 1:
+        if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
-        victim = parsed.who.pop()
+        victim = parsed.who_order[0]
         # @todo: ask for confirmation (async)
         print("Cleaning inventory of",victim)
         player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
@@ -211,8 +211,8 @@ def do_wiretap(player, parsed, **ctx):
     elif arg == "-clear":
         player.installed_wiretaps.clear()
         print("All wiretaps removed.")
-    elif parsed.who:
-        for living in parsed.who:
+    elif parsed.who_order:
+        for living in parsed.who_order:
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
             player.create_wiretap(living)
@@ -300,9 +300,9 @@ def teleport_someone_to_player(who, player):
 def do_return(player, parsed, **ctx):
     """Return a player to the location where they were before a teleport."""
     print = player.tell
-    if len(parsed.who) == 1:
+    if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
-    elif len(parsed.who) == 0:
+    elif len(parsed.who_order) == 0:
         who = player
     else:
         raise ActionRefused("You can only return one person at a time.")
@@ -384,8 +384,8 @@ def do_debug(player, parsed, **ctx):
     name = parsed.args[0]
     if name == ".":
         obj = player.location
-    elif parsed.who:
-        obj = parsed.who.pop()
+    elif parsed.who_order:
+        obj = parsed.who_order[0]
     else:
         raise ActionRefused("Can't find %s." % name)
     print(repr(obj))
