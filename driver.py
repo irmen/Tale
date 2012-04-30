@@ -154,6 +154,7 @@ class Driver(object):
             if args.transcript:
                 self.player.activate_transcript(args.transcript)
             self.player.tell("\n")
+            self.player.tell("\n")
             self.player.tell(self.player.look())
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
@@ -169,12 +170,15 @@ class Driver(object):
             self.player = player
             self.move_player_to_start_room()
             self.player.tell("\n")
+            self.player.tell("\n")
             self.player.tell("Welcome, %s." % self.player.title, end=True)
             self.player.tell("\n")
             motd, mtime = mudlib.util.get_motd()
             if motd:
                 self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+                self.player.tell("\n")
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
+                self.player.tell("\n")
                 self.player.tell("\n")
             self.player.tell(self.player.look())
         self.write_output()

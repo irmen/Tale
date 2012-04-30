@@ -224,8 +224,8 @@ def do_wiretap(player, parsed, **ctx):
 @wizcmd("teleport", "teleport_to")
 def do_teleport(player, parsed, **ctx):
     """Teleport to a location or creature, or teleport a creature to you.
-'teleport[_to] .module.path.to.object' teleports [to] that object (location or creature)
-'teleport[_to] playername' teleports [to] that player,
+'teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
+'teleport[_to] playername' teleports [to] that player.
 'teleport_to @start' teleports you to the starting location for wizards."""
     if not parsed.args:
         raise ActionRefused("Teleport what to where?")

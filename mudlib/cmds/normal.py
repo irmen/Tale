@@ -96,7 +96,7 @@ def do_locate(player, parsed, **ctx):
             print("You are here, in %s." % player.location.name)
             return
         if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            print("(by %s you probably mean %s)" % (name, thing.name))
+            print("(By %s you probably mean %s.)" % (name, thing.name))
         if thing in player.location:
             if isinstance(thing, base.Living):
                 print("%s is here next to you." % lang.capital(thing.title))
@@ -112,7 +112,7 @@ def do_locate(player, parsed, **ctx):
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                print("(by %s you probably mean %s)" % (name, item.name))
+                print("(By %s you probably mean %s.)" % (name, item.name))
             util.print_object_location(player, item, container, False)
         else:
             otherplayer = ctx["driver"].search_player(name)  # global player search
@@ -214,8 +214,7 @@ def do_empty(player, parsed, **ctx):
 
 @cmd("put", "place")
 def do_put(player, parsed, **ctx):
-    """Put an item (or all items) into something else.
-If you're not carrying the item, you will first pick it up."""
+    """Put an item (or all items) into something else. If you're not carrying the item, you will first pick it up."""
     print = player.tell
     if len(parsed.args) < 2:
         raise ParseError("Put what where?")
@@ -268,8 +267,7 @@ If you're not carrying the item, you will first pick it up."""
 
 @cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, **ctx):
-    """Take something (or all things) from something or someone else.
-Stealing and robbing is frowned upon, to say the least."""
+    """Take something (or all things) from something or someone else. Stealing and robbing is frowned upon, to say the least."""
     print = player.tell
     if len(parsed.args) == 0:
         raise ParseError("Take what?")
@@ -399,8 +397,7 @@ def try_pick_up_living(player, living):
 
 @cmd("throw")
 def do_throw(player, parsed, **ctx):
-    """Throw something you are carrying at someone or something.
-If you don't have it yet, you will first pick it up."""
+    """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
     print = player.tell
     if len(parsed.who_order) != 2:
         raise ParseError("Throw what where?")
@@ -553,7 +550,8 @@ def do_look(player, parsed, **ctx):
             exit = player.location.exits[arg]
             player.tell(exit.short_description)
             if exit.short_description != exit.long_description:
-                raise ActionRefused("Maybe you should examine it?")
+                player.tell("Maybe you should examine it?")
+                return
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
             player.tell(player.location.exits[abbreviations[arg]].short_description)
         else:
@@ -565,26 +563,26 @@ def do_look(player, parsed, **ctx):
 @cmd("examine", "inspect")
 def do_examine(player, parsed, **ctx):
     """Examine something or someone thoroughly."""
-    print = player.tell
+    tell = player.tell
     if not parsed.args:
         raise ParseError("Examine what or who?")
     name = parsed.args[0]
     living = player.location.search_living(name)
     if living:
         if "wizard" in player.privileges:
-            print(repr(living))
+            tell(repr(living))
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            print("(by %s you probably mean %s)" % (name, living.name))
-        print("This is %s." % living.title)
+            tell("(By %s you probably meant %s.)" % (name, living.name), end=True)
+        tell("This is %s." % living.title)
         if living.description:
-            print(living.description)
+            tell(living.description)
         race = races.races[living.race]
         if living.race == "human":
             # don't print as much info when dealing with mere humans
             msg = lang.capital("%s speaks %s." % (living.subjective, race["language"]))
-            print(msg)
+            tell(msg)
         else:
-            print("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
+            tell("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
                 subj=lang.capital(living.subjective),
                 size=races.sizes[race["size"]],
                 btype=races.bodytypes[race["bodytype"]],
@@ -595,32 +593,32 @@ def do_examine(player, parsed, **ctx):
     item, container = player.locate_item(name)
     if item:
         if "wizard" in player.privileges:
-            print(repr(item))
+            tell(repr(item))
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            print("(by %s you probably mean %s)" % (name, item.name))
+            tell("(by %s you probably mean %s)" % (name, item.name))
         if item in player:
-            print("You're carrying %s." % lang.a(item.title))
+            tell("You're carrying %s." % lang.a(item.title))
         elif container and container in player:
             util.print_object_location(player, item, container)
         else:
-            print("You see %s." % lang.a(item.title))
+            tell("You see %s." % lang.a(item.title))
         if item.description:
-            print(item.description)
+            tell(item.description)
         try:
             inventory = item.inventory()
         except ActionRefused:
             pass
         else:
             if inventory:
-                print("It contains: %s." % lang.join(subitem.title for subitem in inventory))
+                tell("It contains: %s." % lang.join(subitem.title for subitem in inventory))
             else:
-                print("It's empty.")
+                tell("It's empty.")
     elif name in player.location.exits:
-        print("It seems you can go there:")
-        print(player.location.exits[name].long_description)
+        tell("It seems you can go there:")
+        tell(player.location.exits[name].long_description)
     elif name in abbreviations and abbreviations[name] in player.location.exits:
-        print("It seems you can go there:")
-        print(player.location.exits[abbreviations[name]].long_description)
+        tell("It seems you can go there:")
+        tell(player.location.exits[abbreviations[name]].long_description)
     else:
         raise ActionRefused("%s isn't here." % name)
 
@@ -650,8 +648,7 @@ def do_stats(player, parsed, **ctx):
 
 @cmd("tell")
 def do_tell(player, parsed, **ctx):
-    """Pass a message to another player or creature that nobody else can hear.
-The other player doesn't have to be in the same location as you."""
+    """Pass a message to another player or creature that nobody else can hear. The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
     # we can't use parsed.who_order directly, because the message could be directed to a player
@@ -703,7 +700,7 @@ def do_yell(player, parsed, **ctx):
 
 @cmd("say")
 def do_say(player, parsed, **ctx):
-    """Say something."""
+    """Say something to people near you."""
     print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Say what?")
@@ -763,7 +760,6 @@ def print_item_removal(player, item, container, print_parentheses=True):
 @cmd("who")
 def do_who(player, parsed, **ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
-    print = player.tell
     if parsed.args:
         if parsed.args[0] == "are":
             raise ActionRefused("Be more specific.")
@@ -783,18 +779,17 @@ def do_who(player, parsed, **ctx):
         except ActionRefused:
             pass
         if not found:
-            print("Right now, there's nobody here or playing with that name.")
+            player.tell("Right now, there's nobody here or playing with that name.")
     else:
         # print all players
-        print("All players currently in the game:")
+        player.tell("All players currently in the game:", end=True)
         for player in ctx["driver"].all_players():  # list of all players
-            player.tell("%s (%s): currently in '%s'." % (lang.capital(player.name), player.title, player.location.name))
+            player.tell("%s (%s): currently in '%s'." % (lang.capital(player.name), player.title, player.location.name), end=True)
 
 
 @cmd("open", "close", "lock", "unlock")
 def do_open(player, parsed, **ctx):
-    """Do something with a door, exit or item, possibly by using something.
-Example: open door,  unlock chest with key"""
+    """Do something with a door, exit or item, possibly by using something. Example: open door,  unlock chest with key"""
     if len(parsed.args) not in (1, 2) or parsed.unrecognized:
         raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
     if parsed.who_order:
@@ -822,9 +817,7 @@ Example: open door,  unlock chest with key"""
 
 @cmd("what")
 def do_what(player, parsed, **ctx):
-    """Tries to answer your question about what something is.
-The topics range from game commands to location exits to creature and items.
-For more general help, try the 'help' command first."""
+    """Tries to answer your question about what something is. The topics range from game commands to location exits to creature and items. For more general help, try the 'help' command first."""
     print = player.tell
     if not parsed.args:
         raise ParseError("What do you mean?")
@@ -965,12 +958,12 @@ For more general help, try the 'help' command first."""
 def do_exits(player, parsed, **ctx):
     """Provides a tiny clue about possible exits from your current location."""
     if "wizard" in player.privileges:
-        player.tell("The following exits are defined for your current location:")
+        player.tell("The following exits are defined for your current location:", end=True)
         for direction, exit in player.location.exits.items():
             if exit.bound:
-                player.tell("Exit: %s -> %s" % (direction, exit.target.name))
+                player.tell("Exit: %s -> %s" % (direction, exit.target.name), end=True)
             else:
-                player.tell("Exit: %s -> %s (unbound)" % (direction, exit.target))
+                player.tell("Exit: %s -> %s (unbound)" % (direction, exit.target), end=True)
     else:
         player.tell("If you want to know about the possible exits from your location,")
         player.tell("look around the room. Usually the exits are easily visible.")
@@ -1042,6 +1035,7 @@ def do_motd(player, parsed, **ctx):
     motd, mtime = util.get_motd()
     if motd:
         player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+        player.tell("\n")
         player.tell(motd)
     else:
         player.tell("There's currently no message-of-the-day.")
@@ -1050,7 +1044,6 @@ def do_motd(player, parsed, **ctx):
 @cmd("flee")
 def do_flee(player, parsed, **ctx):
     """Flee in a random or given direction, possibly escaping a combat situation."""
-    print = player.tell
     exit = None
     if len(parsed.who_order) == 1:
         exit = parsed.who_order[0]
@@ -1069,7 +1062,7 @@ def do_flee(player, parsed, **ctx):
     for exit in exits_to_try:
         try:
             exit.allow_passage(player)
-            print("You flee!")
+            player.tell("You flee!", end=True)
             # @todo stop combat
             player.move(exit.target)
             player.tell(player.look())
@@ -1085,11 +1078,12 @@ def do_save(player, parsed, **ctx):
     ctx["driver"].do_save(player)
 
 
-@cmd("load", "reload", "restore")
+@cmd("load", "reload", "restore", "restart")
 def do_load(player, parsed, **ctx):
     """Load a previously saved game."""
-    player.tell("If you want to reload a previously saved game, please quit and restart")
-    player.tell("the game. During startup, select the option to start from a saved game.")
+    player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
+                "and start it again. During startup, select the appropriate option to start from a saved game,",
+                "or start a new game.")
 
 
 @cmd("score")

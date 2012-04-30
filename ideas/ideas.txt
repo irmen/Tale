@@ -25,9 +25,13 @@ Do something with the circlemud xml data:
 General ideas/TODO's:
 ---------------------
 !!text layout using textwrap module: fix output of many commands such as look and examine.
+!!tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
+
+Driver/mudlib: Support separate 'mudlibs' (games) so you can 'install' different game files.
+               Move the hardcoded 'demo' mudlib parts into a separate 'demo/test game'.
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
 
