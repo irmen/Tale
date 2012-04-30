@@ -27,7 +27,6 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
-        self._output = []
         self.score = 0
         self.turns = 0
         self.previous_commandline = None
@@ -39,6 +38,7 @@ class Player(base.Living):
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
+        self._output = []
         self.textwrapper = textwrap.TextWrapper(width=self.screen_width, fix_sentence_endings=True)
 
     def __repr__(self):
@@ -47,12 +47,9 @@ class Player(base.Living):
 
     def __getstate__(self):
         state = super(Player, self).__getstate__()
-        # skip all non-serializable things
-        del state["installed_wiretaps"]
-        del state["_input"]
-        del state["input_is_available"]
-        del state["transcript"]
-        del state["textwrapper"]
+        # skip all non-serializable things (or things that need to be reinitialized)
+        for name in ["installed_wiretaps", "_input", "_output", "input_is_available", "transcript", "textwrapper"]:
+            del state[name]
         return state
 
     def __setstate__(self, state):
@@ -92,19 +89,22 @@ class Player(base.Living):
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
-        Notice that the signature and behavior of this method resembles that of the print() function,
-        which means you can easily do: print=player.tell, and use print(..) everywhere as usual.
-        If you want to output a paragraph separator, either set paragraph=True or tell a single '\n'.
-        If you provide format=False, this paragraph of text won't be formatted by textwrap.
+        If you want to output a paragraph separator, either set end=True or tell a single '\n'.
+        If you provide format=False, this paragraph of text won't be formatted by textwrap,
+        and whitespace is untouched.
         """
         super(Player, self).tell(*messages)
         if messages == ("\n",):
             self._output.append("\n")  # single newline = paragraph separator
         else:
-            txt = " ".join(str(msg).strip() for msg in messages)
+            kws = set(kwargs) - {"format", "end"}
+            assert not kws, "only 'format' and 'end' keywords are understood"
             do_format = kwargs.get("format", True)
-            do_paragraph = kwargs.get("paragraph", False)
-            if not do_format:
+            do_paragraph = kwargs.get("end", False)
+            if do_format:
+                txt = " ".join(str(msg).strip() for msg in messages)
+            else:
+                txt = "".join(str(msg) for msg in messages)
                 txt = "\a" + txt  # \a is a special control char meaning 'don't format this'
                 do_paragraph = True
             self._output.append(txt)
@@ -211,4 +211,4 @@ class Wiretap(object):
 
     def tell(self, *messages):
         for msg in messages:
-            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg), paragraph=True)
+            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg), end=True)

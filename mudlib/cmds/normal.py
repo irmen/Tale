@@ -41,7 +41,7 @@ def cmd(command, *aliases):
 @cmd("inventory")
 def do_inventory(player, parsed, **ctx):
     """Show the items you are carrying."""
-    print = player.tell
+    p = player.tell
     if parsed.who_order and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
         other = parsed.who_order[0]
@@ -50,33 +50,33 @@ def do_inventory(player, parsed, **ctx):
             name = lang.capital(other.title)
             inventory = other.inventory()
             if inventory:
-                print(name, "is carrying:")
+                p(name, "is carrying:", end=True)
                 for item in inventory:
-                    print("  " + item.title)
+                    p("  " + item.title, format=False)
             else:
-                print(name, "is carrying nothing.")
-            print("Money in possession: %s." % util.money_display(other.money))
+                p(name, "is carrying nothing.")
+            p("Money in possession: %s." % util.money_display(other.money))
             return
         elif isinstance(other, base.Item):
             # show item's inventory
             inventory = other.inventory()
             if inventory:
-                print("It contains:")
+                p("It contains:", end=True)
                 for item in inventory:
-                    print("  " + item.title)
+                    p("  " + item.title, format=False)
             else:
-                print("It's empty.")
+                p("It's empty.")
         else:
             raise ActionRefused("Can't find %s." % other.name)
     else:
         inventory = player.inventory()
         if inventory:
-            print("You are carrying:")
+            p("You are carrying:", end=True)
             for item in inventory:
-                print("  " + item.title)
+                p("  " + item.title, format=False)
         else:
-            print("You are carrying nothing.")
-        print("Money in possession: %s." % util.money_display(player.money, zero_msg="you are broke"))
+            p("You are carrying nothing.")
+        p("Money in possession: %s." % util.money_display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate", "search")
@@ -535,9 +535,9 @@ def do_help(player, parsed, **ctx):
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
         player.tell("Available commands:")
-        player.tell(", ".join(sorted(cmds_help)), paragraph=True)
+        player.tell(", ".join(sorted(cmds_help)), end=True)
         player.tell("Abbreviations:")
-        player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), paragraph=True)
+        player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
         player.tell("To see all possible verbs ask 'what is emotes' (?emotes).")
@@ -641,11 +641,11 @@ def do_stats(player, parsed, **ctx):
     race = races.races[target.race]
     race_size = races.sizes[race["size"]]
     race_bodytype = races.bodytypes[race["bodytype"]]
-    player.tell("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type), paragraph=True)
-    player.tell("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]), paragraph=True)
+    player.tell("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type), end=True)
+    player.tell("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]), end=True)
     if target.aggressive:
-        player.tell("%s seems to be aggressive." % lang.capital(target.subjective), paragraph=True)
-    player.tell(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())), paragraph=True)
+        player.tell("%s seems to be aggressive." % lang.capital(target.subjective), end=True)
+    player.tell(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
 
 
 @cmd("tell")
@@ -1041,7 +1041,7 @@ def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
     motd, mtime = util.get_motd()
     if motd:
-        player.tell("Message-of-the-day, last modified on %s:" % mtime, paragraph=True)
+        player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
         player.tell(motd)
     else:
         player.tell("There's currently no message-of-the-day.")

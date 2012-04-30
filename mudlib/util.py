@@ -301,11 +301,22 @@ def duration_display(duration):
 
 def split_paragraphs(lines):
     """
-    Split a list of lines into paragraphs, where a paragraph is separated
-    from the next by a single '\n' line. The last paragraph doesn't need to
-    be followed by a '\n' (it's optional at the end).
+    Split a list of lines into paragraphs. A set of lines ending with a single
+    '\n' line is considered a paragraph. The '\n' is optional after the last line.
+    Superfluous empty paragraphs at the end are discarded.
     Individual lines in a paragraph are separated by a space.
     """
+    if lines:
+        # remove superfluous newlines at the end
+        strippable_newlines = 0
+        try:
+            while lines[-(strippable_newlines + 1)] == "\n":
+                strippable_newlines += 1
+            strippable_newlines -= 1
+            if strippable_newlines > 0:
+                lines = lines[:-strippable_newlines]
+        except IndexError:
+            lines = ["\n"]
     paragraph = []
     for line in lines:
         if line == "\n":

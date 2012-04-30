@@ -175,11 +175,12 @@ class TestUtil(unittest.TestCase):
     def test_paragraphs(self):
         self.assertEqual([], list(util.split_paragraphs([])))
         self.assertEqual([''], list(util.split_paragraphs(["\n"])))
-        self.assertEqual(['', ''], list(util.split_paragraphs(["\n","\n"])))
+        self.assertEqual([''], list(util.split_paragraphs(["\n","\n"])))
         self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2'])))
         self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2','\n'])))
-        self.assertEqual(['1', '2', ''], list(util.split_paragraphs(['1','\n','2','\n','\n'])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2','\n','\n'])))
         self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a','1b','\n','2a','2b','\n'])))
+        self.assertEqual(['1','','2'], list(util.split_paragraphs(["1","\n","\n","2","\n","\n","\n"])), "must skip empty trailing paragraphs")
 
 
 if __name__ == '__main__':

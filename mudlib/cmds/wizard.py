@@ -67,7 +67,7 @@ def do_ls(player, parsed, **ctx):
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
-    print("<%s>" % path, paragraph=True)
+    print("<%s>" % path, end=True)
     m_items = vars(module).items()
     modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
     classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], base.MudObject)]
@@ -75,15 +75,15 @@ def do_ls(player, parsed, **ctx):
     livings = [x[0] for x in m_items if isinstance(x[1], base.Living)]
     locations = [x[0] for x in m_items if isinstance(x[1], base.Location)]
     if locations:
-        print("Locations: " + ", ".join(locations), paragraph=True)
+        print("Locations: " + ", ".join(locations), end=True)
     if livings:
-        print("Livings: " + ", ".join(livings), paragraph=True)
+        print("Livings: " + ", ".join(livings), end=True)
     if items:
-        print("Items: " + ", ".join(items), paragraph=True)
+        print("Items: " + ", ".join(items), end=True)
     if modules:
-        print("Submodules: " + ", ".join(modules), paragraph=True)
+        print("Submodules: " + ", ".join(modules), end=True)
     if classes:
-        print("Classes: " + ", ".join(classes), paragraph=True)
+        print("Classes: " + ", ".join(classes), end=True)
 
 
 @wizcmd("clone")

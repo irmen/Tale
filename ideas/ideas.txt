@@ -24,7 +24,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-!!text layout using textwrap module: fix player.look(). Add some more whitespace between commands and output.
+!!text layout using textwrap module: fix output of many commands such as look and examine.
 
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.

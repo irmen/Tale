@@ -149,10 +149,11 @@ class Driver(object):
             print("\n" + banner + "\n\n")
         choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
         if choice == "y":
+            print("")
             self.load_saved_game()
             if args.transcript:
                 self.player.activate_transcript(args.transcript)
-            self.player.tell("")
+            self.player.tell("\n")
             self.player.tell(self.player.look())
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
@@ -168,12 +169,12 @@ class Driver(object):
             self.player = player
             self.move_player_to_start_room()
             self.player.tell("\n")
-            self.player.tell("Welcome, %s." % self.player.title, paragraph=True)
+            self.player.tell("Welcome, %s." % self.player.title, end=True)
             self.player.tell("\n")
             motd, mtime = mudlib.util.get_motd()
             if motd:
-                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, paragraph=True)
-                self.player.tell(motd, paragraph=True, format=True)  # for now, the motd is displayed with formatting
+                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+                self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
                 self.player.tell("\n")
             self.player.tell(self.player.look())
         self.write_output()
@@ -281,6 +282,7 @@ class Driver(object):
             _verb = mudlib.cmds.abbreviations[_verb]
             cmd = "".join([_verb, _sep, _rest])
 
+        self.player.tell("\n")
         # Parse the command by using the soul.
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
@@ -389,7 +391,7 @@ class Driver(object):
             self.SERVER_TICK_TIME = state["server_tick_time"]
             mudlib.rooms.STARTLOCATION_PLAYER = state["start_player"]
             mudlib.rooms.STARTLOCATION_WIZARD = state["start_wizard"]
-            self.player.tell("Game loaded. Game time:", self.game_clock)
+            self.player.tell("Game loaded. Game time:", self.game_clock, end=True)
 
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)
@@ -440,7 +442,7 @@ class PlayerInputThread(threading.Thread):
             try:
                 self.input_allowed.wait()
                 sys.stdout.flush()
-                cmd = input(">> ").lstrip()
+                cmd = input("\n>> ").lstrip()
                 self.input_allowed.clear()
                 self.player.input(cmd)
                 if cmd == "quit":
