@@ -155,7 +155,7 @@ class Driver(object):
                 self.player.activate_transcript(args.transcript)
             self.player.tell("\n")
             self.player.tell("\n")
-            self.player.tell(self.player.look())
+            self.player.look()
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
             if choice == "w":
@@ -180,7 +180,7 @@ class Driver(object):
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
                 self.player.tell("\n")
                 self.player.tell("\n")
-            self.player.tell(self.player.look())
+            self.player.look()
         self.write_output()
         self.player_input_allowed = threading.Event()
         self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
@@ -233,11 +233,11 @@ class Driver(object):
                 except EOFError:
                     continue
                 except mudlib.errors.SessionExit:
-                    self.player.tell("Exiting...")
-                    self.player_input_thread.join()
-                    choice = input("Would you like to save your progress? ").strip()
+                    choice = input("\nWould you like to save your progress? ").strip()
                     if choice in ("y", "yes"):
                         self.do_save(self.player)
+                    self.player.tell("Exiting...", end=True)
+                    self.player_input_thread.join()
                     break
                 except Exception:
                     import traceback
@@ -320,7 +320,7 @@ class Driver(object):
         exit = player.location.exits[direction]
         exit.allow_passage(player)
         player.move(exit.target)
-        player.tell(player.look())
+        player.look()
 
     def do_socialize(self, parsed):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
@@ -371,7 +371,7 @@ class Driver(object):
         }
         with open("snakepit_savegame.bin", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
-        player.tell("Game saved. Game time:", self.game_clock)
+        player.tell("Game saved. Game time:", self.game_clock, end=True)
 
     def load_saved_game(self):
         try:

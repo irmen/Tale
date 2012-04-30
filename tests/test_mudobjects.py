@@ -85,36 +85,23 @@ class TestLocations(unittest.TestCase):
         self.assertFalse(self.julie in self.attic)
 
     def test_look(self):
-        expected = """[Main hall]
-A very large hall.
-A heavy wooden door to the east blocks the noises from the street outside.
-A ladder leads up.
-You see an oak table, a rusty key, and a university magazine.
-Player, attractive Julie, and rat are here."""
+        expected = ["[Main hall]", "A very large hall.",
+                    "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
+                    "You see an oak table, a rusty key, and a university magazine. Player, attractive Julie, and rat are here."]
         self.assertEqual(expected, self.hall.look())
-        expected = """[Main hall]
-A very large hall.
-A heavy wooden door to the east blocks the noises from the street outside.
-A ladder leads up.
-You see an oak table, a rusty key, and a university magazine.
-Attractive Julie and rat are here."""
+        expected = ["[Main hall]", "A very large hall.",
+                    "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
+                    "You see an oak table, a rusty key, and a university magazine. Attractive Julie and rat are here."]
         self.assertEqual(expected, self.hall.look(exclude_living=self.player))
-        expected = """[Attic]
-A dark attic."""
+        expected = ["[Attic]", "A dark attic."]
         self.assertEqual(expected, self.attic.look())
 
     def test_look_short(self):
-        expected = """[Attic]"""
+        expected = ["[Attic]"]
         self.assertEqual(expected, self.attic.look(short=True))
-        expected = """[Main hall]
-Exits: door, east, up
-You see: key, magazine, table
-Present: julie, player, rat"""
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: julie, player, rat"]
         self.assertEqual(expected, self.hall.look(short=True))
-        expected = """[Main hall]
-Exits: door, east, up
-You see: key, magazine, table
-Present: julie, rat"""
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: julie, rat"]
         self.assertEqual(expected, self.hall.look(exclude_living=self.player, short=True))
 
     def test_search_living(self):
@@ -273,19 +260,18 @@ class TestDoorsExits(unittest.TestCase):
     def test_exits(self):
         hall = Location("hall")
         attic = Location("attic")
-        exit1 = Exit(attic, "first ladder to attic")
-        exit2 = Exit(attic, "second ladder to attic", direction="up")
-        exit3 = Exit(attic, "third ladder to attic", direction="ladder")
-        exit4 = Exit(attic, "A window", "A window, maybe if you open it you can get out?", "window")
+        exit1 = Exit(attic, "The first ladder leads to the attic.")
+        exit2 = Exit(attic, "Second ladder to attic.", direction="up")
+        exit3 = Exit(attic, "Third ladder to attic.", direction="ladder")
+        exit4 = Exit(attic, "A window.", "A window, maybe if you open it you can get out?", "window")
         with self.assertRaises(ValueError):
             hall.add_exits([exit1])    # direction must be specified
         hall.add_exits([exit2, exit3, exit4])
         self.assertTrue(hall.exits["up"] is exit2)
         self.assertTrue(hall.exits["ladder"] is exit3)
         self.assertTrue(hall.exits["window"] is exit4)
-        look = sorted(hall.look().splitlines())
-        self.assertEqual(['A window', '[hall]', 'second ladder to attic', 'third ladder to attic'], look)
-        self.assertEqual("third ladder to attic", exit3.long_description)
+        self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], hall.look())
+        self.assertEqual("Third ladder to attic.", exit3.long_description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.long_description)
 
     def test_bind_exit(self):
@@ -422,6 +408,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(["line1","\n","\n","line2","\n","\n","\n"], player.get_output_lines())
     def test_tell_wrapped(self):
         player = Player("fritz", "m")
+        player.set_screen_sizes(0, 80)
         player.tell("line1")
         player.tell("line2", "\n")
         player.tell("hello\nnewline")
@@ -450,12 +437,15 @@ class TestPlayer(unittest.TestCase):
     def test_look(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
-        self.assertEqual("[Limbo]\nThe intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.", player.look())
-        player.move(attic)
-        self.assertEqual("[Attic]", player.look(short=True))
+        player.look()
+        self.assertEqual(["[Limbo]","\n","The intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.","\n"], player.get_output_lines())
+        player.move(attic, silent=True)
+        player.look(short=True)
+        self.assertEqual(["[Attic]", "\n"], player.get_output_lines())
         julie = NPC("julie", "f")
-        julie.move(attic)
-        self.assertEqual("[Attic]\nPresent: julie", player.look(short=True))
+        julie.move(attic, silent=True)
+        player.look(short=True)
+        self.assertEqual(["[Attic]","\n","Present: julie","\n"], player.get_output_lines())
     def test_others(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("merlin", "m")

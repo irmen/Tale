@@ -13,6 +13,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from ..items.basic import WorldClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 from ..globals import MUD_MAX_SCORE
 
@@ -557,7 +558,7 @@ def do_look(player, parsed, **ctx):
         else:
             raise ParseError("Maybe you should examine that instead.")
     else:
-        player.tell(player.look())
+        player.look()
 
 
 @cmd("examine", "inspect")
@@ -745,7 +746,7 @@ def do_wait(player, parsed, **ctx):
 def do_quit(player, parsed, **ctx):
     """Quit the game."""
     # @todo: ask for confirmation (async)
-    player.tell("Goodbye, %s." % player.title)
+    player.tell("Goodbye, %s." % player.title, end=True)
     raise SessionExit()
 
 
@@ -1065,7 +1066,7 @@ def do_flee(player, parsed, **ctx):
             player.tell("You flee!", end=True)
             # @todo stop combat
             player.move(exit.target)
-            player.tell(player.look())
+            player.look()
             return
         except ActionRefused:
             pass
@@ -1116,3 +1117,21 @@ def do_show(player, parsed, **ctx):
     room_msg = "%s shows %s to %s." % (lang.capital(player.title), lang.a(shown.title), target.title)
     target_msg = "%s shows you %s." % (lang.capital(player.title), lang.a(shown.title))
     player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets=[target])
+
+
+@cmd("time", "date")
+def do_time(player, parsed, **ctx):
+    """Query the current date and/or time of day."""
+    if "wizard" in player.privileges:
+        real_time = datetime.datetime.now()
+        real_time = real_time.replace(microsecond=0)
+        player.tell("The game time is:", ctx["driver"].game_clock)
+        player.tell("\n")
+        player.tell("Real time is:", real_time)
+        return
+    for item in player.inventory():
+        if isinstance(item, WorldClock):
+            player.tell("You glance at your %s." % item.name)
+            player.tell(item.description)
+            return
+    raise ActionRefused("You'll have to find a clock or watch that tells the current date or time.")

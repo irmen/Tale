@@ -277,45 +277,48 @@ class Location(MudObject):
                 tap.tell(room_msg)
 
     def look(self, exclude_living=None, short=False):
-        """returns a string describing the surroundings, possibly excluding one living from the description list"""
-        r = ["[" + self.name + "]"]
-        if self.description:
-            if not short:
-                r.append(self.description)
-        if self.exits:
-            # r.append("You can see the following exits:")
-            if short:
-                r.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
-            else:
-                exits_seen = set()
-                for exit_name in sorted(self.exits):
-                    exit = self.exits[exit_name]
-                    if exit not in exits_seen:
-                        exits_seen.add(exit)
-                        r.append(exit.short_description)
-        if self.items:
-            if short:
+        """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
+        paragraphs = ["[" + self.name + "]"]
+        if short:
+            if self.exits:
+                paragraphs.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
+            if self.items:
                 item_names = sorted(item.name for item in self.items)
-                r.append("You see: " + ", ".join(item_names))
-            else:
-                titles = sorted(item.title for item in self.items)
-                titles = [lang.a(title) for title in titles]
-                r.append("You see " + lang.join(titles) + ".")
-        if self.livings:
-            if short:
+                paragraphs.append("You see: " + ", ".join(item_names))
+            if self.livings:
                 living_names = sorted(living.name for living in self.livings if living != exclude_living)
                 if living_names:
-                    r.append("Present: " + ", ".join(living_names))
-            else:
-                titles = sorted(living.title for living in self.livings if living != exclude_living)
-                if titles:
-                    titles_str = lang.join(titles)
-                    if len(titles) > 1:
-                        titles_str += " are here."
-                    else:
-                        titles_str += " is here."
-                    r.append(lang.capital(titles_str))
-        return "\n".join(r)
+                    paragraphs.append("Present: " + ", ".join(living_names))
+            return paragraphs
+        # normal (long) output
+        if self.description:
+            paragraphs.append(self.description)
+        if self.exits:
+            exits_seen = set()
+            exit_paragraph = []
+            for exit_name in sorted(self.exits):
+                exit = self.exits[exit_name]
+                if exit not in exits_seen:
+                    exits_seen.add(exit)
+                    exit_paragraph.append(exit.short_description)
+            paragraphs.append(" ".join(exit_paragraph))
+        items_and_livings = []
+        if self.items:
+            titles = sorted(item.title for item in self.items)
+            titles = [lang.a(title) for title in titles]
+            items_and_livings.append("You see " + lang.join(titles) + ".")
+        if self.livings:
+            titles = sorted(living.title for living in self.livings if living != exclude_living)
+            if titles:
+                titles_str = lang.join(titles)
+                if len(titles) > 1:
+                    titles_str += " are here."
+                else:
+                    titles_str += " is here."
+                items_and_livings.append(lang.capital(titles_str))
+        if items_and_livings:
+            paragraphs.append(" ".join(items_and_livings))
+        return paragraphs
 
     def search_living(self, name):
         """

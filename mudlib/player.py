@@ -30,7 +30,8 @@ class Player(base.Living):
         self.score = 0
         self.turns = 0
         self.previous_commandline = None
-        self.screen_width = 72
+        self.screen_width = 75
+        self.screen_indent = 2
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -39,7 +40,9 @@ class Player(base.Living):
         self.input_is_available = Event()
         self.transcript = None
         self._output = []
-        self.textwrapper = textwrap.TextWrapper(width=self.screen_width, fix_sentence_endings=True)
+        indent = " " * self.screen_indent
+        self.textwrapper = textwrap.TextWrapper(initial_indent=indent, subsequent_indent=indent,
+                                                width=self.screen_width, fix_sentence_endings=True)
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
@@ -55,6 +58,12 @@ class Player(base.Living):
     def __setstate__(self, state):
         super(Player, self).__setstate__(state)
         self.init_nonserializables()
+
+    def set_screen_sizes(self, indent, width):
+        self.screen_indent = indent
+        self.screen_width = width
+        self.textwrapper.initial_indent = self.textwrapper.subsequent_indent = " " * indent
+        self.textwrapper.width = width
 
     def set_title(self, title, includes_name_param=False):
         if includes_name_param:
@@ -131,6 +140,12 @@ class Player(base.Living):
             if paragraph.startswith("\a"):
                 # \a means: don't format this
                 paragraph = paragraph[1:]
+                if self.screen_indent:
+                    indent = " " * self.screen_indent
+                    paragraph = paragraph.splitlines()
+                    for i in range(len(paragraph)):
+                        paragraph[i] = indent + paragraph[i]
+                    paragraph = "\n".join(paragraph)
             else:
                 self.textwrapper.width = self.screen_width
                 paragraph = self.textwrapper.fill(paragraph)
@@ -143,12 +158,13 @@ class Player(base.Living):
     def look(self, short=False):
         """look around in your surroundings (exclude player from livings)"""
         if self.location:
-            look = self.location.look(exclude_living=self, short=short)
             if "wizard" in self.privileges:
-                return repr(self.location) + "\n" + look
-            return look
+                self.tell(repr(self.location), end=True)
+            look_paragraphs = self.location.look(exclude_living=self, short=short)
+            for paragraph in look_paragraphs:
+                self.tell(paragraph, end=True)
         else:
-            return "You see nothing."
+            self.tell("You see nothing.")
 
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
