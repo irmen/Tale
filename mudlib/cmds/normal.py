@@ -721,7 +721,7 @@ def do_say(player, parsed, **ctx):
 
 @cmd("wait")
 def do_wait(player, parsed, **ctx):
-    """Let time pass. You can specify how long you want to wait."""
+    """Let time pass. You can specify how long you want to wait (in hours, minutes, seconds)."""
     print = player.tell
     if parsed.who_order:
         who = lang.join(who.title for who in parsed.who_order)
@@ -733,7 +733,7 @@ def do_wait(player, parsed, **ctx):
     else:
         duration = datetime.timedelta(minutes=10)
     if duration.total_seconds() / 3600 > 2:
-        raise ActionRefused("You can't wait more than two hours at once.")
+        raise ActionRefused("You can't wait more than two hours at once, who knows what might happen in that time?")
     ok, message = ctx["driver"].do_wait(duration)
     if ok:
         print("Time passes. You've waited %s." % util.duration_display(duration))
@@ -821,9 +821,9 @@ def do_what(player, parsed, **ctx):
     print = player.tell
     if not parsed.args:
         raise ParseError("What do you mean?")
-    if parsed.args[0] == "are":
+    if parsed.args[0] == "are" and len(parsed.args) > 2:
         raise ActionRefused("Be more specific.")
-    if len(parsed.args) >= 2 and parsed.args[0] == "is":
+    if len(parsed.args) >= 2 and parsed.args[0] in ("is", "are"):
         del parsed.args[0]
     name = parsed.args[0].rstrip("?")
     if not name:
