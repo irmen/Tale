@@ -460,4 +460,4 @@ def do_events(player, parsed, **ctx):
     print("  due     | function         | owner")
     for d in driver.deferreds:
         due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / driver.GAMETIME_TO_REALTIME))
-        print("  %-7s | %-16s | %s" % (due, d.callable.__name__, d.owner))
+        print("  %-7s | %-16s | %s" % (due, d.callable, d.owner))
