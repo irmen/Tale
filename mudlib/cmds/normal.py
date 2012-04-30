@@ -517,7 +517,6 @@ def give_money(player, amount, recipient):
 @cmd("help")
 def do_help(player, parsed, **ctx):
     """Provides some helpful information about different aspects of the game."""
-    print = player.tell
     if parsed.args:
         do_what(player, parsed, **ctx)
     else:
@@ -535,33 +534,32 @@ def do_help(player, parsed, **ctx):
             if abbrs:
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
-        print("Available commands:")
-        print(", ".join(sorted(cmds_help)))
-        print("Abbreviations:")
-        print(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())))
-        print("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
-        print("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
-        print("To see all possible verbs ask 'what is emotes' (?emotes).")
+        player.tell("Available commands:")
+        player.tell(", ".join(sorted(cmds_help)), paragraph=True)
+        player.tell("Abbreviations:")
+        player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), paragraph=True)
+        player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
+        player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
+        player.tell("To see all possible verbs ask 'what is emotes' (?emotes).")
 
 
 @cmd("look")
 def do_look(player, parsed, **ctx):
     """Look around to see where you are and what's around you."""
-    print = player.tell
     if parsed.args:
         arg = parsed.args[0]
         # look <direction> is the only thing we support, the rest should be done with examine
         if arg in player.location.exits:
             exit = player.location.exits[arg]
-            print(exit.short_description)
+            player.tell(exit.short_description)
             if exit.short_description != exit.long_description:
-                print("Maybe you should examine it?")
+                raise ActionRefused("Maybe you should examine it?")
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
-            print(player.location.exits[abbreviations[arg]].short_description)
+            player.tell(player.location.exits[abbreviations[arg]].short_description)
         else:
             raise ParseError("Maybe you should examine that instead.")
     else:
-        print(player.look())
+        player.tell(player.look())
 
 
 @cmd("examine", "inspect")
@@ -630,7 +628,6 @@ def do_examine(player, parsed, **ctx):
 @cmd("stats")
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
-    print = player.tell
     if not parsed.args:
         target = player
     elif len(parsed.who_order) == 1:
@@ -644,11 +641,11 @@ def do_stats(player, parsed, **ctx):
     race = races.races[target.race]
     race_size = races.sizes[race["size"]]
     race_bodytype = races.bodytypes[race["bodytype"]]
-    print("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type))
-    print("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]))
+    player.tell("%s (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type), paragraph=True)
+    player.tell("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]), paragraph=True)
     if target.aggressive:
-        print("%s looks aggressive." % lang.capital(target.subjective))
-    print(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
+        player.tell("%s seems to be aggressive." % lang.capital(target.subjective), paragraph=True)
+    player.tell(", ".join("%s:%s" % (s[0], s[1]) for s in sorted(target.stats.items())), paragraph=True)
 
 
 @cmd("tell")
@@ -921,7 +918,9 @@ For more general help, try the 'help' command first."""
         print("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
         print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
         print("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
+        print("\n")
         print("There are all sorts of emote possibilities, for instance:")
+        print("\n")
         print("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.")
         print("  pat max on the back  ->  You pat Max on the back.")
         print("  reply max sure thing  ->  You reply to Max: sure thing.")
@@ -932,14 +931,15 @@ For more general help, try the 'help' command first."""
         # if player asks about the emotes, print all soul emote verbs
         found = True
         print("All available soul verbs (emotes):")
-        lines = [""] * (len(soul.VERBS) // 5 + 1)
+        print("\n")
+        columns = player.screen_width // 15
+        lines = [""] * (len(soul.VERBS) // columns + 1)
         index = 0
-        for v in sorted(soul.VERBS):
-            lines[index % len(lines)] += "  %-13s" % v
+        for verb in sorted(soul.VERBS):
+            lines[index % len(lines)] += "%-15s" % verb
             index += 1
-        for line in lines:
-            print(line)
-    if name in ("adverb", "averbs"):
+        print("\n".join(lines), format=False)
+    if name in ("adverb", "adverbs"):
         found = True
         print("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
         print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
@@ -1021,8 +1021,8 @@ def do_dice(player, parsed, **ctx):
     die = "a die"
     if (number, sides) != (1, 6):
         die = "%dd%d" % (number, sides)
-    print("You roll %s. The result is: %d" % (die, total))
-    player.tell_others("{Title} rolls %s. The result is: %d" % (die, total))
+    print("You roll %s. The result is: %d." % (die, total))
+    player.tell_others("{Title} rolls %s. The result is: %d." % (die, total))
     if number > 1:
         player.location.tell("The individual rolls were: %s" % values)
 
@@ -1041,7 +1041,7 @@ def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
     motd, mtime = util.get_motd()
     if motd:
-        player.tell("Message-of-the-day, last modified on %s:" % mtime)
+        player.tell("Message-of-the-day, last modified on %s:" % mtime, paragraph=True)
         player.tell(motd)
     else:
         player.tell("There's currently no message-of-the-day.")

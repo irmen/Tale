@@ -67,7 +67,7 @@ def do_ls(player, parsed, **ctx):
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
-    print("<%s>" % path)
+    print("<%s>" % path, paragraph=True)
     m_items = vars(module).items()
     modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
     classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], base.MudObject)]
@@ -75,15 +75,15 @@ def do_ls(player, parsed, **ctx):
     livings = [x[0] for x in m_items if isinstance(x[1], base.Living)]
     locations = [x[0] for x in m_items if isinstance(x[1], base.Location)]
     if locations:
-        print("Locations: " + ", ".join(locations))
+        print("Locations: " + ", ".join(locations), paragraph=True)
     if livings:
-        print("Livings: " + ", ".join(livings))
+        print("Livings: " + ", ".join(livings), paragraph=True)
     if items:
-        print("Items: " + ", ".join(items))
+        print("Items: " + ", ".join(items), paragraph=True)
     if modules:
-        print("Submodules: " + ", ".join(modules))
+        print("Submodules: " + ", ".join(modules), paragraph=True)
     if classes:
-        print("Classes: " + ", ".join(classes))
+        print("Classes: " + ", ".join(classes), paragraph=True)
 
 
 @wizcmd("clone")
@@ -378,7 +378,6 @@ items that are normally fixed in place (move item to playername)."""
 @wizcmd("debug")
 def do_debug(player, parsed, **ctx):
     """Dumps the internal attribute values of a location (.), item or creature."""
-    print = player.tell
     if not parsed.args:
         raise ParseError("Debug what?")
     name = parsed.args[0]
@@ -388,11 +387,12 @@ def do_debug(player, parsed, **ctx):
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Can't find %s." % name)
-    print(repr(obj))
+    txt = [repr(obj)]
     for varname, value in sorted(vars(obj).items()):
-        print(".%s: %r" % (varname, value))
+        txt.append(".%s: %r" % (varname, value))
     if obj in ctx["driver"].heartbeat_objects:
-        print("%s receives heartbeats." % obj.name)
+        txt.append("%s receives heartbeats." % obj.name)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("set")
@@ -428,36 +428,36 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 @wizcmd("server")
 def do_server(player, parsed, **ctx):
     """Dump some server information."""
-    print = player.tell
     driver = ctx["driver"]
-    print("Server information:")
+    txt = ["Server information:"]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
     uptime = realtime - driver.server_started
     hours, seconds = divmod(uptime.total_seconds(), 3600)
     minutes, seconds = divmod(seconds, 60)
+    pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
-    print("Python version: %d.%d.%d" % sys.version_info[:3], sixtyfour, "on", sys.platform)
-    print("Real time:", realtime, "  Uptime: %d:%02d:%02d" % (hours, minutes, seconds))
-    print("Game time:", driver.game_clock, "  (%.1fx real time)" % driver.GAMETIME_TO_REALTIME)
-    print("Number of GC objects:", len(gc.get_objects()), "  GC counts:", gc.get_count())
-    print("Threads:", threading.active_count(), "  Players:", len(ctx["driver"].all_players()), "  Heartbeats:", len(driver.heartbeat_objects), "  Deferreds:", len(driver.deferreds))
+    txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
+    txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
+    txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, driver.GAMETIME_TO_REALTIME))
+    txt.append("Number of GC objects: %d   GC counts: %s" % (len(gc.get_objects()), gc.get_count()))
+    txt.append("Threads: %d   Players: %d   Heartbeats: %d   Deferreds: %d" % (threading.active_count(), len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
-    print("Server loop tick: %.1f sec" % driver.SERVER_TICK_TIME, "  Duration: %.2f sec." % avg_loop_duration)
+    txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (driver.SERVER_TICK_TIME, avg_loop_duration))
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("events")
 def do_events(player, parsed, **ctx):
     """Dump pending events."""
-    print = player.tell
     driver = ctx["driver"]
-    print("Pending events overview. Server tick is %.1f sec." % driver.SERVER_TICK_TIME)
-    print("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
+    txt = ["Pending events overview. Server tick is %.1f sec." % driver.SERVER_TICK_TIME]
+    txt.append("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
     for hb in driver.heartbeat_objects:
-        print(" ", hb)
-    print()
-    print("Deferreds (%d):" % len(driver.deferreds), "   (server tick: %.1f sec)" % driver.SERVER_TICK_TIME)
-    print("  due     | function         | owner")
+        txt.append("  " + str(hb))
+    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), driver.SERVER_TICK_TIME))
+    txt.append("  due     | function         | owner")
     for d in driver.deferreds:
         due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / driver.GAMETIME_TO_REALTIME))
-        print("  %-7s | %-16s | %s" % (due, d.callable, d.owner))
+        txt.append("  %-7s | %-16s | %s" % (due, d.callable, d.owner))
+    player.tell("\n".join(txt), format=False)

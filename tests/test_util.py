@@ -32,9 +32,9 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(Exception):
             util.print_object_location(p, None, None)
         util.print_object_location(p, key, None)
-        self.assertEqual("(it's not clear where key is)\n", "".join(p.get_output_lines()))
+        self.assertEqual(["(it's not clear where key is)"], p.get_output_lines())
         util.print_object_location(p, key, None, print_parentheses=False)
-        self.assertEqual("It's not clear where key is.\n", "".join(p.get_output_lines()))
+        self.assertEqual(["It's not clear where key is."], p.get_output_lines())
         util.print_object_location(p, key, bag)
         result = "".join(p.get_output_lines())
         self.assertTrue("in bag" in result and "in your inventory" in result)
@@ -171,6 +171,15 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(["boing", "The sound is coming from the south."], wt_road.msgs, "road should give sound direction")
         self.assertEqual(["boing", "You can't hear where the sound is coming from."], wt_house.msgs, "in the house you can't locate the sound direction")
         self.assertEqual([], wt_attic.msgs, "the attic is too far away to receive msgs")
+
+    def test_paragraphs(self):
+        self.assertEqual([], list(util.split_paragraphs([])))
+        self.assertEqual([''], list(util.split_paragraphs(["\n"])))
+        self.assertEqual(['', ''], list(util.split_paragraphs(["\n","\n"])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2'])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2','\n'])))
+        self.assertEqual(['1', '2', ''], list(util.split_paragraphs(['1','\n','2','\n','\n'])))
+        self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a','1b','\n','2a','2b','\n'])))
 
 
 if __name__ == '__main__':

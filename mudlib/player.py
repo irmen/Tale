@@ -12,8 +12,9 @@ else:
     import queue
 from threading import Event
 import time
+import textwrap
 from . import base, soul
-from . import lang
+from . import lang, util
 from .errors import SecurityViolation, ActionRefused
 
 
@@ -30,6 +31,7 @@ class Player(base.Living):
         self.score = 0
         self.turns = 0
         self.previous_commandline = None
+        self.screen_width = 72
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -37,6 +39,7 @@ class Player(base.Living):
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
+        self.textwrapper = textwrap.TextWrapper(width=self.screen_width, fix_sentence_endings=True)
 
     def __repr__(self):
         return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
@@ -49,6 +52,7 @@ class Player(base.Living):
         del state["_input"]
         del state["input_is_available"]
         del state["transcript"]
+        del state["textwrapper"]
         return state
 
     def __setstate__(self, state):
@@ -84,24 +88,57 @@ class Player(base.Living):
         """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
         return self.soul.process_verb_parsed(self, parsed)
 
-    def tell(self, *messages):
+    def tell(self, *messages, **kwargs):
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
         Notice that the signature and behavior of this method resembles that of the print() function,
         which means you can easily do: print=player.tell, and use print(..) everywhere as usual.
+        If you want to output a paragraph separator, either set paragraph=True or tell a single '\n'.
+        If you provide format=False, this paragraph of text won't be formatted by textwrap.
         """
         super(Player, self).tell(*messages)
-        self._output.append(" ".join(str(msg) for msg in messages))
-        self._output.append("\n")
+        if messages == ("\n",):
+            self._output.append("\n")  # single newline = paragraph separator
+        else:
+            txt = " ".join(str(msg).strip() for msg in messages)
+            do_format = kwargs.get("format", True)
+            do_paragraph = kwargs.get("paragraph", False)
+            if not do_format:
+                txt = "\a" + txt  # \a is a special control char meaning 'don't format this'
+                do_paragraph = True
+            self._output.append(txt)
+            if do_paragraph:
+                self._output.append("\n")  # paragraph separator
 
     def get_output_lines(self):
-        """gets the accumulated output lines and clears the buffer"""
+        """
+        Gets the accumulated output lines and clears the buffer.
+        Deprecated: use get_wrapped_output_lines instead.
+        """
         lines = self._output
         self._output = []
         if self.transcript:
             self.transcript.writelines(lines)
         return lines
+
+    def get_wrapped_output_lines(self):
+        """gets the accumulated output lines, formats them nicely, and clears the buffer"""
+        lines = self._output
+        self._output = []
+        output = []
+        for paragraph in util.split_paragraphs(lines):
+            if paragraph.startswith("\a"):
+                # \a means: don't format this
+                paragraph = paragraph[1:]
+            else:
+                self.textwrapper.width = self.screen_width
+                paragraph = self.textwrapper.fill(paragraph)
+            output.append(paragraph)
+        output = "\n".join(output)  # paragraphs are separated on screen by a newline
+        if self.transcript:
+            self.transcript.write(output)
+        return output
 
     def look(self, short=False):
         """look around in your surroundings (exclude player from livings)"""
@@ -174,4 +211,4 @@ class Wiretap(object):
 
     def tell(self, *messages):
         for msg in messages:
-            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg))
+            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg), paragraph=True)

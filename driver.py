@@ -167,11 +167,14 @@ class Driver(object):
             self.game_clock = self.GAMETIME_EPOCH
             self.player = player
             self.move_player_to_start_room()
-            self.player.tell("\nWelcome, %s.\n" % self.player.title)
+            self.player.tell("\n")
+            self.player.tell("Welcome, %s." % self.player.title, paragraph=True)
+            self.player.tell("\n")
             motd, mtime = mudlib.util.get_motd()
             if motd:
-                self.player.tell("Message-of-the-day, last modified on %s:" % mtime)
-                self.player.tell(motd + "\n\n")
+                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, paragraph=True)
+                self.player.tell(motd, paragraph=True, format=True)  # for now, the motd is displayed with formatting
+                self.player.tell("\n")
             self.player.tell(self.player.look())
         self.write_output()
         self.player_input_allowed = threading.Event()
@@ -212,6 +215,7 @@ class Driver(object):
                     for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
                         try:
                             self.process_player_input(cmd)
+                            self.player.tell("\n")  # paragraph separation
                         except mudlib.soul.UnknownVerbException as x:
                             if x.verb in directions:
                                 self.player.tell("You can't go in that direction.")
@@ -232,8 +236,8 @@ class Driver(object):
                     break
                 except Exception:
                     import traceback
-                    self.player.tell("* internal error:")
-                    self.player.tell(traceback.format_exc())
+                    txt = "* internal error:\n" + traceback.format_exc()
+                    self.player.tell(txt, format=False)
         self.player.destroy({"driver": self})
         self.write_output()  # flush pending output at server shutdown.
 
@@ -260,9 +264,9 @@ class Driver(object):
 
     def write_output(self):
         # print any buffered player output
-        output = self.player.get_output_lines()
+        output = self.player.get_wrapped_output_lines()
         if output:
-            print("".join(output))
+            print(output)
             sys.stdout.flush()
 
     def process_player_input(self, cmd):

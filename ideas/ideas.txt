@@ -24,6 +24,8 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
+!!text layout using textwrap module: fix player.look(). Add some more whitespace between commands and output.
+
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
 
@@ -48,7 +50,7 @@ Wiretaps: as soon as invisible objects and room message notifications are implem
 
 use lang.a more?
 less use of isinstance?
-prototypes to extend items/npc instead of inheritance
+prototypes to extend items/npc instead of inheritance?
 testing when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
 test with multiple items of same name in room, in inventory, in bag
 

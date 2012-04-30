@@ -297,3 +297,21 @@ def duration_display(duration):
     elif secs > 1:
         result.append("%d seconds" % secs)
     return lang.join(result)
+
+
+def split_paragraphs(lines):
+    """
+    Split a list of lines into paragraphs, where a paragraph is separated
+    from the next by a single '\n' line. The last paragraph doesn't need to
+    be followed by a '\n' (it's optional at the end).
+    Individual lines in a paragraph are separated by a space.
+    """
+    paragraph = []
+    for line in lines:
+        if line == "\n":
+            yield " ".join(paragraph)
+            paragraph = []
+            continue
+        paragraph.append(line.strip())
+    if paragraph:
+        yield " ".join(paragraph)

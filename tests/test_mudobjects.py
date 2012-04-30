@@ -401,9 +401,36 @@ class TestPlayer(unittest.TestCase):
         player = Player("fritz", "m")
         player.tell("line1")
         player.tell("line2")
+        player.tell("hello\nnewline")
+        player.tell("\n")
         player.tell("ints", 42, 999)
-        self.assertEqual("line1\nline2\nints 42 999\n", "".join(player.get_output_lines()))
+        self.assertEqual(["line1","line2","hello\nnewline","\n","ints 42 999"], player.get_output_lines())
         self.assertEqual([], player.get_output_lines())
+        player.tell("para1", paragraph=False)
+        player.tell("para2", paragraph=True)
+        player.tell("para3")
+        player.tell("\n")
+        player.tell("para4", "\n", "para5")
+        self.assertEqual(["para1","para2","\n","para3","\n","para4  para5"], player.get_output_lines())
+    def test_tell_wrapped(self):
+        player = Player("fritz", "m")
+        player.tell("line1")
+        player.tell("line2", "\n")
+        player.tell("hello\nnewline")
+        player.tell("\n")  # paragraph separator
+        player.tell("ints", 42, 999)
+        self.assertEqual("line1 line2 hello newline\nints 42 999", player.get_wrapped_output_lines())
+        player.tell("para1", paragraph=False)
+        player.tell("para2", paragraph=True)
+        player.tell("para3")
+        player.tell("\n")
+        player.tell("para4", "\n", "para5")
+        self.assertEqual("para1 para2\npara3\npara4  para5", player.get_wrapped_output_lines())
+        player.tell("word "*30)
+        self.assertNotEqual(("word "*30).strip(), player.get_wrapped_output_lines())
+        player.tell("word "*30, format=False)
+        self.assertEqual(("word "*30).strip(), player.get_wrapped_output_lines(), "when format=False output should be unformatted")
+
     def test_look(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
@@ -439,7 +466,7 @@ class TestPlayer(unittest.TestCase):
         player.move(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
-        self.assertEqual("message for room\n", "".join(player.get_output_lines()))
+        self.assertEqual(["message for room"], player.get_output_lines())
         with self.assertRaises(SecurityViolation):
             player.create_wiretap(julie)
         player.privileges = {"wizard"}
@@ -447,14 +474,13 @@ class TestPlayer(unittest.TestCase):
         player.create_wiretap(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
-        self.assertEqual(["\n","\n","\n","\n",
-            "[wiretap on 'Attic': message for room]","[wiretap on 'julie': message for julie]",
+        self.assertEqual(["\n","\n","\n","[wiretap on 'Attic': message for room]","[wiretap on 'julie': message for julie]",
             "[wiretap on 'julie': message for room]","message for room"], sorted(player.get_output_lines()))
         # test removing the wiretaps
         player.installed_wiretaps.clear()
         julie.tell("message for julie")
         attic.tell("message for room")
-        self.assertEqual("message for room\n", "".join(player.get_output_lines()))
+        self.assertEqual(["message for room"], player.get_output_lines())
     def testSocialize(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
