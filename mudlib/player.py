@@ -196,7 +196,7 @@ class Player(base.Living):
     def input(self, cmd):
         self._input.put(cmd)
         if self.transcript:
-            self.transcript.write("\n>> %s\n\n" % cmd)
+            self.transcript.write("\n\n>> %s\n" % cmd)
         self.input_is_available.set()
         self.turns += 1
 

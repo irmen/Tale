@@ -456,8 +456,8 @@ def do_events(player, parsed, **ctx):
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), driver.SERVER_TICK_TIME))
-    txt.append("  due     | function         | owner")
+    txt.append("  due   | function       | owner")
     for d in driver.deferreds:
         due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / driver.GAMETIME_TO_REALTIME))
-        txt.append("  %-7s | %-16s | %s" % (due, d.callable, d.owner))
+        txt.append("%-7s | %-15s| %s" % (due, d.callable, d.owner))
     player.tell("\n".join(txt), format=False)
