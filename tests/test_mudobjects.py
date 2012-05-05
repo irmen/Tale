@@ -484,6 +484,8 @@ class TestPlayer(unittest.TestCase):
             "[wiretap on 'julie': message for room]","message for room"], sorted(player.get_output_lines()))
         # test removing the wiretaps
         player.installed_wiretaps.clear()
+        import gc
+        gc.collect()
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual(["message for room"], player.get_output_lines())
@@ -596,6 +598,8 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(player.inventory())>0)
         self.assertTrue(player in loc.livings)
         player.destroy(ctx)
+        import gc
+        gc.collect()
         self.assertTrue(len(loc.wiretaps)==0)
         self.assertTrue(len(player.installed_wiretaps)==0)
         self.assertTrue(len(player.inventory())==0)
