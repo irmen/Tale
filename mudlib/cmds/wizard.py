@@ -440,8 +440,12 @@ def do_server(player, parsed, **ctx):
     txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, driver.GAMETIME_TO_REALTIME))
-    txt.append("Number of GC objects: %d   GC counts: %s" % (len(gc.get_objects()), gc.get_count()))
-    txt.append("Threads: %d   Players: %d   Heartbeats: %d   Deferreds: %d" % (threading.active_count(), len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
+    if sys.platform=="cli":
+        gc_objects = "??"
+    else:
+        gc_objects = str(len(gc.get_objects()))
+    txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
+    txt.append("Players: %d   Heartbeats: %d   Deferreds: %d" % (len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
     txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (driver.SERVER_TICK_TIME, avg_loop_duration))
     player.tell("\n".join(txt), format=False)
