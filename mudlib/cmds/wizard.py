@@ -399,7 +399,6 @@ def do_debug(player, parsed, **ctx):
 def do_set(player, parsed, **ctx):
     """Set an internal attribute of a location (.), object or creature to a new value.
 Usage is: set xxx.fieldname=value (you can use Python literals only)"""
-    print = player.tell
     if not parsed.args:
         raise ParseError("Set what? (usage: set xxx.fieldname=value)")
     args = parsed.args[0].split("=")
@@ -414,13 +413,13 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
         obj = player.location.search_living(name)
     if not obj:
         raise ActionRefused("Can't find %s." % name)
-    print(repr(obj))
+    player.tell(repr(obj), end=True)
     import ast
     value = ast.literal_eval(args[1])
     expected_type = type(getattr(obj, field))
     if expected_type is type(value):
         setattr(obj, field, value)
-        print("Field set: %s.%s = %r" % (name, field, value))
+        player.tell("Field set: %s.%s = %r" % (name, field, value))
     else:
         raise ActionRefused("Data type mismatch, expected %s." % expected_type)
 

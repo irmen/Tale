@@ -1,5 +1,8 @@
 Concepts for single player Interactive Fiction (and perhaps MUD):
 -----------------------------------------------------------------
+!!server tick linked with player command entry instead of separate timer thread -> player input no longer in thread!!
+!!tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
+!!pictures for locations (viewable in gui driver only ofcourse)!!
 Quests / Tasks / To-do list.
 Disable certain commands and features that might break immersion (such as 'stats').
 Undo? (undo the last move, needs a lot of work: every state-altering action needs
@@ -24,7 +27,9 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-!!tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
+!!'brief' command to enable brief descriptions of locations already visited !!
+!!'brief all' : brief for all locations even when not visited yet!!
+!!'brief off' : normal behavior (long descriptions always)!!
 
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
