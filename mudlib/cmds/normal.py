@@ -558,7 +558,7 @@ def do_look(player, parsed, **ctx):
         else:
             raise ParseError("Maybe you should examine that instead.")
     else:
-        player.look()
+        player.look(short=False)
 
 
 @cmd("examine", "inspect")
@@ -1135,3 +1135,30 @@ def do_time(player, parsed, **ctx):
             player.tell(item.description)
             return
     raise ActionRefused("You'll have to find a clock or watch that tells the current date or time.")
+
+
+@cmd("brief")
+def do_brief(player, parsed, **ctx):
+    """Configure the verbosity of location descriptions. 'brief' mode means: show short description
+for locations that you've already visited at least once.
+'brief all' means: show short descriptions for all locations even if you've not been there before.
+'brief off': disable brief mode, always show long descriptions.
+'brief reset': disable brief mode and forget about the known locations as well.
+Note that when you explicitly use the 'look' or 'examine' commands, the brief setting is ignored.
+    """
+    if not parsed.args:
+        player.brief = 1
+        player.tell("Brief location descriptions enabled for known locations.")
+    elif parsed.args[0] == "all":
+        player.brief = 2
+        player.tell("Brief location descriptions enabled for all locations.")
+    elif parsed.args[0] == "off":
+        player.brief = 0
+        player.tell("Verbose location descriptions restored.")
+    elif parsed.args[0] == "reset":
+        player.brief = 0
+        count = len(player.known_locations)
+        player.known_locations.clear()
+        player.tell("Verbose location descriptions have been restored, and you've forgotten about %d previously visited locations." % count)
+    else:
+        raise ParseError("That's not recognised by this command.")

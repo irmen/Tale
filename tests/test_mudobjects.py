@@ -7,6 +7,7 @@ Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net
 import unittest
 import datetime
 
+
 class DummyDriver(object):
     heartbeats = set()
     exits = []
@@ -19,6 +20,7 @@ class DummyDriver(object):
         self.exits.append(exit)
     def defer(self, due, owner, callable, *vargs, **kwargs):
         pass
+
 
 from mudlib.globals import mud_context
 mud_context.driver = DummyDriver()
@@ -33,16 +35,16 @@ import mudlib.rooms
 
 class Wiretap(object):
     def __init__(self):
-        self.msgs=[]
+        self.msgs = []
     def tell(self, msg):
         self.msgs.append(msg)
     def clear(self):
-        self.msgs=[]
+        self.msgs = []
 
 
 class MsgTraceNPC(NPC):
     def init(self):
-        self._init_called=True
+        self._init_called = True
         self.clearmessages()
     def clearmessages(self):
         self.messages = []
@@ -60,14 +62,14 @@ class TestLocations(unittest.TestCase):
         self.hall.exits["east"] = self.hall.exits["door"]
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label")
-        self.magazine =Item ("magazine", "university magazine")
+        self.magazine = Item("magazine", "university magazine")
         self.rat = NPC("rat", "n", race="rodent")
         self.julie = NPC("julie", "f", "attractive Julie",
                      """
                      She's quite the looker.
                      """)
         self.julie.aliases = {"chick"}
-        self.player = Player("player","m")
+        self.player = Player("player", "m")
         self.pencil = Item("pencil", title="fountain pen")
         self.pencil.aliases = {"pen"}
         self.bag = Container("bag")
@@ -275,7 +277,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.long_description)
 
     def test_bind_exit(self):
-        exit=Exit("town.square", "someplace")
+        exit = Exit("town.square", "someplace")
         self.assertFalse(exit.bound)
         exit.bind(mudlib.rooms)
         self.assertTrue(exit.bound)
@@ -368,7 +370,7 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
-        dragon = Monster("dragon","f",race="dragon")
+        dragon = Monster("dragon", "f", race="dragon")
         self.assertTrue(dragon. aggressive)
 
 
@@ -390,14 +392,14 @@ class TestPlayer(unittest.TestCase):
         player.tell("hello\nnewline")
         player.tell("\n")
         player.tell("ints", 42, 999)
-        self.assertEqual(["line1","line2","hello\nnewline","\n","ints 42 999"], player.get_output_lines())
+        self.assertEqual(["line1", "line2", "hello\nnewline", "\n", "ints 42 999"], player.get_output_lines())
         self.assertEqual([], player.get_output_lines())
         player.tell("para1", end=False)
         player.tell("para2", end=True)
         player.tell("para3")
         player.tell("\n")
         player.tell("para4", "\n", "para5")
-        self.assertEqual(["para1","para2","\n","para3","\n","para4  para5"], player.get_output_lines())
+        self.assertEqual(["para1", "para2", "\n", "para3", "\n", "para4  para5"], player.get_output_lines())
         player.tell("   xyz   \n  123", format=False)
         self.assertEqual(["\a   xyz   \n  123", "\n"], player.get_output_lines())
         player.tell("line1", end=True)
@@ -405,7 +407,7 @@ class TestPlayer(unittest.TestCase):
         player.tell("line2", end=True)
         player.tell("\n")
         player.tell("\n")
-        self.assertEqual(["line1","\n","\n","line2","\n","\n","\n"], player.get_output_lines())
+        self.assertEqual(["line1", "\n", "\n", "line2", "\n", "\n", "\n"], player.get_output_lines())
     def test_tell_wrapped(self):
         player = Player("fritz", "m")
         player.set_screen_sizes(0, 80)
@@ -421,10 +423,10 @@ class TestPlayer(unittest.TestCase):
         player.tell("\n")
         player.tell("para4", "\n", "para5")
         self.assertEqual("para1 para2\npara3\npara4  para5", player.get_wrapped_output_lines())
-        player.tell("word "*30)
-        self.assertNotEqual(("word "*30).strip(), player.get_wrapped_output_lines())
-        player.tell("word "*30, format=False)
-        self.assertEqual(("word "*30).strip(), player.get_wrapped_output_lines(), "when format=False output should be unformatted")
+        player.tell("word " * 30)
+        self.assertNotEqual(("word " * 30).strip(), player.get_wrapped_output_lines())
+        player.tell("word " * 30, format=False)
+        self.assertEqual(("word " * 30).strip(), player.get_wrapped_output_lines(), "when format=False output should be unformatted")
         player.tell("   xyz   \n  123", format=False)
         self.assertEqual("   xyz   \n  123", player.get_wrapped_output_lines())
         player.tell("line1", end=True)
@@ -438,14 +440,49 @@ class TestPlayer(unittest.TestCase):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         player.look()
-        self.assertEqual(["[Limbo]","\n","The intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.","\n"], player.get_output_lines())
+        self.assertEqual(["[Limbo]", "\n", "The intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.", "\n"], player.get_output_lines())
         player.move(attic, silent=True)
         player.look(short=True)
         self.assertEqual(["[Attic]", "\n"], player.get_output_lines())
         julie = NPC("julie", "f")
         julie.move(attic, silent=True)
         player.look(short=True)
-        self.assertEqual(["[Attic]","\n","Present: julie","\n"], player.get_output_lines())
+        self.assertEqual(["[Attic]", "\n", "Present: julie", "\n"], player.get_output_lines())
+
+    def test_look_brief(self):
+        player = Player("fritz", "m")
+        attic = Location("Attic", "A dark attic.")
+        cellar = Location("Cellar", "A gloomy cellar.")
+        julie = NPC("julie", "f")
+        julie.move(attic, silent=True)
+        player.move(attic, silent=True)
+        player.brief = 0  # default setting: always long descriptions
+        player.look()
+        self.assertEqual(["[Attic]", "\n", "A dark attic.", "\n", "Julie is here.", "\n"], player.get_output_lines())
+        player.look()
+        self.assertEqual(["[Attic]", "\n", "A dark attic.", "\n", "Julie is here.", "\n"], player.get_output_lines())
+        player.look(short=True)   # override
+        self.assertEqual(["[Attic]", "\n", "Present: julie", "\n"], player.get_output_lines())
+        player.brief = 1  # short for known, long for new locations
+        player.look()
+        self.assertEqual(["[Attic]", "\n", "Present: julie", "\n"], player.get_output_lines())
+        player.move(cellar, silent=True)
+        player.look()
+        self.assertEqual(["[Cellar]", "\n", "A gloomy cellar.", "\n"], player.get_output_lines())
+        player.look()
+        self.assertEqual(["[Cellar]", "\n"], player.get_output_lines())
+        player.brief = 2  # short always
+        player.known_locations.clear()
+        player.look()
+        self.assertEqual(["[Cellar]", "\n"], player.get_output_lines())
+        player.move(attic, silent=True)
+        player.look()
+        self.assertEqual(["[Attic]", "\n", "Present: julie", "\n"], player.get_output_lines())
+        player.look(short=True)   # override
+        self.assertEqual(["[Attic]", "\n", "Present: julie", "\n"], player.get_output_lines())
+        player.look(short=False)  # override
+        self.assertEqual(["[Attic]", "\n", "A dark attic.", "\n", "Julie is here.", "\n"], player.get_output_lines())
+
     def test_others(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("merlin", "m")
@@ -457,8 +494,8 @@ class TestPlayer(unittest.TestCase):
         player.move(attic, silent=True)
         player.tell_others("one", "two", "three")
         self.assertEqual([], player.get_output_lines())
-        self.assertEqual(["one","two","three"], fritz.messages)
-        self.assertEqual(["one","two","three"], julie.messages)
+        self.assertEqual(["one", "two", "three"], fritz.messages)
+        self.assertEqual(["one", "two", "three"], julie.messages)
         fritz.clearmessages()
         julie.clearmessages()
         player.tell_others("{title} and {Title}")
@@ -480,8 +517,8 @@ class TestPlayer(unittest.TestCase):
         player.create_wiretap(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
-        self.assertEqual(["\n","\n","\n","[wiretap on 'Attic': message for room]","[wiretap on 'julie': message for julie]",
-            "[wiretap on 'julie': message for room]","message for room"], sorted(player.get_output_lines()))
+        self.assertEqual(["\n", "\n", "\n", "[wiretap on 'Attic': message for room]", "[wiretap on 'julie': message for julie]",
+            "[wiretap on 'julie': message for room]", "message for room"], sorted(player.get_output_lines()))
         # test removing the wiretaps
         player.installed_wiretaps.clear()
         import gc
@@ -562,47 +599,47 @@ class TestDestroy(unittest.TestCase):
         ctx = {}
         loc = Location("loc")
         i = Item("item")
-        liv = Living("rat","n")
-        loc.exits={"north": Exit("somewhere", "somewhere")}
-        player = Player("julie","f")
+        liv = Living("rat", "n")
+        loc.exits = {"north": Exit("somewhere", "somewhere")}
+        player = Player("julie", "f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)
         loc.init_inventory([i, liv, player])
-        self.assertTrue(len(loc.exits)>0)
-        self.assertTrue(len(loc.items)>0)
-        self.assertTrue(len(loc.livings)>0)
-        self.assertTrue(len(loc.wiretaps)>0)
+        self.assertTrue(len(loc.exits) > 0)
+        self.assertTrue(len(loc.items) > 0)
+        self.assertTrue(len(loc.livings) > 0)
+        self.assertTrue(len(loc.wiretaps) > 0)
         self.assertEqual(loc, player.location)
         self.assertEqual(loc, liv.location)
-        self.assertTrue(len(player.installed_wiretaps)>0)
+        self.assertTrue(len(player.installed_wiretaps) > 0)
         loc.destroy(ctx)
-        self.assertTrue(len(loc.exits)==0)
-        self.assertTrue(len(loc.items)==0)
-        self.assertTrue(len(loc.livings)==0)
-        self.assertTrue(len(loc.wiretaps)==0)
-        self.assertTrue(len(player.installed_wiretaps)>0, "wiretap object must remain on player")
+        self.assertTrue(len(loc.exits) == 0)
+        self.assertTrue(len(loc.items) == 0)
+        self.assertTrue(len(loc.livings) == 0)
+        self.assertTrue(len(loc.wiretaps) == 0)
+        self.assertTrue(len(player.installed_wiretaps) > 0, "wiretap object must remain on player")
         self.assertEqual(_Limbo, player.location)
         self.assertEqual(_Limbo, liv.location)
 
     def test_destroy_player(self):
         ctx = {}
         loc = Location("loc")
-        player = Player("julie","f")
+        player = Player("julie", "f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)
         player.insert(Item("key"), player)
         loc.init_inventory([player])
-        self.assertTrue(len(loc.wiretaps)>0)
+        self.assertTrue(len(loc.wiretaps) > 0)
         self.assertEqual(loc, player.location)
-        self.assertTrue(len(player.installed_wiretaps)>0)
-        self.assertTrue(len(player.inventory())>0)
+        self.assertTrue(len(player.installed_wiretaps) > 0)
+        self.assertTrue(len(player.inventory()) > 0)
         self.assertTrue(player in loc.livings)
         player.destroy(ctx)
         import gc
         gc.collect()
-        self.assertTrue(len(loc.wiretaps)==0)
-        self.assertTrue(len(player.installed_wiretaps)==0)
-        self.assertTrue(len(player.inventory())==0)
+        self.assertTrue(len(loc.wiretaps) == 0)
+        self.assertTrue(len(player.installed_wiretaps) == 0)
+        self.assertTrue(len(player.inventory()) == 0)
         self.assertFalse(player in loc.livings)
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
 
@@ -613,7 +650,7 @@ class TestContainer(unittest.TestCase):
         key = Item("key")
         self.assertEqual(0, len(bag.inventory()))
         self.assertEqual(0, bag.inventory_size())
-        npc = NPC("julie","f")
+        npc = NPC("julie", "f")
         bag.insert(key, npc)
         self.assertTrue(key in bag)
         self.assertEqual(1, bag.inventory_size())
@@ -723,7 +760,7 @@ class TestItem(unittest.TestCase):
         with self.assertRaises(TypeError):
             thingy.location = "foobar"
         hall = Location("hall")
-        thingy.location=hall
+        thingy.location = hall
         self.assertEqual(hall, thingy.contained_in)
         self.assertEqual(hall, thingy.location)
         person = Living("person", "m")

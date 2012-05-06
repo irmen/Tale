@@ -32,6 +32,8 @@ class Player(base.Living):
         self.previous_commandline = None
         self.screen_width = 75
         self.screen_indent = 2
+        self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
+        self.known_locations = set()
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -155,9 +157,15 @@ class Player(base.Living):
             self.transcript.write(output)
         return output
 
-    def look(self, short=False):
+    def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
+        if short is None:
+            if self.brief == 2:
+                short = True
+            elif self.brief == 1:
+                short = self.location in self.known_locations
         if self.location:
+            self.known_locations.add(self.location)
             if "wizard" in self.privileges:
                 self.tell(repr(self.location), end=True)
             look_paragraphs = self.location.look(exclude_living=self, short=short)

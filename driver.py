@@ -155,7 +155,7 @@ class Driver(object):
                 self.player.activate_transcript(args.transcript)
             self.player.tell("\n")
             self.player.tell("\n")
-            self.player.look()
+            self.player.look(short=False)
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
             if choice == "w":
@@ -180,7 +180,7 @@ class Driver(object):
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
                 self.player.tell("\n")
                 self.player.tell("\n")
-            self.player.look()
+            self.player.look(short=False)
         self.write_output()
         self.player_input_allowed = threading.Event()
         self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)

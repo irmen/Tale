@@ -26,4 +26,4 @@ class __MudContextProxy(object):
 mud_context = __MudContextProxy()
 
 MUD_MAX_SCORE = 100     # arbitrary
-GAME_VERSION = "0.1"    # arbitrary but should be changed when the game code is updated
+GAME_VERSION = "0.2"    # arbitrary but should be changed when the game code is updated

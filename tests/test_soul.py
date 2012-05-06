@@ -80,7 +80,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("It's not clear what you mean by door1.", str(x.exception))
         with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
             soul.process_verb(player, "sit door1 zen", external_verbs={"sit"})
-        parsed=x.exception.parsed
+        parsed = x.exception.parsed
         self.assertEqual("sit", parsed.verb)
         self.assertEqual(["door1", "zen"], parsed.args)
         self.assertEqual(["door1", "zen"], parsed.unrecognized)
@@ -218,7 +218,7 @@ class TestSoul(unittest.TestCase):
         player.set_title("the great %s, destroyer of worlds", True)
         player.move(mudlib.base.Location("somewhere"))
         npc_max = mudlib.npc.NPC("max", "m")
-        player.location.livings = { npc_max, player }
+        player.location.livings = {npc_max, player}
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
         self.assertEqual("grin", verb)
         self.assertTrue(len(who) == 0)
@@ -267,7 +267,7 @@ class TestSoul(unittest.TestCase):
         soul = mudlib.soul.Soul()
         player = mudlib.player.Player("julie", "f")
         player.move(mudlib.base.Location("somewhere"))
-        player.location.livings = { mudlib.npc.NPC("max", "m"), player }
+        player.location.livings = {mudlib.npc.NPC("max", "m"), player}
         # whisper
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper \"hello there\"")
         self.assertEqual("You whisper 'hello there'.", player_msg)
@@ -373,20 +373,20 @@ class TestSoul(unittest.TestCase):
     def testCheckNameWithSpaces(self):
         livings = {"rat": "RAT", "brown bird": "BROWN BIRD"}
         items = {"paper": "PAPER", "blue gem": "BLUE GEM", "dark red crystal": "DARK RED CRYSTAL"}
-        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 0, livings, items)
-        self.assertEqual((None,None,0), result)
-        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 1, livings, items)
-        self.assertEqual((None,None,0), result)
-        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 4, livings, items)
-        self.assertEqual((None,None,0), result)
-        result = mudlib.soul.check_name_with_spaces(["give","the","blue","gem","to","rat"], 2, livings, items)
-        self.assertEqual(("BLUE GEM","blue gem",2), result)
-        result = mudlib.soul.check_name_with_spaces(["give","the","dark","red","crystal", "to","rat"], 2, livings, items)
-        self.assertEqual(("DARK RED CRYSTAL","dark red crystal",3), result)
-        result = mudlib.soul.check_name_with_spaces(["give","the","dark","red","paper", "to","rat"], 2, livings, items)
-        self.assertEqual((None,None,0), result)
-        result = mudlib.soul.check_name_with_spaces(["give", "paper", "to","brown", "bird"], 3, livings, items)
-        self.assertEqual(("BROWN BIRD","brown bird",2), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 0, livings, items)
+        self.assertEqual((None, None, 0), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 1, livings, items)
+        self.assertEqual((None, None, 0), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 4, livings, items)
+        self.assertEqual((None, None, 0), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 2, livings, items)
+        self.assertEqual(("BLUE GEM", "blue gem", 2), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "dark", "red", "crystal", "to", "rat"], 2, livings, items)
+        self.assertEqual(("DARK RED CRYSTAL", "dark red crystal", 3), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "the", "dark", "red", "paper", "to", "rat"], 2, livings, items)
+        self.assertEqual((None, None, 0), result)
+        result = mudlib.soul.check_name_with_spaces(["give", "paper", "to", "brown", "bird"], 3, livings, items)
+        self.assertEqual(("BROWN BIRD", "brown bird", 2), result)
 
     def testCheckNamesWithSpacesParsing(self):
         soul = mudlib.soul.Soul()
@@ -396,13 +396,13 @@ class TestSoul(unittest.TestCase):
         gate = mudlib.base.Exit(room, "the gate", direction="gate")
         door1 = mudlib.base.Exit(room, "door number one", direction="door one")
         door2 = mudlib.base.Exit(room, "door number two", direction="door two")
-        room.add_exits([gate,door1,door2])
+        room.add_exits([gate, door1, door2])
         bird.move(room)
         player.move(room)
         with self.assertRaises(mudlib.errors.ParseError) as x:
             soul.parse(player, "hug bird")
         self.assertEqual("It's not clear what you mean by bird.", str(x.exception))
-        parsed=soul.parse(player, "hug brown bird affection")
+        parsed = soul.parse(player, "hug brown bird affection")
         self.assertEqual("hug", parsed.verb)
         self.assertEqual("affectionately", parsed.adverb)
         self.assertEqual([bird], parsed.who_order)
@@ -437,7 +437,7 @@ class TestSoul(unittest.TestCase):
         gate = mudlib.base.Exit(room, "gate", direction="gate")
         east = mudlib.base.Exit(room, "east", direction="east")
         door1 = mudlib.base.Exit(room, "door number one", direction="door one")
-        room.add_exits([gate,door1,east])
+        room.add_exits([gate, door1, east])
         player.move(room)
         # known actions: enter/go/climb/crawl
         with self.assertRaises(mudlib.soul.NonSoulVerb) as x:
@@ -472,7 +472,7 @@ class TestSoul(unittest.TestCase):
         max_npc = mudlib.npc.NPC("max", "m")
         kate_npc = mudlib.npc.NPC("kate", "f")
         dino_npc = mudlib.npc.NPC("dinosaur", "n")
-        targets = [ max_npc, kate_npc, dino_npc ]
+        targets = [max_npc, kate_npc, dino_npc]
         targets_with_player = targets + [player]
         player.location.livings = targets
         newspaper = mudlib.base.Item("newspaper")

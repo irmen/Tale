@@ -13,11 +13,11 @@ from mudlib.player import Player
 
 class Wiretap(object):
     def __init__(self):
-        self.msgs=[]
+        self.msgs = []
     def tell(self, msg):
         self.msgs.append(msg)
     def clear(self):
-        self.msgs=[]
+        self.msgs = []
 
 
 class TestUtil(unittest.TestCase):
@@ -68,13 +68,13 @@ class TestUtil(unittest.TestCase):
 
     def test_money_to_float(self):
         self.assertEqual(0.0, util.money_to_float_fantasy({}))
-        self.assertAlmostEqual(0.3, util.money_to_float_fantasy({"copper": 1.0, "coppers": 2.0 }), places=4)
-        self.assertAlmostEqual(325.6, util.money_to_float_fantasy({"gold": 22.5, "silver": 100.2, "copper": 4 }), places=4)
+        self.assertAlmostEqual(0.3, util.money_to_float_fantasy({"copper": 1.0, "coppers": 2.0}), places=4)
+        self.assertAlmostEqual(325.6, util.money_to_float_fantasy({"gold": 22.5, "silver": 100.2, "copper": 4}), places=4)
         self.assertAlmostEqual(289.3, util.money_to_float_fantasy("22g/66s/33c"), places=4)
         self.assertEqual(0.0, util.money_to_float_modern({}))
         self.assertAlmostEqual(0.55, util.money_to_float_modern({"cent": 22, "cents": 33}), places=4)
         self.assertAlmostEqual(55.0, util.money_to_float_modern({"dollar": 22, "dollars": 33}), places=4)
-        self.assertAlmostEqual(5.42, util.money_to_float_modern({"dollar": 5, "cent": 42 }), places=4)
+        self.assertAlmostEqual(5.42, util.money_to_float_modern({"dollar": 5, "cent": 42}), places=4)
         self.assertAlmostEqual(3.45, util.money_to_float_modern("$3.45"), places=4)
         self.assertAlmostEqual(3.45, util.money_to_float_modern("$  3.45"), places=4)
 
@@ -110,7 +110,7 @@ class TestUtil(unittest.TestCase):
 
     def test_roll_die(self):
         total, values = util.roll_die()
-        self.assertTrue(1<=total<=6)
+        self.assertTrue(1 <= total <= 6)
         self.assertEqual(1, len(values))
         self.assertEqual(total, values[0])
         total, values = util.roll_die(20, 10)   # 20d10
@@ -119,26 +119,26 @@ class TestUtil(unittest.TestCase):
             util.roll_die(21, 10)
 
     def test_parse_duration(self):
-        duration = util.parse_duration(["1","hour","1","minute","1","second"])
+        duration = util.parse_duration(["1", "hour", "1", "minute", "1", "second"])
         self.assertEqual(datetime.timedelta(hours=1, minutes=1, seconds=1), duration)
-        duration = util.parse_duration(["3","hours","2","minutes","5","seconds"])
+        duration = util.parse_duration(["3", "hours", "2", "minutes", "5", "seconds"])
         self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
-        duration = util.parse_duration(["3","h","2","min","5","sec"])
+        duration = util.parse_duration(["3", "h", "2", "min", "5", "sec"])
         self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
-        duration = util.parse_duration(["3","h","2","m","5","s"])
+        duration = util.parse_duration(["3", "h", "2", "m", "5", "s"])
         self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
-        duration = util.parse_duration(["3h","2m","5s"])
+        duration = util.parse_duration(["3h", "2m", "5s"])
         self.assertEqual(datetime.timedelta(hours=3, minutes=2, seconds=5), duration)
-        duration = util.parse_duration(["2.5","min"])
+        duration = util.parse_duration(["2.5", "min"])
         self.assertEqual(datetime.timedelta(minutes=2, seconds=30), duration)
         with self.assertRaises(ParseError):
             util.parse_duration(None)
         with self.assertRaises(ParseError):
-            util.parse_duration(["1","2","3"])
+            util.parse_duration(["1", "2", "3"])
         with self.assertRaises(ParseError):
-            util.parse_duration(["1","apple"])
+            util.parse_duration(["1", "apple"])
         with self.assertRaises(ParseError):
-            util.parse_duration(["seconds","2"])
+            util.parse_duration(["seconds", "2"])
 
     def test_duration_display(self):
         self.assertEqual("no time at all", util.duration_display(datetime.timedelta(0)))
@@ -175,12 +175,12 @@ class TestUtil(unittest.TestCase):
     def test_paragraphs(self):
         self.assertEqual([], list(util.split_paragraphs([])))
         self.assertEqual([''], list(util.split_paragraphs(["\n"])))
-        self.assertEqual([''], list(util.split_paragraphs(["\n","\n"])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2'])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2','\n'])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1','\n','2','\n','\n'])))
-        self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a','1b','\n','2a','2b','\n'])))
-        self.assertEqual(['1','','2'], list(util.split_paragraphs(["1","\n","\n","2","\n","\n","\n"])), "must skip empty trailing paragraphs")
+        self.assertEqual([''], list(util.split_paragraphs(["\n", "\n"])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2'])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n'])))
+        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n', '\n'])))
+        self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a', '1b', '\n', '2a', '2b', '\n'])))
+        self.assertEqual(['1', '', '2'], list(util.split_paragraphs(["1", "\n", "\n", "2", "\n", "\n", "\n"])), "must skip empty trailing paragraphs")
 
 
 if __name__ == '__main__':

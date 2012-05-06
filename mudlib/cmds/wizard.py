@@ -439,7 +439,7 @@ def do_server(player, parsed, **ctx):
     txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, driver.GAMETIME_TO_REALTIME))
-    if sys.platform=="cli":
+    if sys.platform == "cli":
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))
