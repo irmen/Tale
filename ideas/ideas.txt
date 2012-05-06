@@ -27,10 +27,6 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-!!'brief' command to enable brief descriptions of locations already visited !!
-!!'brief all' : brief for all locations even when not visited yet!!
-!!'brief off' : normal behavior (long descriptions always)!!
-
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
 
