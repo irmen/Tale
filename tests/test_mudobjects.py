@@ -9,9 +9,11 @@ import datetime
 
 
 class DummyDriver(object):
-    heartbeats = set()
-    exits = []
-    game_clock = datetime.datetime.now()
+    def __init__(self):
+        self.heartbeats = set()
+        self.exits = []
+        self.game_clock = datetime.datetime.now()
+        self.deferreds = []
     def register_heartbeat(self, obj):
         self.heartbeats.add(obj)
     def unregister_heartbeat(self, obj):
@@ -19,7 +21,9 @@ class DummyDriver(object):
     def register_exit(self, exit):
         self.exits.append(exit)
     def defer(self, due, owner, callable, *vargs, **kwargs):
-        pass
+        self.deferreds.append((due, owner, callable))
+    def remove_deferreds(self, owner):
+        self.deferreds = [(d[0], d[1], d[2]) for d in self.deferreds if d[1] is not owner]
 
 
 from mudlib.globals import mud_context
@@ -54,6 +58,7 @@ class MsgTraceNPC(NPC):
 
 class TestLocations(unittest.TestCase):
     def setUp(self):
+        mud_context.driver = DummyDriver()
         self.hall = Location("Main hall", "A very large hall.")
         self.attic = Location("Attic", "A dark attic.")
         self.street = Location("Street", "An endless street.")
@@ -591,6 +596,8 @@ class TestDescriptions(unittest.TestCase):
 
 
 class TestDestroy(unittest.TestCase):
+    def setUp(self):
+        mud_context.driver = DummyDriver()
     def test_destroy_base(self):
         ctx = {}
         o = MudObject("x")
@@ -642,6 +649,28 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(player.inventory()) == 0)
         self.assertFalse(player in loc.livings)
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
+
+    def test_destroy_item(self):
+        thing = Item("thing")
+        ctx = {"driver": mud_context.driver}
+        thing.destroy(ctx)
+
+    def test_destroy_deferreds(self):
+        ctx = {"driver": mud_context.driver}
+        thing = Item("thing")
+        player = Player("julie", "f")
+        wolf = Monster("wolf", "m")
+        loc = Location("loc")
+        mud_context.driver.defer(datetime.datetime.now(), thing, "method")
+        mud_context.driver.defer(datetime.datetime.now(), player, "method")
+        mud_context.driver.defer(datetime.datetime.now(), wolf, "method")
+        mud_context.driver.defer(datetime.datetime.now(), loc, "method")
+        self.assertEqual(4, len(mud_context.driver.deferreds))
+        thing.destroy(ctx)
+        player.destroy(ctx)
+        wolf.destroy(ctx)
+        loc.destroy(ctx)
+        self.assertEqual(0, len(mud_context.driver.deferreds), "all deferreds must be removed")
 
 
 class TestContainer(unittest.TestCase):

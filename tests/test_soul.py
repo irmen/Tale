@@ -25,6 +25,8 @@ class DummyDriver(object):
         self.exits.append(exit)
     def defer(self, due, owner, callable, *vargs, **kwargs):
         pass
+    def remove_deferreds(self, owner):
+        pass
 
 mudlib.globals.mud_context.driver = DummyDriver()
 

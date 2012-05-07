@@ -186,7 +186,6 @@ class Player(base.Living):
         super(Player, self).destroy(ctx)
         self.installed_wiretaps.clear()  # the references from within the observed are cleared by means of weakrefs
         self.soul = None   # truly die ;-)
-        # @todo: remove deferreds, etc.
 
     def allow_give_money(self, actor, amount):
         """Do we accept money?"""

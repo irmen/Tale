@@ -434,6 +434,10 @@ class Driver(object):
             return
         raise ValueError("unknown callable on owner object")
 
+    def remove_deferreds(self, owner):
+        deferreds = [d for d in self.deferreds if d.owner is not owner]
+        self.deferreds = heapq.heapify(deferreds)
+
 
 class PlayerInputThread(threading.Thread):
     def __init__(self, player, input_allowed):

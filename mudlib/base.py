@@ -88,6 +88,7 @@ class MudObject(object):
 
     def destroy(self, ctx):
         self.unregister_heartbeat()
+        mud_context.driver.remove_deferreds(self)
 
     def register_heartbeat(self):
         """register this object with the driver to receive heartbeats"""
@@ -497,7 +498,7 @@ class Living(MudObject):
             item.destroy(ctx)
         self.__inventory.clear()
         self.wiretaps.clear()
-        # @todo: remove deferreds, attack status, etc.
+        # @todo: remove attack status, etc.
 
     def set_race(self, race):
         """set the race for this Living and copy the initial set of stats from that race"""
