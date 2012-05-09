@@ -39,7 +39,8 @@ Parser: allow simple question/answer dialog. 'no/yes' verbs? Or use continuation
 There's also some work to be done to add a confirmation question to certain verbs,
 such as 'drop all'.
 
-Invisible objects (only visible to a wizard.) Perhaps easiest by setting name, title and description to None?
+Invisible objects (only visible to a wizard.) Perhaps easiest by setting title and description to None?
+(name can't be None because the object needs a way to identify it).
 
 Wiretaps: as soon as invisible objects and room message notifications are implemented, replace the
     wiretap attribute on Location by a real wiretap object that's placed in the room?
