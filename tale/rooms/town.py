@@ -1,7 +1,8 @@
 """
 The central town, which is the place where mud players start/log in
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import copy

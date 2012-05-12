@@ -1,7 +1,8 @@
 """
 The Wizard Tower, which is the place where Wizards start/log in
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random

@@ -1,7 +1,8 @@
 """
 The actual mudlib 'world' code
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 # this is intentionally left empty; don't put stuff here that other modules

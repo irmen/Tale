@@ -1,7 +1,8 @@
 """
 Mudlib base objects.
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division
@@ -365,7 +366,7 @@ class Exit(object):
     """
     An 'exit' that connects one location to another.
     You can use a Location object as target, or a string designating the location
-    (for instance "town.square" means the square location object in mudlib.rooms.town).
+    (for instance "town.square" means the square location object in tale.rooms.town).
     If using a string, it will be retrieved and bound at runtime.
     Short_description will be shown when the player looks around the room.
     Long_description is optional and will be shown instead if the player examines the exit.
@@ -505,7 +506,7 @@ class Living(MudObject):
         self.race = race
         # Make a copy of the race stats, because they can change dynamically.
         # There's no need to copy the whole race data dict because it's available
-        # from mudlib.races, look it up by the race name.
+        # from tale.races, look it up by the race name.
         self.stats = {}
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg

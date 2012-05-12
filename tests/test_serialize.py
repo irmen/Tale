@@ -1,12 +1,13 @@
 """
 Unit tests for serialization
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import pickle
 import datetime
-from mudlib import globals, races, base, npc, soul, player
+from tale import globals, races, base, npc, soul, player
 
 class DummyDriver(object):
     heartbeats = set()

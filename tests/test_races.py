@@ -1,25 +1,26 @@
 """
 Unit tests for race data
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
-import mudlib.races
+import tale.races as races
 
 
 class TestRaces(unittest.TestCase):
     def test_attributes(self):
-        human = mudlib.races.races["human"]
+        human = races.races["human"]
         self.assertEqual(72.0, human["mass"])
         self.assertEqual(8, len(human["stats"]))
-        self.assertEqual(mudlib.races.B_HUMANOID, human["bodytype"])
-        self.assertEqual(mudlib.races.S_HUMAN_SIZED, human["size"])
+        self.assertEqual(races.B_HUMANOID, human["bodytype"])
+        self.assertEqual(races.S_HUMAN_SIZED, human["size"])
         self.assertEqual("English", human["language"])
 
     def test_descriptions(self):
-        self.assertEqual("somewhat large", mudlib.races.sizes[mudlib.races.S_SOMEWHAT_LARGE])
-        self.assertEqual("biped", mudlib.races.bodytypes[mudlib.races.B_BIPED])
+        self.assertEqual("somewhat large", races.sizes[races.S_SOMEWHAT_LARGE])
+        self.assertEqual("biped", races.bodytypes[races.B_BIPED])
 
 
 if __name__ == '__main__':

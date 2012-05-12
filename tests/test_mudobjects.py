@@ -1,11 +1,13 @@
 """
 Unittests for Mud base objects
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
 import datetime
+import tale.globals
 
 
 class DummyDriver(object):
@@ -26,15 +28,16 @@ class DummyDriver(object):
         self.deferreds = [(d[0], d[1], d[2]) for d in self.deferreds if d[1] is not owner]
 
 
-from mudlib.globals import mud_context
+from tale.globals import mud_context
 mud_context.driver = DummyDriver()
 
-from mudlib.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
-from mudlib.errors import SecurityViolation, ActionRefused, ParseError
-from mudlib.npc import NPC, Monster
-from mudlib.player import Player
-from mudlib.soul import NonSoulVerb
-import mudlib.rooms
+from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
+from tale.errors import SecurityViolation, ActionRefused, ParseError
+from tale.npc import NPC, Monster
+from tale.player import Player
+from tale.soul import NonSoulVerb
+import tale.rooms
+tale.rooms.init(mud_context.driver)
 
 
 class Wiretap(object):
@@ -284,10 +287,10 @@ class TestDoorsExits(unittest.TestCase):
     def test_bind_exit(self):
         exit = Exit("town.square", "someplace")
         self.assertFalse(exit.bound)
-        exit.bind(mudlib.rooms)
+        exit.bind(tale.rooms)
         self.assertTrue(exit.bound)
-        self.assertEqual(mudlib.rooms.town.square, exit.target)
-        exit.bind(mudlib.rooms)
+        self.assertEqual(tale.rooms.town.square, exit.target)
+        exit.bind(tale.rooms)
 
 class TestLiving(unittest.TestCase):
     def test_contains(self):

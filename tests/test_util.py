@@ -1,14 +1,15 @@
 """
 Unit tests for util functions
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import unittest
-from mudlib import util
-from mudlib.errors import ParseError
-from mudlib.base import Item, Container, Location, Exit
-from mudlib.player import Player
+from tale import util
+from tale.errors import ParseError
+from tale.base import Item, Container, Location, Exit
+from tale.player import Player
 
 
 class Wiretap(object):

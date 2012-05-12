@@ -7,7 +7,8 @@ Based on ancient soul.c v1.2 written in LPC by profezzorn@nannymud (Fredrik Hüb
 Only the verb table is more or less intact (with some additions and fixes).
 The verb parsing and message generation have been rewritten.
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division

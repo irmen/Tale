@@ -1,7 +1,8 @@
 """
 Mud driver (server).
 
-Snakepit mud driver and mudlib - Copyright by Irmen de Jong (irmen@razorvine.net)
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division
@@ -14,13 +15,20 @@ import threading
 import heapq
 import inspect
 import argparse
-import mudlib.globals       # don't import anything else from mudlib, see delayed_imports()
+from . import globals
+from . import errors
+from . import util
+from . import races
+from . import soul
+from . import player
+from . import cmds
+from . import rooms
 try:
     import readline
 except ImportError:
     pass
 else:
-    history = os.path.expanduser("~/.snakepit_history")
+    history = os.path.expanduser("~/.tale_history")
     readline.parse_and_bind("tab: complete")
     try:
         readline.read_history_file(history)
@@ -43,18 +51,6 @@ else:
 Deferred = collections.namedtuple("Deferred", "due,owner,callable,vargs,kwargs")
 
 
-def delayed_imports():
-    # we can't do these imports in global scope because first,
-    # the global driver object in mudlib.globals.mud_context needs to be set.
-    import mudlib.errors
-    import mudlib.cmds
-    import mudlib.rooms
-    import mudlib.soul
-    import mudlib.races
-    import mudlib.player
-    import mudlib.util
-
-
 def create_player_from_info():
     while True:
         name = input("Name? ").strip()
@@ -62,30 +58,29 @@ def create_player_from_info():
             break
     gender = input("Gender m/f/n? ").strip()[0]
     while True:
-        print("Player races:", ", ".join(mudlib.races.player_races))
+        print("Player races:", ", ".join(races.player_races))
         race = input("Race? ").strip()
-        if race in mudlib.races.player_races:
+        if race in races.player_races:
             break
         print("Unknown race, try again.")
     wizard = input("Wizard y/n? ").strip() == "y"
     description = "This is a random mud player."
-    player = mudlib.player.Player(name, gender, race, description)
+    p = player.Player(name, gender, race, description)
     if wizard:
-        player.privileges.add("wizard")
-        player.set_title("arch wizard %s", includes_name_param=True)
-    return player
+        p.privileges.add("wizard")
+        p.set_title("arch wizard %s", includes_name_param=True)
+    return p
 
 
 def create_default_wizard():
-    player = mudlib.player.Player("irmen", "m", "human", "This wizard looks very important.")
-    player.privileges.add("wizard")
-    player.set_title("arch wizard %s", includes_name_param=True)
-    return player
+    p = player.Player("irmen", "m", "human", "This wizard looks very important.")
+    p.privileges.add("wizard")
+    p.set_title("arch wizard %s", includes_name_param=True)
+    return p
 
 
 def create_default_player():
-    player = mudlib.player.Player("irmen", "m", "human", "A regular person.")
-    return player
+    return player.Player("irmen", "m", "human", "A regular person.")
 
 
 class Commands(object):
@@ -118,18 +113,18 @@ class Driver(object):
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
         self.commands = Commands()
-        self.game_clock = mudlib.globals.GAMETIME_EPOCH
-        if mudlib.globals.SERVER_TICK_METHOD == "command":
-            mudlib.globals.GAMETIME_TO_REALTIME = 1.0
+        self.game_clock = globals.GAMETIME_EPOCH
+        if globals.SERVER_TICK_METHOD == "command":
+            globals.GAMETIME_TO_REALTIME = 1.0
         self.server_loop_durations = collections.deque(maxlen=10)
-        mudlib.globals.mud_context.driver = self
-        delayed_imports()
-        mudlib.cmds.register_all(self.commands)
+        globals.mud_context.driver = self
+        rooms.init(self)
+        cmds.register_all(self.commands)
         self.bind_exits()
 
     def bind_exits(self):
         for exit in self.unbound_exits:
-            exit.bind(mudlib.rooms)
+            exit.bind(rooms)
         del self.unbound_exits
 
     def start(self, args):
@@ -139,13 +134,14 @@ class Driver(object):
         args = parser.parse_args()
 
         # print GPL 3.0 banner
-        print("\nSnakepit mud driver and mudlib. Copyright (C) 2012  Irmen de Jong.")
+        print("\n'Tale' mud driver, mudlib and interactive fiction framework.")
+        print("Copyright (C) 2012  Irmen de Jong.")
         print("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
         print("and you are welcome to redistribute it under the terms and conditions")
         print("of the GNU General Public License version 3. See the file LICENSE.txt")
 
         # print MUD banner and initiate player creation
-        banner = mudlib.util.get_banner()
+        banner = util.get_banner()
         if banner:
             print("\n" + banner + "\n\n")
         choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
@@ -167,14 +163,14 @@ class Driver(object):
                 player = create_player_from_info()
             if args.transcript:
                 player.activate_transcript(args.transcript)
-            self.game_clock = mudlib.globals.GAMETIME_EPOCH
+            self.game_clock = globals.GAMETIME_EPOCH
             self.player = player
             self.move_player_to_start_room()
             self.player.tell("\n")
             self.player.tell("\n")
             self.player.tell("Welcome, %s." % self.player.title, end=True)
             self.player.tell("\n")
-            motd, mtime = mudlib.util.get_motd()
+            motd, mtime = util.get_motd()
             if motd:
                 self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
                 self.player.tell("\n")
@@ -188,29 +184,29 @@ class Driver(object):
         self.main_loop()
 
     def start_player_input(self):
-        if mudlib.globals.SERVER_TICK_METHOD == "timer":
+        if globals.SERVER_TICK_METHOD == "timer":
             self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
             self.player_input_thread.setDaemon(True)
             self.player_input_thread.start()
-        elif mudlib.globals.SERVER_TICK_METHOD == "command":
+        elif globals.SERVER_TICK_METHOD == "command":
             self.player_input = PlayerInput(self.player, self.player_input_allowed)
         else:
-            raise ValueError("invalid SERVER_TICK_METHOD: " + mudlib.globals.SERVER_TICK_METHOD)
+            raise ValueError("invalid SERVER_TICK_METHOD: " + globals.SERVER_TICK_METHOD)
 
     def move_player_to_start_room(self):
         if "wizard" in self.player.privileges:
-            self.player.move(mudlib.rooms.STARTLOCATION_WIZARD)
+            self.player.move(rooms.STARTLOCATION_WIZARD)
         else:
-            self.player.move(mudlib.rooms.STARTLOCATION_PLAYER)
+            self.player.move(rooms.STARTLOCATION_PLAYER)
 
     def main_loop(self):
         directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         last_loop_time = last_server_tick = time.time()
         while True:
-            mudlib.globals.mud_context.player = self.player
+            globals.mud_context.player = self.player
             self.write_output()
             self.player_input_allowed.set()
-            if mudlib.globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= mudlib.globals.SERVER_TICK_TIME:
+            if globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= globals.SERVER_TICK_TIME:
                 # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
                 self.server_tick()
@@ -219,13 +215,13 @@ class Driver(object):
             else:
                 loop_duration = time.time() - last_loop_time
 
-            if mudlib.globals.SERVER_TICK_METHOD == "timer":
+            if globals.SERVER_TICK_METHOD == "timer":
                 try:
-                    has_input = self.player.input_is_available.wait(max(0.01, mudlib.globals.SERVER_TICK_TIME - loop_duration))
+                    has_input = self.player.input_is_available.wait(max(0.01, globals.SERVER_TICK_TIME - loop_duration))
                 except KeyboardInterrupt:
                     self.player.tell(CTRL_C_MESSAGE)
                     continue
-            elif mudlib.globals.SERVER_TICK_METHOD == "command":
+            elif globals.SERVER_TICK_METHOD == "command":
                 self.player_input.input_line()
                 has_input = self.player.input_is_available.wait()
                 before = time.time()
@@ -239,18 +235,18 @@ class Driver(object):
                         try:
                             self.process_player_input(cmd)
                             self.player.tell("\n")  # paragraph separation
-                        except mudlib.soul.UnknownVerbException as x:
+                        except soul.UnknownVerbException as x:
                             if x.verb in directions:
                                 self.player.tell("You can't go in that direction.")
                             else:
                                 self.player.tell("The verb %s is unrecognized." % x.verb)
-                        except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
+                        except (errors.ParseError, errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
                     self.player.tell(CTRL_C_MESSAGE)
                 except EOFError:
                     continue
-                except mudlib.errors.SessionExit:
+                except errors.SessionExit:
                     choice = input("\nAre you sure you want to quit? ").strip()
                     if choice not in ("y", "yes"):
                         self.player.tell("Good, thanks for staying.")
@@ -264,7 +260,7 @@ class Driver(object):
                         elif choice in ("n", "no"):
                             break
                     self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
-                    if mudlib.globals.SERVER_TICK_METHOD == "timer":
+                    if globals.SERVER_TICK_METHOD == "timer":
                         self.player_input_thread.join()
                     break
                 except Exception:
@@ -276,10 +272,10 @@ class Driver(object):
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
-        if mudlib.globals.SERVER_TICK_METHOD == "timer":
-            self.game_clock += datetime.timedelta(seconds=mudlib.globals.GAMETIME_TO_REALTIME * mudlib.globals.SERVER_TICK_TIME)
-        elif mudlib.globals.SERVER_TICK_METHOD == "command":
-            self.game_clock += datetime.timedelta(seconds=mudlib.globals.SERVER_TICK_TIME)
+        if globals.SERVER_TICK_METHOD == "timer":
+            self.game_clock += datetime.timedelta(seconds=globals.GAMETIME_TO_REALTIME * globals.SERVER_TICK_TIME)
+        elif globals.SERVER_TICK_METHOD == "command":
+            self.game_clock += datetime.timedelta(seconds=globals.SERVER_TICK_TIME)
         # heartbeats
         ctx = {"driver": self, "game_clock": self.game_clock}
         for object in self.heartbeat_objects:
@@ -308,13 +304,13 @@ class Driver(object):
     def process_player_input(self, cmd):
         if not cmd:
             return
-        if cmd and cmd[0] in mudlib.cmds.abbreviations and not cmd[0].isalpha():
+        if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
             cmd = cmd[0] + " " + cmd[1:]
         # check for an abbreviation, replace it with the full verb if present
         _verb, _sep, _rest = cmd.partition(" ")
-        if _verb in mudlib.cmds.abbreviations:
-            _verb = mudlib.cmds.abbreviations[_verb]
+        if _verb in cmds.abbreviations:
+            _verb = cmds.abbreviations[_verb]
             cmd = "".join([_verb, _sep, _rest])
 
         self.player.tell("\n")
@@ -327,11 +323,11 @@ class Driver(object):
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
             return
-        except mudlib.soul.NonSoulVerb as x:
+        except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
                 # for now, qualifiers are only supported on soul-verbs (emotes).
-                raise mudlib.errors.ParseError("That action doesn't support qualifiers.")
+                raise errors.ParseError("That action doesn't support qualifiers.")
             # Execute non-soul verb. First try directions, then the rest.
             try:
                 if parsed.verb in self.player.location.exits:
@@ -342,8 +338,8 @@ class Driver(object):
                     func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock)
                     return
                 else:
-                    raise mudlib.errors.ParseError("That doesn't make much sense.")
-            except mudlib.errors.RetrySoulVerb as x:
+                    raise errors.ParseError("That doesn't make much sense.")
+            except errors.RetrySoulVerb as x:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.do_socialize(parsed)
 
@@ -357,11 +353,11 @@ class Driver(object):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
         self.player.tell(player_message)
         self.player.location.tell(room_message, self.player, who, target_message)
-        if parsed.verb in mudlib.soul.AGGRESSIVE_VERBS:
+        if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
             # We need to check the qualifier, it might void the actual action :)
-            if parsed.qualifier not in mudlib.soul.NEGATING_QUALIFIERS:
+            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
                         living.start_attack(self.player)
@@ -380,7 +376,7 @@ class Driver(object):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times,
         # however @todo: be able to detect if something happened during the wait
-        num_tics = int(duration.seconds / mudlib.globals.GAMETIME_TO_REALTIME / mudlib.globals.SERVER_TICK_TIME)
+        num_tics = int(duration.seconds / globals.GAMETIME_TO_REALTIME / globals.SERVER_TICK_TIME)
         if num_tics < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_tics):
@@ -389,37 +385,37 @@ class Driver(object):
 
     def do_save(self, player):
         state = {
-            "version": mudlib.globals.GAME_VERSION,
+            "version": globals.GAME_VERSION,
             "player": self.player,
             "deferreds": self.deferreds,
             "game_clock": self.game_clock,
             "heartbeats": self.heartbeat_objects,
-            "start_player": mudlib.rooms.STARTLOCATION_PLAYER,
-            "start_wizard": mudlib.rooms.STARTLOCATION_WIZARD
+            "start_player": rooms.STARTLOCATION_PLAYER,
+            "start_wizard": rooms.STARTLOCATION_WIZARD
         }
-        with open("snakepit_savegame.bin", "wb") as out:
+        with open("tale_savegame.bin", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
         player.tell("Game saved. Game time:", self.game_clock, end=True)
 
     def load_saved_game(self):
         try:
-            with open("snakepit_savegame.bin", "rb") as savegame:
+            with open("tale_savegame.bin", "rb") as savegame:
                 state = pickle.load(savegame)
         except (IOError, pickle.PickleError) as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)
             raise SystemExit(10)
         else:
-            if state["version"] != mudlib.globals.GAME_VERSION:
+            if state["version"] != globals.GAME_VERSION:
                 print("This saved game data was from a different version of the game and cannot be used.")
-                print("(Current game version: %s  Saved game data version: %s)" % (mudlib.globals.GAME_VERSION, state["version"]))
+                print("(Current game version: %s  Saved game data version: %s)" % (globals.GAME_VERSION, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["game_clock"]
             self.heartbeat_objects = state["heartbeats"]
-            mudlib.rooms.STARTLOCATION_PLAYER = state["start_player"]
-            mudlib.rooms.STARTLOCATION_WIZARD = state["start_wizard"]
+            rooms.STARTLOCATION_PLAYER = state["start_player"]
+            rooms.STARTLOCATION_WIZARD = state["start_wizard"]
             self.player.tell("Game loaded. Game time:", self.game_clock, end=True)
 
     def register_heartbeat(self, mudobj):
@@ -446,7 +442,7 @@ class Driver(object):
         assert due >= self.game_clock
         # to be able to serialize this, we don't store the actual callable object.
         # instead we store its name.
-        if not isinstance(callable, mudlib.util.basestring_type):
+        if not isinstance(callable, util.basestring_type):
             callable = callable.__name__
         # check that callable is in fact a function on the owner object
         func = getattr(owner, callable, None)
