@@ -2,16 +2,12 @@ Concepts for single player Interactive Fiction (and perhaps MUD):
 -----------------------------------------------------------------
 !!tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 !!pictures for locations (viewable in gui driver only ofcourse)!!
-Quests / Tasks / To-do list.
 Disable certain commands and features that might break immersion (such as 'stats').
-Undo? (undo the last move, needs a lot of work: every state-altering action needs
-to register an appropriate action to undo the alteration)
 
 Concepts that could be implemented for a MUD (but perhaps not for single player IF):
 ------------------------------------------------------------------------------------
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
 Bulletin boards.
-Language system: speak/understand different languages
 Pets: tame/befriend/abandon (charisma/luck)
 Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
 Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
@@ -26,6 +22,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
+Language system: speak/understand different languages.
 Let objects register non-standard verbs with the location they're in.
 For instance a computer might register 'hack' and 'type'.
 
