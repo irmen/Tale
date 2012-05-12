@@ -13,9 +13,7 @@ import sys
 import threading
 import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base
-from .. import lang
-from .. import rooms
+from .. import base, lang, rooms, globals
 from ..player import Player
 
 all_commands = {}
@@ -438,15 +436,21 @@ def do_server(player, parsed, **ctx):
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
-    txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, driver.GAMETIME_TO_REALTIME))
+    if globals.SERVER_TICK_METHOD == "timer":
+        txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, globals.GAMETIME_TO_REALTIME))
+    else:
+        txt.append("Game time: %s" % driver.game_clock)
     if sys.platform == "cli":
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))
     txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
     txt.append("Players: %d   Heartbeats: %d   Deferreds: %d" % (len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
-    avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
-    txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (driver.SERVER_TICK_TIME, avg_loop_duration))
+    if globals.SERVER_TICK_METHOD == "timer":
+        avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
+        txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (globals.SERVER_TICK_TIME, avg_loop_duration))
+    elif globals.SERVER_TICK_METHOD == "command":
+        txt.append("Server loop tick: %.1f sec   (command driven)." % globals.SERVER_TICK_TIME)
     player.tell("\n".join(txt), format=False)
 
 
@@ -454,13 +458,13 @@ def do_server(player, parsed, **ctx):
 def do_events(player, parsed, **ctx):
     """Dump pending events."""
     driver = ctx["driver"]
-    txt = ["Pending events overview. Server tick is %.1f sec." % driver.SERVER_TICK_TIME]
+    txt = ["Pending events overview. Server tick is %.1f sec." % globals.SERVER_TICK_TIME]
     txt.append("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), driver.SERVER_TICK_TIME))
+    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), globals.SERVER_TICK_TIME))
     txt.append("  due   | function       | owner")
     for d in driver.deferreds:
-        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / driver.GAMETIME_TO_REALTIME))
+        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / globals.GAMETIME_TO_REALTIME))
         txt.append("%-7s | %-15s| %s" % (due, d.callable, d.owner))
     player.tell("\n".join(txt), format=False)

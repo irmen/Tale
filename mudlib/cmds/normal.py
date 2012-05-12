@@ -745,8 +745,7 @@ def do_wait(player, parsed, **ctx):
 @cmd("quit")
 def do_quit(player, parsed, **ctx):
     """Quit the game."""
-    # @todo: ask for confirmation (async)
-    player.tell("Goodbye, %s." % player.title, end=True)
+    # @todo: ask for confirmation (async).. this is now done in the driver...
     raise SessionExit()
 
 

@@ -1,6 +1,5 @@
 Concepts for single player Interactive Fiction (and perhaps MUD):
 -----------------------------------------------------------------
-!!server tick linked with player command entry instead of separate timer thread -> player input no longer in thread!!
 !!tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 !!pictures for locations (viewable in gui driver only ofcourse)!!
 Quests / Tasks / To-do list.

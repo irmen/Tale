@@ -106,11 +106,10 @@ class Commands(object):
         return result
 
 
-class Driver(object):
-    SERVER_TICK_TIME = 1.0    # in seconds
-    GAMETIME_TO_REALTIME = 5    # meaning: game time is X times the speed of real time
-    GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)
+CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
+
+class Driver(object):
     def __init__(self):
         self.heartbeat_objects = set()
         self.unbound_exits = []
@@ -119,7 +118,9 @@ class Driver(object):
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
         self.commands = Commands()
-        self.game_clock = self.GAMETIME_EPOCH
+        self.game_clock = mudlib.globals.GAMETIME_EPOCH
+        if mudlib.globals.SERVER_TICK_METHOD == "command":
+            mudlib.globals.GAMETIME_TO_REALTIME = 1.0
         self.server_loop_durations = collections.deque(maxlen=10)
         mudlib.globals.mud_context.driver = self
         delayed_imports()
@@ -166,7 +167,7 @@ class Driver(object):
                 player = create_player_from_info()
             if args.transcript:
                 player.activate_transcript(args.transcript)
-            self.game_clock = self.GAMETIME_EPOCH
+            self.game_clock = mudlib.globals.GAMETIME_EPOCH
             self.player = player
             self.move_player_to_start_room()
             self.player.tell("\n")
@@ -183,10 +184,18 @@ class Driver(object):
             self.player.look(short=False)
         self.write_output()
         self.player_input_allowed = threading.Event()
-        self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
-        self.player_input_thread.setDaemon(True)
-        self.player_input_thread.start()
+        self.start_player_input()
         self.main_loop()
+
+    def start_player_input(self):
+        if mudlib.globals.SERVER_TICK_METHOD == "timer":
+            self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
+            self.player_input_thread.setDaemon(True)
+            self.player_input_thread.start()
+        elif mudlib.globals.SERVER_TICK_METHOD == "command":
+            self.player_input = PlayerInput(self.player, self.player_input_allowed)
+        else:
+            raise ValueError("invalid SERVER_TICK_METHOD: " + mudlib.globals.SERVER_TICK_METHOD)
 
     def move_player_to_start_room(self):
         if "wizard" in self.player.privileges:
@@ -201,7 +210,7 @@ class Driver(object):
             mudlib.globals.mud_context.player = self.player
             self.write_output()
             self.player_input_allowed.set()
-            if time.time() - last_server_tick >= self.SERVER_TICK_TIME:
+            if mudlib.globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= mudlib.globals.SERVER_TICK_TIME:
                 # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
                 self.server_tick()
@@ -209,11 +218,20 @@ class Driver(object):
                 self.server_loop_durations.append(loop_duration_with_server_tick)
             else:
                 loop_duration = time.time() - last_loop_time
-            try:
-                has_input = self.player.input_is_available.wait(max(0.01, self.SERVER_TICK_TIME - loop_duration))
-            except KeyboardInterrupt:
-                self.player.tell("\n* break: Use <quit> if you want to quit.")
-                continue
+
+            if mudlib.globals.SERVER_TICK_METHOD == "timer":
+                try:
+                    has_input = self.player.input_is_available.wait(max(0.01, mudlib.globals.SERVER_TICK_TIME - loop_duration))
+                except KeyboardInterrupt:
+                    self.player.tell(CTRL_C_MESSAGE)
+                    continue
+            elif mudlib.globals.SERVER_TICK_METHOD == "command":
+                self.player_input.input_line()
+                has_input = self.player.input_is_available.wait()
+                before = time.time()
+                self.server_tick()
+                self.server_loop_durations.append(time.time() - before)
+
             last_loop_time = time.time()
             if has_input:
                 try:
@@ -229,15 +247,25 @@ class Driver(object):
                         except (mudlib.errors.ParseError, mudlib.errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    self.player.tell("\n* break: Use <quit> if you want to quit.")
+                    self.player.tell(CTRL_C_MESSAGE)
                 except EOFError:
                     continue
                 except mudlib.errors.SessionExit:
-                    choice = input("\nWould you like to save your progress? ").strip()
-                    if choice in ("y", "yes"):
-                        self.do_save(self.player)
-                    self.player.tell("Exiting...", end=True)
-                    self.player_input_thread.join()
+                    choice = input("\nAre you sure you want to quit? ").strip()
+                    if choice not in ("y", "yes"):
+                        self.player.tell("Good, thanks for staying.")
+                        self.start_player_input()
+                        continue
+                    while True:
+                        choice = input("\nWould you like to save your progress? ").strip()
+                        if choice in ("y", "yes"):
+                            self.do_save(self.player)
+                            break
+                        elif choice in ("n", "no"):
+                            break
+                    self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
+                    if mudlib.globals.SERVER_TICK_METHOD == "timer":
+                        self.player_input_thread.join()
                     break
                 except Exception:
                     import traceback
@@ -248,7 +276,10 @@ class Driver(object):
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
-        self.game_clock += datetime.timedelta(seconds=self.GAMETIME_TO_REALTIME * self.SERVER_TICK_TIME)
+        if mudlib.globals.SERVER_TICK_METHOD == "timer":
+            self.game_clock += datetime.timedelta(seconds=mudlib.globals.GAMETIME_TO_REALTIME * mudlib.globals.SERVER_TICK_TIME)
+        elif mudlib.globals.SERVER_TICK_METHOD == "command":
+            self.game_clock += datetime.timedelta(seconds=mudlib.globals.SERVER_TICK_TIME)
         # heartbeats
         ctx = {"driver": self, "game_clock": self.game_clock}
         for object in self.heartbeat_objects:
@@ -349,7 +380,7 @@ class Driver(object):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times,
         # however @todo: be able to detect if something happened during the wait
-        num_tics = int(duration.seconds / self.GAMETIME_TO_REALTIME / self.SERVER_TICK_TIME)
+        num_tics = int(duration.seconds / mudlib.globals.GAMETIME_TO_REALTIME / mudlib.globals.SERVER_TICK_TIME)
         if num_tics < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_tics):
@@ -362,10 +393,7 @@ class Driver(object):
             "player": self.player,
             "deferreds": self.deferreds,
             "game_clock": self.game_clock,
-            "gametime_epoch": self.GAMETIME_EPOCH,
-            "gametime_to_rt": self.GAMETIME_TO_REALTIME,
             "heartbeats": self.heartbeat_objects,
-            "server_tick_time": self.SERVER_TICK_TIME,
             "start_player": mudlib.rooms.STARTLOCATION_PLAYER,
             "start_wizard": mudlib.rooms.STARTLOCATION_WIZARD
         }
@@ -389,10 +417,7 @@ class Driver(object):
             self.player = state["player"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["game_clock"]
-            self.GAMETIME_EPOCH = state["gametime_epoch"]
-            self.GAMETIME_TO_REALTIME = state["gametime_to_rt"]
             self.heartbeat_objects = state["heartbeats"]
-            self.SERVER_TICK_TIME = state["server_tick_time"]
             mudlib.rooms.STARTLOCATION_PLAYER = state["start_player"]
             mudlib.rooms.STARTLOCATION_WIZARD = state["start_wizard"]
             self.player.tell("Game loaded. Game time:", self.game_clock, end=True)
@@ -442,23 +467,32 @@ class Driver(object):
 class PlayerInputThread(threading.Thread):
     def __init__(self, player, input_allowed):
         super(PlayerInputThread, self).__init__()
+        self.player_input = PlayerInput(player, input_allowed)
+
+    def run(self):
+        while self.player_input.input_line():
+            pass
+
+
+class PlayerInput(object):
+    def __init__(self, player, input_allowed):
         self.player = player
         self.input_allowed = input_allowed
 
-    def run(self):
-        while True:
-            try:
-                self.input_allowed.wait()
-                sys.stdout.flush()
-                cmd = input("\n>> ").lstrip()
-                self.input_allowed.clear()
-                self.player.input(cmd)
-                if cmd == "quit":
-                    break
-            except KeyboardInterrupt:
-                self.player.tell("\n* break: Use <quit> if you want to quit.")
-            except EOFError:
-                pass
+    def input_line(self):
+        try:
+            self.input_allowed.wait()
+            sys.stdout.flush()
+            cmd = input("\n>> ").lstrip()
+            self.input_allowed.clear()
+            self.player.input(cmd)
+            if cmd == "quit":
+                return False
+        except KeyboardInterrupt:
+            self.player.tell(CTRL_C_MESSAGE)
+        except EOFError:
+            pass
+        return True
 
 
 if __name__ == "__main__":

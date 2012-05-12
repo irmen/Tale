@@ -12,7 +12,7 @@ from ..npc import NPC, Monster
 from ..errors import ActionRefused
 from ..items.basic import trashcan, newspaper, gem, worldclock
 from ..util import message_nearby_locations
-from ..globals import mud_context
+from .. import globals
 from .. import lang
 
 square = Location("Essglen Town square",
@@ -76,14 +76,14 @@ class TownCrier(NPC):
     def init(self):
         # note: this npc uses the deferred feature to yell stuff at certain moments/
         # the blubbering idiot NPC uses a heartbeat mechanism (less efficient)
-        due = mud_context.driver.game_clock + datetime.timedelta(seconds=5)
-        mud_context.driver.defer(due, self, self.do_cry)
+        due = globals.mud_context.driver.game_clock + datetime.timedelta(seconds=5)
+        globals.mud_context.driver.defer(due, self, self.do_cry)
 
     def do_cry(self, driver=None):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock + datetime.timedelta(seconds=random.randint(10,20) * driver.GAMETIME_TO_REALTIME)
-        mud_context.driver.defer(due, self, self.do_cry)
+        due = driver.game_clock + datetime.timedelta(seconds=random.randint(10,20) * globals.GAMETIME_TO_REALTIME)
+        globals.mud_context.driver.defer(due, self, self.do_cry)
 
 
 towncrier = TownCrier("laish", "f", "Laish the town crier",
