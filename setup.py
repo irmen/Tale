@@ -3,8 +3,10 @@ from distutils.core import setup
 setup(
     name='tale',
     version='0.3',
-    packages=['tale'],
-    # package_dir={'': 'tale'},
+    packages=['tale', 'tale.cmds', 'tale.items', 'tale.messages', 'tale.rooms'],
+    package_data={
+        'tale': ['soul_adverbs.txt', 'messages/*']
+        },
     url='http://irmen.home.xs4all.nl/tale/',
     license='GPL v3',
     author='Irmen de Jong',

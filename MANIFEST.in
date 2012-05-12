@@ -1,7 +1,5 @@
 include LICENSE.txt
 include MANIFEST.in
-recursive-include tale/messages *
-include tale/soul_adverbs.txt
 recursive-include tests *
 recursive-include ideas *
 global-exclude */.svn/*
