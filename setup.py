@@ -1,8 +1,12 @@
 from distutils.core import setup
 
+from tale.globals import GAME_VERSION
+
+print("version="+GAME_VERSION)
+
 setup(
     name='tale',
-    version='0.3',
+    version=GAME_VERSION,
     packages=['tale', 'tale.cmds', 'tale.items', 'tale.messages', 'tale.rooms'],
     package_data={
         'tale': ['soul_adverbs.txt', 'messages/*']
@@ -12,7 +16,12 @@ setup(
     author='Irmen de Jong',
     author_email='irmen@razorvine.net',
     description='Mud, mudlib & interactive fiction framework',
-    long_description="""Tale is a framework for creating mudlibs, muds and/or interactive fiction (text adventures).""",
+    long_description="""Tale is a framework for creating mudlibs, muds and/or interactive fiction (text adventures).
+
+It's still being designed and new features are implement along the way,
+but the current version contains a runnable minimalistic mud world that you
+can explore. Start it by running the driver; ``python -m tale.driver``.
+""",
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=[],
     platforms="any",
