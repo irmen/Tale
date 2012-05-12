@@ -23,7 +23,7 @@ but the current version contains a runnable minimalistic mud world that you
 can explore. Start it by running the driver; ``python -m tale.driver``.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
-    scripts=["tale-driver.cmd", "tale-driver.sh"],
+    scripts=["tale-driver.cmd", "tale-driver"],
     platforms="any",
     classifiers= [
         "Development Status :: 3 - Alpha",
