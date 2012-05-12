@@ -16,6 +16,7 @@ import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import base, lang, rooms, globals
 from ..player import Player
+from .. import __version__
 
 all_commands = {}
 
@@ -436,6 +437,7 @@ def do_server(player, parsed, **ctx):
     pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
+    txt.append("Tale library: %s   Game version: %s %s" % (__version__, globals.GAME_TITLE, globals.GAME_VERSION))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     if globals.SERVER_TICK_METHOD == "timer":
         txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, globals.GAMETIME_TO_REALTIME))

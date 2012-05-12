@@ -23,6 +23,7 @@ from . import soul
 from . import player
 from . import cmds
 from . import rooms
+from . import __version__ as tale_version_str
 try:
     import readline
 except ImportError:
@@ -104,8 +105,16 @@ class Commands(object):
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
 
+def version_tuple(v_str):
+    return tuple(int(n) for n in v_str.split('.'))
+
+
 class Driver(object):
     def __init__(self):
+        tale_version = version_tuple(tale_version_str)
+        tale_version_required = version_tuple(globals.REQUIRES_TALE_VERSION)
+        if tale_version < tale_version_required:
+            raise RuntimeError("The game requires tale "+globals.REQUIRES_TALE_VERSION+" but installed is "+tale_version_str)
         self.heartbeat_objects = set()
         self.unbound_exits = []
         self.deferreds = []  # heapq
@@ -168,7 +177,7 @@ class Driver(object):
             self.move_player_to_start_room()
             self.player.tell("\n")
             self.player.tell("\n")
-            self.player.tell("Welcome, %s." % self.player.title, end=True)
+            self.player.tell("Welcome to %s, %s." % (globals.GAME_TITLE, self.player.title), end=True)
             self.player.tell("\n")
             motd, mtime = util.get_motd()
             if motd:

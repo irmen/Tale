@@ -11,3 +11,8 @@ Quickstart:
 Run the included test world by starting the driver:
 
 $ python -m tale.driver
+
+
+
+Tale is 100% pure Python and runs on Python 2.7 and 3.2+.
+It should also work on Pypy and Ironpython, but no guarantees.

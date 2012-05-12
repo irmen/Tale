@@ -1,12 +1,12 @@
 from distutils.core import setup
 
-from tale.globals import GAME_VERSION
+import tale
 
-print("version="+GAME_VERSION)
+print("version="+tale.__version__)
 
 setup(
     name='tale',
-    version=GAME_VERSION,
+    version=tale.__version__,
     packages=['tale', 'tale.cmds', 'tale.items', 'tale.messages', 'tale.rooms'],
     package_data={
         'tale': ['soul_adverbs.txt', 'messages/*']
@@ -23,7 +23,7 @@ but the current version contains a runnable minimalistic mud world that you
 can explore. Start it by running the driver; ``python -m tale.driver``.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
-    scripts=[],
+    scripts=["tale-driver.cmd", "tale-driver.sh"],
     platforms="any",
     classifiers= [
         "Development Status :: 3 - Alpha",
