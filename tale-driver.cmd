@@ -1,1 +1,1 @@
-@python -m tale.driver
+@python -m tale.driver %*
