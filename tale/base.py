@@ -434,6 +434,12 @@ class Exit(object):
     def unlock(self, item, actor):
         raise ActionRefused("You can't unlock that.")
 
+    def activate(self, actor):
+        raise ActionRefused("You can't activate that.")
+
+    def deactivate(self, actor):
+        raise ActionRefused("You can't deactivate that.")
+
 
 class Living(MudObject):
     """
