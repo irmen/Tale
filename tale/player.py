@@ -16,7 +16,7 @@ import time
 import textwrap
 from . import base, soul
 from . import lang, util
-from .errors import SecurityViolation, ActionRefused
+from .errors import SecurityViolation, ActionRefused, ParseError
 
 
 class Player(base.Living):
@@ -91,6 +91,9 @@ class Player(base.Living):
             # check if any of the targeted objects is a non-living
             if not all(isinstance(who, base.Living) for who in parsed.who_order):
                 raise soul.NonSoulVerb(parsed)
+        # check if any of the targeted objects is an exit
+        if any(isinstance(w, base.Exit) for w in parsed.who_info):
+            raise ParseError("That doesn't make much sense.")
         return parsed
 
     def socialize_parsed(self, parsed):

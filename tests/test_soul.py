@@ -56,6 +56,8 @@ class TestSoul(unittest.TestCase):
         with self.assertRaises(tale.errors.ParseError) as ex:
             soul.process_verb(player, "fail _unknown_verb_ herp derp")
         self.assertEqual("It's not clear what you mean by '_unknown_verb_'.", str(ex.exception))
+        self.assertTrue(soul.is_verb("bounce"))
+        self.assertFalse(soul.is_verb("_unknown_verb_"))
 
     def testAdverbWithoutVerb(self):
         soul = tale.soul.Soul()

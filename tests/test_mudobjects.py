@@ -566,6 +566,14 @@ class TestPlayer(unittest.TestCase):
         parsed = x.exception.parsed
         self.assertEqual("befrotzificate", parsed.verb)
         self.assertEqual([julie, player], parsed.who_order)
+        attic.exits["south"] = Exit("target", "door")
+        try:
+            player.parse("push south", room_exits=player.location.exits)
+            self.fail("push south should throw a parse error because of the exit that is used")
+        except ParseError:
+            pass
+        with self.assertRaises(NonSoulVerb):
+            player.parse("fart south", room_exits=player.location.exits)
 
 
 class TestDescriptions(unittest.TestCase):

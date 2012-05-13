@@ -387,7 +387,7 @@ NONLIVING_OK_VERBS = {
 
 assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
 
-MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run"}     # used to move through an exit
+MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run", "move"}     # used to move through an exit
 
 ACTION_QUALIFIERS = {
     # qualifier -> (actionmsg, roommsg, use room actionstr)
@@ -551,6 +551,9 @@ class Soul(object):
     """
     def __init__(self):
         pass
+
+    def is_verb(self, verb):
+        return verb in VERBS
 
     def process_verb(self, player, commandstring, external_verbs=frozenset()):
         """
