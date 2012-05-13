@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division
 import collections
+from functools import total_ordering
 import datetime
 import sys
 import time
@@ -48,6 +49,7 @@ if sys.version_info < (3, 0):
     input = raw_input
 
 
+@total_ordering
 class Deferred(object):
     __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
 
@@ -57,6 +59,12 @@ class Deferred(object):
         self.callable = callable
         self.vargs = vargs
         self.kwargs = kwargs
+
+    def __eq__(self, other):
+        return self.due == other.due
+
+    def __lt__(self, other):
+        return self.due < other.due   # deferreds must be sortable
 
 
 def create_player_from_info():
@@ -409,13 +417,13 @@ class Driver(object):
             "start_player": rooms.STARTLOCATION_PLAYER,
             "start_wizard": rooms.STARTLOCATION_WIZARD
         }
-        with open("tale_savegame.bin", "wb") as out:
+        with open(globals.GAME_TITLE.lower() + ".savegame", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
         player.tell("Game saved. Game time:", self.game_clock, end=True)
 
     def load_saved_game(self):
         try:
-            with open("tale_savegame.bin", "rb") as savegame:
+            with open(globals.GAME_TITLE.lower() + ".savegame", "rb") as savegame:
                 state = pickle.load(savegame)
         except (IOError, pickle.PickleError) as x:
             print("There was a problem loading the saved game data:")
