@@ -283,6 +283,18 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], hall.look())
         self.assertEqual("Third ladder to attic.", exit3.long_description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.long_description)
+        with self.assertRaises(ActionRefused):
+            exit1.activate(None)
+        with self.assertRaises(ActionRefused):
+            exit1.deactivate(None)
+        with self.assertRaises(ActionRefused):
+            exit1.close(None, None)
+        with self.assertRaises(ActionRefused):
+            exit1.open(None, None)
+        with self.assertRaises(ActionRefused):
+            exit1.lock(None, None)
+        with self.assertRaises(ActionRefused):
+            exit1.unlock(None, None)
 
     def test_bind_exit(self):
         exit = Exit("town.square", "someplace")
@@ -813,6 +825,23 @@ class TestItem(unittest.TestCase):
         key.move(backpack, person)
         self.assertEqual(backpack, key.contained_in)
         self.assertEqual(hall, key.location)
+
+
+class TestMudObject(unittest.TestCase):
+    def test_mudobj(self):
+        try:
+            x = MudObject("name", "the title", "description")
+            self.fail("assertion error expected")
+        except AssertionError:
+            pass
+        x = MudObject("name", "title", "description")
+        x.init()
+        x.heartbeat(None)
+        with self.assertRaises(ActionRefused):
+            x.activate(None)
+        with self.assertRaises(ActionRefused):
+            x.deactivate(None)
+        x.destroy(None)
 
 
 if __name__ == '__main__':
