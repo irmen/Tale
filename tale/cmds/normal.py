@@ -14,9 +14,9 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .. import globals
 from ..items.basic import WorldClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
-from ..globals import MUD_MAX_SCORE
 
 all_commands = {}
 abbreviations = {}   # will be injected
@@ -1093,7 +1093,7 @@ def do_load(player, parsed, **ctx):
 @cmd("score")
 def do_score(player, parsed, **ctx):
     """Displays your current score in the game."""
-    player.tell("Your score is %d out of a possible %d. (in %s turns)" % (player.score, MUD_MAX_SCORE, player.turns))
+    player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, globals.MAX_SCORE, player.turns))
 
 
 @cmd("transcript")

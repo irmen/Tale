@@ -35,6 +35,8 @@ class Player(base.Living):
         self.screen_indent = 2
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
+        self.story_complete = False
+        self.story_complete_callback = None
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -73,6 +75,11 @@ class Player(base.Living):
             self.title = title % lang.capital(self.name)
         else:
             self.title = title
+
+    def story_completed(self, callback=None):
+        """The player completed the story. Set some flags"""
+        self.story_complete = True
+        self.story_complete_callback = callback
 
     def parse(self, commandline, external_verbs=frozenset()):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""

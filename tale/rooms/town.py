@@ -10,9 +10,9 @@ import random
 import datetime
 from ..base import Location, Exit, Door, Item, Container, heartbeat
 from ..npc import NPC, Monster
-from ..errors import ActionRefused
+from ..errors import ActionRefused, StoryCompleted
 from ..items.basic import trashcan, newspaper, gem, worldclock
-from ..util import message_nearby_locations
+from ..util import message_nearby_locations, input
 from .. import globals
 from .. import lang
 
@@ -142,3 +142,32 @@ alley.exits["fourth door"] = alley.exits["door four"]
 alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
 square.exits["alley"] = Exit(alley, "There's an alley to the south.")
 square.exits["south"] = square.exits["alley"]
+
+
+class GameEnd(Location):
+    def init(self):
+        pass
+    def insert(self, obj, actor):
+        if obj is globals.mud_context.player:
+            # Player entered this location!
+            # The StoryCompleted exception is an immediate game end trigger.
+            # This means the player never actually enters this location
+            # (because the insert call aborts with an exception)
+            # raise StoryCompleted(self.completion)
+            obj.story_completed(self.completion)
+            # setting the status on the player is usually better,
+            # it allows the driver to complete the last player action normally.
+        return super(GameEnd, self).insert(obj, actor)
+    def completion(self, player, driver):
+        player.tell("")
+        player.tell("Congratulations! You beat the game!")
+        player.tell("")
+        player.tell("You scored %d (out of %d) in %d turns." % (player.score, globals.MAX_SCORE, player.turns))
+        driver.write_output()
+        input("\nPress enter to continue. ")
+        player.tell("\n")
+        player.tell("Hope you had fun!")
+
+
+game_end = GameEnd("Game End", "It seems like it is game over!")
+lane.exits["east"] = Exit(game_end, "To the east, it looks like it is game over.")

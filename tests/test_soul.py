@@ -13,22 +13,7 @@ import tale.soul
 import tale.player
 import tale.npc
 import tale.errors
-
-
-class DummyDriver(object):
-    heartbeats = set()
-    exits = []
-    game_clock = datetime.datetime.now()
-    def register_heartbeat(self, obj):
-        self.heartbeats.add(obj)
-    def unregister_heartbeat(self, obj):
-        self.heartbeats.discard(obj)
-    def register_exit(self, exit):
-        self.exits.append(exit)
-    def defer(self, due, owner, callable, *vargs, **kwargs):
-        pass
-    def remove_deferreds(self, owner):
-        pass
+from supportstuff import DummyDriver
 
 tale.globals.mud_context.driver = DummyDriver()
 
@@ -53,18 +38,20 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("_unknown_verb_", ex.exception.verb)
         self.assertEqual(None, ex.exception.words)
         self.assertEqual(None, ex.exception.qualifier)
-        with self.assertRaises(tale.errors.ParseError) as ex:
+        with self.assertRaises(tale.soul.UnknownVerbException) as ex:
             soul.process_verb(player, "fail _unknown_verb_ herp derp")
-        self.assertEqual("It's not clear what you mean by '_unknown_verb_'.", str(ex.exception))
+        self.assertEqual("_unknown_verb_", ex.exception.verb)
+        self.assertEqual("fail", ex.exception.qualifier)
+        self.assertEqual(["_unknown_verb_", "herp", "derp"], ex.exception.words)
         self.assertTrue(soul.is_verb("bounce"))
         self.assertFalse(soul.is_verb("_unknown_verb_"))
 
     def testAdverbWithoutVerb(self):
         soul = tale.soul.Soul()
         player = tale.player.Player("julie", "f")
-        with self.assertRaises(tale.errors.ParseError) as ex:
+        with self.assertRaises(tale.soul.UnknownVerbException) as ex:
             soul.parse(player, "forg")     # forgetfully etc.
-        self.assertEqual("It's not clear what you mean by 'forg'.", str(ex.exception))
+        self.assertEqual("forg", ex.exception.verb)
         with self.assertRaises(tale.errors.ParseError) as ex:
             soul.parse(player, "giggle forg")     # forgetfully etc.
         self.assertEqual("What adverb did you mean: forgetfully or forgivingly?", str(ex.exception))
@@ -72,7 +59,7 @@ class TestSoul(unittest.TestCase):
     def testExternalVerbs(self):
         soul = tale.soul.Soul()
         player = tale.player.Player("julie", "f")
-        with self.assertRaises(tale.errors.ParseError):
+        with self.assertRaises(tale.soul.UnknownVerbException):
             soul.process_verb(player, "externalverb")
         verb, _ = soul.process_verb(player, "sit", external_verbs=set())
         self.assertEqual("sit", verb)
@@ -158,8 +145,9 @@ class TestSoul(unittest.TestCase):
             soul.parse(player, "fail")
         with self.assertRaises(tale.errors.ParseError):
             soul.parse(player, "fail in")
-        with self.assertRaises(tale.errors.ParseError) as x:
+        with self.assertRaises(tale.soul.UnknownVerbException) as x:
             soul.parse(player, "in fail")
+        self.assertEqual("fail", x.exception.verb)
         parsed = soul.parse(player, "in sit")
         self.assertIsNone(parsed.qualifier)
         self.assertIsNone(parsed.adverb)
@@ -430,7 +418,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("frobnizz", parsed.verb)
         self.assertEqual(["gate"], parsed.args)
         self.assertEqual([gate], parsed.who_order)
-        with self.assertRaises(tale.errors.ParseError):
+        with self.assertRaises(tale.soul.UnknownVerbException):
             soul.parse(player, "door")
         parsed = soul.parse(player, "enter door two", external_verbs={"enter"})
         self.assertEqual("enter", parsed.verb)
@@ -562,7 +550,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Crawl where?", str(x.exception))
         room = tale.base.Location("somewhere")  # no exits in this new room
         player.move(room)
-        with self.assertRaises(tale.errors.ParseError):
+        with self.assertRaises(tale.soul.UnknownVerbException):
             soul.parse(player, "crawl")   # must raise unknownverb if there are no exits in the room
 
     def testUnparsed(self):

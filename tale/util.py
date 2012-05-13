@@ -18,11 +18,13 @@ from .errors import ParseError
 
 if sys.version_info < (3, 0):
     basestring_type = basestring
+    input = raw_input
 
     def next_iter(iterable):
         return iterable.next()
 else:
     basestring_type = str
+    input = input
 
     def next_iter(iterable):
         return next(iterable)

@@ -948,7 +948,7 @@ class Soul(object):
                             raise ParseError("Perhaps you meant %s?" % name)
                 if not external_verb:
                     if not verb:
-                        raise ParseError("It's not clear what you mean by '%s'." % word)
+                        raise UnknownVerbException(word, words, qualifier)
                     # check if it is a prefix of an adverb, if so, suggest a few adverbs
                     adverbs = lang.adverb_by_prefix(word)
                     if len(adverbs) == 1:

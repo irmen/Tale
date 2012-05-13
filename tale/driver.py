@@ -44,9 +44,7 @@ else:
 
     atexit.register(save_history, history)
 
-
-if sys.version_info < (3, 0):
-    input = raw_input
+input = util.input
 
 
 @total_ordering
@@ -125,6 +123,8 @@ def version_tuple(v_str):
 
 
 class Driver(object):
+    directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
+
     def __init__(self):
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(globals.REQUIRES_TALE_VERSION)
@@ -229,11 +229,14 @@ class Driver(object):
             self.player.move(rooms.STARTLOCATION_PLAYER)
 
     def main_loop(self):
-        directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
         last_loop_time = last_server_tick = time.time()
         while True:
             globals.mud_context.player = self.player
             self.write_output()
+            if self.player.story_complete:
+                # congratulations ;-)
+                self.story_complete_output(self.player.story_complete_callback)
+                break
             self.player_input_allowed.set()
             if globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= globals.SERVER_TICK_TIME:
                 # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
@@ -265,16 +268,19 @@ class Driver(object):
                             self.process_player_input(cmd)
                             self.player.tell("\n")  # paragraph separation
                         except soul.UnknownVerbException as x:
-                            if x.verb in directions:
+                            if x.verb in self.directions:
                                 self.player.tell("You can't go in that direction.")
                             else:
-                                self.player.tell("The verb %s is unrecognized." % x.verb)
+                                self.player.tell("The verb '%s' is unrecognized." % x.verb)
                         except (errors.ParseError, errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
                     self.player.tell(CTRL_C_MESSAGE)
                 except EOFError:
                     continue
+                except errors.StoryCompleted as ex:
+                    # congratulations ;-)
+                    self.player.story_completed(ex.callback)
                 except errors.SessionExit:
                     choice = input("\nAre you sure you want to quit? ").strip()
                     if choice not in ("y", "yes"):
@@ -323,8 +329,18 @@ class Driver(object):
         # buffered output
         self.write_output()
 
+    def story_complete_output(self, callback):
+        if callback:
+            callback(self.player, self)
+        else:
+            self.player.tell("\n")
+            self.player.tell("Congratulations, you've finished the game.", end=True)
+            if globals.MAX_SCORE:
+                self.player.tell("Your final score is %d out of a possible %d. (in %d turns)" %
+                                 (self.player.score, globals.MAX_SCORE, self.player.turns), end=True)
+
     def write_output(self):
-        # print any buffered player output
+        """print any buffered player output to the screen"""
         output = self.player.get_wrapped_output_lines()
         if output:
             print(output)

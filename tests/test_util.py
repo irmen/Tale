@@ -10,33 +10,9 @@ from tale import util, globals
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
-
-
-class DummyDriver(object):
-    heartbeats = set()
-    exits = []
-    game_clock = datetime.datetime.now()
-    def register_heartbeat(self, obj):
-        self.heartbeats.add(obj)
-    def unregister_heartbeat(self, obj):
-        self.heartbeats.discard(obj)
-    def register_exit(self, exit):
-        self.exits.append(exit)
-    def defer(self, due, owner, callable, *vargs, **kwargs):
-        pass
-    def remove_deferreds(self, owner):
-        pass
+from supportstuff import DummyDriver, Wiretap
 
 globals.mud_context.driver = DummyDriver()
-
-
-class Wiretap(object):
-    def __init__(self):
-        self.msgs = []
-    def tell(self, msg):
-        self.msgs.append(msg)
-    def clear(self):
-        self.msgs = []
 
 
 class TestUtil(unittest.TestCase):

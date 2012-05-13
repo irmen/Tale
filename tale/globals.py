@@ -27,12 +27,12 @@ class __MudContextProxy(object):
 
 mud_context = __MudContextProxy()
 
-MUD_MAX_SCORE = 100     # arbitrary
+MAX_SCORE = 100     # arbitrary, but when max score is reached, the game is supposed to end.
 SERVER_TICK_METHOD = "timer"    # 'command' (waits for player entry) or 'timer' (async timer driven)
 SERVER_TICK_TIME = 1.0    # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
 GAMETIME_TO_REALTIME = 5    # meaning: game time is X times the speed of real time (only used with "timer" tick method)
 GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)    # start date/time of the game clock
 
 GAME_TITLE = "Snakepit"
-GAME_VERSION = "0.3"    # arbitrary but should be changed when the game code or any parameter above is updated
-REQUIRES_TALE_VERSION = "0.2"    # tale library required to run the game
+GAME_VERSION = "0.3"    # arbitrary but should be changed when the game code or any parameter here is changed
+REQUIRES_TALE_VERSION = "0.3"    # tale library required to run the game
