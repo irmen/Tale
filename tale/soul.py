@@ -731,7 +731,7 @@ class Soul(object):
         action_room = action_room.replace("$", "s")
         return result_messages(action, action_room)
 
-    def parse(self, player, cmd, external_verbs=frozenset(), room_exits=None):
+    def parse(self, player, cmd, external_verbs=frozenset()):
         """Parse a command string, returns a ParseResults object."""
         qualifier = None
         message_verb = False  # does the verb expect a message?
@@ -744,7 +744,6 @@ class Soul(object):
         who_info = defaultdict(WhoInfo)
         who_order = []
         who_sequence = 0
-        room_exits = room_exits or {}
         unparsed = cmd
 
         # a substring enclosed in quotes will be extracted as the message
@@ -778,14 +777,14 @@ class Soul(object):
             verbdata = VERBS[verb][2]
             message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
             # note: don't add verb to arg_words
-        elif room_exits:
+        elif player.location.exits:
             # check if the words are the name of a room exit.
             move_action = None
             if words[0] in MOVEMENT_VERBS:
                 move_action = words.pop(0)
                 if not words:
                     raise ParseError("%s where?" % lang.capital(move_action))
-            exit, exit_name, wordcount = check_name_with_spaces(words, 0, room_exits, {})
+            exit, exit_name, wordcount = check_name_with_spaces(words, 0, player.location.exits, {})
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")

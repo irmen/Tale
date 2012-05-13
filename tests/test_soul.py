@@ -426,23 +426,23 @@ class TestSoul(unittest.TestCase):
         # check spaces in exit names
         parsed = soul.parse(player, "gate", external_verbs=frozenset(room.exits))
         self.assertEqual("gate", parsed.verb)
-        parsed = soul.parse(player, "frobnizz gate", external_verbs={"frobnizz"}, room_exits=player.location.exits)
+        parsed = soul.parse(player, "frobnizz gate", external_verbs={"frobnizz"})
         self.assertEqual("frobnizz", parsed.verb)
         self.assertEqual(["gate"], parsed.args)
         self.assertEqual([gate], parsed.who_order)
         with self.assertRaises(tale.errors.ParseError):
-            soul.parse(player, "door", room_exits=player.location.exits)
-        parsed = soul.parse(player, "enter door two", external_verbs={"enter"}, room_exits=player.location.exits)
+            soul.parse(player, "door")
+        parsed = soul.parse(player, "enter door two", external_verbs={"enter"})
         self.assertEqual("enter", parsed.verb)
         self.assertEqual(["door two"], parsed.args)
         self.assertEqual([door2], parsed.who_order)
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "door one", room_exits=player.location.exits)
+            soul.parse(player, "door one")
         parsed = x.exception.parsed
         self.assertEqual("door one", parsed.verb)
         self.assertEqual([door1], parsed.who_order)
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "door two", room_exits=player.location.exits)
+            soul.parse(player, "door two")
         parsed = x.exception.parsed
         self.assertEqual("door two", parsed.verb)
         self.assertEqual([door2], parsed.who_order)
@@ -458,23 +458,23 @@ class TestSoul(unittest.TestCase):
         player.move(room)
         # known actions: enter/go/climb/crawl
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "enter door one", room_exits=player.location.exits)
+            soul.parse(player, "enter door one")
         parsed = x.exception.parsed
         self.assertEqual("door one", parsed.verb)
         self.assertEqual([door1], parsed.who_order)
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "climb gate", room_exits=player.location.exits)
+            soul.parse(player, "climb gate")
         parsed = x.exception.parsed
         self.assertEqual("gate", parsed.verb)
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "go east", room_exits=player.location.exits)
+            soul.parse(player, "go east")
         parsed = x.exception.parsed
         self.assertEqual("east", parsed.verb)
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "crawl east", room_exits=player.location.exits)
+            soul.parse(player, "crawl east")
         parsed = x.exception.parsed
         self.assertEqual("east", parsed.verb)
-        parsed = soul.parse(player, "jump west", room_exits=player.location.exits)
+        parsed = soul.parse(player, "jump west")
         self.assertEqual("jump", parsed.verb)
         self.assertEqual("westwards", parsed.adverb)
 
@@ -549,19 +549,21 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(1, len(parsed.who_order))
         # check movement parsing for room exits
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
-            soul.parse(player, "crawl south", room_exits=player.location.exits)
+            soul.parse(player, "crawl south")
         self.assertEqual("south", x.exception.parsed.verb, "just the exit is the verb, not the movement action")
         self.assertEqual([south_exit], x.exception.parsed.who_order, "exit must be in the who set")
         parsed_str = str(x.exception.parsed)
         self.assertTrue("verb=south" in parsed_str)
         with self.assertRaises(tale.errors.ParseError) as x:
-            soul.parse(player, "crawl somewherenotexisting", room_exits=player.location.exits)
+            soul.parse(player, "crawl somewherenotexisting")
         self.assertEqual("You can't crawl there.", str(x.exception))
         with self.assertRaises(tale.errors.ParseError) as x:
-            soul.parse(player, "crawl", room_exits=player.location.exits)
+            soul.parse(player, "crawl")
         self.assertEqual("Crawl where?", str(x.exception))
+        room = tale.base.Location("somewhere")  # no exits in this new room
+        player.move(room)
         with self.assertRaises(tale.errors.ParseError):
-            soul.parse(player, "crawl", room_exits=[])   # must raise unknownverb if there are no exits in the room
+            soul.parse(player, "crawl")   # must raise unknownverb if there are no exits in the room
 
     def testUnparsed(self):
         soul = tale.soul.Soul()

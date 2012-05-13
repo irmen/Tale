@@ -568,12 +568,12 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual([julie, player], parsed.who_order)
         attic.exits["south"] = Exit("target", "door")
         try:
-            player.parse("push south", room_exits=player.location.exits)
+            player.parse("push south")
             self.fail("push south should throw a parse error because of the exit that is used")
         except ParseError:
             pass
         with self.assertRaises(NonSoulVerb):
-            player.parse("fart south", room_exits=player.location.exits)
+            player.parse("fart south")
 
 
 class TestDescriptions(unittest.TestCase):

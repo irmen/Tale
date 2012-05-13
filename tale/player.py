@@ -74,7 +74,7 @@ class Player(base.Living):
         else:
             self.title = title
 
-    def parse(self, commandline, external_verbs=frozenset(), room_exits=None):
+    def parse(self, commandline, external_verbs=frozenset()):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
         if commandline == "again":
             # special case, repeat previous command
@@ -84,7 +84,7 @@ class Player(base.Living):
             else:
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
-        parsed = self.soul.parse(self, commandline, external_verbs, room_exits)
+        parsed = self.soul.parse(self, commandline, external_verbs)
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
         if parsed.verb not in soul.NONLIVING_OK_VERBS:
