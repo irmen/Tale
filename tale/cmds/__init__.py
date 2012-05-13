@@ -25,6 +25,7 @@ abbreviations = {
     "'": "say"
     }
 
+
 def register_all(cmd_processor):
     """
     Register all commands with the command processor.

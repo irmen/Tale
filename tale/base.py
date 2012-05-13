@@ -42,7 +42,8 @@ Exit
 
 Every object that can hold other objects does so in its "inventory" (a set).
 You can't access it directly, object.inventory() returns a frozenset copy of it.
-Except Location: it separates the items and livings it contains internally. Use its enter/leave methods.
+Except Location: it separates the items and livings it contains internally.
+Use its enter/leave methods instead.
 """
 
 

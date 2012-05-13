@@ -35,4 +35,4 @@ GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)    # start date/time o
 
 GAME_TITLE = "Snakepit"
 GAME_VERSION = "0.3"    # arbitrary but should be changed when the game code or any parameter above is updated
-REQUIRES_TALE_VERSION = "0.1"    # tale library required to run the game
+REQUIRES_TALE_VERSION = "0.2"    # tale library required to run the game

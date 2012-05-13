@@ -15,6 +15,7 @@ import threading
 import heapq
 import inspect
 import argparse
+import pickle
 from . import globals
 from . import errors
 from . import util
@@ -45,11 +46,17 @@ else:
 
 if sys.version_info < (3, 0):
     input = raw_input
-    import cPickle as pickle
-else:
-    import pickle
 
-Deferred = collections.namedtuple("Deferred", "due,owner,callable,vargs,kwargs")
+
+class Deferred(object):
+    __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
+
+    def __init__(self, due, owner, callable, vargs, kwargs):
+        self.due = due
+        self.owner = owner
+        self.callable = callable
+        self.vargs = vargs
+        self.kwargs = kwargs
 
 
 def create_player_from_info():
@@ -114,7 +121,7 @@ class Driver(object):
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(globals.REQUIRES_TALE_VERSION)
         if tale_version < tale_version_required:
-            raise RuntimeError("The game requires tale "+globals.REQUIRES_TALE_VERSION+" but installed is "+tale_version_str)
+            raise RuntimeError("The game requires tale " + globals.REQUIRES_TALE_VERSION + " but installed is " + tale_version_str)
         self.heartbeat_objects = set()
         self.unbound_exits = []
         self.deferreds = []  # heapq
@@ -465,8 +472,8 @@ class Driver(object):
         raise ValueError("unknown callable on owner object")
 
     def remove_deferreds(self, owner):
-        deferreds = [d for d in self.deferreds if d.owner is not owner]
-        self.deferreds = heapq.heapify(deferreds)
+        self.deferreds = [d for d in self.deferreds if d.owner is not owner]
+        heapq.heapify(self.deferreds)
 
 
 class PlayerInputThread(threading.Thread):
