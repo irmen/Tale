@@ -14,11 +14,12 @@ import sys
 import threading
 import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, rooms, globals
+from .. import base, lang, rooms, globals, util
 from ..player import Player
 from .. import __version__
 
 all_commands = {}
+LIBRARY_MODULE_NAME = "tale"
 
 
 def wizcmd(command, *aliases):
@@ -39,6 +40,7 @@ def wizcmd(command, *aliases):
             raise ValueError("Command defined more than once: " + command)
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
+            func.__doc__ = util.format_docstring(func.__doc__)
             all_commands[command] = makewizcmd
             for alias in aliases:
                 if alias in all_commands:
@@ -52,7 +54,7 @@ def wizcmd(command, *aliases):
 
 @wizcmd("ls")
 def do_ls(player, parsed, **ctx):
-    """List the contents of a module path under the mudlib tree (try .items.basic)"""
+    """List the contents of a module path under the library tree (try !ls .items.basic)"""
     print = player.tell
     if not parsed.args:
         raise ParseError("ls what path?")
@@ -60,7 +62,7 @@ def do_ls(player, parsed, **ctx):
     if not path.startswith("."):
         raise ActionRefused("Path must start with '.'")
     try:
-        module_name = "mudlib"
+        module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
         __import__(module_name)
@@ -99,7 +101,7 @@ def do_clone(player, parsed, **ctx):
         if not objectname:
             raise ActionRefused("Invalid object path")
         try:
-            module_name = "mudlib"
+            module_name = LIBRARY_MODULE_NAME
             if len(path) > 1:
                 module_name += path
             __import__(module_name)
@@ -237,7 +239,7 @@ def do_teleport(player, parsed, **ctx):
         if not objectname:
             raise ActionRefused("Invalid object path")
         try:
-            module_name = "mudlib"
+            module_name = LIBRARY_MODULE_NAME
             if len(path) > 1:
                 module_name += path
             __import__(module_name)
@@ -330,7 +332,7 @@ def do_reload(player, parsed, **ctx):
     if not path.startswith("."):
         raise ActionRefused("Path must start with '.'")
     try:
-        module_name = "mudlib"
+        module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
         __import__(module_name)
@@ -461,8 +463,8 @@ def do_server(player, parsed, **ctx):
 def do_events(player, parsed, **ctx):
     """Dump pending events."""
     driver = ctx["driver"]
-    txt = ["Pending events overview. Server tick is %.1f sec." % globals.SERVER_TICK_TIME]
-    txt.append("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
+    txt = ["Pending events overview. Server tick is %.1f sec." % globals.SERVER_TICK_TIME,
+           "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), globals.SERVER_TICK_TIME))

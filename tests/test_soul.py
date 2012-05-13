@@ -14,6 +14,7 @@ import tale.player
 import tale.npc
 import tale.errors
 
+
 class DummyDriver(object):
     heartbeats = set()
     exits = []
@@ -30,6 +31,7 @@ class DummyDriver(object):
         pass
 
 tale.globals.mud_context.driver = DummyDriver()
+
 
 class TestSoul(unittest.TestCase):
     def testSpacify(self):
@@ -53,7 +55,17 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(None, ex.exception.qualifier)
         with self.assertRaises(tale.errors.ParseError) as ex:
             soul.process_verb(player, "fail _unknown_verb_ herp derp")
-        self.assertEqual("It's not clear what you mean by _unknown_verb_.", str(ex.exception))
+        self.assertEqual("It's not clear what you mean by '_unknown_verb_'.", str(ex.exception))
+
+    def testAdverbWithoutVerb(self):
+        soul = tale.soul.Soul()
+        player = tale.player.Player("julie", "f")
+        with self.assertRaises(tale.errors.ParseError) as ex:
+            soul.parse(player, "forg")     # forgetfully etc.
+        self.assertEqual("It's not clear what you mean by 'forg'.", str(ex.exception))
+        with self.assertRaises(tale.errors.ParseError) as ex:
+            soul.parse(player, "giggle forg")     # forgetfully etc.
+        self.assertEqual("What adverb did you mean: forgetfully or forgivingly?", str(ex.exception))
 
     def testExternalVerbs(self):
         soul = tale.soul.Soul()
@@ -80,7 +92,7 @@ class TestSoul(unittest.TestCase):
         player = tale.player.Player("julie", "f")
         with self.assertRaises(tale.soul.ParseError) as x:
             soul.process_verb(player, "sit door1")
-        self.assertEqual("It's not clear what you mean by door1.", str(x.exception))
+        self.assertEqual("It's not clear what you mean by 'door1'.", str(x.exception))
         with self.assertRaises(tale.soul.NonSoulVerb) as x:
             soul.process_verb(player, "sit door1 zen", external_verbs={"sit"})
         parsed = x.exception.parsed
@@ -109,14 +121,14 @@ class TestSoul(unittest.TestCase):
         harry = tale.base.Living("harry", "m")
         self.assertEqual("your own", tale.soul.poss_replacement(player, player, player))  # your own foot
         self.assertEqual("his own",  tale.soul.poss_replacement(player, player, julie))   # his own foot
-        self.assertEqual("harry's",   tale.soul.poss_replacement(player, harry, player))   # harrys foot
-        self.assertEqual("harry's",   tale.soul.poss_replacement(player, harry, julie))    # harrys foot
-        self.assertEqual("harry's",   tale.soul.poss_replacement(player, harry, None))     # harrys foot
+        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, player))   # harrys foot
+        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, julie))    # harrys foot
+        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, None))     # harrys foot
         self.assertEqual("your",     tale.soul.poss_replacement(julie, player, player))   # your foot
-        self.assertEqual("Fritz's",   tale.soul.poss_replacement(julie, player, harry))    # fritz' foot
-        self.assertEqual("harry's",   tale.soul.poss_replacement(julie, harry, player))    # harrys foot
+        self.assertEqual("Fritz's",  tale.soul.poss_replacement(julie, player, harry))    # fritz' foot
+        self.assertEqual("harry's",  tale.soul.poss_replacement(julie, harry, player))    # harrys foot
         self.assertEqual("your",     tale.soul.poss_replacement(julie, harry, harry))     # your foot
-        self.assertEqual("harry's",   tale.soul.poss_replacement(julie, harry, None))      # harrys foot
+        self.assertEqual("harry's",  tale.soul.poss_replacement(julie, harry, None))      # harrys foot
 
     def testGender(self):
         soul = tale.soul.Soul()
@@ -404,7 +416,7 @@ class TestSoul(unittest.TestCase):
         player.move(room)
         with self.assertRaises(tale.errors.ParseError) as x:
             soul.parse(player, "hug bird")
-        self.assertEqual("It's not clear what you mean by bird.", str(x.exception))
+        self.assertEqual("It's not clear what you mean by 'bird'.", str(x.exception))
         parsed = soul.parse(player, "hug brown bird affection")
         self.assertEqual("hug", parsed.verb)
         self.assertEqual("affectionately", parsed.adverb)
@@ -519,7 +531,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Perhaps you meant newspaper?", str(x.exception), "must suggest item with prefix")
         with self.assertRaises(tale.errors.ParseError) as x:
             soul.parse(player, "slap undefined")
-        self.assertEqual("It's not clear what you mean by undefined.", str(x.exception))
+        self.assertEqual("It's not clear what you mean by 'undefined'.", str(x.exception))
         parsed = soul.parse(player, "smile west")
         self.assertEqual("westwards", parsed.adverb)
         with self.assertRaises(tale.errors.ParseError) as x:

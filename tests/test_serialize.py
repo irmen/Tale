@@ -9,6 +9,7 @@ import pickle
 import datetime
 from tale import globals, races, base, npc, soul, player
 
+
 class DummyDriver(object):
     heartbeats = set()
     exits = []
@@ -23,6 +24,7 @@ class DummyDriver(object):
         pass
 
 globals.mud_context.driver = DummyDriver()
+
 
 def serializecycle(obj):
     ser = pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)

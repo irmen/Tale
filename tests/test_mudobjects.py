@@ -292,6 +292,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual(tale.rooms.town.square, exit.target)
         exit.bind(tale.rooms)
 
+
 class TestLiving(unittest.TestCase):
     def test_contains(self):
         orc = Living("orc", "m")
@@ -736,6 +737,7 @@ class TestContainer(unittest.TestCase):
         self.assertEqual("bag", bag.name)
         self.assertEqual("leather bag (containing things)", bag.title)
         self.assertEqual("a small leather bag", bag.description)
+
 
 class TestItem(unittest.TestCase):
     def test_insertremove(self):

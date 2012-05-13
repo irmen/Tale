@@ -6,10 +6,28 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import unittest
-from tale import util
+from tale import util, globals
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
+
+
+class DummyDriver(object):
+    heartbeats = set()
+    exits = []
+    game_clock = datetime.datetime.now()
+    def register_heartbeat(self, obj):
+        self.heartbeats.add(obj)
+    def unregister_heartbeat(self, obj):
+        self.heartbeats.discard(obj)
+    def register_exit(self, exit):
+        self.exits.append(exit)
+    def defer(self, due, owner, callable, *vargs, **kwargs):
+        pass
+    def remove_deferreds(self, owner):
+        pass
+
+globals.mud_context.driver = DummyDriver()
 
 
 class Wiretap(object):
@@ -182,6 +200,22 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n', '\n'])))
         self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a', '1b', '\n', '2a', '2b', '\n'])))
         self.assertEqual(['1', '', '2'], list(util.split_paragraphs(["1", "\n", "\n", "2", "\n", "\n", "\n"])), "must skip empty trailing paragraphs")
+
+    def test_formatdocstring(self):
+        d = "hai"
+        self.assertEqual("hai", util.format_docstring(d))
+        d = """first
+        second
+        third
+
+        """
+        self.assertEqual("first\nsecond\nthird", util.format_docstring(d))
+        d = """
+        first
+          second
+            third
+        """
+        self.assertEqual("first\n  second\n    third", util.format_docstring(d))
 
 
 if __name__ == '__main__':

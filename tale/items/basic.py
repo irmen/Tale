@@ -80,6 +80,12 @@ class WorldClock(Item):
     def description(self):
         return "The clock reads: " + str(mud_context.driver.game_clock)
 
+    def activate(self, actor):
+        raise ActionRefused("It's already running.")
+
+    def deactivate(self, actor):
+        raise ActionRefused("Better to keep it running as it is.")
+
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")

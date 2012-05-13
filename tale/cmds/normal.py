@@ -29,6 +29,7 @@ def cmd(command, *aliases):
             raise ValueError("command defined more than once: " + command)
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
+            func.__doc__ = util.format_docstring(func.__doc__)
             all_commands[command] = func
             for alias in aliases:
                 if alias in all_commands:
@@ -834,7 +835,16 @@ def do_what(player, parsed, **ctx):
     if name in abbreviations:
         name = abbreviations[name]
         print("It's an abbreviation for %s." % name)
-    # is it a verb?
+        # is it a command?
+    if name in ctx["verbs"]:
+        found = True
+        doc = ctx["verbs"][name].__doc__ or ""
+        doc = doc.strip()
+        if doc:
+            print(doc)
+        else:
+            print("It is a command that you can use to perform some action.")
+    # is it a soul verb?
     if name in soul.VERBS:
         found = True
         parsed = soul.ParseResults(name)
@@ -845,7 +855,7 @@ def do_what(player, parsed, **ctx):
             print("It might be regarded as offensive to certain people or beings.")
     if name in soul.BODY_PARTS:
         found = True
-        parsed = soul.ParseResults("pat", who={player}, bodypart=name, message="hi")
+        parsed = soul.ParseResults("pat", who_order=[player], bodypart=name, message="hi")
         _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
         print("It denotes a body part. pat myself %s -> %s" % (name, playermessage))
     if name in soul.ACTION_QUALIFIERS:
@@ -866,15 +876,6 @@ def do_what(player, parsed, **ctx):
         body_msg = races.bodytypes[race["bodytype"]]
         lang_msg = race["language"]
         print("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
-    # is it a command?
-    if name in ctx["verbs"]:
-        found = True
-        doc = ctx["verbs"][name].__doc__ or ""
-        doc = doc.strip()
-        if doc:
-            print(doc)
-        else:
-            print("It is a command that you can use to perform some action.")
     # is it an exit in the current room?
     if name in player.location.exits:
         found = True
@@ -951,8 +952,10 @@ def do_what(player, parsed, **ctx):
     if name in ("that", "this", "they", "them", "it"):
         raise ActionRefused("Be more specific.")
     if not found:
-        # too bad, no help available :)
+        # too bad, no help available
         print("Sorry, there is no information available about that.")
+        if "wizard" in player.privileges:
+            print("Maybe you meant to type a wizard command like '!%s'?" % name)
 
 
 @cmd("exits")
@@ -1140,11 +1143,11 @@ def do_time(player, parsed, **ctx):
 @cmd("brief")
 def do_brief(player, parsed, **ctx):
     """Configure the verbosity of location descriptions. 'brief' mode means: show short description
-for locations that you've already visited at least once.
-'brief all' means: show short descriptions for all locations even if you've not been there before.
-'brief off': disable brief mode, always show long descriptions.
-'brief reset': disable brief mode and forget about the known locations as well.
-Note that when you explicitly use the 'look' or 'examine' commands, the brief setting is ignored.
+    for locations that you've already visited at least once.
+    'brief all' means: show short descriptions for all locations even if you've not been there before.
+    'brief off': disable brief mode, always show long descriptions.
+    'brief reset': disable brief mode and forget about the known locations as well.
+    Note that when you explicitly use the 'look' or 'examine' commands, the brief setting is ignored.
     """
     if not parsed.args:
         player.brief = 1
@@ -1162,3 +1165,55 @@ Note that when you explicitly use the 'look' or 'examine' commands, the brief se
         player.tell("Verbose location descriptions have been restored, and you've forgotten about %d previously visited locations." % count)
     else:
         raise ParseError("That's not recognised by this command.")
+
+
+@cmd("activate")
+def do_activate(player, parsed, **ctx):
+    """Activate something, turn it on, or switch it on."""
+    if not parsed.who_order:
+        raise ParseError("Activate what?")
+    for what in parsed.who_order:
+        try:
+            what.activate(player)
+        except ActionRefused as ex:
+            msg = str(ex)
+            if len(parsed.who_order) > 1:
+                player.tell("%s: %s" % (what.name, msg))
+            else:
+                player.tell(msg)
+
+
+@cmd("deactivate")
+def do_deactivate(player, parsed, **ctx):
+    """Deactivate something, turn it of, or switch it off."""
+    if not parsed.who_order:
+        raise ParseError("Deactivate what?")
+    for what in parsed.who_order:
+        try:
+            what.deactivate(player)
+        except ActionRefused as ex:
+            msg = str(ex)
+            if len(parsed.who_order) > 1:
+                player.tell("%s: %s" % (what.name, msg))
+            else:
+                player.tell(msg)
+
+
+@cmd("turn", "switch")
+def do_turn(player, parsed, **ctx):
+    """Turn something on or off, or switch it on or off."""
+    if len(parsed.who_order) == 1:
+        who = parsed.who_order[0]
+        if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
+            parsed.verb += " on"
+            do_activate(player, parsed, **ctx)
+            return
+        elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
+            parsed.verb += " off"
+            do_deactivate(player, parsed, **ctx)
+            return
+    elif len(parsed.who_order) == 0:
+        arg = parsed.unparsed.partition(" ")[0]
+        if arg in ("on", "off"):
+            raise ParseError("Turn %s what?" % arg)
+    raise RetrySoulVerb

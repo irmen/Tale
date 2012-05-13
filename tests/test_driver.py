@@ -19,7 +19,8 @@ class TestDeferreds(unittest.TestCase):
         d5 = driver.Deferred(3, "owner", "callable", None, None)
         deferreds = sorted([d1, d2, d3, d4, d5])
         dues = [d.due for d in deferreds]
-        self.assertEqual([1,2,3,4,5], dues)
+        self.assertEqual([1, 2, 3, 4, 5], dues)
+
     def testHeapq(self):
         d1 = driver.Deferred(5, "owner", "callable", None, None)
         d2 = driver.Deferred(2, "owner", "callable", None, None)
@@ -31,7 +32,7 @@ class TestDeferreds(unittest.TestCase):
         dues = []
         while heap:
             dues.append(heapq.heappop(heap).due)
-        self.assertEqual([1,2,3,4,5], dues)
+        self.assertEqual([1, 2, 3, 4, 5], dues)
 
 
 if __name__ == "__main__":

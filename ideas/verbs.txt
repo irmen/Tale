@@ -58,17 +58,12 @@ teach
 
 ITEM ACTIONS
 ------------
-            
-activate, deactivate
-turn on, turn off
-switch on, switch off
-    activate an object, deactivate it again
-    -> notify_activate()/notify_deactivate()
-
 attach, apply, install, use X on/with Y
-    use something on something else
+    use something on something else:  -> use_with(item, actor)
 uninstall, unattach, remove
-    break stuff apart again (remove X = remove weapon/armour, remove X from Y = unattach stuff)
+    break stuff apart again
+    remove X = remove weapon/armour (see unwield/unwear)
+    remove X from Y = unattach stuff --> Y.remove(X, actor)
     
 capture, catch
     capture creature with an object (catch mouse with/in a trap)
@@ -93,9 +88,7 @@ extinguish, douse
     extinguish a light source
     
 move, shove, swivel, shift, manipulate, turn, rotate, press, poke
-    move an object around (or shove it) -> manipulate something
-    (maybe a few types of manipulation?  move, rotate, push, pull, unspecified (everything else) )
-    -> notify_manipulate(type)
+    move an object around (or shove it) -> manipulate something  -->manipulate(verb, actor)
 
 lockpick
     open a lock with force or with a tool
@@ -103,7 +96,7 @@ lockpick
 read
     read something
 
-wear, put on, unwear, remove
+wear, put on, take off, unwear, remove
     wear/remove armor
 
 wield, unwield, remove

@@ -474,7 +474,7 @@ def poss_replacement(actor, target, observer):
 
 
 _message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
-_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "onto", "the", "with", "from", "after", "before", "under", "above", "next"}
+_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "onto", "the", "with", "from", "after", "before", "under", "above", "next"}
 
 
 class WhoInfo(object):
@@ -945,6 +945,8 @@ class Soul(object):
                         if name.startswith(word):
                             raise ParseError("Perhaps you meant %s?" % name)
                 if not external_verb:
+                    if not verb:
+                        raise ParseError("It's not clear what you mean by '%s'." % word)
                     # check if it is a prefix of an adverb, if so, suggest a few adverbs
                     adverbs = lang.adverb_by_prefix(word)
                     if len(adverbs) == 1:
@@ -967,7 +969,7 @@ class Soul(object):
                         raise ParseError("The word %s makes no sense at that location." % word)
                     else:
                         # no idea what the user typed, generic error
-                        raise ParseError("It's not clear what you mean by %s." % word)
+                        raise ParseError("It's not clear what you mean by '%s'." % word)
             previous_word = word
 
         message = " ".join(message)

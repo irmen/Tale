@@ -104,6 +104,14 @@ class MudObject(object):
         # not automatically called, only if your object registered with the driver
         pass
 
+    def activate(self, actor):
+        # called from the activate command, override if your object needs to act on this.
+        raise ActionRefused("You can't activate that.")
+
+    def deactivate(self, actor):
+        # called from the deactivate command, override if your object needs to act on this.
+        raise ActionRefused("You can't deactivate that.")
+
 
 class Item(MudObject):
     """
