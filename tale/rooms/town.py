@@ -159,9 +159,9 @@ class GameEnd(Location):
             # it allows the driver to complete the last player action normally.
         return super(GameEnd, self).insert(obj, actor)
     def completion(self, player, driver):
-        player.tell("")
+        player.tell("\n")
         player.tell("Congratulations! You beat the game!")
-        player.tell("")
+        player.tell("\n")
         player.tell("You scored %d (out of %d) in %d turns." % (player.score, globals.MAX_SCORE, player.turns))
         driver.write_output()
         input("\nPress enter to continue. ")

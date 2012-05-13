@@ -116,7 +116,7 @@ class Player(base.Living):
         For efficiency, messages are gathered in a buffer and printed later.
         If you want to output a paragraph separator, either set end=True or tell a single '\n'.
         If you provide format=False, this paragraph of text won't be formatted by textwrap,
-        and whitespace is untouched.
+        and whitespace is untouched. An empty string isn't outputted at all.
         """
         super(Player, self).tell(*messages)
         if messages == ("\n",):
@@ -128,8 +128,12 @@ class Player(base.Living):
             do_paragraph = kwargs.get("end", False)
             if do_format:
                 txt = " ".join(str(msg).strip() for msg in messages)
+                if not txt:
+                    return
             else:
                 txt = "".join(str(msg) for msg in messages)
+                if not txt:
+                    return
                 txt = "\a" + txt  # \a is a special control char meaning 'don't format this'
                 do_paragraph = True
             self._output.append(txt)
