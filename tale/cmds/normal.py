@@ -51,7 +51,7 @@ def do_inventory(player, parsed, **ctx):
         if isinstance(other, base.Living):
             # show another living's inventory
             name = lang.capital(other.title)
-            inventory = other.inventory()
+            inventory = other.inventory
             if inventory:
                 p(name, "is carrying:", end=True)
                 for item in inventory:
@@ -62,7 +62,7 @@ def do_inventory(player, parsed, **ctx):
             return
         elif isinstance(other, base.Item):
             # show item's inventory
-            inventory = other.inventory()
+            inventory = other.inventory
             if inventory:
                 p("It contains:", end=True)
                 for item in inventory:
@@ -72,7 +72,7 @@ def do_inventory(player, parsed, **ctx):
         else:
             raise ActionRefused("Can't find %s." % other.name)
     else:
-        inventory = player.inventory()
+        inventory = player.inventory
         if inventory:
             p("You are carrying:", end=True)
             for item in inventory:
@@ -154,11 +154,11 @@ def do_drop(player, parsed, **ctx):
 
     arg = parsed.args[0]
     if arg == "all":
-        if player.inventory_size() == 0:
+        if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
             # @todo: ask confirmation to drop everything
-            drop_stuff(player.inventory(), player)
+            drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
         if parsed.who_order:
@@ -199,7 +199,7 @@ def do_empty(player, parsed, **ctx):
     else:
         raise ParseError("You can't seem to empty that.")
     items_moved = []
-    for item in container.inventory():
+    for item in container.inventory:
         try:
             item.allow_move(player)
         except ActionRefused as x:
@@ -222,12 +222,12 @@ def do_put(player, parsed, **ctx):
     if len(parsed.args) < 2:
         raise ParseError("Put what where?")
     if parsed.args[0] == "all":
-        if player.inventory_size() == 0:
+        if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         if len(parsed.args) != 2:
             raise ParseError("Put what where?")
         # @todo: ask confirmation to put everything
-        what = list(player.inventory())
+        what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -308,8 +308,8 @@ def do_take(player, parsed, **ctx):
             # take all stuff out of some container
             if where in player or where in player.location:
                 # take all stuff from a bag that the player is carrying, or from a bag in the room.
-                if where.inventory_size() > 0:
-                    take_stuff(player, where.inventory(), where, where.title)
+                if where.inventory_size > 0:
+                    take_stuff(player, where.inventory, where, where.title)
                     return
                 else:
                     raise ActionRefused("There's nothing in there.")
@@ -325,7 +325,7 @@ def do_take(player, parsed, **ctx):
         if where:
             if where in player or where in player.location:
                 # take specific items out of some container
-                items_by_name = { item.name: item for item in where.inventory() }
+                items_by_name = { item.name: item for item in where.inventory }
                 items_to_take = []
                 for name in what_names:
                     if name in items_by_name:
@@ -434,14 +434,14 @@ def do_give(player, parsed, **ctx):
             pass
     if parsed.unrecognized:
         raise ParseError("You don't have %s." % lang.join(parsed.unrecognized))
-    if player.inventory_size() == 0:
+    if player.inventory_size == 0:
         raise ActionRefused("You're not carrying anything.")
     # check for "all"
     if "all" in parsed.args:
         # @todo ask for confirmation to give all
         if len(parsed.args) != 2:
             raise ParseError("Give all to who?")
-        what = player.inventory()
+        what = player.inventory
         if parsed.args[0] == "all":
             # give all [to] living
             return give_stuff(player, what, parsed.args[1])
@@ -608,7 +608,7 @@ def do_examine(player, parsed, **ctx):
         if item.description:
             tell(item.description)
         try:
-            inventory = item.inventory()
+            inventory = item.inventory
         except ActionRefused:
             pass
         else:
@@ -1132,7 +1132,7 @@ def do_time(player, parsed, **ctx):
         player.tell("\n")
         player.tell("Real time is:", real_time)
         return
-    for item in player.inventory():
+    for item in player.inventory:
         if isinstance(item, WorldClock):
             player.tell("You glance at your %s." % item.name)
             player.tell(item.description)

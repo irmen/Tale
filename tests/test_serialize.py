@@ -53,8 +53,8 @@ class TestSerializing(unittest.TestCase):
         bag.insert(o, None)
         x = serializecycle(bag)
         self.assert_base_attrs(x)
-        self.assertEqual(1, x.inventory_size())
-        y = list(x.inventory())[0]
+        self.assertEqual(1, x.inventory_size)
+        y = list(x.inventory)[0]
         self.assertEqual(x, y.contained_in)
         o = base.Weapon("w")
         x = serializecycle(o)

@@ -813,7 +813,7 @@ class Soul(object):
             all_items[item.name] = item
             for alias in item.aliases:
                 all_items[alias] = item
-        for item in player.inventory():
+        for item in player.inventory:
             all_items[item.name] = item
             for alias in item.aliases:
                 all_items[alias] = item

@@ -181,12 +181,12 @@ def do_clean(player, parsed, **ctx):
         # @todo: ask for confirmation (async)
         print("Cleaning inventory of",victim)
         player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
-        items = victim.inventory()
+        items = victim.inventory
         for item in items:
             victim.remove(item, player)
             item.destroy(ctx)
             print("destroyed",item)
-        if victim.inventory_size():
+        if victim.inventory_size:
             print("Some items refused to be destroyed!")
 
 

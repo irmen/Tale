@@ -22,14 +22,14 @@ class TrashCan(Container):
     @property
     def title(self):
         if self.opened:
-            return "filled trashcan" if self.inventory_size() else "empty trashcan"
+            return "filled trashcan" if self.inventory_size else "empty trashcan"
         else:
             return "trashcan"
 
     @property
     def description(self):
         if self.opened:
-            if self.inventory_size():
+            if self.inventory_size:
                 return "It is a trash can, with an open lid, and it stinks!"
             else:
                 return "It is a trash can, with an open lid."
@@ -51,15 +51,17 @@ class TrashCan(Container):
         actor.tell("You closed the %s." % self.title)
         actor.tell_others("{Title} closed the %s." % self.title)
 
+    @property
     def inventory(self):
         if self.opened:
-            return super(TrashCan, self).inventory()
+            return super(TrashCan, self).inventory
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
+    @property
     def inventory_size(self):
         if self.opened:
-            return super(TrashCan, self).inventory_size()
+            return super(TrashCan, self).inventory_size
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
@@ -88,7 +90,7 @@ class WorldClock(Item):
         raise ActionRefused("Better to keep it running as it is.")
 
     def manipulate(self, verb, actor):
-        actor.tell("%s the %s won't have much of an effect." % (lang.capital(lang.fullverb(verb)), self.title))
+        actor.tell("%s the %s won't have much effect." % (lang.capital(lang.fullverb(verb)), self.title))
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")

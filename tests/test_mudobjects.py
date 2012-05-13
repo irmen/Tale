@@ -313,9 +313,9 @@ class TestLiving(unittest.TestCase):
         axe = Weapon("axe")
         orc.insert(axe, orc)
         self.assertTrue(axe in orc)
-        self.assertTrue(axe in orc.inventory())
-        self.assertEqual(1, orc.inventory_size())
-        self.assertEqual(1, len(orc.inventory()))
+        self.assertTrue(axe in orc.inventory)
+        self.assertEqual(1, orc.inventory_size)
+        self.assertEqual(1, len(orc.inventory))
     def test_allowance(self):
         orc = Living("orc", "m")
         idiot = NPC("idiot", "m")
@@ -667,14 +667,14 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(loc.wiretaps) > 0)
         self.assertEqual(loc, player.location)
         self.assertTrue(len(player.installed_wiretaps) > 0)
-        self.assertTrue(len(player.inventory()) > 0)
+        self.assertTrue(len(player.inventory) > 0)
         self.assertTrue(player in loc.livings)
         player.destroy(ctx)
         import gc
         gc.collect()
         self.assertTrue(len(loc.wiretaps) == 0)
         self.assertTrue(len(player.installed_wiretaps) == 0)
-        self.assertTrue(len(player.inventory()) == 0)
+        self.assertTrue(len(player.inventory) == 0)
         self.assertFalse(player in loc.livings)
         self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
 
@@ -705,14 +705,14 @@ class TestContainer(unittest.TestCase):
     def test_container_contains(self):
         bag = Container("bag")
         key = Item("key")
-        self.assertEqual(0, len(bag.inventory()))
-        self.assertEqual(0, bag.inventory_size())
+        self.assertEqual(0, len(bag.inventory))
+        self.assertEqual(0, bag.inventory_size)
         npc = NPC("julie", "f")
         bag.insert(key, npc)
         self.assertTrue(key in bag)
-        self.assertEqual(1, bag.inventory_size())
+        self.assertEqual(1, bag.inventory_size)
         bag.remove(key, npc)
-        self.assertEqual(0, bag.inventory_size())
+        self.assertEqual(0, bag.inventory_size)
         self.assertFalse(key in bag)
         with self.assertRaises(KeyError):
             bag.remove("not_existing", npc)
@@ -746,6 +746,14 @@ class TestContainer(unittest.TestCase):
             key.insert(thing, player)  # can't add stuf to an Item
         bag.insert(thing, player)
         self.assertTrue(thing in bag)
+        self.assertTrue(isinstance(bag.inventory, (set, frozenset)))
+        self.assertEqual(1, bag.inventory_size)
+        with self.assertRaises(AttributeError):
+            bag.inventory_size = 5
+        with self.assertRaises(AttributeError):
+            bag.inventory = None
+        with self.assertRaises(AttributeError):
+            bag.inventory.add(5)
     def test_title(self):
         bag = Container("bag", "leather bag", "a small leather bag")
         stone = Item("stone")
@@ -778,9 +786,9 @@ class TestItem(unittest.TestCase):
             key.insert(thing, player)
         key.allow_move(player)
         with self.assertRaises(ActionRefused):
-            key.inventory()
+            key.inventory
         with self.assertRaises(ActionRefused):
-            key.inventory_size()
+            key.inventory_size
     def test_move(self):
         hall = Location("hall")
         person = Living("person", "m")

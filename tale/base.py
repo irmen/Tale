@@ -41,7 +41,7 @@ Exit
 
 
 Every object that can hold other objects does so in its "inventory" (a set).
-You can't access it directly, object.inventory() returns a frozenset copy of it.
+You can't access it directly, object.inventory returns a frozenset copy of it.
 Except Location: it separates the items and livings it contains internally.
 Use its enter/leave methods instead.
 """
@@ -148,9 +148,11 @@ class Item(MudObject):
         else:
             raise TypeError("can only set item's location to a Location, for other container types use item.contained_in")
 
+    @property
     def inventory(self):
         raise ActionRefused("You can't look inside of that.")
 
+    @property
     def inventory_size(self):
         raise ActionRefused("You can't look inside of that.")
 
@@ -493,9 +495,11 @@ class Living(MudObject):
     def __contains__(self, item):
         return item in self.__inventory
 
+    @property
     def inventory_size(self):
         return len(self.__inventory)
 
+    @property
     def inventory(self):
         return frozenset(self.__inventory)
 
@@ -619,7 +623,7 @@ class Living(MudObject):
             for container in self.__inventory:
                 containing_object = container
                 try:
-                    inventory = container.inventory()
+                    inventory = container.inventory
                 except ActionRefused:
                     continue    # no access to inventory, just skip this item silently
                 else:
@@ -667,9 +671,11 @@ class Container(Item):
                 return self._title + " (empty)"
         return self._title
 
+    @property
     def inventory(self):
         return frozenset(self.__inventory)
 
+    @property
     def inventory_size(self):
         return len(self.__inventory)
 
