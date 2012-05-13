@@ -91,10 +91,13 @@ class Player(base.Living):
             # check if any of the targeted objects is a non-living
             if not all(isinstance(who, base.Living) for who in parsed.who_order):
                 raise soul.NonSoulVerb(parsed)
-        # check if any of the targeted objects is an exit
+        self.validate_socialize_targets(parsed)
+        return parsed
+
+    def validate_socialize_targets(self, parsed):
+        """check if any of the targeted objects is an exit"""
         if any(isinstance(w, base.Exit) for w in parsed.who_info):
             raise ParseError("That doesn't make much sense.")
-        return parsed
 
     def socialize_parsed(self, parsed):
         """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""

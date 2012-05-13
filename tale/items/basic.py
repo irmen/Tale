@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from ..base import Item, Container
 from ..errors import ActionRefused
 from ..globals import mud_context
+from .. import lang
 
 
 class TrashCan(Container):
@@ -85,6 +86,9 @@ class WorldClock(Item):
 
     def deactivate(self, actor):
         raise ActionRefused("Better to keep it running as it is.")
+
+    def manipulate(self, verb, actor):
+        actor.tell("%s the %s won't have much of an effect." % (lang.capital(lang.fullverb(verb)), self.title))
 
 
 newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")

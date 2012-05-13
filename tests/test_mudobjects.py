@@ -295,6 +295,8 @@ class TestDoorsExits(unittest.TestCase):
             exit1.lock(None, None)
         with self.assertRaises(ActionRefused):
             exit1.unlock(None, None)
+        with self.assertRaises(ActionRefused):
+            exit1.manipulate("frobnitz", None)
 
     def test_bind_exit(self):
         exit = Exit("town.square", "someplace")
@@ -547,7 +549,7 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual(["message for room"], player.get_output_lines())
-    def testSocialize(self):
+    def test_socialize(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         julie = NPC("julie", "f")
@@ -574,6 +576,8 @@ class TestPlayer(unittest.TestCase):
             pass
         with self.assertRaises(NonSoulVerb):
             player.parse("fart south")
+        parsed = player.parse("hug julie")
+        player.validate_socialize_targets(parsed)
 
 
 class TestDescriptions(unittest.TestCase):
@@ -849,6 +853,8 @@ class TestMudObject(unittest.TestCase):
             x.activate(None)
         with self.assertRaises(ActionRefused):
             x.deactivate(None)
+        with self.assertRaises(ActionRefused):
+            x.manipulate("frobnitz", None)
         x.destroy(None)
 
 

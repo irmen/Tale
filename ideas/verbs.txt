@@ -87,11 +87,6 @@ light, burn
 extinguish, douse
     extinguish a light source
     
-move, shove, swivel, shift, manipulate, turn, rotate, press, poke
-    move an object around (or shove it) -> manipulate something  -->manipulate(verb, actor)
-    If the manipulate call fails AND the verb is a soul verb as well, retry as soul verb silently.
-    Otherwise show the error.
-
 lockpick
     open a lock with force or with a tool
 

@@ -85,6 +85,15 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual(["a", "'b"], lang.split("a 'b"))
         self.assertEqual(["a", "\"b"], lang.split("a \"b"))
 
+    def testFullverb(self):
+        self.assertEqual("saying", lang.fullverb("say"))
+        self.assertEqual("skiing", lang.fullverb("ski"))
+        self.assertEqual("poking", lang.fullverb("poke"))
+        self.assertEqual("polkaing", lang.fullverb("polka"))
+        self.assertEqual("sniveling", lang.fullverb("snivel"))
+        self.assertEqual("farting", lang.fullverb("fart"))
+        self.assertEqual("trying", lang.fullverb("try"))
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

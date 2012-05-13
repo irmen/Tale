@@ -36,10 +36,10 @@ paper.aliases = {"paper"}
 
 
 class CursedGem(Item):
-    def move(self, target_container, actor, wiz_force=False):
-        if self.contained_in is actor and not wiz_force:
+    def move(self, target_container, actor, wizard_override=False):
+        if self.contained_in is actor and not wizard_override:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
-        super(CursedGem, self).move(target_container, actor, wiz_force)
+        super(CursedGem, self).move(target_container, actor, wizard_override)
 
 
 class InsertOnlyBox(Container):

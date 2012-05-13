@@ -112,6 +112,11 @@ class MudObject(object):
         # called from the deactivate command, override if your object needs to act on this.
         raise ActionRefused("You can't deactivate that.")
 
+    def manipulate(self, verb, actor):
+        # called from the various manipulate commands, override if your object needs to act on this.
+        # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
+        raise ActionRefused("You can't %s that." % verb)
+
 
 class Item(MudObject):
     """
@@ -155,13 +160,13 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target_container, actor, wiz_force=False):
+    def move(self, target_container, actor, wizard_override=False):
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
-        If wiz_force is True, it overrides certain allowance checks (but not all)
+        If wizard_override is True, it overrides certain allowance checks (but not all)
         """
-        if not wiz_force or "wizard" not in actor.privileges:
+        if not wizard_override or "wizard" not in actor.privileges:
             self.allow_move(actor)
         source_container = self.contained_in
         if source_container:
@@ -435,10 +440,16 @@ class Exit(object):
         raise ActionRefused("You can't unlock that.")
 
     def activate(self, actor):
+        # see MudObject
         raise ActionRefused("You can't activate that.")
 
     def deactivate(self, actor):
+        # see MudObject
         raise ActionRefused("You can't deactivate that.")
+
+    def manipulate(self, verb, actor):
+        # see MudObject
+        raise ActionRefused("It makes no sense to %s in that direction." % verb)
 
 
 class Living(MudObject):

@@ -110,6 +110,13 @@ def capital(string):
     return string
 
 
+def fullverb(verb):
+    """return the full verb: shoot->shooting, poke->poking"""
+    if verb[-1] == "e":
+        return verb[:-1] + "ing"
+    return verb + "ing"
+
+
 def split(string):
     """
     Split a string on whitespace, but keeps words enclosed in quotes (' or ") together.

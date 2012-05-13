@@ -1,3 +1,9 @@
+"""
+Setup script for distutils
+
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 from distutils.core import setup
 
 import tale
@@ -20,7 +26,8 @@ setup(
 
 It's still being designed and new features are implement along the way,
 but the current version contains a runnable minimalistic mud world that you
-can explore. Start it by running the driver; ``python -m tale.driver``.
+can explore. Start it by running the driver; ``python -m tale.driver``
+(or use the supplied launch script, ``tale-driver``).
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["tale-driver.cmd", "tale-driver"],

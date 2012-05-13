@@ -365,6 +365,7 @@ class Driver(object):
                     raise errors.ParseError("That doesn't make much sense.")
             except errors.RetrySoulVerb as x:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
+                self.player.validate_socialize_targets(parsed)
                 self.do_socialize(parsed)
 
     def go_through_exit(self, player, direction):

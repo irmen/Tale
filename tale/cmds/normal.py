@@ -1199,21 +1199,55 @@ def do_deactivate(player, parsed, **ctx):
                 player.tell(msg)
 
 
-@cmd("turn", "switch")
-def do_turn(player, parsed, **ctx):
-    """Turn something on or off, or switch it on or off."""
+@cmd("switch")
+def do_switch(player, parsed, **ctx):
+    """Switch something on or off."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
-            parsed.verb += " on"
             do_activate(player, parsed, **ctx)
             return
         elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
-            parsed.verb += " off"
+            do_deactivate(player, parsed, **ctx)
+            return
+    elif len(parsed.who_order) == 0:
+        arg = parsed.unparsed.partition(" ")[0]
+        if arg in ("on", "off"):
+            raise ParseError("Switch %s what?" % arg)
+    raise RetrySoulVerb
+
+
+@cmd("turn")
+def do_turn(player, parsed, **ctx):
+    """Turn something (rotate it), or turn something on or off."""
+    if len(parsed.who_order) == 1:
+        who = parsed.who_order[0]
+        if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
+            do_activate(player, parsed, **ctx)
+            return
+        elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
             do_deactivate(player, parsed, **ctx)
             return
     elif len(parsed.who_order) == 0:
         arg = parsed.unparsed.partition(" ")[0]
         if arg in ("on", "off"):
             raise ParseError("Turn %s what?" % arg)
-    raise RetrySoulVerb
+    # "turn X" -> same as rotate, see below
+    do_manipulate(player, parsed, **ctx)
+
+
+@cmd("move", "shove", "swivel", "shift", "manipulate", "rotate", "press", "poke", "push")
+def do_manipulate(player, parsed, **ctx):
+    """Manipulate something."""
+    if len(parsed.who_order) == 1:
+        what = parsed.who_order[0]
+        try:
+            what.manipulate(parsed.verb, player)
+            return
+        except ActionRefused:
+            if player.soul.is_verb(parsed.verb):
+                raise RetrySoulVerb
+            raise
+    if player.soul.is_verb(parsed.verb):
+        raise RetrySoulVerb
+    raise ParseError("%s what?" % lang.capital(parsed.verb))
