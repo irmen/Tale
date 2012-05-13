@@ -168,7 +168,8 @@ class Driver(object):
         banner = util.get_banner()
         if banner:
             print("\n" + banner + "\n\n")
-        choice = input("Load a saved game (answering 'n' will start a new game)? ").strip()
+        print("This is '%s' version %s.\nYou're using Tale version %s." % (globals.GAME_TITLE, globals.GAME_VERSION, tale_version_str))
+        choice = input("\nDo you want to load a saved game ('n' will start a new game)? ").strip()
         if choice == "y":
             print("")
             self.load_saved_game()
@@ -176,6 +177,7 @@ class Driver(object):
                 self.player.activate_transcript(args.transcript)
             self.player.tell("\n")
             self.player.tell("\n")
+            self.show_motd()
             self.player.look(short=False)
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
@@ -194,18 +196,21 @@ class Driver(object):
             self.player.tell("\n")
             self.player.tell("Welcome to %s, %s." % (globals.GAME_TITLE, self.player.title), end=True)
             self.player.tell("\n")
-            motd, mtime = util.get_motd()
-            if motd:
-                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
-                self.player.tell("\n")
-                self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
-                self.player.tell("\n")
-                self.player.tell("\n")
+            self.show_motd()
             self.player.look(short=False)
         self.write_output()
         self.player_input_allowed = threading.Event()
         self.start_player_input()
         self.main_loop()
+
+    def show_motd(self):
+        motd, mtime = util.get_motd()
+        if motd:
+            self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+            self.player.tell("\n")
+            self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
+            self.player.tell("\n")
+            self.player.tell("\n")
 
     def start_player_input(self):
         if globals.SERVER_TICK_METHOD == "timer":
