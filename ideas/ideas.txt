@@ -3,8 +3,7 @@ Concepts for single player Interactive Fiction (and perhaps MUD):
 Disable certain commands and features that might break immersion (such as 'stats').
 tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 pictures for locations (viewable in gui driver only ofcourse)
-Make it possible to disable the displaying of the game time (at load/save time for instance),
-and disable the 'score' command too if no score is used in the story (MAX_SCORE=0/None)
+Make it possible to disable the displaying of the game time (at load/save time for instance)
 
 
 Concepts that could be implemented for a MUD (but perhaps not for single player IF):

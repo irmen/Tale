@@ -1090,10 +1090,11 @@ def do_load(player, parsed, **ctx):
                 "or start a new game.")
 
 
-@cmd("score")
-def do_score(player, parsed, **ctx):
-    """Displays your current score in the game."""
-    player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, globals.MAX_SCORE, player.turns))
+if globals.MAX_SCORE:    # only enable this command when MAX_SCORE is > 0
+    @cmd("score")
+    def do_score(player, parsed, **ctx):
+        """Displays your current score in the game."""
+        player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, globals.MAX_SCORE, player.turns))
 
 
 @cmd("transcript")

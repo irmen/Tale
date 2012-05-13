@@ -33,7 +33,7 @@ equipment
     show the armor items you are wearing
 kills
     shows a list of your victories
-    (hmm, could also be part of the existing score command? but only if MAX_SCORE>0)
+    (hmm, also show this in the existing score command?)
 pvp
     toggle pvp
 prompt

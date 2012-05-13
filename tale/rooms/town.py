@@ -161,8 +161,9 @@ class GameEnd(Location):
     def completion(self, player, driver):
         player.tell("\n")
         player.tell("Congratulations! You beat the game!")
-        player.tell("\n")
-        player.tell("You scored %d (out of %d) in %d turns." % (player.score, globals.MAX_SCORE, player.turns))
+        if globals.MAX_SCORE:
+            player.tell("\n")
+            player.tell("You scored %d (out of %d) in %d turns." % (player.score, globals.MAX_SCORE, player.turns))
         driver.write_output()
         input("\nPress enter to continue. ")
         player.tell("\n")
