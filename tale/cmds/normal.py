@@ -1133,12 +1133,14 @@ def do_time(player, parsed, **ctx):
         player.tell("\n")
         player.tell("Real time is:", real_time)
         return
-    for item in player.inventory:
-        if isinstance(item, WorldClock):
-            player.tell("You glance at your %s." % item.name)
-            player.tell(item.description)
-            return
-    raise ActionRefused("You'll have to find a clock or watch that tells the current date or time.")
+    if globals.DISPLAY_GAMETIME:
+        for item in player.inventory:
+            if isinstance(item, WorldClock):
+                player.tell("You glance at your %s." % item.name)
+                player.tell(item.description)
+                return
+        raise ActionRefused("You don't have a watch, so you're unsure what %s it is." % parsed.verb)
+    raise ActionRefused("You have no idea what %s it is." % parsed.verb)
 
 
 @cmd("brief")

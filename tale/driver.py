@@ -137,7 +137,7 @@ class Driver(object):
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
         self.commands = Commands()
-        self.game_clock = globals.GAMETIME_EPOCH
+        self.game_clock = globals.GAMETIME_EPOCH or self.server_started
         if globals.SERVER_TICK_METHOD == "command":
             globals.GAMETIME_TO_REALTIME = 1.0
         self.server_loop_durations = collections.deque(maxlen=10)
@@ -189,7 +189,7 @@ class Driver(object):
                 player = create_player_from_info()
             if args.transcript:
                 player.activate_transcript(args.transcript)
-            self.game_clock = globals.GAMETIME_EPOCH
+            self.game_clock = globals.GAMETIME_EPOCH or self.server_started
             self.player = player
             self.move_player_to_start_room()
             self.player.tell("\n")
@@ -441,7 +441,10 @@ class Driver(object):
         }
         with open(globals.GAME_TITLE.lower() + ".savegame", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
-        player.tell("Game saved. Game time:", self.game_clock, end=True)
+        player.tell("Game saved.")
+        if globals.DISPLAY_GAMETIME:
+            player.tell("Game time:", self.game_clock)
+        player.tell("\n")
 
     def load_saved_game(self):
         try:
@@ -462,7 +465,10 @@ class Driver(object):
             self.heartbeat_objects = state["heartbeats"]
             rooms.STARTLOCATION_PLAYER = state["start_player"]
             rooms.STARTLOCATION_WIZARD = state["start_wizard"]
-            self.player.tell("Game loaded. Game time:", self.game_clock, end=True)
+            self.player.tell("Game loaded.")
+            if globals.DISPLAY_GAMETIME:
+                self.player.tell("Game time:", self.game_clock)
+            self.player.tell("\n")
 
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)

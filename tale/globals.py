@@ -32,6 +32,7 @@ SERVER_TICK_METHOD = "timer"    # 'command' (waits for player entry) or 'timer' 
 SERVER_TICK_TIME = 1.0    # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
 GAMETIME_TO_REALTIME = 5    # meaning: game time is X times the speed of real time (only used with "timer" tick method)
 GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)    # start date/time of the game clock
+DISPLAY_GAMETIME = True    # enable/disable display of the game time at certain moments
 
 GAME_TITLE = "Snakepit"
 GAME_VERSION = "0.3"    # arbitrary but should be changed when the game code or any parameter here is changed

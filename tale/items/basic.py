@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from ..base import Item, Container
 from ..errors import ActionRefused
-from ..globals import mud_context
+from ..globals import mud_context, DISPLAY_GAMETIME
 from .. import lang
 
 
@@ -81,7 +81,10 @@ class TrashCan(Container):
 class WorldClock(Item):
     @property
     def description(self):
-        return "The clock reads: " + str(mud_context.driver.game_clock)
+        if DISPLAY_GAMETIME:
+            return "It reads: " + str(mud_context.driver.game_clock)
+        else:
+            return "It looks broken."
 
     def activate(self, actor):
         raise ActionRefused("It's already running.")
