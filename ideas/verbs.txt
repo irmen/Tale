@@ -90,9 +90,6 @@ extinguish, douse
 lockpick
     open a lock with force or with a tool
 
-read
-    read something
-
 wear, put on, take off, unwear, remove
     wear/remove armor
 

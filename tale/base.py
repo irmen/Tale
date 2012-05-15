@@ -117,6 +117,10 @@ class MudObject(object):
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
+    def read(self, actor):
+        # called from the read command, override if your object needs to act on this.
+        raise ActionRefused("There's nothing to read.")
+
 
 class Item(MudObject):
     """
@@ -452,6 +456,10 @@ class Exit(object):
     def manipulate(self, verb, actor):
         # see MudObject
         raise ActionRefused("It makes no sense to %s in that direction." % verb)
+
+    def read(self, actor):
+        # see MudObject
+        raise ActionRefused("There's nothing to read there.")
 
 
 class Living(MudObject):

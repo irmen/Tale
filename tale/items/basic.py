@@ -95,8 +95,20 @@ class WorldClock(Item):
     def manipulate(self, verb, actor):
         actor.tell("%s the %s won't have much effect." % (lang.capital(lang.fullverb(verb)), self.title))
 
+    def read(self, actor):
+        actor.tell(self.description)
 
-newspaper = Item("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
+
+class Newspaper(Item):
+    def read(self, actor):
+        actor.tell("The newspaper reads: \"Last year's Less Popular Sports.\"", end=True)
+        actor.tell("\"Any fan will tell you the big-name leagues aren't the whole sporting world. "
+            "As time expired on last year, we take a look at major accomplishments, happenings, "
+            "and developments in the less popular sports.\"")
+        actor.tell("It looks like a boring article, you have better things to do.")
+
+
+newspaper = Newspaper("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful red gem.")
 pouch = Container("pouch", "small leather pouch", "It is closed with a leather strap.")

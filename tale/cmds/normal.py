@@ -1252,5 +1252,15 @@ def do_manipulate(player, parsed, **ctx):
                 raise RetrySoulVerb
             raise
     if player.soul.is_verb(parsed.verb):
-        raise RetrySoulVerb
+        raise RetrySoulVerb  # some of these commands are also soul verbs
     raise ParseError("%s what?" % lang.capital(parsed.verb))
+
+
+@cmd("read")
+def do_read(player, parsed, **ctx):
+    """Read something."""
+    if len(parsed.who_order) == 1:
+        what = parsed.who_order[0]
+        what.read(player)
+    else:
+        raise ParseError("Read what?")

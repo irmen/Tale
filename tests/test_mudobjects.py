@@ -258,6 +258,8 @@ class TestDoorsExits(unittest.TestCase):
             exit1.unlock(None, None)
         with self.assertRaises(ActionRefused):
             exit1.manipulate("frobnitz", None)
+        with self.assertRaises(ActionRefused):
+            exit1.read(None)
 
     def test_bind_exit(self):
         exit = Exit("town.square", "someplace")
@@ -641,7 +643,10 @@ class TestMudObject(unittest.TestCase):
             x.deactivate(None)
         with self.assertRaises(ActionRefused):
             x.manipulate("frobnitz", None)
+        with self.assertRaises(ActionRefused):
+            x.read(None)
         x.destroy(None)
+
 
 
 if __name__ == '__main__':
