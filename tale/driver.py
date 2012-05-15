@@ -131,6 +131,7 @@ class Driver(object):
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + globals.REQUIRES_TALE_VERSION + " but installed is " + tale_version_str)
         self.heartbeat_objects = set()
+        self.state = {}  # global game state variables
         self.unbound_exits = []
         self.deferreds = []  # heapq
         server_started = datetime.datetime.now()
@@ -142,6 +143,7 @@ class Driver(object):
             globals.GAMETIME_TO_REALTIME = 1.0
         self.server_loop_durations = collections.deque(maxlen=10)
         globals.mud_context.driver = self
+        globals.mud_context.state = self.state
         rooms.init(self)
         cmds.register_all(self.commands)
         self.bind_exits()
@@ -312,7 +314,7 @@ class Driver(object):
         elif globals.SERVER_TICK_METHOD == "command":
             self.game_clock += datetime.timedelta(seconds=globals.SERVER_TICK_TIME)
         # heartbeats
-        ctx = {"driver": self, "game_clock": self.game_clock}
+        ctx = {"driver": self, "game_clock": self.game_clock, "state": self.state}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
         # deferreds
@@ -380,7 +382,7 @@ class Driver(object):
                     return True
                 elif parsed.verb in player_verbs:
                     func = player_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock)
+                    func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock, state=self.state)
                     return
                 else:
                     raise errors.ParseError("That doesn't make much sense.")
@@ -432,6 +434,7 @@ class Driver(object):
     def do_save(self, player):
         state = {
             "version": globals.GAME_VERSION,
+            "gamestate": self.state,
             "player": self.player,
             "deferreds": self.deferreds,
             "game_clock": self.game_clock,
@@ -460,6 +463,7 @@ class Driver(object):
                 print("(Current game version: %s  Saved game data version: %s)" % (globals.GAME_VERSION, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
+            self.state = state["gamestate"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["game_clock"]
             self.heartbeat_objects = state["heartbeats"]

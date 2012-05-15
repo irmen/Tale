@@ -8,6 +8,17 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import heapq
 import tale.driver as driver
+import tale.globals
+
+
+class TestDriver(unittest.TestCase):
+    def testAttributes(self):
+        d = driver.Driver()
+        self.assertEqual({}, d.state)
+        self.assertEqual({}, tale.globals.mud_context.state)
+        self.assertTrue(tale.globals.mud_context.state is d.state)
+        self.assertEqual(d, tale.globals.mud_context.driver)
+
 
 
 class TestDeferreds(unittest.TestCase):

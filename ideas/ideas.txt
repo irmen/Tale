@@ -25,7 +25,8 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-Two game modes: IF and MUD.
+Two game modes: IF and MUD.  Each mode enables/disables certain features.
+
 Let objects register non-standard verbs with the location they're in.
 (For instance a computer might register 'hack' and 'type'.)
 

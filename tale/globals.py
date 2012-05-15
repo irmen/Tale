@@ -35,5 +35,5 @@ GAMETIME_EPOCH = datetime.datetime(2012, 4, 19, 14, 0, 0)    # start date/time o
 DISPLAY_GAMETIME = True    # enable/disable display of the game time at certain moments
 
 GAME_TITLE = "Snakepit"
-GAME_VERSION = "0.3"    # arbitrary but should be changed when the game code or any parameter here is changed
+GAME_VERSION = "0.4"    # arbitrary but should be changed when the game code or any parameter here is changed
 REQUIRES_TALE_VERSION = "0.3"    # tale library required to run the game
