@@ -224,6 +224,13 @@ class TestPlayer(unittest.TestCase):
         parsed = player.parse("hug julie")
         player.validate_socialize_targets(parsed)
 
+    def test_verbs(self):
+        player = Player("julie", "f")
+        player.verbs.append("smurf")
+        player.verbs.append("smurf")
+        self.assertTrue("smurf" in player.verbs)
+        self.assertEqual(2, player.verbs.count("smurf"))
+
     def test_story_complete(self):
         player = Player("fritz", "m")
         self.assertFalse(player.story_complete)

@@ -364,9 +364,11 @@ class Driver(object):
         # Parse the command by using the soul.
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
-        player_verbs = self.commands.get(self.player.privileges)
+        command_verbs = self.commands.get(self.player.privileges)
+        custom_verbs = set(self.player.location.verbs) | set(self.player.verbs)
+        all_verbs = set(command_verbs) | custom_verbs
         try:
-            parsed = self.player.parse(cmd, external_verbs=frozenset(player_verbs))
+            parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
             return
@@ -380,10 +382,13 @@ class Driver(object):
                 if parsed.verb in self.player.location.exits:
                     self.go_through_exit(self.player, parsed.verb)
                     return True
-                elif parsed.verb in player_verbs:
-                    func = player_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=player_verbs, game_clock=self.game_clock, state=self.state)
+                elif parsed.verb in command_verbs:
+                    func = command_verbs[parsed.verb]
+                    func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
                     return
+                elif parsed.verb in custom_verbs:
+                    print(parsed) # XXX
+                    print("@TODO: CUSTOM VERB (LOCATION or PLAYER):", parsed.verb)  # @ todo
                 else:
                     raise errors.ParseError("That doesn't make much sense.")
             except errors.RetrySoulVerb as x:

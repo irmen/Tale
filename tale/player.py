@@ -28,6 +28,7 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, title, description, race)
         self.soul = soul.Soul()
+        self.verbs = []   # things can add custom verbs to this list when they're in the player's inventory
         self.score = 0
         self.turns = 0
         self.previous_commandline = None

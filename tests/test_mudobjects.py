@@ -134,6 +134,13 @@ class TestLocations(unittest.TestCase):
         self.assertEqual([], rat.messages)
         self.assertEqual(["juliemsg"], julie.messages)
 
+    def test_verbs(self):
+        room = Location("room")
+        room.verbs.append("smurf")
+        room.verbs.append("smurf")
+        self.assertTrue("smurf" in room.verbs)
+        self.assertEqual(2, room.verbs.count("smurf"))
+
     def test_enter_leave(self):
         hall = Location("hall")
         rat1 = NPC("rat1", "n")

@@ -225,9 +225,10 @@ class Location(MudObject):
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
         self.livings = set()  # set of livings in this location
-        self.items = set()  # set of all items in the room
+        self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
+        self.verbs = []       # things can add custom verbs to this list when they're present in this location
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items

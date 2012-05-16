@@ -1,12 +1,12 @@
-Concepts for single player Interactive Fiction (and perhaps MUD):
------------------------------------------------------------------
-Disable certain commands and features that might break immersion (such as 'stats').
+Concepts for single player Interactive Fiction mode:
+----------------------------------------------------
+Disable certain commands and features that might break immersion (such as 'stats' and 'who').
 tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 pictures for locations (viewable in gui driver only ofcourse)
 
 
-Concepts that could be implemented for a MUD (but perhaps not for single player IF):
-------------------------------------------------------------------------------------
+Concepts for multiplayer MUD mode (and not really for single player I.F.):
+--------------------------------------------------------------------------
 MUD game mode: disable StoryCompleted exception and player status, and other IF-specific stuff
 Write stuff to a logfile for the server admins.
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
@@ -25,10 +25,13 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-Two game modes: IF and MUD.  Each mode enables/disables certain features.
+Items or NPC's "listening" to actions/messages in a room:
+notify_action(parsed, actor): a more convenient way to 'listen' to action messages.
+Defined on location. Calls recursively on all items, livings and items in their inventories.
+This is different from the normal tell(), because that only provides the rendered message
+string instead of the parsed objects, and isn't called on inventory items.
 
-Let objects register non-standard verbs with the location they're in.
-(For instance a computer might register 'hack' and 'type'.)
+Two game modes: IF and MUD.  Each mode enables/disables certain features.
 
 Driver/mudlib: Support separate 'mudlibs' (games) so you can 'install' different game files.
                Move the hardcoded 'demo' mudlib parts into a separate 'demo/test game'.
@@ -61,12 +64,6 @@ Language system: speak/understand different languages?
 
 test when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
 test with multiple items of same name in room, in inventory, in bag
-
-Items or NPC's "listening" to messages in a room:
-notify_tell(parsed, actor): a more convenient way to 'listen' to messages.
-Defined on location. Calls recursively on all items, livings and items in inventory.
-This is different from the normal tell(), because that only provides the rendered message
-string instead of the parsed objects, and isn't called recursively on inventory items.
 
 Change living location logic so that livings can sit inside a container item too.
 Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
