@@ -120,7 +120,7 @@ VERBS = {
 "leer":      ( DEFA, None, "", "at" ),
 "agree":     ( DEFA, None, "", "with" ),
 "believe":   ( PERS, None, "believe$ in \nMYself \nHOW", "believe$ \nWHO \nHOW" ),
-"understand":( PERS, None, "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
+"understand": ( PERS, None, "understand$ \nHOW", "understand$ \nWHO \nHOW" ),
 "disagree":  ( DEFA, None, "", "with" ),
 "fart":      ( DEFA, None, "", "at" ),
 "dance":     ( DEFA, None, "", "with" ),
@@ -474,7 +474,8 @@ def poss_replacement(actor, target, observer):
 
 
 _message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
-_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "onto", "the", "with", "from", "after", "before", "under", "above", "next"}
+_skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "onto",
+               "the", "with", "from", "after", "before", "under", "above", "next"}
 
 
 class WhoInfo(object):
@@ -618,12 +619,12 @@ class Soul(object):
                 action_room = qual_room % action_room if use_room_default else qual_room % action
                 action = qual_action % action
             # construct message seen by player
-            targetnames = [ who_replacement(player, target, player) for target in parsed.who_order ]
+            targetnames = [who_replacement(player, target, player) for target in parsed.who_order]
             player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
             player_msg = player_msg.replace(" \nYOUR", " your")
             player_msg = player_msg.replace(" \nMY", " your")
             # construct message seen by room
-            targetnames = [ who_replacement(player, target, None) for target in parsed.who_order ]
+            targetnames = [who_replacement(player, target, None) for target in parsed.who_order]
             room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
             room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
             room_msg = room_msg.replace(" \nMY", " " + player.objective)

@@ -325,7 +325,7 @@ def do_take(player, parsed, **ctx):
         if where:
             if where in player or where in player.location:
                 # take specific items out of some container
-                items_by_name = { item.name: item for item in where.inventory }
+                items_by_name = {item.name: item for item in where.inventory}
                 items_to_take = []
                 for name in what_names:
                     if name in items_by_name:

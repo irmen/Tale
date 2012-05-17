@@ -83,8 +83,21 @@ class TownCrier(NPC):
     def do_cry(self, driver=None):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20,40) * globals.GAMETIME_TO_REALTIME)
+        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20, 40) * globals.GAMETIME_TO_REALTIME)
         globals.mud_context.driver.defer(due, self, self.do_cry)
+
+    def notify_action(self, parsed, actor):
+        if parsed.verb in ("hi", "hello"):
+            greet = True
+        elif parsed.verb == "say":
+            if "hello" in parsed.args or "hi" in parsed.args:
+                greet = True
+        elif parsed.verb == "greet" and self in parsed.who_info:
+            greet = True
+        else:
+            greet = False
+        if greet:
+            self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
 
 
 towncrier = TownCrier("laish", "f", "Laish the town crier",
@@ -148,6 +161,7 @@ square.exits["south"] = square.exits["alley"]
 class GameEnd(Location):
     def init(self):
         pass
+
     def insert(self, obj, actor):
         if obj is globals.mud_context.player:
             # Player entered this location!
@@ -159,6 +173,7 @@ class GameEnd(Location):
             # setting the status on the player is usually better,
             # it allows the driver to complete the last player action normally.
         return super(GameEnd, self).insert(obj, actor)
+
     def completion(self, player, driver):
         player.tell("\n")
         player.tell("Congratulations! You beat the game!")
@@ -217,30 +232,38 @@ class Computer(Item):
             message = "INVALID COMMAND"
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
 
-    def notify_action(self, parsed, actor):
+    def handle_verb(self, parsed, actor):
         if parsed.verb == "hack" and self in parsed.who_info:
             actor.tell("It doesn't need to be hacked, you can just type commands on it.")
-        elif parsed.verb in ("type", "enter"):
+            return True
+        if parsed.verb in ("type", "enter"):
             if parsed.who_info and self not in parsed.who_info:
                 raise ActionRefused("You need to type it on the computer.")
             if parsed.message:
                 # type "blabla" on computer (message between quotes)
                 action, _, door = parsed.message.partition(" ")
                 self.process_typed_command(action, door, actor)
-                return
+                return True
             args = list(parsed.args)
             if self.name in args:
                 args.remove(self.name)
             for name in self.aliases:
                 if name in args:
                     args.remove(name)
-            args.append("")
-            self.process_typed_command(args[0], args[1], actor)
-        elif parsed.verb in ("say", "yell"):
+            if args:
+                args.append("")
+                self.process_typed_command(args[0], args[1], actor)
+                return True
+        if parsed.verb in ("hello", "hi"):
+            self.process_typed_command("hello", "", actor)
+            return True
+        if parsed.verb in ("say", "yell"):
             if parsed.args and parsed.args[0] in ("hi", "hello"):
                 self.process_typed_command("hello", "", actor)
             else:
                 actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
+            return True
+        return False
 
 
 computer = Computer("computer")

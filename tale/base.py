@@ -122,8 +122,12 @@ class MudObject(object):
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
 
+    def handle_verb(self, parsed, actor):
+        """Handle a custom verb. Return True if handled, False if not handled."""
+        return False
+
     def notify_action(self, parsed, actor):
-        """Notify the object of an action performed by someone."""
+        """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
         pass
 
 
@@ -282,7 +286,7 @@ class Location(MudObject):
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
         that based on this message string. That will make it quite hard because you need to
-        parse the string again to figure out what happened... Use notify_action instead.
+        parse the string again to figure out what happened... Use handle_verb / notify_action instead.
         """
         specific_targets = specific_targets or set()
         assert isinstance(specific_targets, (frozenset, set, list, tuple))
@@ -375,6 +379,15 @@ class Location(MudObject):
         obj.location = None
         for verb in obj.verbs:
             self.verbs.remove(verb)     # unregister custom verbs
+
+    def handle_verb(self, parsed, actor):
+        """Handle a custom verb. Return True if handled, False if not handled."""
+        handled = any(living.handle_verb(parsed, actor) for living in self.livings)
+        if not handled:
+            handled = any(item.handle_verb(parsed, actor) for item in self.items)
+            if not handled:
+                handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
+        return handled
 
     def notify_action(self, parsed, actor):
         """Notify the room, its livings and items of an action performed by someone."""
@@ -471,6 +484,10 @@ class Exit(object):
     def read(self, actor):
         # see MudObject
         raise ActionRefused("There's nothing to read there.")
+
+    def handle_verb(self, parsed, actor):
+        """Handle a custom verb. Return True if handled, False if not handled."""
+        return False
 
     def notify_action(self, parsed, actor):
         """Notify the exit of an action performed by someone."""
@@ -666,6 +683,11 @@ class Living(MudObject):
     def allow_give_money(self, actor, amount):
         """Do we accept money?"""
         raise ActionRefused("You can't do that.")
+
+    def handle_verb(self, parsed, actor):
+        """Handle a custom verb. Return True if handled, False if not handled."""
+        handled = any(item.handle_verb(parsed, actor) for item in self.__inventory)
+        return handled
 
     def notify_action(self, parsed, actor):
         """Notify the living of an action performed by someone."""

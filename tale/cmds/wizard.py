@@ -179,13 +179,13 @@ def do_clean(player, parsed, **ctx):
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
         # @todo: ask for confirmation (async)
-        print("Cleaning inventory of",victim)
+        print("Cleaning inventory of", victim)
         player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
         items = victim.inventory
         for item in items:
             victim.remove(item, player)
             item.destroy(ctx)
-            print("destroyed",item)
+            print("destroyed", item)
         if victim.inventory_size:
             print("Some items refused to be destroyed!")
 

@@ -381,7 +381,11 @@ class Driver(object):
                     func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
                     self.player.location.notify_action(parsed, self.player)
                 elif parsed.verb in custom_verbs:
-                    self.player.location.notify_action(parsed, self.player)
+                    handled = self.player.location.handle_verb(parsed, self.player)
+                    if handled:
+                        self.player.location.notify_action(parsed, self.player)
+                    else:
+                        raise errors.ParseError("Please be more specific.")
                 else:
                     raise errors.ParseError("That doesn't make much sense.")
             except errors.RetrySoulVerb as x:
