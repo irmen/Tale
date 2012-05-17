@@ -31,6 +31,8 @@ wizard commands must not be processed with notify_action.
 custom verb: must be able to override existing verbs. If not handled however, existing verb should trigger (and not the error!)
 handle_verb / notify_action: unit tests to check if items in player's inventory etc also get the event
 
+parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
+
 allow_move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 Disable various command action_notify calls (look, help, examine...) unless they're in the custom command list.
 Two game modes: IF and MUD.  Each mode enables/disables certain features.

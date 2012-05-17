@@ -232,6 +232,15 @@ class Computer(Item):
             message = "INVALID COMMAND"
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
 
+    def notify_action(self, parsed, actor):
+        if parsed.verb in ("hello", "hi"):
+            self.process_typed_command("hello", "", actor)
+        elif parsed.verb in ("say", "yell"):
+            if "hi" in parsed.args or "hello" in parsed.args:
+                self.process_typed_command("hello", "", actor)
+            else:
+                actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
+
     def handle_verb(self, parsed, actor):
         if parsed.verb == "hack" and self in parsed.who_info:
             actor.tell("It doesn't need to be hacked, you can just type commands on it.")
@@ -254,15 +263,6 @@ class Computer(Item):
                 args.append("")
                 self.process_typed_command(args[0], args[1], actor)
                 return True
-        if parsed.verb in ("hello", "hi"):
-            self.process_typed_command("hello", "", actor)
-            return True
-        if parsed.verb in ("say", "yell"):
-            if parsed.args and parsed.args[0] in ("hi", "hello"):
-                self.process_typed_command("hello", "", actor)
-            else:
-                actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
-            return True
         return False
 
 
