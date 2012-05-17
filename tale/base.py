@@ -63,6 +63,7 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None):
         self.name = name
         self.aliases = []
+        self.verbs = []   # any custom verbs that need to be registered in the location or in the player
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
         try:
@@ -120,6 +121,10 @@ class MudObject(object):
     def read(self, actor):
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
+
+    def notify_action(self, parsed, actor):
+        """Notify the object of an action performed by someone."""
+        pass
 
 
 class Item(MudObject):
@@ -228,7 +233,7 @@ class Location(MudObject):
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
-        self.verbs = []       # things can add custom verbs to this list when they're present in this location
+        self.verbs = []       # custom verbs are added to this list when they're present in this location
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
@@ -249,14 +254,7 @@ class Location(MudObject):
         assert len(self.items) == 0
         assert len(self.livings) == 0
         for obj in objects:
-            if isinstance(obj, Living):
-                self.livings.add(obj)
-                obj.location = self
-            elif isinstance(obj, Item):
-                self.items.add(obj)
-                obj.location = self
-            else:
-                raise TypeError("can only add Living or Item")
+            self.insert(obj, self)
 
     def destroy(self, ctx):
         super(Location, self).destroy(ctx)
@@ -284,7 +282,7 @@ class Location(MudObject):
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
         that based on this message string. That will make it quite hard because you need to
-        parse the string again to figure out what happened...
+        parse the string again to figure out what happened... Use notify_action instead.
         """
         specific_targets = specific_targets or set()
         assert isinstance(specific_targets, (frozenset, set, list, tuple))
@@ -359,21 +357,33 @@ class Location(MudObject):
         """Add obj to the contents of the location (either a Living or an Item)"""
         if isinstance(obj, Living):
             self.livings.add(obj)
-            obj.location = self
         elif isinstance(obj, Item):
             self.items.add(obj)
-            obj.location = self
         else:
             raise TypeError("can only add Living or Item")
+        obj.location = self
+        self.verbs.extend(obj.verbs)    # register custom verbs
 
     def remove(self, obj, actor):
         """Remove obj from this location (either a Living or an Item)"""
         if obj in self.livings:
             self.livings.remove(obj)
-            obj.location = None
         elif obj in self.items:
             self.items.remove(obj)
-            obj.location = None
+        else:
+            return   # just ignore an object that wasn't present in the first place
+        obj.location = None
+        for verb in obj.verbs:
+            self.verbs.remove(verb)     # unregister custom verbs
+
+    def notify_action(self, parsed, actor):
+        """Notify the room, its livings and items of an action performed by someone."""
+        for living in self.livings:
+            living.notify_action(parsed, actor)
+        for item in self.items:
+            item.notify_action(parsed, actor)
+        for exit in set(self.exits.values()):
+            exit.notify_action(parsed, actor)
 
 
 _Limbo = Location("Limbo",
@@ -461,6 +471,10 @@ class Exit(object):
     def read(self, actor):
         # see MudObject
         raise ActionRefused("There's nothing to read there.")
+
+    def notify_action(self, parsed, actor):
+        """Notify the exit of an action performed by someone."""
+        pass
 
 
 class Living(MudObject):
@@ -652,6 +666,11 @@ class Living(MudObject):
     def allow_give_money(self, actor, amount):
         """Do we accept money?"""
         raise ActionRefused("You can't do that.")
+
+    def notify_action(self, parsed, actor):
+        """Notify the living of an action performed by someone."""
+        for item in self.__inventory:
+            item.notify_action(parsed, actor)
 
 
 class Container(Item):

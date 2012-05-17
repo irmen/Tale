@@ -83,7 +83,7 @@ class TownCrier(NPC):
     def do_cry(self, driver=None):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock + datetime.timedelta(seconds=random.randint(10,20) * globals.GAMETIME_TO_REALTIME)
+        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20,40) * globals.GAMETIME_TO_REALTIME)
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
 
@@ -129,10 +129,11 @@ ant = NPC("ant", "n", race="insect")
 square.init_inventory([cursed_gem, normal_gem, paper, trashcan, bag, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
-door1 = Door(alley, "Door one.", direction="door one", locked=False, opened=True)
-door2 = Door(alley, "Door two.", direction="door two", locked=True, opened=True)
-door3 = Door(alley, "Door three.", direction="door three", locked=False, opened=False)
-door4 = Door(alley, "Door four.", direction="door four", locked=True, opened=False)
+descr = "The doors seem to be connected to the computer nearby."
+door1 = Door(alley, "Door one.", long_description=descr, direction="door one", locked=False, opened=True)
+door2 = Door(alley, "Door two,", long_description=descr, direction="door two", locked=True, opened=True)
+door3 = Door(alley, "Door three.", long_description=descr, direction="door three", locked=False, opened=False)
+door4 = Door(alley, "Door four.", long_description=descr, direction="door four", locked=True, opened=False)
 
 alley.add_exits([door1, door2, door3, door4])
 alley.exits["first door"] = alley.exits["door one"]
@@ -172,3 +173,77 @@ class GameEnd(Location):
 
 game_end = GameEnd("Game End", "It seems like it is game over!")
 lane.exits["east"] = Exit(game_end, "To the east, it looks like it is game over.")
+
+
+class Computer(Item):
+    def allow_move(self, actor):
+        raise ActionRefused("You can't move the computer.")
+
+    @property
+    def description(self):
+        return "It seems to be connected to the four doors. "  \
+                + self.screen_text()  \
+                + " There's also a small keyboard to type commands."
+
+    def screen_text(self):
+        txt = ["The screen of the computer reads:  \""]
+        for door in (door1, door2, door3, door4):
+            txt.append(door.name.upper())
+            txt.append(": LOCKED. " if door.locked else ": UNLOCKED. ")
+        txt.append(" AWAITING COMMAND.\"")
+        return "".join(txt)
+
+    def read(self, actor):
+        actor.tell(self.screen_text())
+
+    def process_typed_command(self, command, doorname, actor):
+        if command == "help":
+            message = "KNOWN COMMANDS: LOCK, UNLOCK"
+        elif command in ("hi", "hello"):
+            message = "GREETINGS, PROFESSOR FALKEN."
+        elif command in ("unlock", "lock"):
+            try:
+                door = self.location.exits[doorname]
+            except KeyError:
+                message = "UNKNOWN DOOR"
+            else:
+                if command == "unlock":
+                    door.locked = False
+                    message = doorname.upper() + " UNLOCKED"
+                else:
+                    door.locked = True
+                    message = doorname.upper() + " LOCKED"
+        else:
+            message = "INVALID COMMAND"
+        actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
+
+    def notify_action(self, parsed, actor):
+        if parsed.verb == "hack" and self in parsed.who_info:
+            actor.tell("It doesn't need to be hacked, you can just type commands on it.")
+        elif parsed.verb in ("type", "enter"):
+            if parsed.who_info and self not in parsed.who_info:
+                raise ActionRefused("You need to type it on the computer.")
+            if parsed.message:
+                # type "blabla" on computer (message between quotes)
+                action, _, door = parsed.message.partition(" ")
+                self.process_typed_command(action, door, actor)
+                return
+            args = list(parsed.args)
+            if self.name in args:
+                args.remove(self.name)
+            for name in self.aliases:
+                if name in args:
+                    args.remove(name)
+            args.append("")
+            self.process_typed_command(args[0], args[1], actor)
+        elif parsed.verb in ("say", "yell"):
+            if parsed.args and parsed.args[0] in ("hi", "hello"):
+                self.process_typed_command("hello", "", actor)
+            else:
+                actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
+
+
+computer = Computer("computer")
+computer.verbs = ["hack", "type", "enter"]
+computer.aliases = {"keyboard", "screen"}
+alley.insert(computer, None)

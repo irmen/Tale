@@ -367,7 +367,6 @@ class Driver(object):
             parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
-            return
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -377,14 +376,12 @@ class Driver(object):
             try:
                 if parsed.verb in self.player.location.exits:
                     self.go_through_exit(self.player, parsed.verb)
-                    return True
                 elif parsed.verb in command_verbs:
                     func = command_verbs[parsed.verb]
                     func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
-                    return
+                    self.player.location.notify_action(parsed, self.player)
                 elif parsed.verb in custom_verbs:
-                    print(parsed) # XXX
-                    print("@TODO: CUSTOM VERB (LOCATION or PLAYER):", parsed.verb)  # @ todo
+                    self.player.location.notify_action(parsed, self.player)
                 else:
                     raise errors.ParseError("That doesn't make much sense.")
             except errors.RetrySoulVerb as x:
@@ -402,6 +399,7 @@ class Driver(object):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
         self.player.tell(player_message)
         self.player.location.tell(room_message, self.player, who, target_message)
+        self.player.location.notify_action(parsed, self.player)
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it

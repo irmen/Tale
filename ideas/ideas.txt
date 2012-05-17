@@ -27,12 +27,12 @@ Do something with the circlemud xml data:
 
 General ideas/TODO's:
 ---------------------
-Items or NPC's "listening" to actions/messages in a room:
-notify_action(parsed, actor): a more convenient way to 'listen' to action messages.
-Defined on location. Calls recursively on all items, livings and items in their inventories.
-This is different from the normal tell(), because that only provides the rendered message
-string instead of the parsed objects, and isn't called on inventory items.
+notify_action: return true/false depending on whether the command was processed or not.
+If nothing in the room processed it, the driver should print "Please be more specific"
+notify_action: unit tests to check if items in player's inventory etc also get the event
 
+allow_move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
+Disable various command action_notify calls (look, help,...) unless they're in the custom command list.
 Two game modes: IF and MUD.  Each mode enables/disables certain features.
 
 Driver/mudlib: Support separate 'mudlibs' (games) so you can 'install' different game files.
