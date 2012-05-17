@@ -30,6 +30,8 @@ def cmd(command, *aliases):
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
+            if not hasattr(func, "enable_notify_action"):
+                func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
             all_commands[command] = func
             for alias in aliases:
                 if alias in all_commands:
@@ -41,7 +43,14 @@ def cmd(command, *aliases):
     return cmd2
 
 
+def disable_notify_action(func):
+    """decorator to prevent the command being passed to notify_action events"""
+    func.enable_notify_action = False
+    return func
+
+
 @cmd("inventory")
+@disable_notify_action
 def do_inventory(player, parsed, **ctx):
     """Show the items you are carrying."""
     p = player.tell
@@ -515,6 +524,7 @@ def give_money(player, amount, recipient):
 
 
 @cmd("help")
+@disable_notify_action
 def do_help(player, parsed, **ctx):
     """Provides some helpful information about different aspects of the game."""
     if parsed.args:
@@ -544,6 +554,7 @@ def do_help(player, parsed, **ctx):
 
 
 @cmd("look")
+@disable_notify_action
 def do_look(player, parsed, **ctx):
     """Look around to see where you are and what's around you."""
     if parsed.args:
@@ -564,6 +575,7 @@ def do_look(player, parsed, **ctx):
 
 
 @cmd("examine", "inspect")
+@disable_notify_action
 def do_examine(player, parsed, **ctx):
     """Examine something or someone thoroughly."""
     tell = player.tell
@@ -627,6 +639,7 @@ def do_examine(player, parsed, **ctx):
 
 
 @cmd("stats")
+@disable_notify_action
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
@@ -745,6 +758,7 @@ def do_wait(player, parsed, **ctx):
 
 
 @cmd("quit")
+@disable_notify_action
 def do_quit(player, parsed, **ctx):
     """Quit the game."""
     # @todo: ask for confirmation (async).. this is now done in the driver...
@@ -760,6 +774,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
 
 
 @cmd("who")
+@disable_notify_action
 def do_who(player, parsed, **ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
     if parsed.args:
@@ -818,6 +833,7 @@ def do_open(player, parsed, **ctx):
 
 
 @cmd("what")
+@disable_notify_action
 def do_what(player, parsed, **ctx):
     """Tries to answer your question about what something is. The topics range from game commands to location exits to creature and items. For more general help, try the 'help' command first."""
     print = player.tell
@@ -959,6 +975,7 @@ def do_what(player, parsed, **ctx):
 
 
 @cmd("exits")
+@disable_notify_action
 def do_exits(player, parsed, **ctx):
     """Provides a tiny clue about possible exits from your current location."""
     if "wizard" in player.privileges:
@@ -1034,6 +1051,7 @@ def do_coin(player, parsed, **ctx):
 
 
 @cmd("motd")
+@disable_notify_action
 def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
     motd, mtime = util.get_motd()
@@ -1077,12 +1095,14 @@ def do_flee(player, parsed, **ctx):
 
 
 @cmd("save")
+@disable_notify_action
 def do_save(player, parsed, **ctx):
     """Save your game."""
     ctx["driver"].do_save(player)
 
 
 @cmd("load", "reload", "restore", "restart")
+@disable_notify_action
 def do_load(player, parsed, **ctx):
     """Load a previously saved game."""
     player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
@@ -1092,12 +1112,14 @@ def do_load(player, parsed, **ctx):
 
 if globals.MAX_SCORE:    # only enable this command when MAX_SCORE is > 0
     @cmd("score")
+    @disable_notify_action
     def do_score(player, parsed, **ctx):
         """Displays your current score in the game."""
         player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, globals.MAX_SCORE, player.turns))
 
 
 @cmd("transcript")
+@disable_notify_action
 def do_transcript(player, parsed, **ctx):
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if not parsed.args:
@@ -1124,6 +1146,7 @@ def do_show(player, parsed, **ctx):
 
 
 @cmd("time", "date")
+@disable_notify_action
 def do_time(player, parsed, **ctx):
     """Query the current date and/or time of day."""
     if "wizard" in player.privileges:
@@ -1144,6 +1167,7 @@ def do_time(player, parsed, **ctx):
 
 
 @cmd("brief")
+@disable_notify_action
 def do_brief(player, parsed, **ctx):
     """Configure the verbosity of location descriptions. 'brief' mode means: show short description
     for locations that you've already visited at least once.

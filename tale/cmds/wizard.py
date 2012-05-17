@@ -31,8 +31,9 @@ def wizcmd(command, *aliases):
     aliases = ["!" + alias for alias in aliases]
 
     def wizcmd2(func):
+        func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
         @functools.wraps(func)
-        def makewizcmd(player, parsed, **ctx):
+        def executewizcommand(player, parsed, **ctx):
             if not "wizard" in player.privileges:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, **ctx)
@@ -41,12 +42,12 @@ def wizcmd(command, *aliases):
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
-            all_commands[command] = makewizcmd
+            all_commands[command] = executewizcommand
             for alias in aliases:
                 if alias in all_commands:
                     raise ValueError("Command defined more than once: " + alias)
-                all_commands[alias] = makewizcmd
-            return makewizcmd
+                all_commands[alias] = executewizcommand
+            return executewizcommand
         else:
             raise SyntaxError("invalid wizcmd function signature for: " + func.__name__)
     return wizcmd2

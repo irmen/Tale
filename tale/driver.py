@@ -114,9 +114,6 @@ class Commands(object):
                 result.update(self.commands_per_priv[priv])
         return result
 
-    def is_wizard_cmd(self, verb):
-        return verb in self.commands_per_priv["wizard"]
-
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
@@ -382,7 +379,7 @@ class Driver(object):
                 elif parsed.verb in command_verbs:
                     func = command_verbs[parsed.verb]
                     func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
-                    if not self.commands.is_wizard_cmd(parsed.verb):
+                    if func.enable_notify_action:
                         self.player.location.notify_action(parsed, self.player)
                 elif parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
