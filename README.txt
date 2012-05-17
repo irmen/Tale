@@ -12,6 +12,10 @@ Run the included test world by starting the driver:
 
 $ python -m tale.driver
 
+Choose not to load a saved game (you will have none at first start anyway).
+Choose to create a default player character or
+Type 'help' and 'help soul' to get an idea of the stuff you can type in.
+
 
 
 Tale is 100% pure Python and runs on Python 2.7 and 3.2+.

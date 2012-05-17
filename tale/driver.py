@@ -177,10 +177,6 @@ class Driver(object):
             self.load_saved_game()
             if args.transcript:
                 self.player.activate_transcript(args.transcript)
-            self.player.tell("\n")
-            self.player.tell("\n")
-            self.show_motd()
-            self.player.look(short=False)
         else:
             choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
             if choice == "w":
@@ -194,12 +190,12 @@ class Driver(object):
             self.game_clock = globals.GAMETIME_EPOCH or self.server_started
             self.player = player
             self.move_player_to_start_room()
-            self.player.tell("\n")
-            self.player.tell("\n")
-            self.player.tell("Welcome to %s, %s." % (globals.GAME_TITLE, self.player.title), end=True)
-            self.player.tell("\n")
-            self.show_motd()
-            self.player.look(short=False)
+        self.player.tell("\n")
+        self.player.tell("\n")
+        self.player.tell("Welcome to %s, %s." % (globals.GAME_TITLE, self.player.title), end=True)
+        self.player.tell("\n")
+        self.show_motd()
+        self.player.look(short=False)
         self.write_output()
         self.player_input_allowed = threading.Event()
         self.start_player_input()

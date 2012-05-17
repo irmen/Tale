@@ -1,13 +1,15 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 Disable certain commands and features that might break immersion (such as 'stats' and 'who').
-tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
+Let the game provide a prebuilt player character, or optionally ask a few key attributes. (name, gender).
+Disable the fully customizable character builder.
+Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 pictures for locations (viewable in gui driver only ofcourse)
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-MUD game mode: disable StoryCompleted exception and player status, and other IF-specific stuff
+Disable StoryCompleted exception and player status, and other IF-specific stuff.
 Write stuff to a logfile for the server admins.
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
 Bulletin boards.
