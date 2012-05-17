@@ -13,7 +13,7 @@ Run the included test world by starting the driver:
 $ python -m tale.driver
 
 Choose not to load a saved game (you will have none at first start anyway).
-Choose to create a default player character or
+Choose to create a default player character or build a custom one.
 Type 'help' and 'help soul' to get an idea of the stuff you can type in.
 
 
