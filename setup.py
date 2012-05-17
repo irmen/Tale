@@ -17,7 +17,7 @@ setup(
     package_data={
         'tale': ['soul_adverbs.txt', 'messages/*']
         },
-    url='http://irmen.home.xs4all.nl/tale/',
+    url='http://packages.python.org/tale',
     license='GPL v3',
     author='Irmen de Jong',
     author_email='irmen@razorvine.net',
