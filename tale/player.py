@@ -152,6 +152,10 @@ class Player(base.Living):
             self.transcript.writelines(lines)
         return lines
 
+    def peek_output(self):
+        """Returns a copy of the output that sits in the buffer so far."""
+        return " ".join(self._output).strip()
+
     def get_wrapped_output_lines(self):
         """gets the accumulated output lines, formats them nicely, and clears the buffer"""
         lines = self._output

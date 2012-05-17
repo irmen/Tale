@@ -127,7 +127,6 @@ class MudObject(object):
         return False
 
     def notify_action(self, parsed, actor):
-        print("MUDOBJ NOTIFY_ACTION",parsed.verb) # XXX
         """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
         pass
 

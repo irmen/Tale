@@ -374,21 +374,27 @@ class Driver(object):
                 raise errors.ParseError("That action doesn't support qualifiers.")
             # Execute non-soul verb. First try directions, then the rest.
             try:
-                if parsed.verb in self.player.location.exits:
-                    self.go_through_exit(self.player, parsed.verb)
-                elif parsed.verb in command_verbs:
-                    func = command_verbs[parsed.verb]
-                    func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
-                    if func.enable_notify_action:
-                        self.player.location.notify_action(parsed, self.player)
-                elif parsed.verb in custom_verbs:
+                # Check if the verb is a custom verb and try to handle that.
+                # If it remains unhandled, check if it is a normal verb, and handle that.
+                # If it's not a normal verb, abort with "please be more specific".
+                parse_error = "That doesn't make much sense."
+                handled = False
+                if parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
                     if handled:
                         self.player.location.notify_action(parsed, self.player)
                     else:
-                        raise errors.ParseError("Please be more specific.")
-                else:
-                    raise errors.ParseError("That doesn't make much sense.")
+                        parse_error = "Please be more specific."
+                if not handled:
+                    if parsed.verb in self.player.location.exits:
+                        self.go_through_exit(self.player, parsed.verb)
+                    elif parsed.verb in command_verbs:
+                        func = command_verbs[parsed.verb]
+                        func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
+                        if func.enable_notify_action:
+                            self.player.location.notify_action(parsed, self.player)
+                    else:
+                        raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb as x:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)

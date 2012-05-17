@@ -233,7 +233,6 @@ class Computer(Item):
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
 
     def notify_action(self, parsed, actor):
-        print("COMPUTER notify_action",parsed) # XXX
         if parsed.verb in ("hello", "hi"):
             self.process_typed_command("hello", "", actor)
         elif parsed.verb in ("say", "yell"):
@@ -268,6 +267,6 @@ class Computer(Item):
 
 
 computer = Computer("computer")
-computer.verbs = ["hack", "type", "enter", "help"]  # XXX help just for testing overrides
+computer.verbs = ["hack", "type", "enter"]
 computer.aliases = {"keyboard", "screen"}
 alley.insert(computer, None)
