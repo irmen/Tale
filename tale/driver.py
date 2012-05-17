@@ -114,6 +114,9 @@ class Commands(object):
                 result.update(self.commands_per_priv[priv])
         return result
 
+    def is_wizard_cmd(self, verb):
+        return verb in self.commands_per_priv["wizard"]
+
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
@@ -237,7 +240,7 @@ class Driver(object):
                 break
             self.player_input_allowed.set()
             if globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= globals.SERVER_TICK_TIME:
-                # @todo if the sleep time ever gets down to zero or below zero, the server load is too high
+                # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
                 self.server_tick()
                 loop_duration_with_server_tick = time.time() - last_loop_time
@@ -379,7 +382,8 @@ class Driver(object):
                 elif parsed.verb in command_verbs:
                     func = command_verbs[parsed.verb]
                     func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
-                    self.player.location.notify_action(parsed, self.player)
+                    if not self.commands.is_wizard_cmd(parsed.verb):
+                        self.player.location.notify_action(parsed, self.player)
                 elif parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
                     if handled:
