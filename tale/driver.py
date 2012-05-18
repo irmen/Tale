@@ -361,7 +361,7 @@ class Driver(object):
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
         command_verbs = self.commands.get(self.player.privileges)
-        custom_verbs = set(self.player.location.verbs) | set(self.player.verbs)
+        custom_verbs = set(self.player.location.verbs)
         all_verbs = set(command_verbs) | custom_verbs
         try:
             parsed = self.player.parse(cmd, external_verbs=all_verbs)

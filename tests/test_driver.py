@@ -9,6 +9,8 @@ import unittest
 import heapq
 import tale.driver as driver
 import tale.globals
+import tale.cmds.normal
+import tale.cmds.wizard
 
 
 class TestDriver(unittest.TestCase):
@@ -18,7 +20,6 @@ class TestDriver(unittest.TestCase):
         self.assertEqual({}, tale.globals.mud_context.state)
         self.assertTrue(tale.globals.mud_context.state is d.state)
         self.assertEqual(d, tale.globals.mud_context.driver)
-
 
 
 class TestDeferreds(unittest.TestCase):
@@ -44,6 +45,20 @@ class TestDeferreds(unittest.TestCase):
         while heap:
             dues.append(heapq.heappop(heap).due)
         self.assertEqual([1, 2, 3, 4, 5], dues)
+
+
+class TestCommand(unittest.TestCase):
+    def testCommandsLoaded(self):
+        self.assertGreater(len(tale.cmds.normal.all_commands), 1)
+        self.assertGreater(len(tale.cmds.wizard.all_commands), 1)
+
+    def testEnableNotifyActionSet(self):
+        for cmd in tale.cmds.normal.all_commands.values():
+            self.assertIsNotNone(cmd.__doc__)
+            self.assertTrue(cmd.enable_notify_action in (True, False))
+        for cmd in tale.cmds.wizard.all_commands.values():
+            self.assertIsNotNone(cmd.__doc__)
+            self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
 
 
 if __name__ == "__main__":

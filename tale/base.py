@@ -382,7 +382,7 @@ class Location(MudObject):
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
-        handled = any(living.handle_verb(parsed, actor) for living in self.livings)
+        handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)
         if not handled:
             handled = any(item.handle_verb(parsed, actor) for item in self.items)
             if not handled:
@@ -549,6 +549,7 @@ class Living(MudObject):
             assert isinstance(item, Item)
             self.__inventory.add(item)
             item.contained_in = self
+            self.location.verbs.extend(item.verbs)   # register custom verbs
         else:
             raise ActionRefused("You can't do that.")
 
@@ -557,6 +558,8 @@ class Living(MudObject):
         if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
             item.contained_in = None
+            for verb in item.verbs:
+                self.location.verbs.remove(verb)     # unregister custom verbs
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
@@ -616,6 +619,8 @@ class Living(MudObject):
             self.location.remove(self, actor)
             try:
                 target_location.insert(self, actor)
+                self.unregister_all_inventory_verbs(original_location)
+                self.register_all_inventory_verbs(target_location)
             except:
                 # insert in target failed, put back in original location
                 original_location.insert(self, actor)
@@ -626,6 +631,17 @@ class Living(MudObject):
             target_location.insert(self, actor)
         if not silent:
             target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
+
+    def register_all_inventory_verbs(self, location):
+        """When moving the living to a new location, register all inventory custom verbs"""
+        for item in self.__inventory:
+            location.verbs.extend(item.verbs)
+
+    def unregister_all_inventory_verbs(self, location):
+        """When removing the living from a location, unregister all inventory custom verbs"""
+        for item in self.__inventory:
+            for verb in item.verbs:
+                location.verbs.remove(verb)
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """
@@ -684,10 +700,19 @@ class Living(MudObject):
         """Do we accept money?"""
         raise ActionRefused("You can't do that.")
 
+    def _handle_verb_base(self, parsed, actor):
+        """
+        Handle a custom verb. Return True if handled, False if not handled.
+        Also checks inventory items. Don't override this one in a subclass,
+        override handle_verb instead.
+        """
+        if self.handle_verb(parsed, actor):
+            return True
+        return any(item.handle_verb(parsed, actor) for item in self.__inventory)
+
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
-        handled = any(item.handle_verb(parsed, actor) for item in self.__inventory)
-        return handled
+        return False
 
     def notify_action(self, parsed, actor):
         """Notify the living of an action performed by someone."""

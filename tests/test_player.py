@@ -11,11 +11,11 @@ from supportstuff import DummyDriver, MsgTraceNPC
 
 tale.globals.mud_context.driver = DummyDriver()
 
-from tale.base import Location, Exit
+from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player
-from tale.soul import NonSoulVerb
+from tale.soul import NonSoulVerb, ParseResults
 import tale.rooms
 tale.rooms.init(tale.globals.mud_context.driver)
 
@@ -241,6 +241,83 @@ class TestPlayer(unittest.TestCase):
         player.story_completed("huzzah")
         self.assertTrue(player.story_complete)
         self.assertEqual("huzzah", player.story_complete_callback)
+
+    def test_handle_action(self):
+        class SpecialPlayer(Player):
+            def init(self):
+                self.handled = False
+                self.handle_verb_called = False
+            def handle_verb(self, parsed, actor):
+                self.handle_verb_called = True
+                if parsed.verb in self.verbs:
+                    self.handled = True
+                    return True
+                else:
+                    return False
+        player = SpecialPlayer("julie", "f")
+        player.verbs = ["xywobble"]
+        room = Location("room")
+        class Chair(Item):
+            def init(self):
+                self.handled = False
+                self.handle_verb_called = False
+            def handle_verb(self, parsed, actor):
+                self.handle_verb_called = True
+                if parsed.verb in self.verbs:
+                    self.handled = True
+                    return True
+                else:
+                    return False
+        chair_in_inventory = Chair("littlechair")
+        chair_in_inventory.verbs = ["kerwaffle"]
+        player.insert(chair_in_inventory, player)
+        chair = Chair("chair")
+        chair.verbs = ["frobnitz"]
+        room.init_inventory([player, chair])
+
+        # first check if the handle_verb passes to all objects including inventory
+        parsed = ParseResults("kowabungaa12345")
+        handled = room.handle_verb(parsed, player)
+        self.assertFalse(handled)
+        self.assertTrue(chair.handle_verb_called)
+        self.assertTrue(player.handle_verb_called)
+        self.assertTrue(chair_in_inventory.handle_verb_called)
+        self.assertFalse(chair.handled)
+        self.assertFalse(player.handled)
+        self.assertFalse(chair_in_inventory.handled)
+        player.init()
+        chair.init()
+        chair_in_inventory.init()
+
+        # check item handling
+        parsed = ParseResults("frobnitz")
+        handled = room.handle_verb(parsed, player)
+        self.assertTrue(handled)
+        self.assertTrue(chair.handled)
+        self.assertFalse(player.handled)
+        self.assertFalse(chair_in_inventory.handled)
+        player.init()
+        chair.init()
+        chair_in_inventory.init()
+
+        # check living handling
+        parsed = ParseResults("xywobble")
+        handled = room.handle_verb(parsed, player)
+        self.assertTrue(handled)
+        self.assertFalse(chair.handled)
+        self.assertTrue(player.handled)
+        self.assertFalse(chair_in_inventory.handled)
+        player.init()
+        chair.init()
+        chair_in_inventory.init()
+
+        # check inventory handling
+        parsed = ParseResults("kerwaffle")
+        handled = room.handle_verb(parsed, player)
+        self.assertTrue(handled)
+        self.assertFalse(chair.handled)
+        self.assertFalse(player.handled)
+        self.assertTrue(chair_in_inventory.handled)
 
 
 if __name__ == '__main__':

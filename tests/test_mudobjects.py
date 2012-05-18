@@ -172,6 +172,41 @@ class TestLocations(unittest.TestCase):
         hall.remove(rat1, julie)
         hall.remove(12345, julie)
 
+    def test_custom_verbs(self):
+        player = Player("julie", "f")
+        player.verbs = ["xywobble"]
+        room = Location("room")
+        chair1 = Item("chair1")
+        chair1.verbs=["frobnitz"]
+        chair2 = Item("chair2")
+        chair2.verbs=["frobnitz"]
+        chair_in_inventory = Item("chair3")
+        chair_in_inventory.verbs = ["kowabooga"]
+        room.init_inventory([chair1, player, chair2])
+
+        # check inventory NOT affecting player custom verbs, but DOES affect location verbs
+        self.assertEqual(["xywobble"], player.verbs)
+        self.assertEqual(["frobnitz", "xywobble", "frobnitz"], room.verbs)
+        player.insert(chair_in_inventory, player)
+        self.assertEqual(["xywobble"], player.verbs)
+        self.assertEqual(["frobnitz", "xywobble", "frobnitz", "kowabooga"], room.verbs)
+        player.remove(chair_in_inventory, player)
+        self.assertEqual(["frobnitz", "xywobble", "frobnitz"], room.verbs)
+
+        player.insert(chair_in_inventory, player)
+        self.assertEqual(["frobnitz", "xywobble", "frobnitz", "kowabooga"], room.verbs)
+        room2 = Location("room2")
+        self.assertEqual([], room2.verbs)
+        chair1.move(room2, player)
+        self.assertEqual(["xywobble", "frobnitz", "kowabooga"], room.verbs)
+        self.assertEqual(["frobnitz"], room2.verbs)
+        chair2.move(room2, player)
+        self.assertEqual(["xywobble", "kowabooga"], room.verbs)
+        self.assertEqual(["frobnitz", "frobnitz"], room2.verbs)
+        player.move(room2)
+        self.assertEqual([], room.verbs)
+        self.assertEqual(["frobnitz", "frobnitz", "xywobble", "kowabooga"], room2.verbs)
+
 
 class TestDoorsExits(unittest.TestCase):
     def test_actions(self):
