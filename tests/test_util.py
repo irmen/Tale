@@ -10,6 +10,7 @@ from tale import util, globals
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
+from tale.resource import ResourceLoader
 from supportstuff import DummyDriver, Wiretap
 
 globals.mud_context.driver = DummyDriver()
@@ -192,6 +193,17 @@ class TestUtil(unittest.TestCase):
             third
         """
         self.assertEqual("first\n  second\n    third", util.format_docstring(d))
+
+    def test_resourceloader(self):
+        r = ResourceLoader(util)
+        with self.assertRaises(ValueError):
+            r.load_text("a\\b")
+        with self.assertRaises(ValueError):
+            r.load_text("/abs/path")
+        with self.assertRaises(IOError):
+            r.load_text("normal/text")
+        with self.assertRaises(IOError):
+            r.load_image("normal/image")
 
 
 if __name__ == '__main__':

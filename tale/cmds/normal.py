@@ -1052,7 +1052,7 @@ def do_coin(player, parsed, **ctx):
 @disable_notify_action
 def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
-    motd, mtime = util.get_motd()
+    motd, mtime = util.get_motd(globals.MOTD_FILE)
     if motd:
         player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
         player.tell("\n")

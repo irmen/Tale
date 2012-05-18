@@ -6,9 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division
-import os
 import re
 import bisect
+from . import resource
+
 
 # genders are m,f,n
 SUBJECTIVE = {"m": "he", "f": "she", "n": "it"}
@@ -65,9 +66,8 @@ def fullstop(sentence, punct="."):
 
 
 # adverbs are stored in a datafile next to this module
-with open(os.path.join(os.path.dirname(__file__), "soul_adverbs.txt")) as adverbsfile:
-    ADVERB_LIST = sorted(adverbsfile.read().splitlines())     # keep the list for prefix search
-    ADVERBS = frozenset(ADVERB_LIST)
+ADVERB_LIST = sorted(resource.loader.load_text("soul_adverbs.txt").splitlines())   # keep the list for prefix search
+ADVERBS = frozenset(ADVERB_LIST)
 
 
 def adverb_by_prefix(prefix, amount=5):

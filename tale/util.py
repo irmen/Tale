@@ -13,7 +13,7 @@ import random
 import os
 import time
 import sys
-from . import lang
+from . import lang, resource
 from .errors import ParseError
 
 if sys.version_info < (3, 0):
@@ -191,10 +191,10 @@ def words_to_money(words, money_to_float=money_to_float, money_words=MONEY_WORDS
     raise ParseError("That is not an amount of money.")
 
 
-def get_motd():
+def get_motd(path):
     """Read the MOTD and return it and its modification timestamp, if it's not there, return None for both"""
     try:
-        with open(os.path.join(os.path.dirname(__file__), "messages", "motd.txt")) as motd:
+        with resource.loader.open(path) as motd:
             message = motd.read().rstrip()
             if not message:
                 return None, None
@@ -203,15 +203,6 @@ def get_motd():
             return message, mtime
     except IOError:
         return None, None
-
-
-def get_banner():
-    """Read the banner message, returns None if it's not there"""
-    try:
-        with open(os.path.join(os.path.dirname(__file__), "messages", "banner.txt")) as banner:
-            return banner.read().rstrip() or None
-    except IOError:
-        return None
 
 
 def message_nearby_locations(source_location, message):

@@ -27,6 +27,9 @@ class __MudContextProxy(object):
 
 mud_context = __MudContextProxy()
 
+MOTD_FILE = "messages/motd.txt"
+BANNER_FILE = "messages/banner.txt"
+
 MAX_SCORE = 100     # arbitrary, but when max score is reached, the game is supposed to end. Use 0 or None to disable scoring.
 SERVER_TICK_METHOD = "timer"    # 'command' (waits for player entry) or 'timer' (async timer driven)
 SERVER_TICK_TIME = 1.0    # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)

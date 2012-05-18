@@ -20,6 +20,9 @@ Once Jython's new 2.7 release gets debugged a bit more, it should work on that a
     This documentation is still a stub. I hope to write some real documentation soon,
     but in the meantime, use the source, Luke.
 
+Tale can be found on Pypi as `tale <http://pypi.python.org/pypi/tale/>`_.
+Read only source repository (subversion): ``svn://svn.razorvine.net/Various/Tale``
+
 
 Getting started
 ---------------
@@ -62,8 +65,6 @@ Copyright
 ---------
 
 Tale is copyright © Irmen de Jong (irmen@razorvine.net | http://www.razorvine.net).
-It's licensed under GPL v3 (see ``LICENSE.txt``).
-
-Tale can be found on Pypi as `tale <http://pypi.python.org/pypi/tale/>`_.
+It's licensed under GPL v3, see http://www.gnu.org/licenses/gpl.html
 
 

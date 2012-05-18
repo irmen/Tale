@@ -25,6 +25,7 @@ from . import soul
 from . import player
 from . import cmds
 from . import rooms
+from . import resource
 from . import __version__ as tale_version_str
 try:
     import readline
@@ -167,9 +168,11 @@ class Driver(object):
         print("of the GNU General Public License version 3. See the file LICENSE.txt")
 
         # print MUD banner and initiate player creation
-        banner = util.get_banner()
-        if banner:
-            print("\n" + banner + "\n\n")
+        try:
+            banner = resource.loader.load_text(globals.BANNER_FILE)
+            print("\n" + banner + "\n")
+        except IOError:
+            pass  # no banner present
         print("This is '%s' version %s.\nYou're using Tale version %s." % (globals.GAME_TITLE, globals.GAME_VERSION, tale_version_str))
         choice = input("\nDo you want to load a saved game ('n' will start a new game)? ").strip()
         if choice == "y":
@@ -202,7 +205,7 @@ class Driver(object):
         self.main_loop()
 
     def show_motd(self):
-        motd, mtime = util.get_motd()
+        motd, mtime = util.get_motd(globals.MOTD_FILE)
         if motd:
             self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
             self.player.tell("\n")

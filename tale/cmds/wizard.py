@@ -32,11 +32,13 @@ def wizcmd(command, *aliases):
 
     def wizcmd2(func):
         func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
+
         @functools.wraps(func)
         def executewizcommand(player, parsed, **ctx):
             if not "wizard" in player.privileges:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, **ctx)
+
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
         argspec = inspect.getargspec(func)
