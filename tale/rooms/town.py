@@ -103,7 +103,7 @@ towncrier = TownCrier("laish", "f", "Laish the town crier",
     """
     The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.
     """)
-towncrier.aliases = {"crier"}
+towncrier.aliases = {"crier", "town crier"}
 
 
 @heartbeat

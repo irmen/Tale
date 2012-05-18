@@ -27,12 +27,14 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-input should be case insensitive (greet Laish fails at the moment, greet laish works)
+input should be case insensitive (everything except stuff in quotes - the message)
+  commands, adverbs, names - all should be lowercased and compared by lowercase.
+  object names and aliases should all be stored lowercased, object titles however not.
+
 arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 
-allow_move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 Two game modes: IF and MUD.  Each mode enables/disables certain features.
 
 Driver/mudlib: Support separate 'mudlibs' (games) so you can 'install' different game files.
@@ -58,8 +60,8 @@ Wiretaps: as soon as invisible objects and room message notifications are implem
     Maybe implement it all as a special Effect object that is stored in Object.effects?
     Or just leave it be, the wiretap logic isn't that complex to keep around as separate attributes.
 
+allow_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 Language system: speak/understand different languages?
-
 should Exit inherit from MudObject? (it contains a fair amount of similar methods now)
 use lang.a more?
 less use of isinstance?
@@ -74,9 +76,9 @@ Then:  go-in (wizard): step into something, go-out (wizard): step out of current
 
 DAMAGE TYPES
 ------------
-blunt, blade, knife, water, shock, cold, heat, gas, acid, magic, poison,
-disease, trauma, pierce, psionic, anoxia, deathray, emotional, sonic,
-emp, other, karma, drama, overpressure, underpressure, inertia
+blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
+disease, trauma, psionic, suffocation, deathray, emotional, sonic,
+E.M.P., karma, drama, pressure, underpressure, inertia
 
 
 Light/Dark

@@ -210,12 +210,10 @@ def do_empty(player, parsed, **ctx):
     items_moved = []
     for item in container.inventory:
         try:
-            item.allow_move(player)
-        except ActionRefused as x:
-            print(str(x))
-        else:
             item.move(target, player)
             items_moved.append(item.title)
+        except ActionRefused as x:
+            print(str(x))
     if items_moved:
         itemnames = lang.join(items_moved)
         print("You %s: %s." % (action, itemnames))
