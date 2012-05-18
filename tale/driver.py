@@ -151,7 +151,7 @@ class Driver(object):
     def bind_exits(self):
         for exit in self.unbound_exits:
             exit.bind(rooms)
-        del self.unbound_exits
+        self.unbound_exits = []
 
     def start(self, args):
         # parse args
