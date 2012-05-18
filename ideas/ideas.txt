@@ -27,6 +27,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+input should be case insensitive (greet Laish fails at the moment, greet laish works)
 arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".

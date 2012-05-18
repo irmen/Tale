@@ -4,13 +4,18 @@ Setup script for distutils
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from distutils.core import setup
-
 import tale
+try:
+    # try setuptools first, to get access to build_sphinx and test commands
+    from setuptools import setup
+    using_setuptools = True
+except ImportError:
+    from distutils.core import setup
+    using_setuptools=False
 
 print("version="+tale.__version__)
 
-setup(
+setup_args = dict(
     name='tale',
     version=tale.__version__,
     packages=['tale', 'tale.cmds', 'tale.items', 'tale.messages', 'tale.rooms'],
@@ -50,3 +55,8 @@ can explore. Start it by running the driver; ``python -m tale.driver``
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ]
 )
+
+if using_setuptools:
+    setup_args["test_suite"]="nose.collector"    # use Nose to run unittests
+
+setup(**setup_args)

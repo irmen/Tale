@@ -87,6 +87,7 @@ class TownCrier(NPC):
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
     def notify_action(self, parsed, actor):
+        greet = False
         if parsed.verb in ("hi", "hello"):
             greet = True
         elif parsed.verb == "say":
@@ -94,8 +95,6 @@ class TownCrier(NPC):
                 greet = True
         elif parsed.verb == "greet" and self in parsed.who_info:
             greet = True
-        else:
-            greet = False
         if greet:
             self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
 
