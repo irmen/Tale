@@ -392,7 +392,7 @@ class Location(MudObject):
     def notify_action(self, parsed, actor):
         """Notify the room, its livings and items of an action performed by someone."""
         for living in self.livings:
-            living.notify_action(parsed, actor)
+            living._notify_action_base(parsed, actor)
         for item in self.items:
             item.notify_action(parsed, actor)
         for exit in set(self.exits.values()):
@@ -714,10 +714,19 @@ class Living(MudObject):
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def notify_action(self, parsed, actor):
-        """Notify the living of an action performed by someone."""
+    def _notify_action_base(self, parsed, actor):
+        """
+        Notify the living of an action performed by someone.
+        Also calls inventory items. Don't override this one in a subclass,
+        override notify_action instead.
+        """
+        self.notify_action(parsed, actor)
         for item in self.__inventory:
             item.notify_action(parsed, actor)
+
+    def notify_action(self, parsed, actor):
+        """Notify the living of an action performed by someone."""
+        pass
 
 
 class Container(Item):

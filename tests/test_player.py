@@ -242,11 +242,12 @@ class TestPlayer(unittest.TestCase):
         self.assertTrue(player.story_complete)
         self.assertEqual("huzzah", player.story_complete_callback)
 
-    def test_handle_action(self):
+    def test_handle_and_notify_action(self):
         class SpecialPlayer(Player):
             def init(self):
                 self.handled = False
                 self.handle_verb_called = False
+                self.notify_called = False
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
                 if parsed.verb in self.verbs:
@@ -254,6 +255,8 @@ class TestPlayer(unittest.TestCase):
                     return True
                 else:
                     return False
+            def notify_action(self, parsed, actor):
+                self.notify_called = True
         player = SpecialPlayer("julie", "f")
         player.verbs = ["xywobble"]
         room = Location("room")
@@ -261,6 +264,7 @@ class TestPlayer(unittest.TestCase):
             def init(self):
                 self.handled = False
                 self.handle_verb_called = False
+                self.notify_called = False
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
                 if parsed.verb in self.verbs:
@@ -268,6 +272,8 @@ class TestPlayer(unittest.TestCase):
                     return True
                 else:
                     return False
+            def notify_action(self, parsed, actor):
+                self.notify_called = True
         chair_in_inventory = Chair("littlechair")
         chair_in_inventory.verbs = ["kerwaffle"]
         player.insert(chair_in_inventory, player)
@@ -285,39 +291,48 @@ class TestPlayer(unittest.TestCase):
         self.assertFalse(chair.handled)
         self.assertFalse(player.handled)
         self.assertFalse(chair_in_inventory.handled)
+
+        # check item handling
         player.init()
         chair.init()
         chair_in_inventory.init()
-
-        # check item handling
         parsed = ParseResults("frobnitz")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertTrue(chair.handled)
         self.assertFalse(player.handled)
         self.assertFalse(chair_in_inventory.handled)
+
+        # check living handling
         player.init()
         chair.init()
         chair_in_inventory.init()
-
-        # check living handling
         parsed = ParseResults("xywobble")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertFalse(chair.handled)
         self.assertTrue(player.handled)
         self.assertFalse(chair_in_inventory.handled)
+
+        # check inventory handling
         player.init()
         chair.init()
         chair_in_inventory.init()
-
-        # check inventory handling
         parsed = ParseResults("kerwaffle")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertFalse(chair.handled)
         self.assertFalse(player.handled)
         self.assertTrue(chair_in_inventory.handled)
+
+        # check notify_action
+        player.init()
+        chair.init()
+        chair_in_inventory.init()
+        room.notify_action(parsed, player)
+        self.assertTrue(chair.notify_called)
+        self.assertTrue(player.notify_called)
+        self.assertTrue(chair_in_inventory.notify_called)
 
 
 if __name__ == '__main__':
