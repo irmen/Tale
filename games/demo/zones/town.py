@@ -5,20 +5,15 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import copy
 import random
 import datetime
 from tale.base import Location, Exit, Door, Item, Container, heartbeat
 from tale.npc import NPC, Monster
 from tale.errors import ActionRefused, StoryCompleted
-from tale.items.basic import trashcan, newspaper, gem, worldclock
-from tale.util import message_nearby_locations, input
+from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
+from tale.util import message_nearby_locations, input, clone
 from tale import globals
 from tale import lang
-
-
-def init(driver):
-    pass
 
 
 square = Location("Essglen Town square",
@@ -36,7 +31,7 @@ lane = Location("Lane of Magicks",
 square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
 square.exits["lane"] = square.exits["north"]
 
-paper = copy.deepcopy(newspaper)
+paper = clone(newspaper)
 paper.aliases = {"paper"}
 
 
@@ -58,13 +53,11 @@ class RemoveOnlyBox(Container):
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
-bag = Container("bag")
-normal_gem = copy.deepcopy(gem)
+normal_gem = clone(gem)
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("black gem", "a black gem")
 normal_gem = Item("blue gem", "a blue gem")
-clock = copy.deepcopy(worldclock)
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
@@ -143,7 +136,9 @@ rat = Monster("rat", "n", race="rodent", description="A filthy looking rat. Its 
 
 ant = NPC("ant", "n", race="insect")
 
-square.init_inventory([cursed_gem, normal_gem, paper, trashcan, bag, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
+clock = clone(gameclock)
+
+square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
 alley = Location("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."

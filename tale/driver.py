@@ -243,7 +243,6 @@ class Driver(object):
                 modulename = modulename + "." + name
                 __import__(modulename)
                 location = getattr(location, name)
-                location.init(self)
         return location
 
     def show_motd(self):

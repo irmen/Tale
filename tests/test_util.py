@@ -28,7 +28,7 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(Exception):
             util.print_object_location(p, None, None)
         util.print_object_location(p, key, None)
-        self.assertEqual(["(it's not clear where key is)"], p.get_output_lines())
+        self.assertEqual(["(It's not clear where key is)."], p.get_output_lines())
         util.print_object_location(p, key, None, print_parentheses=False)
         self.assertEqual(["It's not clear where key is."], p.get_output_lines())
         util.print_object_location(p, key, bag)
@@ -204,6 +204,22 @@ class TestUtil(unittest.TestCase):
             r.load_text("normal/text")
         with self.assertRaises(IOError):
             r.load_image("normal/image")
+
+    def test_clone(self):
+        item = Item("thing", "description")
+        item.aliases=["a1", "a2"]
+        item2 = util.clone(item)
+        self.assertNotEqual(item, item2)
+        item2.aliases.append("a3")
+        self.assertNotEqual(item.aliases, item2.aliases)
+        player = Player("julie", "f")
+        player.insert(item, player)
+        player2 = util.clone(player)
+        player2.insert(item2, player2)
+        self.assertNotEqual(player.inventory_size, player2.inventory_size)
+        self.assertNotEqual(player.inventory, player2.inventory)
+        self.assertTrue(item in player)
+        self.assertFalse(item in player2)
 
 
 if __name__ == '__main__':

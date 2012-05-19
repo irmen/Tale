@@ -78,7 +78,7 @@ class TrashCan(Container):
             raise ActionRefused("You can't take things from the trashcan: you should open it first.")
 
 
-class WorldClock(Item):
+class GameClock(Item):
     @property
     def description(self):
         if mud_context.config.display_gametime:
@@ -110,7 +110,7 @@ class Newspaper(Item):
 
 newspaper = Newspaper("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
-gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful red gem.")
-pouch = Container("pouch", "small leather pouch", "It is closed with a leather strap.")
+gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
+pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
 trashcan = TrashCan("trashcan", "dented steel trashcan")
-worldclock = WorldClock("clock")
+gameclock = GameClock("clock")

@@ -14,7 +14,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from ..items.basic import WorldClock
+from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
 all_commands = {}
@@ -764,7 +764,7 @@ def do_quit(player, parsed, **ctx):
 
 def print_item_removal(player, item, container, print_parentheses=True):
     if print_parentheses:
-        player.tell("(you take the %s from the %s)" % (item.name, container.name))
+        player.tell("(You take the %s from the %s)." % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
@@ -1071,7 +1071,8 @@ def do_flee(player, parsed, **ctx):
         exit.allow_passage(player)
     elif parsed.args:
         raise ParseError("Flee where?")
-    if not exit:
+    random_direction = not exit
+    if random_direction:
         # choose a random exit direction
         if not player.location.exits:
             raise ActionRefused("You can't flee anywhere!")
@@ -1081,7 +1082,8 @@ def do_flee(player, parsed, **ctx):
     for exit in exits_to_try:
         try:
             exit.allow_passage(player)
-            player.tell("You flee!", end=True)
+            player.tell("You flee in a random direction!" if random_direction else "You flee!", end=True)
+            player.tell("\n")
             # @todo stop combat
             player.move(exit.target)
             player.look()
@@ -1154,7 +1156,7 @@ def do_time(player, parsed, **ctx):
         return
     if ctx["config"].display_gametime:
         for item in player.inventory:
-            if isinstance(item, WorldClock):
+            if isinstance(item, GameClock):
                 player.tell("You glance at your %s." % item.name)
                 player.tell(item.description)
                 return

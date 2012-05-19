@@ -10,10 +10,6 @@ from tale.base import Location, Exit, Item, heartbeat
 from tale.npc import Monster
 
 
-def init(driver):
-    pass
-
-
 hall = Location("Main hall of the Tower of Magic",
     """
     The main hall of this ancient wizard tower sparkles with traces of magic.

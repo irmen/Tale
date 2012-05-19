@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division
 import datetime
 import inspect
-import copy
 import functools
 import sys
 import threading
@@ -118,12 +117,12 @@ def do_clone(player, parsed, **ctx):
         raise ActionRefused("Object not found")
     # clone it
     if isinstance(obj, base.Item):
-        item = copy.deepcopy(obj)
+        item = util.clone(obj)
         player.insert(item, player)
         print("Cloned: " + repr(item))
         player.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
     elif isinstance(obj, base.Living):
-        clone = copy.deepcopy(obj)
+        clone = util.clone(obj)
         print("Cloned: " + repr(clone))
         player.tell_others("{Title} summons %s." % lang.a(clone.title))
         player.location.insert(clone, player)

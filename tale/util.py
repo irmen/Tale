@@ -11,6 +11,7 @@ import random
 import os
 import time
 import sys
+import copy
 from . import lang, resource
 from .errors import ParseError
 
@@ -38,7 +39,7 @@ def roll_die(number=1, sides=6):
 def print_object_location(player, obj, container, print_parentheses=True):
     if not container:
         if print_parentheses:
-            player.tell("(it's not clear where %s is)" % obj.name)
+            player.tell("(It's not clear where %s is)." % obj.name)
         else:
             player.tell("It's not clear where %s is." % obj.name)
         return
@@ -348,3 +349,8 @@ def format_docstring(docstring):
         trimmed.pop(0)
     # Return a single string:
     return '\n'.join(trimmed)
+
+
+def clone(object):
+    """Create a copy of an existing MudObject"""
+    return copy.deepcopy(object)
