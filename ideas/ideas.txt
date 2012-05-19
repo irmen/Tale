@@ -27,6 +27,9 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+driver.clock : object that abstracts the game time and contains the config as well, to easily calculate game times, timespans, etc.
+try to get rid of the global threadpool scope now that the driver calls game.init(driver)/zones.init(driver) -- they can store the driver object themselves now
+
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
   object names and aliases should all be stored lowercased, object titles however not.
@@ -34,13 +37,11 @@ input should be case insensitive (everything except stuff in quotes - the messag
 arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
+text render bug: a tell with format=False doesn't work if it is preceded by another tell.
 
 Two game modes: IF and MUD.  Each mode enables/disables certain features.
 
-Driver/mudlib: Support separate 'mudlibs' (games) so you can 'install' different game files.
-               Move the hardcoded 'demo' mudlib parts into a separate 'demo/test game'.
-               Also allow for extra commands to be added to the driver (both wizard and normal).
-               Allow commands to replace the builtin commands (with explicit flag?)
+Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
 

@@ -51,7 +51,7 @@ class Player(base.Living):
                                                 width=self.screen_width, fix_sentence_endings=True)
 
     def __repr__(self):
-        return "<%s.%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__module__, self.__class__.__name__,
+        return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
             self.name, id(self), ",".join(self.privileges) or "-")
 
     def __getstate__(self):
@@ -88,7 +88,7 @@ class Player(base.Living):
             # special case, repeat previous command
             if self.previous_commandline:
                 commandline = self.previous_commandline
-                self.tell("(repeat: %s)" % commandline)
+                self.tell("(repeat: %s)" % commandline, end=True)
             else:
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline

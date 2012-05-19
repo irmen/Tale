@@ -5,8 +5,6 @@ Utility stuff
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-# there's nothing her so far
-
 from __future__ import print_function, division
 import datetime
 import random
@@ -191,10 +189,13 @@ def words_to_money(words, money_to_float=money_to_float, money_words=MONEY_WORDS
     raise ParseError("That is not an amount of money.")
 
 
-def get_motd(path):
-    """Read the MOTD and return it and its modification timestamp, if it's not there, return None for both"""
+def get_motd(resourceloader):
+    """
+    Read the MOTD from its fixed location, and return it and its modification timestamp.
+    If it's not there, return None for both.
+    """
     try:
-        with resource.loader.open(path) as motd:
+        with resourceloader.open("messages/motd.txt") as motd:
             message = motd.read().rstrip()
             if not message:
                 return None, None

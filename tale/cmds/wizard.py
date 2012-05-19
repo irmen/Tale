@@ -14,7 +14,7 @@ import sys
 import threading
 import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, rooms, globals, util
+from .. import base, lang, util
 from ..player import Player
 from .. import __version__
 
@@ -265,7 +265,7 @@ def do_teleport(player, parsed, **ctx):
     else:
         # target is a player (or @start - the wizard starting location)
         if args[0] == "@start":
-            teleport_to(player, rooms.STARTLOCATION_WIZARD)
+            teleport_to(player, ctx["config"].startlocation_wizard)
         else:
             target = ctx["driver"].search_player(args[0])
             if not target:
@@ -392,7 +392,7 @@ def do_debug(player, parsed, **ctx):
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Can't find %s." % name)
-    txt = [repr(obj)]
+    txt = [repr(obj), "Class defined in: " + inspect.getfile(obj.__class__)]
     for varname, value in sorted(vars(obj).items()):
         txt.append(".%s: %r" % (varname, value))
     if obj in ctx["driver"].heartbeat_objects:
@@ -433,6 +433,7 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 def do_server(player, parsed, **ctx):
     """Dump some server information."""
     driver = ctx["driver"]
+    config = ctx["config"]
     txt = ["Server information:"]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
@@ -442,10 +443,10 @@ def do_server(player, parsed, **ctx):
     pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
-    txt.append("Tale library: %s   Game version: %s %s" % (__version__, globals.GAME_TITLE, globals.GAME_VERSION))
+    txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
-    if globals.SERVER_TICK_METHOD == "timer":
-        txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, globals.GAMETIME_TO_REALTIME))
+    if config.server_tick_method == "timer":
+        txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, config.gametime_to_realtime))
     else:
         txt.append("Game time: %s" % driver.game_clock)
     if sys.platform == "cli":
@@ -454,11 +455,11 @@ def do_server(player, parsed, **ctx):
         gc_objects = str(len(gc.get_objects()))
     txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
     txt.append("Players: %d   Heartbeats: %d   Deferreds: %d" % (len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
-    if globals.SERVER_TICK_METHOD == "timer":
+    if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
-        txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (globals.SERVER_TICK_TIME, avg_loop_duration))
-    elif globals.SERVER_TICK_METHOD == "command":
-        txt.append("Server loop tick: %.1f sec   (command driven)." % globals.SERVER_TICK_TIME)
+        txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
+    elif config.server_tick_method == "command":
+        txt.append("Server loop tick: %.1f sec   (command driven)." % config.server_tick_time)
     player.tell("\n".join(txt), format=False)
 
 
@@ -466,13 +467,14 @@ def do_server(player, parsed, **ctx):
 def do_events(player, parsed, **ctx):
     """Dump pending events."""
     driver = ctx["driver"]
-    txt = ["Pending events overview. Server tick is %.1f sec." % globals.SERVER_TICK_TIME,
+    config = ctx["config"]
+    txt = ["Pending events overview. Server tick is %.1f sec." % config.server_tick_time,
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), globals.SERVER_TICK_TIME))
+    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
     txt.append("  due   | function       | owner")
     for d in driver.deferreds:
-        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / globals.GAMETIME_TO_REALTIME))
+        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / config.gametime_to_realtime))
         txt.append("%-7s | %-15s| %s" % (due, d.callable, d.owner))
     player.tell("\n".join(txt), format=False)

@@ -16,8 +16,6 @@ from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player
 from tale.soul import NonSoulVerb, ParseResults
-import tale.rooms
-tale.rooms.init(tale.globals.mud_context.driver)
 
 
 class TestPlayer(unittest.TestCase):

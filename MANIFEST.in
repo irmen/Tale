@@ -2,6 +2,7 @@ include LICENSE.txt
 include MANIFEST.in
 recursive-include tests *
 recursive-include ideas *
+recursive-include games *
 global-exclude */.svn/*
 global-exclude */.idea/*
 global-exclude */__pycache__/*

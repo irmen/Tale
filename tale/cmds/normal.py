@@ -14,7 +14,6 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from .. import globals
 from ..items.basic import WorldClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
@@ -1052,7 +1051,7 @@ def do_coin(player, parsed, **ctx):
 @disable_notify_action
 def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
-    motd, mtime = util.get_motd(globals.MOTD_FILE)
+    motd, mtime = util.get_motd(ctx["driver"].game_resource)
     if motd:
         player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
         player.tell("\n")
@@ -1108,12 +1107,11 @@ def do_load(player, parsed, **ctx):
                 "or start a new game.")
 
 
-if globals.MAX_SCORE:    # only enable this command when MAX_SCORE is > 0
-    @cmd("score")
-    @disable_notify_action
-    def do_score(player, parsed, **ctx):
-        """Displays your current score in the game."""
-        player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, globals.MAX_SCORE, player.turns))
+@cmd("score")
+@disable_notify_action
+def do_score(player, parsed, **ctx):
+    """Displays your current score in the game."""
+    player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, ctx["config"].max_score, player.turns))
 
 
 @cmd("transcript")
@@ -1154,7 +1152,7 @@ def do_time(player, parsed, **ctx):
         player.tell("\n")
         player.tell("Real time is:", real_time)
         return
-    if globals.DISPLAY_GAMETIME:
+    if ctx["config"].display_gametime:
         for item in player.inventory:
             if isinstance(item, WorldClock):
                 player.tell("You glance at your %s." % item.name)

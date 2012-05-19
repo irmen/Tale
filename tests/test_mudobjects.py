@@ -16,8 +16,6 @@ from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
-import tale.rooms
-tale.rooms.init(mud_context.driver)
 
 
 class TestLocations(unittest.TestCase):
@@ -304,12 +302,17 @@ class TestDoorsExits(unittest.TestCase):
             exit1.read(None)
 
     def test_bind_exit(self):
+        class ModuleDummy(object):
+            pass
+        zones = ModuleDummy()
+        zones.town = ModuleDummy()
+        zones.town.square = Location("square")
         exit = Exit("town.square", "someplace")
         self.assertFalse(exit.bound)
-        exit.bind(tale.rooms)
+        exit.bind(zones)
         self.assertTrue(exit.bound)
-        self.assertEqual(tale.rooms.town.square, exit.target)
-        exit.bind(tale.rooms)
+        self.assertTrue(zones.town.square is exit.target)
+        exit.bind(zones)
 
 
 class TestLiving(unittest.TestCase):

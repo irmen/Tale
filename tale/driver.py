@@ -24,7 +24,6 @@ from . import races
 from . import soul
 from . import player
 from . import cmds
-from . import rooms
 from . import resource
 from . import __version__ as tale_version_str
 try:
@@ -46,6 +45,11 @@ else:
     atexit.register(save_history, history)
 
 input = util.input
+
+
+class GameConfig(object):
+    # @todo placeholder for the game configuration settings
+    pass
 
 
 @total_ordering
@@ -115,6 +119,13 @@ class Commands(object):
                 result.update(self.commands_per_priv[priv])
         return result
 
+    def adjust_by_config(self, config):
+        if not config.max_score:
+            # remove the 'score' command because scoring has been disabled
+            for cmds in self.commands_per_priv.values():
+                if "score" in cmds:
+                    del cmds["score"]
+
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
@@ -127,10 +138,6 @@ class Driver(object):
     directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
 
     def __init__(self):
-        tale_version = version_tuple(tale_version_str)
-        tale_version_required = version_tuple(globals.REQUIRES_TALE_VERSION)
-        if tale_version < tale_version_required:
-            raise RuntimeError("The game requires tale " + globals.REQUIRES_TALE_VERSION + " but installed is " + tale_version_str)
         self.heartbeat_objects = set()
         self.state = {}  # global game state variables
         self.unbound_exits = []
@@ -139,29 +146,48 @@ class Driver(object):
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
         self.commands = Commands()
-        self.game_clock = globals.GAMETIME_EPOCH or self.server_started
-        if globals.SERVER_TICK_METHOD == "command":
-            globals.GAMETIME_TO_REALTIME = 1.0
         self.server_loop_durations = collections.deque(maxlen=10)
         globals.mud_context.driver = self
         globals.mud_context.state = self.state
-        rooms.init(self)
+        globals.mud_context.config = None
         cmds.register_all(self.commands)
-        self.bind_exits()
 
     def bind_exits(self):
         for exit in self.unbound_exits:
-            exit.bind(rooms)
+            exit.bind(self.zones)
         self.unbound_exits = []
 
     def start(self, args):
         # parse args
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
-        parser.add_argument('--transcript', type=str, help='transcript filename')
+        parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
+        parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
         args = parser.parse_args()
 
+        # cd into the game directory and load its config and zones
+        os.chdir(args.game)
+        import game
+        self.config = game.GameConfig()
+        globals.mud_context.config = self.config
+        self.commands.adjust_by_config(self.config)
+        tale_version = version_tuple(tale_version_str)
+        tale_version_required = version_tuple(self.config.requires_tale)
+        if tale_version < tale_version_required:
+            raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
+        self.game_clock = self.config.epoch or self.server_started
+        self.game_resource = resource.ResourceLoader(game)
+        game.init(self)
+        import zones
+        self.zones = zones
+        self.config.startlocation_player = self.lookup_location(self.config.startlocation_player)
+        self.config.startlocation_wizard = self.lookup_location(self.config.startlocation_wizard)
+        self.game_clock = self.config.epoch or self.server_started
+        if self.config.server_tick_method == "command":
+            self.config.gametime_to_realtime = 1.0
+        self.bind_exits()
+
         # print GPL 3.0 banner
-        print("\n'Tale' mud driver, mudlib and interactive fiction framework.")
+        print("\nTale: mud driver, mudlib and interactive fiction framework.")
         print("Copyright (C) 2012  Irmen de Jong.")
         print("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
         print("and you are welcome to redistribute it under the terms and conditions")
@@ -169,11 +195,11 @@ class Driver(object):
 
         # print MUD banner and initiate player creation
         try:
-            banner = resource.loader.load_text(globals.BANNER_FILE)
+            banner = self.game_resource.load_text("messages/banner.txt")
             print("\n" + banner + "\n")
         except IOError:
             pass  # no banner present
-        print("This is '%s' version %s.\nYou're using Tale version %s." % (globals.GAME_TITLE, globals.GAME_VERSION, tale_version_str))
+        print("This is '%s' version %s.\nYou're using Tale version %s." % (self.config.name, self.config.version, tale_version_str))
         choice = input("\nDo you want to load a saved game ('n' will start a new game)? ").strip()
         if choice == "y":
             print("")
@@ -190,12 +216,15 @@ class Driver(object):
                 player = create_player_from_info()
             if args.transcript:
                 player.activate_transcript(args.transcript)
-            self.game_clock = globals.GAMETIME_EPOCH or self.server_started
             self.player = player
-            self.move_player_to_start_room()
+            # move the player to the starting location
+            if "wizard" in self.player.privileges:
+                self.player.move(self.config.startlocation_wizard)
+            else:
+                self.player.move(self.config.startlocation_player)
         self.player.tell("\n")
         self.player.tell("\n")
-        self.player.tell("Welcome to %s, %s." % (globals.GAME_TITLE, self.player.title), end=True)
+        self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
         self.player.tell("\n")
         self.show_motd()
         self.player.look(short=False)
@@ -204,8 +233,21 @@ class Driver(object):
         self.start_player_input()
         self.main_loop()
 
+    def lookup_location(self, location_name):
+        location = self.zones
+        modulename = "zones"
+        for name in location_name.split('.'):
+            if hasattr(location, name):
+                location = getattr(location, name)
+            else:
+                modulename = modulename + "." + name
+                __import__(modulename)
+                location = getattr(location, name)
+                location.init(self)
+        return location
+
     def show_motd(self):
-        motd, mtime = util.get_motd(globals.MOTD_FILE)
+        motd, mtime = util.get_motd(self.game_resource)
         if motd:
             self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
             self.player.tell("\n")
@@ -214,20 +256,14 @@ class Driver(object):
             self.player.tell("\n")
 
     def start_player_input(self):
-        if globals.SERVER_TICK_METHOD == "timer":
+        if self.config.server_tick_method == "timer":
             self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
             self.player_input_thread.setDaemon(True)
             self.player_input_thread.start()
-        elif globals.SERVER_TICK_METHOD == "command":
+        elif self.config.server_tick_method == "command":
             self.player_input = PlayerInput(self.player, self.player_input_allowed)
         else:
-            raise ValueError("invalid SERVER_TICK_METHOD: " + globals.SERVER_TICK_METHOD)
-
-    def move_player_to_start_room(self):
-        if "wizard" in self.player.privileges:
-            self.player.move(rooms.STARTLOCATION_WIZARD)
-        else:
-            self.player.move(rooms.STARTLOCATION_PLAYER)
+            raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
 
     def main_loop(self):
         last_loop_time = last_server_tick = time.time()
@@ -239,7 +275,7 @@ class Driver(object):
                 self.story_complete_output(self.player.story_complete_callback)
                 break
             self.player_input_allowed.set()
-            if globals.SERVER_TICK_METHOD == "timer" and time.time() - last_server_tick >= globals.SERVER_TICK_TIME:
+            if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
                 # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
                 self.server_tick()
@@ -248,13 +284,13 @@ class Driver(object):
             else:
                 loop_duration = time.time() - last_loop_time
 
-            if globals.SERVER_TICK_METHOD == "timer":
+            if self.config.server_tick_method == "timer":
                 try:
-                    has_input = self.player.input_is_available.wait(max(0.01, globals.SERVER_TICK_TIME - loop_duration))
+                    has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
                 except KeyboardInterrupt:
                     self.player.tell(CTRL_C_MESSAGE)
                     continue
-            elif globals.SERVER_TICK_METHOD == "command":
+            elif self.config.server_tick_method == "command":
                 self.player_input.input_line()
                 has_input = self.player.input_is_available.wait()
                 before = time.time()
@@ -296,7 +332,7 @@ class Driver(object):
                         elif choice in ("n", "no"):
                             break
                     self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
-                    if globals.SERVER_TICK_METHOD == "timer":
+                    if self.config.server_tick_method == "timer":
                         self.player_input_thread.join()
                     break
                 except Exception:
@@ -308,10 +344,10 @@ class Driver(object):
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
-        if globals.SERVER_TICK_METHOD == "timer":
-            self.game_clock += datetime.timedelta(seconds=globals.GAMETIME_TO_REALTIME * globals.SERVER_TICK_TIME)
-        elif globals.SERVER_TICK_METHOD == "command":
-            self.game_clock += datetime.timedelta(seconds=globals.SERVER_TICK_TIME)
+        if self.config.server_tick_method == "timer":
+            self.game_clock += datetime.timedelta(seconds=self.config.gametime_to_realtime * self.config.server_tick_time)
+        elif self.config.server_tick_method == "command":
+            self.game_clock += datetime.timedelta(seconds=self.config.server_tick_time)
         # heartbeats
         ctx = {"driver": self, "game_clock": self.game_clock, "state": self.state}
         for object in self.heartbeat_objects:
@@ -332,13 +368,13 @@ class Driver(object):
 
     def story_complete_output(self, callback):
         if callback:
-            callback(self.player, self)
+            callback(self.player, self.config, self)
         else:
             self.player.tell("\n")
             self.player.tell("Congratulations, you've finished the game.", end=True)
-            if globals.MAX_SCORE:
+            if self.config.max_score:
                 self.player.tell("Your final score is %d out of a possible %d. (in %d turns)" %
-                                 (self.player.score, globals.MAX_SCORE, self.player.turns), end=True)
+                                 (self.player.score, self.config.max_score, self.player.turns), end=True)
 
     def write_output(self):
         """print any buffered player output to the screen"""
@@ -393,7 +429,8 @@ class Driver(object):
                         self.go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        func(self.player, parsed, driver=self, verbs=command_verbs, game_clock=self.game_clock, state=self.state)
+                        func(self.player, parsed, driver=self, verbs=command_verbs, config=self.config,
+                                                  game_clock=self.game_clock, state=self.state)
                         if func.enable_notify_action:
                             self.player.location.notify_action(parsed, self.player)
                     else:
@@ -437,7 +474,7 @@ class Driver(object):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times,
         # however @todo: be able to detect if something happened during the wait
-        num_tics = int(duration.seconds / globals.GAMETIME_TO_REALTIME / globals.SERVER_TICK_TIME)
+        num_tics = int(duration.seconds / self.config.gametime_to_realtime / self.config.server_tick_time)
         if num_tics < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_tics):
@@ -446,44 +483,42 @@ class Driver(object):
 
     def do_save(self, player):
         state = {
-            "version": globals.GAME_VERSION,
+            "version": self.config.version,
             "gamestate": self.state,
             "player": self.player,
             "deferreds": self.deferreds,
             "game_clock": self.game_clock,
             "heartbeats": self.heartbeat_objects,
-            "start_player": rooms.STARTLOCATION_PLAYER,
-            "start_wizard": rooms.STARTLOCATION_WIZARD
+            "config": self.config
         }
-        with open(globals.GAME_TITLE.lower() + ".savegame", "wb") as out:
+        with open(self.config.name.lower() + ".savegame", "wb") as out:
             pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
         player.tell("Game saved.")
-        if globals.DISPLAY_GAMETIME:
+        if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)
         player.tell("\n")
 
     def load_saved_game(self):
         try:
-            with open(globals.GAME_TITLE.lower() + ".savegame", "rb") as savegame:
+            with open(self.config.name.lower() + ".savegame", "rb") as savegame:
                 state = pickle.load(savegame)
         except (IOError, pickle.PickleError) as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)
             raise SystemExit(10)
         else:
-            if state["version"] != globals.GAME_VERSION:
+            if state["version"] != self.config.version:
                 print("This saved game data was from a different version of the game and cannot be used.")
-                print("(Current game version: %s  Saved game data version: %s)" % (globals.GAME_VERSION, state["version"]))
+                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
             self.state = state["gamestate"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["game_clock"]
             self.heartbeat_objects = state["heartbeats"]
-            rooms.STARTLOCATION_PLAYER = state["start_player"]
-            rooms.STARTLOCATION_WIZARD = state["start_wizard"]
+            self.config = state["config"]
             self.player.tell("Game loaded.")
-            if globals.DISPLAY_GAMETIME:
+            if self.config.display_gametime:
                 self.player.tell("Game time:", self.game_clock)
             self.player.tell("\n")
 

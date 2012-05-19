@@ -8,13 +8,18 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import copy
 import random
 import datetime
-from ..base import Location, Exit, Door, Item, Container, heartbeat
-from ..npc import NPC, Monster
-from ..errors import ActionRefused, StoryCompleted
-from ..items.basic import trashcan, newspaper, gem, worldclock
-from ..util import message_nearby_locations, input
-from .. import globals
-from .. import lang
+from tale.base import Location, Exit, Door, Item, Container, heartbeat
+from tale.npc import NPC, Monster
+from tale.errors import ActionRefused, StoryCompleted
+from tale.items.basic import trashcan, newspaper, gem, worldclock
+from tale.util import message_nearby_locations, input
+from tale import globals
+from tale import lang
+
+
+def init(driver):
+    pass
+
 
 square = Location("Essglen Town square",
     """
@@ -80,10 +85,10 @@ class TownCrier(NPC):
         due = globals.mud_context.driver.game_clock + datetime.timedelta(seconds=5)
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
-    def do_cry(self, driver=None):
+    def do_cry(self, driver):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20, 40) * globals.GAMETIME_TO_REALTIME)
+        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20, 40) * globals.mud_context.config.gametime_to_realtime)
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
     def notify_action(self, parsed, actor):
@@ -173,12 +178,12 @@ class GameEnd(Location):
             # it allows the driver to complete the last player action normally.
         return super(GameEnd, self).insert(obj, actor)
 
-    def completion(self, player, driver):
+    def completion(self, player, config, driver):
         player.tell("\n")
         player.tell("Congratulations! You beat the game!")
-        if globals.MAX_SCORE:
+        if config.max_score:
             player.tell("\n")
-            player.tell("You scored %d (out of %d) in %d turns." % (player.score, globals.MAX_SCORE, player.turns))
+            player.tell("You scored %d (out of %d) in %d turns." % (player.score, config.max_score, player.turns))
         driver.write_output()
         input("\nPress enter to continue. ")
         player.tell("\n")

@@ -23,7 +23,8 @@ class ResourceLoader(object):
         if os.path.isabs(path):
             raise ValueError("resource paths may not be absolute")
         path = os.path.join(*path.split("/"))   # convert to platform path separator
-        return open(os.path.join(self.root_path, path), mode=mode)
+        path = os.path.join(self.root_path, path)
+        return open(path, mode=mode)
 
     def load_text(self, path):
         with self.open(path) as f:
@@ -35,4 +36,4 @@ class ResourceLoader(object):
 
 
 # create the resource loader for Tale itself:
-loader = ResourceLoader(os.path.dirname(inspect.getabsfile(ResourceLoader)))
+loader = ResourceLoader(ResourceLoader)

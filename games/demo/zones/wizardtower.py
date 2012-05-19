@@ -6,8 +6,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from ..base import Location, Exit, Item, heartbeat
-from ..npc import Monster
+from tale.base import Location, Exit, Item, heartbeat
+from tale.npc import Monster
+
+
+def init(driver):
+    pass
+
 
 hall = Location("Main hall of the Tower of Magic",
     """

@@ -87,7 +87,7 @@ class MudObject(object):
         pass
 
     def __repr__(self):
-        return "<%s.%s '%s' @ 0x%x>" % (self.__class__.__module__, self.__class__.__name__, self.name, id(self))
+        return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
 
     def destroy(self, ctx):
         self.unregister_heartbeat()
@@ -410,7 +410,7 @@ class Exit(object):
     """
     An 'exit' that connects one location to another.
     You can use a Location object as target, or a string designating the location
-    (for instance "town.square" means the square location object in tale.rooms.town).
+    (for instance "town.square" means the square location object in game.zones.town).
     If using a string, it will be retrieved and bound at runtime.
     Short_description will be shown when the player looks around the room.
     Long_description is optional and will be shown instead if the player examines the exit.
@@ -437,15 +437,15 @@ class Exit(object):
         targetname = self.target.name if self.bound else self.target
         return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
 
-    def bind(self, mudlib_rooms_module):
+    def bind(self, game_zones_module):
         """
         Binds the exit to the actual target_location object.
         Usually called by the driver before it starts player interaction.
-        The caller needs to pass in the root module of the mudlib rooms (to avoid circular import dependencies)
+        The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
         """
         if not self.bound:
             target_module, target_object = self.target.rsplit(".", 1)
-            module = mudlib_rooms_module
+            module = game_zones_module
             for name in target_module.split("."):
                 module = getattr(module, name)
             target = getattr(module, target_object)

@@ -18,9 +18,9 @@ print("version="+tale.__version__)
 setup_args = dict(
     name='tale',
     version=tale.__version__,
-    packages=['tale', 'tale.cmds', 'tale.items', 'tale.messages', 'tale.rooms'],
+    packages=['tale', 'tale.cmds', 'tale.items'],
     package_data={
-        'tale': ['soul_adverbs.txt', 'messages/*']
+        'tale': ['soul_adverbs.txt']
         },
     url='http://packages.python.org/tale',
     license='GPL v3',
@@ -29,10 +29,11 @@ setup_args = dict(
     description='Mud, mudlib & interactive fiction framework',
     long_description="""Tale is a framework for creating mudlibs, muds and/or interactive fiction (text adventures).
 
-It's still being designed and new features are implement along the way,
-but the current version contains a runnable minimalistic mud world that you
-can explore. Start it by running the driver; ``python -m tale.driver``
-(or use the supplied launch script, ``tale-driver``).
+It's still being developed and new features are implement along the way,
+but the current version is quite capable of running an interactive fiction story world.
+The multi-user aspects of the framework have been put on the back burner for now.
+
+An example test/demo game is included in the ``games`` directory.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["tale-driver.cmd", "tale-driver"],
