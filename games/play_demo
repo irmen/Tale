@@ -7,9 +7,6 @@ if [ -f ../tale/__init__.py ];
 then
    #use the tail library found in the project directory one dir up
    export PYTHONPATH=..:$PYTHONPATH
-   echo $PYTHONPATH
-else
-   echo HERP!
 fi
 
 #start the game
