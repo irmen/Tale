@@ -433,6 +433,7 @@ def do_server(player, parsed, **ctx):
     """Dump some server information."""
     driver = ctx["driver"]
     config = ctx["config"]
+    clock = ctx["clock"]
     txt = ["Server information:"]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
@@ -445,9 +446,9 @@ def do_server(player, parsed, **ctx):
     txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     if config.server_tick_method == "timer":
-        txt.append("Game time: %s   (%.1fx real time)" % (driver.game_clock, config.gametime_to_realtime))
+        txt.append("Game time: %s   (%dx real time)" % (clock, clock.times_realtime))
     else:
-        txt.append("Game time: %s" % driver.game_clock)
+        txt.append("Game time: %s" % clock)
     if sys.platform == "cli":
         gc_objects = "??"
     else:
@@ -467,13 +468,13 @@ def do_events(player, parsed, **ctx):
     """Dump pending events."""
     driver = ctx["driver"]
     config = ctx["config"]
+    clock = ctx["clock"]
     txt = ["Pending events overview. Server tick is %.1f sec." % config.server_tick_time,
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
-    txt.append("  due   | function       | owner")
+    txt.append("  due   | function            | owner")
     for d in driver.deferreds:
-        due = datetime.timedelta(seconds=int((d.due - driver.game_clock).total_seconds() / config.gametime_to_realtime))
-        txt.append("%-7s | %-15s| %s" % (due, d.callable, d.owner))
+        txt.append("%-7s | %-20s| %s" % (d.due_secs(clock, realtime=True), d.callable, d.owner))
     player.tell("\n".join(txt), format=False)

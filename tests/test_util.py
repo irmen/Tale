@@ -221,6 +221,20 @@ class TestUtil(unittest.TestCase):
         self.assertTrue(item in player)
         self.assertFalse(item in player2)
 
+    def test_gametime(self):
+        gt = util.GameDateTime(datetime.datetime(2012, 4, 19, 14, 0, 0))
+        span = datetime.timedelta(hours=1, minutes=10, seconds=5)
+        dt2 = gt.plus_realtime(span)
+        self.assertIsInstance(dt2, datetime.datetime)
+        self.assertEqual(datetime.datetime(2012, 4, 19, 15, 10, 5), dt2)
+        gt.times_realtime = 5
+        dt2 = gt.plus_realtime(span)
+        self.assertEqual(datetime.datetime(2012, 4, 19, 19, 50, 25), dt2)
+        gt.add_realtime(span)
+        self.assertEqual(datetime.datetime(2012, 4, 19, 19, 50, 25), gt.clock)
+        gt = util.GameDateTime(datetime.datetime.now(), 99)
+        self.assertEqual(99, gt.times_realtime)
+
 
 if __name__ == '__main__':
     unittest.main()

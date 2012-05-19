@@ -1150,7 +1150,7 @@ def do_time(player, parsed, **ctx):
     if "wizard" in player.privileges:
         real_time = datetime.datetime.now()
         real_time = real_time.replace(microsecond=0)
-        player.tell("The game time is:", ctx["driver"].game_clock)
+        player.tell("The game time is:", ctx["clock"])
         player.tell("\n")
         player.tell("Real time is:", real_time)
         return

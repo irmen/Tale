@@ -27,8 +27,6 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-driver.clock : object that abstracts the game time and contains the config as well, to easily calculate game times, timespans, etc.
-
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
   object names and aliases should all be stored lowercased, object titles however not.

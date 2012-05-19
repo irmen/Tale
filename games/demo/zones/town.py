@@ -75,13 +75,13 @@ class TownCrier(NPC):
     def init(self):
         # note: this npc uses the deferred feature to yell stuff at certain moments/
         # the blubbering idiot NPC uses a heartbeat mechanism (less efficient)
-        due = globals.mud_context.driver.game_clock + datetime.timedelta(seconds=5)
+        due = globals.mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=2))
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
     def do_cry(self, driver):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock + datetime.timedelta(seconds=random.randint(20, 40) * globals.mud_context.config.gametime_to_realtime)
+        due = driver.game_clock.plus_realtime(datetime.timedelta(seconds=random.randint(20, 40)))
         globals.mud_context.driver.defer(due, self, self.do_cry)
 
     def notify_action(self, parsed, actor):

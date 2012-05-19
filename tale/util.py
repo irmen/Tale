@@ -354,3 +354,32 @@ def format_docstring(docstring):
 def clone(object):
     """Create a copy of an existing MudObject"""
     return copy.deepcopy(object)
+
+
+class GameDateTime(object):
+    """
+    The datetime class that tracks game time.
+    times_realtime means how much faster the game time is running than real time.
+    """
+    def __init__(self, datetime, times_realtime=1):
+        self.times_realtime = times_realtime
+        self.clock = datetime
+
+    def __str__(self):
+        return str(self.clock)
+
+    def plus_realtime(self, timedelta):
+        assert isinstance(timedelta, datetime.timedelta)
+        return self.clock + timedelta * self.times_realtime
+
+    def minus_realtime(self, timedelta):
+        assert isinstance(timedelta, datetime.timedelta)
+        return self.clock - timedelta * self.times_realtime
+
+    def add_realtime(self, timedelta):
+        assert isinstance(timedelta, datetime.timedelta)
+        self.clock += timedelta * self.times_realtime
+
+    def sub_realtime(self, timedelta):
+        assert isinstance(timedelta, datetime.timedelta)
+        self.clock -= timedelta * self.times_realtime

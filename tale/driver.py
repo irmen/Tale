@@ -57,7 +57,7 @@ class Deferred(object):
     __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
 
     def __init__(self, due, owner, callable, vargs, kwargs):
-        self.due = due
+        self.due = due   # in game time
         self.owner = owner
         self.callable = callable
         self.vargs = vargs
@@ -68,6 +68,12 @@ class Deferred(object):
 
     def __lt__(self, other):
         return self.due < other.due   # deferreds must be sortable
+
+    def due_secs(self, game_clock, realtime=False):
+        secs = (self.due - game_clock.clock).total_seconds()
+        if realtime:
+            secs = int(secs / game_clock.times_realtime)
+        return datetime.timedelta(seconds=secs)
 
 
 def create_player_from_info():
@@ -174,16 +180,18 @@ class Driver(object):
         tale_version_required = version_tuple(self.config.requires_tale)
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
-        self.game_clock = self.config.epoch or self.server_started
+        self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.game_resource = resource.ResourceLoader(game)
         game.init(self)
         import zones
         self.zones = zones
         self.config.startlocation_player = self.lookup_location(self.config.startlocation_player)
         self.config.startlocation_wizard = self.lookup_location(self.config.startlocation_wizard)
-        self.game_clock = self.config.epoch or self.server_started
         if self.config.server_tick_method == "command":
-            self.config.gametime_to_realtime = 1.0
+            # If the server tick is synchronized with player commands, this factor needs to be 1,
+            # because at every command entered the game time simply advances 1 x server_tick_time.
+            self.config.gametime_to_realtime = 1
+        self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
 
         # print GPL 3.0 banner
@@ -343,18 +351,16 @@ class Driver(object):
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
-        if self.config.server_tick_method == "timer":
-            self.game_clock += datetime.timedelta(seconds=self.config.gametime_to_realtime * self.config.server_tick_time)
-        elif self.config.server_tick_method == "command":
-            self.game_clock += datetime.timedelta(seconds=self.config.server_tick_time)
-        # heartbeats
-        ctx = {"driver": self, "game_clock": self.game_clock, "state": self.state}
+        # First, adjust the game clock.
+        self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
+        # Heartbeats.
+        ctx = {"driver": self, "clock": self.game_clock, "state": self.state}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
         # deferreds
         if self.deferreds:
             deferred = self.deferreds[0]
-            if deferred.due <= self.game_clock:
+            if deferred.due <= self.game_clock.clock:
                 deferred = heapq.heappop(self.deferreds)
                 kwargs = deferred.kwargs
                 kwargs["driver"] = self  # always add a 'driver' keyword argument for convenience
@@ -429,7 +435,7 @@ class Driver(object):
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         func(self.player, parsed, driver=self, verbs=command_verbs, config=self.config,
-                                                  game_clock=self.game_clock, state=self.state)
+                                                  clock=self.game_clock, state=self.state)
                         if func.enable_notify_action:
                             self.player.location.notify_action(parsed, self.player)
                     else:
@@ -486,7 +492,7 @@ class Driver(object):
             "gamestate": self.state,
             "player": self.player,
             "deferreds": self.deferreds,
-            "game_clock": self.game_clock,
+            "clock": self.game_clock,
             "heartbeats": self.heartbeat_objects,
             "config": self.config
         }
@@ -513,7 +519,7 @@ class Driver(object):
             self.player = state["player"]
             self.state = state["gamestate"]
             self.deferreds = state["deferreds"]
-            self.game_clock = state["game_clock"]
+            self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
             self.config = state["config"]
             self.player.tell("Game loaded.")
@@ -542,7 +548,7 @@ class Driver(object):
         access the global driver object)
         """
         assert isinstance(due, datetime.datetime)
-        assert due >= self.game_clock
+        assert due >= self.game_clock.clock
         # to be able to serialize this, we don't store the actual callable object.
         # instead we store its name.
         if not isinstance(callable, util.basestring_type):
