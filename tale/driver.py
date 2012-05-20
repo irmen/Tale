@@ -20,11 +20,10 @@ import pickle
 from . import globals
 from . import errors
 from . import util
-from . import races
 from . import soul
-from . import player
 from . import cmds
 from . import resource
+from . import player
 from . import __version__ as tale_version_str
 try:
     import readline
@@ -76,38 +75,6 @@ class Deferred(object):
         return datetime.timedelta(seconds=secs)
 
 
-def create_player_from_info():
-    while True:
-        name = input("Name? ").strip()
-        if name:
-            break
-    gender = input("Gender m/f/n? ").strip()[0]
-    while True:
-        print("Player races:", ", ".join(races.player_races))
-        race = input("Race? ").strip()
-        if race in races.player_races:
-            break
-        print("Unknown race, try again.")
-    wizard = input("Wizard y/n? ").strip() == "y"
-    description = "This is a random mud player."
-    p = player.Player(name, gender, race, description)
-    if wizard:
-        p.privileges.add("wizard")
-        p.set_title("arch wizard %s", includes_name_param=True)
-    return p
-
-
-def create_default_wizard():
-    p = player.Player("irmen", "m", "human", "This wizard looks very important.")
-    p.privileges.add("wizard")
-    p.set_title("arch wizard %s", includes_name_param=True)
-    return p
-
-
-def create_default_player():
-    return player.Player("irmen", "m", "human", "A regular person.")
-
-
 class Commands(object):
     def __init__(self):
         self.commands_per_priv = {None: {}}
@@ -151,6 +118,7 @@ class Driver(object):
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
+        self.mode = "if"  # if/mud driver mode
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
         globals.mud_context.driver = self
@@ -168,7 +136,9 @@ class Driver(object):
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
+        parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args()
+        self.mode = args.mode
 
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
@@ -194,46 +164,59 @@ class Driver(object):
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
 
-        # print GPL 3.0 banner
-        print("\nTale: mud driver, mudlib and interactive fiction framework.")
-        print("Copyright (C) 2012  Irmen de Jong.")
-        print("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
-        print("and you are welcome to redistribute it under the terms and conditions")
-        print("of the GNU General Public License version 3. See the file LICENSE.txt")
-
-        # print MUD banner and initiate player creation
         try:
             banner = self.game_resource.load_text("messages/banner.txt")
+            # print game banner as supplied by the game
             print("\n" + banner + "\n")
         except IOError:
-            pass  # no banner present
-        print("This is '%s' version %s.\nYou're using Tale version %s." % (self.config.name, self.config.version, tale_version_str))
+            # no banner provided by the game, print default game header
+            print()
+            print()
+            msg = "'%s'" % self.config.name
+            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            msg = "v%s" % self.config.version
+            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            print()
+            msg = "written by %s" % self.config.author
+            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            if self.config.author_address:
+                print(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+            print()
+
         choice = input("\nDo you want to load a saved game ('n' will start a new game)? ").strip()
+        print("")
         if choice == "y":
-            print("")
             self.load_saved_game()
             if args.transcript:
                 self.player.activate_transcript(args.transcript)
-        else:
-            choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
-            if choice == "w":
-                player = create_default_wizard()
-            elif choice == "p":
-                player = create_default_player()
+            self.player.tell("\n")
+            if self.mode == "if":
+                self.config.welcome_savegame(self.player)
             else:
-                player = create_player_from_info()
+                self.player.tell("Welcome back to %s, %s." % (self.config.name, self.player.title))
+            self.player.tell("\n")
+        else:
+            if self.mode == "if" and self.config.player_name:
+                # interactive fiction mode, create the player from the game's config
+                self.player = player.Player(self.config.player_name, self.config.player_gender, self.config.player_race)
+            elif self.mode == "mud" or not self.config.player_name:
+                # mud mode, or if mode without player config: create a character with the builder
+                from .charbuilder import CharacterBuilder
+                builder = CharacterBuilder()
+                self.player = builder.build()
             if args.transcript:
-                player.activate_transcript(args.transcript)
-            self.player = player
+                self.player.activate_transcript(args.transcript)
             # move the player to the starting location
             if "wizard" in self.player.privileges:
                 self.player.move(self.config.startlocation_wizard)
             else:
                 self.player.move(self.config.startlocation_player)
-        self.player.tell("\n")
-        self.player.tell("\n")
-        self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
-        self.player.tell("\n")
+            self.player.tell("\n")
+            if self.mode == "if":
+                self.config.welcome(self.player)
+            else:
+                self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title))
+            self.player.tell("\n")
         self.show_motd()
         self.player.look(short=False)
         self.write_output()
@@ -258,7 +241,7 @@ class Driver(object):
         if motd:
             self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
             self.player.tell("\n")
-            self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed with formatting
+            self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
             self.player.tell("\n")
             self.player.tell("\n")
 
@@ -338,7 +321,10 @@ class Driver(object):
                             break
                         elif choice in ("n", "no"):
                             break
-                    self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
+                    if self.mode == "if":
+                        self.config.goodbye(self.player)
+                    else:
+                        self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
                     if self.config.server_tick_method == "timer":
                         self.player_input_thread.join()
                     break
@@ -376,10 +362,14 @@ class Driver(object):
             callback(self.player, self.config, self)
         else:
             self.player.tell("\n")
-            self.player.tell("Congratulations, you've finished the game.", end=True)
+            self.config.completion(self.player)
+            self.player.tell("\n")
             if self.config.max_score:
                 self.player.tell("Your final score is %d out of a possible %d. (in %d turns)" %
                                  (self.player.score, self.config.max_score, self.player.turns), end=True)
+            self.write_output()
+            input("\nPress enter to continue. ")
+            self.player.tell("\n")
 
     def write_output(self):
         """print any buffered player output to the screen"""

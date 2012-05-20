@@ -19,6 +19,10 @@ from . import lang, util
 from .errors import SecurityViolation, ActionRefused, ParseError
 
 
+DEFAULT_SCREEN_WIDTH = 72
+DEFAULT_SCREEN_INDENT = 2
+
+
 class Player(base.Living):
     """
     Player controlled entity.
@@ -32,8 +36,8 @@ class Player(base.Living):
         self.score = 0
         self.turns = 0
         self.previous_commandline = None
-        self.screen_width = 75
-        self.screen_indent = 2
+        self.screen_width = DEFAULT_SCREEN_WIDTH
+        self.screen_indent = DEFAULT_SCREEN_INDENT
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
         self.story_complete = False
@@ -189,8 +193,8 @@ class Player(base.Living):
                 short = self.location in self.known_locations
         if self.location:
             self.known_locations.add(self.location)
-            if "wizard" in self.privileges:
-                self.tell(repr(self.location), end=True)
+            # if "wizard" in self.privileges:
+            #    self.tell(repr(self.location), end=True)
             look_paragraphs = self.location.look(exclude_living=self, short=short)
             for paragraph in look_paragraphs:
                 self.tell(paragraph, end=True)

@@ -14,6 +14,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
 
@@ -581,8 +582,8 @@ def do_examine(player, parsed, **ctx):
     name = parsed.args[0]
     living = player.location.search_living(name)
     if living:
-        if "wizard" in player.privileges:
-            tell(repr(living))
+        # if "wizard" in player.privileges:
+        #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
             tell("(By %s you probably meant %s.)" % (name, living.name), end=True)
         tell("This is %s." % living.title)
@@ -604,8 +605,8 @@ def do_examine(player, parsed, **ctx):
         return
     item, container = player.locate_item(name)
     if item:
-        if "wizard" in player.privileges:
-            tell(repr(item))
+        # if "wizard" in player.privileges:
+        #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
             tell("(by %s you probably mean %s)" % (name, item.name))
         if item in player:
@@ -1286,3 +1287,23 @@ def do_read(player, parsed, **ctx):
         what.read(player)
     else:
         raise ParseError("Read what?")
+
+
+@cmd("@info")
+def do_gameinfo(player, parsed, **ctx):
+    """Show information about the game and about Tale."""
+    t = player.tell
+    # version info
+    config = ctx["config"]
+    author_addr = " (%s)" % config.author_address if config.author_address else ""
+    t("The game is '%s' v%s," % (config.name, config.version))
+    t("written by %s%s." % (config.author, author_addr))
+    t("Using Tale framework v%s." % tale_version_string)
+    t("\n")
+    t("\n")
+    # print GPL 3.0 banner
+    t("Tale: mud driver, mudlib and interactive fiction framework.", end=True)
+    t("Copyright (C) 2012  Irmen de Jong.", end=True)
+    t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
+    t("and you are welcome to redistribute it under the terms and conditions")
+    t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)

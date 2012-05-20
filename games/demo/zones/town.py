@@ -175,14 +175,10 @@ class GameEnd(Location):
 
     def completion(self, player, config, driver):
         player.tell("\n")
-        player.tell("Congratulations! You beat the game!")
-        if config.max_score:
-            player.tell("\n")
-            player.tell("You scored %d (out of %d) in %d turns." % (player.score, config.max_score, player.turns))
-        driver.write_output()
-        input("\nPress enter to continue. ")
+        player.tell("This is the game-specific GAME OVER callback.")
+        player.tell("It's just here as an example, we now call the normal routine:")
         player.tell("\n")
-        player.tell("Hope you had fun!")
+        driver.story_complete_output(None)
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")

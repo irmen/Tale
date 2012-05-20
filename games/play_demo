@@ -9,5 +9,5 @@ then
    export PYTHONPATH=..:$PYTHONPATH
 fi
 
-#start the game
+# start the game
 python -m tale.driver --game demo

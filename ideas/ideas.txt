@@ -1,10 +1,9 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 Disable certain commands and features that might break immersion (such as stats,who,emote).
-Let the game provide a prebuilt player character, or optionally ask a few key attributes. (name, gender).
-Disable the fully customizable character builder.
+'recap' command to show the important actions and events so far (need code in game to store events in this list)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
-pictures for locations (viewable in gui driver only ofcourse)
+Pictures for locations (viewable in gui driver only ofcourse)
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
@@ -27,6 +26,8 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
+
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
   object names and aliases should all be stored lowercased, object titles however not.
@@ -35,10 +36,6 @@ arrivals/departures (and spawned items) should be passed to notify_appear/notify
 
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 text render bug: a tell with format=False doesn't work if it is preceded by another tell.
-
-Two game modes: IF and MUD.  Each mode enables/disables certain features.
-
-Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
 

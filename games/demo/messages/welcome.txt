@@ -1,0 +1,4 @@
+You find yourself in the demo world of
+the Tale interactive fiction framework.
+How you got here is unclear, but feel
+free to snoop around and try to find the exit!
