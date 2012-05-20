@@ -11,4 +11,4 @@ SET PYTHONPATH=..;%PYTHONPATH%
 :use_lib_tail
 
 REM start the game
-python -m tale.driver --story demo
+python -m tale.driver --game demo
