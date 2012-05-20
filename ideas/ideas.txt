@@ -26,6 +26,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+Add a convenient callback Location.notify_player_enters/notify_player_leaves.
 Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
 
 input should be case insensitive (everything except stuff in quotes - the message)
