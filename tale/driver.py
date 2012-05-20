@@ -46,9 +46,21 @@ else:
 input = util.input
 
 
-class GameConfig(object):
-    # @todo placeholder for the game configuration settings
-    pass
+class StoryConfig(dict):
+    """A dict-like object that supports accessing its members as attributes."""
+    def __init__(self, *vargs, **kwargs):
+        if vargs:
+            assert len(vargs) == 1
+            assert not kwargs
+            source = vargs[0]
+            assert isinstance(source, dict)
+        else:
+            source = kwargs
+        dict.__init__(self, source)
+        self.__dict__.update(source)
+    def __setitem__(self, key, value):
+        dict.__setitem__(self, key, value)
+        self.__dict__[key] = value
 
 
 @total_ordering
@@ -137,7 +149,7 @@ class Driver(object):
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
-        parser.add_argument('-d', '--delay',type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
+        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args()
         self.mode = args.mode
@@ -148,8 +160,9 @@ class Driver(object):
 
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
-        import game
-        self.config = game.GameConfig()
+        import story
+        self.story = story.Story()
+        self.config = StoryConfig(self.story.config)
         globals.mud_context.config = self.config
         self.commands.adjust_by_config(self.config)
         tale_version = version_tuple(tale_version_str)
@@ -157,8 +170,8 @@ class Driver(object):
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
-        self.game_resource = resource.ResourceLoader(game)
-        game.init(self)
+        self.game_resource = resource.ResourceLoader(story)
+        self.story.init(self)
         import zones
         self.zones = zones
         self.config.startlocation_player = self.lookup_location(self.config.startlocation_player)
@@ -189,7 +202,7 @@ class Driver(object):
                 print(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
             print()
 
-        choice = input("\nDo you want to load a saved game ('n' will start a new game)? ").strip()
+        choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
         print("")
         if choice == "y":
             self.load_saved_game()
@@ -197,7 +210,7 @@ class Driver(object):
                 self.player.activate_transcript(args.transcript)
             self.player.tell("\n")
             if self.mode == "if":
-                self.config.welcome_savegame(self.player)
+                self.story.welcome_savegame(self.player)
             else:
                 self.player.tell("Welcome back to %s, %s." % (self.config.name, self.player.title))
             self.player.tell("\n")
@@ -208,7 +221,7 @@ class Driver(object):
             elif self.mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                builder = CharacterBuilder()
+                builder = CharacterBuilder(self)
                 self.player = builder.build()
             if args.transcript:
                 self.player.activate_transcript(args.transcript)
@@ -219,7 +232,7 @@ class Driver(object):
                 self.player.move(self.config.startlocation_player)
             self.player.tell("\n")
             if self.mode == "if":
-                self.config.welcome(self.player)
+                self.story.welcome(self.player)
             else:
                 self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
             self.player.tell("\n")
@@ -287,7 +300,7 @@ class Driver(object):
                     self.player.tell(CTRL_C_MESSAGE)
                     continue
             elif self.config.server_tick_method == "command":
-                PlayerInputThread.input_line(self.player, self.player_input_allowed)
+                PlayerInputThread.input_line(self.player, self.player_input_allowed, self.input)
                 has_input = self.player.input_is_available.is_set()  # don't block
                 before = time.time()
                 self.server_tick()
@@ -318,20 +331,22 @@ class Driver(object):
                     else:
                         pass   # in mud mode, the game can't be completed
                 except errors.SessionExit:
-                    choice = input("\nAre you sure you want to quit? ").strip()
+                    choice = self.input("\nAre you sure you want to quit? ")
+                    self.player.tell("\n")
                     if choice not in ("y", "yes"):
                         self.player.tell("Good, thanks for staying.")
                         self.start_player_input()
                         continue
                     while True:
-                        choice = input("\nWould you like to save your progress? ").strip()
+                        choice = self.input("\nWould you like to save your progress? ")
+                        self.player.tell("\n")
                         if choice in ("y", "yes"):
                             self.do_save(self.player)
                             break
                         elif choice in ("n", "no"):
                             break
                     if self.mode == "if":
-                        self.config.goodbye(self.player)
+                        self.story.goodbye(self.player)
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
                     if self.config.server_tick_method == "timer":
@@ -371,17 +386,18 @@ class Driver(object):
             callback(self.player, self.config, self)
         else:
             self.player.tell("\n")
-            self.config.completion(self.player)
+            self.story.completion(self.player)
             self.player.tell("\n")
             if self.config.max_score:
                 self.player.tell("Your final score is %d out of a possible %d. (in %d turns)" %
                                  (self.player.score, self.config.max_score, self.player.turns), end=True)
-            self.write_output()
-            input("\nPress enter to continue. ")
+            self.input("\nPress enter to continue. ")
             self.player.tell("\n")
 
     def write_output(self):
         """print any buffered player output to the screen"""
+        if not self.player:
+            return
         output = self.player.get_wrapped_output_lines()
         if output:
             if self.mode == "if" and 0 < self.output_line_delay < 1000:
@@ -573,6 +589,11 @@ class Driver(object):
         self.deferreds = [d for d in self.deferreds if d.owner is not owner]
         heapq.heapify(self.deferreds)
 
+    def input(self, prompt=None):
+        """Writes any pending output and prompts for input. Returns stripped result."""
+        self.write_output()
+        return input(prompt).strip()
+
 
 class PlayerInputThread(threading.Thread):
     def __init__(self, player, input_allowed):
@@ -581,11 +602,11 @@ class PlayerInputThread(threading.Thread):
         self.input_allowed = input_allowed
 
     def run(self):
-        while PlayerInputThread.input_line(self.player, self.input_allowed):
+        while PlayerInputThread.input_line(self.player, self.input_allowed, input):
             pass
 
     @classmethod
-    def input_line(cls, player, input_allowed):
+    def input_line(cls, player, input_allowed, input_function):
         """
         Input a line of text by the player.
         It's a classmethod because it's also used by the 'command' driven server loop.
@@ -593,9 +614,9 @@ class PlayerInputThread(threading.Thread):
         try:
             input_allowed.wait()
             sys.stdout.flush()
-            cmd = input("\n>> ").lstrip()
+            cmd = input_function("\n>> ").lstrip()
             input_allowed.clear()
-            player.input(cmd)
+            player.input_line(cmd)
             if cmd == "quit":
                 return False
         except KeyboardInterrupt:

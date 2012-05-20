@@ -38,6 +38,10 @@ arrivals/departures (and spawned items) should be passed to notify_appear/notify
 text render bug: a tell with format=False produces a newline at the beginning even if there's no paragraph without formatting before it
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 
+Load game from zipfile.
+Signed game files (to avoid basic tampering)
+Obfuscated/encrypted resource files (to avoid easy spoilers by simply reading the game files)
+
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
 
 Parser: allow simple question/answer dialog. 'no/yes' verbs? Or use continuations?

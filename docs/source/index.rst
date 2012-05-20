@@ -33,7 +33,7 @@ Install tale, preferably using pip or by executing ``python setup.py install``.
 
 After that, you'll need a game to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).
-There's a demo/example game included in the source distribution, in the ``games`` directory.
+There's a demo/example game included in the source distribution, in the ``stories`` directory.
 
 Start the demo game using the supplied ``play_demo`` script, or start it using the tale driver directly:
 

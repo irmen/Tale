@@ -2,10 +2,10 @@ include LICENSE.txt
 include MANIFEST.in
 recursive-include tests *
 recursive-include ideas *
-recursive-include games *
+recursive-include stories *
 prune sandbox
-prune games/Zed_is_me
-exclude games/play_zed_is_me*
+prune stories/Zed_is_me
+exclude stories/play_zed_is_me*
 global-exclude */.svn/*
 global-exclude */.idea/*
 global-exclude */__pycache__/*

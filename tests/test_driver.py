@@ -47,7 +47,7 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual([1, 2, 3, 4, 5], dues)
 
 
-class TestCommand(unittest.TestCase):
+class TestVarious(unittest.TestCase):
     def testCommandsLoaded(self):
         self.assertGreater(len(tale.cmds.normal.all_commands), 1)
         self.assertGreater(len(tale.cmds.wizard.all_commands), 1)
@@ -59,6 +59,18 @@ class TestCommand(unittest.TestCase):
         for cmd in tale.cmds.wizard.all_commands.values():
             self.assertIsNotNone(cmd.__doc__)
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
+
+    def test_storyconfig(self):
+        sc = driver.StoryConfig(a=42, b="hello")
+        self.assertEqual([42, 42], [sc.a, sc["a"]])
+        self.assertEqual(["hello", "hello"], [sc.b, sc["b"]])
+        sc.a=999
+        sc["b"]="bye"
+        self.assertEqual(999, sc.a)
+        self.assertEqual("bye", sc.b)
+        d = {"a": 1, "b": 2}
+        sc = driver.StoryConfig(d)
+        self.assertEqual([1, 2], [sc.a, sc.b])
 
 
 if __name__ == "__main__":

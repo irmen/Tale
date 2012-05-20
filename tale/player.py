@@ -7,16 +7,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division
 import sys
-if sys.version_info < (3, 0):
-    import Queue as queue
-else:
-    import queue
 from threading import Event
 import time
 import textwrap
 from . import base, soul
 from . import lang, util
 from .errors import SecurityViolation, ActionRefused, ParseError
+if sys.version_info < (3, 0):
+    import Queue as queue
+else:
+    import queue
 
 
 DEFAULT_SCREEN_WIDTH = 72
@@ -230,7 +230,7 @@ class Player(base.Living):
         except queue.Empty:
             return result
 
-    def input(self, cmd):
+    def input_line(self, cmd):
         self._input.put(cmd)
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)

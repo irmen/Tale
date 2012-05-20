@@ -5,20 +5,17 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from . import util
 from . import races
 from . import player
 
-input = util.input
-
 
 class CharacterBuilder(object):
-    def __init__(self):
-        pass
+    def __init__(self, driver):
+        self.driver = driver
 
     def build(self):
         while True:
-            choice = input("Create default (w)izard, default (p)layer, (c)ustom player? ").strip()
+            choice = self.driver.input("Create default (w)izard, default (p)layer, (c)ustom player? ")
             if choice == "w":
                 return self.create_default_wizard()
             elif choice == "p":
@@ -28,17 +25,17 @@ class CharacterBuilder(object):
 
     def create_player_from_info(self):
         while True:
-            name = input("Name? ").strip()
+            name = self.driver.input("Name? ")
             if name:
                 break
-        gender = input("Gender m/f/n? ").strip()[0]
+        gender = self.driver.input("Gender m/f/n? ")[0]
         while True:
             print("Player races:", ", ".join(races.player_races))
-            race = input("Race? ").strip()
+            race = self.driver.input("Race? ")
             if race in races.player_races:
                 break
             print("Unknown race, try again.")
-        wizard = input("Wizard y/n? ").strip() == "y"
+        wizard = self.driver.input("Wizard y/n? ") == "y"
         description = "A regular person."
         p = player.Player(name, gender, race, description)
         if wizard:

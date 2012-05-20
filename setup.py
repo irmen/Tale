@@ -33,7 +33,7 @@ It's still being developed and new features are implement along the way,
 but the current version is quite capable of running an interactive fiction story world.
 The multi-user aspects of the framework have been put on the back burner for now.
 
-An example test/demo game is included in the ``games`` directory.
+An example test/demo story is included in the ``stories`` directory.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["tale-driver.cmd", "tale-driver"],

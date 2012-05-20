@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import pickle
-from tale import globals, races, base, npc, soul, player
+from tale import globals, races, base, npc, soul, player, driver
 from supportstuff import DummyDriver
 
 globals.mud_context.driver = DummyDriver()
@@ -108,6 +108,13 @@ class TestSerializing(unittest.TestCase):
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
         self.assertIsNotNone(x.wiretaps)
+    def test_storyconfig(self):
+        s = driver.StoryConfig(a=42, b="hello", c=[1,2,3])
+        x = serializecycle(s)
+        self.assertEqual(s, x)
+        i1 = list(s.items())
+        i2 = list(x.items())
+        self.assertEqual(i1, i2)
 
 
 if __name__ == '__main__':

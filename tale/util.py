@@ -12,7 +12,7 @@ import os
 import time
 import sys
 import copy
-from . import lang, resource
+from . import lang
 from .errors import ParseError
 
 if sys.version_info < (3, 0):
