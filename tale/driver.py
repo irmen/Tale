@@ -120,6 +120,7 @@ class Driver(object):
         self.player = None
         self.mode = "if"  # if/mud driver mode
         self.commands = Commands()
+        self.output_line_delay = 60   # milliseconds
         self.server_loop_durations = collections.deque(maxlen=10)
         globals.mud_context.driver = self
         globals.mud_context.state = self.state
@@ -136,9 +137,14 @@ class Driver(object):
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
+        parser.add_argument('-d', '--delay',type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args()
         self.mode = args.mode
+        if 0 <= args.delay <= 100:
+            self.output_line_delay = args.delay
+        else:
+            raise ValueError("invalid delay, valid range is 0-100")
 
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
@@ -215,7 +221,7 @@ class Driver(object):
             if self.mode == "if":
                 self.config.welcome(self.player)
             else:
-                self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title))
+                self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
             self.player.tell("\n")
         self.show_motd()
         self.player.look(short=False)
@@ -260,7 +266,7 @@ class Driver(object):
         while True:
             globals.mud_context.player = self.player
             self.write_output()
-            if self.player.story_complete:
+            if self.player.story_complete and self.mode == "if":
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
                 break
@@ -306,8 +312,11 @@ class Driver(object):
                 except EOFError:
                     continue
                 except errors.StoryCompleted as ex:
-                    # congratulations ;-)
-                    self.player.story_completed(ex.callback)
+                    if self.mode == "if":
+                        # congratulations ;-)
+                        self.player.story_completed(ex.callback)
+                    else:
+                        pass   # in mud mode, the game can't be completed
                 except errors.SessionExit:
                     choice = input("\nAre you sure you want to quit? ").strip()
                     if choice not in ("y", "yes"):
@@ -375,8 +384,14 @@ class Driver(object):
         """print any buffered player output to the screen"""
         output = self.player.get_wrapped_output_lines()
         if output:
-            print(output)
-            sys.stdout.flush()
+            if self.mode == "if" and 0 < self.output_line_delay < 1000:
+                for line in output.splitlines():
+                    print(line)
+                    sys.stdout.flush()
+                    time.sleep(self.output_line_delay / 1000)
+            else:
+                print(output)
+                sys.stdout.flush()
 
     def process_player_input(self, cmd):
         if not cmd:

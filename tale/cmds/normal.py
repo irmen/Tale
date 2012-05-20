@@ -991,7 +991,7 @@ def do_exits(player, parsed, **ctx):
         elif len(player.location.exits) > 1:
             player.tell("Your current location seems to have some possible exits.")
         else:
-            player.tell("Your current location doesn't seem to have obvious exits.")
+            player.tell("Your current location doesn't seem to have any obvious exits.")
 
 
 @cmd("use")
@@ -1307,3 +1307,28 @@ def do_gameinfo(player, parsed, **ctx):
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
+
+
+@cmd("@config")
+def do_config(player, parsed, **ctx):
+    """Show or change game configuration parameters."""
+    config = ctx["config"]
+    driver = ctx["driver"]
+    if parsed.args:
+        if len(parsed.args) != 1:
+            raise ParseError("Configure what? Usage is: @config parameter=value")
+        param, _, value = parsed.args[0].partition("=")
+        if not value:
+            raise ParseError("You must provide a value.")
+        if param == "delay":
+            value = int(value)
+            if 0 <= value <= 100:
+                driver.output_line_delay = value
+            else:
+                raise ActionRefused("Invalid delay value, range is 0..100")
+        else:
+            raise ActionRefused("Invalid parameter name.")
+        player.tell("Configuration parameter updated.", end=True)
+        player.tell("\n")
+    player.tell("Game configuration:", end=True)
+    player.tell("  delay (output line delay) = ", driver.output_line_delay, format=False)

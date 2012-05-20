@@ -1,6 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Disable certain commands and features that might break immersion (such as stats,who,emote).
+Disable certain commands and features that might break immersion (such as stats,who,emote,motd).
 'recap' command to show the important actions and events so far (need code in game to store events in this list)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver only ofcourse)
@@ -8,7 +8,7 @@ Pictures for locations (viewable in gui driver only ofcourse)
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-Disable StoryCompleted exception and player status, and other IF-specific stuff.
+Check for and disable IF-specific stuff.
 Write stuff to a logfile for the server admins.
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
 Bulletin boards.
@@ -26,7 +26,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-Add a convenient callback Location.notify_player_enters/notify_player_leaves.
+Add a convenient callback Location.notify_player_entered/notify_player_left.
 Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
 
 input should be case insensitive (everything except stuff in quotes - the message)
