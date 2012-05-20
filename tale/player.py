@@ -134,6 +134,8 @@ class Player(base.Living):
             if do_format:
                 txt = " ".join(str(msg).strip() for msg in messages)
                 if not txt:
+                    if do_paragraph:
+                        self._output.append("\n")  # single newline = paragraph separator
                     return
             else:
                 txt = "".join(str(msg) for msg in messages)
@@ -141,6 +143,7 @@ class Player(base.Living):
                     return
                 txt = "\a" + txt  # \a is a special control char meaning 'don't format this'
                 do_paragraph = True
+                self._output.append("\n")  # in front of the unformatted paragraph
             self._output.append(txt)
             if do_paragraph:
                 self._output.append("\n")  # paragraph separator

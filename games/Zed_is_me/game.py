@@ -28,24 +28,24 @@ class GameConfig(object):
     startlocation_player = "house.livingroom"
     startlocation_wizard = startlocation_player
 
+    def display_text_file(self, player, filename):
+        for paragraph in resources.load_text(filename).split("\n\n"):
+            if paragraph.startswith("\n"):
+                player.tell("\n")
+            player.tell(paragraph, end=True)
+
     def welcome(self, player):
         """welcome text when player enters a new game"""
         player.tell("Welcome to '%s'." % self.name, end=True)
         player.tell("\n")
-        for paragraph in resources.load_text("messages/welcome.txt").split("\n\n"):
-            player.tell(paragraph, end=True)
+        self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
         player.tell("Welcome back to '%s'." % self.name, end=True)
         player.tell("\n")
-        player.tell("", end=True)
-        player.tell("", end=True)
-        player.tell("", end=True)
-        player.tell("", end=True)
-        for paragraph in resources.load_text("messages/welcome.txt").split("\n\n"):
-            player.tell(paragraph, end=True)
+        self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
 
     def goodbye(self, player):
@@ -56,9 +56,9 @@ class GameConfig(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         if player.score >= self.max_score:
-            player.tell(resources.load_text("messages/completion_success.txt"))
+            self.display_text_file(player, "messages/completion_success.txt")
         else:
-            player.tell(resources.load_text("messages/completion_failed.txt"))
+            self.display_text_file(player, "messages/completion_failed.txt")
 
 
 def init(driver):

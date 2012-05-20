@@ -177,6 +177,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n', '\n'])))
         self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a', '1b', '\n', '2a', '2b', '\n'])))
         self.assertEqual(['1', '', '2'], list(util.split_paragraphs(["1", "\n", "\n", "2", "\n", "\n", "\n"])), "must skip empty trailing paragraphs")
+        self.assertEqual(["\aa b c", "\ad e f"], list(util.split_paragraphs(["\aa b c", "\n", "\ad e f", "\n"])))
 
     def test_formatdocstring(self):
         d = "hai"

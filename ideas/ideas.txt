@@ -35,8 +35,7 @@ input should be case insensitive (everything except stuff in quotes - the messag
 
 arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 
-text render bug: tell("", end=True) doesn't output an empty line. should be the same as tell("\n")
-text render bug: a tell with format=False doesn't work if it is preceded by another tell.
+text render bug: a tell with format=False produces a newline at the beginning even if there's no paragraph without formatting before it
 parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
