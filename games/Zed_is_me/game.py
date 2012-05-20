@@ -32,16 +32,20 @@ class GameConfig(object):
         """welcome text when player enters a new game"""
         player.tell("Welcome to '%s'." % self.name, end=True)
         player.tell("\n")
-        player.tell(resources.load_text("messages/welcome.txt"))
-        player.tell("\n")
+        for paragraph in resources.load_text("messages/welcome.txt").split("\n\n"):
+            player.tell(paragraph, end=True)
         player.tell("\n")
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
         player.tell("Welcome back to '%s'." % self.name, end=True)
         player.tell("\n")
-        player.tell(resources.load_text("messages/welcome.txt"))
-        player.tell("\n")
+        player.tell("", end=True)
+        player.tell("", end=True)
+        player.tell("", end=True)
+        player.tell("", end=True)
+        for paragraph in resources.load_text("messages/welcome.txt").split("\n\n"):
+            player.tell(paragraph, end=True)
         player.tell("\n")
 
     def goodbye(self, player):

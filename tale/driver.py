@@ -251,7 +251,7 @@ class Driver(object):
             self.player_input_thread.setDaemon(True)
             self.player_input_thread.start()
         elif self.config.server_tick_method == "command":
-            self.player_input = PlayerInput(self.player, self.player_input_allowed)
+            pass  # player input is done in the same thread as the game loop
         else:
             raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
 
@@ -281,8 +281,8 @@ class Driver(object):
                     self.player.tell(CTRL_C_MESSAGE)
                     continue
             elif self.config.server_tick_method == "command":
-                self.player_input.input_line()
-                has_input = self.player.input_is_available.wait()
+                PlayerInputThread.input_line(self.player, self.player_input_allowed)
+                has_input = self.player.input_is_available.is_set()  # don't block
                 before = time.time()
                 self.server_tick()
                 self.server_loop_durations.append(time.time() - before)
@@ -562,29 +562,29 @@ class Driver(object):
 class PlayerInputThread(threading.Thread):
     def __init__(self, player, input_allowed):
         super(PlayerInputThread, self).__init__()
-        self.player_input = PlayerInput(player, input_allowed)
-
-    def run(self):
-        while self.player_input.input_line():
-            pass
-
-
-class PlayerInput(object):
-    def __init__(self, player, input_allowed):
         self.player = player
         self.input_allowed = input_allowed
 
-    def input_line(self):
+    def run(self):
+        while PlayerInputThread.input_line(self.player, self.input_allowed):
+            pass
+
+    @classmethod
+    def input_line(cls, player, input_allowed):
+        """
+        Input a line of text by the player.
+        It's a classmethod because it's also used by the 'command' driven server loop.
+        """
         try:
-            self.input_allowed.wait()
+            input_allowed.wait()
             sys.stdout.flush()
             cmd = input("\n>> ").lstrip()
-            self.input_allowed.clear()
-            self.player.input(cmd)
+            input_allowed.clear()
+            player.input(cmd)
             if cmd == "quit":
                 return False
         except KeyboardInterrupt:
-            self.player.tell(CTRL_C_MESSAGE)
+            player.tell(CTRL_C_MESSAGE)
         except EOFError:
             pass
         return True
