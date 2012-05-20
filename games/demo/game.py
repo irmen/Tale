@@ -50,5 +50,3 @@ class GameConfig(object):
 def init(driver):
     global resources
     resources = driver.game_resource
-
-
