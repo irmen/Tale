@@ -147,7 +147,7 @@ class Driver(object):
     def start(self, args):
         # parse args
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
-        parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
+        parser.add_argument('-s', '--story', type=str, help='path to the story to run', required=True)
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
@@ -159,7 +159,7 @@ class Driver(object):
             raise ValueError("invalid delay, valid range is 0-100")
 
         # cd into the game directory and load its config and zones
-        os.chdir(args.game)
+        os.chdir(args.story)
         import story
         self.story = story.Story()
         self.config = StoryConfig(self.story.config)
