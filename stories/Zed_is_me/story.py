@@ -12,8 +12,8 @@ class Story(object):
         name = "Zed is me",
         author = "Irmen de Jong",
         author_address = "irmen@razorvine.net",
-        version = "0.1",                 # arbitrary but is used to check savegames for compatibility
-        requires_tale = "0.4",           # tale library required to run the game
+        version = "0.2",                 # arbitrary but is used to check savegames for compatibility
+        requires_tale = "0.5",           # tale library required to run the game
         player_name = "julie",           # set a name to create a prebuilt player, None to use the character builder
         player_gender = "f",             # m/f/n
         player_race = "human",           # default is "human" ofcourse, but you can select something else if you want
