@@ -104,12 +104,18 @@ class Commands(object):
                 result.update(self.commands_per_priv[priv])
         return result
 
-    def adjust_by_config(self, config):
-        if not config.max_score:
+    def adjust_available_commands(self, story_config, game_mode):
+        if not story_config.max_score:
             # remove the 'score' command because scoring has been disabled
             for cmds in self.commands_per_priv.values():
                 if "score" in cmds:
                     del cmds["score"]
+        if game_mode == "if":
+            # disable commands flagged with 'disabled_for_IF'
+            for cmds in self.commands_per_priv.values():
+                for cmd, func in list(cmds.items()):
+                    if getattr(func, "disabled_for_IF", False):
+                        del cmds[cmd]
 
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
@@ -164,7 +170,7 @@ class Driver(object):
         self.story = story.Story()
         self.config = StoryConfig(self.story.config)
         globals.mud_context.config = self.config
-        self.commands.adjust_by_config(self.config)
+        self.commands.adjust_available_commands(self.config, self.mode)
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(self.config.requires_tale)
         if tale_version < tale_version_required:
@@ -256,13 +262,14 @@ class Driver(object):
         return location
 
     def show_motd(self):
-        motd, mtime = util.get_motd(self.game_resource)
-        if motd:
-            self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
-            self.player.tell("\n")
-            self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
-            self.player.tell("\n")
-            self.player.tell("\n")
+        if self.mode != "if":
+            motd, mtime = util.get_motd(self.game_resource)
+            if motd:
+                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+                self.player.tell("\n")
+                self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
+                self.player.tell("\n")
+                self.player.tell("\n")
 
     def start_player_input(self):
         if self.config.server_tick_method == "timer":

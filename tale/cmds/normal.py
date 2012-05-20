@@ -49,6 +49,12 @@ def disable_notify_action(func):
     return func
 
 
+def disable_in_IF(func):
+    """decorator to remove the command in Interactive Fiction mode"""
+    func.disabled_for_IF = True
+    return func
+
+
 @cmd("inventory")
 @disable_notify_action
 def do_inventory(player, parsed, **ctx):
@@ -638,6 +644,7 @@ def do_examine(player, parsed, **ctx):
 
 @cmd("stats")
 @disable_notify_action
+@disable_in_IF
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
@@ -687,6 +694,7 @@ def do_tell(player, parsed, **ctx):
 
 
 @cmd("emote")
+@disable_in_IF
 def do_emote(player, parsed, **ctx):
     """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
     if not parsed.unparsed:
@@ -773,6 +781,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
 
 @cmd("who")
 @disable_notify_action
+@disable_in_IF
 def do_who(player, parsed, **ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
     if parsed.args:
@@ -1050,6 +1059,7 @@ def do_coin(player, parsed, **ctx):
 
 @cmd("motd")
 @disable_notify_action
+@disable_in_IF
 def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
     motd, mtime = util.get_motd(ctx["driver"].game_resource)
@@ -1289,9 +1299,9 @@ def do_read(player, parsed, **ctx):
         raise ParseError("Read what?")
 
 
-@cmd("@info")
+@cmd("@info", "license")
 def do_gameinfo(player, parsed, **ctx):
-    """Show information about the game and about Tale."""
+    """Show information about the game and about Tale, and show the software license."""
     t = player.tell
     # version info
     config = ctx["config"]
@@ -1309,14 +1319,14 @@ def do_gameinfo(player, parsed, **ctx):
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
 
 
-@cmd("@config")
+@cmd("config")
 def do_config(player, parsed, **ctx):
     """Show or change game configuration parameters."""
     config = ctx["config"]
     driver = ctx["driver"]
     if parsed.args:
         if len(parsed.args) != 1:
-            raise ParseError("Configure what? Usage is: @config parameter=value")
+            raise ParseError("Configure what? Usage is: config parameter=value")
         param, _, value = parsed.args[0].partition("=")
         if not value:
             raise ParseError("You must provide a value.")

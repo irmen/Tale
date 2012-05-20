@@ -1,6 +1,5 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Disable certain commands and features that might break immersion (such as stats,who,emote,motd).
 'recap' command to show the important actions and events so far (need code in game to store events in this list)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver only ofcourse)
