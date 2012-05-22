@@ -137,6 +137,15 @@ class TestPlayer(unittest.TestCase):
         player.tell("\n")
         self.assertEqual("line1\n\nline2\n\n\n", player.get_output())
 
+    def test_peek_output(self):
+        player = Player("fritz", "m")
+        player.tell("line1")
+        player.tell("line2", 42)
+        self.assertEqual("line1\nline2\n42\n", player.peek_output())
+        self.assertEqual("line1\nline2\n42\n", player.peek_output())
+        self.assertEqual("  line1 line2 42\n", player.get_output())
+        self.assertEqual("", player.peek_output())
+
     def test_look(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")

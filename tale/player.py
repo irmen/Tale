@@ -137,11 +137,12 @@ class Player(base.Living):
 
     def peek_output(self):
         """Returns a copy of the output that sits in the buffer so far."""
-        raise NotImplementedError("peek_output")  # @todo implement peek_output
+        lines = self._output.raw(clear=False)
+        return "\n".join(lines)
 
     def get_raw_output(self):
         """Gets the accumulated output lines in raw form (for test purposes)"""
-        return self._output.raw()
+        return self._output.raw(clear=True)
 
     def get_output(self):
         """Gets the accumulated output lines, formats them nicely, and clears the buffer"""

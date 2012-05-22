@@ -16,6 +16,9 @@ class Paragraph(object):
     def add(self, line):
         self.lines.append(line)
 
+    def raw(self):
+        return "\n".join(self.lines) + "\n"
+
     def render(self, textwrapper):
         if not self.lines:
             return "" if self.format else "\n"
@@ -73,12 +76,10 @@ class TextOutput(object):
         if end:
             self.in_paragraph = False
 
-    def raw(self):
-        lines = []
-        for p in self.paragraphs:
-            p.format = False
-            lines.append(p.render(None))
-        self.init()
+    def raw(self, clear=True):
+        lines = [p.raw() for p in self.paragraphs]
+        if clear:
+            self.init()
         return lines
 
     def render(self):
