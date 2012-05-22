@@ -939,12 +939,12 @@ def do_what(player, parsed, **ctx):
         print("\n")
         print("There are all sorts of emote possibilities, for instance:")
         print("\n")
-        print("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.")
-        print("  pat max on the back  ->  You pat Max on the back.")
-        print("  reply max sure thing  ->  You reply to Max: sure thing.")
-        print("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)")
-        print("  slap all  ->  You slap X, Y and Z in the face.")
-        print("  slap all and me  ->  You slap yourself, X, Y and Z in the face.")
+        print("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.", end=True)
+        print("  pat max on the back  ->  You pat Max on the back.", end=True)
+        print("  reply max sure thing  ->  You reply to Max: sure thing.", end=True)
+        print("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)", end=True)
+        print("  slap all  ->  You slap X, Y and Z in the face.", end=True)
+        print("  slap all and me  ->  You slap yourself, X, Y and Z in the face.", end=True)
     if name == "emotes":
         # if player asks about the emotes, print all soul emote verbs
         found = True
@@ -956,7 +956,7 @@ def do_what(player, parsed, **ctx):
         for verb in sorted(soul.VERBS):
             lines[index % len(lines)] += "%-15s" % verb
             index += 1
-        print("\n".join(lines), format=False)
+        print(*lines, format=False)
     if name in ("adverb", "adverbs"):
         found = True
         print("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
@@ -1336,9 +1336,16 @@ def do_config(player, parsed, **ctx):
                 driver.output_line_delay = value
             else:
                 raise ActionRefused("Invalid delay value, range is 0..100")
+        elif param == "width":
+            value = int(value)
+            if 40 <= value <= 200:
+                player.screen_width = value
+            else:
+                raise ActionRefused("Invalid screen width, range is 40..200")
         else:
             raise ActionRefused("Invalid parameter name.")
         player.tell("Configuration parameter updated.", end=True)
         player.tell("\n")
     player.tell("Game configuration:", end=True)
-    player.tell("  delay (output line delay) = ", driver.output_line_delay, format=False)
+    player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
+    player.tell("  width (screen width) = %d" % player.screen_width, format=False)

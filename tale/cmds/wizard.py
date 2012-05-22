@@ -396,7 +396,7 @@ def do_debug(player, parsed, **ctx):
         txt.append(".%s: %r" % (varname, value))
     if obj in ctx["driver"].heartbeat_objects:
         txt.append("%s receives heartbeats." % obj.name)
-    player.tell("\n".join(txt), format=False)
+    player.tell(*txt, format=False)
 
 
 @wizcmd("set")
@@ -460,7 +460,7 @@ def do_server(player, parsed, **ctx):
         txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
     elif config.server_tick_method == "command":
         txt.append("Server loop tick: %.1f sec   (command driven)." % config.server_tick_time)
-    player.tell("\n".join(txt), format=False)
+    player.tell(*txt, format=False)
 
 
 @wizcmd("events")
@@ -473,8 +473,9 @@ def do_events(player, parsed, **ctx):
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    txt.append("\nDeferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
+    txt.append("")
+    txt.append("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
     txt.append("  due   | function            | owner")
     for d in driver.deferreds:
         txt.append("%-7s | %-20s| %s" % (d.due_secs(clock, realtime=True), d.callable, d.owner))
-    player.tell("\n".join(txt), format=False)
+    player.tell(*txt, format=False)

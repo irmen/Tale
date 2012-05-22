@@ -58,6 +58,7 @@ class StoryConfig(dict):
             source = kwargs
         dict.__init__(self, source)
         self.__dict__.update(source)
+
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
         self.__dict__[key] = value
@@ -319,7 +320,6 @@ class Driver(object):
                     for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
                         try:
                             self.process_player_input(cmd)
-                            self.player.tell("\n")  # paragraph separation
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
                                 self.player.tell("You can't go in that direction.")
@@ -338,14 +338,14 @@ class Driver(object):
                     else:
                         pass   # in mud mode, the game can't be completed
                 except errors.SessionExit:
-                    choice = self.input("\nAre you sure you want to quit? ")
+                    choice = self.input("Are you sure you want to quit? ")
                     self.player.tell("\n")
                     if choice not in ("y", "yes"):
                         self.player.tell("Good, thanks for staying.")
                         self.start_player_input()
                         continue
                     while True:
-                        choice = self.input("\nWould you like to save your progress? ")
+                        choice = self.input("Would you like to save your progress? ")
                         self.player.tell("\n")
                         if choice in ("y", "yes"):
                             self.do_save(self.player)
@@ -405,7 +405,7 @@ class Driver(object):
         """print any buffered player output to the screen"""
         if not self.player:
             return
-        output = self.player.get_wrapped_output_lines()
+        output = self.player.get_output()
         if output:
             if self.mode == "if" and 0 < self.output_line_delay < 1000:
                 for line in output.splitlines():

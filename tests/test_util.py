@@ -28,18 +28,18 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(Exception):
             util.print_object_location(p, None, None)
         util.print_object_location(p, key, None)
-        self.assertEqual(["(It's not clear where key is)."], p.get_output_lines())
+        self.assertEqual(["(It's not clear where key is).\n"], p.get_raw_output())
         util.print_object_location(p, key, None, print_parentheses=False)
-        self.assertEqual(["It's not clear where key is."], p.get_output_lines())
+        self.assertEqual(["It's not clear where key is.\n"], p.get_raw_output())
         util.print_object_location(p, key, bag)
-        result = "".join(p.get_output_lines())
+        result = "".join(p.get_raw_output())
         self.assertTrue("in bag" in result and "in your inventory" in result)
         util.print_object_location(p, key, room)
-        self.assertTrue("in your current location" in "".join(p.get_output_lines()))
+        self.assertTrue("in your current location" in "".join(p.get_raw_output()))
         util.print_object_location(p, bag, p)
-        self.assertTrue("in your inventory" in "".join(p.get_output_lines()))
+        self.assertTrue("in your inventory" in "".join(p.get_raw_output()))
         util.print_object_location(p, p, room)
-        self.assertTrue("in your current location" in "".join(p.get_output_lines()))
+        self.assertTrue("in your current location" in "".join(p.get_raw_output()))
 
     def test_moneydisplay(self):
         self.assertEqual("nothing", util.money_display_fantasy(0))
@@ -167,17 +167,6 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(["boing", "The sound is coming from the south."], wt_road.msgs, "road should give sound direction")
         self.assertEqual(["boing", "You can't hear where the sound is coming from."], wt_house.msgs, "in the house you can't locate the sound direction")
         self.assertEqual([], wt_attic.msgs, "the attic is too far away to receive msgs")
-
-    def test_paragraphs(self):
-        self.assertEqual([], list(util.split_paragraphs([])))
-        self.assertEqual([''], list(util.split_paragraphs(["\n"])))
-        self.assertEqual([''], list(util.split_paragraphs(["\n", "\n"])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2'])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n'])))
-        self.assertEqual(['1', '2'], list(util.split_paragraphs(['1', '\n', '2', '\n', '\n'])))
-        self.assertEqual(['1a 1b', '2a 2b'], list(util.split_paragraphs(['1a', '1b', '\n', '2a', '2b', '\n'])))
-        self.assertEqual(['1', '', '2'], list(util.split_paragraphs(["1", "\n", "\n", "2", "\n", "\n", "\n"])), "must skip empty trailing paragraphs")
-        self.assertEqual(["\aa b c", "\ad e f"], list(util.split_paragraphs(["\aa b c", "\n", "\ad e f", "\n"])))
 
     def test_formatdocstring(self):
         d = "hai"

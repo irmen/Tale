@@ -16,6 +16,7 @@ room1.exits["living room"] = Exit(livingroom, "You can see the living room.")
 livingroom.exits["large room"] = Exit(room2, "There's a large room in your house.")
 room2.exits["living room"] = Exit(livingroom, "You can see the living room.")
 
+
 class GameEnd(Location):
     def init(self):
         pass

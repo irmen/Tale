@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 
+
 class Story(object):
     config = dict(
         name = "Tale Demo",

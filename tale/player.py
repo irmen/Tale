@@ -10,8 +10,10 @@ import sys
 from threading import Event
 import time
 import textwrap
-from . import base, soul
-from . import lang, util
+from . import base
+from . import soul
+from . import lang
+from . import textoutput
 from .errors import SecurityViolation, ActionRefused, ParseError
 if sys.version_info < (3, 0):
     import Queue as queue
@@ -49,10 +51,10 @@ class Player(base.Living):
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
-        self._output = []
         indent = " " * self.screen_indent
         self.textwrapper = textwrap.TextWrapper(initial_indent=indent, subsequent_indent=indent,
                                                 width=self.screen_width, fix_sentence_endings=True)
+        self._output = textoutput.TextOutput(self.textwrapper)
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -122,67 +124,29 @@ class Player(base.Living):
         If you want to output a paragraph separator, either set end=True or tell a single '\n'.
         If you provide format=False, this paragraph of text won't be formatted by textwrap,
         and whitespace is untouched. An empty string isn't outputted at all.
+        Multiple messages are separated by a space.
+        The player object is returned so you can chain calls.
         """
         super(Player, self).tell(*messages)
         if messages == ("\n",):
-            self._output.append("\n")  # single newline = paragraph separator
+            self._output.p()
         else:
-            kws = set(kwargs) - {"format", "end"}
-            assert not kws, "only 'format' and 'end' keywords are understood"
-            do_format = kwargs.get("format", True)
-            do_paragraph = kwargs.get("end", False)
-            if do_format:
-                txt = " ".join(str(msg).strip() for msg in messages)
-                if not txt:
-                    if do_paragraph:
-                        self._output.append("\n")  # single newline = paragraph separator
-                    return
-            else:
-                txt = "".join(str(msg) for msg in messages)
-                if not txt:
-                    return
-                txt = "\a" + txt  # \a is a special control char meaning 'don't format this'
-                do_paragraph = True
-                self._output.append("\n")  # in front of the unformatted paragraph
-            self._output.append(txt)
-            if do_paragraph:
-                self._output.append("\n")  # paragraph separator
-
-    def get_output_lines(self):
-        """
-        Gets the accumulated output lines and clears the buffer.
-        Deprecated: use get_wrapped_output_lines instead.
-        """
-        lines = self._output
-        self._output = []
-        if self.transcript:
-            self.transcript.writelines(lines)
-        return lines
+            for msg in messages:
+                self._output.print(str(msg), **kwargs)
+        return self
 
     def peek_output(self):
         """Returns a copy of the output that sits in the buffer so far."""
-        return " ".join(self._output).strip()
+        raise NotImplementedError("peek_output")  # @todo implement peek_output
 
-    def get_wrapped_output_lines(self):
-        """gets the accumulated output lines, formats them nicely, and clears the buffer"""
-        lines = self._output
-        self._output = []
-        output = []
-        for paragraph in util.split_paragraphs(lines):
-            if paragraph.startswith("\a"):
-                # \a means: don't format this
-                paragraph = paragraph[1:]
-                if self.screen_indent:
-                    indent = " " * self.screen_indent
-                    paragraph = paragraph.splitlines()
-                    for i in range(len(paragraph)):
-                        paragraph[i] = indent + paragraph[i]
-                    paragraph = "\n".join(paragraph)
-            else:
-                self.textwrapper.width = self.screen_width
-                paragraph = self.textwrapper.fill(paragraph)
-            output.append(paragraph)
-        output = "\n".join(output)  # paragraphs are separated on screen by a newline
+    def get_raw_output(self):
+        """Gets the accumulated output lines in raw form (for test purposes)"""
+        return self._output.raw()
+
+    def get_output(self):
+        """Gets the accumulated output lines, formats them nicely, and clears the buffer"""
+        self._output.width = self.screen_width
+        output = self._output.render()
         if self.transcript:
             self.transcript.write(output)
         return output

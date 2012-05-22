@@ -295,35 +295,6 @@ def duration_display(duration):
     return lang.join(result)
 
 
-def split_paragraphs(lines):
-    """
-    Split a list of lines into paragraphs. A set of lines ending with a single
-    '\n' line is considered a paragraph. The '\n' is optional after the last line.
-    Superfluous empty paragraphs at the end are discarded.
-    Individual lines in a paragraph are separated by a space.
-    """
-    if lines:
-        # remove superfluous newlines at the end
-        strippable_newlines = 0
-        try:
-            while lines[-(strippable_newlines + 1)] == "\n":
-                strippable_newlines += 1
-            strippable_newlines -= 1
-            if strippable_newlines > 0:
-                lines = lines[:-strippable_newlines]
-        except IndexError:
-            lines = ["\n"]
-    paragraph = []
-    for line in lines:
-        if line == "\n":
-            yield " ".join(paragraph)
-            paragraph = []
-            continue
-        paragraph.append(line.strip())
-    if paragraph:
-        yield " ".join(paragraph)
-
-
 def format_docstring(docstring):
     """Format a docstring according to the algorithm in PEP-257"""
     if not docstring:
