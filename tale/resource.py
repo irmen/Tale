@@ -27,7 +27,7 @@ class ResourceLoader(object):
         return open(path, mode=mode)
 
     def load_text(self, path):
-        with self.open(path) as f:
+        with self.open(path, mode="U") as f:
             return f.read()
 
     def load_image(self, path):
