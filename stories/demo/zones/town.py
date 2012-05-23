@@ -161,17 +161,15 @@ class GameEnd(Location):
     def init(self):
         pass
 
-    def insert(self, obj, actor):
-        if obj is globals.mud_context.player:
-            # Player entered this location!
-            # The StoryCompleted exception is an immediate game end trigger.
-            # This means the player never actually enters this location
-            # (because the insert call aborts with an exception)
-            # raise StoryCompleted(self.completion)
-            obj.story_completed(self.completion)
-            # setting the status on the player is usually better,
-            # it allows the driver to complete the last player action normally.
-        return super(GameEnd, self).insert(obj, actor)
+    def notify_player_arrived(self, player, previous_location):
+        # player arrived!
+        # The StoryCompleted exception is an immediate game end trigger.
+        # This means the player never actually enters this location
+        # (because the insert call aborts with an exception)
+        # raise StoryCompleted(self.completion)
+        player.story_completed(self.completion)
+        # setting the status on the player is usually better,
+        # it allows the driver to complete the last player action normally.
 
     def completion(self, player, config, driver):
         player.tell("\n")

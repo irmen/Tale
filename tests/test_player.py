@@ -380,6 +380,31 @@ class TestPlayer(unittest.TestCase):
         self.assertTrue(player.notify_called)
         self.assertTrue(chair_in_inventory.notify_called)
 
+    def test_move_notify(self):
+        class LocationNotify(Location):
+            def notify_npc_left(self, npc, target_location):
+                self.npc_left = npc
+                self.npc_left_target = target_location
+            def notify_npc_arrived(self, npc, previous_location):
+                self.npc_arrived = npc
+                self.npc_arrived_from = previous_location
+            def notify_player_left(self, player, target_location):
+                self.player_left = player
+                self.player_left_target = target_location
+            def notify_player_arrived(self, player, previous_location):
+                self.player_arrived = player
+                self.player_arrived_from = previous_location
+        player = Player("julie", "f")
+        room1 = LocationNotify("room1")
+        room2 = LocationNotify("room2")
+        room1.insert(player, player)
+        player.move(room2)
+        self.assertEqual(room2, player.location)
+        self.assertEqual(player, room1.player_left)
+        self.assertEqual(room2, room1.player_left_target)
+        self.assertEqual(player, room2.player_arrived)
+        self.assertEqual(room1, room2.player_arrived_from)
+
 
 if __name__ == '__main__':
     unittest.main()

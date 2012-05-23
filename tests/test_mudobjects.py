@@ -16,7 +16,7 @@ from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
-
+from tale.soul import ParseResults
 
 class TestLocations(unittest.TestCase):
     def setUp(self):
@@ -204,6 +204,17 @@ class TestLocations(unittest.TestCase):
         player.move(room2)
         self.assertEqual([], room.verbs)
         self.assertEqual(["frobnitz", "frobnitz", "xywobble", "kowabooga"], room2.verbs)
+
+    def test_notify(self):
+        room = Location("room")
+        room2 = Location("room2")
+        player = Player("julie", "f")
+        room.notify_player_arrived(player, room2)
+        room.notify_player_left(player, room2)
+        room.notify_npc_arrived(player, room2)
+        room.notify_npc_left(player, room2)
+        parsed = ParseResults("verb")
+        room.notify_action(parsed, player)
 
 
 class TestDoorsExits(unittest.TestCase):
@@ -403,6 +414,31 @@ class TestNPC(unittest.TestCase):
         self.assertTrue(1 < rat.stats["agi"] < 100)
         dragon = Monster("dragon", "f", race="dragon")
         self.assertTrue(dragon. aggressive)
+
+    def test_move_notify(self):
+        class LocationNotify(Location):
+            def notify_npc_left(self, npc, target_location):
+                self.npc_left = npc
+                self.npc_left_target = target_location
+            def notify_npc_arrived(self, npc, previous_location):
+                self.npc_arrived = npc
+                self.npc_arrived_from = previous_location
+            def notify_player_left(self, player, target_location):
+                self.player_left = player
+                self.player_left_target = target_location
+            def notify_player_arrived(self, player, previous_location):
+                self.player_arrived = player
+                self.player_arrived_from = previous_location
+        npc = NPC("rat", "m", race="rodent")
+        room1 = LocationNotify("room1")
+        room2 = LocationNotify("room2")
+        room1.insert(npc, None)
+        npc.move(room2)
+        self.assertEqual(room2, npc.location)
+        self.assertEqual(npc, room1.npc_left)
+        self.assertEqual(room2, room1.npc_left_target)
+        self.assertEqual(npc, room2.npc_arrived)
+        self.assertEqual(room1, room2.npc_arrived_from)
 
 
 class TestDescriptions(unittest.TestCase):

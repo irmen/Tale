@@ -21,11 +21,9 @@ class GameEnd(Location):
     def init(self):
         pass
 
-    def insert(self, obj, actor):
-        if obj is globals.mud_context.player:
-            # Player entered this location!
-            obj.story_completed()
-        return super(GameEnd, self).insert(obj, actor)
+    def notify_player_arrived(self, player, previous_location):
+        # player has entered!
+        player.story_completed()
 
 outside = GameEnd("Outside", "You escaped the house.")
 livingroom.exits["door"] = Door(outside, "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.", opened=False)

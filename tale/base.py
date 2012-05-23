@@ -398,6 +398,22 @@ class Location(MudObject):
         for exit in set(self.exits.values()):
             exit.notify_action(parsed, actor)
 
+    def notify_npc_arrived(self, npc, previous_location):
+        """a NPC has arrived in this location."""
+        pass
+
+    def notify_npc_left(self, npc, target_location):
+        """a NPC has left the location."""
+        pass
+
+    def notify_player_arrived(self, player, previous_location):
+        """a player has arrived in this location."""
+        pass
+
+    def notify_player_left(self, player, target_location):
+        """a player has left this location."""
+        pass
+
 
 _Limbo = Location("Limbo",
                      """
@@ -608,7 +624,7 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def move(self, target_location, actor=None, silent=False):
+    def move(self, target_location, actor=None, silent=False, is_player=False):
         """
         Leave the current location, enter the new location (transactional).
         Messages are being printed to the locations if the move was successful.
@@ -627,10 +643,18 @@ class Living(MudObject):
                 raise
             if not silent:
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
+            if is_player:
+                original_location.notify_player_left(self, target_location)
+            else:
+                original_location.notify_npc_left(self, target_location)
         else:
             target_location.insert(self, actor)
         if not silent:
             target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
+        if is_player:
+            target_location.notify_player_arrived(self, original_location)
+        else:
+            target_location.notify_npc_arrived(self, original_location)
 
     def register_all_inventory_verbs(self, location):
         """When moving the living to a new location, register all inventory custom verbs"""

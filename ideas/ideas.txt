@@ -25,7 +25,9 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-Add a convenient callback Location.notify_player_entered/notify_player_left.
+Convert the various notify_* calls to Deferreds with an immediate due time so they will execute 'asynchronously'
+directly after the player's command processing has completed.
+
 Allow a game to define new commands and override builtin commands (with explicit flag?) both wiz+normal
 
 input should be case insensitive (everything except stuff in quotes - the message)
