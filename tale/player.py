@@ -6,7 +6,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division
-import sys
 from threading import Event
 import time
 import textwrap
@@ -15,10 +14,7 @@ from . import soul
 from . import lang
 from . import textoutput
 from .errors import SecurityViolation, ActionRefused, ParseError
-if sys.version_info < (3, 0):
-    import Queue as queue
-else:
-    import queue
+from .util import queue
 
 
 DEFAULT_SCREEN_WIDTH = 72

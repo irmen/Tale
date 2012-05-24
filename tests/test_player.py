@@ -399,6 +399,7 @@ class TestPlayer(unittest.TestCase):
         room2 = LocationNotify("room2")
         room1.insert(player, player)
         player.move(room2)
+        tale.globals.mud_context.driver.execute_after_player_actions()
         self.assertEqual(room2, player.location)
         self.assertEqual(player, room1.player_left)
         self.assertEqual(room2, room1.player_left_target)

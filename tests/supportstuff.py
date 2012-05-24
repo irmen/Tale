@@ -15,6 +15,7 @@ class DummyDriver(object):
         self.exits = []
         self.game_clock = datetime.datetime.now()
         self.deferreds = []
+        self.after_player_queue = []
     def register_heartbeat(self, obj):
         self.heartbeats.add(obj)
     def unregister_heartbeat(self, obj):
@@ -25,7 +26,12 @@ class DummyDriver(object):
         self.deferreds.append((due, owner, callable))
     def remove_deferreds(self, owner):
         self.deferreds = [(d[0], d[1], d[2]) for d in self.deferreds if d[1] is not owner]
-
+    def after_player_action(self, callable, *vargs, **kwargs):
+        self.after_player_queue.append((callable, vargs, kwargs))
+    def execute_after_player_actions(self):
+        for callable, vargs, kwargs in self.after_player_queue:
+            callable(*vargs, **kwargs)
+        self.after_player_queue = []
 
 class Wiretap(object):
     def __init__(self):

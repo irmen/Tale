@@ -87,6 +87,19 @@ class Deferred(object):
             secs = int(secs / game_clock.times_realtime)
         return datetime.timedelta(seconds=secs)
 
+    def __call__(self, *args, **kwargs):
+        self.kwargs = self.kwargs or {}
+        if "driver" in kwargs:
+            self.kwargs["driver"] = kwargs["driver"]  # always add a 'driver' keyword argument for convenience
+        if self.owner is None:
+            # deferred callable is stored as a normal callable object
+            self.callable(*self.vargs, **self.kwargs)
+        else:
+            # deferred callable is stored as a name, so we need to obtain the actual function
+            callable = getattr(self.owner, self.callable, None)
+            if callable:
+                callable(*self.vargs, **self.kwargs)
+
 
 class Commands(object):
     def __init__(self):
@@ -134,6 +147,8 @@ class Driver(object):
         self.state = {}  # global game state variables
         self.unbound_exits = []
         self.deferreds = []  # heapq
+        self.deferreds_lock = threading.Lock()
+        self.notification_queue = util.queue.Queue()
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
@@ -363,29 +378,35 @@ class Driver(object):
                     import traceback
                     txt = "* internal error:\n" + traceback.format_exc()
                     self.player.tell(txt, format=False)
+            # call any queued event notification handlers
+            while True:
+                try:
+                    deferred = self.notification_queue.get_nowait()
+                    deferred()
+                except util.queue.Empty:
+                    break
         self.player.destroy({"driver": self})
         self.write_output()  # flush pending output at server shutdown.
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
-        # First, adjust the game clock.
+        # 1) game clock
+        # 2) heartbeats
+        # 3) deferreds
+        # 4) write buffered output to the screen.
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
-        # Heartbeats.
         ctx = {"driver": self, "clock": self.game_clock, "state": self.state}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
-        # deferreds
         if self.deferreds:
-            deferred = self.deferreds[0]
-            if deferred.due <= self.game_clock.clock:
-                deferred = heapq.heappop(self.deferreds)
-                kwargs = deferred.kwargs
-                kwargs["driver"] = self  # always add a 'driver' keyword argument for convenience
-                # deferred callable is stored as a name, so we need to obtain the actual function:
-                callable = getattr(deferred.owner, deferred.callable, None)
-                if callable:
-                    callable(*deferred.vargs, **kwargs)
-        # buffered output
+            with self.deferreds_lock:
+                deferred = self.deferreds[0]
+                if deferred.due <= self.game_clock.clock:
+                    deferred = heapq.heappop(self.deferreds)
+                else:
+                    deferred = None
+            if deferred:
+                deferred(driver=self)
         self.write_output()
 
     def story_complete_output(self, callback):
@@ -454,7 +475,7 @@ class Driver(object):
                 if parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
                     if handled:
-                        self.player.location.notify_action(parsed, self.player)
+                        self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -465,7 +486,7 @@ class Driver(object):
                         func(self.player, parsed, driver=self, verbs=command_verbs, config=self.config,
                                                   clock=self.game_clock, state=self.state)
                         if func.enable_notify_action:
-                            self.player.location.notify_action(parsed, self.player)
+                            self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb as x:
@@ -483,7 +504,7 @@ class Driver(object):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
         self.player.tell(player_message)
         self.player.location.tell(room_message, self.player, who, target_message)
-        self.player.location.notify_action(parsed, self.player)
+        self.after_player_action(self.player.location.notify_action, parsed, self.player)
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
@@ -588,13 +609,24 @@ class Driver(object):
             deferred = Deferred(due, owner, callable, vargs, kwargs)
             # we skip the pickle check because it is extremely inefficient.....:
             # pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
-            heapq.heappush(self.deferreds, deferred)
+            with self.deferreds_lock:
+                heapq.heappush(self.deferreds, deferred)
             return
         raise ValueError("unknown callable on owner object")
 
+    def after_player_action(self, callable, *vargs, **kwargs):
+        """
+        Register a deferred callable (optionally with arguments) in the queue
+        of events that will be executed immediately *after* the player's own actions
+        have been completed.
+        """
+        deferred = Deferred(None, None, callable, vargs, kwargs)
+        self.notification_queue.put(deferred)
+
     def remove_deferreds(self, owner):
-        self.deferreds = [d for d in self.deferreds if d.owner is not owner]
-        heapq.heapify(self.deferreds)
+        with self.deferreds_lock:
+            self.deferreds = [d for d in self.deferreds if d.owner is not owner]
+            heapq.heapify(self.deferreds)
 
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""

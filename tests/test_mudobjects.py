@@ -434,6 +434,7 @@ class TestNPC(unittest.TestCase):
         room2 = LocationNotify("room2")
         room1.insert(npc, None)
         npc.move(room2)
+        mud_context.driver.execute_after_player_actions()
         self.assertEqual(room2, npc.location)
         self.assertEqual(npc, room1.npc_left)
         self.assertEqual(room2, room1.npc_left_target)

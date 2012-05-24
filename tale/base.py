@@ -290,6 +290,8 @@ class Location(MudObject):
         """
         specific_targets = specific_targets or set()
         assert isinstance(specific_targets, (frozenset, set, list, tuple))
+        if exclude_living:
+            assert isinstance(exclude_living, Living)
         for living in self.livings:
             if living == exclude_living:
                 continue
@@ -391,6 +393,9 @@ class Location(MudObject):
 
     def notify_action(self, parsed, actor):
         """Notify the room, its livings and items of an action performed by someone."""
+        # Notice that this notification event is invoked by the driver after all
+        # actions concerning player input have been handled, so we don't have to
+        # queue the delegated calls.
         for living in self.livings:
             living._notify_action_base(parsed, actor)
         for item in self.items:
@@ -643,18 +648,20 @@ class Living(MudObject):
                 raise
             if not silent:
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
+            # queue event
             if is_player:
-                original_location.notify_player_left(self, target_location)
+                mud_context.driver.after_player_action(original_location.notify_player_left, self, target_location)
             else:
-                original_location.notify_npc_left(self, target_location)
+                mud_context.driver.after_player_action(original_location.notify_npc_left, self, target_location)
         else:
             target_location.insert(self, actor)
         if not silent:
             target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
+        # queue event
         if is_player:
-            target_location.notify_player_arrived(self, original_location)
+            mud_context.driver.after_player_action(target_location.notify_player_arrived, self, original_location)
         else:
-            target_location.notify_npc_arrived(self, original_location)
+            mud_context.driver.after_player_action(target_location.notify_npc_arrived, self, original_location)
 
     def register_all_inventory_verbs(self, location):
         """When moving the living to a new location, register all inventory custom verbs"""
