@@ -782,9 +782,9 @@ class Container(Item):
     def title(self):
         if isinstance(self.contained_in, Living):
             if self.__inventory:
-                return self._title + " (containing things)"
+                return self._title + color.dim(" (containing things)")
             else:
-                return self._title + " (empty)"
+                return self._title + color.dim(" (empty)")
         return self._title
 
     @property

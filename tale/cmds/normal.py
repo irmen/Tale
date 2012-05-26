@@ -14,6 +14,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .. import color
 from .decorators import disable_in_IF, disable_notify_action
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
@@ -106,7 +107,7 @@ def do_locate(player, parsed, **ctx):
             print("You are here, in %s." % player.location.name)
             return
         if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            print("(By %s you probably mean %s.)" % (name, thing.name))
+            print(color.dim("(By %s you probably mean %s.)" % (name, thing.name)))
         if thing in player.location:
             if isinstance(thing, base.Living):
                 print("%s is here next to you." % lang.capital(thing.title))
@@ -122,7 +123,7 @@ def do_locate(player, parsed, **ctx):
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                print("(By %s you probably mean %s.)" % (name, item.name))
+                print(color.dim("(By %s you probably mean %s.)" % (name, item.name)))
             util.print_object_location(player, item, container, False)
         else:
             otherplayer = ctx["driver"].search_player(name)  # global player search
@@ -540,9 +541,9 @@ def do_help(player, parsed, **ctx):
             if abbrs:
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
-        player.tell("Available commands:")
+        player.tell(color.bright("Available commands:"))
         player.tell(", ".join(sorted(cmds_help)), end=True)
-        player.tell("Abbreviations:")
+        player.tell(color.bright("Abbreviations:"))
         player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
@@ -583,7 +584,7 @@ def do_examine(player, parsed, **ctx):
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            tell("(By %s you probably meant %s.)" % (name, living.name), end=True)
+            tell(color.dim("(By %s you probably meant %s.)" % (name, living.name)), end=True)
         tell("This is %s." % living.title)
         if living.description:
             tell(living.description)
@@ -606,7 +607,7 @@ def do_examine(player, parsed, **ctx):
         # if "wizard" in player.privileges:
         #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            tell("(by %s you probably mean %s)" % (name, item.name))
+            tell(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
         if item in player:
             tell("You're carrying %s." % lang.a(item.title))
         elif container and container in player:
@@ -765,7 +766,7 @@ def do_quit(player, parsed, **ctx):
 
 def print_item_removal(player, item, container, print_parentheses=True):
     if print_parentheses:
-        player.tell("(You take the %s from the %s)." % (item.name, container.name))
+        player.tell(color.dim("(You take the %s from the %s)." % (item.name, container.name)))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
@@ -898,7 +899,7 @@ def do_what(player, parsed, **ctx):
     # is it a npc here?
     living = player.location.search_living(name)
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        print("(by %s you probably mean %s)" % (name, living.name))
+        print(color.dim("(By %s you probably meant %s.)" % (name, living.name)))
     if living:
         found = True
         if living is player:
@@ -916,7 +917,7 @@ def do_what(player, parsed, **ctx):
     if item:
         found = True
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            print("(by %s you probably mean %s)" % (name, item.name))
+            print(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
         print("It's an item in your vicinity. You should perhaps try to examine it.")
     if name == "soul":
         # if player is asking about the soul, give some general info
@@ -937,6 +938,9 @@ def do_what(player, parsed, **ctx):
         print("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)", end=True)
         print("  slap all  ->  You slap X, Y and Z in the face.", end=True)
         print("  slap all and me  ->  You slap yourself, X, Y and Z in the face.", end=True)
+        print("Often you can target a specific bodypart (try 'what is bodyparts' or ?bodyparts).")
+        print("It's sometimes also possible to qualify your action to make it mean something else, such as fail ... or pretend...")
+        print("(try 'what are qualifiers' or ?qualifiers).", end=True)
     if name == "emotes":
         # if player asks about the emotes, print all soul emote verbs
         found = True
@@ -1298,7 +1302,7 @@ def do_gameinfo(player, parsed, **ctx):
     # version info
     config = ctx["config"]
     author_addr = " (%s)" % config.author_address if config.author_address else ""
-    t("The game is '%s' v%s," % (config.name, config.version))
+    t(color.BRIGHT + "The game is '%s' v%s," % (config.name, config.version))
     t("written by %s%s." % (config.author, author_addr))
     t("Using Tale framework v%s." % tale_version_string)
     t("\n")
@@ -1309,6 +1313,7 @@ def do_gameinfo(player, parsed, **ctx):
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
+    t(color.NORMAL)
 
 
 @cmd("config")

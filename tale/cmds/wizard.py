@@ -13,7 +13,7 @@ import sys
 import threading
 import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util
+from .. import base, lang, util, color
 from ..player import Player
 from .. import __version__
 
@@ -435,7 +435,7 @@ def do_server(player, parsed, **ctx):
     driver = ctx["driver"]
     config = ctx["config"]
     clock = ctx["clock"]
-    txt = ["Server information:"]
+    txt = [color.bright("Server information:")]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
     uptime = realtime - driver.server_started
@@ -470,13 +470,14 @@ def do_events(player, parsed, **ctx):
     driver = ctx["driver"]
     config = ctx["config"]
     clock = ctx["clock"]
-    txt = ["Pending events overview. Server tick is %.1f sec." % config.server_tick_time,
+    txt = [color.BRIGHT + "Pending events overview." + color.NORMAL + " Server tick is %.1f sec." % config.server_tick_time,
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     txt.append("")
     txt.append("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
-    txt.append("  due   | function            | owner")
+    txt.append("  due   " + color.DIM + "|" + color.NORMAL + " function            " + color.DIM + "|" + color.NORMAL + " owner")
     for d in driver.deferreds:
-        txt.append("%-7s | %-20s| %s" % (d.due_secs(clock, realtime=True), d.callable, d.owner))
+        txt.append(("%-7s " + color.DIM + "|" + color.NORMAL + " %-20s" + color.DIM + "|" + color.NORMAL + " %s") %
+            (d.due_secs(clock, realtime=True), d.callable, d.owner))
     player.tell(*txt, format=False)

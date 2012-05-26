@@ -20,16 +20,21 @@ if colorama:
     else:
         DIM = colorama.Style.DIM
     RESET_ALL = colorama.Style.RESET_ALL
+
     def bright(txt):
-        return BRIGHT+txt+NORMAL
+        return BRIGHT + txt + NORMAL
+
     def dim(txt):
-        return DIM+txt+NORMAL
+        return DIM + txt + NORMAL
+
 else:
     BRIGHT = ""
     NORMAL = ""
     DIM = ""
     RESET_ALL = ""
+
     def bright(txt):
         return txt
+
     def dim(txt):
         return txt

@@ -12,6 +12,7 @@ import textwrap
 from . import base
 from . import soul
 from . import lang
+from . import color
 from . import textoutput
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
@@ -90,7 +91,7 @@ class Player(base.Living):
             # special case, repeat previous command
             if self.previous_commandline:
                 commandline = self.previous_commandline
-                self.tell("(repeat: %s)" % commandline, end=True)
+                self.tell(color.dim("(repeat: %s)" % commandline), end=True)
             else:
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
