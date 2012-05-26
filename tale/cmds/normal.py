@@ -14,6 +14,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from .decorators import disable_in_IF, disable_notify_action
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
@@ -23,7 +24,10 @@ abbreviations = {}   # will be injected
 
 
 def cmd(command, *aliases):
-    """decorator to add the command to the global dictionary of commands"""
+    """
+    (Internal) decorator to add the command to the global dictionary of commands.
+    User code should use @cmd from cmds.decorators.
+    """
     def cmd2(func):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
@@ -41,18 +45,6 @@ def cmd(command, *aliases):
         else:
             raise SyntaxError("invalid cmd function signature for: " + func.__name__)
     return cmd2
-
-
-def disable_notify_action(func):
-    """decorator to prevent the command being passed to notify_action events"""
-    func.enable_notify_action = False
-    return func
-
-
-def disable_in_IF(func):
-    """decorator to remove the command in Interactive Fiction mode"""
-    func.disabled_for_IF = True
-    return func
 
 
 @cmd("inventory")
@@ -1344,7 +1336,7 @@ def do_config(player, parsed, **ctx):
                 raise ActionRefused("Invalid screen width, range is 40..200")
         else:
             raise ActionRefused("Invalid parameter name.")
-        player.tell("Configuration parameter updated.", end=True)
+        player.tell("Configuration modified.", end=True)
         player.tell("\n")
     player.tell("Game configuration:", end=True)
     player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)

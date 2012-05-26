@@ -23,8 +23,9 @@ LIBRARY_MODULE_NAME = "tale"
 
 def wizcmd(command, *aliases):
     """
-    Decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
+    (Internal) decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
     Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
+    User code should use @wizcmd from cmds.decorators.
     """
     command = "!" + command
     aliases = ["!" + alias for alias in aliases]

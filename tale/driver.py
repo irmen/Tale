@@ -105,11 +105,18 @@ class Commands(object):
     def __init__(self):
         self.commands_per_priv = {None: {}}
 
-    def add(self, verb, func, privilege):
+    def add(self, verb, func, privilege=None):
         for commands in self.commands_per_priv.values():
             if verb in commands:
                 raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
+
+    def override(self, verb, func, privilege=None):
+        if verb in self.commands_per_priv[privilege]:
+            existing = self.commands_per_priv[privilege][verb]
+            self.commands_per_priv[privilege][verb] = func
+            return existing
+        raise KeyError("command not defined: " + verb)
 
     def get(self, privileges):
         result = self.commands_per_priv[None]  # always include the cmds for None
@@ -182,10 +189,15 @@ class Driver(object):
 
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
-        import story
+        story = __import__("story", level=0)
         self.story = story.Story()
         self.config = StoryConfig(self.story.config)
         globals.mud_context.config = self.config
+        try:
+            story_cmds = __import__("cmds", level=0)
+            story_cmds.register_all(self.commands)
+        except ImportError:
+            pass
         self.commands.adjust_available_commands(self.config, self.mode)
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(self.config.requires_tale)
