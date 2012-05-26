@@ -24,6 +24,7 @@ from . import soul
 from . import cmds
 from . import resource
 from . import player
+from . import color
 from . import __version__ as tale_version_str
 try:
     import readline
@@ -220,11 +221,12 @@ class Driver(object):
         try:
             banner = self.game_resource.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            print("\n" + banner + "\n")
+            print(color.bright("\n" + banner + "\n"))
         except IOError:
             # no banner provided by the game, print default game header
             print()
             print()
+            print(color.BRIGHT)
             msg = "'%s'" % self.config.name
             print(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
@@ -234,6 +236,7 @@ class Driver(object):
             print(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
                 print(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+            print(color.NORMAL)
             print()
 
         choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
@@ -293,7 +296,7 @@ class Driver(object):
         if self.mode != "if":
             motd, mtime = util.get_motd(self.game_resource)
             if motd:
-                self.player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
+                self.player.tell(color.bright("Message-of-the-day, last modified on %s:" % mtime), end=True)
                 self.player.tell("\n")
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
                 self.player.tell("\n")
@@ -429,8 +432,8 @@ class Driver(object):
             self.story.completion(self.player)
             self.player.tell("\n")
             if self.config.max_score:
-                self.player.tell("Your final score is %d out of a possible %d. (in %d turns)" %
-                                 (self.player.score, self.config.max_score, self.player.turns), end=True)
+                self.player.tell(color.bright("Your final score is %d out of a possible %d. (in %d turns)" %
+                                 (self.player.score, self.config.max_score, self.player.turns)), end=True)
             self.input("\nPress enter to continue. ")
             self.player.tell("\n")
 
@@ -446,7 +449,10 @@ class Driver(object):
                     sys.stdout.flush()
                     time.sleep(self.output_line_delay / 1000)
             else:
-                print(output)
+                if output.endswith("\n"):
+                    print(output, end="")
+                else:
+                    print(output)
                 sys.stdout.flush()
 
     def process_player_input(self, cmd):
@@ -664,8 +670,9 @@ class PlayerInputThread(threading.Thread):
         """
         try:
             input_allowed.wait()
+            print()
             sys.stdout.flush()
-            cmd = input_function("\n>> ").lstrip()
+            cmd = input_function(color.dim(">> ")).lstrip()
             input_allowed.clear()
             player.input_line(cmd)
             if cmd == "quit":

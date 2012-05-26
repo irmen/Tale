@@ -9,6 +9,7 @@ from __future__ import print_function, division
 import weakref
 import textwrap
 from . import lang
+from . import color
 from .errors import ActionRefused
 from .races import races
 from .globals import mud_context
@@ -305,7 +306,7 @@ class Location(MudObject):
 
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
-        paragraphs = ["[" + self.name + "]"]
+        paragraphs = [color.bright("[" + self.name + "]")]
         if short:
             if self.exits:
                 paragraphs.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
