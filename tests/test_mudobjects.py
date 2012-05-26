@@ -46,6 +46,11 @@ class TestLocations(unittest.TestCase):
         self.player.insert(self.bag, self.player)
         self.hall.init_inventory([self.table, self.key, self.magazine, self.rat, self.julie, self.player])
 
+    def test_names(self):
+        loc = Location("The Attic", "A dusty attic.")
+        self.assertEqual("The Attic", loc.name)
+        self.assertEqual("A dusty attic.", loc.description)
+
     def test_contains(self):
         self.assertTrue(self.julie in self.hall)
         self.assertTrue(self.magazine in self.hall)
@@ -447,6 +452,10 @@ class TestDescriptions(unittest.TestCase):
         item = Item("key")
         self.assertEqual("key", item.name)
         self.assertEqual("key", item.title)
+        self.assertEqual("", item.description)
+        item = Item("KEY")
+        self.assertEqual("key", item.name)
+        self.assertEqual("KEY", item.title)
         self.assertEqual("", item.description)
     def test_title(self):
         item = Item("key", "rusty old key")

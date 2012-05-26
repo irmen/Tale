@@ -1,6 +1,5 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-'recap' command to show the important actions and events so far (need code in game to store events in this list)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver only ofcourse)
 
@@ -25,11 +24,13 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+Add a 'look_text' (see circlemud data 'longdesc') kind of text to livings and items that will be displayed
+in the look command. If objects don't have it, they're displayed as usual ("XYZ is here").
+
 Console output: dynamically highlight names/aliases/exits/items?
 
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
-  object names and aliases should all be stored lowercased, object titles however not.
 
 arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 

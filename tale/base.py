@@ -62,7 +62,7 @@ class MudObject(object):
     gender = "n"
 
     def __init__(self, name, title=None, description=None):
-        self.name = name
+        self.name = name.lower()
         self.aliases = []
         self.verbs = []   # any custom verbs that need to be registered in the location or in the player
         if title:
@@ -234,6 +234,7 @@ class Location(MudObject):
     """
     def __init__(self, name, description=None):
         super(Location, self).__init__(name, description=description)
+        self.name = name      # make sure we preserve the case; base object stores it lowercase
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
