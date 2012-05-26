@@ -4,7 +4,7 @@ recursive-include tests *
 recursive-include ideas *
 recursive-include stories *
 prune sandbox
-prune stories/Zed_is_me
+prune stories/zed_is_me
 exclude stories/play_zed_is_me*
 global-exclude */.svn/*
 global-exclude */.idea/*
