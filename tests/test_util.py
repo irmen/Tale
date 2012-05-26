@@ -6,14 +6,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import unittest
-from tale import util, globals
+from tale import util, globalcontext
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
 from tale.resource import ResourceLoader
 from supportstuff import DummyDriver, Wiretap
 
-globals.mud_context.driver = DummyDriver()
+globalcontext.mud_context.driver = DummyDriver()
 
 
 class TestUtil(unittest.TestCase):

@@ -5,6 +5,13 @@ Demo story.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
+from tale import color
+
+try:
+    import colorama
+except ImportError:
+    print("\n(Note: Tale can use Colorama to add some effects to the console output.")
+    print("You don't have it installed, so Tale will now use plain text output.)\n")
 
 
 class Story(object):
@@ -37,7 +44,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("Welcome to %s." % self.config["name"], end=True)
+        player.tell(color.bright("Welcome to %s." % self.config["name"]), end=True)
         player.tell("\n")
         player.tell(self.resources.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -45,7 +52,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("Welcome back to %s." % self.config["name"], end=True)
+        player.tell(color.bright("Welcome back to %s." % self.config["name"]), end=True)
         player.tell("\n")
         player.tell(self.resources.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -58,4 +65,4 @@ class Story(object):
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("Congratulations! You've finished the game!")
+        player.tell(color.bright("Congratulations! You've finished the game!"))

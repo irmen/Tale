@@ -7,9 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import unittest
 import datetime
-from tale.globals import mud_context
+from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
-
 mud_context.driver = DummyDriver()
 
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
@@ -17,6 +16,7 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResults
+
 
 class TestLocations(unittest.TestCase):
     def setUp(self):

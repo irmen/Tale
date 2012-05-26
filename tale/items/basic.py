@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from ..base import Item, Container
 from ..errors import ActionRefused
-from ..globals import mud_context
+from ..globalcontext import mud_context
 from .. import lang
 
 

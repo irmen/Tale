@@ -5,15 +5,12 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import random
-import datetime
-from tale.base import Location, Exit, Door, Item, Container, heartbeat
-from tale.npc import NPC, Monster
+from tale.base import Location, Exit, Door, Item, Container
+from tale.npc import NPC
 from tale.errors import ActionRefused, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
-from tale.util import message_nearby_locations, input, clone
-from tale import globals
-from tale import lang
+from tale.util import clone
+from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
 square = Location("Essglen Town square",
@@ -71,59 +68,11 @@ class WizardTowerEntry(Exit):
 lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
 
 
-class TownCrier(NPC):
-    def init(self):
-        # note: this npc uses the deferred feature to yell stuff at certain moments/
-        # the blubbering idiot NPC uses a heartbeat mechanism (less efficient)
-        due = globals.mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=2))
-        globals.mud_context.driver.defer(due, self, self.do_cry)
-
-    def do_cry(self, driver):
-        self.tell_others("{Title} yells: welcome everyone!")
-        message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        due = driver.game_clock.plus_realtime(datetime.timedelta(seconds=random.randint(20, 40)))
-        globals.mud_context.driver.defer(due, self, self.do_cry)
-
-    def notify_action(self, parsed, actor):
-        greet = False
-        if parsed.verb in ("hi", "hello"):
-            greet = True
-        elif parsed.verb == "say":
-            if "hello" in parsed.args or "hi" in parsed.args:
-                greet = True
-        elif parsed.verb == "greet" and self in parsed.who_info:
-            greet = True
-        if greet:
-            self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
-
-
 towncrier = TownCrier("laish", "f", "Laish the town crier",
     """
     The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.
     """)
 towncrier.aliases = {"crier", "town crier"}
-
-
-@heartbeat
-class VillageIdiot(NPC):
-    def init(self):
-        self.beats_before_drool = 4
-
-    def heartbeat(self, ctx):
-        # note: this village idiot NPC uses a heartbeat mechanism to drool at certain moments.
-        # This is less efficient than using a deferred (as the town crier NPC does) because
-        # the driver has to call all heartbeats every tick even though they do nothing yet.
-        self.beats_before_drool -= 1
-        if self.beats_before_drool <= 0:
-            self.beats_before_drool = random.randint(10, 20)
-            target = random.choice(list(self.location.livings))
-            if target is self:
-                self.location.tell("%s drools on %sself." % (lang.capital(self.title), self.objective))
-            else:
-                title = lang.capital(self.title)
-                self.location.tell("%s drools on %s." % (title, target.title),
-                    specific_targets=[target], specific_target_msg="%s drools on you." % title)
-
 
 idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     """
@@ -132,7 +81,7 @@ idiot = VillageIdiot("idiot", "m", "blubbering idiot",
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
     """)
 
-rat = Monster("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
+rat = WalkingRat("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
 
 ant = NPC("ant", "n", race="insect")
 
@@ -140,12 +89,18 @@ clock = clone(gameclock)
 
 square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
-alley = Location("Alley of doors", "An alley filled with doors.")
+
+class AlleyOfDoors(Location):
+    def notify_player_arrived(self, player, previous_location):
+        if previous_location is self:
+            player.tell("Weird. That door seemed to go back to the same place you came from.")
+
+alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
-door1 = Door(alley, "Door one.", long_description=descr, direction="door one", locked=False, opened=True)
-door2 = Door(alley, "Door two,", long_description=descr, direction="door two", locked=True, opened=True)
-door3 = Door(alley, "Door three.", long_description=descr, direction="door three", locked=False, opened=False)
-door4 = Door(alley, "Door four.", long_description=descr, direction="door four", locked=True, opened=False)
+door1 = Door(alley, "There's a door marked 'door one'.", long_description=descr, direction="door one", locked=False, opened=True)
+door2 = Door(alley, "There's a door marked 'door two'.", long_description=descr, direction="door two", locked=True, opened=True)
+door3 = Door(alley, "There's a door marked 'door three'.", long_description=descr, direction="door three", locked=False, opened=False)
+door4 = Door(alley, "There's a door marked 'door four'.", long_description=descr, direction="door four", locked=True, opened=False)
 
 alley.add_exits([door1, door2, door3, door4])
 alley.exits["first door"] = alley.exits["door one"]
@@ -191,7 +146,8 @@ class Computer(Item):
     def description(self):
         return "It seems to be connected to the four doors. "  \
                 + self.screen_text()  \
-                + " There's also a small keyboard to type commands."
+                + " There's also a small keyboard to type commands. " \
+                + " On the side of the screen there's a large sticker with 'say hello' written on it."
 
     def screen_text(self):
         txt = ["The screen of the computer reads:  \""]

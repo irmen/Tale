@@ -1,5 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
+Add the confirmation questions that are lacking from certain commands such as drop all.
+  (use simple imput(), for IF this works fine. For MUD it needs to be rewritten though.)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver only ofcourse)
 
@@ -24,42 +26,36 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-Add a 'look_text' (see circlemud data 'longdesc') kind of text to livings and items that will be displayed
+Add a 'look_text' (see circlemud data 'longdesc') to livings and items that will be displayed
 in the look command. If objects don't have it, they're displayed as usual ("XYZ is here").
+
+Key mechanism to unlock doors but not directly coupled to the exact object, rather a "keycode" property on *some* object
+so you have some flexibility when creating objects to unlock doors in a totally different area/source file.
+
+
+State transitions machine to support multi-phase actions (such as a short dialog with an npc)?
+(note: less suited for MUDs because people might interfere)
 
 Console output: dynamically highlight names/aliases/exits/items?
 
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-arrivals/departures (and spawned items) should be passed to notify_appear/notify_disappear functions.
 
-parse bug: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
+Load game from a zipfile. Resource loader should be able to load stuff from the zipfile too!
 
-Load game from zipfile.
-Signed game files (to avoid basic tampering)
-Obfuscated/encrypted resource files (to avoid easy spoilers by simply reading the game files)
+Obfuscated resource files (to avoid easy spoilers by simply reading the game files)?
 
+Parser (bug): say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
-
-Parser: allow simple question/answer dialog. 'no/yes' verbs? Or use continuations?
+Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?  Or use state machine (meh-overkill for a simple question state)?
 There's also some work to be done to add a confirmation question to certain verbs, such as 'drop all'.
+ (can do a simple input()-based question right now but this won't work in MUD mode).
 
 Invisible objects (only visible to a wizard.) Perhaps easiest by setting title and description to None?
 (name can't be None because the object needs a way to identify it).
 
-Wiretaps: as soon as invisible objects and room message notifications are implemented, replace the
-    wiretap attribute on Location by a real wiretap object that's placed in the room?
-    This could then replay the messages it receives to the owner.
-    It needs to auto-destruct if the owner is gone.
-    Wiretaps on livings are a bit harder to replace by a normal object because they need
-    to intercept the stuff that's told to the living, and there's no regular game mechanic to do that,
-    unless Living.tell() is going to broadcast to all items in its inventory... (also nested in bags!)
-    Maybe implement it all as a special Effect object that is stored in Object.effects?
-    Or just leave it be, the wiretap logic isn't that complex to keep around as separate attributes.
-
 allow_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
-Language system: speak/understand different languages?
 should Exit inherit from MudObject? (it contains a fair amount of similar methods now)
 use lang.a more?
 less use of isinstance?
@@ -77,7 +73,6 @@ DAMAGE TYPES
 blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
 disease, trauma, psionic, suffocation, deathray, emotional, sonic,
 E.M.P., karma, drama, pressure, underpressure, inertia
-
 
 Light/Dark
 ----------

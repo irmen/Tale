@@ -19,9 +19,11 @@ def register_all(cmd_processor):
 def do_demo(player, parsed, **ctx):
     player.tell("DEMO WIZARD COMMAND")
 
+
 @cmd
 def do_demo2(player, parsed, **ctx):
     player.tell("DEMO COMMAND")
+
 
 @cmd
 def do_examine(player, parsed, **ctx):

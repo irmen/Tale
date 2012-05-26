@@ -3,7 +3,6 @@ The house, where the player starts the game
 """
 
 from tale.base import Location, Exit, Door
-from tale import globals
 
 
 livingroom = Location("Living room", "The living room in your home in the outskirts of the city.")

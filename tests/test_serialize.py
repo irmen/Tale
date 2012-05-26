@@ -6,10 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import pickle
-from tale import globals, races, base, npc, soul, player, driver
+from tale import globalcontext, races, base, npc, soul, player, driver
 from supportstuff import DummyDriver
 
-globals.mud_context.driver = DummyDriver()
+globalcontext.mud_context.driver = DummyDriver()
 
 
 def serializecycle(obj):

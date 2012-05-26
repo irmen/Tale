@@ -6,8 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
-import datetime
-import tale.globals
+import tale.globalcontext
 import tale.base
 import tale.soul
 import tale.player
@@ -15,7 +14,7 @@ import tale.npc
 import tale.errors
 from supportstuff import DummyDriver
 
-tale.globals.mud_context.driver = DummyDriver()
+tale.globalcontext.mud_context.driver = DummyDriver()
 
 
 class TestSoul(unittest.TestCase):

@@ -6,10 +6,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
-import tale.globals
+import tale.globalcontext
 from supportstuff import DummyDriver, MsgTraceNPC
-
-tale.globals.mud_context.driver = DummyDriver()
+tale.globalcontext.mud_context.driver = DummyDriver()
 
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
@@ -399,7 +398,7 @@ class TestPlayer(unittest.TestCase):
         room2 = LocationNotify("room2")
         room1.insert(player, player)
         player.move(room2)
-        tale.globals.mud_context.driver.execute_after_player_actions()
+        tale.globalcontext.mud_context.driver.execute_after_player_actions()
         self.assertEqual(room2, player.location)
         self.assertEqual(player, room1.player_left)
         self.assertEqual(room2, room1.player_left_target)

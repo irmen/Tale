@@ -17,7 +17,7 @@ import heapq
 import inspect
 import argparse
 import pickle
-from . import globals
+from . import globalcontext
 from . import errors
 from . import util
 from . import soul
@@ -164,9 +164,9 @@ class Driver(object):
         self.commands = Commands()
         self.output_line_delay = 60   # milliseconds
         self.server_loop_durations = collections.deque(maxlen=10)
-        globals.mud_context.driver = self
-        globals.mud_context.state = self.state
-        globals.mud_context.config = None
+        globalcontext.mud_context.driver = self
+        globalcontext.mud_context.state = self.state
+        globalcontext.mud_context.config = None
         cmds.register_all(self.commands)
 
     def bind_exits(self):
@@ -193,7 +193,7 @@ class Driver(object):
         story = __import__("story", level=0)
         self.story = story.Story()
         self.config = StoryConfig(self.story.config)
-        globals.mud_context.config = self.config
+        globalcontext.mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
             story_cmds.register_all(self.commands)
@@ -315,7 +315,7 @@ class Driver(object):
     def main_loop(self):
         last_loop_time = last_server_tick = time.time()
         while True:
-            globals.mud_context.player = self.player
+            globalcontext.mud_context.player = self.player
             self.write_output()
             if self.player.story_complete and self.mode == "if":
                 # congratulations ;-)

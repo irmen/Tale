@@ -6,6 +6,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 # @todo: this game is not yet finished and is excluded in the MANIFEST.in for now
 
+from tale import color
+
 
 class Story(object):
     config = dict(
@@ -43,7 +45,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("Welcome to '%s'." % self.config["name"], end=True)
+        player.tell(color.bright("Welcome to '%s'." % self.config["name"]), end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
@@ -52,7 +54,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("Welcome back to '%s'." % self.config["name"], end=True)
+        player.tell(color.bright("Welcome back to '%s'." % self.config["name"]), end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")

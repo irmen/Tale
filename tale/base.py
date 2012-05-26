@@ -12,7 +12,7 @@ from . import lang
 from . import color
 from .errors import ActionRefused
 from .races import races
-from .globals import mud_context
+from .globalcontext import mud_context
 from .util import basestring_type
 
 """
