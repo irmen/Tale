@@ -1,7 +1,5 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Add the confirmation questions that are lacking from certain commands such as drop all.
-  (use simple imput(), for IF this works fine. For MUD it needs to be rewritten though.)
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver only ofcourse)
 
