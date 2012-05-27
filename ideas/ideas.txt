@@ -1,7 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
-Pictures for locations (viewable in gui driver only ofcourse)
+Pictures for locations (viewable in gui driver only)
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
@@ -29,7 +29,7 @@ Better naming of exits/doors; they need to know their own name (direction). It c
 State transitions machine to support multi-phase actions (such as a short dialog with an npc)?
 (note: less suited for MUDs because people might interfere)
 
-Console output: dynamically highlight names/aliases/exits/items?
+Console output: dynamically highlight names/aliases/exits/items? (Problem: textwrap also counts the ansi escape sequences)
 
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
@@ -41,9 +41,7 @@ Obfuscated resource files (to avoid easy spoilers by simply reading the game fil
 
 Parser (bug): say "I don't get it" -> it thinks the message stops at the single quote in "don't".
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
-Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?  Or use state machine (meh-overkill for a simple question state)?
-There's also some work to be done to add a confirmation question to certain verbs, such as 'drop all'.
- (can do a simple input()-based question right now but this won't work in MUD mode).
+Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?  Or use state machine (overkill for a simple question state)?
 
 Invisible objects (only visible to a wizard.) Perhaps easiest by setting title and description to None?
 (name can't be None because the object needs a way to identify it).
@@ -62,8 +60,8 @@ Change living location logic so that livings can sit inside a container item too
 Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
 + take <living> actually working! (take ant, trap rabbit in cage, ...)
 
-DAMAGE TYPES
-------------
+DAMAGE TYPES (MUD)
+------------------
 blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
 disease, trauma, psionic, suffocation, deathray, emotional, sonic,
 E.M.P., karma, drama, pressure, underpressure, inertia

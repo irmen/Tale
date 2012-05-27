@@ -64,6 +64,7 @@ class TownCrier(NPC):
 
 class WalkingRat(Monster):
     def init(self):
+        super(WalkingRat, self).init()
         due = globalcontext.mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=2))
         globalcontext.mud_context.driver.defer(due, self, self.do_idle_action)
         due = globalcontext.mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=4))
