@@ -7,6 +7,7 @@ Pictures for locations (viewable in gui driver only)
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 Check for and disable IF-specific stuff.
+Let players define aliases for certain commands (including args).
 Write stuff to a logfile for the server admins.
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
 Bulletin boards.
@@ -24,16 +25,18 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+Make the money type configurable per story (it's now hardcoded in util)
 Better naming of exits/doors; they need to know their own name (direction). It can now be None...
+Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
+there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?
 
-State transitions machine to support multi-phase actions (such as a short dialog with an npc)?
+Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
 (note: less suited for MUDs because people might interfere)
 
 Console output: dynamically highlight names/aliases/exits/items? (Problem: textwrap also counts the ansi escape sequences)
 
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
-
 
 Load game from a zipfile. Resource loader should be able to load stuff from the zipfile too!
 
@@ -51,6 +54,7 @@ should Exit inherit from MudObject? (it contains a fair amount of similar method
 use lang.a more?
 less use of isinstance?
 prototypes to extend items/npc instead of inheritance? or use a DSL altogether to define the basic world stuff?
+ASCII-art parser to easily define mazes/dungeons
 
 test when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
 test with multiple items of same name in room, in inventory, in bag
@@ -59,6 +63,7 @@ Bug: when item X is in inventory, can't take another X from the room ("there's n
 Change living location logic so that livings can sit inside a container item too.
 Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
 + take <living> actually working! (take ant, trap rabbit in cage, ...)
+
 
 DAMAGE TYPES (MUD)
 ------------------

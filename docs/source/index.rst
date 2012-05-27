@@ -81,6 +81,54 @@ You may want to go to the Town Square and say hello to the people standing there
 
     >>
 
+Features
+--------
+
+A random list of the features of the current codebase:
+
+- Runs on most Python implementations, but requires 2.7 or 3.2+
+- game engine and framework code is separated from the actual game code;
+  it can run different games from different directories
+- single-player I.F. mode and multi-player MUD mode (but no multiplayer server yet,
+  it's just a difference in active features for now)
+- wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
+  while testing/debugging the game.
+- the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'
+- the soul has 250+ 'emotes' such as bounce and shrug.
+- it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
+  it out in full (gives a list of suggestions if multiple words match).
+- it knows about bodyparts that you can target certain actions (such as kick or pat) at.
+- it can deal with object names that consist of multiple words (i.e. contain spaces). For instance, it understands
+  when you type 'get the blue pill' when there are multiple pills on the table.
+- you can alter the meaning of a sentence by using words like fail, attempt, don't, suddenly, pretend
+- you can put stuff into a bag and carry the bag, to avoid cluttering your inventory.
+- yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
+  someone is yelling something, and if possible, where the sound is coming from.
+- text is nicely formatted when outputted (wrapped to a configurable width).
+- uses colorama if available to spice up the console output a bit.
+- game can be saved (and reloaded) - pickle is used to serialize the full game world state
+- there's a list of 70+ creature races, adapted from the Dark Souls mudlib
+- supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
+- game clock is independent of real-time wall clock, configurable speed and start time
+- server 'tick' synced with command entry, or independent. This means things can happen in the background.
+- it's trivial to give objects a 'heartbeat' (=they will get a call every server tick to do stuff)
+- you can also quite easily schedule calls to be executed at a defined later moment in time
+- easy definition of commands in separate functions
+- command function code is quite compact due to convenient parameters and available methods on the game objects
+- there's a set of configurable parameters on a per-story basis
+- stories can define their own introduction text and completion texts
+- stories can define their own commands or override existing commands
+- version checks are done on the story files and the save game files to avoid loading data in different versions of the code
+- a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
+- action and event notification mechanism: objects are notified when things happen (such as the player entering a room,
+  or someone saying a line of text) and can react on that.
+- for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
+  or derive new classes from them with changed behavior. Currently this means that writing a game is
+  very much a programming job. This may or may not improve in the future (to allow for more natural ways
+  of writing a game story, in a DSL or whatever).
+- many unit tests to check the code
+
+
 
 MUD mode versus Interactive Fiction mode
 ----------------------------------------
