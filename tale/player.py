@@ -27,13 +27,14 @@ class Player(base.Living):
     Player controlled entity.
     Has a Soul for social interaction.
     """
-    def __init__(self, name, gender, race="human", description=None):
+    def __init__(self, name, gender, race="human", description=None, short_description=None):
         title = lang.capital(name)
-        super(Player, self).__init__(name, gender, title, description, race)
+        super(Player, self).__init__(name, gender, race, title, description, short_description)
         self.soul = soul.Soul()
         self.verbs = []   # things can add custom verbs to this list when they're in the player's inventory
         self.score = 0
         self.turns = 0
+        self.state = {}
         self.previous_commandline = None
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT

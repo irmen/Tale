@@ -26,12 +26,7 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-Add a 'look_text' (see circlemud data 'longdesc') to livings and items that will be displayed
-in the look command. If objects don't have it, they're displayed as usual ("XYZ is here").
-
-Key mechanism to unlock doors but not directly coupled to the exact object, rather a "keycode" property on *some* object
-so you have some flexibility when creating objects to unlock doors in a totally different area/source file.
-
+Better naming of exits/doors; they need to know their own name (direction). It can now be None...
 
 State transitions machine to support multi-phase actions (such as a short dialog with an npc)?
 (note: less suited for MUDs because people might interfere)
@@ -63,6 +58,7 @@ prototypes to extend items/npc instead of inheritance? or use a DSL altogether t
 
 test when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
 test with multiple items of same name in room, in inventory, in bag
+Bug: when item X is in inventory, can't take another X from the room ("there's no X here")
 
 Change living location logic so that livings can sit inside a container item too.
 Then:  go-in (wizard): step into something, go-out (wizard): step out of current location

@@ -90,8 +90,8 @@ class TestSoul(unittest.TestCase):
 
     def testWho(self):
         player = tale.player.Player("fritz", "m")
-        julie = tale.base.Living("julie", "f")
-        harry = tale.base.Living("harry", "m")
+        julie = tale.base.Living("julie", "f", race="human")
+        harry = tale.base.Living("harry", "m", race="human")
         self.assertEqual("yourself", tale.soul.who_replacement(player, player, player))  # you kick yourself
         self.assertEqual("himself",  tale.soul.who_replacement(player, player, julie))   # fritz kicks himself
         self.assertEqual("harry",    tale.soul.who_replacement(player, harry, player))   # you kick harry
@@ -105,8 +105,8 @@ class TestSoul(unittest.TestCase):
 
     def testPoss(self):
         player = tale.player.Player("fritz", "m")
-        julie = tale.base.Living("julie", "f")
-        harry = tale.base.Living("harry", "m")
+        julie = tale.base.Living("julie", "f", race="human")
+        harry = tale.base.Living("harry", "m", race="human")
         self.assertEqual("your own", tale.soul.poss_replacement(player, player, player))  # your own foot
         self.assertEqual("his own",  tale.soul.poss_replacement(player, player, julie))   # his own foot
         self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, player))   # harrys foot

@@ -55,13 +55,15 @@ class MudObject(object):
     an optional short title (shown when listed in a room),
     and an optional longer description (shown when explicitly 'examined').
     The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
+    Short_description is optional, and is used in the text when a player 'looks' around.
+    If it's not set, a generic 'look' message will be shown (something like "XYZ is here").
     """
     subjective = "it"
     possessive = "its"
     objective = "it"
     gender = "n"
 
-    def __init__(self, name, title=None, description=None):
+    def __init__(self, name, title=None, description=None, short_description=None):
         self.name = name.lower()
         self.aliases = []
         self.verbs = []   # any custom verbs that need to be registered in the location or in the player
@@ -78,6 +80,11 @@ class MudObject(object):
         except AttributeError:
             # this can occur if someone made description into a property
             self._description = descr
+        try:
+            self.short_description = short_description
+        except AttributeError:
+            # this can occur if someone made short_description into a property
+            self._short_description = short_description
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -332,12 +339,18 @@ class Location(MudObject):
                     exit_paragraph.append(exit.short_description)
             paragraphs.append(" ".join(exit_paragraph))
         items_and_livings = []
-        if self.items:
-            titles = sorted(item.title for item in self.items)
-            titles = [lang.a(title) for title in titles]
+        items_with_short_descr = [item for item in self.items if item.short_description]
+        items_without_short_descr = [item for item in self.items if not item.short_description]
+        if items_with_short_descr:
+            for item in items_with_short_descr:
+                items_and_livings.append(item.short_description)
+        if items_without_short_descr:
+            titles = sorted([lang.a(item.title) for item in items_without_short_descr])
             items_and_livings.append("You see " + lang.join(titles) + ".")
-        if self.livings:
-            titles = sorted(living.title for living in self.livings if living != exclude_living)
+        livings_with_short_descr = [living for living in self.livings if living != exclude_living and living.short_description]
+        livings_without_short_descr = [living for living in self.livings if living != exclude_living and not living.short_description]
+        if livings_without_short_descr:
+            titles = sorted(living.title for living in livings_without_short_descr)
             if titles:
                 titles_str = lang.join(titles)
                 if len(titles) > 1:
@@ -345,6 +358,9 @@ class Location(MudObject):
                 else:
                     titles_str += " is here."
                 items_and_livings.append(lang.capital(titles_str))
+        if livings_with_short_descr:
+            for living in livings_with_short_descr:
+                items_and_livings.append(living.short_description)
         if items_and_livings:
             paragraphs.append(" ".join(items_and_livings))
         return paragraphs
@@ -445,7 +461,7 @@ class Exit(object):
         assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.bound = isinstance(target_location, Location)
-        self.direction = self.name = direction
+        self.direction = self.name = direction      # direction and name can be None! Don't depend on them!
         try:
             self.short_description = short_description
         except AttributeError:
@@ -524,7 +540,7 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
-    def __init__(self, name, gender, title=None, description=None, race=None):
+    def __init__(self, name, gender, race, title=None, description=None, short_description=None):
         # override the language help attributes inherited from the base object:
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
@@ -535,14 +551,18 @@ class Living(MudObject):
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.money_display
-        self.race = None
         self.stats = {}
         self.default_verb = "examine"
-        if race:
-            self.set_race(race)
+        self.race = race
+        # Make a copy of the race stats, because they can change dynamically.
+        # There's no need to copy the whole race data dict because it's available
+        # from tale.races, look it up by the race name.
+        self.stats = {}
+        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
+            self.stats[stat_name] = stat_avg
         self.__inventory = set()
         self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
-        super(Living, self).__init__(name, title, description)
+        super(Living, self).__init__(name, title, description, short_description)
 
     def __getstate__(self):
         # can't serialize the wiretaps because it's a weakset. Too bad, just skip them.
@@ -596,16 +616,6 @@ class Living(MudObject):
         self.__inventory.clear()
         self.wiretaps.clear()
         # @todo: remove attack status, etc.
-
-    def set_race(self, race):
-        """set the race for this Living and copy the initial set of stats from that race"""
-        self.race = race
-        # Make a copy of the race stats, because they can change dynamically.
-        # There's no need to copy the whole race data dict because it's available
-        # from tale.races, look it up by the race name.
-        self.stats = {}
-        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
-            self.stats[stat_name] = stat_avg
 
     def tell(self, *messages):
         """
@@ -825,7 +835,10 @@ class Door(Exit):
         super(Door, self).__init__(target_location, short_description, long_description, direction)
         self.locked = locked
         self.opened = opened
+        if locked and opened:
+            raise ValueError("door cannot be both locked and opened")
         self.__long_description_prefix = long_description or short_description
+        self.door_code = None   # you can set this to any code that a key must match to unlock the door
 
     @property
     def long_description(self):
@@ -855,7 +868,7 @@ class Door(Exit):
         if self.opened:
             raise ActionRefused("It's already open.")
         elif self.locked:
-            raise ActionRefused("You can't open it; it's locked.")
+            raise ActionRefused("You try to open it, but it's locked.")
         else:
             self.opened = True
             actor.tell("You opened it.")
@@ -878,18 +891,62 @@ class Door(Exit):
             actor.tell_others("{Title} closed an exit.")
 
     def lock(self, item, actor):
-        """Lock the door with something, default is to not allow locking (override in subclass)"""
+        """Lock the door with the proper key."""
         if self.locked:
             raise ActionRefused("It's already locked.")
+        if item:
+            if self.check_key(item):
+                key = item
+            else:
+                raise ActionRefused("You can't use that to lock it.")
         else:
-            raise ActionRefused("You can't lock it.")
+            key = self.search_key(actor)
+            if key:
+                actor.tell(color.dim("(You use your %s; %s matches the lock.)" % (key.title, key.subjective)))
+            else:
+                raise ActionRefused("You don't seem to have the means to lock it.")
+        self.locked = False
+        actor.tell("Your %s fits, it is now locked." % key.title)
+        if self.direction:
+            what = "the exit %s" % self.direction
+        else:
+            what = "an exit"
+        actor.tell_others("{Title} locked %s with %s." % (what, lang.a(key.title)))
 
     def unlock(self, item, actor):
-        """Unlock the door with something, default is to not allow unlocking (override in subclass)"""
-        if self.locked:
-            raise ActionRefused("You can't unlock it.")
-        else:
+        """Unlock the door with the proper key."""
+        if not self.locked:
             raise ActionRefused("It's not locked.")
+        if item:
+            if self.check_key(item):
+                key = item
+            else:
+                raise ActionRefused("You can't use that to unlock it.")
+        else:
+            key = self.search_key(actor)
+            if key:
+                actor.tell(color.dim("(You use your %s; %s matches the lock.)" % (key.title, key.subjective)))
+            else:
+                raise ActionRefused("You don't seem to have the means to unlock it.")
+        self.locked = False
+        actor.tell("Your %s fits, it is now unlocked." % key.title)
+        if self.direction:
+            what = "the exit %s" % self.direction
+        else:
+            what = "an exit"
+        actor.tell_others("{Title} unlocked %s with %s." % (what, lang.a(key.title)))
+
+    def check_key(self, item):
+        """Check if the item is a proper key for this door (based on door_code)"""
+        door_code = getattr(item, "door_code", None)
+        return door_code and door_code == self.door_code
+
+    def search_key(self, actor):
+        """Does the actor have a proper key? Return the item if so, otherwise return None."""
+        for item in actor.inventory:
+            if self.check_key(item):
+                return item
+        return None
 
 
 def heartbeat(klass):

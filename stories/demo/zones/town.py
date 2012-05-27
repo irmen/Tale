@@ -30,6 +30,7 @@ square.exits["lane"] = square.exits["north"]
 
 paper = clone(newspaper)
 paper.aliases = {"paper"}
+paper.short_description = "Last day's newspaper lies on the floor."
 
 
 class CursedGem(Item):
@@ -68,14 +69,10 @@ class WizardTowerEntry(Exit):
 lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
 
 
-towncrier = TownCrier("laish", "f", "Laish the town crier",
-    """
-    The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.
-    """)
+towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.")
 towncrier.aliases = {"crier", "town crier"}
 
-idiot = VillageIdiot("idiot", "m", "blubbering idiot",
-    """
+idiot = VillageIdiot("idiot", "m", title="blubbering idiot", description="""
     This person's engine is running but there is nobody behind the wheel.
     He is a few beers short of a six-pack. Three ice bricks shy of an igloo.
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
@@ -83,9 +80,10 @@ idiot = VillageIdiot("idiot", "m", "blubbering idiot",
 
 rat = WalkingRat("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
 
-ant = NPC("ant", "n", race="insect")
+ant = NPC("ant", "n", race="insect", short_description="A single ant seems to have lost its way.")
 
 clock = clone(gameclock)
+clock.short_description = "On the pavement lies a clock, it seems to be working still."
 
 square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])
 
@@ -98,7 +96,7 @@ class AlleyOfDoors(Location):
 alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
 door1 = Door(alley, "There's a door marked 'door one'.", long_description=descr, direction="door one", locked=False, opened=True)
-door2 = Door(alley, "There's a door marked 'door two'.", long_description=descr, direction="door two", locked=True, opened=True)
+door2 = Door(alley, "There's a door marked 'door two'.", long_description=descr, direction="door two", locked=True, opened=False)
 door3 = Door(alley, "There's a door marked 'door three'.", long_description=descr, direction="door three", locked=False, opened=False)
 door4 = Door(alley, "There's a door marked 'door four'.", long_description=descr, direction="door four", locked=True, opened=False)
 
@@ -135,7 +133,10 @@ class GameEnd(Location):
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")
-lane.exits["east"] = Exit(game_end, "To the east, it looks like it is game over.")
+end_door = Door(game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
+end_door.door_code = 999
+lane.exits["east"] = end_door
+lane.exits["door"] = end_door
 
 
 class Computer(Item):
@@ -215,7 +216,11 @@ class Computer(Item):
         return False
 
 
-computer = Computer("computer")
+computer = Computer("computer", short_description="A computer is connected to the doors via a couple of wires.")
 computer.verbs = ["hack", "type", "enter"]
 computer.aliases = {"keyboard", "screen"}
 alley.insert(computer, None)
+
+doorkey = Item("key", description="A key with a little label marked 'Game Over'.")
+doorkey.door_code = end_door.door_code
+alley.insert(doorkey, None)

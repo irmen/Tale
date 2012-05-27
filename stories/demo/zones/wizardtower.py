@@ -25,7 +25,7 @@ class Drone(Monster):
         if random.random() < 0.1:
             self.location.tell("The drone hums softly.")
 
-drone = Drone("drone", "n", "mindless drone", race="bot", description="A stupid metallic drone. It just hovers here with no apparent reason.")
+drone = Drone("drone", "n", race="bot", title="mindless drone", description="A stupid metallic drone. It just hovers here with no apparent reason.")
 hall.init_inventory([table, key, drone])
 
 attic = Location("Tower attic",

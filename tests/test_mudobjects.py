@@ -28,13 +28,11 @@ class TestLocations(unittest.TestCase):
         self.hall.exits["door"] = Exit(self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
         self.hall.exits["east"] = self.hall.exits["door"]
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
-        self.key = Item("key", "rusty key", "an old rusty key without a label")
+        self.key = Item("key", "rusty key", "an old rusty key without a label", short_description="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
         self.rat = NPC("rat", "n", race="rodent")
-        self.julie = NPC("julie", "f", "attractive Julie",
-                     """
-                     She's quite the looker.
-                     """)
+        self.fly = NPC("fly", "n", race="insect", short_description="A fly buzzes around your head.")
+        self.julie = NPC("julie", "f", title="attractive Julie", description="She's quite the looker.")
         self.julie.aliases = {"chick"}
         self.player = Player("player", "m")
         self.pencil = Item("pencil", title="fountain pen")
@@ -44,7 +42,7 @@ class TestLocations(unittest.TestCase):
         self.bag.insert(self.notebook_in_bag, self.player)
         self.player.insert(self.pencil, self.player)
         self.player.insert(self.bag, self.player)
-        self.hall.init_inventory([self.table, self.key, self.magazine, self.rat, self.julie, self.player])
+        self.hall.init_inventory([self.table, self.key, self.magazine, self.rat, self.julie, self.player, self.fly])
 
     def test_names(self):
         loc = Location("The Attic", "A dusty attic.")
@@ -61,11 +59,11 @@ class TestLocations(unittest.TestCase):
     def test_look(self):
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
-                    "You see an oak table, a rusty key, and a university magazine. Player, attractive Julie, and rat are here."]
+                    "Someone forgot a key. You see a university magazine and an oak table. Player, attractive Julie, and rat are here. A fly buzzes around your head."]
         self.assertEqual(expected, self.hall.look())
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
-                    "You see an oak table, a rusty key, and a university magazine. Attractive Julie and rat are here."]
+                    "Someone forgot a key. You see a university magazine and an oak table. Attractive Julie and rat are here. A fly buzzes around your head."]
         self.assertEqual(expected, self.hall.look(exclude_living=self.player))
         expected = ["[Attic]", "A dark attic."]
         self.assertEqual(expected, self.attic.look())
@@ -73,9 +71,9 @@ class TestLocations(unittest.TestCase):
     def test_look_short(self):
         expected = ["[Attic]"]
         self.assertEqual(expected, self.attic.look(short=True))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: julie, player, rat"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, player, rat"]
         self.assertEqual(expected, self.hall.look(short=True))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: julie, rat"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, rat"]
         self.assertEqual(expected, self.hall.look(exclude_living=self.player, short=True))
 
     def test_search_living(self):
@@ -223,6 +221,13 @@ class TestLocations(unittest.TestCase):
 
 
 class TestDoorsExits(unittest.TestCase):
+    def test_state(self):
+        Door("xyz", "short desc", locked=False, opened=False)
+        Door("xyz", "short desc", locked=False, opened=True)
+        Door("xyz", "short desc", locked=True, opened=False)
+        with self.assertRaises(ValueError):
+            Door("xyz", "short desc", locked=True, opened=True)
+
     def test_actions(self):
         player = Player("julie", "f")
         hall = Location("hall")
@@ -236,27 +241,28 @@ class TestDoorsExits(unittest.TestCase):
         door = Door(hall, "open unlocked door", direction="north", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # fail, it's already open
-        self.assertTrue("already" in str(x.exception))
+        self.assertEqual("It's already open.", str(x.exception))
         door.close(None, player)
         self.assertFalse(door.opened, "must be closed")
         with self.assertRaises(ActionRefused) as x:
             door.lock(None, player)  # default door can't be locked
-        self.assertTrue("can't" in str(x.exception))
+        self.assertEqual("You don't seem to have the means to lock it.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
             door.unlock(None, player)  # fail, it's not locked
-        self.assertTrue("not" in str(x.exception))
+        self.assertEqual("It's not locked.", str(x.exception))
 
-        door = Door(hall, "open locked door", direction="north", locked=True, opened=True)
+        door = Door(hall, "open locked door", direction="north", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # fail, it's already open
-        self.assertTrue("already" in str(x.exception))
+        self.assertEqual("It's already open.", str(x.exception))
         door.close(None, player)
+        door.locked = True
         with self.assertRaises(ActionRefused) as x:
             door.lock(None, player)  # it's already locked
-        self.assertTrue("already" in str(x.exception))
+        self.assertEqual("It's already locked.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
             door.unlock(None, player)  # you can't unlock it
-        self.assertTrue("can't" in str(x.exception))
+        self.assertEqual("You don't seem to have the means to unlock it.", str(x.exception))
 
         door = Door(hall, "closed unlocked door", direction="north", locked=False, opened=False)
         door.open(None, player)
@@ -265,15 +271,15 @@ class TestDoorsExits(unittest.TestCase):
         self.assertFalse(door.opened)
         with self.assertRaises(ActionRefused) as x:
             door.close(None, player)  # it's already closed
-        self.assertTrue("already" in str(x.exception))
+        self.assertEqual("It's already closed.", str(x.exception))
 
         door = Door(hall, "closed locked door", direction="north", locked=True, opened=False)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # can't open it, it's locked
-        self.assertTrue("can't" in str(x.exception))
+        self.assertEqual("You try to open it, but it's locked.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
             door.close(None, player)  # it's already closed
-        self.assertTrue("already" in str(x.exception))
+        self.assertEqual("It's already closed.", str(x.exception))
 
         door = Door(hall, "Some door.", direction="north")
         self.assertEqual("Some door.", door.short_description)
@@ -283,6 +289,26 @@ class TestDoorsExits(unittest.TestCase):
         door = Door(hall, "Some door.", "This is a peculiar door leading north.", direction="north")
         self.assertEqual("Some door.", door.short_description)
         self.assertEqual("This is a peculiar door leading north. It is open and unlocked.", door.long_description)
+
+    def test_with_key(self):
+        player = Player("julie", "f")
+        key = Item("key", "door key")
+        key.door_code = 12345
+        hall = Location("hall")
+        door = Door(hall, "a locked door", direction="north", locked=True, opened=False)
+        with self.assertRaises(ActionRefused):
+            door.unlock(None, player)
+        with self.assertRaises(ActionRefused):
+            door.unlock(key, player)
+        door.door_code = 12345
+        door.unlock(key, player)
+        self.assertFalse(door.locked)
+        door.locked = True
+        with self.assertRaises(ActionRefused):
+            door.unlock(None, player)
+        key.move(player, player)
+        door.unlock(None, player)
+        self.assertFalse(door.locked)
 
     def test_exits(self):
         hall = Location("hall")
@@ -333,7 +359,7 @@ class TestDoorsExits(unittest.TestCase):
 
 class TestLiving(unittest.TestCase):
     def test_contains(self):
-        orc = Living("orc", "m")
+        orc = Living("orc", "m", race="orc")
         axe = Weapon("axe")
         orc.insert(axe, orc)
         self.assertTrue(axe in orc)
@@ -341,7 +367,7 @@ class TestLiving(unittest.TestCase):
         self.assertEqual(1, orc.inventory_size)
         self.assertEqual(1, len(orc.inventory))
     def test_allowance(self):
-        orc = Living("orc", "m")
+        orc = Living("orc", "m", race="half-orc")
         idiot = NPC("idiot", "m")
         player = Player("julie", "f")
         axe = Weapon("axe")
@@ -355,7 +381,7 @@ class TestLiving(unittest.TestCase):
     def test_move(self):
         hall = Location("hall")
         attic = Location("attic")
-        rat = Living("rat", "n")
+        rat = Living("rat", "n", race="rodent")
         hall.init_inventory([rat])
         wiretap_hall = Wiretap()
         wiretap_attic = Wiretap()
@@ -380,17 +406,17 @@ class TestLiving(unittest.TestCase):
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
     def test_lang(self):
-        living = Living("julie", "f")
+        living = Living("julie", "f", race="human")
         self.assertEqual("her", living.objective)
         self.assertEqual("her", living.possessive)
         self.assertEqual("she", living.subjective)
         self.assertEqual("f", living.gender)
-        living = Living("max", "m")
+        living = Living("max", "m", race="human")
         self.assertEqual("him", living.objective)
         self.assertEqual("his", living.possessive)
         self.assertEqual("he", living.subjective)
         self.assertEqual("m", living.gender)
-        living = Living("herp", "n")
+        living = Living("herp", "n", race="human")
         self.assertEqual("it", living.objective)
         self.assertEqual("its", living.possessive)
         self.assertEqual("it", living.subjective)
@@ -400,10 +426,10 @@ class TestLiving(unittest.TestCase):
 class TestNPC(unittest.TestCase):
     def test_init(self):
         rat = NPC("rat", "n", race="rodent")
-        julie = NPC("julie", "f", "attractive Julie",
-                    """
+        julie = NPC("julie", "f", title="attractive Julie",
+                    description="""
                     She's quite the looker.
-                    """)
+                    """, race="human")
         self.assertFalse(julie.aggressive)
         self.assertEqual("julie", julie.name)
         self.assertEqual("attractive Julie", julie.title)
@@ -505,7 +531,7 @@ class TestDestroy(unittest.TestCase):
         ctx = {}
         loc = Location("loc")
         i = Item("item")
-        liv = Living("rat", "n")
+        liv = Living("rat", "n", race="rodent")
         loc.exits = {"north": Exit("somewhere", "somewhere")}
         player = Player("julie", "f")
         player.privileges = {"wizard"}
@@ -662,7 +688,7 @@ class TestItem(unittest.TestCase):
             key.inventory_size
     def test_move(self):
         hall = Location("hall")
-        person = Living("person", "m")
+        person = Living("person", "m", race="human")
         monster = Monster("dragon", "f", race="dragon")
         key = Item("key")
         stone = Item("stone")
@@ -700,7 +726,7 @@ class TestItem(unittest.TestCase):
         thingy.location = hall
         self.assertEqual(hall, thingy.contained_in)
         self.assertEqual(hall, thingy.location)
-        person = Living("person", "m")
+        person = Living("person", "m", race="human")
         key = Item("key")
         backpack = Container("backpack")
         person.insert(backpack, person)
