@@ -26,6 +26,11 @@ class NPC(base.Living):
         else:
             raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
+    def allow_give_money(self, actor, amount):
+        """Do we accept money? Raise ActionRefused if not."""
+        if self.race != "human":
+            raise ActionRefused("You can't do that.")
+
 
 class Monster(NPC):
     """

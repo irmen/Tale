@@ -127,11 +127,6 @@ class Commands(object):
         return result
 
     def adjust_available_commands(self, story_config, game_mode):
-        if not story_config.max_score:
-            # remove the 'score' command because scoring has been disabled
-            for cmds in self.commands_per_priv.values():
-                if "score" in cmds:
-                    del cmds["score"]
         if game_mode == "if":
             # disable commands flagged with 'disabled_for_IF'
             for cmds in self.commands_per_priv.values():
@@ -368,20 +363,6 @@ class Driver(object):
                     else:
                         pass   # in mud mode, the game can't be completed
                 except errors.SessionExit:
-                    choice = self.input("Are you sure you want to quit? ")
-                    self.player.tell("\n")
-                    if choice not in ("y", "yes"):
-                        self.player.tell("Good, thanks for staying.")
-                        self.start_player_input()
-                        continue
-                    while True:
-                        choice = self.input("Would you like to save your progress? ")
-                        self.player.tell("\n")
-                        if choice in ("y", "yes"):
-                            self.do_save(self.player)
-                            break
-                        elif choice in ("n", "no"):
-                            break
                     if self.mode == "if":
                         self.story.goodbye(self.player)
                     else:
@@ -431,9 +412,6 @@ class Driver(object):
             self.player.tell("\n")
             self.story.completion(self.player)
             self.player.tell("\n")
-            if self.config.max_score:
-                self.player.tell(color.bright("Your final score is %d out of a possible %d. (in %d turns)" %
-                                 (self.player.score, self.config.max_score, self.player.turns)), end=True)
             self.input("\nPress enter to continue. ")
             self.player.tell("\n")
 

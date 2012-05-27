@@ -36,7 +36,6 @@ equipment
     show the armor items you are wearing
 kills
     shows a list of your victories
-    (hmm, also show this in the existing score command?)
 pvp
     toggle pvp
 prompt

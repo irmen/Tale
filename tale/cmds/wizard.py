@@ -134,13 +134,13 @@ def do_clone(player, parsed, **ctx):
 @wizcmd("destroy")
 def do_destroy(player, parsed, **ctx):
     """Destroys an object or creature."""
-    print = player.tell
     if not parsed.who_order:
         raise ParseError("Destroy what or who?")
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
-    # @todo: ask for confirmation (async)
     for victim in parsed.who_info:
+        if not util.confirm("Are you sure you want to destroy %s? " % victim.title, ctx["driver"]):
+            continue
         if isinstance(victim, base.Item):
             if victim in player:
                 player.remove(victim, player)
@@ -154,7 +154,7 @@ def do_destroy(player, parsed, **ctx):
             victim.destroy(ctx)
         else:
             raise ActionRefused("Can't destroy " + lang.a(victim.__class__.__name__))
-        print("You destroyed %r." % victim)
+        player.tell("You destroyed %r." % victim)
         player.tell_others("{Title} makes some gestures and a tiny black hole appears.\n"
                              "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))
 
@@ -163,7 +163,6 @@ def do_destroy(player, parsed, **ctx):
 def do_clean(player, parsed, **ctx):
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
     print = player.tell
-    print(parsed)
     if parsed.args and parsed.args[0] == '.':
         # clean the current location
         print("Cleaning the stuff in your environment.")
@@ -181,16 +180,16 @@ def do_clean(player, parsed, **ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        # @todo: ask for confirmation (async)
-        print("Cleaning inventory of", victim)
-        player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
-        items = victim.inventory
-        for item in items:
-            victim.remove(item, player)
-            item.destroy(ctx)
-            print("destroyed", item)
-        if victim.inventory_size:
-            print("Some items refused to be destroyed!")
+        if util.confirm("Are you sure you want to clean out %s? " % victim.title, ctx["driver"]):
+            print("Cleaning inventory of", victim)
+            player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
+            items = victim.inventory
+            for item in items:
+                victim.remove(item, player)
+                item.destroy(ctx)
+                print("destroyed", item)
+            if victim.inventory_size:
+                print("Some items refused to be destroyed!")
 
 
 @wizcmd("pdb")

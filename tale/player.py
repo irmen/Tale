@@ -32,7 +32,6 @@ class Player(base.Living):
         super(Player, self).__init__(name, gender, race, title, description, short_description)
         self.soul = soul.Soul()
         self.verbs = []   # things can add custom verbs to this list when they're in the player's inventory
-        self.score = 0
         self.turns = 0
         self.state = {}
         self.previous_commandline = None
@@ -185,7 +184,7 @@ class Player(base.Living):
         self.soul = None   # truly die ;-)
 
     def allow_give_money(self, actor, amount):
-        """Do we accept money?"""
+        """Do we accept money? Raise ActionRefused if not."""
         pass
 
     def get_pending_input(self):

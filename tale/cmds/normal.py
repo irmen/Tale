@@ -165,8 +165,8 @@ def do_drop(player, parsed, **ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            # @todo: ask confirmation to drop everything
-            drop_stuff(player.inventory, player)
+            if util.confirm("Are you sure you want to drop all you are carrying? ", ctx["driver"]):
+                drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
         if parsed.who_order:
@@ -232,9 +232,11 @@ def do_put(player, parsed, **ctx):
             raise ActionRefused("You're not carrying anything.")
         if len(parsed.args) != 2:
             raise ParseError("Put what where?")
-        # @todo: ask confirmation to put everything
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
+        if what:
+            if not util.confirm("Are you sure you want to put everything away? ", ctx["driver"]):
+                return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
     else:
@@ -435,7 +437,7 @@ def do_give(player, parsed, **ctx):
         try:
             # first try if the first one or two words can be interpreted as an amount of money
             money = util.words_to_money(parsed.unrecognized)
-            return give_money(player, money, parsed.who_order[0])
+            return give_money(player, money, parsed.who_order[0], ctx["driver"])
         except (ValueError, ParseError):
             pass
     if parsed.unrecognized:
@@ -444,10 +446,12 @@ def do_give(player, parsed, **ctx):
         raise ActionRefused("You're not carrying anything.")
     # check for "all"
     if "all" in parsed.args:
-        # @todo ask for confirmation to give all
         if len(parsed.args) != 2:
             raise ParseError("Give all to who?")
         what = player.inventory
+        if what:
+            if not util.confirm("Are you sure you want to give it all away? ", ctx["driver"]):
+                return
         if parsed.args[0] == "all":
             # give all [to] living
             return give_stuff(player, what, parsed.args[1])
@@ -500,7 +504,7 @@ def give_stuff(player, items, target_name, target=None):
         print("You didn't give %s anything." % target.title)
 
 
-def give_money(player, amount, recipient):
+def give_money(player, amount, recipient, driver):
     if not recipient:
         raise ActionRefused("Give it to whom?")
     if not isinstance(recipient, base.Living):
@@ -512,12 +516,12 @@ def give_money(player, amount, recipient):
     elif player.money < amount:
         player.tell("You don't have that amount of wealth.")
     else:
-        #@ todo ask for confirmation to give away money
-        #recipient.allow_give_money(player, amount)
-        player.money -= amount
-        recipient.money += amount
-        player.tell("You gave %s %s." % (recipient.title, util.money_display(amount)))
-        player.tell_others("{Title} gave %s some money." % recipient.title)
+        recipient.allow_give_money(player, amount)
+        if util.confirm("Are you sure you want to give %s away? " % util.money_display(amount), driver):
+            player.money -= amount
+            recipient.money += amount
+            player.tell("You gave %s %s." % (recipient.title, util.money_display(amount)))
+            player.tell_others("{Title} gave %s some money." % recipient.title)
 
 
 @cmd("help")
@@ -760,8 +764,14 @@ def do_wait(player, parsed, **ctx):
 @disable_notify_action
 def do_quit(player, parsed, **ctx):
     """Quit the game."""
-    # @todo: ask for confirmation (async).. this is now done in the driver...
-    raise SessionExit()
+    driver = ctx["driver"]
+    if util.confirm("Are you sure you want to quit? ", driver):
+        if util.confirm("Would you like to save your progress? ", driver):
+            do_save(player, parsed, **ctx)
+        player.tell("\n")
+        raise SessionExit()
+    player.tell("Good, thank you for staying.")
+    driver.start_player_input()   # because the 'quit' command terminates the player input
 
 
 def print_item_removal(player, item, container, print_parentheses=True):
@@ -1116,13 +1126,6 @@ def do_load(player, parsed, **ctx):
                 "or start a new game.")
 
 
-@cmd("score")
-@disable_notify_action
-def do_score(player, parsed, **ctx):
-    """Displays your current score in the game."""
-    player.tell("Your score is %d out of a possible %d. (in %d turns)" % (player.score, ctx["config"].max_score, player.turns))
-
-
 @cmd("transcript")
 @disable_notify_action
 def do_transcript(player, parsed, **ctx):
@@ -1346,3 +1349,6 @@ def do_config(player, parsed, **ctx):
     player.tell("Game configuration:", end=True)
     player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
     player.tell("  width (screen width) = %d" % player.screen_width, format=False)
+
+
+

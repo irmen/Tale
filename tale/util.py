@@ -356,3 +356,13 @@ class GameDateTime(object):
     def sub_realtime(self, timedelta):
         assert isinstance(timedelta, datetime.timedelta)
         self.clock -= timedelta * self.times_realtime
+
+
+def confirm(question, driver):
+    # @todo this input only works in single player IF mode because it blocks the game
+    while True:
+        reply = driver.input(question)
+        if reply in ("y", "yes", "sure", "yep"):
+            return True
+        if reply in ("n", "no", "nope"):
+            return False

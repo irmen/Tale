@@ -740,7 +740,7 @@ class Living(MudObject):
         pass
 
     def allow_give_money(self, actor, amount):
-        """Do we accept money?"""
+        """Do we accept money? Raise ActionRefused if not."""
         raise ActionRefused("You can't do that.")
 
     def _handle_verb_base(self, parsed, actor):

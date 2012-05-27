@@ -7,8 +7,10 @@ FLEE (of evade?) is de enige manier om ze kwijt te raken (normaal weglopen helpt
 1 van de zombies heeft een keycard bij zich waarmee je een deur kunt openmaken. (koelcel bij slager?)
 
 Einde: je redt iemand (partner?) uit de koelcel, maar kan niet voorkomen dat je zelf zombie wordt
-op tijd zorgen dat die persoon weg rent of zelf weg gaan, anders vreet je haar op (geen 100% score)
+op tijd zorgen dat die persoon weg rent of zelf weg gaan, anders vreet je haar op (=fail ending)
 
 
 Extra commands?
+
+"bribe" ->  geef geld aan iemand die een kist bewaakt -van iemand anders- met spullen erin die je nodig hebt (give $... werkt ook)
 
