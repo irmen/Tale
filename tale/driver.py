@@ -200,6 +200,7 @@ class Driver(object):
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
+        self.moneyfmt = util.MoneyFormatter(self.config.money_type)
         self.game_resource = resource.ResourceLoader(story)
         self.story.init(self)
         import zones

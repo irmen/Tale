@@ -19,6 +19,7 @@ class Story(object):
         player_name = "julie",           # set a name to create a prebuilt player, None to use the character builder
         player_gender = "f",             # m/f/n
         player_race = "human",           # default is "human" ofcourse, but you can select something else if you want
+        money_type = "modern",           # money type modern/fantasy
         server_tick_method = "command",  # 'command' (waits for player entry) or 'timer' (async timer driven)
         server_tick_time = 5.0,          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
         gametime_to_realtime = 1,        # meaning: game time is X times the speed of real time (only used with "timer" tick method)

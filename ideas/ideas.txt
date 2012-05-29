@@ -25,7 +25,6 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-Make the money type configurable per story (it's now hardcoded in util)
 Better naming of exits/doors; they need to know their own name (direction). It can now be None...
 Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
 there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?

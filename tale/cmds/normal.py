@@ -66,7 +66,7 @@ def do_inventory(player, parsed, **ctx):
                     p("  " + item.title, format=False)
             else:
                 p(name, "is carrying nothing.")
-            p("Money in possession: %s." % util.money_display(other.money))
+            p("Money in possession: %s." % ctx["driver"].moneyfmt.display(other.money))
             return
         elif isinstance(other, base.Item):
             # show item's inventory
@@ -87,7 +87,7 @@ def do_inventory(player, parsed, **ctx):
                 p("  " + item.title, format=False)
         else:
             p("You are carrying nothing.")
-        p("Money in possession: %s." % util.money_display(player.money, zero_msg="you are broke"))
+        p("Money in possession: %s." % ctx["driver"].moneyfmt.display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate", "search")
@@ -436,7 +436,7 @@ def do_give(player, parsed, **ctx):
     if len(parsed.who_order) == 1:
         try:
             # first try if the first one or two words can be interpreted as an amount of money
-            money = util.words_to_money(parsed.unrecognized)
+            money = ctx["driver"].moneyfmt.parse(parsed.unrecognized)
             return give_money(player, money, parsed.who_order[0], ctx["driver"])
         except (ValueError, ParseError):
             pass
@@ -517,10 +517,10 @@ def give_money(player, amount, recipient, driver):
         player.tell("You don't have that amount of wealth.")
     else:
         recipient.allow_give_money(player, amount)
-        if util.confirm("Are you sure you want to give %s away? " % util.money_display(amount), driver):
+        if util.confirm("Are you sure you want to give %s away? " % driver.moneyfmt.display(amount), driver):
             player.money -= amount
             recipient.money += amount
-            player.tell("You gave %s %s." % (recipient.title, util.money_display(amount)))
+            player.tell("You gave %s %s." % (recipient.title, driver.moneyfmt.display(amount)))
             player.tell_others("{Title} gave %s some money." % recipient.title)
 
 
@@ -1349,6 +1349,3 @@ def do_config(player, parsed, **ctx):
     player.tell("Game configuration:", end=True)
     player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
     player.tell("  width (screen width) = %d" % player.screen_width, format=False)
-
-
-

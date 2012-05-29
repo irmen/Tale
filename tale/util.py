@@ -67,129 +67,133 @@ def print_object_location(player, obj, container, print_parentheses=True):
             player.tell("%s was found in %s." % (lang.capital(obj.name), container.name))
 
 
-def money_display_fantasy(amount, short=False, zero_msg="nothing"):
-    """
-    Display amount of money in gold/silver/copper units,
-    base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
-    """
-    gold, amount = divmod(amount, 10.0)
-    silver, copper = divmod(amount, 1.0)
-    copper = round(copper * 10.0)
-    if short:
-        return "%dg/%ds/%dc" % (gold, silver, copper)
-    result = []
-    if gold:
-        result.append("%d gold" % gold)
-    if silver:
-        result.append("%d silver" % silver)
-    if copper:
-        result.append("%d copper" % copper)
-    if result:
-        return lang.join(result)
-    return zero_msg
+class MoneyFormatter(object):
+    """Display and parsing of money. Supports 'fantasy' and 'modern' style money."""
+    money_words_fantasy = {"gold", "silver", "copper", "coppers"}
+    money_words_modern = {"dollar", "dollars", "cent", "cents"}
 
-
-def money_display_modern(amount, short=False, zero_msg="nothing"):
-    """
-    Display amount of money in modern currency (dollars/cents).
-    """
-    if short:
-        return "$ %.2f" % amount
-    dollar, cents = divmod(amount, 1.0)
-    cents = round(cents * 100.0)
-    result = []
-    if dollar:
-        result.append("%d dollar" % dollar)
-    if cents:
-        result.append("%d cent" % cents)
-    if result:
-        return lang.join(result)
-    return zero_msg
-
-
-def money_to_float_fantasy(coins):
-    """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
-    if type(coins) is str:
-        if not coins:
-            raise ValueError("That's not an amount of money.")
-        result = 0.0
-        while coins:
-            c, _, coins = coins.partition("/")
-            try:
-                if c.endswith("g"):
-                    result += float(c[:-1]) * 10.0
-                elif c.endswith("s"):
-                    result += float(c[:-1])
-                elif c.endswith("c"):
-                    result += float(c[:-1]) / 10.0
-                else:
-                    raise ValueError("invalid coin letter")
-            except ValueError:
-                raise ValueError("That's not an amount of money.")
-        return result
-    result = coins.get("gold", 0.0) * 10.0
-    result += coins.get("silver", 0.0)
-    result += coins.get("copper", 0.0) / 10.0
-    result += coins.get("coppers", 0.0) / 10.0
-    return result
-
-
-def money_to_float_modern(coins):
-    """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
-    if type(coins) is str:
-        if coins.startswith("$"):
-            return float(coins[1:])
+    def __init__(self, money_type):
+        if money_type == "fantasy":
+            self.display = self.money_display_fantasy
+            self.money_to_float = self.money_to_float_fantasy
+            self.money_words = self.money_words_fantasy
+        elif money_type == "modern":
+            self.display = self.money_display_modern
+            self.money_to_float = self.money_to_float_modern
+            self.money_words = self.money_words_modern
         else:
-            raise ValueError("That's not an amount of money.")
-    result = coins.get("dollar", 0.0)
-    result += coins.get("dollars", 0.0)
-    result += coins.get("cent", 0.0) / 100.0
-    result += coins.get("cents", 0.0) / 100.0
-    return result
+            raise ValueError("invalid money type " + money_type)
 
+    def money_display_fantasy(self, amount, short=False, zero_msg="nothing"):
+        """
+        Display amount of money in gold/silver/copper units,
+        base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
+        """
+        gold, amount = divmod(amount, 10.0)
+        silver, copper = divmod(amount, 1.0)
+        copper = round(copper * 10.0)
+        if short:
+            return "%dg/%ds/%dc" % (gold, silver, copper)
+        result = []
+        if gold:
+            result.append("%d gold" % gold)
+        if silver:
+            result.append("%d silver" % silver)
+        if copper:
+            result.append("%d copper" % copper)
+        if result:
+            return lang.join(result)
+        return zero_msg
 
-MONEY_WORDS_FANTASY = {"gold", "silver", "copper", "coppers"}
-MONEY_WORDS_MODERN = {"dollar", "dollars", "cent", "cents"}
+    def money_display_modern(self, amount, short=False, zero_msg="nothing"):
+        """
+        Display amount of money in modern currency (dollars/cents).
+        """
+        if short:
+            return "$ %.2f" % amount
+        dollar, cents = divmod(amount, 1.0)
+        cents = round(cents * 100.0)
+        result = []
+        if dollar:
+            result.append("%d dollar" % dollar)
+        if cents:
+            result.append("%d cent" % cents)
+        if result:
+            return lang.join(result)
+        return zero_msg
 
-# select one of the above for each (must match ofcourse):
-money_display = money_display_modern
-money_to_float = money_to_float_modern
-MONEY_WORDS = MONEY_WORDS_MODERN
-
-
-def words_to_money(words, money_to_float=money_to_float, money_words=MONEY_WORDS):
-    """Convert a parsed sequence of words to the amount of money it represents (foat)"""
-    if len(words) == 1:
-        try:
-            return money_to_float(words[0])
-        except ValueError:
-            pass
-    elif len(words) == 2:
-        try:
-            return money_to_float(words[0] + words[1])
-        except ValueError:
-            pass
-    coins = {}
-    for word in words:
-        if word in money_words:
-            # check if all words are either a number (currency) or a moneyword
-            amount = None
-            for word in words:
-                if word in money_words:
-                    if amount:
-                        if word in coins:
-                            raise ParseError("What amount?")
-                        coins[word] = amount
-                        amount = None
+    def money_to_float_fantasy(self, coins):
+        """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
+        if type(coins) is str:
+            if not coins:
+                raise ValueError("That's not an amount of money.")
+            result = 0.0
+            while coins:
+                c, _, coins = coins.partition("/")
+                try:
+                    if c.endswith("g"):
+                        result += float(c[:-1]) * 10.0
+                    elif c.endswith("s"):
+                        result += float(c[:-1])
+                    elif c.endswith("c"):
+                        result += float(c[:-1]) / 10.0
                     else:
-                        raise ParseError("What amount?")
-                else:
-                    try:
-                        amount = float(word)
-                    except ValueError:
-                        raise ParseError("What amount?")
-            return money_to_float(coins)
-    raise ParseError("That is not an amount of money.")
+                        raise ValueError("invalid coin letter")
+                except ValueError:
+                    raise ValueError("That's not an amount of money.")
+            return result
+        result = coins.get("gold", 0.0) * 10.0
+        result += coins.get("silver", 0.0)
+        result += coins.get("copper", 0.0) / 10.0
+        result += coins.get("coppers", 0.0) / 10.0
+        return result
+
+    def money_to_float_modern(self, coins):
+        """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
+        if type(coins) is str:
+            if coins.startswith("$"):
+                return float(coins[1:])
+            else:
+                raise ValueError("That's not an amount of money.")
+        result = coins.get("dollar", 0.0)
+        result += coins.get("dollars", 0.0)
+        result += coins.get("cent", 0.0) / 100.0
+        result += coins.get("cents", 0.0) / 100.0
+        return result
+
+    def parse(self, words):
+        """Convert a parsed sequence of words to the amount of money it represents (foat)"""
+        if len(words) == 1:
+            try:
+                return self.money_to_float(words[0])
+            except ValueError:
+                pass
+        elif len(words) == 2:
+            try:
+                return self.money_to_float(words[0] + words[1])
+            except ValueError:
+                pass
+        coins = {}
+        for word in words:
+            if word in self.money_words:
+                # check if all words are either a number (currency) or a moneyword
+                amount = None
+                for word in words:
+                    if word in self.money_words:
+                        if amount:
+                            if word in coins:
+                                raise ParseError("What amount?")
+                            coins[word] = amount
+                            amount = None
+                        else:
+                            raise ParseError("What amount?")
+                    else:
+                        try:
+                            amount = float(word)
+                        except ValueError:
+                            raise ParseError("What amount?")
+                return self.money_to_float(coins)
+        raise ParseError("That is not an amount of money.")
 
 
 def get_motd(resourceloader):

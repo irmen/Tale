@@ -550,7 +550,7 @@ class Living(MudObject):
         self.location = _Limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
-        self.money = 0.0  # the currency is determined by util.money_display
+        self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
         self.stats = {}
         self.default_verb = "examine"
         self.race = race
