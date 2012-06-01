@@ -19,8 +19,8 @@ class Story(object):
         name = "Tale Demo",
         author = "Irmen de Jong",
         author_address = "irmen@razorvine.net",
-        version = "0.7",                 # arbitrary but is used to check savegames for compatibility
-        requires_tale = "0.6",           # tale library required to run the game
+        version = "0.8",                 # arbitrary but is used to check savegames for compatibility
+        requires_tale = "0.7",           # tale library required to run the game
         player_name = None,              # set a name to create a prebuilt player, None to use the character builder
         player_gender = None,            # m/f/n
         player_race = None,              # default is "human" ofcourse, but you can select something else if you want

@@ -38,8 +38,7 @@ After that, you'll need a story to run it on (tale by itself doesn't do anything
 it's only a framework to build games with).
 There's a demo/example story included in the source distribution, in the ``stories`` directory.
 
-Start the demo story using the supplied ``play_demo`` script, or start it using the tale driver directly
-(:
+Start the demo story using the supplied ``play_demo`` script, or start it using the tale driver directly:
 
 :kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`
 
