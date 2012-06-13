@@ -15,6 +15,8 @@ from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player
 from tale.soul import NonSoulVerb, ParseResults
+from tale import color
+color.disable()
 
 
 class TestPlayer(unittest.TestCase):

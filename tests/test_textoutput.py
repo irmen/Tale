@@ -8,6 +8,8 @@ from __future__ import print_function, division
 import unittest
 import textwrap
 from tale import textoutput
+from tale import color
+color.disable()
 
 
 class TestTextoutput(unittest.TestCase):

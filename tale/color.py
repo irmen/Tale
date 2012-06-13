@@ -38,3 +38,11 @@ else:
 
     def dim(txt):
         return txt
+
+
+def disable():
+    global bright
+    global dim
+    bright = lambda txt: txt
+    dim = lambda txt: txt
+

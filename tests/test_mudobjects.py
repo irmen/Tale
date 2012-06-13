@@ -16,6 +16,8 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResults
+from tale import color
+color.disable()
 
 
 class TestLocations(unittest.TestCase):
