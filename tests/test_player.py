@@ -8,8 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import tale.globalcontext
 from supportstuff import DummyDriver, MsgTraceNPC
-tale.globalcontext.mud_context.driver = DummyDriver()
-
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
@@ -20,6 +18,8 @@ color.disable()
 
 
 class TestPlayer(unittest.TestCase):
+    def setUp(self):
+        tale.globalcontext.mud_context.driver = DummyDriver()
     def test_init(self):
         player = Player("fritz", "m")
         player.set_title("%s the great", includes_name_param=True)
@@ -128,7 +128,7 @@ class TestPlayer(unittest.TestCase):
         player.tell("word " * 30)
         self.assertNotEqual(("word " * 30).strip(), player.get_output())
         player.tell("word " * 30, format=False)
-        self.assertEqual(("word " * 30)+"\n", player.get_output(), "when format=False output should be unformatted")
+        self.assertEqual(("word " * 30) + "\n", player.get_output(), "when format=False output should be unformatted")
         player.tell("   xyz   \n  123", format=False)
         self.assertEqual("   xyz   \n  123\n", player.get_output())
         player.tell("line1", end=True)

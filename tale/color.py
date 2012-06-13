@@ -45,4 +45,3 @@ def disable():
     global dim
     bright = lambda txt: txt
     dim = lambda txt: txt
-

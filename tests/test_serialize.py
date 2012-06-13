@@ -9,8 +9,6 @@ import pickle
 from tale import globalcontext, races, base, npc, soul, player, driver
 from supportstuff import DummyDriver
 
-globalcontext.mud_context.driver = DummyDriver()
-
 
 def serializecycle(obj):
     ser = pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
@@ -18,6 +16,9 @@ def serializecycle(obj):
 
 
 class TestSerializing(unittest.TestCase):
+    def setUp(self):
+        globalcontext.mud_context.driver = DummyDriver()
+
     def assert_base_attrs(self, obj):
         self.assertEqual("name", obj.name)
         self.assertEqual("title", obj.title)
@@ -109,7 +110,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(42, x.money)
         self.assertIsNotNone(x.wiretaps)
     def test_storyconfig(self):
-        s = driver.StoryConfig(a=42, b="hello", c=[1,2,3])
+        s = driver.StoryConfig(a=42, b="hello", c=[1, 2, 3])
         x = serializecycle(s)
         self.assertEqual(s, x)
         i1 = list(s.items())

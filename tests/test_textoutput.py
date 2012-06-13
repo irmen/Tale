@@ -28,7 +28,6 @@ class TestTextoutput(unittest.TestCase):
         p.format = False
         self.assertEqual("1\n2\n", p.render(wrapper))
 
-
     def test_empty_lines(self):
         wrapper = textwrap.TextWrapper(width=20)
         output = textoutput.TextOutput(wrapper)
@@ -116,7 +115,7 @@ class TestTextoutput(unittest.TestCase):
         output.print("|   x    x   |", format=False)
         output.print("|    y    y  |", format=False)
         output.print("|     z    z |", format=False)
-        expected="""@@one two three four five six seven eight
+        expected = """@@one two three four five six seven eight
 @@nine ten eleven twelve thirteen fourteen
 @@fifteen sixteen seventeen eighteen nineteen
 @@twenty.

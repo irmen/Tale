@@ -13,10 +13,11 @@ from tale.player import Player
 from tale.resource import ResourceLoader
 from supportstuff import DummyDriver, Wiretap
 
-globalcontext.mud_context.driver = DummyDriver()
-
 
 class TestUtil(unittest.TestCase):
+    def setUp(self):
+        globalcontext.mud_context.driver = DummyDriver()
+
     def test_print_location(self):
         p = Player("julie", "f")
         key = Item("key")
@@ -205,7 +206,7 @@ class TestUtil(unittest.TestCase):
 
     def test_clone(self):
         item = Item("thing", "description")
-        item.aliases=["a1", "a2"]
+        item.aliases = ["a1", "a2"]
         item2 = util.clone(item)
         self.assertNotEqual(item, item2)
         item2.aliases.append("a3")

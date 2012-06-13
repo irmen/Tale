@@ -9,8 +9,6 @@ import unittest
 import datetime
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
-mud_context.driver = DummyDriver()
-
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
@@ -180,9 +178,9 @@ class TestLocations(unittest.TestCase):
         player.verbs = ["xywobble"]
         room = Location("room")
         chair1 = Item("chair1")
-        chair1.verbs=["frobnitz"]
+        chair1.verbs = ["frobnitz"]
         chair2 = Item("chair2")
-        chair2.verbs=["frobnitz"]
+        chair2.verbs = ["frobnitz"]
         chair_in_inventory = Item("chair3")
         chair_in_inventory.verbs = ["kowabooga"]
         room.init_inventory([chair1, player, chair2])
@@ -765,7 +763,6 @@ class TestMudObject(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             x.read(None)
         x.destroy(None)
-
 
 
 if __name__ == '__main__':

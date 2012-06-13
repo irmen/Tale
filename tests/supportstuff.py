@@ -33,6 +33,7 @@ class DummyDriver(object):
             callable(*vargs, **kwargs)
         self.after_player_queue = []
 
+
 class Wiretap(object):
     def __init__(self):
         self.msgs = []

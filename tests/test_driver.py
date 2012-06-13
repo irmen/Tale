@@ -63,7 +63,6 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual([42], t.x)
 
 
-
 class TestVarious(unittest.TestCase):
     def testCommandsLoaded(self):
         self.assertGreater(len(tale.cmds.normal.all_commands), 1)
@@ -81,8 +80,8 @@ class TestVarious(unittest.TestCase):
         sc = the_driver.StoryConfig(a=42, b="hello")
         self.assertEqual([42, 42], [sc.a, sc["a"]])
         self.assertEqual(["hello", "hello"], [sc.b, sc["b"]])
-        sc.a=999
-        sc["b"]="bye"
+        sc.a = 999
+        sc["b"] = "bye"
         self.assertEqual(999, sc.a)
         self.assertEqual("bye", sc.b)
         d = {"a": 1, "b": 2}
