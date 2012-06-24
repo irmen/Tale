@@ -4,6 +4,7 @@ Unit tests for util functions
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+from __future__ import print_function, division, unicode_literals
 import datetime
 import unittest
 from tale import util, globalcontext
@@ -203,6 +204,9 @@ class TestUtil(unittest.TestCase):
             r.load_text("normal/text")
         with self.assertRaises(IOError):
             r.load_image("normal/image")
+        r = ResourceLoader("/var/temp")
+        with self.assertRaises(IOError):
+            r.load_text("test_doesnt_exist_999.txt")
 
     def test_clone(self):
         item = Item("thing", "description")

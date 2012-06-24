@@ -11,7 +11,7 @@ The verb parsing and message generation have been rewritten.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division
+from __future__ import print_function, division, unicode_literals
 import re
 from collections import defaultdict
 from . import lang

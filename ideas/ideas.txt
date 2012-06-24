@@ -1,7 +1,8 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
+HTTP server mode with HTML+Javascript frontend.
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
-Pictures for locations (viewable in gui driver only)
+Pictures for locations (viewable in gui driver/html version only)
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):

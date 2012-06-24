@@ -5,6 +5,7 @@ Resource loader.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division, unicode_literals
 import os
 import inspect
 
@@ -12,10 +13,10 @@ import inspect
 class ResourceLoader(object):
     """Simple abstraction to load resource files embedded inside a package directory"""
     def __init__(self, root_module_or_path):
-        if type(root_module_or_path) is str:
-            self.root_path = root_module_or_path
-        else:
+        try:
             self.root_path = os.path.dirname(inspect.getabsfile(root_module_or_path))
+        except TypeError:
+            self.root_path = root_module_or_path
 
     def open(self, path, mode="r"):
         if "\\" in path:

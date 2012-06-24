@@ -5,6 +5,7 @@ Unit tests for race data
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division, unicode_literals
 import unittest
 import tale.races as races
 

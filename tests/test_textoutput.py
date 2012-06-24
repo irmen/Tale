@@ -4,7 +4,7 @@ Unit tests for text output and formatting
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import print_function, division
+from __future__ import print_function, division, unicode_literals
 import unittest
 import textwrap
 from tale import textoutput

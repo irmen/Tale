@@ -5,6 +5,8 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from __future__ import print_function, division, unicode_literals
+
 
 class SecurityViolation(Exception):
     """Some security constraint was violated"""

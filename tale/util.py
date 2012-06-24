@@ -5,7 +5,7 @@ Utility stuff
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division
+from __future__ import print_function, division, unicode_literals
 import datetime
 import random
 import os
@@ -124,7 +124,7 @@ class MoneyFormatter(object):
 
     def money_to_float_fantasy(self, coins):
         """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
-        if type(coins) is str:
+        if type(coins) is not dict:
             if not coins:
                 raise ValueError("That's not an amount of money.")
             result = 0.0
@@ -150,7 +150,7 @@ class MoneyFormatter(object):
 
     def money_to_float_modern(self, coins):
         """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
-        if type(coins) is str:
+        if type(coins) is not dict:
             if coins.startswith("$"):
                 return float(coins[1:])
             else:
