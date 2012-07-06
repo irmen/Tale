@@ -269,6 +269,7 @@ class Driver(object):
             else:
                 self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
             self.player.tell("\n")
+        self.story.init_player(self.player)
         self.show_motd()
         self.player.look(short=False)
         self.write_output()

@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import datetime
 from tale import color
+from tale.hints import Hint
 
 try:
     import colorama
@@ -39,9 +40,19 @@ class Story(object):
     driver = None       # will be set by driver init()
 
     def init(self, driver):
-        """Called by the game driver when it is done with its initialization"""
+        """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
         self.resources = driver.game_resource
+
+    def init_player(self, player):
+        """
+        Called by the game driver when it has created the player object.
+        You can set the hint texts on the player object, or change the state object, etc.
+        """
+        player.hints.init([
+            Hint(None, None, None, "Find a way to open the door that leads to the exit of the game.")
+        ])
+        pass
 
     def welcome(self, player):
         """welcome text when player enters a new game"""

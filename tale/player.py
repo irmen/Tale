@@ -14,6 +14,7 @@ from . import soul
 from . import lang
 from . import color
 from . import textoutput
+from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 
@@ -34,6 +35,7 @@ class Player(base.Living):
         self.verbs = []   # things can add custom verbs to this list when they're in the player's inventory
         self.turns = 0
         self.state = {}
+        self.hints = hints.HintSystem()
         self.previous_commandline = None
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT

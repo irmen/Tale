@@ -34,15 +34,16 @@ class Story(object):
     driver = None       # will be set by driver init()
 
     def init(self, driver):
-        """Called by the game driver when it is done with its initialization"""
+        """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
         self.resources = driver.game_resource
 
-    def display_text_file(self, player, filename):
-        for paragraph in self.resources.load_text(filename).split("\n\n"):
-            if paragraph.startswith("\n"):
-                player.tell("\n")
-            player.tell(paragraph, end=True)
+    def init_player(self, player):
+        """
+        Called by the game driver when it has created the player object.
+        You can set the hint texts on the player object, or change the state object, etc.
+        """
+        pass
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
@@ -72,3 +73,9 @@ class Story(object):
         # @TODO: determine fail/success
         self.display_text_file(player, "messages/completion_success.txt")
         # self.display_text_file(player, "messages/completion_failed.txt")
+
+    def display_text_file(self, player, filename):
+        for paragraph in self.resources.load_text(filename).split("\n\n"):
+            if paragraph.startswith("\n"):
+                player.tell("\n")
+            player.tell(paragraph, end=True)

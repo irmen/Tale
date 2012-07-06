@@ -527,7 +527,7 @@ def give_money(player, amount, recipient, driver):
 @cmd("help")
 @disable_notify_action
 def do_help(player, parsed, **ctx):
-    """Provides some helpful information about different aspects of the game."""
+    """Provides some helpful information about different aspects of the game. Also try 'hint'."""
     if parsed.args:
         do_what(player, parsed, **ctx)
     else:
@@ -551,7 +551,10 @@ def do_help(player, parsed, **ctx):
         player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
-        player.tell("To see all possible verbs ask 'what is emotes' (?emotes).")
+        player.tell("To see all possible verbs ask 'what is emotes' (?emotes).", end=True)
+        if player.hints.has_hints():
+            player.tell(color.bright("Hints:"))
+            player.tell("When you're stuck, you can use the 'hint' command to try to get a clue about what to do next.")
 
 
 @cmd("look")
@@ -1349,3 +1352,13 @@ def do_config(player, parsed, **ctx):
     player.tell("Game configuration:", end=True)
     player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
     player.tell("  width (screen width) = %d" % player.screen_width, format=False)
+
+
+@cmd("hint")
+def do_hint(player, parsed, **ctx):
+    """Provide a clue about what to do next. Also try 'help'."""
+    hint = player.hints.hint(player)
+    if hint:
+        player.tell(hint)
+    else:
+        player.tell("You're on your own to decide what to do next...")
