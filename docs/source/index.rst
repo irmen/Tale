@@ -38,16 +38,17 @@ After that, you'll need a story to run it on (tale by itself doesn't do anything
 it's only a framework to build games with).
 There's a demo/example story included in the source distribution, in the ``stories`` directory.
 
-Start the demo story using the supplied ``play_demo`` script, or start it using the tale driver directly:
+Start the demo story using the supplied ``play_demo`` script.
+You don't have to install anything if you run it using this script.
+
+You can also start it without the script and by using the tale driver directly, but that
+only works correctly after you've actually installed Tale.
+It won't work from the distribution directory without having properly installed Tale.
+(This is because Tale changes its working directory to the directory where
+the story files are located, and they still need to be able to access Tale).
+The command is:
 
 :kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`
-
-.. note::
-    Running the driver directly and launching a story like this,
-    only works correctly after you've actually installed Tale.
-    It won't work from the distribution directory.
-    (This is because Tale changes its working directory to the directory where
-    the story files are located, and they still need to be able to access Tale).
 
 The story might prompt you with a couple of questions:
 Choose not to load a saved game (you will have none at first start anyway).
@@ -121,11 +122,12 @@ A random list of the features of the current codebase:
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room,
   or someone saying a line of text) and can react on that.
+- hint and story-recap system that can adapt dynamically to the progress of the story.
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways
   of writing a game story, in a DSL or whatever).
-- many unit tests to check the code
+- many unit tests to validate the code
 
 
 
