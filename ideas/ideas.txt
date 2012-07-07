@@ -7,7 +7,7 @@ Pictures for locations (viewable in gui driver/html version only)
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-Check for and disable IF-specific stuff.
+Check for and disable IF-specific stuff. (make the @disable_in_IF decorator more general into @disable_in_gamemode("..."))
 Let players define aliases for certain commands (including args).
 Write stuff to a logfile for the server admins.
 Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
@@ -38,7 +38,7 @@ Console output: dynamically highlight names/aliases/exits/items? (Problem: textw
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-Load game from a zipfile. Resource loader should be able to load stuff from the zipfile too!
+Load story from a zipfile. So the resource loader should be able to load stuff from zipfile too!
 
 Obfuscated resource files (to avoid easy spoilers by simply reading the game files)?
 

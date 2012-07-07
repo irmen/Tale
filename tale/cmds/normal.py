@@ -527,7 +527,7 @@ def give_money(player, amount, recipient, driver):
 @cmd("help")
 @disable_notify_action
 def do_help(player, parsed, **ctx):
-    """Provides some helpful information about different aspects of the game. Also try 'hint'."""
+    """Provides some helpful information about different aspects of the game. Also try 'hint' or 'recap'."""
     if parsed.args:
         do_what(player, parsed, **ctx)
     else:
@@ -1356,9 +1356,23 @@ def do_config(player, parsed, **ctx):
 
 @cmd("hint")
 def do_hint(player, parsed, **ctx):
-    """Provide a clue about what to do next. Also try 'help'."""
+    """Provide a clue about what to do next. Also try 'help', and 'recap'."""
     hint = player.hints.hint(player)
     if hint:
         player.tell(hint)
     else:
         player.tell("You're on your own to decide what to do next...")
+
+
+@cmd("recap")
+def do_hint(player, parsed, **ctx):
+    """
+    Shows the key events or actions that have happened so that you might
+    get back up to speed with the story so far.
+    """
+    recapmessages = player.hints.recap()
+    if recapmessages:
+        for msg in recapmessages:
+            player.tell(msg, end=True)
+    else:
+        player.tell("There's not much to say about the events thus far.")

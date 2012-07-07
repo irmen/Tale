@@ -11,6 +11,7 @@ from tale.npc import NPC
 from tale.errors import ActionRefused, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.util import clone
+from tale import globalcontext
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -134,7 +135,15 @@ class GameEnd(Location):
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")
-end_door = Door(game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
+
+
+class EndDoor(Door):
+    def unlock(self, item, actor):
+        super(EndDoor, self).unlock(item, actor)
+        if not self.locked:
+            actor.hints.state("unlocked_enddoor", "The way to freedom lies before you!")
+
+end_door = EndDoor(game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
 end_door.door_code = 999
 lane.exits["east"] = end_door
 lane.exits["door"] = end_door
@@ -222,6 +231,13 @@ computer.verbs = ["hack", "type", "enter"]
 computer.aliases = {"keyboard", "screen"}
 alley.insert(computer, None)
 
-doorkey = Item("key", description="A key with a little label marked 'Game Over'.")
+
+class DoorKey(Item):
+    def notify_moved(self, source_container, target_container, actor):
+        player = globalcontext.mud_context.player
+        if target_container is player or target_container in player:
+            player.hints.state("got_doorkey", "You've found something that might open the exit.")
+
+doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
 doorkey.door_code = end_door.door_code
 alley.insert(doorkey, None)

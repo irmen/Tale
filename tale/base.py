@@ -196,10 +196,15 @@ class Item(MudObject):
             source_container.remove(self, actor)
         try:
             target_container.insert(self, actor)
+            self.notify_moved(source_container, target_container, actor)
         except:
             # insert in target failed, put back in original location
             source_container.insert(self, actor)
             raise
+
+    def notify_moved(self, source_container, target_container, actor):
+        """Called when the item has been moved from one place to another"""
+        pass
 
     def allow_move(self, actor):
         """Does it allow to be moved by someone? (yes, no ActionRefused raised)"""
@@ -905,7 +910,7 @@ class Door(Exit):
                 actor.tell(color.dim("(You use your %s; %s matches the lock.)" % (key.title, key.subjective)))
             else:
                 raise ActionRefused("You don't seem to have the means to lock it.")
-        self.locked = False
+        self.locked = True
         actor.tell("Your %s fits, it is now locked." % key.title)
         if self.direction:
             what = "the exit %s" % self.direction

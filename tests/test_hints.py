@@ -81,6 +81,16 @@ class TestHints(unittest.TestCase):
         h.state("4")
         self.assertEqual("first third", h.hint(self.player))
 
+    def test_recap(self):
+        h = HintSystem()
+        self.assertEqual([], h.recap())
+        h.state("state1", "recap one")
+        self.assertEqual(["recap one"], h.recap())
+        h.state("state1", "recap two")
+        self.assertEqual(["recap one"], h.recap())
+        h.state("state2", "recap three")
+        self.assertEqual(["recap one", "recap three"], h.recap())
+
 
 if __name__ == '__main__':
     unittest.main()

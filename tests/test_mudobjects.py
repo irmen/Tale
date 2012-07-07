@@ -261,9 +261,11 @@ class TestDoorsExits(unittest.TestCase):
         with self.assertRaises(ActionRefused) as x:
             door.lock(None, player)  # it's already locked
         self.assertEqual("It's already locked.", str(x.exception))
+        self.assertTrue(door.locked)
         with self.assertRaises(ActionRefused) as x:
             door.unlock(None, player)  # you can't unlock it
         self.assertEqual("You don't seem to have the means to unlock it.", str(x.exception))
+        self.assertTrue(door.locked)
 
         door = Door(hall, "closed unlocked door", direction="north", locked=False, opened=False)
         door.open(None, player)
@@ -302,6 +304,7 @@ class TestDoorsExits(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             door.unlock(key, player)
         door.door_code = 12345
+        self.assertTrue(door.locked)
         door.unlock(key, player)
         self.assertFalse(door.locked)
         door.locked = True
@@ -310,6 +313,8 @@ class TestDoorsExits(unittest.TestCase):
         key.move(player, player)
         door.unlock(None, player)
         self.assertFalse(door.locked)
+        door.lock(None, player)
+        self.assertTrue(door.locked)
 
     def test_exits(self):
         hall = Location("hall")

@@ -22,9 +22,6 @@ zap
 
 PLAYER STUFF
 ------------
-recap
-    show the important actions and events so far
-    (need code in game to store events in this list, also see 'hint' command)
 shout
     shout a message to all players in the mud (doesn't matter where they are)
 block, unblock
