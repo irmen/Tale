@@ -1,5 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
+Self-modifying rooms/exits to create a more dynamic game world.
+do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
 HTTP server mode with HTML+Javascript frontend.
 Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
 Pictures for locations (viewable in gui driver/html version only)
