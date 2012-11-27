@@ -36,7 +36,7 @@ The multi-user aspects of the framework have been put on the back burner for now
 An example test/demo story is included in the ``stories`` directory.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
-    scripts=["tale-driver.cmd", "tale-driver"],
+    scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],
     platforms="any",
     classifiers= [
         "Development Status :: 3 - Alpha",

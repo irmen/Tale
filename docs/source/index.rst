@@ -13,7 +13,8 @@ mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
 Tale is 100% pure Python and runs on Python 2.7 and 3.2+.
 It should also work on Pypy and Ironpython.
-Once Jython's new 2.7 release gets debugged a bit more, it should work on that as well.
+Jython 2.5 is not supported, and Jython 2.7 currently has a few bugs that prevent it to run Tale (Jython issues
+1886, 1887, 1949, 1994, and probably others). Once these get fixed, Tale should work on Jython 2.7 too.
 
 .. note::
     The multi-user aspects are on the back burner, I'm mainly focusing on the (single player)
@@ -41,11 +42,11 @@ There's a demo/example story included in the source distribution, in the ``stori
 Start the demo story using the supplied ``play_demo`` script.
 You don't have to install anything if you run it using this script.
 
-You can also start it without the script and by using the tale driver directly, but that
-only works correctly after you've actually installed Tale.
-It won't work from the distribution directory without having properly installed Tale.
-(This is because Tale changes its working directory to the directory where
-the story files are located, and they still need to be able to access Tale).
+You can also start it without the script and by using the tale driver directly, but
+it is recommended to properly install it first.
+It won't work from the distribution's root directory itself. You need to install Tale properly
+and/or invoke it from the start script that belongs to a story.
+
 The command is:
 
 :kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`

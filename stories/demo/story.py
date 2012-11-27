@@ -9,6 +9,14 @@ import datetime
 from tale import color
 from tale.hints import Hint
 
+if __name__=="__main__":
+    # story is invoked as a script, start it in the Tale Driver.
+    from tale.driver import Driver
+    driver = Driver()
+    driver.start(["-g", "."])
+    raise SystemExit(0)
+
+
 try:
     import colorama
 except ImportError:
@@ -78,3 +86,4 @@ class Story(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell(color.bright("Congratulations! You've finished the game!"))
+

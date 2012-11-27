@@ -9,6 +9,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 from tale import color
 
+if __name__=="__main__":
+    # story is invoked as a script, start it in the Tale Driver.
+    from tale.driver import Driver
+    driver = Driver()
+    driver.start(["-g", "."])
+    raise SystemExit(0)
+
 
 class Story(object):
     config = dict(

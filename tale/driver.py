@@ -176,13 +176,19 @@ class Driver(object):
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
-        args = parser.parse_args()
+        args = parser.parse_args(args)
         self.mode = args.mode
         if 0 <= args.delay <= 100:
             self.output_line_delay = args.delay
         else:
             raise ValueError("invalid delay, valid range is 0-100")
 
+        path_for_driver = os.path.abspath(os.path.split(inspect.getfile(Driver))[0])
+        if path_for_driver == os.path.abspath("tale"):
+            # The tale library is being loaded from the current directory, this is not supported.
+            print("Tale is being asked to run directly from the distribution directory, this is not supported.")
+            print("Install Tale properly, and/or use the start script from the story directory instead.")
+            return
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
         story = __import__("story", level=0)
