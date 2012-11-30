@@ -230,12 +230,12 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         output = player.get_output()
-        self.assertTrue("[wiretap on 'Attic': message for room]\n" in output)
-        self.assertTrue("[wiretap on 'julie': message for julie]\n" in output)
-        self.assertTrue("[wiretap on 'julie': message for room]\n" in output)
+        self.assertTrue("[wiretapped from 'Attic': message for room]\n" in output)
+        self.assertTrue("[wiretapped from 'julie': message for julie]\n" in output)
+        self.assertTrue("[wiretapped from 'julie': message for room]\n" in output)
         self.assertTrue("message for room " in output)
         # test removing the wiretaps
-        player.installed_wiretaps.clear()
+        player.clear_wiretaps()
         import gc
         gc.collect()
         julie.tell("message for julie")

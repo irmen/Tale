@@ -58,7 +58,7 @@ less use of isinstance?
 prototypes to extend items/npc instead of inheritance? or use a DSL altogether to define the basic world stuff?
 ASCII-art parser to easily define mazes/dungeons
 
-test when player name == npc name (movement, examine, talk, soul emotes, wiretap, destroy player)
+test when player name == npc name (movement, examine, talk, soul emotes, destroy player)
 test with multiple items of same name in room, in inventory, in bag
 Bug: when item X is in inventory, can't take another X from the room ("there's no X here")
 

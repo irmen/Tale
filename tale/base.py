@@ -10,6 +10,7 @@ import weakref
 import textwrap
 from . import lang
 from . import color
+import blinker
 from .errors import ActionRefused
 from .races import races
 from .globalcontext import mud_context
@@ -250,22 +251,17 @@ class Location(MudObject):
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
-        self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
         self.verbs = []       # custom verbs are added to this list when they're present in this location
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
 
     def __getstate__(self):
-        # can't serialize the wiretaps because it's a weakset. Too bad, just skip them.
         state = dict(self.__dict__)
-        del state["wiretaps"]
         return state
 
     def __setstate__(self, state):
         self.__dict__ = state
-        # restore the wireteaps to an empty weakset
-        self.wiretaps = weakref.WeakSet()
 
     def init_inventory(self, objects):
         """Set the location's initial item and livings 'inventory'"""
@@ -282,7 +278,6 @@ class Location(MudObject):
         self.livings.clear()
         self.items.clear()
         self.exits.clear()
-        self.wiretaps.clear()
 
     def add_exits(self, exits):
         """
@@ -314,8 +309,8 @@ class Location(MudObject):
             else:
                 living.tell(room_msg)
         if room_msg:
-            for tap in self.wiretaps:
-                tap.tell(room_msg)
+            tap = blinker.signal("wiretap")
+            tap.send(self.name, message=room_msg)
 
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
@@ -566,19 +561,14 @@ class Living(MudObject):
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
         self.__inventory = set()
-        self.wiretaps = weakref.WeakSet()     # wizard wiretaps for this location
         super(Living, self).__init__(name, title, description, short_description)
 
     def __getstate__(self):
-        # can't serialize the wiretaps because it's a weakset. Too bad, just skip them.
         state = dict(self.__dict__)
-        del state["wiretaps"]
         return state
 
     def __setstate__(self, state):
         self.__dict__ = state
-        # restore the wireteaps to an empty weakset
-        self.wiretaps = weakref.WeakSet()
 
     def __contains__(self, item):
         return item in self.__inventory
@@ -619,20 +609,19 @@ class Living(MudObject):
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
-        self.wiretaps.clear()
         # @todo: remove attack status, etc.
 
     def tell(self, *messages):
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
-        livings the default is to do nothing (only distribute the messages to any
-        wiretaps that might be present).
+        livings the default is to do nothing.
         They could react on it but this is not advisable because you will need
         to parse the string again to figure out what happened...
         """
-        for tap in self.wiretaps:
-            tap.tell(*messages)
+        tap = blinker.signal("wiretap")
+        for msg in messages:
+            tap.send(self.name, message=msg)
 
     def tell_others(self, *messages):
         """

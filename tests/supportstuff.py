@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division, unicode_literals
 import datetime
+import blinker
 from tale import npc
 
 
@@ -37,11 +38,15 @@ class DummyDriver(object):
 
 class Wiretap(object):
     def __init__(self):
-        self.msgs = []
-    def tell(self, msg):
-        self.msgs.append(msg)
+        self.clear()
+        tap = blinker.signal("wiretap")
+        tap.connect(self.tell)
+    def tell(self, sender, message):
+        self.msgs.append((sender, message))
+        self.senders.append(sender)
     def clear(self):
         self.msgs = []
+        self.senders = []
 
 
 class MsgTraceNPC(npc.NPC):

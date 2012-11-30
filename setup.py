@@ -54,7 +54,9 @@ An example test/demo story is included in the ``stories`` directory.
         "Topic :: Communications :: Chat",
         "Topic :: Games/Entertainment",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
-    ]
+    ],
+    install_requires=['blinker>=1.1'],
+    requires=['blinker']
 )
 
 if using_setuptools:

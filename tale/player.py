@@ -9,6 +9,7 @@ from __future__ import print_function, division, unicode_literals
 from threading import Event
 import time
 import textwrap
+import blinker
 from . import base
 from . import soul
 from . import lang
@@ -46,7 +47,6 @@ class Player(base.Living):
         self.init_nonserializables()
 
     def init_nonserializables(self):
-        self.installed_wiretaps = set()
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
@@ -62,7 +62,7 @@ class Player(base.Living):
     def __getstate__(self):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["installed_wiretaps", "_input", "_output", "input_is_available", "transcript", "textwrapper"]:
+        for name in ["_input", "_output", "input_is_available", "transcript", "textwrapper"]:
             del state[name]
         return state
 
@@ -175,14 +175,18 @@ class Player(base.Living):
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
             raise SecurityViolation("wiretap requires wizard privilege")
-        tap = Wiretap(self, target)
-        self.installed_wiretaps.add(tap)  # hold on to the wiretap otherwise it's garbage collected immediately
-        target.wiretaps.add(tap)  # install the wiretap on the target
+        tap = blinker.signal("wiretap")
+        tap.connect(self.wiretap_msg, sender=target.name)
+
+    def wiretap_msg(self, sender, message=None):
+        self.tell("[wiretapped from '%s': %s]" % (sender, message), end=True)
+
+    def clear_wiretaps(self):
+        blinker.signal("wiretap").disconnect(self.wiretap_msg)
 
     def destroy(self, ctx):
         self.activate_transcript(False)
         super(Player, self).destroy(ctx)
-        self.installed_wiretaps.clear()  # the references from within the observed are cleared by means of weakrefs
         self.soul = None   # truly die ;-)
 
     def allow_give_money(self, actor, amount):
@@ -218,18 +222,3 @@ class Player(base.Living):
                 self.transcript.close()
                 self.transcript = None
                 self.tell("Transcript ended.")
-
-
-class Wiretap(object):
-    """wiretap that can be installed on a location or a living, to tap into the messages they're receiving"""
-    def __init__(self, observer, target):
-        self.observer = observer
-        self.target_name = target.name
-        self.target_type = target.__class__.__name__
-
-    def __str__(self):
-        return "%s '%s'" % (self.target_type, self.target_name)
-
-    def tell(self, *messages):
-        for msg in messages:
-            self.observer.tell("[wiretap on '%s': %s]" % (self.target_name, msg), end=True)

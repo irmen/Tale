@@ -203,17 +203,16 @@ def do_pdb(player, parsed, **ctx):
 def do_wiretap(player, parsed, **ctx):
     """Adds a wiretap to something to overhear the messages they receive.
 'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
-'wiretap' shows all your taps, 'wiretap -clear' gets rid of all taps."""
+'wiretap -clear' gets rid of all taps."""
     print = player.tell
     if not parsed.args:
-        print("Installed wiretaps:", ", ".join(str(tap) for tap in player.installed_wiretaps) or "none")
-        return
+        raise ActionRefused("Wiretap who?")
     arg = parsed.args[0]
     if arg == ".":
         player.create_wiretap(player.location)
         print("Wiretapped room '%s'." % player.location.name)
     elif arg == "-clear":
-        player.installed_wiretaps.clear()
+        player.clear_wiretaps()
         print("All wiretaps removed.")
     elif parsed.who_order:
         for living in parsed.who_order:
