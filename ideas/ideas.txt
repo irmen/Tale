@@ -28,6 +28,20 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+File system abstraction: resourceloader should also be able to *save* stuff (savegames).
+Player I/O abstraction: add an input/output layer.
+Player output should not be printed directly to stdout by the driver.
+Player input should not be read directly from stdin.
+
+Instead of using colors directly in the output, use basic html-ish or bbcode markup (dim/normal/bright, underline, negative (reversevideo) and the 8 ansi colors)
+The I/O abstraction should convert this to the appropriate output (colorama/ true html/ whatever).
+
+Fix the textformatting to deal with colorama effects taking up character width.
+TextOutput.render should probably be removed as the I/O abstraction will take care of that.
+(rename Textoutput to Textbuffer?)
+
+Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.
+
 Better naming of exits/doors; they need to know their own name (direction). It can now be None...
 Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
 there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?
