@@ -500,8 +500,8 @@ class ParseResults(object):
         self.message = message
         self.bodypart = bodypart
         self.qualifier = qualifier
-        self.who_info = who_info or {}
-        self.who_order = who_order or []
+        self.who_info = who_info or {}      # WhoInfo for all objects parsed  (note: who-objects can be items, livings, and exits!)
+        self.who_order = who_order or []    # the order of the occurrence of the objects in the input text
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed

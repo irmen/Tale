@@ -356,6 +356,8 @@ def do_take(player, parsed, **ctx):
                 for item in parsed.who_order:
                     if item in player.location.items:
                         items_to_take.append(item)
+                    elif isinstance(item, base.Exit):
+                        raise ActionRefused("You can't pick that up.")
                     elif item not in player.location.livings:
                         print("There's no %s here." % item.name)
                 take_stuff(player, items_to_take, player.location)
@@ -752,6 +754,9 @@ def do_wait(player, parsed, **ctx):
         if not parsed.who_info:
             raise ActionRefused("Who exactly do you want to wait for?")
     if parsed.who_order:
+        # check if any of the targeted objects is a non-living
+        if not all(isinstance(who, base.Living) for who in parsed.who_order):
+            raise ActionRefused("You can't wait for something that's not alive.")
         who = lang.join(who.title for who in parsed.who_order)
         print("You wait for %s." % who)
         player.tell_others("{Title} waits for %s." % who)

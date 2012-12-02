@@ -461,6 +461,11 @@ class Exit(object):
         self.target = target_location
         self.bound = isinstance(target_location, Location)
         self.direction = self.name = direction      # direction and name can be None! Don't depend on them!
+        if self.bound:
+            self.title = "Exit to " + self.target.title
+        else:
+            self.title = "Exit to <unbound:%s>" % self.target
+        self.aliases = []
         try:
             self.short_description = short_description
         except AttributeError:
@@ -489,11 +494,15 @@ class Exit(object):
             target = getattr(module, target_object)
             assert isinstance(target, Location)
             self.target = target
+            self.title = "Exit to " + target.title
             self.bound = True
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
+
+    def move(self, target_container, actor, wizard_override=False):
+        raise ActionRefused("You can't move that.")
 
     def open(self, item, actor):
         raise ActionRefused("You can't open that.")

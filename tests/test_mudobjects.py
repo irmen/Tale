@@ -361,6 +361,23 @@ class TestDoorsExits(unittest.TestCase):
         self.assertTrue(zones.town.square is exit.target)
         exit.bind(zones)
 
+    def test_title_name(self):
+        door = Door("hall", "a locked door", direction="north", locked=True, opened=False)
+        print(door, vars(door))
+        self.assertEqual("north", door.name)
+        self.assertEqual("Exit to <unbound:hall>", door.title)
+        exit = Exit("town.square", "someplace")
+        print(exit, vars(exit))
+        self.assertEqual(None, exit.name)
+        self.assertEqual("Exit to <unbound:town.square>", exit.title)
+        class ModuleDummy(object):
+            pass
+        zones = ModuleDummy()
+        zones.town = ModuleDummy()
+        zones.town.square = Location("square")
+        exit.bind(zones)
+        self.assertEqual("Exit to square", exit.title)
+
 
 class TestLiving(unittest.TestCase):
     def test_contains(self):

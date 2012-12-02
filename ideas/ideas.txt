@@ -29,7 +29,8 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
-BUG:  say X to <exit> / wait for <exit> ==> crash
+consolidate all move() methods into one signature
+add a move() to MudObject that simply raises ActionRefused
 
 change **ctx to a proper object+attributes for all cmds
 
