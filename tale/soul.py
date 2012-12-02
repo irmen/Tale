@@ -405,33 +405,33 @@ NEGATING_QUALIFIERS = {"fail", "pretend", "dont", "don't", "attempt"}
 assert NEGATING_QUALIFIERS.issubset(ACTION_QUALIFIERS.keys())
 
 BODY_PARTS = {
-        "hand": "on the hand",
-        "forehead": "on the forehead",
-        "head": "on the head",
-        "kneecap": "on the kneecap",
-        "ankle": "in the ankle",
-        "knee": "on the knee",
-        "face": "in the face",
-        "hurts": "where it hurts",
-        "nuts": "where it hurts",
-        "eye": "in the eye",
-        "ear": "on the ear",
-        "stomach": "in the stomach",
-        "butt": "on the butt",
-        "behind": "on the behind",
-        "leg": "on the leg",
-        "foot": "on the foot",
-        "toe": "on the right toe",
-        "nose": "on the nose",
-        "neck": "in the neck",
-        "back": "on the back",
-        "arm": "on the arm",
-        "chest": "on the chest",
-        "cheek": "on the cheek",
-        "side": "in the side",
-        "everywhere": "everywhere",
-        "shoulder": "on the shoulder"
-    }
+    "hand": "on the hand",
+    "forehead": "on the forehead",
+    "head": "on the head",
+    "kneecap": "on the kneecap",
+    "ankle": "in the ankle",
+    "knee": "on the knee",
+    "face": "in the face",
+    "hurts": "where it hurts",
+    "nuts": "where it hurts",
+    "eye": "in the eye",
+    "ear": "on the ear",
+    "stomach": "in the stomach",
+    "butt": "on the butt",
+    "behind": "on the behind",
+    "leg": "on the leg",
+    "foot": "on the foot",
+    "toe": "on the right toe",
+    "nose": "on the nose",
+    "neck": "in the neck",
+    "back": "on the back",
+    "arm": "on the arm",
+    "chest": "on the chest",
+    "cheek": "on the cheek",
+    "side": "in the side",
+    "everywhere": "everywhere",
+    "shoulder": "on the shoulder"
+}
 
 
 def check_person(action, who):
@@ -525,7 +525,7 @@ class ParseResults(object):
             " who_info=%s" % "\n   ".join(who_info_str),
             " who_order=%s" % self.who_order,
             " unparsed=%s" % self.unparsed
-            ]
+        ]
         return "\n".join(s)
 
 

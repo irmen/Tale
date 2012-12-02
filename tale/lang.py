@@ -127,3 +127,78 @@ def split(string):
             return word[1:-1].strip()
         return word
     return [removequotes(p) for p in re.split("( |\\\".*?\\\"|'.*?')", string) if p.strip()]
+
+
+__number_words = [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
+]
+
+
+def spell_number(number):
+    result = ""
+    if number < 0:
+        result = "minus "
+        number = -number
+    if number > 20:
+        return result + str(number)
+    if number is int:
+        return result + __number_words[number]
+    int_number = int(number)
+    fraction = number - int_number
+    if fraction == 0:
+        fraction_txt = ""
+    elif fraction == 0.5:
+        fraction_txt = " and a half"
+    else:
+        raise ValueError("can't spell fractions other than 0.5")
+    return result + __number_words[int_number] + fraction_txt
+
+
+__plural_irregularities = {
+    "mouse": "mice",
+    "child": "children",
+    "person": "people",
+    "man": "men",
+    "woman": "women",
+    "foot": "feet",
+    "goose": "geese",
+    "tooth": "teeth",
+    "aircraft": "aircraft",
+    "fish": "fish",
+    "headquarters": "headquarters",
+    "sheep": "sheep",
+    "species": "species",
+    "cattle": "cattle",
+    "scissors": "scissors",
+    "trousers": "trousers",
+    "pants": "pants",
+    "tweezers": "tweezers",
+    "congratulations": "congratulations",
+    "pyjamas": "pyjamas",
+    "photo": "photos",
+    "piano": "pianos"
+}
+
+
+def pluralize(word, amount=2):
+    if amount == 1:
+        return word
+    if word in __plural_irregularities:
+        return __plural_irregularities[word]
+    if word.endswith("is"):
+        return word[:-2] + "es"
+    if word.endswith("z"):
+        return word + "zes"
+    if word.endswith("o") and len(word) > 1:
+        if word[-2] not in "aeiouy":
+            return word + "es"
+    if word.endswith("y"):
+        return word[:-1] + "ies"
+    if word.endswith("f"):
+        return word[:-1] + "ves"
+    if word.endswith("fe"):
+        return word[:-2] + "ves"
+    if word.endswith("s") or word.endswith("ch") or word.endswith("x") or word.endswith("sh"):
+        return word + "es"
+    return word + "s"

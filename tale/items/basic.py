@@ -104,8 +104,8 @@ class Newspaper(Item):
     def read(self, actor):
         actor.tell("The newspaper reads: \"Last year's Less Popular Sports.\"", end=True)
         actor.tell("\"Any fan will tell you the big-name leagues aren't the whole sporting world. "
-            "As time expired on last year, we take a look at major accomplishments, happenings, "
-            "and developments in the less popular sports.\"")
+                   "As time expired on last year, we take a look at major accomplishments, happenings, "
+                   "and developments in the less popular sports.\"")
         actor.tell("It looks like a boring article, you have better things to do.")
 
 

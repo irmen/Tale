@@ -29,7 +29,7 @@ class TestHints(unittest.TestCase):
             Hint("start", None, None, "first"),
             Hint("state2", None, None, "second"),
             Hint("state4", None, None, "third"),
-            ])
+        ])
         self.assertTrue(h.has_hints())
         self.assertIsNone(h.hint(self.player))
         h.state("start")
@@ -49,7 +49,7 @@ class TestHints(unittest.TestCase):
             Hint(None, None, None, "first"),
             Hint(None, "loc1", None, "second"),
             Hint(None, "loc2", None, "third"),
-            ])
+        ])
         self.assertEqual("first", h.hint(self.player))
         self.player.location = "loc999"
         self.assertEqual("first", h.hint(self.player))
@@ -70,7 +70,7 @@ class TestHints(unittest.TestCase):
             Hint(None, None, filter1, "first"),
             Hint(None, None, filter2, "second"),
             Hint(None, None, filterAll, "third"),
-            ])
+        ])
         self.assertIsNone(h.hint(self.player))
         h.state("1")
         self.assertEqual("first", h.hint(self.player))

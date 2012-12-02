@@ -57,7 +57,7 @@ class Player(base.Living):
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
-            self.name, id(self), ",".join(self.privileges) or "-")
+               self.name, id(self), ",".join(self.privileges) or "-")
 
     def __getstate__(self):
         state = super(Player, self).__getstate__()

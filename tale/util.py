@@ -240,6 +240,34 @@ def message_nearby_locations(source_location, message):
                     exit.target.tell("You can't hear where the sound is coming from.")
 
 
+def parse_time(args):
+    """parses a time from args like: 13:44:59, or like a duration such as 1h 30m 15s"""
+    try:
+        duration = parse_duration(args)
+        return (datetime.datetime.min + duration).time()
+    except ParseError:
+        if not args or len(args) > 1:
+            raise ParseError("It's not clear what time you mean.")
+        try:
+            return datetime.datetime.strptime(args[0], "%H:%M:%S").time()
+        except ValueError:
+            try:
+                return datetime.datetime.strptime(args[0], "%H:%M").time()
+            except ValueError:
+                if args[0] == "noon":
+                    return datetime.time(hour=12)
+                elif args[0] == "midnight":
+                    return datetime.time(hour=0)
+                elif args[0] in ("sunrise", "dawn"):
+                    return datetime.time(hour=6)
+                elif args[0] in ("sunset", "dusk"):
+                    return datetime.time(hour=20)
+                elif args[0] in ("evening", "morning", "later", "earlier", "future", "past"):
+                    raise ParseError("You must be more specific about the time you mean.")
+                else:
+                    raise ParseError("It's not clear what time you mean.")
+
+
 def parse_duration(args):
     """parses a duration from args like: 1 hour 20 minutes 15 seconds (hour/h, minutes/min/m, seconds/sec/s)"""
     hours = minutes = seconds = 0
@@ -339,25 +367,40 @@ class GameDateTime(object):
     times_realtime means how much faster the game time is running than real time.
     """
     def __init__(self, datetime, times_realtime=1):
+        assert times_realtime >= 0
         self.times_realtime = times_realtime
         self.clock = datetime
 
     def __str__(self):
         return str(self.clock)
 
+    def add_gametime(self, timedelta):
+        """advance the game clock by a time delta expressed in game time"""
+        assert isinstance(timedelta, datetime.timedelta)
+        self.clock += timedelta
+
+    def sub_gametime(self, timedelta):
+        """rewind the game clock by a time delta expressed in game time"""
+        assert isinstance(timedelta, datetime.timedelta)
+        self.clock -= timedelta
+
     def plus_realtime(self, timedelta):
+        """return the game clock plus a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         return self.clock + timedelta * self.times_realtime
 
     def minus_realtime(self, timedelta):
+        """return the game clock minus a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         return self.clock - timedelta * self.times_realtime
 
     def add_realtime(self, timedelta):
+        """advance the game clock by a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock += timedelta * self.times_realtime
 
     def sub_realtime(self, timedelta):
+        """rewind the game clock by a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock -= timedelta * self.times_realtime
 

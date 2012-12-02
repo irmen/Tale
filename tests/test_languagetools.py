@@ -95,6 +95,35 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("farting", lang.fullverb("fart"))
         self.assertEqual("trying", lang.fullverb("try"))
 
+    def testNumberSpell(self):
+        self.assertEqual("zero", lang.spell_number(0))
+        self.assertEqual("one", lang.spell_number(1))
+        self.assertEqual("twenty", lang.spell_number(20))
+        self.assertEqual("99", lang.spell_number(99))
+        self.assertEqual("minus one", lang.spell_number(-1))
+        self.assertEqual("minus twenty", lang.spell_number(-20))
+        self.assertEqual("two and a half", lang.spell_number(2.5))
+        with self.assertRaises(ValueError):
+            lang.spell_number(1.234)
+
+    def test_pluralize(self):
+        self.assertEqual("cars", lang.pluralize("car"))
+        self.assertEqual("cars", lang.pluralize("car", amount=0))
+        self.assertEqual("car", lang.pluralize("car", amount=1))
+        self.assertEqual("boxes", lang.pluralize("box"))
+        self.assertEqual("bosses", lang.pluralize("boss"))
+        self.assertEqual("bushes", lang.pluralize("bush"))
+        self.assertEqual("churches", lang.pluralize("church"))
+        self.assertEqual("gases", lang.pluralize("gas"))
+        self.assertEqual("quizzes", lang.pluralize("quiz"))
+        self.assertEqual("volcanoes", lang.pluralize("volcano"))
+        self.assertEqual("photos", lang.pluralize("photo"))
+        self.assertEqual("pianos", lang.pluralize("piano"))
+        self.assertEqual("ladies", lang.pluralize("lady"))
+        self.assertEqual("crises", lang.pluralize("crisis"))
+        self.assertEqual("wolves", lang.pluralize("wolf"))
+        self.assertEqual("ladies", lang.pluralize("lady"))
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

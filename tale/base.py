@@ -438,10 +438,10 @@ class Location(MudObject):
 
 
 _Limbo = Location("Limbo",
-                     """
-                     The intermediate or transitional place or state. There's only nothingness.
-                     Livings end up here if they're not inside a proper location yet.
-                     """)
+                  """
+                  The intermediate or transitional place or state. There's only nothingness.
+                  Livings end up here if they're not inside a proper location yet.
+                  """)
 
 
 class Exit(object):

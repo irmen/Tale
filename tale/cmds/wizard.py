@@ -156,7 +156,7 @@ def do_destroy(player, parsed, **ctx):
             raise ActionRefused("Can't destroy " + lang.a(victim.__class__.__name__))
         player.tell("You destroyed %r." % victim)
         player.tell_others("{Title} makes some gestures and a tiny black hole appears.\n"
-                             "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))
+                           "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))
 
 
 @wizcmd("clean")
@@ -477,5 +477,5 @@ def do_events(player, parsed, **ctx):
     txt.append("  due   " + color.DIM + "|" + color.NORMAL + " function            " + color.DIM + "|" + color.NORMAL + " owner")
     for d in driver.deferreds:
         txt.append(("%-7s " + color.DIM + "|" + color.NORMAL + " %-20s" + color.DIM + "|" + color.NORMAL + " %s") %
-            (d.due_secs(clock, realtime=True), d.callable, d.owner))
+                   (d.due_secs(clock, realtime=True), d.callable, d.owner))
     player.tell(*txt, format=False)

@@ -25,7 +25,7 @@ abbreviations = {
     "exa": "examine",
     "inv": "inventory",
     "'": "say"
-    }
+}
 
 
 def register_all(cmd_processor):

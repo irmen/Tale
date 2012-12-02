@@ -218,6 +218,8 @@ class Driver(object):
             # If the server tick is synchronized with player commands, this factor needs to be 1,
             # because at every command entered the game time simply advances 1 x server_tick_time.
             self.config.gametime_to_realtime = 1
+        assert self.config.server_tick_time > 0
+        assert self.config.max_wait_hours >= 0
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
 
@@ -489,7 +491,7 @@ class Driver(object):
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         func(self.player, parsed, driver=self, verbs=command_verbs, config=self.config,
-                                                  clock=self.game_clock, state=self.state)
+                             clock=self.game_clock, state=self.state)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
@@ -533,10 +535,16 @@ class Driver(object):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times,
         # however @todo: be able to detect if something happened during the wait
-        num_tics = int(duration.seconds / self.config.gametime_to_realtime / self.config.server_tick_time)
-        if num_tics < 1:
+        if self.config.gametime_to_realtime == 0:
+            # game is running with a 'frozen' clock
+            # simply advance the clock, and perform a single server_tick
+            self.game_clock.add_gametime(duration)
+            self.server_tick()
+            return True, None      # uneventful
+        num_ticks = int(duration.seconds / self.config.gametime_to_realtime / self.config.server_tick_time)
+        if num_ticks < 1:
             return False, "It's no use waiting such a short while."
-        for _ in range(num_tics):
+        for _ in range(num_ticks):
             self.server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
@@ -680,8 +688,10 @@ def monkeypatch_blinker():
         import blinker
         if getattr(blinker.signal.im_class, "_tale_monkeypatch", False):
             return  # already patched
+
         class MonkeyPatchedNamespace(dict, blinker.Namespace):
-            _tale_monkeypatch=True
+            _tale_monkeypatch = True
+
         blinker.signal = MonkeyPatchedNamespace().signal
 
 

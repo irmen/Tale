@@ -743,19 +743,41 @@ def do_say(player, parsed, **ctx):
 
 @cmd("wait")
 def do_wait(player, parsed, **ctx):
-    """Let time pass. You can specify how long you want to wait (in hours, minutes, seconds)."""
+    """
+    Let someone know you are waiting for them. Alternatively, you can simply Let time pass.
+    For the latter use, you can optionally specify how long you want to wait (in hours, minutes, seconds).
+    """
     print = player.tell
+    if "for" in parsed.unrecognized:
+        if not parsed.who_info:
+            raise ActionRefused("Who exactly do you want to wait for?")
     if parsed.who_order:
         who = lang.join(who.title for who in parsed.who_order)
         print("You wait for %s." % who)
         player.tell_others("{Title} waits for %s." % who)
         return
     if parsed.args:
-        duration = util.parse_duration(parsed.args)
+        if parsed.args[0] in ("till", "until"):
+            # wait until an absolute time on the clock
+            wait_time = util.parse_time(parsed.args[1:])
+            now_dt = ctx["clock"].clock
+            wait_dt = datetime.datetime.combine(now_dt.date(), wait_time)
+            if wait_dt == now_dt:
+                raise ActionRefused("It is already that time.")
+            if wait_dt < now_dt:
+                wait_dt += datetime.timedelta(hours=24)
+            duration = wait_dt - now_dt
+        else:
+            # wait a given duration
+            duration = util.parse_duration(parsed.args)
     else:
         duration = datetime.timedelta(minutes=10)
-    if duration.total_seconds() / 3600 > 2:
-        raise ActionRefused("You can't wait more than two hours at once, who knows what might happen in that time?")
+    max_wait_hours = ctx["config"].max_wait_hours
+    if max_wait_hours == 0:
+        raise ActionRefused("It is not possible to wait.")
+    if duration.total_seconds() / 3600 > max_wait_hours:
+        msg = lang.spell_number(max_wait_hours) + " " + lang.pluralize("hour", max_wait_hours)
+        raise ActionRefused("You can't wait more than " + msg + " at once, who knows what might happen in that time?")
     ok, message = ctx["driver"].do_wait(duration)
     if ok:
         print("Time passes. You've waited %s." % util.duration_display(duration))

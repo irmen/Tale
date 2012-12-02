@@ -232,6 +232,28 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(datetime.datetime(2012, 4, 19, 19, 50, 25), gt.clock)
         gt = util.GameDateTime(datetime.datetime.now(), 99)
         self.assertEqual(99, gt.times_realtime)
+        gt = util.GameDateTime(datetime.datetime(2012, 4, 19, 14, 0, 0), times_realtime=99)
+        gt.add_gametime(datetime.timedelta(hours=1, minutes=10, seconds=5))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 15, 10, 5), gt.clock)
+        gt.sub_gametime(datetime.timedelta(hours=2, minutes=20, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 12, 49, 35), gt.clock)
+
+    def test_parsetime(self):
+        self.assertEqual(datetime.time(hour=13, minute=22, second=58), util.parse_time(["13:22:58"]))
+        self.assertEqual(datetime.time(hour=13, minute=22, second=58), util.parse_time(["13:22:58"]))
+        self.assertEqual(datetime.time(hour=13, minute=22, second=0), util.parse_time(["13:22"]))
+        time = util.parse_time(["3", "h", "2", "m", "5", "s"])
+        self.assertEqual(datetime.time(hour=3, minute=2, second=5), time)
+        self.assertEqual(datetime.time(hour=0), util.parse_time(["midnight"]))
+        self.assertEqual(datetime.time(hour=12), util.parse_time(["noon"]))
+        util.parse_time(["sunrise"])
+        util.parse_time(["sunset"])
+        with self.assertRaises(ParseError):
+            util.parse_time(None)
+        with self.assertRaises(ParseError):
+            util.parse_time([])
+        with self.assertRaises(ParseError):
+            util.parse_time(["some_weird_occasion"])
 
 
 if __name__ == '__main__':

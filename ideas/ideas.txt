@@ -28,6 +28,15 @@ Do something with the circlemud xml data:
 
 General ideas/TODO:
 -------------------
+BUG:  say X to <exit> / wait for <exit> ==> crash
+
+change **ctx to a proper object+attributes for all cmds
+
+Improve the game clock:
+ - option to not advance automatically at all
+ - option to only advance when changing locations?
+ - explicitly advance time when player waits
+
 File system abstraction: resourceloader should also be able to *save* stuff (savegames).
 Player I/O abstraction: add an input/output layer.
 Player output should not be printed directly to stdout by the driver.
