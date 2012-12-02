@@ -9,6 +9,9 @@ from __future__ import print_function, division, unicode_literals
 import datetime
 import blinker
 from tale import npc
+from tale import driver
+
+driver.monkeypatch_blinker()
 
 
 class DummyDriver(object):

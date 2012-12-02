@@ -163,6 +163,7 @@ class Driver(object):
         globalcontext.mud_context.state = self.state
         globalcontext.mud_context.config = None
         cmds.register_all(self.commands)
+        monkeypatch_blinker()
 
     def bind_exits(self):
         for exit in self.unbound_exits:
@@ -668,6 +669,20 @@ class PlayerInputThread(threading.Thread):
         except EOFError:
             pass
         return True
+
+
+def monkeypatch_blinker():
+    """
+    On Pypy: monkeypatch blinker to use a namespace based on dict instead of weakvaluedict
+    See blinker issue: https://bitbucket.org/jek/blinker/issue/7
+    """
+    if hasattr(sys, "pypy_version_info"):
+        import blinker
+        if getattr(blinker.signal.im_class, "_tale_monkeypatch", False):
+            return  # already patched
+        class MonkeyPatchedNamespace(dict, blinker.Namespace):
+            _tale_monkeypatch=True
+        blinker.signal = MonkeyPatchedNamespace().signal
 
 
 if __name__ == "__main__":

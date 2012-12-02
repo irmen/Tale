@@ -6,11 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division, unicode_literals
-import weakref
+import blinker
 import textwrap
 from . import lang
 from . import color
-import blinker
 from .errors import ActionRefused
 from .races import races
 from .globalcontext import mud_context
