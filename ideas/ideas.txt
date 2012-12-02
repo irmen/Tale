@@ -23,6 +23,7 @@ Vendors and shops: stock, sell stuff, buy stuff, haggle?
 World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
 
 Do something with the circlemud xml data:
+  http://www.razorvine.net/download/circlemuddata_converters.zip
   http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
 

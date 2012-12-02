@@ -201,6 +201,7 @@ VERBS = {
 # "emote":    ( DEUX, None, "emote: player \nWHAT", " \nWHAT"),   # replaced by a command
 
 # Verbs that require a person
+"glance":   ( SIMP, None, "glance$ \nHOW at \nWHO" ),
 "hide":     ( SIMP, None, "hide$ \nHOW behind \nWHO" ),
 "finger":   ( SIMP, None, "give$ \nWHO the finger" ),
 "mercy":    ( SIMP, None, "beg$ \nWHO for mercy" ),
@@ -208,6 +209,7 @@ VERBS = {
 "insult":   ( SIMP, ( "angrily", ), " \nHOW spew$ profanities at \nWHO" ),
 "gripe":    ( PREV, None, "to" ),
 "peer":     ( PREV, None, "at" ),
+"gaze":     ( PREV, None, "at" ),
 "chase":    ( PREV, ("angrily",), "after" ),
 "remember": ( SIMP, None, "remember$ \nAT \nHOW", "" ),
 "surprise": ( PREV, None, "" ),
@@ -373,7 +375,7 @@ NONLIVING_OK_VERBS = {
     "admire", "adore", "answer", "argh", "ask", "babble", "barf", "bark", "beam",
     "bite", "blink", "bow", "breathe", "bump", "cackle", "caper", "capitulate",
     "chuckle", "complain", "cuddle", "curse", "drool", "embrace", "eye", "fear",
-    "feel", "finger", "fondle", "giggle", "glare", "grimace", "grin", "groan",
+    "feel", "finger", "fondle", "gaze", "giggle", "glare", "glance", "grimace", "grin", "groan",
     "grope", "growl", "grunt", "guffaw", "hate", "headshake", "hide", "hiss",
     "hmm", "ignore", "jerk", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
     "love", "lust", "meow", "moan", "mumble", "murmur", "mutter", "nod", "nominate",
