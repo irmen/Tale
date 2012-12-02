@@ -2,18 +2,18 @@ Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 Self-modifying rooms/exits to create a more dynamic game world.
 do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
-HTTP server mode with HTML+Javascript frontend.
-Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver
-Pictures for locations (viewable in gui driver/html version only)
+Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver. (fix I/O abstraction first!)
+Pictures for locations, items, livings and exits. (viewable in gui driver/html version only, ofcourse).
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 Check for and disable IF-specific stuff. (make the @disable_in_IF decorator more general into @disable_in_gamemode("..."))
-Let players define aliases for certain commands (including args).
+Let players define aliases for certain commands (including args) "alias w_s=wield sword"
 Write stuff to a logfile for the server admins.
-Mailbox system: can mail messages, money and items to other players. Only when mailbox in environment?
-Bulletin boards.
+Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
+Notify player if mail arrived.
+Simple Bulletin boards. Readonly (except by wizards) and read/write for everyone.
 Pets: tame/befriend/abandon (charisma/luck)
 Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
 Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
@@ -26,77 +26,67 @@ Do something with the circlemud xml data:
   http://www.razorvine.net/download/circlemuddata_converters.zip
   http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
+DAMAGE TYPES:
+blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
+disease, trauma, psionic, suffocation, deathray, emotional, sonic,
+EMP, karma, drama, pressure, vacuum, inertia
+
 
 General ideas/TODO:
 -------------------
+BUG: when item X is in inventory, can't take another X from the room ("there's no X here")
+BUG: Parser: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
+
 consolidate all move() methods into one signature
 add a move() to MudObject that simply raises ActionRefused
+allow_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 
-change **ctx to a proper object+attributes for all cmds
-
-Improve the game clock:
- - option to not advance automatically at all
- - option to only advance when changing locations?
- - explicitly advance time when player waits
+change **ctx to a proper object+attributes for all cmds, to get rid of string based attribute access ctx["driver"] => ctx.driver
 
 File system abstraction: resourceloader should also be able to *save* stuff (savegames).
 Player I/O abstraction: add an input/output layer.
-Player output should not be printed directly to stdout by the driver.
-Player input should not be read directly from stdin.
+Player output should not be printed directly to stdout by the driver, but routed through the I/O abstraction.
+Player input should not be read directly from stdin but asked from the I/O abstraction.
 
 Instead of using colors directly in the output, use basic html-ish or bbcode markup (dim/normal/bright, underline, negative (reversevideo) and the 8 ansi colors)
 The I/O abstraction should convert this to the appropriate output (colorama/ true html/ whatever).
+Console output: dynamically highlight names/aliases/exits/items? (can be a special markup tag!)
 
-Fix the textformatting to deal with colorama effects taking up character width.
+Fix the textformatting to deal with ansi-escape characters (due to coloring) taking up character width.
 TextOutput.render should probably be removed as the I/O abstraction will take care of that.
 (rename Textoutput to Textbuffer?)
 
+HTTP server mode with HTML+Javascript frontend.
 Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.
 
-Better naming of exits/doors; they need to know their own name (direction). It can now be None...
+Better naming of exits/doors; they need to know their own name (direction). It can now be None... (set name to exit.title)
 Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
 there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?
 
 Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
-(note: less suited for MUDs because people might interfere)
-
-Console output: dynamically highlight names/aliases/exits/items? (Problem: textwrap also counts the ansi escape sequences)
+(note: less suited for MUDs because other people might interfere with the states)
 
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-Load story from a zipfile. So the resource loader should be able to load stuff from zipfile too!
+Load story from a zipfile. Resourceloader should be able to load stuff from zipfile too! (where to save savegames??)
 
-Obfuscated resource files (to avoid easy spoilers by simply reading the game files)?
+Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
+Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
 
-Parser (bug): say "I don't get it" -> it thinks the message stops at the single quote in "don't".
-Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them'.
-Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?  Or use state machine (overkill for a simple question state)?
-
-Invisible objects (only visible to a wizard.) Perhaps easiest by setting title and description to None?
-(name can't be None because the object needs a way to identify it).
-
-allow_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 should Exit inherit from MudObject? (it contains a fair amount of similar methods now)
 use lang.a more?
 less use of isinstance?
-prototypes to extend items/npc instead of inheritance? or use a DSL altogether to define the basic world stuff?
-ASCII-art parser to easily define mazes/dungeons
+prototypes to extend items/npc instead of inheritance?
+Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
 
-test when player name == npc name (movement, examine, talk, soul emotes, destroy player)
-test with multiple items of same name in room, in inventory, in bag
-Bug: when item X is in inventory, can't take another X from the room ("there's no X here")
+test what happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
+test what happens with multiple items of same name in room, in inventory, in bag
 
 Change living location logic so that livings can sit inside a container item too.
 Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
-+ take <living> actually working! (take ant, trap rabbit in cage, ...)
++ take <living> can actually work! (take ant, trap rabbit in cage, ...)
 
-
-DAMAGE TYPES (MUD)
-------------------
-blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
-disease, trauma, psionic, suffocation, deathray, emotional, sonic,
-E.M.P., karma, drama, pressure, underpressure, inertia
 
 Light/Dark
 ----------
