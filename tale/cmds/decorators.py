@@ -47,7 +47,14 @@ def disable_notify_action(func):
     return func
 
 
-def disable_in_IF(func):
-    """decorator to remove the command in Interactive Fiction mode"""
-    func.disabled_for_IF = True
+def disabled_in_gamemode(mode):
+    """decorator to disable a command in the given game mode"""
+    def disable(func):
+        func.disabled_in_mode = mode
+        return func
+    return disable
+
+def overrides_soul(func):
+    """decorator to let the command override (hide) the corresponding soul command"""
+    func.overrides_soul = True
     return func

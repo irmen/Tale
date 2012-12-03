@@ -166,7 +166,7 @@ VERBS = {
 "melt":      ( PERS, ( "in front of",), "melt$ from the heat", "melt$ \nHOW \nWHO"),
 "hello":     ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
 "hi":        ( PERS, None, "greet$ everyone \nHOW", "greet$ \nWHO \nHOW"),
-# "wait":      ( SIMP, None, "wait$ \nHOW", ""),   # replaced by a command
+"wait":      ( SIMP, None, "wait$ \nHOW", ""),   # replaced by a command
 "grease":    ( SIMP, ("like a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like a shiatsu",), "oil$ \nWHO \nHOW"),
 #"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),    # replaced by a command

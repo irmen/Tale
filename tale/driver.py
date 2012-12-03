@@ -127,12 +127,15 @@ class Commands(object):
         return result
 
     def adjust_available_commands(self, story_config, game_mode):
-        if game_mode == "if":
-            # disable commands flagged with 'disabled_for_IF'
-            for cmds in self.commands_per_priv.values():
-                for cmd, func in list(cmds.items()):
-                    if getattr(func, "disabled_for_IF", False):
-                        del cmds[cmd]
+        # disable commands flagged with the given game_mode
+        # disable soul verbs flagged with override
+        for cmds in self.commands_per_priv.values():
+            for cmd, func in list(cmds.items()):
+                disabled_mode = getattr(func, "disabled_in_mode", None)
+                if game_mode == disabled_mode:
+                    del cmds[cmd]
+                elif getattr(func, "overrides_soul", False):
+                    del soul.VERBS[cmd]
 
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
@@ -155,7 +158,7 @@ class Driver(object):
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
-        self.mode = "if"  # if/mud driver mode
+        self.mode = "if"  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         self.commands = Commands()
         self.output_line_delay = 60   # milliseconds
         self.server_loop_durations = collections.deque(maxlen=10)
@@ -244,9 +247,12 @@ class Driver(object):
             print(color.NORMAL)
             print()
 
-        choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
+        if self.mode == "mud":
+            load_choice = "n"
+        else:
+            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
         print("")
-        if choice == "y":
+        if load_choice == "y":
             self.load_saved_game()
             if args.transcript:
                 self.player.activate_transcript(args.transcript)

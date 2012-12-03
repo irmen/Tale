@@ -453,7 +453,7 @@ def do_server(player, parsed, **ctx):
     else:
         gc_objects = str(len(gc.get_objects()))
     txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
-    txt.append("Players: %d   Heartbeats: %d   Deferreds: %d" % (len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
+    txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (driver.mode, len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
         txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))

@@ -31,7 +31,7 @@ class Story(object):
         server_tick_method = "command",  # 'command' (waits for player entry) or 'timer' (async timer driven)
         server_tick_time = 5.0,          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
         gametime_to_realtime = 1,        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
-        max_wait_hours = 0,              # the max. number of hours (gametime) the player is allowed to wait (>=0)
+        max_wait_hours = 2,              # the max. number of hours (gametime) the player is allowed to wait (>=0)
         display_gametime = False,        # enable/disable display of the game time at certain moments
         epoch = None,                    # start date/time of the game clock
         startlocation_player = "house.livingroom",

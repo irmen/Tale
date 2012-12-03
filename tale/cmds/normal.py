@@ -15,7 +15,7 @@ from .. import races
 from .. import util
 from .. import base
 from .. import color
-from .decorators import disable_in_IF, disable_notify_action
+from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
@@ -359,7 +359,10 @@ def do_take(player, parsed, **ctx):
                     elif isinstance(item, base.Exit):
                         raise ActionRefused("You can't pick that up.")
                     elif item not in player.location.livings:
-                        print("There's no %s here." % item.name)
+                        if item in player:
+                            print("You've already got it.")
+                        else:
+                            print("There's no %s here." % item.name)
                 take_stuff(player, items_to_take, player.location)
                 return
 
@@ -646,7 +649,7 @@ def do_examine(player, parsed, **ctx):
 
 @cmd("stats")
 @disable_notify_action
-@disable_in_IF
+@disabled_in_gamemode("if")
 def do_stats(player, parsed, **ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
@@ -696,7 +699,7 @@ def do_tell(player, parsed, **ctx):
 
 
 @cmd("emote")
-@disable_in_IF
+@disabled_in_gamemode("if")
 def do_emote(player, parsed, **ctx):
     """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
     if not parsed.unparsed:
@@ -744,6 +747,8 @@ def do_say(player, parsed, **ctx):
 
 
 @cmd("wait")
+@disabled_in_gamemode("mud")
+@overrides_soul
 def do_wait(player, parsed, **ctx):
     """
     Let someone know you are waiting for them. Alternatively, you can simply Let time pass.
@@ -796,8 +801,9 @@ def do_quit(player, parsed, **ctx):
     """Quit the game."""
     driver = ctx["driver"]
     if util.confirm("Are you sure you want to quit? ", driver):
-        if util.confirm("Would you like to save your progress? ", driver):
-            do_save(player, parsed, **ctx)
+        if driver.mode != "mud":
+            if util.confirm("Would you like to save your progress? ", driver):
+                do_save(player, parsed, **ctx)
         player.tell("\n")
         raise SessionExit()
     player.tell("Good, thank you for staying.")
@@ -814,7 +820,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
 
 @cmd("who")
 @disable_notify_action
-@disable_in_IF
+@disabled_in_gamemode("if")
 def do_who(player, parsed, **ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
     if parsed.args:
@@ -1095,7 +1101,7 @@ def do_coin(player, parsed, **ctx):
 
 @cmd("motd")
 @disable_notify_action
-@disable_in_IF
+@disabled_in_gamemode("if")
 def do_motd(player, parsed, **ctx):
     """Show the message-of-the-day again."""
     motd, mtime = util.get_motd(ctx["driver"].game_resource)
@@ -1142,6 +1148,7 @@ def do_flee(player, parsed, **ctx):
 
 @cmd("save")
 @disable_notify_action
+@disabled_in_gamemode("mud")
 def do_save(player, parsed, **ctx):
     """Save your game."""
     ctx["driver"].do_save(player)
@@ -1149,6 +1156,7 @@ def do_save(player, parsed, **ctx):
 
 @cmd("load", "reload", "restore", "restart")
 @disable_notify_action
+@disabled_in_gamemode("mud")
 def do_load(player, parsed, **ctx):
     """Load a previously saved game."""
     player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
@@ -1158,6 +1166,7 @@ def do_load(player, parsed, **ctx):
 
 @cmd("transcript")
 @disable_notify_action
+@disabled_in_gamemode("mud")
 def do_transcript(player, parsed, **ctx):
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if not parsed.args:
@@ -1214,15 +1223,15 @@ def do_brief(player, parsed, **ctx):
     'brief reset': disable brief mode and forget about the known locations as well.
     Note that when you explicitly use the 'look' or 'examine' commands, the brief setting is ignored.
     """
-    if not parsed.args:
+    if parsed.unparsed=="off" or (parsed.args and parsed.args[0] == "off"):
+        player.brief = 0
+        player.tell("Verbose location descriptions restored.")
+    elif not parsed.args:
         player.brief = 1
         player.tell("Brief location descriptions enabled for known locations.")
     elif parsed.args[0] == "all":
         player.brief = 2
         player.tell("Brief location descriptions enabled for all locations.")
-    elif parsed.args[0] == "off":
-        player.brief = 0
-        player.tell("Verbose location descriptions restored.")
     elif parsed.args[0] == "reset":
         player.brief = 0
         count = len(player.known_locations)
@@ -1351,7 +1360,7 @@ def do_gameinfo(player, parsed, **ctx):
 
 @cmd("config")
 def do_config(player, parsed, **ctx):
-    """Show or change game configuration parameters."""
+    """Show or change player configuration parameters."""
     config = ctx["config"]
     driver = ctx["driver"]
     if parsed.args:
@@ -1376,7 +1385,7 @@ def do_config(player, parsed, **ctx):
             raise ActionRefused("Invalid parameter name.")
         player.tell("Configuration modified.", end=True)
         player.tell("\n")
-    player.tell("Game configuration:", end=True)
+    player.tell("Configuration:", end=True)
     player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
     player.tell("  width (screen width) = %d" % player.screen_width, format=False)
 
