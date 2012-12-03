@@ -555,8 +555,8 @@ class Driver(object):
             "heartbeats": self.heartbeat_objects,
             "config": self.config
         }
-        with open(self.config.name.lower() + ".savegame", "wb") as out:
-            pickle.dump(state, out, protocol=pickle.HIGHEST_PROTOCOL)
+        savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
+        self.vfs.write_to_storage(self.config.name.lower() + ".savegame", savedata)
         player.tell("Game saved.")
         if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)
@@ -564,8 +564,9 @@ class Driver(object):
 
     def load_saved_game(self):
         try:
-            with open(self.config.name.lower() + ".savegame", "rb") as savegame:
-                state = pickle.load(savegame)
+            savegame = self.vfs.load_from_storage(self.config.name.lower() + ".savegame")
+            state = pickle.loads(savegame)
+            del savegame
         except (IOError, pickle.PickleError) as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)

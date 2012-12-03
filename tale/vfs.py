@@ -67,15 +67,18 @@ class VirtualFileSystem(object):
         with self.open_read(path, mode="rb") as f:
             return f.read()
 
-    def write_text(self, path, text):
-        with self.open_write(path, mode="w") as f:
-            f.write(text)
+    def load_from_storage(self, path):
+        self.validatePath(path)
+        path = os.path.join(*path.split("/"))   # convert to platform path separator
+        path = self.get_userdata_dir(path)
+        with open(path, "rb") as f:
+            return f.read()
 
-    def write_binary(self, path, data):
+    def write_to_storage(self, path, data):
         with self.open_write(path, mode="wb") as f:
             f.write(data)
 
-    def delete(self, path):
+    def delete_storage(self, path):
         self.validatePath(path)
         path = self.get_userdata_dir(path)
         os.remove(path)

@@ -35,8 +35,7 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
-Driver should use vfs to save the savegames.
-Player I/O abstraction: add an input/output layer.
+Player text I/O abstraction: add an input/output layer.
 Player output should not be printed directly to stdout by the driver, but routed through the I/O abstraction.
 Player input should not be read directly from stdin but asked from the I/O abstraction.
 
@@ -64,7 +63,7 @@ Finite-state-machine to support multi-phase actions (such as a short dialog with
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-Load story from a zipfile. Resourceloader should be able to load stuff from zipfile too! (where to save savegames??)
+Load story from a zipfile. VFS should thus be able to load resources from a zipfile too.
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
 Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
