@@ -33,7 +33,7 @@ EMP, karma, drama, pressure, vacuum, inertia
 
 General ideas/TODO:
 -------------------
-BUG: Parser: say "I don't get it" -> it thinks the message stops at the single quote in "don't".
+BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
 consolidate all move() methods into one signature
 add a move() to MudObject that simply raises ActionRefused

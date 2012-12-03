@@ -373,7 +373,7 @@ items that are normally fixed in place (move item to playername)."""
         thing_container = player.location
     else:
         raise ParseError("There seems to be no %s here." % thing.name)
-    thing.move(target, player, wizard_override=True)
+    thing.move(target, player)
     print("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
     player.tell_others("{Title} moved %s into %s." % (thing.title, target.title))
 

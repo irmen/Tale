@@ -183,13 +183,13 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target_container, actor, wizard_override=False):
+    def move(self, target_container, actor):
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
-        If wizard_override is True, it overrides certain allowance checks (but not all)
+        An actor with 'wizard' privilege may move stuff with less restrictions as usual.
         """
-        if not wizard_override or "wizard" not in actor.privileges:
+        if "wizard" not in actor.privileges:
             self.allow_move(actor)
         source_container = self.contained_in
         if source_container:
@@ -501,7 +501,7 @@ class Exit(object):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
 
-    def move(self, target_container, actor, wizard_override=False):
+    def move(self, target_container, actor):
         raise ActionRefused("You can't move that.")
 
     def open(self, item, actor):
