@@ -22,7 +22,7 @@ from . import errors
 from . import util
 from . import soul
 from . import cmds
-from . import resource
+from . import vfs
 from . import player
 from . import color
 from . import __version__ as tale_version_str
@@ -178,7 +178,7 @@ class Driver(object):
         else:
             raise ValueError("invalid delay, valid range is 0-100")
 
-        path_for_driver = os.path.abspath(os.path.split(inspect.getfile(Driver))[0])
+        path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
             # The tale library is being loaded from the current directory, this is not supported.
             print("Tale is being asked to run directly from the distribution directory, this is not supported.")
@@ -202,7 +202,7 @@ class Driver(object):
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type)
-        self.game_resource = resource.ResourceLoader(story)
+        self.vfs = vfs.VirtualFileSystem(story)
         self.story.init(self)
         import zones
         self.zones = zones
@@ -218,7 +218,7 @@ class Driver(object):
         self.bind_exits()
 
         try:
-            banner = self.game_resource.load_text("messages/banner.txt")
+            banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
             print(color.bright("\n" + banner + "\n"))
         except IOError:
@@ -297,7 +297,7 @@ class Driver(object):
 
     def show_motd(self):
         if self.mode != "if":
-            motd, mtime = util.get_motd(self.game_resource)
+            motd, mtime = util.get_motd(self.vfs)
             if motd:
                 self.player.tell(color.bright("Message-of-the-day, last modified on %s:" % mtime), end=True)
                 self.player.tell("\n")

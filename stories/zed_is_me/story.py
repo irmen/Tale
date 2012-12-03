@@ -38,13 +38,13 @@ class Story(object):
         startlocation_wizard = "house.livingroom",
     )
 
-    resources = None    # will be set by driver init()
-    driver = None       # will be set by driver init()
+    vfs = None        # will be set by driver init()
+    driver = None     # will be set by driver init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
-        self.resources = driver.game_resource
+        self.vfs = driver.vfs
 
     def init_player(self, player):
         """
@@ -83,7 +83,7 @@ class Story(object):
         # self.display_text_file(player, "messages/completion_failed.txt")
 
     def display_text_file(self, player, filename):
-        for paragraph in self.resources.load_text(filename).split("\n\n"):
+        for paragraph in self.vfs.load_text(filename).split("\n\n"):
             if paragraph.startswith("\n"):
                 player.tell("\n")
             player.tell(paragraph, end=True)

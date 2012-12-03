@@ -35,7 +35,7 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
-File system abstraction: resourceloader should also be able to *save* stuff (savegames).
+Driver should use vfs to save the savegames.
 Player I/O abstraction: add an input/output layer.
 Player output should not be printed directly to stdout by the driver, but routed through the I/O abstraction.
 Player input should not be read directly from stdin but asked from the I/O abstraction.

@@ -11,7 +11,7 @@ from tale import util, globalcontext
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
-from tale.resource import ResourceLoader
+from tale.vfs import VirtualFileSystem, VfsError
 from supportstuff import DummyDriver, Wiretap
 
 
@@ -189,19 +189,28 @@ class TestUtil(unittest.TestCase):
         """
         self.assertEqual("first\n  second\n    third", util.format_docstring(d))
 
-    def test_resourceloader(self):
-        r = ResourceLoader(util)
-        with self.assertRaises(ValueError):
-            r.load_text("a\\b")
-        with self.assertRaises(ValueError):
-            r.load_text("/abs/path")
+    def test_vfs_load(self):
+        vfs = VirtualFileSystem(util)
+        with self.assertRaises(VfsError):
+            vfs.load_text("a\\b")
+        with self.assertRaises(VfsError):
+            vfs.load_text("/abs/path")
         with self.assertRaises(IOError):
-            r.load_text("normal/text")
+            vfs.load_text("normal/text")
         with self.assertRaises(IOError):
-            r.load_image("normal/image")
-        r = ResourceLoader("/var/temp")
+            vfs.load_image("normal/image")
+        vfs = VirtualFileSystem("/var/temp")
         with self.assertRaises(IOError):
-            r.load_text("test_doesnt_exist_999.txt")
+            vfs.load_text("test_doesnt_exist_999.txt")
+
+    def test_vfs_save(self):
+        vfs = VirtualFileSystem(util)
+        with vfs.open_write("unittest.txt") as f:
+            pass
+        vfs.write_text("unittest.txt", "This is written from a unit test.\nSecond line.\n")
+        vfs.write_binary("unittest.bin", b"This is a binary file\nSecond line.\n")
+        vfs.delete("unittest.txt")
+        vfs.delete("unittest.bin")
 
     def test_clone(self):
         item = Item("thing", "description")

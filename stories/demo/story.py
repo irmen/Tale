@@ -45,13 +45,13 @@ class Story(object):
         startlocation_wizard = "wizardtower.hall",
         )
 
-    resources = None    # will be set by driver init()
-    driver = None       # will be set by driver init()
+    vfs = None        # will be set by driver init()
+    driver = None     # will be set by driver init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
-        self.resources = driver.game_resource
+        self.vfs = driver.vfs
 
     def init_player(self, player):
         """
@@ -67,7 +67,7 @@ class Story(object):
         """welcome text when player enters a new game"""
         player.tell(color.bright("Welcome to %s." % self.config["name"]), end=True)
         player.tell("\n")
-        player.tell(self.resources.load_text("messages/welcome.txt"))
+        player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
         player.tell("\n")
 
@@ -75,7 +75,7 @@ class Story(object):
         """welcome text when player enters the game after loading a saved game"""
         player.tell(color.bright("Welcome back to %s." % self.config["name"]), end=True)
         player.tell("\n")
-        player.tell(self.resources.load_text("messages/welcome.txt"))
+        player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
         player.tell("\n")
 

@@ -196,13 +196,13 @@ class MoneyFormatter(object):
         raise ParseError("That is not an amount of money.")
 
 
-def get_motd(resourceloader):
+def get_motd(vfs):
     """
     Read the MOTD from its fixed location, and return it and its modification timestamp.
     If it's not there, return None for both.
     """
     try:
-        with resourceloader.open("messages/motd.txt") as motd:
+        with vfs.open_read("messages/motd.txt") as motd:
             message = motd.read().rstrip()
             if not message:
                 return None, None

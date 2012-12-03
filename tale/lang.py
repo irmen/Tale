@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import re
 import bisect
-from . import resource
+from . import vfs
 
 
 # genders are m,f,n
@@ -66,7 +66,7 @@ def fullstop(sentence, punct="."):
 
 
 # adverbs are stored in a datafile next to this module
-ADVERB_LIST = sorted(resource.loader.load_text("soul_adverbs.txt").splitlines())   # keep the list for prefix search
+ADVERB_LIST = sorted(vfs.vfs.load_text("soul_adverbs.txt").splitlines())   # keep the list for prefix search
 ADVERBS = frozenset(ADVERB_LIST)
 
 

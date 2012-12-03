@@ -1105,7 +1105,7 @@ def do_coin(player, parsed, ctx):
 @disabled_in_gamemode("if")
 def do_motd(player, parsed, ctx):
     """Show the message-of-the-day again."""
-    motd, mtime = util.get_motd(ctx.driver.game_resource)
+    motd, mtime = util.get_motd(ctx.driver.vfs)
     if motd:
         player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
         player.tell("\n")
