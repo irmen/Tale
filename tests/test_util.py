@@ -207,10 +207,10 @@ class TestUtil(unittest.TestCase):
         vfs = VirtualFileSystem(util)
         with vfs.open_write("unittest.txt") as f:
             f.write("test")
-        self.assertEquals("test", vfs.load_from_storage("unittest.txt"))
         with self.assertRaises(IOError):
             vfs.load_from_storage("test_doesnt_exist_999.txt")
-        vfs.write_to_storage("unittest.txt", "This is written from a unit test.\nSecond line.\n")
+        vfs.write_to_storage("unittest.txt", b"Test1\nTest2\n")
+        self.assertEqual(b"Test1\nTest2\n", vfs.load_from_storage("unittest.txt"))
         vfs.delete_storage("unittest.txt")
 
     def test_clone(self):
