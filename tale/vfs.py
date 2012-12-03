@@ -49,7 +49,6 @@ class VirtualFileSystem(object):
         self.validatePath(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = self.get_userdata_dir(path)
-        print("WRITE TO PATH",path) # XXX
         directory = os.path.dirname(path)
         try:
             os.makedirs(directory)    # make sure the path exists
@@ -79,7 +78,6 @@ class VirtualFileSystem(object):
     def delete(self, path):
         self.validatePath(path)
         path = self.get_userdata_dir(path)
-        print("DELETE",path) # XXX
         os.remove(path)
 
 
