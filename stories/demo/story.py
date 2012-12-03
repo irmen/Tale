@@ -37,7 +37,7 @@ class Story(object):
         money_type = "modern",           # money type modern/fantasy
         server_tick_method = "timer",    # 'command' (waits for player entry) or 'timer' (async timer driven)
         server_tick_time = 1.0,          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        gametime_to_realtime = 0,        # meaning: game time is X times the speed of real time (only used with "timer" tick method)
+        gametime_to_realtime = 5,        # meaning: game time is X times the speed of real time (only used with "timer" tick method)
         max_wait_hours = 2,              # the max. number of hours (gametime) the player is allowed to wait
         display_gametime = True,         # enable/disable display of the game time at certain moments
         epoch = datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
