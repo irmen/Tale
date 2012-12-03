@@ -36,10 +36,10 @@ paper.short_description = "Last day's newspaper lies on the floor."
 
 
 class CursedGem(Item):
-    def move(self, target_container, actor, wizard_override=False):
-        if self.contained_in is actor and not wizard_override:
+    def move(self, target, actor, silent=False, is_player=False):
+        if self.contained_in is actor and not "wizard" in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
-        super(CursedGem, self).move(target_container, actor, wizard_override)
+        super(CursedGem, self).move(target, actor)
 
 
 class InsertOnlyBox(Container):
@@ -150,7 +150,7 @@ lane.exits["door"] = end_door
 
 
 class Computer(Item):
-    def allow_move(self, actor):
+    def allow_item_move(self, actor):
         raise ActionRefused("You can't move the computer.")
 
     @property

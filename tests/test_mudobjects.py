@@ -629,7 +629,7 @@ class TestContainer(unittest.TestCase):
         with self.assertRaises(KeyError):
             bag.remove(None, player)
         bag.remove(key, player)
-        bag.allow_move(player)
+        bag.allow_item_move(player)
         with self.assertRaises(ActionRefused):
             key.insert(bag, player)
         with self.assertRaises(ActionRefused):
@@ -687,7 +687,7 @@ class TestItem(unittest.TestCase):
             key.insert(None, player)
         with self.assertRaises(ActionRefused):
             key.insert(thing, player)
-        key.allow_move(player)
+        key.allow_item_move(player)
         with self.assertRaises(ActionRefused):
             key.inventory
         with self.assertRaises(ActionRefused):

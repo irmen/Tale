@@ -17,7 +17,7 @@ class TrashCan(Container):
         super(TrashCan, self).init()
         self.opened = False
 
-    def allow_move(self, actor):
+    def allow_item_move(self, actor):
         raise ActionRefused("You can't move %s." % self.title)
 
     @property

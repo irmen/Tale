@@ -126,6 +126,10 @@ class MudObject(object):
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
+    def move(self, target, actor=None, silent=False, is_player=False):
+        # move the MudObject to a different place (location, container, living).
+        raise ActionRefused("You can't move that.")
+
     def read(self, actor):
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
@@ -183,20 +187,22 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target_container, actor):
+    def move(self, target, actor=None, silent=False, is_player=False):
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
         An actor with 'wizard' privilege may move stuff with less restrictions as usual.
+        The silent and is_player arguments are not used when moving items.
         """
+        actor = actor or self
         if "wizard" not in actor.privileges:
-            self.allow_move(actor)
+            self.allow_item_move(actor)
         source_container = self.contained_in
         if source_container:
             source_container.remove(self, actor)
         try:
-            target_container.insert(self, actor)
-            self.notify_moved(source_container, target_container, actor)
+            target.insert(self, actor)
+            self.notify_moved(source_container, target, actor)
         except:
             # insert in target failed, put back in original location
             source_container.insert(self, actor)
@@ -206,8 +212,8 @@ class Item(MudObject):
         """Called when the item has been moved from one place to another"""
         pass
 
-    def allow_move(self, actor):
-        """Does it allow to be moved by someone? (yes, no ActionRefused raised)"""
+    def allow_item_move(self, actor):
+        """Does the item allow to be moved by someone? (yes; no ActionRefused is raised)"""
         pass
 
     def open(self, item, actor):
@@ -501,7 +507,7 @@ class Exit(object):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
 
-    def move(self, target_container, actor):
+    def move(self, target, actor=None, silent=False, is_player=False):
         raise ActionRefused("You can't move that.")
 
     def open(self, item, actor):
@@ -643,7 +649,7 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def move(self, target_location, actor=None, silent=False, is_player=False):
+    def move(self, target, actor=None, silent=False, is_player=False):
         """
         Leave the current location, enter the new location (transactional).
         Messages are being printed to the locations if the move was successful.
@@ -653,9 +659,9 @@ class Living(MudObject):
             original_location = self.location
             self.location.remove(self, actor)
             try:
-                target_location.insert(self, actor)
+                target.insert(self, actor)
                 self.unregister_all_inventory_verbs(original_location)
-                self.register_all_inventory_verbs(target_location)
+                self.register_all_inventory_verbs(target)
             except:
                 # insert in target failed, put back in original location
                 original_location.insert(self, actor)
@@ -664,18 +670,18 @@ class Living(MudObject):
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
             # queue event
             if is_player:
-                mud_context.driver.after_player_action(original_location.notify_player_left, self, target_location)
+                mud_context.driver.after_player_action(original_location.notify_player_left, self, target)
             else:
-                mud_context.driver.after_player_action(original_location.notify_npc_left, self, target_location)
+                mud_context.driver.after_player_action(original_location.notify_npc_left, self, target)
         else:
-            target_location.insert(self, actor)
+            target.insert(self, actor)
         if not silent:
-            target_location.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
+            target.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
         # queue event
         if is_player:
-            mud_context.driver.after_player_action(target_location.notify_player_arrived, self, original_location)
+            mud_context.driver.after_player_action(target.notify_player_arrived, self, original_location)
         else:
-            mud_context.driver.after_player_action(target_location.notify_npc_arrived, self, original_location)
+            mud_context.driver.after_player_action(target.notify_npc_arrived, self, original_location)
 
     def register_all_inventory_verbs(self, location):
         """When moving the living to a new location, register all inventory custom verbs"""

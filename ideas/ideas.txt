@@ -35,9 +35,7 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
-consolidate all move() methods into one signature
-add a move() to MudObject that simply raises ActionRefused
-allow_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
+allow_item_move/item.move: pass the verb as well so it can output specific messages (you can't move/take/drop it).
 
 change **ctx to a proper object+attributes for all cmds, to get rid of string based attribute access ctx["driver"] => ctx.driver
 
