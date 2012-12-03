@@ -35,6 +35,9 @@ Getting started
 ---------------
 Install tale, preferably using pip or by executing ``python setup.py install``.
 
+Tale requires the `blinker <http://pypi.python.org/pypi/blinker/>`_ and `appdirs <http://pypi.python.org/pypi/appdirs/>`_
+libraries to be available.
+
 After that, you'll need a story to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).
 There's a demo/example story included in the source distribution, in the ``stories`` directory.
@@ -108,6 +111,7 @@ A random list of the features of the current codebase:
 - text is nicely formatted when outputted (wrapped to a configurable width).
 - uses colorama if available to spice up the console output a bit.
 - game can be saved (and reloaded) - pickle is used to serialize the full game world state
+- save game data is placed in the operating system's user data directory
 - there's a list of 70+ creature races, adapted from the Dark Souls mudlib
 - supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
 - game clock is independent of real-time wall clock, configurable speed and start time
@@ -124,6 +128,8 @@ A random list of the features of the current codebase:
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room,
   or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
+- uses the blinker library for internal synchronous signaling (pubsub).
+- contains a simple virtual file system to provide a resource loading / datafile storage facility.
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways
