@@ -16,15 +16,15 @@ def register_all(cmd_processor):
 
 
 @wizcmd
-def do_demo(player, parsed, **ctx):
+def do_demo(player, parsed, ctx):
     player.tell("DEMO WIZARD COMMAND")
 
 
 @cmd
-def do_demo2(player, parsed, **ctx):
+def do_demo2(player, parsed, ctx):
     player.tell("DEMO COMMAND")
 
 
 @cmd
-def do_examine(player, parsed, **ctx):
+def do_examine(player, parsed, ctx):
     player.tell("EXAMINE OVERRIDE")

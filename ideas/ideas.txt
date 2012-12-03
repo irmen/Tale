@@ -35,8 +35,6 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
-change **ctx to a proper object+attributes for all cmds, to get rid of string based attribute access ctx["driver"] => ctx.driver
-
 File system abstraction: resourceloader should also be able to *save* stuff (savegames).
 Player I/O abstraction: add an input/output layer.
 Player output should not be printed directly to stdout by the driver, but routed through the I/O abstraction.

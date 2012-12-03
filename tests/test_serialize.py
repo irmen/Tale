@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import unittest
 import pickle
-from tale import globalcontext, races, base, npc, soul, player, driver
+from tale import globalcontext, races, base, npc, soul, player, util
 from supportstuff import DummyDriver
 
 
@@ -107,8 +107,8 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
-    def test_storyconfig(self):
-        s = driver.StoryConfig(a=42, b="hello", c=[1, 2, 3])
+    def test_attrdict(self):
+        s = util.AttrDict(a=42, b="hello", c=[1, 2, 3])
         x = serializecycle(s)
         self.assertEqual(s, x)
         i1 = list(s.items())

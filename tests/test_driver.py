@@ -77,18 +77,6 @@ class TestVarious(unittest.TestCase):
             self.assertIsNotNone(cmd.__doc__)
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
 
-    def test_storyconfig(self):
-        sc = the_driver.StoryConfig(a=42, b="hello")
-        self.assertEqual([42, 42], [sc.a, sc["a"]])
-        self.assertEqual(["hello", "hello"], [sc.b, sc["b"]])
-        sc.a = 999
-        sc["b"] = "bye"
-        self.assertEqual(999, sc.a)
-        self.assertEqual("bye", sc.b)
-        d = {"a": 1, "b": 2}
-        sc = the_driver.StoryConfig(d)
-        self.assertEqual([1, 2], [sc.a, sc.b])
-
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

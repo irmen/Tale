@@ -413,3 +413,21 @@ def confirm(question, driver):
             return True
         if reply in ("n", "no", "nope"):
             return False
+
+
+class AttrDict(dict):
+    """A dict-like object that supports accessing its members as attributes."""
+    def __init__(self, *vargs, **kwargs):
+        if vargs:
+            assert len(vargs) == 1
+            assert not kwargs
+            source = vargs[0]
+            assert isinstance(source, dict)
+        else:
+            source = kwargs
+        dict.__init__(self, source)
+        self.__dict__.update(source)
+
+    def __setitem__(self, key, value):
+        dict.__setitem__(self, key, value)
+        self.__dict__[key] = value

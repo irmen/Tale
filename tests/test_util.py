@@ -255,6 +255,18 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(ParseError):
             util.parse_time(["some_weird_occasion"])
 
+    def test_attrdict(self):
+        ad = util.AttrDict(a=42, b="hello")
+        self.assertEqual([42, 42], [ad.a, ad["a"]])
+        self.assertEqual(["hello", "hello"], [ad.b, ad["b"]])
+        ad.a = 999
+        ad["b"] = "bye"
+        self.assertEqual(999, ad.a)
+        self.assertEqual("bye", ad.b)
+        d = {"a": 1, "b": 2}
+        ad = util.AttrDict(d)
+        self.assertEqual([1, 2], [ad.a, ad.b])
+
 
 if __name__ == '__main__':
     unittest.main()

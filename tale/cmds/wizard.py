@@ -34,15 +34,15 @@ def wizcmd(command, *aliases):
         func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
 
         @functools.wraps(func)
-        def executewizcommand(player, parsed, **ctx):
+        def executewizcommand(player, parsed, ctx):
             if not "wizard" in player.privileges:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
-            return func(player, parsed, **ctx)
+            return func(player, parsed, ctx)
 
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
         argspec = inspect.getargspec(func)
-        if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
+        if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
             all_commands[command] = executewizcommand
             for alias in aliases:
@@ -56,7 +56,7 @@ def wizcmd(command, *aliases):
 
 
 @wizcmd("ls")
-def do_ls(player, parsed, **ctx):
+def do_ls(player, parsed, ctx):
     """List the contents of a module path under the library tree (try !ls .items.basic)"""
     print = player.tell
     if not parsed.args:
@@ -92,7 +92,7 @@ def do_ls(player, parsed, **ctx):
 
 
 @wizcmd("clone")
-def do_clone(player, parsed, **ctx):
+def do_clone(player, parsed, ctx):
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
     print = player.tell
     if not parsed.args:
@@ -132,14 +132,14 @@ def do_clone(player, parsed, **ctx):
 
 
 @wizcmd("destroy")
-def do_destroy(player, parsed, **ctx):
+def do_destroy(player, parsed, ctx):
     """Destroys an object or creature."""
     if not parsed.who_order:
         raise ParseError("Destroy what or who?")
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not util.confirm("Are you sure you want to destroy %s? " % victim.title, ctx["driver"]):
+        if not util.confirm("Are you sure you want to destroy %s? " % victim.title, ctx.driver):
             continue
         if isinstance(victim, base.Item):
             if victim in player:
@@ -160,7 +160,7 @@ def do_destroy(player, parsed, **ctx):
 
 
 @wizcmd("clean")
-def do_clean(player, parsed, **ctx):
+def do_clean(player, parsed, ctx):
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
     print = player.tell
     if parsed.args and parsed.args[0] == '.':
@@ -180,7 +180,7 @@ def do_clean(player, parsed, **ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if util.confirm("Are you sure you want to clean out %s? " % victim.title, ctx["driver"]):
+        if util.confirm("Are you sure you want to clean out %s? " % victim.title, ctx.driver):
             print("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
@@ -193,14 +193,14 @@ def do_clean(player, parsed, **ctx):
 
 
 @wizcmd("pdb")
-def do_pdb(player, parsed, **ctx):
+def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session."""
     import pdb
     pdb.set_trace()   # @todo: remove this when going multiuser (I don't think you can have a synchronous debug session anymore)
 
 
 @wizcmd("wiretap")
-def do_wiretap(player, parsed, **ctx):
+def do_wiretap(player, parsed, ctx):
     """Adds a wiretap to something to overhear the messages they receive.
 'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
 'wiretap -clear' gets rid of all taps."""
@@ -225,7 +225,7 @@ def do_wiretap(player, parsed, **ctx):
 
 
 @wizcmd("teleport", "teleport_to")
-def do_teleport(player, parsed, **ctx):
+def do_teleport(player, parsed, ctx):
     """Teleport to a location or creature, or teleport a creature to you.
 'teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
 'teleport[_to] playername' teleports [to] that player.
@@ -263,9 +263,9 @@ def do_teleport(player, parsed, **ctx):
     else:
         # target is a player (or @start - the wizard starting location)
         if args[0] == "@start":
-            teleport_to(player, ctx["config"].startlocation_wizard)
+            teleport_to(player, ctx.config.startlocation_wizard)
         else:
-            target = ctx["driver"].search_player(args[0])
+            target = ctx.driver.search_player(args[0])
             if not target:
                 raise ActionRefused("%s isn't here." % args[0])
             if teleport_self:
@@ -300,7 +300,7 @@ def teleport_someone_to_player(who, player):
 
 
 @wizcmd("return")
-def do_return(player, parsed, **ctx):
+def do_return(player, parsed, ctx):
     """Return a player to the location where they were before a teleport."""
     print = player.tell
     if len(parsed.who_order) == 1:
@@ -324,7 +324,7 @@ def do_return(player, parsed, **ctx):
 
 
 @wizcmd("reload")
-def do_reload(player, parsed, **ctx):
+def do_reload(player, parsed, ctx):
     """Reload the given module (Python)."""
     print = player.tell
     if not parsed.args:
@@ -346,7 +346,7 @@ def do_reload(player, parsed, **ctx):
 
 
 @wizcmd("move")
-def do_move(player, parsed, **ctx):
+def do_move(player, parsed, ctx):
     """Move something or someone to another location (.), item or creature.
 This may work around possible restrictions that could prevent stuff
 to be moved around normally. For instance you could use it to pick up
@@ -379,7 +379,7 @@ items that are normally fixed in place (move item to playername)."""
 
 
 @wizcmd("debug")
-def do_debug(player, parsed, **ctx):
+def do_debug(player, parsed, ctx):
     """Dumps the internal attribute values of a location (.), item or creature."""
     if not parsed.args:
         raise ParseError("Debug what?")
@@ -393,13 +393,13 @@ def do_debug(player, parsed, **ctx):
     txt = [repr(obj), "Class defined in: " + inspect.getfile(obj.__class__)]
     for varname, value in sorted(vars(obj).items()):
         txt.append(".%s: %r" % (varname, value))
-    if obj in ctx["driver"].heartbeat_objects:
+    if obj in ctx.driver.heartbeat_objects:
         txt.append("%s receives heartbeats." % obj.name)
     player.tell(*txt, format=False)
 
 
 @wizcmd("set")
-def do_set(player, parsed, **ctx):
+def do_set(player, parsed, ctx):
     """Set an internal attribute of a location (.), object or creature to a new value.
 Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     if not parsed.args:
@@ -428,11 +428,10 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 
 
 @wizcmd("server")
-def do_server(player, parsed, **ctx):
+def do_server(player, parsed, ctx):
     """Dump some server information."""
-    driver = ctx["driver"]
-    config = ctx["config"]
-    clock = ctx["clock"]
+    driver = ctx.driver
+    config = ctx.config
     txt = [color.bright("Server information:")]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
@@ -445,15 +444,15 @@ def do_server(player, parsed, **ctx):
     txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     if config.server_tick_method == "timer":
-        txt.append("Game time: %s   (%dx real time)" % (clock, clock.times_realtime))
+        txt.append("Game time: %s   (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
-        txt.append("Game time: %s" % clock)
+        txt.append("Game time: %s" % ctx.clock)
     if sys.platform == "cli":
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))
     txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
-    txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (driver.mode, len(ctx["driver"].all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
+    txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (driver.mode, len(ctx.driver.all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
         txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
@@ -463,11 +462,10 @@ def do_server(player, parsed, **ctx):
 
 
 @wizcmd("events")
-def do_events(player, parsed, **ctx):
+def do_events(player, parsed, ctx):
     """Dump pending events."""
-    driver = ctx["driver"]
-    config = ctx["config"]
-    clock = ctx["clock"]
+    driver = ctx.driver
+    config = ctx.config
     txt = [color.BRIGHT + "Pending events overview." + color.NORMAL + " Server tick is %.1f sec." % config.server_tick_time,
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
@@ -477,5 +475,5 @@ def do_events(player, parsed, **ctx):
     txt.append("  due   " + color.DIM + "|" + color.NORMAL + " function            " + color.DIM + "|" + color.NORMAL + " owner")
     for d in driver.deferreds:
         txt.append(("%-7s " + color.DIM + "|" + color.NORMAL + " %-20s" + color.DIM + "|" + color.NORMAL + " %s") %
-                   (d.due_secs(clock, realtime=True), d.callable, d.owner))
+                   (d.due_secs(ctx.clock, realtime=True), d.callable, d.owner))
     player.tell(*txt, format=False)

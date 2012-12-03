@@ -6,6 +6,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division, unicode_literals
+from .. import util
+
 
 abbreviations = {
     "n": "north",
@@ -40,3 +42,12 @@ def register_all(cmd_processor):
         cmd_processor.add(command, func, "wizard")
     for command, func in normal.all_commands.items():
         cmd_processor.add(command, func, None)
+
+
+class Context(util.AttrDict):
+    """The context used for every command function"""
+    driver = None
+    verbs = None
+    clock = None
+    config = None
+    state = None

@@ -33,7 +33,7 @@ def cmd(command, *aliases):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
         argspec = inspect.getargspec(func)
-        if argspec.args == ["player", "parsed"] and argspec.varargs is None and argspec.keywords == "ctx" and argspec.defaults is None:
+        if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
             if not hasattr(func, "enable_notify_action"):
                 func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
@@ -50,7 +50,7 @@ def cmd(command, *aliases):
 
 @cmd("inventory")
 @disable_notify_action
-def do_inventory(player, parsed, **ctx):
+def do_inventory(player, parsed, ctx):
     """Show the items you are carrying."""
     p = player.tell
     if parsed.who_order and "wizard" in player.privileges:
@@ -66,7 +66,7 @@ def do_inventory(player, parsed, **ctx):
                     p("  " + item.title, format=False)
             else:
                 p(name, "is carrying nothing.")
-            p("Money in possession: %s." % ctx["driver"].moneyfmt.display(other.money))
+            p("Money in possession: %s." % ctx.driver.moneyfmt.display(other.money))
             return
         elif isinstance(other, base.Item):
             # show item's inventory
@@ -87,11 +87,11 @@ def do_inventory(player, parsed, **ctx):
                 p("  " + item.title, format=False)
         else:
             p("You are carrying nothing.")
-        p("Money in possession: %s." % ctx["driver"].moneyfmt.display(player.money, zero_msg="you are broke"))
+        p("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate", "search")
-def do_locate(player, parsed, **ctx):
+def do_locate(player, parsed, ctx):
     """Try to locate a specific item, creature or player."""
     print = player.tell
     if not parsed.args:
@@ -126,7 +126,7 @@ def do_locate(player, parsed, **ctx):
                 print(color.dim("(By %s you probably mean %s.)" % (name, item.name)))
             util.print_object_location(player, item, container, False)
         else:
-            otherplayer = ctx["driver"].search_player(name)  # global player search
+            otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
                 player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
@@ -134,7 +134,7 @@ def do_locate(player, parsed, **ctx):
 
 
 @cmd("drop")
-def do_drop(player, parsed, **ctx):
+def do_drop(player, parsed, ctx):
     """Drop an item (or all items) you are carrying."""
     print = player.tell
     if not parsed.args:
@@ -165,7 +165,7 @@ def do_drop(player, parsed, **ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            if util.confirm("Are you sure you want to drop all you are carrying? ", ctx["driver"]):
+            if util.confirm("Are you sure you want to drop all you are carrying? ", ctx.driver):
                 drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
@@ -186,7 +186,7 @@ def do_drop(player, parsed, **ctx):
 
 
 @cmd("empty")
-def do_empty(player, parsed, **ctx):
+def do_empty(player, parsed, ctx):
     """Remove the contents from an object."""
     print = player.tell
     if len(parsed.args) != 1:
@@ -222,7 +222,7 @@ def do_empty(player, parsed, **ctx):
 
 
 @cmd("put", "place")
-def do_put(player, parsed, **ctx):
+def do_put(player, parsed, ctx):
     """Put an item (or all items) into something else. If you're not carrying the item, you will first pick it up."""
     print = player.tell
     if len(parsed.args) < 2:
@@ -235,7 +235,7 @@ def do_put(player, parsed, **ctx):
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
         if what:
-            if not util.confirm("Are you sure you want to put everything away? ", ctx["driver"]):
+            if not util.confirm("Are you sure you want to put everything away? ", ctx.driver):
                 return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -277,7 +277,7 @@ def do_put(player, parsed, **ctx):
 
 
 @cmd("take", "get", "steal", "rob")
-def do_take(player, parsed, **ctx):
+def do_take(player, parsed, ctx):
     """Take something (or all things) from something or someone else. Stealing and robbing is frowned upon, to say the least."""
     print = player.tell
     if len(parsed.args) == 0:
@@ -412,7 +412,7 @@ def try_pick_up_living(player, living):
 
 
 @cmd("throw")
-def do_throw(player, parsed, **ctx):
+def do_throw(player, parsed, ctx):
     """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
     print = player.tell
     if len(parsed.who_order) != 2:
@@ -434,15 +434,15 @@ def do_throw(player, parsed, **ctx):
 
 
 @cmd("give")
-def do_give(player, parsed, **ctx):
+def do_give(player, parsed, ctx):
     """Give something (or all things) you are carrying to someone else."""
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
     if len(parsed.who_order) == 1:
         try:
             # first try if the first one or two words can be interpreted as an amount of money
-            money = ctx["driver"].moneyfmt.parse(parsed.unrecognized)
-            return give_money(player, money, parsed.who_order[0], ctx["driver"])
+            money = ctx.driver.moneyfmt.parse(parsed.unrecognized)
+            return give_money(player, money, parsed.who_order[0], ctx.driver)
         except (ValueError, ParseError):
             pass
     if parsed.unrecognized:
@@ -455,7 +455,7 @@ def do_give(player, parsed, **ctx):
             raise ParseError("Give all to who?")
         what = player.inventory
         if what:
-            if not util.confirm("Are you sure you want to give it all away? ", ctx["driver"]):
+            if not util.confirm("Are you sure you want to give it all away? ", ctx.driver):
                 return
         if parsed.args[0] == "all":
             # give all [to] living
@@ -531,14 +531,13 @@ def give_money(player, amount, recipient, driver):
 
 @cmd("help")
 @disable_notify_action
-def do_help(player, parsed, **ctx):
+def do_help(player, parsed, ctx):
     """Provides some helpful information about different aspects of the game. Also try 'hint' or 'recap'."""
     if parsed.args:
-        do_what(player, parsed, **ctx)
+        do_what(player, parsed, ctx)
     else:
-        verbs = ctx["verbs"]
         verb_help = {}   # verb -> [list of abbrs]
-        for verb in verbs:
+        for verb in ctx.verbs:
             verb_help[verb] = []
         abbrevs = dict(abbreviations)
         for abbr, verb in abbreviations.items():
@@ -564,7 +563,7 @@ def do_help(player, parsed, **ctx):
 
 @cmd("look")
 @disable_notify_action
-def do_look(player, parsed, **ctx):
+def do_look(player, parsed, ctx):
     """Look around to see where you are and what's around you."""
     if parsed.args:
         arg = parsed.args[0]
@@ -585,7 +584,7 @@ def do_look(player, parsed, **ctx):
 
 @cmd("examine", "inspect")
 @disable_notify_action
-def do_examine(player, parsed, **ctx):
+def do_examine(player, parsed, ctx):
     """Examine something or someone thoroughly."""
     tell = player.tell
     if not parsed.args:
@@ -650,7 +649,7 @@ def do_examine(player, parsed, **ctx):
 @cmd("stats")
 @disable_notify_action
 @disabled_in_gamemode("if")
-def do_stats(player, parsed, **ctx):
+def do_stats(player, parsed, ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
         target = player
@@ -673,7 +672,7 @@ def do_stats(player, parsed, **ctx):
 
 
 @cmd("tell")
-def do_tell(player, parsed, **ctx):
+def do_tell(player, parsed, ctx):
     """Pass a message to another player or creature that nobody else can hear. The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
@@ -682,7 +681,7 @@ def do_tell(player, parsed, **ctx):
     name = parsed.args[0]
     living = player.location.search_living(name)
     if not living:
-        living = ctx["driver"].search_player(name)   # is there a player around with this name?
+        living = ctx.driver.search_player(name)   # is there a player around with this name?
         if not living:
             if name == "all":
                 raise ActionRefused("You can't tell something to everyone, only to individuals.")
@@ -700,7 +699,7 @@ def do_tell(player, parsed, **ctx):
 
 @cmd("emote")
 @disabled_in_gamemode("if")
-def do_emote(player, parsed, **ctx):
+def do_emote(player, parsed, ctx):
     """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
     if not parsed.unparsed:
         raise ParseError("Emote what message?")
@@ -712,7 +711,7 @@ def do_emote(player, parsed, **ctx):
 
 
 @cmd("yell")
-def do_yell(player, parsed, **ctx):
+def do_yell(player, parsed, ctx):
     """Yell something. People in nearby locations will also be able to hear you."""
     print = player.tell
     if not parsed.unparsed:
@@ -726,7 +725,7 @@ def do_yell(player, parsed, **ctx):
 
 
 @cmd("say")
-def do_say(player, parsed, **ctx):
+def do_say(player, parsed, ctx):
     """Say something to people near you."""
     print = player.tell
     if not parsed.unparsed:
@@ -749,7 +748,7 @@ def do_say(player, parsed, **ctx):
 @cmd("wait")
 @disabled_in_gamemode("mud")
 @overrides_soul
-def do_wait(player, parsed, **ctx):
+def do_wait(player, parsed, ctx):
     """
     Let someone know you are waiting for them. Alternatively, you can simply Let time pass.
     For the latter use, you can optionally specify how long you want to wait (in hours, minutes, seconds).
@@ -770,7 +769,7 @@ def do_wait(player, parsed, **ctx):
         if parsed.args[0] in ("till", "until"):
             # wait until an absolute time on the clock
             wait_time = util.parse_time(parsed.args[1:])
-            now_dt = ctx["clock"].clock
+            now_dt = ctx.clock.clock
             wait_dt = datetime.datetime.combine(now_dt.date(), wait_time)
             if wait_dt == now_dt:
                 raise ActionRefused("It is already that time.")
@@ -782,13 +781,13 @@ def do_wait(player, parsed, **ctx):
             duration = util.parse_duration(parsed.args)
     else:
         duration = datetime.timedelta(minutes=10)
-    max_wait_hours = ctx["config"].max_wait_hours
+    max_wait_hours = ctx.config.max_wait_hours
     if max_wait_hours == 0:
         raise ActionRefused("It is not possible to wait.")
     if duration.total_seconds() / 3600 > max_wait_hours:
         msg = lang.spell_number(max_wait_hours) + " " + lang.pluralize("hour", max_wait_hours)
         raise ActionRefused("You can't wait more than " + msg + " at once, who knows what might happen in that time?")
-    ok, message = ctx["driver"].do_wait(duration)
+    ok, message = ctx.driver.do_wait(duration)
     if ok:
         print("Time passes. You've waited %s." % util.duration_display(duration))
     else:
@@ -797,13 +796,13 @@ def do_wait(player, parsed, **ctx):
 
 @cmd("quit")
 @disable_notify_action
-def do_quit(player, parsed, **ctx):
+def do_quit(player, parsed, ctx):
     """Quit the game."""
-    driver = ctx["driver"]
+    driver = ctx.driver
     if util.confirm("Are you sure you want to quit? ", driver):
         if driver.mode != "mud":
             if util.confirm("Would you like to save your progress? ", driver):
-                do_save(player, parsed, **ctx)
+                do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()
     player.tell("Good, thank you for staying.")
@@ -821,7 +820,7 @@ def print_item_removal(player, item, container, print_parentheses=True):
 @cmd("who")
 @disable_notify_action
 @disabled_in_gamemode("if")
-def do_who(player, parsed, **ctx):
+def do_who(player, parsed, ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
     if parsed.args:
         if parsed.args[0] == "are":
@@ -833,12 +832,12 @@ def do_who(player, parsed, **ctx):
                 raise ActionRefused("Who do you mean?")
         name = parsed.args[0].rstrip("?")
         found = False
-        otherplayer = ctx["driver"].search_player(name)  # global player search
+        otherplayer = ctx.driver.search_player(name)  # global player search
         if otherplayer:
             found = True
             player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
         try:
-            do_examine(player, parsed, **ctx)
+            do_examine(player, parsed, ctx)
         except ActionRefused:
             pass
         if not found:
@@ -846,12 +845,12 @@ def do_who(player, parsed, **ctx):
     else:
         # print all players
         player.tell("All players currently in the game:", end=True)
-        for player in ctx["driver"].all_players():  # list of all players
+        for player in ctx.driver.all_players():  # list of all players
             player.tell("%s (%s): currently in '%s'." % (lang.capital(player.name), player.title, player.location.name), end=True)
 
 
 @cmd("open", "close", "lock", "unlock")
-def do_open(player, parsed, **ctx):
+def do_open(player, parsed, ctx):
     """Do something with a door, exit or item, possibly by using something. Example: open door,  unlock chest with key"""
     if len(parsed.args) not in (1, 2) or parsed.unrecognized:
         raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
@@ -880,7 +879,7 @@ def do_open(player, parsed, **ctx):
 
 @cmd("what")
 @disable_notify_action
-def do_what(player, parsed, **ctx):
+def do_what(player, parsed, ctx):
     """Tries to answer your question about what something is. The topics range from game commands to location exits to creature and items. For more general help, try the 'help' command first."""
     print = player.tell
     if not parsed.args:
@@ -898,9 +897,9 @@ def do_what(player, parsed, **ctx):
         name = abbreviations[name]
         print("It's an abbreviation for %s." % name)
         # is it a command?
-    if name in ctx["verbs"]:
+    if name in ctx.verbs:
         found = True
-        doc = ctx["verbs"][name].__doc__ or ""
+        doc = ctx.verbs[name].__doc__ or ""
         doc = doc.strip()
         if doc:
             print(doc)
@@ -1025,7 +1024,7 @@ def do_what(player, parsed, **ctx):
 
 @cmd("exits")
 @disable_notify_action
-def do_exits(player, parsed, **ctx):
+def do_exits(player, parsed, ctx):
     """Provides a tiny clue about possible exits from your current location."""
     if "wizard" in player.privileges:
         player.tell("The following exits are defined for your current location:", end=True)
@@ -1046,7 +1045,7 @@ def do_exits(player, parsed, **ctx):
 
 
 @cmd("use")
-def do_use(player, parsed, **ctx):
+def do_use(player, parsed, ctx):
     """General object use. Most of the time, you'll need to be more specific to say exactly what you want to do with it."""
     if not parsed.who_order:
         raise ActionRefused("Use what?")
@@ -1064,7 +1063,7 @@ def do_use(player, parsed, **ctx):
 
 
 @cmd("dice", "roll")
-def do_dice(player, parsed, **ctx):
+def do_dice(player, parsed, ctx):
     """Roll a 6-sided die. Use the familiar '3d6' argument style if you want to roll multiple dice."""
     print = player.tell
     if not parsed.args:
@@ -1091,7 +1090,7 @@ def do_dice(player, parsed, **ctx):
 
 
 @cmd("coin")
-def do_coin(player, parsed, **ctx):
+def do_coin(player, parsed, ctx):
     """Toss a coin."""
     number, _ = util.roll_die(sides=2)
     result = ["heads", "tails"][number - 1]
@@ -1102,9 +1101,9 @@ def do_coin(player, parsed, **ctx):
 @cmd("motd")
 @disable_notify_action
 @disabled_in_gamemode("if")
-def do_motd(player, parsed, **ctx):
+def do_motd(player, parsed, ctx):
     """Show the message-of-the-day again."""
-    motd, mtime = util.get_motd(ctx["driver"].game_resource)
+    motd, mtime = util.get_motd(ctx.driver.game_resource)
     if motd:
         player.tell("Message-of-the-day, last modified on %s:" % mtime, end=True)
         player.tell("\n")
@@ -1114,7 +1113,7 @@ def do_motd(player, parsed, **ctx):
 
 
 @cmd("flee")
-def do_flee(player, parsed, **ctx):
+def do_flee(player, parsed, ctx):
     """Flee in a random or given direction, possibly escaping a combat situation."""
     exit = None
     if len(parsed.who_order) == 1:
@@ -1149,15 +1148,15 @@ def do_flee(player, parsed, **ctx):
 @cmd("save")
 @disable_notify_action
 @disabled_in_gamemode("mud")
-def do_save(player, parsed, **ctx):
+def do_save(player, parsed, ctx):
     """Save your game."""
-    ctx["driver"].do_save(player)
+    ctx.driver.do_save(player)
 
 
 @cmd("load", "reload", "restore", "restart")
 @disable_notify_action
 @disabled_in_gamemode("mud")
-def do_load(player, parsed, **ctx):
+def do_load(player, parsed, ctx):
     """Load a previously saved game."""
     player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
                 "and start it again. During startup, select the appropriate option to start from a saved game,",
@@ -1167,7 +1166,7 @@ def do_load(player, parsed, **ctx):
 @cmd("transcript")
 @disable_notify_action
 @disabled_in_gamemode("mud")
-def do_transcript(player, parsed, **ctx):
+def do_transcript(player, parsed, ctx):
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
@@ -1178,7 +1177,7 @@ def do_transcript(player, parsed, **ctx):
 
 
 @cmd("show")
-def do_show(player, parsed, **ctx):
+def do_show(player, parsed, ctx):
     """Shows something to someone else."""
     if len(parsed.who_order) != 2:
         raise ParseError("Show what to whom?")
@@ -1194,16 +1193,16 @@ def do_show(player, parsed, **ctx):
 
 @cmd("time", "date")
 @disable_notify_action
-def do_time(player, parsed, **ctx):
+def do_time(player, parsed, ctx):
     """Query the current date and/or time of day."""
     if "wizard" in player.privileges:
         real_time = datetime.datetime.now()
         real_time = real_time.replace(microsecond=0)
-        player.tell("The game time is:", ctx["clock"])
+        player.tell("The game time is:", ctx.clock)
         player.tell("\n")
         player.tell("Real time is:", real_time)
         return
-    if ctx["config"].display_gametime:
+    if ctx.config.display_gametime:
         for item in player.inventory:
             if isinstance(item, GameClock):
                 player.tell("You glance at your %s." % item.name)
@@ -1215,7 +1214,7 @@ def do_time(player, parsed, **ctx):
 
 @cmd("brief")
 @disable_notify_action
-def do_brief(player, parsed, **ctx):
+def do_brief(player, parsed, ctx):
     """Configure the verbosity of location descriptions. 'brief' mode means: show short description
     for locations that you've already visited at least once.
     'brief all' means: show short descriptions for all locations even if you've not been there before.
@@ -1242,7 +1241,7 @@ def do_brief(player, parsed, **ctx):
 
 
 @cmd("activate")
-def do_activate(player, parsed, **ctx):
+def do_activate(player, parsed, ctx):
     """Activate something, turn it on, or switch it on."""
     if not parsed.who_order:
         raise ParseError("Activate what?")
@@ -1258,7 +1257,7 @@ def do_activate(player, parsed, **ctx):
 
 
 @cmd("deactivate")
-def do_deactivate(player, parsed, **ctx):
+def do_deactivate(player, parsed, ctx):
     """Deactivate something, turn it of, or switch it off."""
     if not parsed.who_order:
         raise ParseError("Deactivate what?")
@@ -1274,15 +1273,15 @@ def do_deactivate(player, parsed, **ctx):
 
 
 @cmd("switch")
-def do_switch(player, parsed, **ctx):
+def do_switch(player, parsed, ctx):
     """Switch something on or off."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
-            do_activate(player, parsed, **ctx)
+            do_activate(player, parsed, ctx)
             return
         elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
-            do_deactivate(player, parsed, **ctx)
+            do_deactivate(player, parsed, ctx)
             return
     elif len(parsed.who_order) == 0:
         arg = parsed.unparsed.partition(" ")[0]
@@ -1292,26 +1291,26 @@ def do_switch(player, parsed, **ctx):
 
 
 @cmd("turn")
-def do_turn(player, parsed, **ctx):
+def do_turn(player, parsed, ctx):
     """Turn something (rotate it), or turn something on or off."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
-            do_activate(player, parsed, **ctx)
+            do_activate(player, parsed, ctx)
             return
         elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
-            do_deactivate(player, parsed, **ctx)
+            do_deactivate(player, parsed, ctx)
             return
     elif len(parsed.who_order) == 0:
         arg = parsed.unparsed.partition(" ")[0]
         if arg in ("on", "off"):
             raise ParseError("Turn %s what?" % arg)
     # "turn X" -> same as rotate, see below
-    do_manipulate(player, parsed, **ctx)
+    do_manipulate(player, parsed, ctx)
 
 
 @cmd("move", "shove", "swivel", "shift", "manipulate", "rotate", "press", "poke", "push")
-def do_manipulate(player, parsed, **ctx):
+def do_manipulate(player, parsed, ctx):
     """Manipulate something."""
     if len(parsed.who_order) == 1:
         what = parsed.who_order[0]
@@ -1328,7 +1327,7 @@ def do_manipulate(player, parsed, **ctx):
 
 
 @cmd("read")
-def do_read(player, parsed, **ctx):
+def do_read(player, parsed, ctx):
     """Read something."""
     if len(parsed.who_order) == 1:
         what = parsed.who_order[0]
@@ -1338,11 +1337,11 @@ def do_read(player, parsed, **ctx):
 
 
 @cmd("@info", "license")
-def do_gameinfo(player, parsed, **ctx):
+def do_gameinfo(player, parsed, ctx):
     """Show information about the game and about Tale, and show the software license."""
     t = player.tell
     # version info
-    config = ctx["config"]
+    config = ctx.config
     author_addr = " (%s)" % config.author_address if config.author_address else ""
     t(color.BRIGHT + "The game is '%s' v%s," % (config.name, config.version))
     t("written by %s%s." % (config.author, author_addr))
@@ -1359,10 +1358,10 @@ def do_gameinfo(player, parsed, **ctx):
 
 
 @cmd("config")
-def do_config(player, parsed, **ctx):
+def do_config(player, parsed, ctx):
     """Show or change player configuration parameters."""
-    config = ctx["config"]
-    driver = ctx["driver"]
+    config = ctx.config
+    driver = ctx.driver
     if parsed.args:
         if len(parsed.args) != 1:
             raise ParseError("Configure what? Usage is: config parameter=value")
@@ -1391,7 +1390,7 @@ def do_config(player, parsed, **ctx):
 
 
 @cmd("hint")
-def do_hint(player, parsed, **ctx):
+def do_hint(player, parsed, ctx):
     """Provide a clue about what to do next. Also try 'help', and 'recap'."""
     hint = player.hints.hint(player)
     if hint:
@@ -1401,7 +1400,7 @@ def do_hint(player, parsed, **ctx):
 
 
 @cmd("recap")
-def do_hint(player, parsed, **ctx):
+def do_hint(player, parsed, ctx):
     """
     Shows the key events or actions that have happened so that you might
     get back up to speed with the story so far.

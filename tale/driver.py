@@ -47,22 +47,7 @@ else:
 input = util.input
 
 
-class StoryConfig(dict):
-    """A dict-like object that supports accessing its members as attributes."""
-    def __init__(self, *vargs, **kwargs):
-        if vargs:
-            assert len(vargs) == 1
-            assert not kwargs
-            source = vargs[0]
-            assert isinstance(source, dict)
-        else:
-            source = kwargs
-        dict.__init__(self, source)
-        self.__dict__.update(source)
 
-    def __setitem__(self, key, value):
-        dict.__setitem__(self, key, value)
-        self.__dict__[key] = value
 
 
 @total_ordering
@@ -197,7 +182,7 @@ class Driver(object):
         os.chdir(args.game)
         story = __import__("story", level=0)
         self.story = story.Story()
-        self.config = StoryConfig(self.story.config)
+        self.config = util.AttrDict(self.story.config)
         globalcontext.mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
@@ -496,8 +481,8 @@ class Driver(object):
                         self.go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        func(self.player, parsed, driver=self, verbs=command_verbs, config=self.config,
-                             clock=self.game_clock, state=self.state)
+                        ctx = cmds.Context(driver=self, verbs=command_verbs, config=self.config, clock=self.game_clock, state=self.state)
+                        func(self.player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
