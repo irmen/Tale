@@ -126,9 +126,9 @@ class MudObject(object):
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
-    def move(self, target, actor=None, silent=False, is_player=False):
+    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         # move the MudObject to a different place (location, container, living).
-        raise ActionRefused("You can't move that.")
+        raise ActionRefused("You can't %s that." % verb)
 
     def read(self, actor):
         # called from the read command, override if your object needs to act on this.
@@ -187,16 +187,14 @@ class Item(MudObject):
     def remove(self, item, actor):
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target, actor=None, silent=False, is_player=False):
+    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
-        An actor with 'wizard' privilege may move stuff with less restrictions as usual.
         The silent and is_player arguments are not used when moving items.
         """
         actor = actor or self
-        if "wizard" not in actor.privileges:
-            self.allow_item_move(actor)
+        self.allow_item_move(actor, verb)
         source_container = self.contained_in
         if source_container:
             source_container.remove(self, actor)
@@ -212,7 +210,7 @@ class Item(MudObject):
         """Called when the item has been moved from one place to another"""
         pass
 
-    def allow_item_move(self, actor):
+    def allow_item_move(self, actor, verb="move"):
         """Does the item allow to be moved by someone? (yes; no ActionRefused is raised)"""
         pass
 
@@ -507,8 +505,8 @@ class Exit(object):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
 
-    def move(self, target, actor=None, silent=False, is_player=False):
-        raise ActionRefused("You can't move that.")
+    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
+        raise ActionRefused("You can't %s that." % verb)
 
     def open(self, item, actor):
         raise ActionRefused("You can't open that.")
@@ -649,7 +647,7 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def move(self, target, actor=None, silent=False, is_player=False):
+    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """
         Leave the current location, enter the new location (transactional).
         Messages are being printed to the locations if the move was successful.

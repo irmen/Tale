@@ -36,10 +36,10 @@ paper.short_description = "Last day's newspaper lies on the floor."
 
 
 class CursedGem(Item):
-    def move(self, target, actor, silent=False, is_player=False):
+    def move(self, target, actor, silent=False, is_player=False, verb="move"):
         if self.contained_in is actor and not "wizard" in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
-        super(CursedGem, self).move(target, actor)
+        super(CursedGem, self).move(target, actor, verb=verb)
 
 
 class InsertOnlyBox(Container):
@@ -57,7 +57,9 @@ normal_gem = clone(gem)
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("black gem", "a black gem")
+cursed_gem.aliases={"gem"}
 normal_gem = Item("blue gem", "a blue gem")
+normal_gem.aliases={"gem"}
 lane.exits["south"] = Exit(square, "The town square lies to the south.")
 
 
@@ -150,8 +152,8 @@ lane.exits["door"] = end_door
 
 
 class Computer(Item):
-    def allow_item_move(self, actor):
-        raise ActionRefused("You can't move the computer.")
+    def allow_item_move(self, actor, verb="move"):
+        raise ActionRefused("You can't %s the computer." % verb)
 
     @property
     def description(self):

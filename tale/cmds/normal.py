@@ -145,7 +145,7 @@ def do_drop(player, parsed, **ctx):
         refused = []
         for item in items:
             try:
-                item.move(player.location, player)
+                item.move(player.location, player, verb="drop")
                 if container is not player and container in player:
                     print_item_removal(player, item, container)
             except ActionRefused as x:
@@ -382,7 +382,7 @@ def take_stuff(player, items, container, where_str=None):
     refused = []
     for item in items:
         try:
-            item.move(player, player)
+            item.move(player, player, verb="take")
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
@@ -422,11 +422,11 @@ def do_throw(player, parsed, **ctx):
         raise ActionRefused("You can't throw that.")
     if item in player.location:
         # first take the item from the room
-        item.move(player, player)
+        item.move(player, player, verb="take")
         print("You take %s." % item.title)
         player.tell_others("{Title} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
-    item.move(player.location, player)
+    item.move(player.location, player, verb="throw")
     print("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     player.tell_others("{Title} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:

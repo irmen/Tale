@@ -168,9 +168,9 @@ class Player(base.Living):
         else:
             self.tell("You see nothing.")
 
-    def move(self, target, actor=None, silent=False, is_player=True):
+    def move(self, target, actor=None, silent=False, is_player=True, verb="move"):
         """delegate to Living but with is_player set to True"""
-        return super(Player, self).move(target, actor, silent, True)
+        return super(Player, self).move(target, actor, silent, True, verb)
 
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
