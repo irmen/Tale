@@ -9,10 +9,9 @@ from tale.cmds.decorators import wizcmd, cmd
 
 
 def register_all(cmd_processor):
-    pass
-    # cmd_processor.add("demo", do_demo, "wizard")
-    # cmd_processor.add("demo2", do_demo2)
-    # cmd_processor.override("examine", do_examine)
+    cmd_processor.add("demo", do_demo, "wizard")
+    cmd_processor.add("demo2", do_demo2)
+    cmd_processor.override("coin", do_coin)
 
 
 @wizcmd
@@ -26,5 +25,5 @@ def do_demo2(player, parsed, ctx):
 
 
 @cmd
-def do_examine(player, parsed, ctx):
-    player.tell("EXAMINE OVERRIDE")
+def do_coin(player, parsed, ctx):
+    player.tell("COIN OVERRIDE")

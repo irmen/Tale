@@ -27,11 +27,13 @@ def wizcmd(command, *aliases):
     Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
     User code should use @wizcmd from cmds.decorators.
     """
+    # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
     command = "!" + command
     aliases = ["!" + alias for alias in aliases]
 
     def wizcmd2(func):
         func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
+        func.is_tale_command_func = True
 
         @functools.wraps(func)
         def executewizcommand(player, parsed, ctx):

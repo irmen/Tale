@@ -7,12 +7,16 @@ from .. import errors
 
 def cmd(func):
     """
-    Decorator to define a normal command function.
+    Public decorator to define a normal command function.
     It checks the signature.
+    Can be used by the user that is writing story code.
     """
+    # NOTE: this code is VERY similar to the internal @cmd decorator in cmds/normal.py
+    # If changes are made, make sure to update both occurrences
     argspec = inspect.getargspec(func)
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)
+        func.is_tale_command_func = True
         if not hasattr(func, "enable_notify_action"):
             func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
         return func
@@ -22,11 +26,15 @@ def cmd(func):
 
 def wizcmd(func):
     """
-    Decorator to define a wizard command function.
+    Public decorator to define a wizard command function.
     It adds a privilege check wrapper and checks the signature.
+    Can be used by the user that is writing story code.
     """
     func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
+    func.is_tale_command_func = True
 
+    # NOTE: this code is VERY similar to the internal @wizcmd decorator in cmds/wizard.py
+    # If changes are made, make sure to update both occurrences
     @functools.wraps(func)
     def executewizcommand(player, parsed, ctx):
         if not "wizard" in player.privileges:
@@ -36,7 +44,7 @@ def wizcmd(func):
     argspec = inspect.getargspec(func)
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)
-        return func
+        return executewizcommand
     else:
         raise SyntaxError("invalid wizcmd function signature for: " + func.__name__)
 

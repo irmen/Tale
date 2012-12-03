@@ -92,17 +92,23 @@ class Commands(object):
         self.commands_per_priv = {None: {}}
 
     def add(self, verb, func, privilege=None):
+        self.validateFunc(func)
         for commands in self.commands_per_priv.values():
             if verb in commands:
                 raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
 
     def override(self, verb, func, privilege=None):
+        self.validateFunc(func)
         if verb in self.commands_per_priv[privilege]:
             existing = self.commands_per_priv[privilege][verb]
             self.commands_per_priv[privilege][verb] = func
             return existing
         raise KeyError("command not defined: " + verb)
+
+    def validateFunc(self, func):
+        if not hasattr(func, "is_tale_command_func"):
+            raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 
     def get(self, privileges):
         result = self.commands_per_priv[None]  # always include the cmds for None

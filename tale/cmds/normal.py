@@ -29,12 +29,14 @@ def cmd(command, *aliases):
     (Internal) decorator to add the command to the global dictionary of commands.
     User code should use @cmd from cmds.decorators.
     """
+    # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
     def cmd2(func):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
+            func.is_tale_command_func = True
             if not hasattr(func, "enable_notify_action"):
                 func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
             all_commands[command] = func
