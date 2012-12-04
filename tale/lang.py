@@ -35,6 +35,7 @@ __a_exceptions = {
     "university": "a",
     "user": "a",
     "hour": "an"
+    # probably more, but these will have to do for now
 }
 
 
@@ -177,7 +178,8 @@ __plural_irregularities = {
     "congratulations": "congratulations",
     "pyjamas": "pyjamas",
     "photo": "photos",
-    "piano": "pianos"
+    "piano": "pianos",
+    # probably more, but these will have to do for now
 }
 
 
@@ -190,15 +192,14 @@ def pluralize(word, amount=2):
         return word[:-2] + "es"
     if word.endswith("z"):
         return word + "zes"
-    if word.endswith("o") and len(word) > 1:
-        if word[-2] not in "aeiouy":
-            return word + "es"
+    if word.endswith("s") or word.endswith("ch") or word.endswith("x") or word.endswith("sh"):
+        return word + "es"
     if word.endswith("y"):
         return word[:-1] + "ies"
     if word.endswith("f"):
         return word[:-1] + "ves"
     if word.endswith("fe"):
         return word[:-2] + "ves"
-    if word.endswith("s") or word.endswith("ch") or word.endswith("x") or word.endswith("sh"):
+    if word.endswith("o") and len(word) > 1 and word[-2] not in "aeiouy":
         return word + "es"
     return word + "s"
