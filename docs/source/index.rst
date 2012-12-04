@@ -33,7 +33,7 @@ If you're interested, follow `my blog about developing Tale <http://www.razorvin
 
 Getting started
 ---------------
-Install tale, preferably using pip or by executing ``python setup.py install``.
+Install tale, preferably using ``pip install tale``. You can also download the source, and then execute ``python setup.py install``.
 
 Tale requires the `blinker <http://pypi.python.org/pypi/blinker/>`_ and `appdirs <http://pypi.python.org/pypi/appdirs/>`_
 libraries to be available.
