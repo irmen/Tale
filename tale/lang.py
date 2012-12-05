@@ -8,10 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import re
 import bisect
-from . import vfs
 
 
 # genders are m,f,n
+from .io import vfs
+
 SUBJECTIVE = {"m": "he", "f": "she", "n": "it"}
 POSSESSIVE = {"m": "his", "f": "her", "n": "its"}
 OBJECTIVE = {"m": "him", "f": "her", "n": "it"}

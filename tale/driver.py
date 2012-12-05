@@ -22,10 +22,10 @@ from . import errors
 from . import util
 from . import soul
 from . import cmds
-from . import vfs
 from . import player
-from . import color
 from . import __version__ as tale_version_str
+from .io import vfs, color
+
 try:
     import readline
 except ImportError:

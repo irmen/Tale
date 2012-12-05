@@ -85,4 +85,5 @@ class VirtualFileSystem(object):
 
 
 # create the resource loader for Tale itself:
-vfs = VirtualFileSystem(VirtualFileSystem)
+from .. import errors   # get a package residing in the Tale package root
+vfs = VirtualFileSystem(errors)

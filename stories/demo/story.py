@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import print_function, division, unicode_literals
 import datetime
-from tale import color
+from tale.io import color
 from tale.hints import Hint
 
 if __name__=="__main__":

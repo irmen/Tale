@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import unittest
 import datetime
+from tale.io import color
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
@@ -15,7 +16,7 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResults
-from tale import color
+
 color.disable()
 
 

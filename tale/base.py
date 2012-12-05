@@ -9,9 +9,9 @@ from __future__ import print_function, division, unicode_literals
 import blinker
 import textwrap
 from . import lang
-from . import color
 from . import util
 from .errors import ActionRefused
+from .io import color
 from .races import races
 from .globalcontext import mud_context
 

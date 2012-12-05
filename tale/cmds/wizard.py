@@ -13,9 +13,10 @@ import sys
 import threading
 import gc
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util, color
+from .. import base, lang, util
 from ..player import Player
 from .. import __version__
+from ..io import color
 
 all_commands = {}
 LIBRARY_MODULE_NAME = "tale"

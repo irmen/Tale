@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division, unicode_literals
 import unittest
+from tale.io import color
 import tale.globalcontext
 from supportstuff import DummyDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
@@ -14,7 +15,7 @@ from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player
 from tale.soul import NonSoulVerb, ParseResults
-from tale import color
+
 color.disable()
 
 

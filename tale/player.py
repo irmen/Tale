@@ -13,10 +13,9 @@ import blinker
 from . import base
 from . import soul
 from . import lang
-from . import color
-from . import textoutput
 from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
+from .io import color, textoutput
 from .util import queue
 
 

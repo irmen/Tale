@@ -14,11 +14,11 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from .. import color
-from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
+from ..io import color
+from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 
 all_commands = {}
 abbreviations = {}   # will be injected
