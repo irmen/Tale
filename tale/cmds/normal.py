@@ -54,42 +54,19 @@ def cmd(command, *aliases):
 @disable_notify_action
 def do_inventory(player, parsed, ctx):
     """Show the items you are carrying."""
-    p = player.tell
     if parsed.who_order and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
         other = parsed.who_order[0]
-        if isinstance(other, base.Living):
-            # show another living's inventory
-            name = lang.capital(other.title)
-            inventory = other.inventory
-            if inventory:
-                p(name, "is carrying:", end=True)
-                for item in inventory:
-                    p("  " + item.title, format=False)
-            else:
-                p(name, "is carrying nothing.")
-            p("Money in possession: %s." % ctx.driver.moneyfmt.display(other.money))
-            return
-        elif isinstance(other, base.Item):
-            # show item's inventory
-            inventory = other.inventory
-            if inventory:
-                p("It contains:", end=True)
-                for item in inventory:
-                    p("  " + item.title, format=False)
-            else:
-                p("It's empty.")
-        else:
-            raise ActionRefused("Can't find %s." % other.name)
+        other.show_inventory(player, ctx)
     else:
         inventory = player.inventory
         if inventory:
-            p("You are carrying:", end=True)
+            player.tell("You are carrying:", end=True)
             for item in inventory:
-                p("  " + item.title, format=False)
+                player.tell("  " + item.title, format=False)
         else:
-            p("You are carrying nothing.")
-        p("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
+            player.tell("You are carrying nothing.")
+        player.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate", "search")

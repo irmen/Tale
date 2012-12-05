@@ -10,10 +10,10 @@ import blinker
 import textwrap
 from . import lang
 from . import color
+from . import util
 from .errors import ActionRefused
 from .races import races
 from .globalcontext import mud_context
-from .util import basestring_type
 
 """
 object hierarchy:
@@ -98,8 +98,21 @@ class MudObject(object):
         return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
 
     def destroy(self, ctx):
+        """Common cleanup code that needs to be called when the object is destroyed"""
         self.unregister_heartbeat()
         mud_context.driver.remove_deferreds(self)
+
+    def wiz_clone(self, actor):
+        """clone the thing (performed by a wizard)"""
+        raise ActionRefused("Can't clone " + lang.a(self.__class__.__name__))
+
+    def wiz_destroy(self, actor, ctx):
+        """destroy the thing (performed by a wizard)"""
+        raise ActionRefused("Can't destroy " + lang.a(self.__class__.__name__))
+
+    def show_inventory(self, actor, ctx):
+        """show the object's inventory to the actor"""
+        raise ActionRefused("Can't find %s." % self.name)
 
     def register_heartbeat(self):
         """register this object with the driver to receive heartbeats"""
@@ -225,6 +238,33 @@ class Item(MudObject):
 
     def unlock(self, item, actor):
         raise ActionRefused("You can't unlock that.")
+
+    def wiz_clone(self, actor):
+        if "wizard" not in actor.privileges:
+            raise ActionRefused("You're not allowed to do that.")
+        item = util.clone(self)
+        actor.insert(item, actor)
+        actor.tell("Cloned into: " + repr(item))
+        actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
+        return item
+
+    def wiz_destroy(self, actor, ctx):
+        if "wizard" not in actor.privileges:
+            raise ActionRefused("You're not allowed to do that.")
+        if self in actor:
+            actor.remove(self, actor)
+        else:
+            actor.location.remove(self, actor)
+        self.destroy(ctx)
+
+    def show_inventory(self, actor, ctx):
+        if self.inventory:
+            actor.tell("It contains:", end=True)
+            for item in self.inventory:
+                actor.tell("  " + item.title, format=False)
+        else:
+            actor.tell("It's empty.")
+
 
 
 class Weapon(Item):
@@ -461,7 +501,7 @@ class Exit(object):
     """
     def __init__(self, target_location, short_description, long_description=None, direction=None):
         assert target_location is not None
-        assert isinstance(target_location, (Location, basestring_type)), "target must be a Location or a string"
+        assert isinstance(target_location, (Location, util.basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.bound = isinstance(target_location, Location)
         self.direction = self.name = direction      # direction and name can be None! Don't depend on them!
@@ -622,6 +662,33 @@ class Living(MudObject):
             item.destroy(ctx)
         self.__inventory.clear()
         # @todo: remove attack status, etc.
+
+    def wiz_clone(self, actor):
+        if "wizard" not in actor.privileges:
+            raise ActionRefused("You're not allowed to do that.")
+        clone = util.clone(self)
+        actor.tell("Cloned into: " + repr(clone))
+        actor.tell_others("{Title} summons %s." % lang.a(clone.title))
+        actor.location.insert(clone, actor)
+        return clone
+
+    def wiz_destroy(self, actor, ctx):
+        if "wizard" not in actor.privileges:
+            raise ActionRefused("You're not allowed to do that.")
+        if self is actor:
+            raise ActionRefused("You can't destroy yourself, are you insane?!")
+        self.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % lang.capital(actor.title))
+        self.destroy(ctx)
+
+    def show_inventory(self, actor, ctx):
+        name = lang.capital(self.title)
+        if self.inventory:
+            actor.tell(name, "is carrying:", end=True)
+            for item in self.inventory:
+                actor.tell("  " + item.title, format=False)
+        else:
+            actor.tell(name, "is carrying nothing.")
+        actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
 
     def tell(self, *messages):
         """

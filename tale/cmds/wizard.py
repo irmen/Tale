@@ -96,7 +96,6 @@ def do_ls(player, parsed, ctx):
 @wizcmd("clone")
 def do_clone(player, parsed, ctx):
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
-    print = player.tell
     if not parsed.args:
         raise ParseError("Clone what?")
     path = parsed.args[0]
@@ -118,19 +117,7 @@ def do_clone(player, parsed, ctx):
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Object not found")
-    # clone it
-    if isinstance(obj, base.Item):
-        item = util.clone(obj)
-        player.insert(item, player)
-        print("Cloned: " + repr(item))
-        player.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
-    elif isinstance(obj, base.Living):
-        clone = util.clone(obj)
-        print("Cloned: " + repr(clone))
-        player.tell_others("{Title} summons %s." % lang.a(clone.title))
-        player.location.insert(clone, player)
-    else:
-        raise ActionRefused("Can't clone " + lang.a(obj.__class__.__name__))
+    obj.wiz_clone(player)  # actually clone it
 
 
 @wizcmd("destroy")
@@ -143,19 +130,7 @@ def do_destroy(player, parsed, ctx):
     for victim in parsed.who_info:
         if not util.confirm("Are you sure you want to destroy %s? " % victim.title, ctx.driver):
             continue
-        if isinstance(victim, base.Item):
-            if victim in player:
-                player.remove(victim, player)
-            else:
-                player.location.remove(victim, player)
-            victim.destroy(ctx)
-        elif isinstance(victim, base.Living):
-            if victim is player:
-                raise ActionRefused("You can't destroy yourself, are you insane?!")
-            victim.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % lang.capital(player.title))
-            victim.destroy(ctx)
-        else:
-            raise ActionRefused("Can't destroy " + lang.a(victim.__class__.__name__))
+        victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
         player.tell_others("{Title} makes some gestures and a tiny black hole appears.\n"
                            "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))

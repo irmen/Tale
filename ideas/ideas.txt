@@ -57,6 +57,7 @@ Better naming of exits/doors; they need to know their own name (direction). It c
 Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
 there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?
 Should Exit inherit from MudObject? (it contains a fair amount of similar methods now)
+Exit is now still lacking wiz_clone, wiz_destroy, show_inventory
 
 Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
 (note: less suited for MUDs because other people might interfere with the states)
@@ -69,7 +70,6 @@ Load story from a zipfile. VFS should thus be able to load resources from a zipf
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
 Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
 
-less use of isinstance?
 prototypes to extend items/npc instead of inheritance?
 Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
 
