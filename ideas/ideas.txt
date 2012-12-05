@@ -39,9 +39,20 @@ Player text I/O abstraction: add an input/output layer.
 Player output should not be printed directly to stdout by the driver, but routed through the I/O abstraction.
 Player input should not be read directly from stdin but asked from the I/O abstraction.
 
-Instead of using colors directly in the output, use basic html-ish or bbcode markup (dim/normal/bright, underline, negative (reversevideo) and the 8 ansi colors)
+Instead of using colors directly in the output, use basic html-ish or bbcode markup: (and get rid of color.py):
+ Physical style/color tags:
+    dim, normal, bright
+    ul (underlined - not supported by default by colorama)
+    rev (reverse video - not supported by default by colorama)
+    black, red, green, yellow, blue, magenta, cyan, white
+    line (print a horizontal separator line)
+    p (start a new paragraph... maybe not include this because it's an argument to the textoutput object?)
+ Semantic tags?:
+    living  player  item  exit    (can be used to automatically hightlight these)
+ All text within tags {tag}....{/tag} is tagged as such. All other text is outputted normally.
+ All tags must be matched with an end tag within a single piece of text that is printed.
+ A tag may be closed immediately by using {tag/}.
 The I/O abstraction should convert this to the appropriate output (colorama/ true html/ whatever).
-Console output: dynamically highlight names/aliases/exits/items? (can be a special markup tag!)
 
 Fix the textformatting to deal with ansi-escape characters (due to coloring) taking up character width.
 TextOutput.render should probably be removed as the I/O abstraction will take care of that.
