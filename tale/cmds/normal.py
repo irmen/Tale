@@ -72,50 +72,49 @@ def do_inventory(player, parsed, ctx):
 @cmd("locate", "search")
 def do_locate(player, parsed, ctx):
     """Try to locate a specific item, creature or player."""
-    print = player.tell
+    p = player.tell
     if not parsed.args:
         raise ParseError("Locate what/who?")
     if len(parsed.args) > 1 or len(parsed.who_order) > 1:
         raise ParseError("Can only search for one thing at a time.")
     name = parsed.args[0]
-    print("You look around to see if you can locate %s." % name)
+    p("You look around to see if you can locate %s." % name)
     player.tell_others("{Title} looks around.")
     if parsed.who_order:
         thing = parsed.who_order[0]
         if thing is player:
-            print("You are here, in %s." % player.location.name)
+            p("You are here, in %s." % player.location.name)
             return
         if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            print(color.dim("(By %s you probably mean %s.)" % (name, thing.name)))
+            p(color.dim("(By %s you probably mean %s.)" % (name, thing.name)))
         if thing in player.location:
             if isinstance(thing, base.Living):
-                print("%s is here next to you." % lang.capital(thing.title))
+                p("%s is here next to you." % lang.capital(thing.title))
             else:
                 util.print_object_location(player, thing, player.location, False)
         elif thing in player:
             util.print_object_location(player, thing, player, False)
         else:
-            print("You can't find that.")
+            p("You can't find that.")
     else:
         # The default parser checks inventory and location, but it didn't find anything.
         # Check inside containers in the player's inventory instead.
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                print(color.dim("(By %s you probably mean %s.)" % (name, item.name)))
+                p(color.dim("(By %s you probably mean %s.)" % (name, item.name)))
             util.print_object_location(player, item, container, False)
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
                 player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
-                print("You can't find that.")
+                p("You can't find that.")
 
 
 @cmd("drop")
 def do_drop(player, parsed, ctx):
     """Drop an item (or all items) you are carrying."""
-    print = player.tell
     if not parsed.args:
         raise ParseError("Drop what?")
 
@@ -131,13 +130,13 @@ def do_drop(player, parsed, ctx):
                 refused.append((item, str(x)))
         for item, message in refused:
             items.remove(item)
-            print(message)
+            player.tell(message)
         if items:
             items_str = lang.join(lang.a(item.title) for item in items)
-            print("You drop %s." % items_str)
+            player.tell("You drop %s." % items_str)
             player.tell_others("{Title} drops %s." % items_str)
         else:
-            print("You didn't drop anything.")
+            player.tell("You didn't drop anything.")
 
     arg = parsed.args[0]
     if arg == "all":
@@ -167,7 +166,6 @@ def do_drop(player, parsed, ctx):
 @cmd("empty")
 def do_empty(player, parsed, ctx):
     """Remove the contents from an object."""
-    print = player.tell
     if len(parsed.args) != 1:
         raise ParseError("Empty what?")
     if len(parsed.who_order) > 1:
@@ -191,19 +189,19 @@ def do_empty(player, parsed, ctx):
             item.move(target, player)
             items_moved.append(item.title)
         except ActionRefused as x:
-            print(str(x))
+            player.tell(str(x))
     if items_moved:
         itemnames = lang.join(items_moved)
-        print("You %s: %s." % (action, itemnames))
+        player.tell("You %s: %s." % (action, itemnames))
         player.tell_others("{Title} %s: %s." % (action, itemnames))
     else:
-        print("You %s nothing." % action)
+        player.tell("You %s nothing." % action)
 
 
 @cmd("put", "place")
 def do_put(player, parsed, ctx):
     """Put an item (or all items) into something else. If you're not carrying the item, you will first pick it up."""
-    print = player.tell
+    p = player.tell
     if len(parsed.args) < 2:
         raise ParseError("Put what where?")
     if parsed.args[0] == "all":
@@ -230,7 +228,7 @@ def do_put(player, parsed, ctx):
         raise ActionRefused("You can't do that.")  # only supports put X in Y
     for item in what:
         if item is where:
-            print("You can't put %s %s itself." % (item.title, word_before))
+            p("You can't put %s %s itself." % (item.title, word_before))
             continue
         try:
             if item in player:
@@ -240,25 +238,25 @@ def do_put(player, parsed, ctx):
             elif item in player.location:
                 # first take the item from the room, then move it to the target location
                 item.move(player, player)
-                print("You take %s." % item.title)
+                p("You take %s." % item.title)
                 player.tell_others("{Title} takes %s." % item.title)
                 item.move(where, player)
-                print("You put it in the %s." % where.name)
+                p("You put it in the %s." % where.name)
                 player.tell_others("{Title} puts it in the %s." % where.name)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
-        print(message)
+        p(message)
     if inventory_items:
         items_msg = lang.join(lang.a(item.title) for item in inventory_items)
         player.tell_others("{Title} puts %s in the %s." % (items_msg, where.name))
-        print("You put {items} in the {where}.".format(items=items_msg, where=where.name))
+        p("You put {items} in the {where}.".format(items=items_msg, where=where.name))
 
 
 @cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, ctx):
     """Take something (or all things) from something or someone else. Stealing and robbing is frowned upon, to say the least."""
-    print = player.tell
+    p = player.tell
     if len(parsed.args) == 0:
         raise ParseError("Take what?")
     if len(parsed.args) == 1:  # take thing|all
@@ -318,13 +316,13 @@ def do_take(player, parsed, ctx):
                     if name in items_by_name:
                         items_to_take.append(items_by_name[name])
                     else:
-                        print("There's no %s in there." % name)
+                        p("There's no %s in there." % name)
                 take_stuff(player, items_to_take, where, where.title)
                 return
         else:
             # take things from the room
             if parsed.unrecognized:
-                print("You don't see %s." % lang.join(parsed.unrecognized))
+                p("You don't see %s." % lang.join(parsed.unrecognized))
             livings = [item for item in parsed.who_order if item in player.location.livings]
             for living in livings:
                 try_pick_up_living(player, living)
@@ -339,9 +337,9 @@ def do_take(player, parsed, ctx):
                         raise ActionRefused("You can't pick that up.")
                     elif item not in player.location.livings:
                         if item in player:
-                            print("You've already got it.")
+                            p("You've already got it.")
                         else:
-                            print("There's no %s here." % item.name)
+                            p("There's no %s here." % item.name)
                 take_stuff(player, items_to_take, player.location)
                 return
 
@@ -350,7 +348,6 @@ def take_stuff(player, items, container, where_str=None):
     """Takes stuff and returns the number of items taken"""
     if not items:
         return 0
-    print = player.tell
     if where_str:
         player_msg = "You take {items} from the %s." % where_str
         room_msg = "{{Title}} takes {items} from the %s." % where_str
@@ -365,11 +362,11 @@ def take_stuff(player, items, container, where_str=None):
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
-        print(message)
+        player.tell(message)
         items.remove(item)
     if items:
         items_str = lang.join(lang.a(item.title) for item in items)
-        print(player_msg.format(items=items_str))
+        player.tell(player_msg.format(items=items_str))
         player.tell_others(room_msg.format(items=items_str))
         return len(items)
     else:
@@ -377,23 +374,22 @@ def take_stuff(player, items, container, where_str=None):
 
 
 def try_pick_up_living(player, living):
-    print = player.tell
+    p = player.tell
     living_race = races.races[living.race]
     player_race = races.races[player.race]
     if player_race["size"] - living_race["size"] >= 2:
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
-        print("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+        p("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
-            print("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
+            p("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
             living.start_attack(player)
     else:
-        print("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
+        p("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
 
 
 @cmd("throw")
 def do_throw(player, parsed, ctx):
     """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
-    print = player.tell
     if len(parsed.who_order) != 2:
         raise ParseError("Throw what where?")
     item, where = parsed.who_order[0], parsed.who_order[1]
@@ -402,11 +398,11 @@ def do_throw(player, parsed, ctx):
     if item in player.location:
         # first take the item from the room
         item.move(player, player, verb="take")
-        print("You take %s." % item.title)
+        player.tell("You take %s." % item.title)
         player.tell_others("{Title} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
     item.move(player.location, player, verb="throw")
-    print("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
+    player.tell("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     player.tell_others("{Title} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:
         where.start_attack(player)
@@ -460,7 +456,7 @@ def do_give(player, parsed, ctx):
 
 
 def give_stuff(player, items, target_name, target=None):
-    print = player.tell
+    p = player.tell
     if not target:
         target = player.location.search_living(target_name)
     if not target:
@@ -475,7 +471,7 @@ def give_stuff(player, items, target_name, target=None):
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
-        print(message)
+        p(message)
         items.remove(item)
     if items:
         items_str = lang.join(lang.a(item.title) for item in items)
@@ -483,9 +479,9 @@ def give_stuff(player, items, target_name, target=None):
         room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
         target_msg = "%s gives you %s." % (player_str, items_str)
         player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
-        print("You give %s %s." % (target.title, items_str))
+        p("You give %s %s." % (target.title, items_str))
     else:
-        print("You didn't give %s anything." % target.title)
+        p("You didn't give %s anything." % target.title)
 
 
 def give_money(player, amount, recipient, driver):
@@ -694,13 +690,12 @@ def do_emote(player, parsed, ctx):
 @cmd("yell")
 def do_yell(player, parsed, ctx):
     """Yell something. People in nearby locations will also be able to hear you."""
-    print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
     message = parsed.unparsed
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
-    print("You yell:", message)
+    player.tell("You yell:", message)
     player.tell_others("{Title} yells: %s" % message)
     util.message_nearby_locations(player.location, "Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
 
@@ -708,7 +703,6 @@ def do_yell(player, parsed, ctx):
 @cmd("say")
 def do_say(player, parsed, ctx):
     """Say something to people near you."""
-    print = player.tell
     if not parsed.unparsed:
         raise ActionRefused("Say what?")
     message = parsed.unparsed
@@ -722,7 +716,7 @@ def do_say(player, parsed, ctx):
                 target = " to " + possible_target.title
                 _, _, message = message.partition(parsed.args[0])
                 message = message.lstrip()
-    print("You say%s: %s" % (target, message))
+    player.tell("You say%s: %s" % (target, message))
     player.tell_others("{Title} says%s: %s" % (target, message))
 
 
@@ -734,7 +728,6 @@ def do_wait(player, parsed, ctx):
     Let someone know you are waiting for them. Alternatively, you can simply Let time pass.
     For the latter use, you can optionally specify how long you want to wait (in hours, minutes, seconds).
     """
-    print = player.tell
     if "for" in parsed.unrecognized:
         if not parsed.who_info:
             raise ActionRefused("Who exactly do you want to wait for?")
@@ -743,7 +736,7 @@ def do_wait(player, parsed, ctx):
         if not all(isinstance(who, base.Living) for who in parsed.who_order):
             raise ActionRefused("You can't wait for something that's not alive.")
         who = lang.join(who.title for who in parsed.who_order)
-        print("You wait for %s." % who)
+        player.tell("You wait for %s." % who)
         player.tell_others("{Title} waits for %s." % who)
         return
     if parsed.args:
@@ -770,9 +763,9 @@ def do_wait(player, parsed, ctx):
         raise ActionRefused("You can't wait more than " + msg + " at once, who knows what might happen in that time?")
     ok, message = ctx.driver.do_wait(duration)
     if ok:
-        print("Time passes. You've waited %s." % util.duration_display(duration))
+        player.tell("Time passes. You've waited %s." % util.duration_display(duration))
     else:
-        print(message)
+        player.tell(message)
 
 
 @cmd("quit", "leave")
@@ -862,7 +855,7 @@ def do_open(player, parsed, ctx):
 @disable_notify_action
 def do_what(player, parsed, ctx):
     """Tries to answer your question about what something is. The topics range from game commands to location exits to creature and items. For more general help, try the 'help' command first."""
-    print = player.tell
+    p = player.tell
     if not parsed.args:
         raise ParseError("What do you mean?")
     if parsed.args[0] == "are" and len(parsed.args) > 2:
@@ -876,131 +869,131 @@ def do_what(player, parsed, ctx):
     # is it an abbreviation?
     if name in abbreviations:
         name = abbreviations[name]
-        print("It's an abbreviation for %s." % name)
+        p("It's an abbreviation for %s." % name)
     # is it a command?
     all_verbs = ctx.driver.get_current_verbs()
     if name in all_verbs:
         found = True
         doc = all_verbs[name].strip()
         if doc:
-            print(doc)
+            p(doc)
         else:
-            print("It is a command that you can use to perform some action.")
+            p("It is a command that you can use to perform some action.")
     # is it a soul verb?
     if name in soul.VERBS:
         found = True
         parsed = soul.ParseResults(name)
         parsed.who_order = [player]
         _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
-        print("It is a soul emote you can do. %s: %s" % (name, playermessage))
+        p("It is a soul emote you can do. %s: %s" % (name, playermessage))
         if name in soul.AGGRESSIVE_VERBS:
-            print("It might be regarded as offensive to certain people or beings.")
+            p("It might be regarded as offensive to certain people or beings.")
     if name in soul.BODY_PARTS:
         found = True
         parsed = soul.ParseResults("pat", who_order=[player], bodypart=name, message="hi")
         _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
-        print("It denotes a body part. pat myself %s -> %s" % (name, playermessage))
+        p("It denotes a body part. pat myself %s -> %s" % (name, playermessage))
     if name in soul.ACTION_QUALIFIERS:
         found = True
         parsed = soul.ParseResults("smile", qualifier=name)
         _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
-        print("It is a qualifier for something. %s smile -> %s" % (name, playermessage))
+        p("It is a qualifier for something. %s smile -> %s" % (name, playermessage))
     if name in lang.ADVERBS:
         found = True
         parsed = soul.ParseResults("smile", adverb=name)
         _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
-        print("That's an adverb you can use with the soul emote commands.")
-        print("smile %s -> %s" % (name, playermessage))
+        p("That's an adverb you can use with the soul emote commands.")
+        p("smile %s -> %s" % (name, playermessage))
     if name in races.races:
         found = True
         race = races.races[name]
         size_msg = races.sizes[race["size"]]
         body_msg = races.bodytypes[race["bodytype"]]
         lang_msg = race["language"]
-        print("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
+        p("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
     # is it an exit in the current room?
     if name in player.location.exits:
         found = True
-        print("It's a possible way to leave your current location: %s" % player.location.exits[name].short_description)
+        p("It's a possible way to leave your current location: %s" % player.location.exits[name].short_description)
     # is it a npc here?
     living = player.location.search_living(name)
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        print(color.dim("(By %s you probably meant %s.)" % (name, living.name)))
+        p(color.dim("(By %s you probably meant %s.)" % (name, living.name)))
     if living:
         found = True
         if living is player:
-            print("That's you.")
+            p("That's you.")
         else:
             title = lang.capital(living.title)
             gender = lang.GENDERS[living.gender]
             subj = lang.capital(living.subjective)
             if type(living) is type(player):
-                print("%s is a %s %s (player). %s's here." % (title, gender, living.race, subj))
+                p("%s is a %s %s (player). %s's here." % (title, gender, living.race, subj))
             else:
-                print("%s is a %s %s. %s's here." % (title, gender, living.race, subj))
+                p("%s is a %s %s. %s's here." % (title, gender, living.race, subj))
     # is it an item somewhere?
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:
         found = True
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            print(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
-        print("It's an item in your vicinity. You should perhaps try to examine it.")
+            p(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
+        p("It's an item in your vicinity. You should perhaps try to examine it.")
     if name == "soul":
         # if player is asking about the soul, give some general info
         found = True
-        print("Your soul provides a large amount of 'emotes' or 'verbs' that you can perform.")
-        print("An emote is a command that you can do to perform something, or tell something.")
-        print("They usually are just for socialization or fun and are not normally considered")
-        print("considered to be a command to actually do something or interact with things.")
-        print("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
-        print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
-        print("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
-        print("\n")
-        print("There are all sorts of emote possibilities, for instance:")
-        print("\n")
-        print("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.", end=True)
-        print("  pat max on the back  ->  You pat Max on the back.", end=True)
-        print("  reply max sure thing  ->  You reply to Max: sure thing.", end=True)
-        print("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)", end=True)
-        print("  slap all  ->  You slap X, Y and Z in the face.", end=True)
-        print("  slap all and me  ->  You slap yourself, X, Y and Z in the face.", end=True)
-        print("Often you can target a specific bodypart (try 'what is bodyparts' or ?bodyparts).")
-        print("It's sometimes also possible to qualify your action to make it mean something else, such as fail ... or pretend...")
-        print("(try 'what are qualifiers' or ?qualifiers).", end=True)
+        p("Your soul provides a large amount of 'emotes' or 'verbs' that you can perform.")
+        p("An emote is a command that you can do to perform something, or tell something.")
+        p("They usually are just for socialization or fun and are not normally considered")
+        p("considered to be a command to actually do something or interact with things.")
+        p("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
+        p("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
+        p("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
+        p("\n")
+        p("There are all sorts of emote possibilities, for instance:")
+        p("\n")
+        p("  fail sit zen  ->  You try to sit zen-likely, but fail miserably.", end=True)
+        p("  pat max on the back  ->  You pat Max on the back.", end=True)
+        p("  reply max sure thing  ->  You reply to Max: sure thing.", end=True)
+        p("  die  ->  You fall down and play dead. (others see: XYZ falls, dead.)", end=True)
+        p("  slap all  ->  You slap X, Y and Z in the face.", end=True)
+        p("  slap all and me  ->  You slap yourself, X, Y and Z in the face.", end=True)
+        p("Often you can target a specific bodypart (try 'what is bodyparts' or ?bodyparts).")
+        p("It's sometimes also possible to qualify your action to make it mean something else, such as fail ... or pretend...")
+        p("(try 'what are qualifiers' or ?qualifiers).", end=True)
     if name == "emotes":
         # if player asks about the emotes, print all soul emote verbs
         found = True
-        print("All available soul verbs (emotes):")
-        print("\n")
+        p("All available soul verbs (emotes):")
+        p("\n")
         columns = player.screen_width // 15
         lines = [""] * (len(soul.VERBS) // columns + 1)
         index = 0
         for verb in sorted(soul.VERBS):
             lines[index % len(lines)] += "%-15s" % verb
             index += 1
-        print(*lines, format=False)
+        p(*lines, format=False)
     if name in ("adverb", "adverbs"):
         found = True
-        print("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
-        print("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
-        print("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
+        p("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
+        p("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
+        p("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
     if name in ("bodypart", "bodyparts"):
         found = True
-        print("You can sometimes use a specific body part with certain soul emotes.")
-        print("For instance, 'hit max knee' -> You hit Max on the knee.")
-        print("Recognised body parts:", ", ".join(soul.BODY_PARTS))
+        p("You can sometimes use a specific body part with certain soul emotes.")
+        p("For instance, 'hit max knee' -> You hit Max on the knee.")
+        p("Recognised body parts:", ", ".join(soul.BODY_PARTS))
     if name in ("qualifier", "qualifiers"):
         found = True
-        print("You can use an action qualifier to change the meaning of a soul emote.")
-        print("For instance, 'fail stand' -> You try to stand up, but fail miserably.")
-        print("Recognised qualifiers:", ", ".join(soul.ACTION_QUALIFIERS))
+        p("You can use an action qualifier to change the meaning of a soul emote.")
+        p("For instance, 'fail stand' -> You try to stand up, but fail miserably.")
+        p("Recognised qualifiers:", ", ".join(soul.ACTION_QUALIFIERS))
     if name in ("that", "this", "they", "them", "it"):
         raise ActionRefused("Be more specific.")
     if not found:
         # too bad, no help available
-        print("Sorry, there is no information available about that.")
+        p("Sorry, there is no information available about that.")
         if "wizard" in player.privileges:
-            print("Maybe you meant to type a wizard command like '!%s'?" % name)
+            p("Maybe you meant to type a wizard command like '!%s'?" % name)
 
 
 @cmd("exits")
@@ -1046,7 +1039,6 @@ def do_use(player, parsed, ctx):
 @cmd("dice", "roll")
 def do_dice(player, parsed, ctx):
     """Roll a 6-sided die. Use the familiar '3d6' argument style if you want to roll multiple dice."""
-    print = player.tell
     if not parsed.args:
         if parsed.verb == "roll":
             raise RetrySoulVerb
@@ -1064,7 +1056,7 @@ def do_dice(player, parsed, ctx):
     die = "a die"
     if (number, sides) != (1, 6):
         die = "%dd%d" % (number, sides)
-    print("You roll %s. The result is: %d." % (die, total))
+    player.tell("You roll %s. The result is: %d." % (die, total))
     player.tell_others("{Title} rolls %s. The result is: %d." % (die, total))
     if number > 1:
         player.location.tell("The individual rolls were: %s" % values)

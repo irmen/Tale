@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 from . import races
 from . import player
-
+from . import driver
 
 class CharacterBuilder(object):
     def __init__(self, driver):
@@ -31,11 +31,11 @@ class CharacterBuilder(object):
                 break
         gender = self.driver.input("Gender m/f/n? ")[0]
         while True:
-            print("Player races:", ", ".join(races.player_races))
+            driver.io_adapter.output("Player races: " + ", ".join(races.player_races))
             race = self.driver.input("Race? ")
             if race in races.player_races:
                 break
-            print("Unknown race, try again.")
+            driver.io_adapter.output("Unknown race, try again.")
         wizard = self.driver.input("Wizard y/n? ") == "y"
         description = "A regular person."
         p = player.Player(name, gender, race, description)

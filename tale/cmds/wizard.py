@@ -61,7 +61,7 @@ def wizcmd(command, *aliases):
 @wizcmd("ls")
 def do_ls(player, parsed, ctx):
     """List the contents of a module path under the library tree (try !ls .items.basic)"""
-    print = player.tell
+    p = player.tell
     if not parsed.args:
         raise ParseError("ls what path?")
     path = parsed.args[0]
@@ -75,7 +75,7 @@ def do_ls(player, parsed, ctx):
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
-    print("<%s>" % path, end=True)
+    p("<%s>" % path, end=True)
     m_items = vars(module).items()
     modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
     classes = [x[0] for x in m_items if type(x[1]) is type and issubclass(x[1], base.MudObject)]
@@ -83,15 +83,15 @@ def do_ls(player, parsed, ctx):
     livings = [x[0] for x in m_items if isinstance(x[1], base.Living)]
     locations = [x[0] for x in m_items if isinstance(x[1], base.Location)]
     if locations:
-        print("Locations: " + ", ".join(locations), end=True)
+        p("Locations: " + ", ".join(locations), end=True)
     if livings:
-        print("Livings: " + ", ".join(livings), end=True)
+        p("Livings: " + ", ".join(livings), end=True)
     if items:
-        print("Items: " + ", ".join(items), end=True)
+        p("Items: " + ", ".join(items), end=True)
     if modules:
-        print("Submodules: " + ", ".join(modules), end=True)
+        p("Submodules: " + ", ".join(modules), end=True)
     if classes:
-        print("Classes: " + ", ".join(classes), end=True)
+        p("Classes: " + ", ".join(classes), end=True)
 
 
 @wizcmd("clone")
@@ -140,10 +140,10 @@ def do_destroy(player, parsed, ctx):
 @wizcmd("clean")
 def do_clean(player, parsed, ctx):
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
-    print = player.tell
+    p = player.tell
     if parsed.args and parsed.args[0] == '.':
         # clean the current location
-        print("Cleaning the stuff in your environment.")
+        p("Cleaning the stuff in your environment.")
         player.tell_others("{Title} cleans out the environment.")
         for item in set(player.location.items):
             player.location.remove(item, player)
@@ -153,21 +153,21 @@ def do_clean(player, parsed, ctx):
                 player.location.remove(living, player)
                 living.destroy(ctx)
         if player.location.items:
-            print("Some items refused to be destroyed!")
+            p("Some items refused to be destroyed!")
     else:
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
         if util.confirm("Are you sure you want to clean out %s? " % victim.title, ctx.driver):
-            print("Cleaning inventory of", victim)
+            p("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
             for item in items:
                 victim.remove(item, player)
                 item.destroy(ctx)
-                print("destroyed", item)
+                p("destroyed", item)
             if victim.inventory_size:
-                print("Some items refused to be destroyed!")
+                p("Some items refused to be destroyed!")
 
 
 @wizcmd("pdb")
@@ -182,22 +182,21 @@ def do_wiretap(player, parsed, ctx):
     """Adds a wiretap to something to overhear the messages they receive.
 'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
 'wiretap -clear' gets rid of all taps."""
-    print = player.tell
     if not parsed.args:
         raise ActionRefused("Wiretap who?")
     arg = parsed.args[0]
     if arg == ".":
         player.create_wiretap(player.location)
-        print("Wiretapped room '%s'." % player.location.name)
+        player.tell("Wiretapped room '%s'." % player.location.name)
     elif arg == "-clear":
         player.clear_wiretaps()
-        print("All wiretaps removed.")
+        player.tell("All wiretaps removed.")
     elif parsed.who_order:
         for living in parsed.who_order:
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
             player.create_wiretap(living)
-            print("Wiretapped %s." % living.name)
+            player.tell("Wiretapped %s." % living.name)
     else:
         raise ActionRefused("Wiretap who?")
 
@@ -254,12 +253,11 @@ def do_teleport(player, parsed, ctx):
 
 def teleport_to(player, location):
     """helper function for teleport command, to teleport the player somewhere"""
-    print = player.tell
     player.tell_others("{Title} makes some gestures and a portal suddenly opens.")
     player.tell_others("%s jumps into the portal, which quickly closes behind %s." % (lang.capital(player.subjective), player.objective))
     player.teleported_from = player.location  # used for the 'return' command
     player.move(location, silent=True)
-    print("You've been teleported.")
+    player.tell("You've been teleported.")
     player.look()
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
     location.tell("%s jumps out, and the portal quickly closes behind %s." %
@@ -280,7 +278,6 @@ def teleport_someone_to_player(who, player):
 @wizcmd("return")
 def do_return(player, parsed, ctx):
     """Return a player to the location where they were before a teleport."""
-    print = player.tell
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
     elif len(parsed.who_order) == 0:
@@ -289,7 +286,7 @@ def do_return(player, parsed, ctx):
         raise ActionRefused("You can only return one person at a time.")
     previous_location = getattr(who, "teleported_from", None)
     if previous_location:
-        print("Returning", who.name, "to", previous_location.name)
+        player.tell("Returning", who.name, "to", previous_location.name)
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
         who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
@@ -298,13 +295,12 @@ def do_return(player, parsed, ctx):
         who.tell_others("Suddenly, a shimmering portal opens!")
         who.tell_others("{Title} tumbles out of it, and the portal quickly closes again.")
     else:
-        print("Can't determine %s's previous location." % who.name)
+        player.tell("Can't determine %s's previous location." % who.name)
 
 
 @wizcmd("reload")
 def do_reload(player, parsed, ctx):
     """Reload the given module (Python)."""
-    print = player.tell
     if not parsed.args:
         raise ActionRefused("Reload what?")
     path = parsed.args[0]
@@ -320,7 +316,7 @@ def do_reload(player, parsed, ctx):
         raise ActionRefused("There's no module named " + path)
     import imp
     imp.reload(module)
-    print("Module has been reloaded:", module.__name__)
+    player.tell("Module has been reloaded:", module.__name__)
 
 
 @wizcmd("move")
@@ -329,7 +325,6 @@ def do_move(player, parsed, ctx):
 This may work around possible restrictions that could prevent stuff
 to be moved around normally. For instance you could use it to pick up
 items that are normally fixed in place (move item to playername)."""
-    print = player.tell
     if len(parsed.args) != 2 or len(parsed.who_order) < 1:
         raise ActionRefused("Move what where?")
     thing = parsed.who_order[0]
@@ -352,7 +347,7 @@ items that are normally fixed in place (move item to playername)."""
     else:
         raise ParseError("There seems to be no %s here." % thing.name)
     thing.move(target, player)
-    print("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
+    player.tell("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
     player.tell_others("{Title} moved %s into %s." % (thing.title, target.title))
 
 

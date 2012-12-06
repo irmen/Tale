@@ -25,6 +25,7 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .io import vfs, color
+from .io import console_io as io_adapter
 
 try:
     import readline
@@ -43,11 +44,6 @@ else:
         readline.write_history_file(historyfile)
 
     atexit.register(save_history, history)
-
-input = util.input
-
-
-
 
 
 @total_ordering
@@ -129,9 +125,6 @@ class Commands(object):
                     del soul.VERBS[cmd]
 
 
-CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
-
-
 def version_tuple(v_str):
     return tuple(int(n) for n in v_str.split('.'))
 
@@ -181,8 +174,8 @@ class Driver(object):
         path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
             # The tale library is being loaded from the current directory, this is not supported.
-            print("Tale is being asked to run directly from the distribution directory, this is not supported.")
-            print("Install Tale properly, and/or use the start script from the story directory instead.")
+            io_adapter.output("Tale is being asked to run directly from the distribution directory, this is not supported.")
+            io_adapter.output("Install Tale properly, and/or use the start script from the story directory instead.")
             return
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
@@ -220,29 +213,29 @@ class Driver(object):
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            print(color.bright("\n" + banner + "\n"))
+            io_adapter.output(color.bright("\n" + banner + "\n"))
         except IOError:
             # no banner provided by the game, print default game header
-            print()
-            print()
-            print(color.BRIGHT)
+            io_adapter.output("")
+            io_adapter.output("")
+            io_adapter.output(color.BRIGHT)
             msg = "'%s'" % self.config.name
-            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
-            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
-            print()
+            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io_adapter.output("")
             msg = "written by %s" % self.config.author
-            print(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
-                print(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            print(color.NORMAL)
-            print()
+                io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+            io_adapter.output(color.NORMAL)
+            io_adapter.output("")
 
         if self.mode == "mud":
             load_choice = "n"
         else:
             load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
-        print("")
+        io_adapter.output("")
         if load_choice == "y":
             self.load_saved_game()
             if args.transcript:
@@ -279,9 +272,14 @@ class Driver(object):
         self.show_motd()
         self.player.look(short=False)
         self.write_output()
-        self.player_input_allowed = threading.Event()
         self.start_player_input()
-        self.main_loop()
+        while True:
+            try:
+                self.main_loop()
+                break
+            except KeyboardInterrupt:
+                io_adapter.break_pressed(self.player)
+                continue
 
     def lookup_location(self, location_name):
         location = self.zones
@@ -307,11 +305,9 @@ class Driver(object):
 
     def start_player_input(self):
         if self.config.server_tick_method == "timer":
-            self.player_input_thread = PlayerInputThread(self.player, self.player_input_allowed)
-            self.player_input_thread.setDaemon(True)
-            self.player_input_thread.start()
+            self.async_player_input = io_adapter.AsyncInput(self.player)
         elif self.config.server_tick_method == "command":
-            pass  # player input is done in the same thread as the game loop
+            self.async_player_input = None  # player input is done in the same thread as the game loop
         else:
             raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
 
@@ -324,7 +320,8 @@ class Driver(object):
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
                 break
-            self.player_input_allowed.set()
+            if self.async_player_input:
+                self.async_player_input.enable()  # enable player input
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
                 # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
@@ -335,14 +332,10 @@ class Driver(object):
                 loop_duration = time.time() - last_loop_time
 
             if self.config.server_tick_method == "timer":
-                try:
-                    has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
-                except KeyboardInterrupt:
-                    self.player.tell(CTRL_C_MESSAGE)
-                    continue
+                has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                PlayerInputThread.input_line(self.player, self.player_input_allowed, self.input)
-                has_input = self.player.input_is_available.is_set()  # don't block
+                io_adapter.input_line(self.player)
+                has_input = self.player.input_is_available.is_set()
                 before = time.time()
                 self.server_tick()
                 self.server_loop_durations.append(time.time() - before)
@@ -361,7 +354,7 @@ class Driver(object):
                         except (errors.ParseError, errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    self.player.tell(CTRL_C_MESSAGE)
+                    io_adapter.break_pressed(self.player)
                 except EOFError:
                     continue
                 except errors.StoryCompleted as ex:
@@ -376,7 +369,7 @@ class Driver(object):
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
                     if self.config.server_tick_method == "timer":
-                        self.player_input_thread.join()
+                        self.async_player_input.stop()
                     break
                 except Exception:
                     import traceback
@@ -429,17 +422,12 @@ class Driver(object):
             return
         output = self.player.get_output()
         if output:
-            if self.mode == "if" and 0 < self.output_line_delay < 1000:
+            if self.mode == "if" and io_adapter.supports_delayed_output and 0 < self.output_line_delay < 1000:
                 for line in output.splitlines():
-                    print(line)
-                    sys.stdout.flush()
+                    io_adapter.output(line)
                     time.sleep(self.output_line_delay / 1000)
             else:
-                if output.endswith("\n"):
-                    print(output, end="")
-                else:
-                    print(output)
-                sys.stdout.flush()
+                io_adapter.output(output.rstrip())
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -575,13 +563,13 @@ class Driver(object):
             state = pickle.loads(savegame)
             del savegame
         except (IOError, pickle.PickleError) as x:
-            print("There was a problem loading the saved game data:")
-            print(type(x).__name__, x)
+            io_adapter.output("There was a problem loading the saved game data:")
+            io_adapter.output(type(x).__name__, x)
             raise SystemExit(10)
         else:
             if state["version"] != self.config.version:
-                print("This saved game data was from a different version of the game and cannot be used.")
-                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                io_adapter.output("This saved game data was from a different version of the game and cannot be used.")
+                io_adapter.output("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
             self.state = state["gamestate"]
@@ -649,39 +637,7 @@ class Driver(object):
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
         self.write_output()
-        return input(prompt).strip()
-
-
-class PlayerInputThread(threading.Thread):
-    def __init__(self, player, input_allowed):
-        super(PlayerInputThread, self).__init__()
-        self.player = player
-        self.input_allowed = input_allowed
-
-    def run(self):
-        while PlayerInputThread.input_line(self.player, self.input_allowed, input):
-            pass
-
-    @classmethod
-    def input_line(cls, player, input_allowed, input_function):
-        """
-        Input a line of text by the player.
-        It's a classmethod because it's also used by the 'command' driven server loop.
-        """
-        try:
-            input_allowed.wait()
-            print()
-            sys.stdout.flush()
-            cmd = input_function(color.dim(">> ")).lstrip()
-            input_allowed.clear()
-            player.input_line(cmd)
-            if cmd == "quit":
-                return False
-        except KeyboardInterrupt:
-            player.tell(CTRL_C_MESSAGE)
-        except EOFError:
-            pass
-        return True
+        return io_adapter.input(prompt).strip()
 
 
 def monkeypatch_blinker():
