@@ -28,13 +28,13 @@ class AsyncInput(threading.Thread):
         self.enabled = threading.Event()
         self.enabled.clear()
         self.start()
-        self._stop = False
+        self._stoploop = False
 
     def run(self):
         loop = True
         while loop:
             self.enabled.wait()
-            if self._stop:
+            if self._stoploop:
                 break
             loop = input_line(self.player)
             self.enabled.clear()
@@ -46,7 +46,7 @@ class AsyncInput(threading.Thread):
         self.enabled.clear()
 
     def stop(self):
-        self._stop = True
+        self._stoploop = True
         self.enabled.set()
         self.join()
 
