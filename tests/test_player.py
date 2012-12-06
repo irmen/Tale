@@ -275,10 +275,10 @@ class TestPlayer(unittest.TestCase):
 
     def test_verbs(self):
         player = Player("julie", "f")
-        player.verbs.append("smurf")
-        player.verbs.append("smurf")
+        player.verbs["smurf"] = ""
         self.assertTrue("smurf" in player.verbs)
-        self.assertEqual(2, player.verbs.count("smurf"))
+        del player.verbs["smurf"]
+        self.assertFalse("smurf" in player.verbs)
 
     def test_story_complete(self):
         player = Player("fritz", "m")
@@ -307,7 +307,7 @@ class TestPlayer(unittest.TestCase):
             def notify_action(self, parsed, actor):
                 self.notify_called = True
         player = SpecialPlayer("julie", "f")
-        player.verbs = ["xywobble"]
+        player.verbs["xywobble"] = ""
         room = Location("room")
         class Chair(Item):
             def init(self):
@@ -324,10 +324,10 @@ class TestPlayer(unittest.TestCase):
             def notify_action(self, parsed, actor):
                 self.notify_called = True
         chair_in_inventory = Chair("littlechair")
-        chair_in_inventory.verbs = ["kerwaffle"]
+        chair_in_inventory.verbs["kerwaffle"] = ""
         player.insert(chair_in_inventory, player)
         chair = Chair("chair")
-        chair.verbs = ["frobnitz"]
+        chair.verbs["frobnitz"] = ""
         room.init_inventory([player, chair])
 
         # first check if the handle_verb passes to all objects including inventory

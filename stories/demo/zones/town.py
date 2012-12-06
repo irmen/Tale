@@ -204,9 +204,14 @@ class Computer(Item):
                 actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
 
     def handle_verb(self, parsed, actor):
-        if parsed.verb == "hack" and self in parsed.who_info:
-            actor.tell("It doesn't need to be hacked, you can just type commands on it.")
-            return True
+        if parsed.verb == "hack":
+            if self in parsed.who_info:
+                actor.tell("It doesn't need to be hacked, you can just type commands on it.")
+                return True
+            elif parsed.who_info:
+                raise ActionRefused("You can't hack that.")
+            else:
+                raise ActionRefused("What do you want to hack?")
         if parsed.verb in ("type", "enter"):
             if parsed.who_info and self not in parsed.who_info:
                 raise ActionRefused("You need to type it on the computer.")
@@ -229,7 +234,12 @@ class Computer(Item):
 
 
 computer = Computer("computer", short_description="A computer is connected to the doors via a couple of wires.")
-computer.verbs = ["hack", "type", "enter"]
+computer.verbs = {
+    # register some custom verbs. You can overwrite existing verbs, so be careful.
+    "hack": "Attempt to hack an electronic device.",
+    "type": "Enter some text.",
+    "enter": "Enter some text.",
+}
 computer.aliases = {"keyboard", "screen"}
 alley.insert(computer, None)
 

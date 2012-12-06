@@ -66,7 +66,7 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None, short_description=None):
         self.name = name.lower()
         self.aliases = []
-        self.verbs = []   # any custom verbs that need to be registered in the location or in the player
+        self.verbs = {}   # any custom verbs that need to be registered in the location or in the player
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
         try:
@@ -294,7 +294,7 @@ class Location(MudObject):
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
-        self.verbs = []       # custom verbs are added to this list when they're present in this location
+        self.verbs = {}       # custom verbs are added to this list when they're present in this location
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
@@ -429,7 +429,7 @@ class Location(MudObject):
         else:
             raise TypeError("can only add Living or Item")
         obj.location = self
-        self.verbs.extend(obj.verbs)    # register custom verbs
+        self.verbs.update(obj.verbs)    # register custom verbs
 
     def remove(self, obj, actor):
         """Remove obj from this location (either a Living or an Item)"""
@@ -441,7 +441,7 @@ class Location(MudObject):
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
         for verb in obj.verbs:
-            self.verbs.remove(verb)     # unregister custom verbs
+            self.verbs.pop(verb, None)     # unregister custom verbs
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
@@ -639,7 +639,7 @@ class Living(MudObject):
             assert isinstance(item, Item)
             self.__inventory.add(item)
             item.contained_in = self
-            self.location.verbs.extend(item.verbs)   # register custom verbs
+            self.location.verbs.update(item.verbs)   # register custom verbs
         else:
             raise ActionRefused("You can't do that.")
 
@@ -649,7 +649,7 @@ class Living(MudObject):
             self.__inventory.remove(item)
             item.contained_in = None
             for verb in item.verbs:
-                self.location.verbs.remove(verb)     # unregister custom verbs
+                self.location.verbs.pop(verb, None)     # unregister custom verbs
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
@@ -751,13 +751,13 @@ class Living(MudObject):
     def register_all_inventory_verbs(self, location):
         """When moving the living to a new location, register all inventory custom verbs"""
         for item in self.__inventory:
-            location.verbs.extend(item.verbs)
+            location.verbs.update(item.verbs)
 
     def unregister_all_inventory_verbs(self, location):
         """When removing the living from a location, unregister all inventory custom verbs"""
         for item in self.__inventory:
             for verb in item.verbs:
-                location.verbs.remove(verb)
+                location.verbs.pop(verb, None)
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """

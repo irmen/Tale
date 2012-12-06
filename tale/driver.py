@@ -487,7 +487,7 @@ class Driver(object):
                         self.go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        ctx = cmds.Context(driver=self, verbs=command_verbs, config=self.config, clock=self.game_clock, state=self.state)
+                        ctx = cmds.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
                         func(self.player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
@@ -497,6 +497,13 @@ class Driver(object):
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)
                 self.do_socialize(parsed)
+
+    def get_current_verbs(self):
+        """return a dict of all currently recognised verbs, and their help text"""
+        normal_verbs = self.commands.get(self.player.privileges)
+        verbs = {v:(f.__doc__ or "") for v,f in normal_verbs.items()}
+        verbs.update(self.player.location.verbs)  # add the custom verbs
+        return verbs
 
     def go_through_exit(self, player, direction):
         exit = player.location.exits[direction]

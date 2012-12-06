@@ -32,7 +32,6 @@ class Player(base.Living):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, race, title, description, short_description)
         self.soul = soul.Soul()
-        self.verbs = []   # things can add custom verbs to this list when they're in the player's inventory
         self.turns = 0
         self.state = {}
         self.hints = hints.HintSystem()

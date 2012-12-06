@@ -515,8 +515,9 @@ def do_help(player, parsed, ctx):
     if parsed.args:
         do_what(player, parsed, ctx)
     else:
+        all_verbs = ctx.driver.get_current_verbs()
         verb_help = {}   # verb -> [list of abbrs]
-        for verb in ctx.verbs:
+        for verb in all_verbs:
             verb_help[verb] = []
         abbrevs = dict(abbreviations)
         for abbr, verb in abbreviations.items():
@@ -875,11 +876,11 @@ def do_what(player, parsed, ctx):
     if name in abbreviations:
         name = abbreviations[name]
         print("It's an abbreviation for %s." % name)
-        # is it a command?
-    if name in ctx.verbs:
+    # is it a command?
+    all_verbs = ctx.driver.get_current_verbs()
+    if name in all_verbs:
         found = True
-        doc = ctx.verbs[name].__doc__ or ""
-        doc = doc.strip()
+        doc = all_verbs[name].strip()
         if doc:
             print(doc)
         else:
