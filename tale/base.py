@@ -34,11 +34,10 @@ MudObject
   |     +-- NPC
   |          |
   |          +-- Monster
-
-
-Exit
   |
-  +-- Door
+  +-- Exit
+        |
+        +-- Door
 
 
 Every object that can hold other objects does so in its "inventory" (a set).
@@ -51,7 +50,7 @@ Use its enter/leave methods instead.
 class MudObject(object):
     """
     Root class of all objects in the mud world
-    All objects have an identifying short name,
+    All objects have an identifying short name (will be lowercased),
     an optional short title (shown when listed in a room),
     and an optional longer description (shown when explicitly 'examined').
     The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
@@ -488,7 +487,7 @@ _Limbo = Location("Limbo",
                   """)
 
 
-class Exit(object):
+class Exit(MudObject):
     """
     An 'exit' that connects one location to another.
     You can use a Location object as target, or a string designating the location
@@ -504,20 +503,17 @@ class Exit(object):
         assert isinstance(target_location, (Location, util.basestring_type)), "target must be a Location or a string"
         self.target = target_location
         self.bound = isinstance(target_location, Location)
-        self.direction = self.name = direction      # direction and name can be None! Don't depend on them!
+        self.direction = direction      # direction can be None! Don't depend on it!
         if self.bound:
-            self.title = "Exit to " + self.target.title
+            title = "Exit to " + self.target.title
         else:
-            self.title = "Exit to <unbound:%s>" % self.target
-        self.aliases = []
+            title = "Exit to <unbound:%s>" % self.target
+        super(Exit, self).__init__(title, description=long_description, short_description=short_description)
         try:
-            self.short_description = short_description
+            self.description = self.description or self.short_description
         except AttributeError:
-            pass   # this can occur if someone made it into a property
-        try:
-            self.long_description = long_description or self.short_description
-        except AttributeError:
-            pass   # this can occur if someone made it into a property
+            # can occur when someone made description into a property
+            pass
         mud_context.driver.register_exit(self)
 
     def __repr__(self):
@@ -539,14 +535,12 @@ class Exit(object):
             assert isinstance(target, Location)
             self.target = target
             self.title = "Exit to " + target.title
+            self.name = self.title.lower()
             self.bound = True
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
-
-    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
-        raise ActionRefused("You can't %s that." % verb)
 
     def open(self, item, actor):
         raise ActionRefused("You can't open that.")
@@ -560,29 +554,9 @@ class Exit(object):
     def unlock(self, item, actor):
         raise ActionRefused("You can't unlock that.")
 
-    def activate(self, actor):
-        # see MudObject
-        raise ActionRefused("You can't activate that.")
-
-    def deactivate(self, actor):
-        # see MudObject
-        raise ActionRefused("You can't deactivate that.")
-
     def manipulate(self, verb, actor):
-        # see MudObject
+        # override from base to print a special error message
         raise ActionRefused("It makes no sense to %s in that direction." % verb)
-
-    def read(self, actor):
-        # see MudObject
-        raise ActionRefused("There's nothing to read there.")
-
-    def handle_verb(self, parsed, actor):
-        """Handle a custom verb. Return True if handled, False if not handled."""
-        return False
-
-    def notify_action(self, parsed, actor):
-        """Notify the exit of an action performed by someone."""
-        pass
 
 
 class Living(MudObject):
@@ -905,16 +879,16 @@ class Door(Exit):
     A special exit that connects one location to another but which can be closed or even locked.
     """
     def __init__(self, target_location, short_description, long_description=None, direction=None, locked=False, opened=True):
-        super(Door, self).__init__(target_location, short_description, long_description, direction)
         self.locked = locked
         self.opened = opened
+        self.__description_prefix = long_description or short_description
+        self.door_code = None   # you can set this to any code that a key must match to unlock the door
+        super(Door, self).__init__(target_location, short_description, long_description, direction)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
-        self.__long_description_prefix = long_description or short_description
-        self.door_code = None   # you can set this to any code that a key must match to unlock the door
 
     @property
-    def long_description(self):
+    def description(self):
         if self.opened:
             status = "It is open "
         else:
@@ -923,7 +897,7 @@ class Door(Exit):
             status += "and locked."
         else:
             status += "and unlocked."
-        return self.__long_description_prefix + " " + status
+        return self.__description_prefix + " " + status
 
     def __repr__(self):
         target = self.target.name if self.bound else self.target

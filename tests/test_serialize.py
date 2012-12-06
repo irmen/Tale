@@ -81,10 +81,10 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("somewhere", x.short_description)
         self.assertEqual("east", x.direction)
         o = base.Door("target", "somewhere", direction="east", locked=True, opened=False)
-        self.assertEqual("somewhere It is closed and locked.", o.long_description)
+        self.assertEqual("somewhere It is closed and locked.", o.description)
         x = serializecycle(o)
         self.assertEqual("target", x.target)
-        self.assertEqual("somewhere It is closed and locked.", x.long_description)
+        self.assertEqual("somewhere It is closed and locked.", x.description)
     def test_living_npc_monster(self):
         o = base.Living("name", "n", title="title", description="description", race="dragon")
         x = serializecycle(o)

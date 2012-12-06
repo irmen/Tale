@@ -551,7 +551,8 @@ def do_look(player, parsed, ctx):
         if arg in player.location.exits:
             exit = player.location.exits[arg]
             player.tell(exit.short_description)
-            if exit.short_description != exit.long_description:
+            if exit.short_description != exit.description:
+                # give a little hint that more information can be gained by examining it
                 player.tell("Maybe you should examine it?")
                 return
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
@@ -618,10 +619,10 @@ def do_examine(player, parsed, ctx):
                 tell("It's empty.")
     elif name in player.location.exits:
         tell("It seems you can go there:")
-        tell(player.location.exits[name].long_description)
+        tell(player.location.exits[name].description)
     elif name in abbreviations and abbreviations[name] in player.location.exits:
         tell("It seems you can go there:")
-        tell(player.location.exits[abbreviations[name]].long_description)
+        tell(player.location.exits[abbreviations[name]].description)
     else:
         raise ActionRefused("%s isn't here." % name)
 
@@ -774,7 +775,7 @@ def do_wait(player, parsed, ctx):
         print(message)
 
 
-@cmd("quit")
+@cmd("quit", "leave")
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""

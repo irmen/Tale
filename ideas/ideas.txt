@@ -64,11 +64,9 @@ Use mdx_smartypants to automatically add some nice typography (quotes etc) when 
 Self-modifying rooms/exits to create a more dynamic game world.
 Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
 
-Better naming of exits/doors; they need to know their own name (direction). It can now be None... (set name to exit.title)
-Exits should be defined more clearly, instead of scattered through the code on a per-room basis,
-there should be a single table where all exits are defined. But how to link to code if it is not a normal plain exit?
-Should Exit inherit from MudObject? (it contains a fair amount of similar methods now)
-Exit is now still lacking wiz_clone, wiz_destroy, show_inventory
+Exits should be defined more clearly, instead of scattered through the code on a per-room basis:
+should there be a single table where all exits are defined? But how to link to code object if it is not a normal plain exit?
+Create a two-way exit that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
 
 Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
 (note: less suited for MUDs because other people might interfere with the states)

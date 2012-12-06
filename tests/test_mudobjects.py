@@ -286,12 +286,12 @@ class TestDoorsExits(unittest.TestCase):
 
         door = Door(hall, "Some door.", direction="north")
         self.assertEqual("Some door.", door.short_description)
-        self.assertEqual("Some door. It is open and unlocked.", door.long_description)
+        self.assertEqual("Some door. It is open and unlocked.", door.description)
         self.assertTrue(door.opened)
         self.assertFalse(door.locked)
         door = Door(hall, "Some door.", "This is a peculiar door leading north.", direction="north")
         self.assertEqual("Some door.", door.short_description)
-        self.assertEqual("This is a peculiar door leading north. It is open and unlocked.", door.long_description)
+        self.assertEqual("This is a peculiar door leading north. It is open and unlocked.", door.description)
 
     def test_with_key(self):
         player = Player("julie", "f")
@@ -330,8 +330,8 @@ class TestDoorsExits(unittest.TestCase):
         self.assertTrue(hall.exits["ladder"] is exit3)
         self.assertTrue(hall.exits["window"] is exit4)
         self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], hall.look())
-        self.assertEqual("Third ladder to attic.", exit3.long_description)
-        self.assertEqual("A window, maybe if you open it you can get out?", exit4.long_description)
+        self.assertEqual("Third ladder to attic.", exit3.description)
+        self.assertEqual("A window, maybe if you open it you can get out?", exit4.description)
         with self.assertRaises(ActionRefused):
             exit1.activate(None)
         with self.assertRaises(ActionRefused):
@@ -364,10 +364,10 @@ class TestDoorsExits(unittest.TestCase):
 
     def test_title_name(self):
         door = Door("hall", "a locked door", direction="north", locked=True, opened=False)
-        self.assertEqual("north", door.name)
+        self.assertEqual("exit to <unbound:hall>", door.name)
         self.assertEqual("Exit to <unbound:hall>", door.title)
         exit = Exit("town.square", "someplace")
-        self.assertEqual(None, exit.name)
+        self.assertEqual("exit to <unbound:town.square>", exit.name)
         self.assertEqual("Exit to <unbound:town.square>", exit.title)
         class ModuleDummy(object):
             pass
@@ -376,6 +376,7 @@ class TestDoorsExits(unittest.TestCase):
         zones.town.square = Location("square")
         exit.bind(zones)
         self.assertEqual("Exit to square", exit.title)
+        self.assertEqual("exit to square", exit.name)
 
 
 class TestLiving(unittest.TestCase):
