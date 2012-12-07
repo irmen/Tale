@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 # @todo: this game is not yet finished and is excluded in the MANIFEST.in for now
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.io import color
 
 if __name__=="__main__":

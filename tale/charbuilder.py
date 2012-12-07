@@ -5,7 +5,7 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division, unicode_literals
 from . import races
 from . import player
 from . import driver

@@ -4,7 +4,7 @@ Creatures living in the central town.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
 import random
 from tale import lang

@@ -9,7 +9,7 @@ with certain key events and actions that the player performed earlier.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division, unicode_literals
 from collections import namedtuple
 
 Hint = namedtuple("Hint", "state location filter text")

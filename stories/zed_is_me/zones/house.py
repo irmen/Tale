@@ -2,7 +2,7 @@
 The house, where the player starts the game
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door
 
 
