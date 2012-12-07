@@ -4,6 +4,7 @@ Monkeypatch colorama to support a few additional text styles
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+from __future__ import absolute_import, print_function, division, unicode_literals
 import colorama
 import colorama.ansi
 import colorama.winterm
@@ -45,10 +46,10 @@ from colorama import *
 
 if __name__=="__main__":
     colorama.init()
-    print colorama.Style.BRIGHT+"bright"+colorama.Style.RESET_ALL
-    print colorama.Style.ITALIC+"italic"+colorama.Style.RESET_ALL
-    print colorama.Style.UNDERLINED+"underlined"+colorama.Style.RESET_ALL
-    print colorama.Style.BLINK+"blink"+colorama.Style.RESET_ALL
-    print colorama.Fore.YELLOW + colorama.Back.RED + "yellow on red" + colorama.Style.RESET_ALL
-    print colorama.Style.REVERSEVID+"reversevid"+colorama.Style.RESET_ALL
-    print colorama.Fore.YELLOW + colorama.Back.RED + colorama.Style.REVERSEVID +"yellow on red, reversed" + colorama.Style.RESET_ALL
+    print(colorama.Style.BRIGHT+"bright"+colorama.Style.RESET_ALL)
+    print(colorama.Style.ITALIC+"italic"+colorama.Style.RESET_ALL)
+    print(colorama.Style.UNDERLINED+"underlined"+colorama.Style.RESET_ALL)
+    print(colorama.Style.BLINK+"blink"+colorama.Style.RESET_ALL)
+    print(colorama.Fore.YELLOW + colorama.Back.RED + "yellow on red" + colorama.Style.RESET_ALL)
+    print(colorama.Style.REVERSEVID+"reversevid"+colorama.Style.RESET_ALL)
+    print(colorama.Fore.YELLOW + colorama.Back.RED + colorama.Style.REVERSEVID +"yellow on red, reversed" + colorama.Style.RESET_ALL)

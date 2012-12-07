@@ -35,6 +35,8 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 
+Remove textwrap from Player. Remove textoutput from Player? (should be moved to console_io?)
+
 Instead of using colors directly in the output, use basic html-ish or bbcode markup: (and get rid of color.py):
  Physical style/color tags:
     dim, normal, bright

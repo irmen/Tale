@@ -563,7 +563,7 @@ def do_look(player, parsed, ctx):
 @disable_notify_action
 def do_examine(player, parsed, ctx):
     """Examine something or someone thoroughly."""
-    tell = player.tell
+    p = player.tell
     if not parsed.args:
         raise ParseError("Examine what or who?")
     name = parsed.args[0]
@@ -572,17 +572,17 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            tell(color.dim("(By %s you probably meant %s.)" % (name, living.name)), end=True)
-        tell("This is %s." % living.title)
+            p(color.dim("(By %s you probably meant %s.)" % (name, living.name)), end=True)
+        p("This is %s." % living.title)
         if living.description:
-            tell(living.description)
+            p(living.description)
         race = races.races[living.race]
         if living.race == "human":
             # don't print as much info when dealing with mere humans
             msg = lang.capital("%s speaks %s." % (living.subjective, race["language"]))
-            tell(msg)
+            p(msg)
         else:
-            tell("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
+            p("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
                 subj=lang.capital(living.subjective),
                 size=races.sizes[race["size"]],
                 btype=races.bodytypes[race["bodytype"]],
@@ -595,30 +595,30 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            tell(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
+            p(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
         if item in player:
-            tell("You're carrying %s." % lang.a(item.title))
+            p("You're carrying %s." % lang.a(item.title))
         elif container and container in player:
             util.print_object_location(player, item, container)
         else:
-            tell("You see %s." % lang.a(item.title))
+            p("You see %s." % lang.a(item.title))
         if item.description:
-            tell(item.description)
+            p(item.description)
         try:
             inventory = item.inventory
         except ActionRefused:
             pass
         else:
             if inventory:
-                tell("It contains: %s." % lang.join(subitem.title for subitem in inventory))
+                p("It contains: %s." % lang.join(subitem.title for subitem in inventory))
             else:
-                tell("It's empty.")
+                p("It's empty.")
     elif name in player.location.exits:
-        tell("It seems you can go there:")
-        tell(player.location.exits[name].description)
+        p("It seems you can go there:")
+        p(player.location.exits[name].description)
     elif name in abbreviations and abbreviations[name] in player.location.exits:
-        tell("It seems you can go there:")
-        tell(player.location.exits[abbreviations[name]].description)
+        p("It seems you can go there:")
+        p(player.location.exits[abbreviations[name]].description)
     else:
         raise ActionRefused("%s isn't here." % name)
 

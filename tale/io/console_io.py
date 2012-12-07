@@ -60,8 +60,8 @@ def input_line(player):
     """
     try:
         print()
-        sys.stdout.flush()
-        cmd = input(color.dim(">> ")).lstrip()
+        print(color.dim(">> "), end="")
+        cmd = input().lstrip()
         player.input_line(cmd)
         if cmd == "quit":
             return False
