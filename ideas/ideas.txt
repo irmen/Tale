@@ -33,6 +33,7 @@ EMP, karma, drama, pressure, vacuum, inertia
 
 General ideas/TODO:
 -------------------
+BUG: who am i  doesn't work (it doesn't recognise 'am')
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 BUG: textformatting is hacked into the player.get_output, for now.
 
