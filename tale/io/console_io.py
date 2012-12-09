@@ -9,7 +9,7 @@ import threading
 import sys
 from ..util import basestring_type
 try:
-    from . import colorama_patched as colorama
+    from . import colorama_patchedXXX as colorama
     colorama.init()
 except ImportError:
     colorama = None
@@ -132,7 +132,9 @@ def apply(line):
     if style_colors:
         for tag in style_colors:
             line = line.replace("<%s>" % tag, style_colors[tag])
-    return line
+        return line
+    else:
+        return strip_text_styles(line)
 
 
 def apply_style(line=None, lines=[]):
