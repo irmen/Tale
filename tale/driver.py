@@ -25,7 +25,7 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .io import vfs
-from .io import console_io as io_adapter
+from .io import console_io
 
 try:
     import readline
@@ -174,8 +174,8 @@ class Driver(object):
         path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
             # The tale library is being loaded from the current directory, this is not supported.
-            io_adapter.output("Tale is being asked to run directly from the distribution directory, this is not supported.")
-            io_adapter.output("Install Tale properly, and/or use the start script from the story directory instead.")
+            print("Tale is being asked to run directly from the distribution directory, this is not supported.")
+            print("Install Tale properly, and/or use the start script from the story directory instead.")
             return
         # cd into the game directory and load its config and zones
         os.chdir(args.game)
@@ -209,33 +209,33 @@ class Driver(object):
         assert self.config.max_wait_hours >= 0
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
-
+        self.io_adapter = console_io.ConsoleIo()
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            io_adapter.output("\n<bright>" + banner + "</>\n")
+            self.io_adapter.output("\n<bright>" + banner + "</>\n")
         except IOError:
             # no banner provided by the game, print default game header
-            io_adapter.output("")
-            io_adapter.output("")
-            io_adapter.output("<bright>")
+            self.io_adapter.output("")
+            self.io_adapter.output("")
+            self.io_adapter.output("<bright>")
             msg = "'%s'" % self.config.name
-            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
-            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
-            io_adapter.output("")
+            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            self.io_adapter.output("")
             msg = "written by %s" % self.config.author
-            io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
-                io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            io_adapter.output("</>")
-            io_adapter.output("")
+                self.io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+            self.io_adapter.output("</>")
+            self.io_adapter.output("")
 
         if self.mode == "mud":
             load_choice = "n"
         else:
             load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
-        io_adapter.output("")
+        self.io_adapter.output("")
         if load_choice == "y":
             self.load_saved_game()
             if args.transcript:
@@ -278,7 +278,7 @@ class Driver(object):
                 self.main_loop()
                 break
             except KeyboardInterrupt:
-                io_adapter.break_pressed(self.player)
+                self.io_adapter.break_pressed(self.player)
                 continue
 
     def lookup_location(self, location_name):
@@ -305,7 +305,7 @@ class Driver(object):
 
     def start_player_input(self):
         if self.config.server_tick_method == "timer":
-            self.async_player_input = io_adapter.AsyncInput(self.player)
+            self.async_player_input = self.io_adapter.get_async_input(self.player)
         elif self.config.server_tick_method == "command":
             self.async_player_input = None  # player input is done in the same thread as the game loop
         else:
@@ -334,7 +334,7 @@ class Driver(object):
             if self.config.server_tick_method == "timer":
                 has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                io_adapter.input_line(self.player)
+                self.io_adapter.input_line(self.player)
                 has_input = self.player.input_is_available.is_set()
                 before = time.time()
                 self.server_tick()
@@ -354,7 +354,7 @@ class Driver(object):
                         except (errors.ParseError, errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    io_adapter.break_pressed(self.player)
+                    self.io_adapter.break_pressed(self.player)
                     continue
                 except EOFError:
                     continue
@@ -423,12 +423,12 @@ class Driver(object):
             return
         output = self.player.get_output()
         if output:
-            if self.mode == "if" and io_adapter.supports_delayed_output and 0 < self.output_line_delay < 1000:
+            if self.mode == "if" and self.io_adapter.supports_delayed_output and 0 < self.output_line_delay < 1000:
                 for line in output.splitlines():
-                    io_adapter.output(line)
+                    self.io_adapter.output(line)
                     time.sleep(self.output_line_delay / 1000)
             else:
-                io_adapter.output(output.rstrip())
+                self.io_adapter.output(output.rstrip())
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -564,13 +564,13 @@ class Driver(object):
             state = pickle.loads(savegame)
             del savegame
         except (IOError, pickle.PickleError) as x:
-            io_adapter.output("There was a problem loading the saved game data:")
-            io_adapter.output(type(x).__name__, x)
+            print("There was a problem loading the saved game data:")
+            print(type(x).__name__, x)
             raise SystemExit(10)
         else:
             if state["version"] != self.config.version:
-                io_adapter.output("This saved game data was from a different version of the game and cannot be used.")
-                io_adapter.output("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                print("This saved game data was from a different version of the game and cannot be used.")
+                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
             self.state = state["gamestate"]
@@ -638,7 +638,7 @@ class Driver(object):
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
         self.write_output()
-        return io_adapter.input(prompt).strip()
+        return self.io_adapter.input(prompt).strip()
 
 
 def monkeypatch_blinker():

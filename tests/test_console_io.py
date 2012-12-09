@@ -11,15 +11,17 @@ from tale.io import console_io
 
 class TestConsoleIo(unittest.TestCase):
     def test_basic(self):
-        self.assertTrue(console_io.supports_delayed_output)
+        io = console_io.ConsoleIo()
+        self.assertTrue(io.supports_delayed_output)
         def print(*lines):
             pass
-        console_io.print = print
-        console_io.break_pressed(None)
-        console_io.output("line1", "line2")
-        del console_io.print
+        io.print = print
+        io.break_pressed(None)
+        io.output("line1", "line2")
+        del io.print
     def test_async(self):
-        a = console_io.AsyncInput(None)
+        io = console_io.ConsoleIo()
+        a = io.get_async_input(None)
         a.disable()
         a.enable()
         a.stop()

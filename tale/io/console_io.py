@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
-from ..util import basestring_type
+from . import iobase
 try:
     from . import colorama_patched as colorama
     colorama.init()
@@ -19,84 +19,8 @@ if sys.version_info < (3, 0):
 else:
     input = input
 
-__all__ = ["AsyncInput", "input", "input_line", "supports_delayed_output", "output", "break_pressed", "apply_style", "strip_text_styles"]
+__all__ = ["ConsoleIo"]
 
-
-CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
-
-
-class AsyncInput(threading.Thread):
-    def __init__(self, player):
-        super(AsyncInput, self).__init__()
-        self.player = player
-        self.setDaemon(True)
-        self.enabled = threading.Event()
-        self.enabled.clear()
-        self.start()
-        self._stoploop = False
-
-    def run(self):
-        loop = True
-        while loop:
-            self.enabled.wait()
-            if self._stoploop:
-                break
-            loop = input_line(self.player)
-            self.enabled.clear()
-
-    def enable(self):
-        self.enabled.set()
-
-    def disable(self):
-        self.enabled.clear()
-
-    def stop(self):
-        self._stoploop = True
-        self.enabled.set()
-        self.join()
-
-
-def input_line(player):
-    """
-    Input a single line of text by the player.
-    Returns True if the input loop should continue as usual.
-    Returns False if the input loop should be terminated (this could
-    be the case when the player types 'quit', for instance).
-    """
-    try:
-        print(apply_style("\n<dim>>></> "), end="")
-        cmd = input().lstrip()
-        player.input_line(cmd)
-        if cmd == "quit":
-            return False
-    except KeyboardInterrupt:
-        break_pressed(player)
-    except EOFError:
-        pass
-    return True
-
-
-supports_delayed_output = True
-
-
-def output(*lines):
-    """Write some text to the visible output buffer."""
-    for line in apply_style(lines=lines):
-        print(line)
-    sys.stdout.flush()
-
-
-def break_pressed(player):
-    print(apply_style(CTRL_C_MESSAGE))
-    sys.stdout.flush()
-
-
-ALL_COLOR_TAGS = {
-    "dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
-    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
-    "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
-    "living", "player", "item", "exit", "location"
-}
 
 if colorama is not None:
     style_colors = {
@@ -130,37 +54,97 @@ if colorama is not None:
         "exit": colorama.Style.BRIGHT,
         "location": colorama.Style.BRIGHT
     }
-    assert len(set(style_colors.keys()) ^ ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
+    assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
 else:
     style_colors = None
 
 
-def _apply(line):
-    if "<" not in line:
-        return line
-    if style_colors:
-        for tag in style_colors:
-            line = line.replace("<%s>" % tag, style_colors[tag])
-        return line
-    else:
-        return strip_text_styles(line)
+class AsyncConsoleInput(threading.Thread):
+    def __init__(self, io, player):
+        super(AsyncConsoleInput, self).__init__()
+        self.io = io
+        self.player = player
+        self.setDaemon(True)
+        self.enabled = threading.Event()
+        self.enabled.clear()
+        self.start()
+        self._stoploop = False
+
+    def run(self):
+        loop = True
+        while loop:
+            self.enabled.wait()
+            if self._stoploop:
+                break
+            loop = self.io.input_line(self.player)
+            self.enabled.clear()
+
+    def enable(self):
+        self.enabled.set()
+
+    def disable(self):
+        self.enabled.clear()
+
+    def stop(self):
+        self._stoploop = True
+        self.enabled.set()
+        self.join()
 
 
-def apply_style(line=None, lines=[]):
-    """Convert style tags to colorama escape sequences suited for console text output"""
-    if line is not None:
-        return _apply(line)
-    return (_apply(line) for line in lines)
+class ConsoleIo(object):
+    CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
+    supports_delayed_output = True
 
+    def __init__(self):
+        pass
 
-def strip_text_styles(text):
-    """remove any special text styling tags from the text (you can pass a single string, and also a list of strings)"""
-    def strip(text):
-        if "<" not in text:
-            return text
-        for tag in ALL_COLOR_TAGS:
-            text = text.replace("<%s>" % tag, "")
-        return text
-    if isinstance(text, basestring_type):
-        return strip(text)
-    return [strip(line) for line in text]
+    def get_async_input(self, player=None):
+        return AsyncConsoleInput(self, player)
+
+    def input(self, prompt=None):
+        return input(prompt)
+
+    def input_line(self, player):
+        """
+        Input a single line of text by the player.
+        Returns True if the input loop should continue as usual.
+        Returns False if the input loop should be terminated (this could
+        be the case when the player types 'quit', for instance).
+        """
+        try:
+            print(self.apply_style("\n<dim>>></> "), end="")
+            cmd = input().lstrip()
+            player.input_line(cmd)
+            if cmd == "quit":
+                return False
+        except KeyboardInterrupt:
+            self.break_pressed(player)
+        except EOFError:
+            pass
+        return True
+
+    def output(self, *lines):
+        """Write some text to the visible output buffer."""
+        for line in self.apply_style(lines=lines):
+            print(line)
+        sys.stdout.flush()
+
+    def break_pressed(self, player):
+        print(self.apply_style(self.CTRL_C_MESSAGE))
+        sys.stdout.flush()
+
+    def _apply_style(self, line):
+        if "<" not in line:
+            return line
+        if style_colors:
+            for tag in style_colors:
+                line = line.replace("<%s>" % tag, style_colors[tag])
+            return line
+        else:
+            return iobase.strip_text_styles(line)
+
+    def apply_style(self, line=None, lines=[]):
+        """Convert style tags to colorama escape sequences suited for console text output"""
+        if line is not None:
+            return self._apply_style(line)
+        return (self._apply_style(line) for line in lines)

@@ -563,11 +563,20 @@ def do_look(player, parsed, ctx):
 def do_examine(player, parsed, ctx):
     """Examine something or someone thoroughly."""
     p = player.tell
-    if not parsed.args:
-        raise ParseError("Examine what or who?")
     name = parsed.args[0]
-    living = player.location.search_living(name)
+    living = None
+    if parsed.who_info and isinstance(parsed.who_order[0], base.Living):
+        living = parsed.who_order[0]
+    if not living:
+        if not parsed.args:
+            raise ParseError("Examine what or who?")
+        living = player.location.search_living(name)
     if living:
+        if living is player:
+            # player examines him/herself
+            p("You are <living>%s</>. But you knew that already." % living.title)
+            player.tell_others("{Title} is looking at %sself." % living.objective)
+            return
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:

@@ -15,7 +15,7 @@ from . import lang
 from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
-from .io.console_io import strip_text_styles
+from .io.iobase import strip_text_styles
 
 
 DEFAULT_SCREEN_WIDTH = 72
