@@ -7,9 +7,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
-from . import colorama_patched as colorama
-
-colorama.init()
+try:
+    from . import colorama_patched as colorama
+    colorama.init()
+except ImportError:
+    colorama = None
 
 if sys.version_info < (3, 0):
     input = raw_input
@@ -88,46 +90,52 @@ def break_pressed(player):
     sys.stdout.flush()
 
 
-style_colors = {
-    "dim": colorama.Style.DIM,
-    "normal": colorama.Style.NORMAL,
-    "bright": colorama.Style.BRIGHT,
-    "ul": colorama.Style.UNDERLINED,
-    "rev": colorama.Style.REVERSEVID,
-    "/": colorama.Style.RESET_ALL,
-    "italic": colorama.Style.ITALIC,
-    "blink": colorama.Style.BLINK,
-    "black": colorama.Fore.BLACK,
-    "red": colorama.Fore.RED,
-    "green": colorama.Fore.GREEN,
-    "yellow": colorama.Fore.YELLOW,
-    "blue": colorama.Fore.BLUE,
-    "magenta": colorama.Fore.MAGENTA,
-    "cyan": colorama.Fore.CYAN,
-    "white": colorama.Fore.WHITE,
-    "bg:black": colorama.Back.BLACK,
-    "bg:red": colorama.Back.RED,
-    "bg:green": colorama.Back.GREEN,
-    "bg:yellow": colorama.Back.YELLOW,
-    "bg:blue": colorama.Back.BLUE,
-    "bg:magenta": colorama.Back.MAGENTA,
-    "bg:cyan": colorama.Back.CYAN,
-    "bg:white": colorama.Back.WHITE,
-    "living": colorama.Style.BRIGHT,
-    "player": colorama.Style.BRIGHT,
-    "item": colorama.Style.BRIGHT,
-    "exit": colorama.Style.BRIGHT
-}
+if colorama is not None:
+    style_colors = {
+        "dim": colorama.Style.DIM,
+        "normal": colorama.Style.NORMAL,
+        "bright": colorama.Style.BRIGHT,
+        "ul": colorama.Style.UNDERLINED,
+        "rev": colorama.Style.REVERSEVID,
+        "/": colorama.Style.RESET_ALL,
+        "italic": colorama.Style.ITALIC,
+        "blink": colorama.Style.BLINK,
+        "black": colorama.Fore.BLACK,
+        "red": colorama.Fore.RED,
+        "green": colorama.Fore.GREEN,
+        "yellow": colorama.Fore.YELLOW,
+        "blue": colorama.Fore.BLUE,
+        "magenta": colorama.Fore.MAGENTA,
+        "cyan": colorama.Fore.CYAN,
+        "white": colorama.Fore.WHITE,
+        "bg:black": colorama.Back.BLACK,
+        "bg:red": colorama.Back.RED,
+        "bg:green": colorama.Back.GREEN,
+        "bg:yellow": colorama.Back.YELLOW,
+        "bg:blue": colorama.Back.BLUE,
+        "bg:magenta": colorama.Back.MAGENTA,
+        "bg:cyan": colorama.Back.CYAN,
+        "bg:white": colorama.Back.WHITE,
+        "living": colorama.Style.BRIGHT,
+        "player": colorama.Style.BRIGHT,
+        "item": colorama.Style.BRIGHT,
+        "exit": colorama.Style.BRIGHT
+    }
 
-
-def apply_style(line=None, lines=[]):
-    """Convert style tags to colorama escape sequences suited for console text output"""
     def apply(line):
         if "{" not in line:
             return line
         for tag in style_colors:
             line = line.replace("{%s}" % tag, style_colors[tag])
         return line
+
+else:
+    from .textoutput import strip_text_styles
+    apply = strip_text_styles
+
+
+def apply_style(line=None, lines=[]):
+    """Convert style tags to colorama escape sequences suited for console text output"""
     if line is not None:
         return apply(line)
     return (apply(line) for line in lines)
