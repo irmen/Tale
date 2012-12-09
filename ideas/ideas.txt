@@ -34,11 +34,8 @@ EMP, karma, drama, pressure, vacuum, inertia
 General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
-
-Remove textwrap from Player. Remove textoutput from Player? (should be moved to console_io?)
-Fix the textformatting to deal with ansi-escape characters (due to coloring) taking up character width.
-TextOutput.render should probably be removed as the I/O abstraction will take care of that.
-(rename Textoutput to Textbuffer?)
+BUG: empty tells keep outputting newlines on the player's console.
+BUG: textformatting is hacked into the player.get_output, for now.
 
 HTTP server mode with HTML+Javascript frontend.
 Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.

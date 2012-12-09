@@ -8,15 +8,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from threading import Event
 import time
-import textwrap
 import blinker
 from . import base
 from . import soul
 from . import lang
 from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
-from .io import textoutput
 from .util import queue
+from .io.console_io import strip_text_styles
 
 
 DEFAULT_SCREEN_WIDTH = 72
@@ -48,10 +47,7 @@ class Player(base.Living):
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
-        indent = " " * self.screen_indent
-        self.textwrapper = textwrap.TextWrapper(initial_indent=indent, subsequent_indent=indent,
-                                                width=self.screen_width, fix_sentence_endings=True)
-        self._output = textoutput.TextOutput(self.textwrapper)
+        self._output = TextBuffer()
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -60,7 +56,7 @@ class Player(base.Living):
     def __getstate__(self):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["_input", "_output", "input_is_available", "transcript", "textwrapper"]:
+        for name in ["_input", "_output", "input_is_available", "transcript"]:
             del state[name]
         return state
 
@@ -71,8 +67,6 @@ class Player(base.Living):
     def set_screen_sizes(self, indent, width):
         self.screen_indent = indent
         self.screen_width = width
-        self.textwrapper.initial_indent = self.textwrapper.subsequent_indent = " " * indent
-        self.textwrapper.width = width
 
     def set_title(self, title, includes_name_param=False):
         if includes_name_param:
@@ -119,7 +113,7 @@ class Player(base.Living):
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
         If you want to output a paragraph separator, either set end=True or tell a single '\n'.
-        If you provide format=False, this paragraph of text won't be formatted by textwrap,
+        If you provide format=False, this paragraph of text won't be formatted when it is outputted,
         and whitespace is untouched. An empty string isn't outputted at all.
         Multiple messages are separated by a space.
         The player object is returned so you can chain calls.
@@ -132,19 +126,35 @@ class Player(base.Living):
                 self._output.print(str(msg), **kwargs)
         return self
 
-    def peek_output(self):
-        """Returns a copy of the output that sits in the buffer so far (for test purposes). No text styles are included."""
-        lines = (textoutput.strip_text_styles(line) for line in self._output.raw(clear=False))
-        return "\n".join(lines)
+    def peek_output_paragraphs_raw(self):
+        """
+        Returns a copy of the output paragraphs that sit in the buffer so far
+        This is for test purposes. No text styles are included.
+        """
+        paragraphs = self._output.get_paragraphs(clear=False)
+        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
-    def get_raw_output(self):
-        """Gets the accumulated output lines in raw form (for test purposes). No text styles are included."""
-        return [textoutput.strip_text_styles(line) for line in self._output.raw(clear=True)]
+    def get_output_paragraphs_raw(self):
+        """
+        Gets the accumulated output paragraphs in raw form.
+        This is for test purposes. No text styles are included.
+        """
+        paragraphs = self._output.get_paragraphs(clear=True)
+        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
     def get_output(self):
         """Gets the accumulated output lines, formats them nicely, and clears the buffer"""
         self._output.width = self.screen_width
-        output = self._output.render()
+        # @todo fix formatting!
+        import textwrap
+        wrapper = textwrap.TextWrapper(width=70, fix_sentence_endings=True, initial_indent="", subsequent_indent="")
+        output = ""
+        for txt, formatted in self._output.get_paragraphs():
+            if formatted:
+                txt = wrapper.fill(txt) + "\n"
+            output += txt
+        if not output.endswith("\n"):
+            output += "\n"
         if self.transcript:
             self.transcript.write(output)
         return output
@@ -183,7 +193,7 @@ class Player(base.Living):
         blinker.signal("wiretap").disconnect(self.wiretap_msg)
 
     def destroy(self, ctx):
-        self.activate_transcript(False)
+        self.activate_transcript(None, None)
         super(Player, self).destroy(ctx)
         self.soul = None   # truly die ;-)
 
@@ -207,16 +217,77 @@ class Player(base.Living):
         self.input_is_available.set()
         self.turns += 1
 
-    def activate_transcript(self, file):
+    def activate_transcript(self, file, vfs):
         if file:
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
-            self.transcript = open(file, "a")
+            self.transcript = vfs.open_write(file, mode="a")
+            self.tell("Transcript is being written to", self.transcript.name)
             self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
-            self.tell("Transcript is being written to", file)
         else:
             if self.transcript:
                 self.transcript.write("\n*Transcript ending at %s*\n\n" % time.ctime())
                 self.transcript.close()
                 self.transcript = None
                 self.tell("Transcript ended.")
+            else:
+                self.tell("There was no transcript being made.")
+
+
+
+class TextBuffer(object):
+    class Paragraph(object):
+        def __init__(self, format=True):
+            self.format = format
+            self.lines = []
+
+        def add(self, line):
+            self.lines.append(line)
+
+        def text(self):
+            return "\n".join(self.lines) + "\n"
+
+    def __init__(self):
+        self.init()
+
+    def init(self):
+        self.paragraphs = []
+        self.in_paragraph = False
+
+    def p(self):
+        """Paragraph terminator. Start new paragraph on next line."""
+        if not self.in_paragraph:
+            self.__new_paragraph(False)
+        self.in_paragraph = False
+
+    def __new_paragraph(self, format):
+        p = TextBuffer.Paragraph(format)
+        self.paragraphs.append(p)
+        self.in_paragraph = True
+        return p
+
+    def print(self, line, end=False, format=True):
+        """
+        Write a line of text. A single space is inserted between lines, if format=True.
+        If end=True, the current paragraph is ended and a new one begins.
+        If format=True, the text will be formatted when output, otherwise it is outputted as-is.
+        """
+        if not line and format and not end:
+            return
+        if self.in_paragraph:
+            p = self.paragraphs[-1]
+        else:
+            p = self.__new_paragraph(format)
+        if p.format != format:
+            p = self.__new_paragraph(format)
+        if format:
+            line = line.strip()
+        p.add(line)
+        if end:
+            self.in_paragraph = False
+
+    def get_paragraphs(self, clear=True):
+        paragraphs = [(p.text(), p.format) for p in self.paragraphs]
+        if clear:
+            self.init()
+        return paragraphs

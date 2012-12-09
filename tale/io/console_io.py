@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
+from ..util import basestring_type
 try:
     from . import colorama_patched as colorama
     colorama.init()
@@ -18,7 +19,7 @@ if sys.version_info < (3, 0):
 else:
     input = input
 
-__all__ = ["AsyncInput", "input", "input_line", "supports_delayed_output", "output", "break_pressed", "apply_style"]
+__all__ = ["AsyncInput", "input", "input_line", "supports_delayed_output", "output", "break_pressed", "apply_style", "strip_text_styles"]
 
 
 CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
@@ -121,17 +122,16 @@ if colorama is not None:
         "item": colorama.Style.BRIGHT,
         "exit": colorama.Style.BRIGHT
     }
+else:
+    style_colors = None
 
-    def apply(line):
-        if "{" not in line:
-            return line
+def apply(line):
+    if "{" not in line:
+        return line
+    if style_colors:
         for tag in style_colors:
             line = line.replace("{%s}" % tag, style_colors[tag])
-        return line
-
-else:
-    from .textoutput import strip_text_styles
-    apply = strip_text_styles
+    return line
 
 
 def apply_style(line=None, lines=[]):
@@ -139,3 +139,19 @@ def apply_style(line=None, lines=[]):
     if line is not None:
         return apply(line)
     return (apply(line) for line in lines)
+
+
+def strip_text_styles(text):
+    """remove any special text styling tags from the text (you can pass a single string, and also a list of strings)"""
+    def strip(text):
+        if "{" not in text:
+            return text
+        for tag in ("dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
+                    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
+                    "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
+                    "living", "player", "item", "exit"):
+            text = text.replace("{%s}" % tag, "")
+        return text
+    if isinstance(text, basestring_type):
+        return strip(text)
+    return [strip(line) for line in text]

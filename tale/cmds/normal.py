@@ -1140,12 +1140,12 @@ def do_load(player, parsed, ctx):
 @disabled_in_gamemode("mud")
 def do_transcript(player, parsed, ctx):
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
-    if not parsed.args:
+    if parsed.unparsed == "off" or (parsed.args and parsed.args[0] == "off"):
+        player.activate_transcript(None, None)
+    elif not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
-    if parsed.args[0] == "off":
-        player.activate_transcript(None)
     else:
-        player.activate_transcript(parsed.args[0])
+        player.activate_transcript(parsed.args[0], ctx.driver.vfs)
 
 
 @cmd("show")
@@ -1420,6 +1420,7 @@ def do_teststyles(player, parsed, ctx):
     ]
     player.tell("Text style and coloring tests. Depending on the capabilities of the output device,")
     player.tell("you should see various colors and text formatting styles being used.")
-    player.tell("If you're on a text console and don't see any colors, make sure the 'colorama' Python module is installed.", end=True)
+    player.tell("If you're on a text console and don't see any colors, make sure the 'colorama' Python module is installed.")
+    player.tell("Note that some styles are not widely supported (blink, italic).", end=True)
     for style, example in style_tests:
         player.tell("  %-15s %s" % (style, example), format=False)

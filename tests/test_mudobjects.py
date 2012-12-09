@@ -15,7 +15,7 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResults
-from tale.io.textoutput import strip_text_styles
+from tale.io.console_io import strip_text_styles
 
 
 class TestLocations(unittest.TestCase):

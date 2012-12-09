@@ -239,7 +239,7 @@ class Driver(object):
         if load_choice == "y":
             self.load_saved_game()
             if args.transcript:
-                self.player.activate_transcript(args.transcript)
+                self.player.activate_transcript(args.transcript, self.vfs)
             self.player.tell("\n")
             if self.mode == "if":
                 self.story.welcome_savegame(self.player)
@@ -256,7 +256,7 @@ class Driver(object):
                 builder = CharacterBuilder(self)
                 self.player = builder.build()
             if args.transcript:
-                self.player.activate_transcript(args.transcript)
+                self.player.activate_transcript(args.transcript, self.vfs)
             # move the player to the starting location
             if "wizard" in self.player.privileges:
                 self.player.move(self.config.startlocation_wizard)
