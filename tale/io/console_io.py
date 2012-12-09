@@ -9,7 +9,7 @@ import threading
 import sys
 from ..util import basestring_type
 try:
-    from . import colorama_patchedXXX as colorama
+    from . import colorama_patched as colorama
     colorama.init()
 except ImportError:
     colorama = None
@@ -91,6 +91,13 @@ def break_pressed(player):
     sys.stdout.flush()
 
 
+ALL_COLOR_TAGS = {
+    "dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
+    "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
+    "living", "player", "item", "exit", "location"
+}
+
 if colorama is not None:
     style_colors = {
         "dim": colorama.Style.DIM,
@@ -123,10 +130,12 @@ if colorama is not None:
         "exit": colorama.Style.BRIGHT,
         "location": colorama.Style.BRIGHT
     }
+    assert len(set(style_colors.keys()) ^ ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
 else:
     style_colors = None
 
-def apply(line):
+
+def _apply(line):
     if "<" not in line:
         return line
     if style_colors:
@@ -140,8 +149,8 @@ def apply(line):
 def apply_style(line=None, lines=[]):
     """Convert style tags to colorama escape sequences suited for console text output"""
     if line is not None:
-        return apply(line)
-    return (apply(line) for line in lines)
+        return _apply(line)
+    return (_apply(line) for line in lines)
 
 
 def strip_text_styles(text):
@@ -149,10 +158,7 @@ def strip_text_styles(text):
     def strip(text):
         if "<" not in text:
             return text
-        for tag in ("dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
-                    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
-                    "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
-                    "living", "player", "item", "exit", "location"):
+        for tag in ALL_COLOR_TAGS:
             text = text.replace("<%s>" % tag, "")
         return text
     if isinstance(text, basestring_type):
