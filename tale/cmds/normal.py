@@ -62,7 +62,7 @@ def do_inventory(player, parsed, ctx):
         if inventory:
             player.tell("You are carrying:", end=True)
             for item in inventory:
-                player.tell("  " + item.title, format=False)
+                player.tell("  <item>%s</>" % item.title, format=False)
         else:
             player.tell("You are carrying nothing.")
         player.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
@@ -82,13 +82,13 @@ def do_locate(player, parsed, ctx):
     if parsed.who_order:
         thing = parsed.who_order[0]
         if thing is player:
-            p("You are here, in %s." % player.location.name)
+            p("You are here, in <location>%s</>." % player.location.name)
             return
         if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            p("{dim}(By %s you probably mean %s.){/}" % (name, thing.name))
+            p("<dim>(By %s you probably mean %s.)</>" % (name, thing.name))
         if thing in player.location:
             if isinstance(thing, base.Living):
-                p("%s is here next to you." % lang.capital(thing.title))
+                p("<living>%s</> is here next to you." % lang.capital(thing.title))
             else:
                 util.print_object_location(player, thing, player.location, False)
         elif thing in player:
@@ -101,12 +101,12 @@ def do_locate(player, parsed, ctx):
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                p("{dim}(By %s you probably mean %s.){/}" % (name, item.name))
+                p("<dim>(By %s you probably mean %s.)</>" % (name, item.name))
             util.print_object_location(player, item, container, False)
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
-                player.tell("%s is playing, %s is currently in '%s'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
+                player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
                 p("You can't find that.")
 
@@ -132,8 +132,8 @@ def do_drop(player, parsed, ctx):
             player.tell(message)
         if items:
             items_str = lang.join(lang.a(item.title) for item in items)
-            player.tell("You drop %s." % items_str)
-            player.tell_others("{Title} drops %s." % items_str)
+            player.tell("You drop <item>%s</>." % items_str)
+            player.tell_others("<player>{Title}</> drops <item>%s</>." % items_str)
         else:
             player.tell("You didn't drop anything.")
 
@@ -159,7 +159,7 @@ def do_drop(player, parsed, ctx):
                     util.print_object_location(player, item, container)
                 drop_stuff([item], container)
             else:
-                raise ActionRefused("You don't have %s." % lang.a(arg))
+                raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
 
 
 @cmd("empty")
@@ -171,7 +171,7 @@ def do_empty(player, parsed, ctx):
         raise ParseError("Please be more specific, only empty one thing at a time.")
     container = parsed.who_order[0]
     if not isinstance(container, base.Container):
-        raise ActionRefused("You can't take anything from %s." % container.title)
+        raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
     if container in player.location:
         # move the contents to the room
         target = player.location
@@ -191,8 +191,8 @@ def do_empty(player, parsed, ctx):
             player.tell(str(x))
     if items_moved:
         itemnames = lang.join(items_moved)
-        player.tell("You %s: %s." % (action, itemnames))
-        player.tell_others("{Title} %s: %s." % (action, itemnames))
+        player.tell("You %s: <item>%s</>." % (action, itemnames))
+        player.tell_others("<player>{Title}</> %s: <item>%s</>." % (action, itemnames))
     else:
         player.tell("You %s nothing." % action)
 
@@ -219,7 +219,7 @@ def do_put(player, parsed, ctx):
         what = parsed.who_order[:-1]
         where = parsed.who_order[-1]
     if isinstance(where, base.Living):
-        raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (where.name, where.objective))
+        raise ActionRefused("You can't put stuff in <living>%s</>, try giving it to %s?" % (where.name, where.objective))
     inventory_items = []
     refused = []
     word_before = parsed.who_info[where].previous_word or "in"
@@ -227,7 +227,7 @@ def do_put(player, parsed, ctx):
         raise ActionRefused("You can't do that.")  # only supports put X in Y
     for item in what:
         if item is where:
-            p("You can't put %s %s itself." % (item.title, word_before))
+            p("You can't put <item>%s</> %s itself." % (item.title, word_before))
             continue
         try:
             if item in player:
@@ -238,18 +238,18 @@ def do_put(player, parsed, ctx):
                 # first take the item from the room, then move it to the target location
                 item.move(player, player)
                 p("You take %s." % item.title)
-                player.tell_others("{Title} takes %s." % item.title)
+                player.tell_others("<player>{Title}</> takes <item>%s</>." % item.title)
                 item.move(where, player)
-                p("You put it in the %s." % where.name)
-                player.tell_others("{Title} puts it in the %s." % where.name)
+                p("You put it in the <item>%s</>." % where.name)
+                player.tell_others("<player>{Title}</> puts it in the <item>%s</>." % where.name)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
         p(message)
     if inventory_items:
         items_msg = lang.join(lang.a(item.title) for item in inventory_items)
-        player.tell_others("{Title} puts %s in the %s." % (items_msg, where.name))
-        p("You put {items} in the {where}.".format(items=items_msg, where=where.name))
+        player.tell_others("<player>{Title}</> puts <item>%s</> in the <item>%s</>." % (items_msg, where.name))
+        p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))  # XXX
 
 
 @cmd("take", "get", "steal", "rob")
@@ -524,15 +524,15 @@ def do_help(player, parsed, ctx):
             if abbrs:
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
-        player.tell("{bright}Available commands:{/}")
+        player.tell("<bright>Available commands:</>")
         player.tell(", ".join(sorted(cmds_help)), end=True)
-        player.tell("{bright}Abbreviations:{/}")
+        player.tell("<bright>Abbreviations:</>")
         player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
         player.tell("To see all possible verbs ask 'what is emotes' (?emotes).", end=True)
         if player.hints.has_hints():
-            player.tell("{bright}Hints:{/}")
+            player.tell("<bright>Hints:</>")
             player.tell("When you're stuck, you can use the 'hint' command to try to get a clue about what to do next.")
 
 
@@ -571,7 +571,7 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            p("{dim}(By %s you probably meant %s.){/}" % (name, living.name), end=True)
+            p("<dim>(By %s you probably meant %s.)</>" % (name, living.name), end=True)
         p("This is %s." % living.title)
         if living.description:
             p(living.description)
@@ -594,7 +594,7 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p("{dim}(By %s you probably meant %s.){/}" % (name, item.name))
+            p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
         if item in player:
             p("You're carrying %s." % lang.a(item.title))
         elif container and container in player:
@@ -784,7 +784,7 @@ def do_quit(player, parsed, ctx):
 
 def print_item_removal(player, item, container, print_parentheses=True):
     if print_parentheses:
-        player.tell("{dim}(You take the %s from the %s).{/}" % (item.name, container.name))
+        player.tell("<dim>(You take the %s from the %s).</>" % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
@@ -917,7 +917,7 @@ def do_what(player, parsed, ctx):
     # is it a npc here?
     living = player.location.search_living(name)
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        p("{dim}(By %s you probably meant %s.){/}" % (name, living.name))
+        p("<dim>(By %s you probably meant %s.)</>" % (name, living.name))
     if living:
         found = True
         if living is player:
@@ -935,7 +935,7 @@ def do_what(player, parsed, ctx):
     if item:
         found = True
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p("{dim}(By %s you probably meant %s.){/}" % (name, item.name))
+            p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
         p("It's an item in your vicinity. You should perhaps try to examine it.")
     if name == "soul":
         # if player is asking about the soul, give some general info
@@ -1315,18 +1315,18 @@ def do_gameinfo(player, parsed, ctx):
     # version info
     config = ctx.config
     author_addr = " (%s)" % config.author_address if config.author_address else ""
-    t("{bright}This game is '%s' v%s," % (config.name, config.version))
+    t("<bright>This game is '%s' v%s," % (config.name, config.version))
     t("written by %s%s." % (config.author, author_addr))
     t("Using Tale framework v%s." % tale_version_string)
-    t("{/}\n")
+    t("</>\n")
     t("\n")
     # print GPL 3.0 banner
-    t("{bright}Tale: mud driver, mudlib and interactive fiction framework.", end=True)
+    t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)
     t("Copyright (C) 2012  Irmen de Jong.", end=True)
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
-    t("{/}")
+    t("</>")
 
 
 @cmd("config")
@@ -1390,33 +1390,33 @@ def do_teststyles(player, parsed, ctx):
     """Test the text output styling (styles and colors)."""
     style_tests = [
         ("normal", "This is NORMAL."),
-        ("dim", "{dim}This is DIM.{/}"),
-        ("bright", "{bright}This is BRIGHT.{/}"),
-        ("ul", "{ul}This is UNDERLINED.{/}"),
-        ("rev", "{rev}This is RERVERSE VIDEO.{/}"),
-        ("italic", "{italic}This is ITALIC.{/}"),
-        ("blink", "{blink}This is BLINKING.{/}"),
-        ("black", "{black}This is BLACK.{/} (black text)"),
-        ("red", "{red}This is RED.{/}"),
-        ("green", "{green}This is GREEN.{/}"),
-        ("yellow", "{yellow}This is YELLOW.{/}"),
-        ("blue", "{blue}This is BLUE.{/}"),
-        ("magenta", "{magenta}This is MAGENTA.{/}"),
-        ("cyan", "{cyan}This is CYAN.{/}"),
-        ("white", "{white}This is WHITE.{/} (white text)"),
-        ("bg:black", "{bg:black}This is BG:BLACK.{/} (black background)"),
-        ("bg:red", "{bg:red}This is BG:RED.{/}"),
-        ("bg:green", "{bg:green}This is BG:GREEN.{/}"),
-        ("bg:yellow", "{bg:yellow}This is BG:YELLOW.{/}"),
-        ("bg:blue", "{bg:blue}This is BG:BLUE.{/}"),
-        ("bg:magenta", "{bg:magenta}This is BG:MAGENTA.{/}"),
-        ("bg:cyan", "{bg:cyan}This is BG:CYAN.{/}"),
-        ("bg:white", "{bg:white}This is BG:WHITE.{/} (white background)"),
-        ("living", "{living}This is LIVING.{/}"),
-        ("player", "{player}This is PLAYER.{/}"),
-        ("item", "{item}This is ITEM.{/}"),
-        ("exit", "{exit}This is EXIT.{/}"),
-            {"(combined)", "{green}{bg:blue}{ul}{bright}Bright green on blue, underlined. {rev}(reverse video){/}"}
+        ("dim", "<dim>This is DIM.</>"),
+        ("bright", "<bright>This is BRIGHT.</>"),
+        ("ul", "<ul>This is UNDERLINED.</>"),
+        ("rev", "<rev>This is RERVERSE VIDEO.</>"),
+        ("italic", "<italic>This is ITALIC.</>"),
+        ("blink", "<blink>This is BLINKING.</>"),
+        ("black", "<black>This is BLACK.</> (black text)"),
+        ("red", "<red>This is RED.</>"),
+        ("green", "<green>This is GREEN.</>"),
+        ("yellow", "<yellow>This is YELLOW.</>"),
+        ("blue", "<blue>This is BLUE.</>"),
+        ("magenta", "<magenta>This is MAGENTA.</>"),
+        ("cyan", "<cyan>This is CYAN.</>"),
+        ("white", "<white>This is WHITE.</> (white text)"),
+        ("bg:black", "<bg:black>This is BG:BLACK.</> (black background)"),
+        ("bg:red", "<bg:red>This is BG:RED.</>"),
+        ("bg:green", "<bg:green>This is BG:GREEN.</>"),
+        ("bg:yellow", "<bg:yellow>This is BG:YELLOW.</>"),
+        ("bg:blue", "<bg:blue>This is BG:BLUE.</>"),
+        ("bg:magenta", "<bg:magenta>This is BG:MAGENTA.</>"),
+        ("bg:cyan", "<bg:cyan>This is BG:CYAN.</>"),
+        ("bg:white", "<bg:white>This is BG:WHITE.</> (white background)"),
+        ("living", "<living>This is LIVING.</>"),
+        ("player", "<player>This is PLAYER.</>"),
+        ("item", "<item>This is ITEM.</>"),
+        ("exit", "<exit>This is EXIT.</>"),
+            {"(combined)", "<green><bg:blue><ul><bright>Bright green on blue, underlined. <rev>(reverse video)</>"}
     ]
     player.tell("Text style and coloring tests. Depending on the capabilities of the output device,")
     player.tell("you should see various colors and text formatting styles being used.")

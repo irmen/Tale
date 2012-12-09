@@ -64,7 +64,7 @@ def input_line(player):
     be the case when the player types 'quit', for instance).
     """
     try:
-        print(apply_style("\n{dim}>>{/} "), end="")
+        print(apply_style("\n<dim>>></> "), end="")
         cmd = input().lstrip()
         player.input_line(cmd)
         if cmd == "quit":
@@ -120,17 +120,18 @@ if colorama is not None:
         "living": colorama.Style.BRIGHT,
         "player": colorama.Style.BRIGHT,
         "item": colorama.Style.BRIGHT,
-        "exit": colorama.Style.BRIGHT
+        "exit": colorama.Style.BRIGHT,
+        "location": colorama.Style.BRIGHT
     }
 else:
     style_colors = None
 
 def apply(line):
-    if "{" not in line:
+    if "<" not in line:
         return line
     if style_colors:
         for tag in style_colors:
-            line = line.replace("{%s}" % tag, style_colors[tag])
+            line = line.replace("<%s>" % tag, style_colors[tag])
     return line
 
 
@@ -144,13 +145,13 @@ def apply_style(line=None, lines=[]):
 def strip_text_styles(text):
     """remove any special text styling tags from the text (you can pass a single string, and also a list of strings)"""
     def strip(text):
-        if "{" not in text:
+        if "<" not in text:
             return text
         for tag in ("dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
                     "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
                     "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
-                    "living", "player", "item", "exit"):
-            text = text.replace("{%s}" % tag, "")
+                    "living", "player", "item", "exit", "location"):
+            text = text.replace("<%s>" % tag, "")
         return text
     if isinstance(text, basestring_type):
         return strip(text)

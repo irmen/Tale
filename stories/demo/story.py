@@ -64,7 +64,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("{bright}Welcome to %s.{/}" % self.config["name"], end=True)
+        player.tell("<bright>Welcome to %s.</>" % self.config["name"], end=True)
         player.tell("\n")
         player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -72,7 +72,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("{bright}Welcome back to %s.{/}" % self.config["name"], end=True)
+        player.tell("<bright>Welcome back to %s.</>" % self.config["name"], end=True)
         player.tell("\n")
         player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -85,5 +85,5 @@ class Story(object):
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("{bright}Congratulations! You've finished the game!{/}")
+        player.tell("<bright>Congratulations! You've finished the game!</>")
 

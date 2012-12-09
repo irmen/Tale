@@ -404,7 +404,7 @@ def do_server(player, parsed, ctx):
     """Dump some server information."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["{bright}Server information:{/}"]
+    txt = ["<bright>Server information:</>"]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
     uptime = realtime - driver.server_started
@@ -438,13 +438,13 @@ def do_events(player, parsed, ctx):
     """Dump pending events."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["{bright}Pending events overview.{/} Server tick is %.1f sec." % config.server_tick_time,
+    txt = ["<bright>Pending events overview.</> Server tick is %.1f sec." % config.server_tick_time,
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     txt.append("")
     txt.append("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
-    txt.append("{ul}  due   {dim}|{/}{ul} function            {dim}|{/}{ul} owner                  {/}")
+    txt.append("<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                  </>")
     for d in driver.deferreds:
-        txt.append(("%-7s {dim}|{/} %-20s{dim}|{/} %s") % (d.due_secs(ctx.clock, realtime=True), d.callable, d.owner))
+        txt.append(("%-7s <dim>|</> %-20s<dim>|</> %s") % (d.due_secs(ctx.clock, realtime=True), d.callable, d.owner))
     player.tell(*txt, format=False)

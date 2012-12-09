@@ -213,12 +213,12 @@ class Driver(object):
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            io_adapter.output("\n{bright}" + banner + "{/}\n")
+            io_adapter.output("\n<bright>" + banner + "</>\n")
         except IOError:
             # no banner provided by the game, print default game header
             io_adapter.output("")
             io_adapter.output("")
-            io_adapter.output("{bright}")
+            io_adapter.output("<bright>")
             msg = "'%s'" % self.config.name
             io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
@@ -228,7 +228,7 @@ class Driver(object):
             io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
                 io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            io_adapter.output("{/}")
+            io_adapter.output("</>")
             io_adapter.output("")
 
         if self.mode == "mud":
@@ -297,7 +297,7 @@ class Driver(object):
         if self.mode != "if":
             motd, mtime = util.get_motd(self.vfs)
             if motd:
-                self.player.tell("{bright}Message-of-the-day, last modified on %s:{/}" % mtime, end=True)
+                self.player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
                 self.player.tell("\n")
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
                 self.player.tell("\n")

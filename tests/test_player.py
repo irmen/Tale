@@ -233,7 +233,6 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         output = player.get_output()
-        print(output)
         self.assertTrue("[wiretapped from 'Attic': message for room]" in output)
         self.assertTrue("[wiretapped from 'julie': message for julie]" in output)
         self.assertTrue("[wiretapped from 'julie': message for room]" in output)

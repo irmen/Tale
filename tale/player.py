@@ -85,7 +85,7 @@ class Player(base.Living):
             # special case, repeat previous command
             if self.previous_commandline:
                 commandline = self.previous_commandline
-                self.tell("{dim}(repeat: %s){/}" % commandline, end=True)
+                self.tell("<dim>(repeat: %s)</>" % commandline, end=True)
             else:
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
@@ -143,7 +143,10 @@ class Player(base.Living):
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
     def get_output(self):
-        """Gets the accumulated output lines, formats them nicely, and clears the buffer"""
+        """
+        Gets the accumulated output lines, formats them nicely, and clears the buffer.
+        If there is nothing to be outputted, None is returned.
+        """
         self._output.width = self.screen_width
         # @todo fix formatting!
         import textwrap
@@ -153,11 +156,10 @@ class Player(base.Living):
             if formatted:
                 txt = wrapper.fill(txt) + "\n"
             output += txt
-        if not output.endswith("\n"):
-            output += "\n"
-        if self.transcript:
-            self.transcript.write(output)
-        return output
+        if output:
+            if self.transcript:
+                self.transcript.write(output)
+        return output or None
 
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
@@ -230,9 +232,6 @@ class Player(base.Living):
                 self.transcript.close()
                 self.transcript = None
                 self.tell("Transcript ended.")
-            else:
-                self.tell("There was no transcript being made.")
-
 
 
 class TextBuffer(object):
