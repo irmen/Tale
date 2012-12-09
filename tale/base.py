@@ -11,7 +11,6 @@ import textwrap
 from . import lang
 from . import util
 from .errors import ActionRefused
-from .io import color
 from .races import races
 from .globalcontext import mud_context
 
@@ -265,7 +264,6 @@ class Item(MudObject):
             actor.tell("It's empty.")
 
 
-
 class Weapon(Item):
     """
     An item that can be wielded by a Living (i.e. present in a weapon itemslot),
@@ -356,7 +354,7 @@ class Location(MudObject):
 
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
-        paragraphs = [color.bright("[" + self.name + "]")]
+        paragraphs = ["{bright}[" + self.name + "]{/}"]
         if short:
             if self.exits:
                 paragraphs.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
@@ -840,9 +838,9 @@ class Container(Item):
     def title(self):
         if isinstance(self.contained_in, Living):
             if self.__inventory:
-                return self._title + color.dim(" (containing things)")
+                return self._title + " {dim}(containing things){/}"
             else:
-                return self._title + color.dim(" (empty)")
+                return self._title + " {dim}(empty){/}"
         return self._title
 
     @property
@@ -949,7 +947,7 @@ class Door(Exit):
         else:
             key = self.search_key(actor)
             if key:
-                actor.tell(color.dim("(You use your %s; %s matches the lock.)" % (key.title, key.subjective)))
+                actor.tell("{dim}(You use your %s; %s matches the lock.){/}" % (key.title, key.subjective))
             else:
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
@@ -972,7 +970,7 @@ class Door(Exit):
         else:
             key = self.search_key(actor)
             if key:
-                actor.tell(color.dim("(You use your %s; %s matches the lock.)" % (key.title, key.subjective)))
+                actor.tell("{dim}(You use your %s; %s matches the lock.){/}" % (key.title, key.subjective))
             else:
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False

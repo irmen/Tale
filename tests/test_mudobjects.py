@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import unittest
 import datetime
-from tale.io import color
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
@@ -16,8 +15,7 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResults
-
-color.disable()
+from tale.io.textoutput import strip_text_styles
 
 
 class TestLocations(unittest.TestCase):
@@ -62,21 +60,21 @@ class TestLocations(unittest.TestCase):
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
                     "Someone forgot a key. You see a university magazine and an oak table. Player, attractive Julie, and rat are here. A fly buzzes around your head."]
-        self.assertEqual(expected, self.hall.look())
+        self.assertEqual(expected, strip_text_styles(self.hall.look()))
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
                     "Someone forgot a key. You see a university magazine and an oak table. Attractive Julie and rat are here. A fly buzzes around your head."]
-        self.assertEqual(expected, self.hall.look(exclude_living=self.player))
+        self.assertEqual(expected, strip_text_styles(self.hall.look(exclude_living=self.player)))
         expected = ["[Attic]", "A dark attic."]
-        self.assertEqual(expected, self.attic.look())
+        self.assertEqual(expected, strip_text_styles(self.attic.look()))
 
     def test_look_short(self):
         expected = ["[Attic]"]
-        self.assertEqual(expected, self.attic.look(short=True))
+        self.assertEqual(expected, strip_text_styles(self.attic.look(short=True)))
         expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, player, rat"]
-        self.assertEqual(expected, self.hall.look(short=True))
+        self.assertEqual(expected, strip_text_styles(self.hall.look(short=True)))
         expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, rat"]
-        self.assertEqual(expected, self.hall.look(exclude_living=self.player, short=True))
+        self.assertEqual(expected, strip_text_styles(self.hall.look(exclude_living=self.player, short=True)))
 
     def test_search_living(self):
         self.assertEqual(None, self.hall.search_living("<notexisting>"))
@@ -329,7 +327,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertTrue(hall.exits["up"] is exit2)
         self.assertTrue(hall.exits["ladder"] is exit3)
         self.assertTrue(hall.exits["window"] is exit4)
-        self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], hall.look())
+        self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], strip_text_styles(hall.look()))
         self.assertEqual("Third ladder to attic.", exit3.description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.description)
         with self.assertRaises(ActionRefused):
@@ -668,12 +666,12 @@ class TestContainer(unittest.TestCase):
         self.assertEqual("a small leather bag", bag.description)
         bag.move(player, player)
         self.assertEqual("bag", bag.name)
-        self.assertEqual("leather bag (empty)", bag.title)
-        self.assertEqual("a small leather bag", bag.description)
+        self.assertEqual("leather bag (empty)", strip_text_styles(bag.title))
+        self.assertEqual("a small leather bag", strip_text_styles(bag.description))
         stone.move(bag, player)
         self.assertEqual("bag", bag.name)
-        self.assertEqual("leather bag (containing things)", bag.title)
-        self.assertEqual("a small leather bag", bag.description)
+        self.assertEqual("leather bag (containing things)", strip_text_styles(bag.title))
+        self.assertEqual("a small leather bag", strip_text_styles(bag.description))
 
 
 class TestItem(unittest.TestCase):

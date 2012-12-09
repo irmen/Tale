@@ -17,7 +17,6 @@ from .. import base
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
-from ..io import color
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 
 all_commands = {}
@@ -86,7 +85,7 @@ def do_locate(player, parsed, ctx):
             p("You are here, in %s." % player.location.name)
             return
         if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            p(color.dim("(By %s you probably mean %s.)" % (name, thing.name)))
+            p("{dim}(By %s you probably mean %s.){/}" % (name, thing.name))
         if thing in player.location:
             if isinstance(thing, base.Living):
                 p("%s is here next to you." % lang.capital(thing.title))
@@ -102,7 +101,7 @@ def do_locate(player, parsed, ctx):
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                p(color.dim("(By %s you probably mean %s.)" % (name, item.name)))
+                p("{dim}(By %s you probably mean %s.){/}" % (name, item.name))
             util.print_object_location(player, item, container, False)
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
@@ -525,15 +524,15 @@ def do_help(player, parsed, ctx):
             if abbrs:
                 verb += "/" + "/".join(abbrs)
             cmds_help.append(verb)
-        player.tell(color.bright("Available commands:"))
+        player.tell("{bright}Available commands:{/}")
         player.tell(", ".join(sorted(cmds_help)), end=True)
-        player.tell(color.bright("Abbreviations:"))
+        player.tell("{bright}Abbreviations:{/}")
         player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
         player.tell("To see all possible verbs ask 'what is emotes' (?emotes).", end=True)
         if player.hints.has_hints():
-            player.tell(color.bright("Hints:"))
+            player.tell("{bright}Hints:{/}")
             player.tell("When you're stuck, you can use the 'hint' command to try to get a clue about what to do next.")
 
 
@@ -572,7 +571,7 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            p(color.dim("(By %s you probably meant %s.)" % (name, living.name)), end=True)
+            p("{dim}(By %s you probably meant %s.){/}" % (name, living.name), end=True)
         p("This is %s." % living.title)
         if living.description:
             p(living.description)
@@ -595,7 +594,7 @@ def do_examine(player, parsed, ctx):
         # if "wizard" in player.privileges:
         #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
+            p("{dim}(By %s you probably meant %s.){/}" % (name, item.name))
         if item in player:
             p("You're carrying %s." % lang.a(item.title))
         elif container and container in player:
@@ -785,7 +784,7 @@ def do_quit(player, parsed, ctx):
 
 def print_item_removal(player, item, container, print_parentheses=True):
     if print_parentheses:
-        player.tell(color.dim("(You take the %s from the %s)." % (item.name, container.name)))
+        player.tell("{dim}(You take the %s from the %s).{/}" % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
     player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
@@ -918,7 +917,7 @@ def do_what(player, parsed, ctx):
     # is it a npc here?
     living = player.location.search_living(name)
     if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        p(color.dim("(By %s you probably meant %s.)" % (name, living.name)))
+        p("{dim}(By %s you probably meant %s.){/}" % (name, living.name))
     if living:
         found = True
         if living is player:
@@ -936,7 +935,7 @@ def do_what(player, parsed, ctx):
     if item:
         found = True
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p(color.dim("(By %s you probably meant %s.)" % (name, item.name)))
+            p("{dim}(By %s you probably meant %s.){/}" % (name, item.name))
         p("It's an item in your vicinity. You should perhaps try to examine it.")
     if name == "soul":
         # if player is asking about the soul, give some general info
@@ -1195,7 +1194,7 @@ def do_brief(player, parsed, ctx):
     'brief reset': disable brief mode and forget about the known locations as well.
     Note that when you explicitly use the 'look' or 'examine' commands, the brief setting is ignored.
     """
-    if parsed.unparsed=="off" or (parsed.args and parsed.args[0] == "off"):
+    if parsed.unparsed == "off" or (parsed.args and parsed.args[0] == "off"):
         player.brief = 0
         player.tell("Verbose location descriptions restored.")
     elif not parsed.args:
@@ -1316,18 +1315,18 @@ def do_gameinfo(player, parsed, ctx):
     # version info
     config = ctx.config
     author_addr = " (%s)" % config.author_address if config.author_address else ""
-    t(color.BRIGHT + "The game is '%s' v%s," % (config.name, config.version))
+    t("{bright}This game is '%s' v%s," % (config.name, config.version))
     t("written by %s%s." % (config.author, author_addr))
     t("Using Tale framework v%s." % tale_version_string)
-    t("\n")
+    t("{/}\n")
     t("\n")
     # print GPL 3.0 banner
-    t("Tale: mud driver, mudlib and interactive fiction framework.", end=True)
+    t("{bright}Tale: mud driver, mudlib and interactive fiction framework.", end=True)
     t("Copyright (C) 2012  Irmen de Jong.", end=True)
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
-    t(color.NORMAL)
+    t("{/}")
 
 
 @cmd("config")

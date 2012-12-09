@@ -10,6 +10,7 @@ from . import races
 from . import player
 from . import driver
 
+
 class CharacterBuilder(object):
     def __init__(self, driver):
         self.driver = driver

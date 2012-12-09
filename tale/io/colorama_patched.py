@@ -30,6 +30,7 @@ if hasattr(colorama.ansitowin32, "winterm"):
             #result[colorama.ansi.AnsiStyle.REVERSEVID] = (colorama.ansitowin32.winterm.style, colorama.winterm.WinStyle.REVERSEVID)
             result[colorama.ansi.AnsiStyle.REVERSEVID] = (self.style_reverse_vid, )
             return result
+
         def style_reverse_vid(self, style=None, on_stderr=False):
             # REVERSEVID console style doesn't seem to work on windows, so simulate it:
             # Get the current style settings, flip foreground and background colors.
@@ -44,12 +45,12 @@ if hasattr(colorama.ansitowin32, "winterm"):
 
 from colorama import *
 
-if __name__=="__main__":
+if __name__ == "__main__":
     colorama.init()
-    print(colorama.Style.BRIGHT+"bright"+colorama.Style.RESET_ALL)
-    print(colorama.Style.ITALIC+"italic"+colorama.Style.RESET_ALL)
-    print(colorama.Style.UNDERLINED+"underlined"+colorama.Style.RESET_ALL)
-    print(colorama.Style.BLINK+"blink"+colorama.Style.RESET_ALL)
+    print(colorama.Style.BRIGHT + "bright" + colorama.Style.RESET_ALL)
+    print(colorama.Style.ITALIC + "italic" + colorama.Style.RESET_ALL)
+    print(colorama.Style.UNDERLINED + "underlined" + colorama.Style.RESET_ALL)
+    print(colorama.Style.BLINK + "blink" + colorama.Style.RESET_ALL)
     print(colorama.Fore.YELLOW + colorama.Back.RED + "yellow on red" + colorama.Style.RESET_ALL)
-    print(colorama.Style.REVERSEVID+"reversevid"+colorama.Style.RESET_ALL)
-    print(colorama.Fore.YELLOW + colorama.Back.RED + colorama.Style.REVERSEVID +"yellow on red, reversed" + colorama.Style.RESET_ALL)
+    print(colorama.Style.REVERSEVID + "reversevid" + colorama.Style.RESET_ALL)
+    print(colorama.Fore.YELLOW + colorama.Back.RED + colorama.Style.REVERSEVID + "yellow on red, reversed" + colorama.Style.RESET_ALL)

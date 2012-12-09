@@ -15,7 +15,7 @@ from . import soul
 from . import lang
 from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
-from .io import color, textoutput
+from .io import textoutput
 from .util import queue
 
 
@@ -91,7 +91,7 @@ class Player(base.Living):
             # special case, repeat previous command
             if self.previous_commandline:
                 commandline = self.previous_commandline
-                self.tell(color.dim("(repeat: %s)" % commandline), end=True)
+                self.tell("{dim}(repeat: %s){/}" % commandline, end=True)
             else:
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
@@ -133,13 +133,13 @@ class Player(base.Living):
         return self
 
     def peek_output(self):
-        """Returns a copy of the output that sits in the buffer so far."""
-        lines = self._output.raw(clear=False)
+        """Returns a copy of the output that sits in the buffer so far (for test purposes). No text styles are included."""
+        lines = (textoutput.strip_text_styles(line) for line in self._output.raw(clear=False))
         return "\n".join(lines)
 
     def get_raw_output(self):
-        """Gets the accumulated output lines in raw form (for test purposes)"""
-        return self._output.raw(clear=True)
+        """Gets the accumulated output lines in raw form (for test purposes). No text styles are included."""
+        return [textoutput.strip_text_styles(line) for line in self._output.raw(clear=True)]
 
     def get_output(self):
         """Gets the accumulated output lines, formats them nicely, and clears the buffer"""

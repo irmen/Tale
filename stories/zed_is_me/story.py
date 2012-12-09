@@ -7,7 +7,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 # @todo: this game is not yet finished and is excluded in the MANIFEST.in for now
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-from tale.io import color
 
 if __name__=="__main__":
     # story is invoked as a script, start it in the Tale Driver.
@@ -55,7 +54,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell(color.bright("Welcome to '%s'." % self.config["name"]), end=True)
+        player.tell("{bright}Welcome to '%s'.{/}" % self.config["name"], end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
@@ -64,7 +63,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell(color.bright("Welcome back to '%s'." % self.config["name"]), end=True)
+        player.tell("{bright}Welcome back to '%s'.{/}" % self.config["name"], end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")

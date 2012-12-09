@@ -7,9 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import unittest
 import textwrap
-from tale.io import color, textoutput
-
-color.disable()
+from tale.io import textoutput
 
 
 class TestTextoutput(unittest.TestCase):

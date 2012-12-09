@@ -24,7 +24,7 @@ from . import soul
 from . import cmds
 from . import player
 from . import __version__ as tale_version_str
-from .io import vfs, color
+from .io import vfs
 from .io import console_io as io_adapter
 
 try:
@@ -213,12 +213,12 @@ class Driver(object):
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            io_adapter.output(color.bright("\n" + banner + "\n"))
+            io_adapter.output("\n{bright}" + banner + "{/}\n")
         except IOError:
             # no banner provided by the game, print default game header
             io_adapter.output("")
             io_adapter.output("")
-            io_adapter.output(color.BRIGHT)
+            io_adapter.output("{bright}")
             msg = "'%s'" % self.config.name
             io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
@@ -228,7 +228,7 @@ class Driver(object):
             io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
                 io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            io_adapter.output(color.NORMAL)
+            io_adapter.output("{/}")
             io_adapter.output("")
 
         if self.mode == "mud":
@@ -297,7 +297,7 @@ class Driver(object):
         if self.mode != "if":
             motd, mtime = util.get_motd(self.vfs)
             if motd:
-                self.player.tell(color.bright("Message-of-the-day, last modified on %s:" % mtime), end=True)
+                self.player.tell("{bright}Message-of-the-day, last modified on %s:{/}" % mtime, end=True)
                 self.player.tell("\n")
                 self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
                 self.player.tell("\n")
@@ -489,7 +489,7 @@ class Driver(object):
     def get_current_verbs(self):
         """return a dict of all currently recognised verbs, and their help text"""
         normal_verbs = self.commands.get(self.player.privileges)
-        verbs = {v:(f.__doc__ or "") for v,f in normal_verbs.items()}
+        verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
         verbs.update(self.player.location.verbs)  # add the custom verbs
         return verbs
 

@@ -62,6 +62,7 @@ def disabled_in_gamemode(mode):
         return func
     return disable
 
+
 def overrides_soul(func):
     """decorator to let the command override (hide) the corresponding soul command"""
     func.overrides_soul = True
