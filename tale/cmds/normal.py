@@ -563,13 +563,15 @@ def do_look(player, parsed, ctx):
 def do_examine(player, parsed, ctx):
     """Examine something or someone thoroughly."""
     p = player.tell
-    name = parsed.args[0]
     living = None
     if parsed.who_info and isinstance(parsed.who_order[0], base.Living):
         living = parsed.who_order[0]
+        name = living.name
     if not living:
         if not parsed.args:
             raise ParseError("Examine what or who?")
+        remove_is_are_args(parsed.args)
+        name = parsed.args[0]
         living = player.location.search_living(name)
     if living:
         if living is player:
@@ -799,19 +801,26 @@ def print_item_removal(player, item, container, print_parentheses=True):
     player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
 
 
-@cmd("who")
-@disable_notify_action
-@disabled_in_gamemode("if")
-def do_who(player, parsed, ctx):
-    """Search for all players, a specific player or creature, and shows some information about them."""
-    if parsed.args:
-        if parsed.args[0] == "are":
+def remove_is_are_args(args):
+    if args:
+        if args[0] == "are":
             raise ActionRefused("Be more specific.")
-        elif parsed.args[0] == "is":
-            if len(parsed.args) >= 2:
-                del parsed.args[0]   # skip 'is'
+        elif args[0] == "is":
+            if len(args) >= 2:
+                del args[0]   # skip 'is', but only if more args follow
             else:
                 raise ActionRefused("Who do you mean?")
+
+
+@cmd("who")
+@disable_notify_action
+def do_who(player, parsed, ctx):
+    """Search for all players, a specific player or creature, and shows some information about them."""
+    if ctx.driver.mode=="if":
+        # in interactive fiction mode, revert to a simple substitute (examine)
+        return do_examine(player, parsed, ctx)
+    if parsed.args:
+        remove_is_are_args(parsed.args)
         name = parsed.args[0].rstrip("?")
         found = False
         otherplayer = ctx.driver.search_player(name)  # global player search
