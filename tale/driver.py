@@ -355,6 +355,7 @@ class Driver(object):
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
                     io_adapter.break_pressed(self.player)
+                    continue
                 except EOFError:
                     continue
                 except errors.StoryCompleted as ex:

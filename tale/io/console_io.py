@@ -70,7 +70,7 @@ def input_line(player):
         if cmd == "quit":
             return False
     except KeyboardInterrupt:
-        player.tell(CTRL_C_MESSAGE)
+        break_pressed(player)
     except EOFError:
         pass
     return True

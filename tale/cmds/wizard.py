@@ -186,7 +186,7 @@ def do_wiretap(player, parsed, ctx):
     arg = parsed.args[0]
     if arg == ".":
         player.create_wiretap(player.location)
-        player.tell("Wiretapped room '%s'." % player.location.name)
+        player.tell("Wiretapped room '<location>%s</>'." % player.location.name)
     elif arg == "-clear":
         player.clear_wiretaps()
         player.tell("All wiretaps removed.")
@@ -195,7 +195,7 @@ def do_wiretap(player, parsed, ctx):
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
             player.create_wiretap(living)
-            player.tell("Wiretapped %s." % living.name)
+            player.tell("Wiretapped <living>%s</>." % living.name)
     else:
         raise ActionRefused("Wiretap who?")
 
@@ -285,7 +285,7 @@ def do_return(player, parsed, ctx):
         raise ActionRefused("You can only return one person at a time.")
     previous_location = getattr(who, "teleported_from", None)
     if previous_location:
-        player.tell("Returning", who.name, "to", previous_location.name)
+        player.tell("Returning <player>%s</> to <location>%s</>" % (who.name, previous_location.name))
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
         who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
@@ -294,7 +294,7 @@ def do_return(player, parsed, ctx):
         who.tell_others("Suddenly, a shimmering portal opens!")
         who.tell_others("{Title} tumbles out of it, and the portal quickly closes again.")
     else:
-        player.tell("Can't determine %s's previous location." % who.name)
+        player.tell("Can't determine <player>%s</>'s previous location." % who.name)
 
 
 @wizcmd("reload")
@@ -344,9 +344,9 @@ items that are normally fixed in place (move item to playername)."""
     elif thing in player.location:
         thing_container = player.location
     else:
-        raise ParseError("There seems to be no %s here." % thing.name)
+        raise ParseError("There seems to be no <item>%s</> here." % thing.name)
     thing.move(target, player)
-    player.tell("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
+    player.tell("Moved <item>%s</> from %s to %s." % (thing.name, thing_container.name, target.name))
     player.tell_others("{Title} moved %s into %s." % (thing.title, target.title))
 
 
