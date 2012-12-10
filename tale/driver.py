@@ -211,27 +211,43 @@ class Driver(object):
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
         self.io_adapter = console_io.ConsoleIo()
+        self.start_print_game_intro(self.io_adapter)
+        self.start_create_player(args.transcript)
+        self.start_show_motd()
+        self.player.look(short=False)
+        self.write_output()
+        self.start_player_input()
+        while True:
+            try:
+                self.main_loop()
+                break
+            except KeyboardInterrupt:
+                self.io_adapter.break_pressed(self.player)
+                continue
+
+    def start_print_game_intro(self, io):
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            self.io_adapter.output("\n<bright>" + banner + "</>\n")
+            io.output("\n<bright>" + banner + "</>\n")
         except IOError:
             # no banner provided by the game, print default game header
-            self.io_adapter.output("")
-            self.io_adapter.output("")
-            self.io_adapter.output("<bright>")
+            io.output("")
+            io.output("")
+            io.output("<bright>")
             msg = "'%s'" % self.config.name
-            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
-            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
-            self.io_adapter.output("")
+            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output("")
             msg = "written by %s" % self.config.author
-            self.io_adapter.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
-                self.io_adapter.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            self.io_adapter.output("</>")
-            self.io_adapter.output("")
+                io.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output("</>")
+            io.output("")
 
+    def start_create_player(self, transcript):
         if self.mode == "mud":
             load_choice = "n"
         else:
@@ -239,8 +255,8 @@ class Driver(object):
         self.io_adapter.output("")
         if load_choice == "y":
             self.load_saved_game()
-            if args.transcript:
-                self.player.activate_transcript(args.transcript, self.vfs)
+            if transcript:
+                self.player.activate_transcript(transcript, self.vfs)
             self.player.tell("\n")
             if self.mode == "if":
                 self.story.welcome_savegame(self.player)
@@ -256,8 +272,8 @@ class Driver(object):
                 from .charbuilder import CharacterBuilder
                 builder = CharacterBuilder(self)
                 self.player = builder.build()
-            if args.transcript:
-                self.player.activate_transcript(args.transcript, self.vfs)
+            if transcript:
+                self.player.activate_transcript(transcript, self.vfs)
             # move the player to the starting location
             if "wizard" in self.player.privileges:
                 self.player.move(self.config.startlocation_wizard)
@@ -270,31 +286,8 @@ class Driver(object):
                 self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
             self.player.tell("\n")
         self.story.init_player(self.player)
-        self.show_motd()
-        self.player.look(short=False)
-        self.write_output()
-        self.start_player_input()
-        while True:
-            try:
-                self.main_loop()
-                break
-            except KeyboardInterrupt:
-                self.io_adapter.break_pressed(self.player)
-                continue
 
-    def lookup_location(self, location_name):
-        location = self.zones
-        modulename = "zones"
-        for name in location_name.split('.'):
-            if hasattr(location, name):
-                location = getattr(location, name)
-            else:
-                modulename = modulename + "." + name
-                __import__(modulename)
-                location = getattr(location, name)
-        return location
-
-    def show_motd(self):
+    def start_show_motd(self):
         if self.mode != "if":
             motd, mtime = util.get_motd(self.vfs)
             if motd:
@@ -345,6 +338,8 @@ class Driver(object):
             if has_input:
                 try:
                     for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
+                        if not cmd:
+                            continue
                         try:
                             self.player.tell("\n")
                             self.process_player_input(cmd)
@@ -502,6 +497,18 @@ class Driver(object):
         exit.allow_passage(player)
         player.move(exit.target)
         player.look()
+
+    def lookup_location(self, location_name):
+        location = self.zones
+        modulename = "zones"
+        for name in location_name.split('.'):
+            if hasattr(location, name):
+                location = getattr(location, name)
+            else:
+                modulename = modulename + "." + name
+                __import__(modulename)
+                location = getattr(location, name)
+        return location
 
     def do_socialize(self, parsed):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)

@@ -1329,25 +1329,23 @@ def do_read(player, parsed, ctx):
         raise ParseError("Read what?")
 
 
-@cmd("@info", "license")
+@cmd("license")
 def do_gameinfo(player, parsed, ctx):
     """Show information about the game and about Tale, and show the software license."""
     t = player.tell
     # version info
     config = ctx.config
     author_addr = " (%s)" % config.author_address if config.author_address else ""
-    t("<bright>This game is '%s' v%s," % (config.name, config.version))
-    t("written by %s%s." % (config.author, author_addr))
-    t("Using Tale framework v%s." % tale_version_string)
-    t("</>\n")
+    t("This game, '<bright>%s</>' v%s," % (config.name, config.version))
+    t("is written by <bright>%s%s</>," % (config.author, author_addr))
+    t("and is using Tale framework v%s." % tale_version_string, end=True)
     t("\n")
     # print GPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)
-    t("Copyright (C) 2012  Irmen de Jong.", end=True)
+    t("Copyright (C) 2012  Irmen de Jong.</>", end=True)
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
-    t("</>")
 
 
 @cmd("config")

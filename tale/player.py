@@ -147,10 +147,10 @@ class Player(base.Living):
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
         """
-        self._output.width = self.screen_width
         # @todo fix formatting!
         import textwrap
-        wrapper = textwrap.TextWrapper(width=70, fix_sentence_endings=True, initial_indent="", subsequent_indent="")
+        indent = " " * self.screen_indent
+        wrapper = textwrap.TextWrapper(width=self.screen_width, fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
         output = ""
         for txt, formatted in self._output.get_paragraphs():
             if formatted:
