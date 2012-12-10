@@ -185,9 +185,10 @@ class Driver(object):
         globalcontext.mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
-            story_cmds.register_all(self.commands)
-        except ImportError:
+        except (ImportError, ValueError):
             pass
+        else:
+            story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config, self.mode)
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(self.config.requires_tale)
@@ -345,6 +346,7 @@ class Driver(object):
                 try:
                     for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
                         try:
+                            self.player.tell("\n")
                             self.process_player_input(cmd)
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
@@ -442,7 +444,6 @@ class Driver(object):
             _verb = cmds.abbreviations[_verb]
             cmd = "".join([_verb, _sep, _rest])
 
-        self.player.tell("\n")
         # Parse the command by using the soul.
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
@@ -486,6 +487,8 @@ class Driver(object):
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)
                 self.do_socialize(parsed)
+            except errors.RetryParse as x:
+                return self.process_player_input(x.command)   # try again but with new command string
 
     def get_current_verbs(self):
         """return a dict of all currently recognised verbs, and their help text"""

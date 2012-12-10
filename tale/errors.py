@@ -33,6 +33,12 @@ class RetrySoulVerb(Exception):
     pass
 
 
+class RetryParse(Exception):
+    """Retry the command as a different one"""
+    def __init__(self, command):
+        self.command=command
+
+
 class StoryCompleted(Exception):
     """The story has been completed by the player. (I.F. mode only). (Immediate game end!)"""
     def __init__(self, callback=None):

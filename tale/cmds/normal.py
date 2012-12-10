@@ -16,7 +16,7 @@ from .. import util
 from .. import base
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
-from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 
 all_commands = {}
@@ -816,6 +816,9 @@ def remove_is_are_args(args):
 @disable_notify_action
 def do_who(player, parsed, ctx):
     """Search for all players, a specific player or creature, and shows some information about them."""
+    if parsed.args == ["am", "i"]:
+        # who am i
+        raise RetryParse("examine myself")      # 'who am i' -> 'examine myself')
     if ctx.driver.mode=="if":
         # in interactive fiction mode, revert to a simple substitute (examine)
         return do_examine(player, parsed, ctx)
