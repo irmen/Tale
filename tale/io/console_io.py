@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
+import textwrap
 from . import iobase
 try:
     from . import colorama_patched as colorama
@@ -60,9 +61,8 @@ else:
 
 
 class AsyncConsoleInput(threading.Thread):
-    def __init__(self, io, player):
+    def __init__(self, player):
         super(AsyncConsoleInput, self).__init__()
-        self.io = io
         self.player = player
         self.setDaemon(True)
         self.enabled = threading.Event()
@@ -76,7 +76,7 @@ class AsyncConsoleInput(threading.Thread):
             self.enabled.wait()
             if self._stoploop:
                 break
-            loop = self.io.input_line(self.player)
+            loop = self.player.io.input_line(self.player)
             self.enabled.clear()
 
     def enable(self):
@@ -99,7 +99,7 @@ class ConsoleIo(object):
         pass
 
     def get_async_input(self, player=None):
-        return AsyncConsoleInput(self, player)
+        return AsyncConsoleInput(player)
 
     def input(self, prompt=None):
         return input(prompt)
@@ -122,6 +122,26 @@ class ConsoleIo(object):
         except EOFError:
             pass
         return True
+
+    def render_output(self, paragraphs, **params):
+        """
+        Render (format) the given paragraphs to a text representation.
+        This implementation expects 2 extra parameters: "indent" and "width".
+        """
+        if not paragraphs:
+            return None
+        indent = " " * params["indent"]
+        wrapper = textwrap.TextWrapper(width=params["width"], fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
+        output = []
+        for txt, formatted in paragraphs:
+            if formatted:
+                txt = wrapper.fill(txt) + "\n"
+            else:
+                # unformatted output, prepend every line with the indent but otherwise leave them alone
+                txt = indent + ("\n"+indent).join(txt.splitlines()) + "\n"
+            assert txt.endswith("\n")
+            output.append(txt)
+        return "".join(output)
 
     def output(self, *lines):
         """Write some text to the visible output buffer."""

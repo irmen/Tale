@@ -210,9 +210,9 @@ class Driver(object):
         assert self.config.max_wait_hours >= 0
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
-        self.io_adapter = console_io.ConsoleIo()
-        self.start_print_game_intro(self.io_adapter)
-        self.start_create_player(args.transcript)
+        io = console_io.ConsoleIo()
+        self.start_print_game_intro(io)
+        self.start_create_player(io, args.transcript)
         self.start_show_motd()
         self.player.look(short=False)
         self.write_output()
@@ -222,7 +222,7 @@ class Driver(object):
                 self.main_loop()
                 break
             except KeyboardInterrupt:
-                self.io_adapter.break_pressed(self.player)
+                self.player.io.break_pressed(self.player)
                 continue
 
     def start_print_game_intro(self, io):
@@ -247,12 +247,12 @@ class Driver(object):
             io.output("</>")
             io.output("")
 
-    def start_create_player(self, transcript):
+    def start_create_player(self, io, transcript):
         if self.mode == "mud":
             load_choice = "n"
         else:
-            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
-        self.io_adapter.output("")
+            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ", io=io)
+        io.output("")
         if load_choice == "y":
             self.load_saved_game()
             if transcript:
@@ -270,8 +270,10 @@ class Driver(object):
             elif self.mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                builder = CharacterBuilder(self)
+                builder = CharacterBuilder(self, io)
                 self.player = builder.build()
+            # set an I/O adapter for this player
+            self.player.io = console_io.ConsoleIo()
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)
             # move the player to the starting location
@@ -299,7 +301,7 @@ class Driver(object):
 
     def start_player_input(self):
         if self.config.server_tick_method == "timer":
-            self.async_player_input = self.io_adapter.get_async_input(self.player)
+            self.async_player_input = self.player.io.get_async_input(self.player)
         elif self.config.server_tick_method == "command":
             self.async_player_input = None  # player input is done in the same thread as the game loop
         else:
@@ -328,7 +330,7 @@ class Driver(object):
             if self.config.server_tick_method == "timer":
                 has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                self.io_adapter.input_line(self.player)
+                self.player.io.input_line(self.player)
                 has_input = self.player.input_is_available.is_set()
                 before = time.time()
                 self.server_tick()
@@ -351,7 +353,7 @@ class Driver(object):
                         except (errors.ParseError, errors.ActionRefused) as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    self.io_adapter.break_pressed(self.player)
+                    self.player.io.break_pressed(self.player)
                     continue
                 except EOFError:
                     continue
@@ -420,12 +422,12 @@ class Driver(object):
             return
         output = self.player.get_output()
         if output:
-            if self.mode == "if" and self.io_adapter.supports_delayed_output and 0 < self.output_line_delay < 1000:
+            if self.mode == "if" and self.player.io.supports_delayed_output and 0 < self.output_line_delay < 1000:
                 for line in output.splitlines():
-                    self.io_adapter.output(line)
+                    self.player.io.output(line)
                     time.sleep(self.output_line_delay / 1000)
             else:
-                self.io_adapter.output(output.rstrip())
+                self.player.io.output(output.rstrip())
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -645,10 +647,11 @@ class Driver(object):
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
 
-    def input(self, prompt=None):
+    def input(self, prompt=None, io=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
         self.write_output()
-        return self.io_adapter.input(prompt).strip()
+        io = io or self.player.io       # @todo eventually there should always be a self.player (or rather, a connection)
+        return io.input(prompt).strip()
 
 
 def monkeypatch_blinker():

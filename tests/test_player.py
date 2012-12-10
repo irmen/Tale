@@ -12,8 +12,9 @@ from supportstuff import DummyDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
-from tale.player import Player
+from tale.player import Player, TextBuffer
 from tale.soul import NonSoulVerb, ParseResults
+from tale.io.console_io import ConsoleIo
 
 
 class TestPlayer(unittest.TestCase):
@@ -90,6 +91,8 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell_formats(self):
         player = Player("fritz", "m")
+        player.io = ConsoleIo()
+        player.set_screen_sizes(0, 100)
         player.tell("a b c", format=True)
         player.tell("d e f", format=True)
         self.assertEqual(["a b c\nd e f\n"], player.get_output_paragraphs_raw())
@@ -111,7 +114,8 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell_formatted(self):
         player = Player("fritz", "m")
-        player.set_screen_sizes(0, 80)
+        player.io = ConsoleIo()
+        player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2", "\n")
         player.tell("hello\nnewline")
@@ -145,6 +149,8 @@ class TestPlayer(unittest.TestCase):
 
     def test_peek_output(self):
         player = Player("fritz", "m")
+        player.io = ConsoleIo()
+        player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2", 42)
         self.assertEqual(["line1\nline2\n42\n"], player.peek_output_paragraphs_raw())
@@ -219,6 +225,8 @@ class TestPlayer(unittest.TestCase):
     def test_wiretap(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("fritz", "m")
+        player.io = ConsoleIo()
+        player.set_screen_sizes(0, 100)
         julie = NPC("julie", "f")
         julie.move(attic)
         player.move(attic)
@@ -410,6 +418,55 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(room2, room1.player_left_target)
         self.assertEqual(player, room2.player_arrived)
         self.assertEqual(room1, room2.player_arrived_from)
+
+
+class TestTextbuffer(unittest.TestCase):
+    def test_empty_lines(self):
+        output = TextBuffer()
+        output.print("")
+        output.print("")
+        self.assertEqual([], output.get_paragraphs(), "empty strings shouldn't be stored")
+        output.print("", format=False)
+        output.print("", format=False)
+        self.assertEqual([("\n\n", False)], output.get_paragraphs(), "2 empty strings without format should be stored in 1 paragraph with 2 new lines")
+        output.print("", end=True)
+        output.print("", end=True)
+        self.assertEqual([("\n", True), ("\n", True)], output.get_paragraphs(), "2 empty strings with end=true should be stored in 2 paragraphs")
+        output.print("", end=True)
+        output.print("", end=True)
+        output.print("", end=True)
+        self.assertEqual([("\n", True), ("\n", True), ("\n", True)], output.get_paragraphs())
+        output.print("")
+        output.print("1")
+        output.print("2")
+        output.print("")
+        self.assertEqual([("1\n2\n", True)], output.get_paragraphs())
+
+    def test_end(self):
+        output = TextBuffer()
+        output.print("1", end=True)
+        output.print("2", end=True)
+        self.assertEqual([("1\n", True), ("2\n", True)], output.get_paragraphs())
+        output.print("one")
+        output.print("1", end=True)
+        output.print("two")
+        output.print("2", end=True)
+        output.print("three")
+        self.assertEqual([("one\n1\n", True), ("two\n2\n", True), ("three\n", True)], output.get_paragraphs())
+
+    def test_whitespace(self):
+        output = TextBuffer()
+        output.print("1")
+        output.print("2")
+        output.print("3")
+        self.assertEqual([("1\n2\n3\n", True)], output.get_paragraphs())
+
+    def test_strip(self):
+        output = TextBuffer()
+        output.print("   1   ", format=True)
+        self.assertEqual([("1\n", True)], output.get_paragraphs())
+        output.print("   1   ", format=False)
+        self.assertEqual([("   1   \n", False)], output.get_paragraphs())
 
 
 if __name__ == '__main__':

@@ -34,12 +34,12 @@ EMP, karma, drama, pressure, vacuum, inertia
 General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
-BUG: textformatting is hacked into the player.get_output, for now.
 
 Player creation and initial text i/o are not handled very well in the driver startup.
  Should create a player immediately even when she's not yet "logged on".
- Player should contain the IO adapter, not the driver.  Should do all I/O through the player.
+ Actually, separate the "Connection" from the in-game Player.  The I/O adapter goes to the Connection.
 
+Add <center> text style which centers the line(s) on the screen.
 
 HTTP server mode with HTML+Javascript frontend.
 Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.

@@ -41,6 +41,7 @@ class Player(base.Living):
         self.known_locations = set()
         self.story_complete = False
         self.story_complete_callback = None
+        self.io = None  # will be set to appropriate I/O adapter by the driver
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -147,19 +148,10 @@ class Player(base.Living):
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
         """
-        # @todo fix formatting!
-        import textwrap
-        indent = " " * self.screen_indent
-        wrapper = textwrap.TextWrapper(width=self.screen_width, fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
-        output = ""
-        for txt, formatted in self._output.get_paragraphs():
-            if formatted:
-                txt = wrapper.fill(txt) + "\n"
-            output += txt
-        if output:
-            if self.transcript:
-                self.transcript.write(output)
-        return output or None
+        formatted = self.io.render_output(self._output.get_paragraphs(), width=self.screen_width, indent=self.screen_indent)
+        if formatted and self.transcript:
+            self.transcript.write(formatted)
+        return formatted or None
 
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
