@@ -1434,7 +1434,7 @@ def do_teststyles(player, parsed, ctx):
         ("player", "<player>This is PLAYER.</>"),
         ("item", "<item>This is ITEM.</>"),
         ("exit", "<exit>This is EXIT.</>"),
-            {"(combined)", "<green><bg:blue><ul><bright>Bright green on blue, underlined. <rev>(reverse video)</>"}
+        ("(combined)", "<green><bg:blue><ul><bright>Bright green on blue, underlined. <rev>(reverse video)</>")
     ]
     player.tell("Text style and coloring tests. Depending on the capabilities of the output device,")
     player.tell("you should see various colors and text formatting styles being used.")
