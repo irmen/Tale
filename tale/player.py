@@ -20,6 +20,7 @@ from .io.iobase import strip_text_styles
 
 DEFAULT_SCREEN_WIDTH = 72
 DEFAULT_SCREEN_INDENT = 2
+DEFAULT_SCREEN_DELAY = 50
 
 
 class Player(base.Living):

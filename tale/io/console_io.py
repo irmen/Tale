@@ -95,7 +95,7 @@ class ConsoleIo(object):
     CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
     def __init__(self):
-        self.output_line_delay = 60   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
+        self.output_line_delay = 50   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
 
     def get_async_input(self, player=None):
         return AsyncConsoleInput(player)

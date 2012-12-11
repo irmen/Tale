@@ -161,7 +161,7 @@ class Driver(object):
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
-        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=60)
+        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args(args)
         self.mode = args.mode
