@@ -277,6 +277,17 @@ class TestUtil(unittest.TestCase):
         ad = util.AttrDict(d)
         self.assertEqual([1, 2], [ad.a, ad.b])
 
+    def test_context(self):
+        ctx = util.Context(driver=1, clock=2)
+        self.assertEqual(1, ctx.driver)
+        self.assertEqual(2, ctx.clock)
+        self.assertEqual(1, ctx["driver"])
+        self.assertEqual(2, ctx["clock"])
+        self.assertIsNone(ctx.state)
+        self.assertIsNone(ctx.config)
+        with self.assertRaises(AttributeError):
+            _ = ctx.doesnotexist
+
 
 if __name__ == '__main__':
     unittest.main()

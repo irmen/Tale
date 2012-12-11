@@ -11,6 +11,7 @@ import datetime
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
+from tale.util import Context
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
@@ -538,11 +539,11 @@ class TestDestroy(unittest.TestCase):
     def setUp(self):
         mud_context.driver = DummyDriver()
     def test_destroy_base(self):
-        ctx = {}
+        ctx = Context()
         o = MudObject("x")
         o.destroy(ctx)
     def test_destroy_loc(self):
-        ctx = {}
+        ctx = Context()
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat", "n", race="rodent")
@@ -564,7 +565,7 @@ class TestDestroy(unittest.TestCase):
         self.assertEqual(_Limbo, liv.location)
 
     def test_destroy_player(self):
-        ctx = {}
+        ctx = Context()
         loc = Location("loc")
         player = Player("julie", "f")
         player.privileges = {"wizard"}
@@ -583,11 +584,11 @@ class TestDestroy(unittest.TestCase):
 
     def test_destroy_item(self):
         thing = Item("thing")
-        ctx = {"driver": mud_context.driver}
+        ctx = Context(driver=mud_context.driver)
         thing.destroy(ctx)
 
     def test_destroy_deferreds(self):
-        ctx = {"driver": mud_context.driver}
+        ctx = Context(driver=mud_context.driver)
         thing = Item("thing")
         player = Player("julie", "f")
         wolf = Monster("wolf", "m")
@@ -764,7 +765,7 @@ class TestMudObject(unittest.TestCase):
             x.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             x.read(None)
-        x.destroy(None)
+        x.destroy(Context())
 
 
 if __name__ == '__main__':

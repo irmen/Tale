@@ -144,7 +144,6 @@ class Driver(object):
         self.player = None
         self.mode = "if"  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         self.commands = Commands()
-        self.output_line_delay = 60   # milliseconds
         self.server_loop_durations = collections.deque(maxlen=10)
         globalcontext.mud_context.driver = self
         globalcontext.mud_context.state = self.state
@@ -167,7 +166,7 @@ class Driver(object):
         args = parser.parse_args(args)
         self.mode = args.mode
         if 0 <= args.delay <= 100:
-            self.output_line_delay = args.delay
+            output_line_delay = args.delay
         else:
             raise ValueError("invalid delay, valid range is 0-100")
 
@@ -213,11 +212,12 @@ class Driver(object):
         # story has been initialised, create and connect a player
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         self.player.io = console_io.ConsoleIo()   # currently the console is the only way a player 'connects' to the driver
+        self.player.io.output_line_delay = output_line_delay
         self.start_print_game_intro()
         self.start_create_player(args.transcript)
         self.start_show_motd()
         self.player.look(short=False)
-        self.write_output()
+        self.write_output(self.player)
         self.start_player_input()
         while True:
             try:
@@ -317,7 +317,7 @@ class Driver(object):
         last_loop_time = last_server_tick = time.time()
         while True:
             globalcontext.mud_context.player = self.player
-            self.write_output()
+            self.write_output(self.player)
             if self.player.story_complete and self.mode == "if":
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
@@ -388,8 +388,9 @@ class Driver(object):
                     deferred()
                 except util.queue.Empty:
                     break
-        self.player.destroy({"driver": self})
-        self.write_output()  # flush pending output at server shutdown.
+        self.write_output(self.player)  # flush pending output at server shutdown.
+        ctx = util.Context(driver=self)
+        self.player.destroy(ctx)
 
     def server_tick(self):
         # Do everything that the server needs to do every tick.
@@ -410,7 +411,7 @@ class Driver(object):
                     deferred = None
             if deferred:
                 deferred(driver=self)
-        self.write_output()
+        self.write_output(self.player)
 
     def story_complete_output(self, callback):
         if callback:
@@ -422,18 +423,16 @@ class Driver(object):
             self.input("\nPress enter to continue. ")
             self.player.tell("\n")
 
-    def write_output(self):
-        """print any buffered player output to the screen"""
-        if not self.player:
-            return
-        output = self.player.get_output()
+    def write_output(self, player):
+        """print any buffered player output to their screen"""
+        output = player.get_output()
         if output:
-            if self.mode == "if" and self.player.io.supports_delayed_output and 0 < self.output_line_delay < 1000:
+            if self.mode == "if" and player.io.output_line_delay > 0:
                 for line in output.splitlines():
-                    self.player.io.output(line)
-                    time.sleep(self.output_line_delay / 1000)
+                    player.io.output(line)
+                    player.io.output_delay()
             else:
-                self.player.io.output(output.rstrip())
+                player.io.output(output.rstrip())
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -480,7 +479,7 @@ class Driver(object):
                         self.go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        ctx = cmds.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
+                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
                         func(self.player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
@@ -655,7 +654,7 @@ class Driver(object):
 
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
-        self.write_output()
+        self.write_output(self.player)
         return self.player.io.input(prompt).strip()
 
 

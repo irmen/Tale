@@ -1362,7 +1362,7 @@ def do_config(player, parsed, ctx):
         if param == "delay":
             value = int(value)
             if 0 <= value <= 100:
-                driver.output_line_delay = value
+                player.io.output_line_delay = value
             else:
                 raise ActionRefused("Invalid delay value, range is 0..100")
         elif param == "width":
@@ -1376,7 +1376,7 @@ def do_config(player, parsed, ctx):
         player.tell("Configuration modified.", end=True)
         player.tell("\n")
     player.tell("Configuration:", end=True)
-    player.tell("  delay (output line delay) = %d" % driver.output_line_delay, format=False)
+    player.tell("  delay (output line delay) = %d" % player.io.output_line_delay, format=False)
     player.tell("  width (screen width) = %d" % player.screen_width, format=False)
 
 

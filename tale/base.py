@@ -101,6 +101,7 @@ class MudObject(object):
 
     def destroy(self, ctx):
         """Common cleanup code that needs to be called when the object is destroyed"""
+        assert isinstance(ctx, util.Context)
         self.unregister_heartbeat()
         mud_context.driver.remove_deferreds(self)
 

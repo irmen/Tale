@@ -429,3 +429,11 @@ class AttrDict(dict):
     def __setitem__(self, key, value):
         dict.__setitem__(self, key, value)
         self.__dict__[key] = value
+
+
+class Context(AttrDict):
+    """The context used for every command function and obj.destroy"""
+    driver = None
+    clock = None
+    config = None
+    state = None

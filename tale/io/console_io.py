@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
+import time
 import textwrap
 from . import iobase
 try:
@@ -92,10 +93,9 @@ class AsyncConsoleInput(threading.Thread):
 
 class ConsoleIo(object):
     CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
-    supports_delayed_output = True
 
     def __init__(self):
-        pass
+        self.output_line_delay = 60   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
 
     def get_async_input(self, player=None):
         return AsyncConsoleInput(player)
@@ -147,6 +147,10 @@ class ConsoleIo(object):
         for line in self.apply_style(lines=lines):
             print(line)
         sys.stdout.flush()
+
+    def output_delay(self):
+        """delay the output for a short period"""
+        time.sleep(self.output_line_delay / 1000.0)
 
     def break_pressed(self, player):
         print(self.apply_style(self.CTRL_C_MESSAGE))
