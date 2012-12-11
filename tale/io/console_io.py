@@ -31,7 +31,6 @@ if colorama is not None:
         "ul": colorama.Style.UNDERLINED,
         "rev": colorama.Style.REVERSEVID,
         "/": colorama.Style.RESET_ALL,
-        "italic": colorama.Style.ITALIC,
         "blink": colorama.Style.BLINK,
         "black": colorama.Fore.BLACK,
         "red": colorama.Fore.RED,

@@ -9,7 +9,7 @@ from ..util import basestring_type
 
 
 ALL_COLOR_TAGS = {
-    "dim", "normal", "bright", "ul", "rev", "italic", "blink", "/",
+    "dim", "normal", "bright", "ul", "rev", "blink", "/",
     "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
     "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
     "living", "player", "item", "exit", "location"
