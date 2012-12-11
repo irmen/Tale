@@ -34,10 +34,9 @@ EMP, karma, drama, pressure, vacuum, inertia
 General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
+BUG: on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
 
-Player creation and initial text i/o are not handled very well in the driver startup.
- Should create a player immediately even when she's not yet "logged on".
- Actually, separate the "Connection" from the in-game Player.  The I/O adapter goes to the Connection.
+Driver write_output and input should probably be moved to the player or even the IO adapter itself.
 
 Add <center> text style which centers the line(s) on the screen.
 

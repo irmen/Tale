@@ -210,9 +210,11 @@ class Driver(object):
         assert self.config.max_wait_hours >= 0
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
-        io = console_io.ConsoleIo()
-        self.start_print_game_intro(io)
-        self.start_create_player(io, args.transcript)
+        # story has been initialised, create and connect a player
+        self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
+        self.player.io = console_io.ConsoleIo()   # currently the console is the only way a player 'connects' to the driver
+        self.start_print_game_intro()
+        self.start_create_player(args.transcript)
         self.start_show_motd()
         self.player.look(short=False)
         self.write_output()
@@ -225,7 +227,8 @@ class Driver(object):
                 self.player.io.break_pressed(self.player)
                 continue
 
-    def start_print_game_intro(self, io):
+    def start_print_game_intro(self):
+        io = self.player.io
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
@@ -247,14 +250,17 @@ class Driver(object):
             io.output("</>")
             io.output("")
 
-    def start_create_player(self, io, transcript):
+    def start_create_player(self, transcript):
+        io = self.player.io
         if self.mode == "mud":
             load_choice = "n"
         else:
-            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ", io=io)
+            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
         io.output("")
         if load_choice == "y":
             self.load_saved_game()
+            self.player.io = io  # set the I/O adapter for this player
+            del io
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)
             self.player.tell("\n")
@@ -266,14 +272,14 @@ class Driver(object):
         else:
             if self.mode == "if" and self.config.player_name:
                 # interactive fiction mode, create the player from the game's config
-                self.player = player.Player(self.config.player_name, self.config.player_gender, self.config.player_race)
+                self.player.init_names(self.config.player_name, None, None, None)
+                self.player.init_race(self.config.player_race, self.config.player_gender)
             elif self.mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                builder = CharacterBuilder(self, io)
-                self.player = builder.build()
-            # set an I/O adapter for this player
-            self.player.io = console_io.ConsoleIo()
+                CharacterBuilder(self).build(self.player)
+            self.player.io = io  # set the I/O adapter for this player
+            del io
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)
             # move the player to the starting location
@@ -647,11 +653,10 @@ class Driver(object):
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
 
-    def input(self, prompt=None, io=None):
+    def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
         self.write_output()
-        io = io or self.player.io       # @todo eventually there should always be a self.player (or rather, a connection)
-        return io.input(prompt).strip()
+        return self.player.io.input(prompt).strip()
 
 
 def monkeypatch_blinker():

@@ -957,3 +957,13 @@ races = {
                       'str': (21, 3),
                       'wis': (31, 2)}}
 }
+
+_all_races = set(races)
+assert len(swimming_races - _all_races)==0
+assert len(flying_races - _all_races)==0
+assert len(limbless_combat_races - _all_races)==0
+assert len(limbless_races - _all_races)==0
+assert len(nonbiting_races - _all_races)==0
+assert len(nonmeat_races - _all_races)==0
+assert len(player_races - _all_races)==0
+del _all_races

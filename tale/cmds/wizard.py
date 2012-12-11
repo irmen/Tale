@@ -194,6 +194,8 @@ def do_wiretap(player, parsed, ctx):
         for living in parsed.who_order:
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
+            if isinstance(living, base.Item):
+                raise ActionRefused("Can't wiretap an item, try a living being or a location instead.")
             player.create_wiretap(living)
             player.tell("Wiretapped <living>%s</>." % living.name)
     else:

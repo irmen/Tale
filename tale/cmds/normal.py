@@ -576,7 +576,7 @@ def do_examine(player, parsed, ctx):
     if living:
         if living is player:
             # player examines him/herself
-            p("You are <living>%s</>. But you knew that already." % living.title)
+            p("You are <living>%s</>. But you knew that already." % lang.capital(living.title))
             player.tell_others("{Title} is looking at %sself." % living.objective)
             return
         # if "wizard" in player.privileges:

@@ -62,27 +62,9 @@ class MudObject(object):
     gender = "n"
 
     def __init__(self, name, title=None, description=None, short_description=None):
-        self.name = name.lower()
+        self.init_names(name, title, description, short_description)
         self.aliases = []
         self.verbs = {}   # any custom verbs that need to be registered in the location or in the player
-        if title:
-            assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
-        try:
-            self.title = title or name
-        except AttributeError:
-            # this can occur if someone made title into a property
-            self._title = title or name
-        descr = textwrap.dedent(description).strip() if description else ""
-        try:
-            self.description = descr
-        except AttributeError:
-            # this can occur if someone made description into a property
-            self._description = descr
-        try:
-            self.short_description = short_description
-        except AttributeError:
-            # this can occur if someone made short_description into a property
-            self._short_description = short_description
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -91,6 +73,28 @@ class MudObject(object):
     def init(self):
         """Secondary initialization/customization. You can easily override this in a subclass."""
         pass
+
+    def init_names(self, name, title, description, short_description):
+        """(re)set the name and description attributes"""
+        self.name = name.lower()
+        if title:
+            assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
+        try:
+            self.title = title or name
+        except AttributeError:
+            # this can occur if a subclass made title into a property
+            self._title = title or name
+        descr = textwrap.dedent(description).strip() if description else ""
+        try:
+            self.description = descr
+        except AttributeError:
+            # this can occur if a subclass made description into a property
+            self._description = descr
+        try:
+            self.short_description = short_description
+        except AttributeError:
+            # this can occur if a subclass made short_description into a property
+            self._short_description = short_description
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
@@ -481,7 +485,7 @@ class Location(MudObject):
 _Limbo = Location("Limbo",
                   """
                   The intermediate or transitional place or state. There's only nothingness.
-                  Livings end up here if they're not inside a proper location yet.
+                  Living beings end up here if they're not in a proper location yet.
                   """)
 
 
@@ -565,19 +569,13 @@ class Living(MudObject):
     They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name, gender, race, title=None, description=None, short_description=None):
-        # override the language help attributes inherited from the base object:
-        self.gender = gender
-        self.subjective = lang.SUBJECTIVE[self.gender]
-        self.possessive = lang.POSSESSIVE[self.gender]
-        self.objective = lang.OBJECTIVE[self.gender]
-        # other stuff:
+        self.init_race(race, gender)
         self.location = _Limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
         self.stats = {}
         self.default_verb = "examine"
-        self.race = race
         # Make a copy of the race stats, because they can change dynamically.
         # There's no need to copy the whole race data dict because it's available
         # from tale.races, look it up by the race name.
@@ -586,6 +584,14 @@ class Living(MudObject):
             self.stats[stat_name] = stat_avg
         self.__inventory = set()
         super(Living, self).__init__(name, title, description, short_description)
+
+    def init_race(self, race, gender):
+        """(re)set race and gender attributes"""
+        self.gender = gender
+        self.subjective = lang.SUBJECTIVE[self.gender]
+        self.possessive = lang.POSSESSIVE[self.gender]
+        self.objective = lang.OBJECTIVE[self.gender]
+        self.race = race
 
     def __getstate__(self):
         state = dict(self.__dict__)
@@ -692,6 +698,7 @@ class Living(MudObject):
         Messages are being printed to the locations if the move was successful.
         """
         actor = actor or self
+        original_location = None
         if self.location:
             original_location = self.location
             self.location.remove(self, actor)

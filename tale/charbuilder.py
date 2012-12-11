@@ -7,49 +7,78 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 from . import races
-from . import player
+from . import lang
+
+
+class PlayerNaming(object):
+    wizard = False
+    name = title = gender = race = description =  None
+    def apply_to(self, player):
+        player.init_race(self.race, self.gender)
+        player.init_names(self.name, self.title, self.description, None)
+        if self.wizard:
+            player.privileges.add("wizard")
+        else:
+            if "wizard" in player.privileges:
+                player.privileges.remove("wizard")
 
 
 class CharacterBuilder(object):
-    def __init__(self, driver, io):
+    def __init__(self, driver):
         self.driver = driver
-        self.io = io   # @todo eventually to be replaced by a pre-constructed player object (or rather, a connection)
 
-    def build(self):
+    def build(self, target_player=None):
         while True:
-            choice = self.driver.input("Create default (w)izard, default (p)layer, (c)ustom player? ", io=self.io)
+            choice = self.driver.input("Create default (w)izard, default (p)layer, (c)ustom player? ")
             if choice == "w":
-                return self.create_default_wizard()
+                naming = self.create_default_wizard()
+                break
             elif choice == "p":
-                return self.create_default_player()
+                naming = self.create_default_player()
+                break
             elif choice == "c":
-                return self.create_player_from_info()
+                naming = self.create_player_from_info()
+                break
+        if target_player:
+            naming.apply_to(target_player)
+        return naming
 
     def create_player_from_info(self):
+        naming = PlayerNaming()
         while True:
-            name = self.driver.input("Name? ", io=self.io)
-            if name:
+            naming.name = self.driver.input("Name? ")
+            if naming.name:
                 break
-        gender = self.driver.input("Gender m/f/n? ", io=self.io)[0]
+        naming.gender = self.driver.input("Gender m/f/n? ")[0]
         while True:
-            self.io.output("Player races: " + ", ".join(races.player_races))
-            race = self.driver.input("Race? ", io=self.io)
-            if race in races.player_races:
+            self.driver.player.io.output("Player races: " + ", ".join(races.player_races))     # @todo urghhhhh too many indirections
+            naming.race = self.driver.input("Race? ")
+            if naming.race in races.player_races:
                 break
-            self.io.output("Unknown race, try again.")
-        wizard = self.driver.input("Wizard y/n? ", io=self.io) == "y"
-        description = "A regular person."
-        p = player.Player(name, gender, race, description)
-        if wizard:
-            p.privileges.add("wizard")
-            p.set_title("arch wizard %s", includes_name_param=True)
-        return p
+            self.driver.player.io.output("Unknown race, try again.")  # @todo too many interactions
+        naming.wizard = self.driver.input("Wizard y/n? ") == "y"
+        naming.description = "A regular person."
+        if naming.wizard:
+            naming.title = "arch wizard " + lang.capital(naming.name)
+        return naming
 
     def create_default_wizard(self):
-        p = player.Player("irmen", "m", "human", "This wizard looks very important.")
-        p.privileges.add("wizard")
-        p.set_title("arch wizard %s", includes_name_param=True)
-        return p
+        #@todo these hardcoded names eventually need to go
+        naming = PlayerNaming()
+        naming.name = "irmen"
+        naming.wizard = True
+        naming.description = "This wizard looks very important."
+        naming.gender = "m"
+        naming.race = "human"
+        naming.title = "arch wizard " + lang.capital(naming.name)
+        return naming
 
     def create_default_player(self):
-        return player.Player("irmen", "m", "human", "A regular person.")
+        #@todo these hardcoded names eventually need to go
+        naming = PlayerNaming()
+        naming.name = "irmen"
+        naming.wizard = False
+        naming.description = "A regular person."
+        naming.gender = "m"
+        naming.race = "human"
+        return naming

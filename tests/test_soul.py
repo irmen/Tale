@@ -221,7 +221,7 @@ class TestSoul(unittest.TestCase):
     def testVerbTarget(self):
         soul = tale.soul.Soul()
         player = tale.player.Player("julie", "f")
-        player.set_title("the great %s, destroyer of worlds", True)
+        player.title = "the great Julie, destroyer of worlds"
         player.move(tale.base.Location("somewhere"))
         npc_max = tale.npc.NPC("max", "m")
         player.location.livings = {npc_max, player}

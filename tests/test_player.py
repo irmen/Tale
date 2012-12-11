@@ -15,6 +15,7 @@ from tale.npc import NPC
 from tale.player import Player, TextBuffer
 from tale.soul import NonSoulVerb, ParseResults
 from tale.io.console_io import ConsoleIo
+from tale.charbuilder import CharacterBuilder
 
 
 class TestPlayer(unittest.TestCase):
@@ -22,7 +23,7 @@ class TestPlayer(unittest.TestCase):
         tale.globalcontext.mud_context.driver = DummyDriver()
     def test_init(self):
         player = Player("fritz", "m")
-        player.set_title("%s the great", includes_name_param=True)
+        player.title = "Fritz the great"
         self.assertEqual("fritz", player.name)
         self.assertEqual("Fritz the great", player.title)
         self.assertEqual("", player.description)
@@ -161,7 +162,7 @@ class TestPlayer(unittest.TestCase):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         player.look()
-        self.assertEqual(["[Limbo]\n", "The intermediate or transitional place or state. There's only nothingness.\nLivings end up here if they're not inside a proper location yet.\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(["[Limbo]\n", "The intermediate or transitional place or state. There's only nothingness.\nLiving beings end up here if they're not in a proper location yet.\n"], player.get_output_paragraphs_raw())
         player.move(attic, silent=True)
         player.look(short=True)
         self.assertEqual(["[Attic]\n"], player.get_output_paragraphs_raw())
@@ -207,7 +208,7 @@ class TestPlayer(unittest.TestCase):
     def test_others(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("merlin", "m")
-        player.set_title("wizard merlin")
+        player.title = "wizard Merlin"
         julie = MsgTraceNPC("julie", "f", "human")
         fritz = MsgTraceNPC("fritz", "m", "human")
         julie.move(attic, silent=True)
@@ -220,7 +221,7 @@ class TestPlayer(unittest.TestCase):
         fritz.clearmessages()
         julie.clearmessages()
         player.tell_others("{title} and {Title}")
-        self.assertEqual(["wizard merlin and Wizard merlin"], fritz.messages)
+        self.assertEqual(["wizard Merlin and Wizard Merlin"], fritz.messages)
 
     def test_wiretap(self):
         attic = Location("Attic", "A dark attic.")
@@ -467,6 +468,27 @@ class TestTextbuffer(unittest.TestCase):
         self.assertEqual([("1\n", True)], output.get_paragraphs())
         output.print("   1   ", format=False)
         self.assertEqual([("   1   \n", False)], output.get_paragraphs())
+
+
+class TestCharacterBuilder(unittest.TestCase):
+    def test_build(self):
+        b = CharacterBuilder(None)
+        pn = b.create_default_player()
+        self.assertFalse(pn.wizard)
+        pn = b.create_default_wizard()
+        self.assertTrue(pn.wizard)
+    def test_apply_to(self):
+        b = CharacterBuilder(None)
+        p = Player("test", "n")
+        pn = b.create_default_wizard()
+        self.assertFalse("wizard" in p.privileges)
+        self.assertEqual("Test", p.title)
+        pn.apply_to(p)
+        self.assertTrue("wizard" in p.privileges)
+        self.assertEqual("irmen", p.name)
+        self.assertEqual("human", p.race)
+        self.assertEqual("m", p.gender)
+        self.assertEqual("arch wizard Irmen", p.title)
 
 
 if __name__ == '__main__':

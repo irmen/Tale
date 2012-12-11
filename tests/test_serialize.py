@@ -102,11 +102,13 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         self.assertIsNotNone(x)
         p = player.Player("name", "n", description="description")
-        p.set_title("title")
+        p.title="title"
         p.money = 42
+        p.io = "IO-dummy"
         x = serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
+        self.assertIsNone(x.io)
     def test_attrdict(self):
         s = util.AttrDict(a=42, b="hello", c=[1, 2, 3])
         x = serializecycle(s)

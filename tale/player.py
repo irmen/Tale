@@ -41,7 +41,6 @@ class Player(base.Living):
         self.known_locations = set()
         self.story_complete = False
         self.story_complete_callback = None
-        self.io = None  # will be set to appropriate I/O adapter by the driver
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -49,6 +48,7 @@ class Player(base.Living):
         self.input_is_available = Event()
         self.transcript = None
         self._output = TextBuffer()
+        self.io = None  # will be set to appropriate I/O adapter by the driver
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -57,7 +57,7 @@ class Player(base.Living):
     def __getstate__(self):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["_input", "_output", "input_is_available", "transcript"]:
+        for name in ["_input", "_output", "input_is_available", "transcript", "io"]:
             del state[name]
         return state
 
@@ -68,12 +68,6 @@ class Player(base.Living):
     def set_screen_sizes(self, indent, width):
         self.screen_indent = indent
         self.screen_width = width
-
-    def set_title(self, title, includes_name_param=False):
-        if includes_name_param:
-            self.title = title % lang.capital(self.name)
-        else:
-            self.title = title
 
     def story_completed(self, callback=None):
         """The player completed the story. Set some flags"""
@@ -184,7 +178,8 @@ class Player(base.Living):
         self.tell("[wiretapped from '%s': %s]" % (sender, message), end=True)
 
     def clear_wiretaps(self):
-        blinker.signal("wiretap").disconnect(self.wiretap_msg)
+        sig = blinker.signal("wiretap")
+        sig.disconnect(self.wiretap_msg)   # XXX doesn't remove all taps on python 3.3
 
     def destroy(self, ctx):
         self.activate_transcript(None, None)

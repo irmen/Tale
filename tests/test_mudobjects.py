@@ -458,7 +458,7 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
         dragon = Monster("dragon", "f", race="dragon")
-        self.assertTrue(dragon. aggressive)
+        self.assertTrue(dragon.aggressive)
 
     def test_move_notify(self):
         class LocationNotify(Location):
