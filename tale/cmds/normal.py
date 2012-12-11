@@ -782,15 +782,14 @@ def do_wait(player, parsed, ctx):
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""
-    driver = ctx.driver
-    if util.confirm("Are you sure you want to quit? ", driver):
-        if driver.mode != "mud":
-            if util.confirm("Would you like to save your progress? ", driver):
+    if util.confirm("Are you sure you want to quit? ", ctx.driver):
+        if ctx.config.server_mode != "mud":
+            if util.confirm("Would you like to save your progress? ", ctx.driver):
                 do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()
     player.tell("Good, thank you for staying.")
-    driver.start_player_input()   # because the 'quit' command terminates the player input
+    ctx.driver.start_player_input()   # because the 'quit' command has terminated the player input
 
 
 def print_item_removal(player, item, container, print_parentheses=True):
@@ -819,7 +818,7 @@ def do_who(player, parsed, ctx):
     if parsed.args == ["am", "i"]:
         # who am i
         raise RetryParse("examine myself")      # 'who am i' -> 'examine myself')
-    if ctx.driver.mode=="if":
+    if ctx.config.server_mode=="if":
         # in interactive fiction mode, revert to a simple substitute (examine)
         return do_examine(player, parsed, ctx)
     if parsed.args:

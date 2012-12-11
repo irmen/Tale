@@ -113,13 +113,13 @@ class Commands(object):
                 result.update(self.commands_per_priv[priv])
         return result
 
-    def adjust_available_commands(self, story_config, game_mode):
+    def adjust_available_commands(self, story_config):
         # disable commands flagged with the given game_mode
         # disable soul verbs flagged with override
         for cmds in self.commands_per_priv.values():
             for cmd, func in list(cmds.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
-                if game_mode == disabled_mode:
+                if story_config.server_mode == disabled_mode:
                     del cmds[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]
@@ -142,7 +142,6 @@ class Driver(object):
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
-        self.mode = "if"  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
         globalcontext.mud_context.driver = self
@@ -164,7 +163,6 @@ class Driver(object):
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args(args)
-        self.mode = args.mode
         if 0 <= args.delay <= 100:
             output_line_delay = args.delay
         else:
@@ -181,6 +179,7 @@ class Driver(object):
         story = __import__("story", level=0)
         self.story = story.Story()
         self.config = util.AttrDict(self.story.config)
+        self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         globalcontext.mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
@@ -188,7 +187,7 @@ class Driver(object):
             pass
         else:
             story_cmds.register_all(self.commands)
-        self.commands.adjust_available_commands(self.config, self.mode)
+        self.commands.adjust_available_commands(self.config)
         tale_version = version_tuple(tale_version_str)
         tale_version_required = version_tuple(self.config.requires_tale)
         if tale_version < tale_version_required:
@@ -252,7 +251,7 @@ class Driver(object):
 
     def start_create_player(self, transcript):
         io = self.player.io
-        if self.mode == "mud":
+        if self.config.server_mode == "mud":
             load_choice = "n"
         else:
             load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
@@ -264,17 +263,17 @@ class Driver(object):
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)
             self.player.tell("\n")
-            if self.mode == "if":
+            if self.config.server_mode == "if":
                 self.story.welcome_savegame(self.player)
             else:
                 self.player.tell("Welcome back to %s, %s." % (self.config.name, self.player.title))
             self.player.tell("\n")
         else:
-            if self.mode == "if" and self.config.player_name:
+            if self.config.server_mode == "if" and self.config.player_name:
                 # interactive fiction mode, create the player from the game's config
                 self.player.init_names(self.config.player_name, None, None, None)
                 self.player.init_race(self.config.player_race, self.config.player_gender)
-            elif self.mode == "mud" or not self.config.player_name:
+            elif self.config.server_mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
                 CharacterBuilder(self).build(self.player)
@@ -288,7 +287,7 @@ class Driver(object):
             else:
                 self.player.move(self.config.startlocation_player)
             self.player.tell("\n")
-            if self.mode == "if":
+            if self.config.server_mode == "if":
                 self.story.welcome(self.player)
             else:
                 self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
@@ -296,7 +295,7 @@ class Driver(object):
         self.story.init_player(self.player)
 
     def start_show_motd(self):
-        if self.mode != "if":
+        if self.config.server_mode != "if":
             motd, mtime = util.get_motd(self.vfs)
             if motd:
                 self.player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
@@ -318,7 +317,7 @@ class Driver(object):
         while True:
             globalcontext.mud_context.player = self.player
             self.write_output(self.player)
-            if self.player.story_complete and self.mode == "if":
+            if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
                 break
@@ -364,13 +363,13 @@ class Driver(object):
                 except EOFError:
                     continue
                 except errors.StoryCompleted as ex:
-                    if self.mode == "if":
+                    if self.config.server_mode == "if":
                         # congratulations ;-)
                         self.player.story_completed(ex.callback)
                     else:
                         pass   # in mud mode, the game can't be completed
                 except errors.SessionExit:
-                    if self.mode == "if":
+                    if self.config.server_mode == "if":
                         self.story.goodbye(self.player)
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
@@ -427,7 +426,7 @@ class Driver(object):
         """print any buffered player output to their screen"""
         output = player.get_output()
         if output:
-            if self.mode == "if" and player.io.output_line_delay > 0:
+            if self.config.server_mode == "if" and player.io.output_line_delay > 0:
                 for line in output.splitlines():
                     player.io.output(line)
                     player.io.output_delay()
