@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import unittest
 import pickle
-from tale import globalcontext, races, base, npc, soul, player, util
+from tale import globalcontext, races, base, npc, soul, player, util, hints
 from supportstuff import DummyDriver
 
 
@@ -116,6 +116,17 @@ class TestSerializing(unittest.TestCase):
         i1 = list(s.items())
         i2 = list(x.items())
         self.assertEqual(i1, i2)
+    def test_Context(self):
+        c = util.Context(driver=1, state=2)
+        x = serializecycle(c)
+        self.assertEqual(c, x)
+        i1 = list(c.items())
+        i2 = list(x.items())
+        self.assertEqual(i1, i2)
+    def test_Hints(self):
+        h = hints.HintSystem()
+        h.init([hints.Hint("start", None, None, "first")])
+
 
 
 if __name__ == '__main__':

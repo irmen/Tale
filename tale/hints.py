@@ -10,9 +10,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-from collections import namedtuple
 
-Hint = namedtuple("Hint", "state location filter text")
+
+class Hint(object):
+    def __init__(self, state, location, filter, text):
+        self.state = state
+        self.location = location
+        self.filter = filter
+        self.text = text
 
 
 class HintSystem(object):
