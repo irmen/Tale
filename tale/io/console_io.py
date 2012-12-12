@@ -64,11 +64,11 @@ class AsyncConsoleInput(threading.Thread):
     def __init__(self, player):
         super(AsyncConsoleInput, self).__init__()
         self.player = player
-        self.setDaemon(True)
+        self.daemon = True
         self.enabled = threading.Event()
         self.enabled.clear()
-        self.start()
         self._stoploop = False
+        self.start()
 
     def run(self):
         loop = True
@@ -97,7 +97,7 @@ class ConsoleIo(object):
     def __init__(self):
         self.output_line_delay = 50   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
 
-    def get_async_input(self, player=None):
+    def get_async_input(self, player):
         return AsyncConsoleInput(player)
 
     def input(self, prompt=None):
@@ -113,7 +113,7 @@ class ConsoleIo(object):
         try:
             print(self.apply_style("\n<dim>>></> "), end="")
             cmd = input().lstrip()
-            player.input_line(cmd)
+            player.store_input_line(cmd)
             if cmd == "quit":
                 return False
         except KeyboardInterrupt:

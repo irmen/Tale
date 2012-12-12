@@ -200,7 +200,7 @@ class Player(base.Living):
         except queue.Empty:
             return result
 
-    def input_line(self, cmd):
+    def store_input_line(self, cmd):
         self._input.put(cmd)
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)

@@ -1,31 +1,26 @@
 from __future__ import print_function
-import threading
-import sys
 import time
-import readline
+from tale.io.console_io import ConsoleIo
+try:
+    import readline
+except ImportError:
+    pass
+else:
+    readline.parse_and_bind("tab: complete")
 
-readline.parse_and_bind("tab: complete")
-
-if sys.version_info < (3,0):
-    input = raw_input
-
-class InputThread(threading.Thread):
-    def __init__(self):
-        super(InputThread, self).__init__()
-        self.daemon = True
-        self.enabled = threading.Event()
-        self.start()
-
-    def run(self):
-        while True:
-            self.enabled.wait()
-            string = input("[thread] enter something: ")
-            print("[thread] you entered:", string)
-            self.enabled.clear()
+class Player(object):
+    def store_input_line(self, cmd):
+        print("you entered: ", cmd)
 
 
 if __name__=="__main__":
-    it = InputThread()
+    io = ConsoleIo()
+    player = Player()
+    player.io = io
+    ainput = io.get_async_input(player)
     print("[main] running")
-    it.enabled.set()
-    time.sleep(100)
+    while True:
+        ainput.enable()
+        time.sleep(1)
+    print("[main] exiting")
+
