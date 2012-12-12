@@ -1,7 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver. (fix I/O abstraction first!)
-Pictures for locations, items, livings and exits. (viewable in gui driver/html version only, ofcourse).
+Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver.
+Add optional picture to every MudObject description. (viewable in gui driver/html version only, ofcourse).
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
@@ -23,12 +23,11 @@ World zones: (optional) timed zone resets to reset to starting configuration. Or
 
 Do something with the circlemud xml data:
   http://www.razorvine.net/download/circlemuddata_converters.zip
-  http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+  original from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
 DAMAGE TYPES:
-blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison,
-disease, trauma, psionic, suffocation, deathray, emotional, sonic,
-EMP, karma, drama, pressure, vacuum, inertia
+  blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
+  trauma/wound, suffocation, deathray, EMP, karma, pressure, decompression, inertia
 
 
 General ideas/TODO:
@@ -39,7 +38,9 @@ BUG: on pypy when using readline (linux/osx), and async input thread (servermode
      driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
      (code contains a workaround now: readline not enabled on pypy)
 
-Add <center> text style which centers the line(s) on the screen.
+Extra text style tags?
+    <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
+    <line>   add a horizontal line break.
 
 HTTP server mode with HTML+Javascript frontend.
 Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.
@@ -57,7 +58,7 @@ Finite-state-machine to support multi-phase actions (such as a short dialog with
 input should be case insensitive (everything except stuff in quotes - the message)
   commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-Load story from a zipfile. VFS should thus be able to load resources from a zipfile too.
+Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources)
 
 Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
 Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?

@@ -12,6 +12,8 @@ import functools
 import sys
 import threading
 import gc
+import os
+import platform
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import base, lang, util
 from ..player import Player
@@ -414,7 +416,11 @@ def do_server(player, parsed, ctx):
     minutes, seconds = divmod(seconds, 60)
     pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
-    txt.append("Python version: %s %s on %s" % (pyversion, sixtyfour, sys.platform))
+    if hasattr(platform, "python_implementation"):
+        implementation = platform.python_implementation()
+    else:
+        implementation = "Jython" if os.name=="java" else "???"
+    txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))
     txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
     if config.server_tick_method == "timer":
@@ -429,7 +435,7 @@ def do_server(player, parsed, ctx):
     txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (config.server_mode, len(ctx.driver.all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
-        txt.append("Server loop tick: %.1f sec   Duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
+        txt.append("Server loop tick: %.1f sec   Loop duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
     elif config.server_tick_method == "command":
         txt.append("Server loop tick: %.1f sec   (command driven)." % config.server_tick_time)
     player.tell(*txt, format=False)
