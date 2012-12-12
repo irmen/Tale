@@ -9,7 +9,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import errno
 import inspect
-import appdirs   # @todo doesn't work on IronPython, make alternative
+try:
+    from appdirs import user_data_dir
+except ImportError:
+    # for platforms lacking this module, we have a workaround
+    def user_data_dir(appname, appauthor=None, version=None, roaming=False):
+        return os.path.join(os.path.expanduser("~"), appname+"-data")
 
 
 class VfsError(IOError):
@@ -41,7 +46,7 @@ class VirtualFileSystem(object):
         return open(path, mode=mode)
 
     def get_userdata_dir(self, path):
-        user_data = appdirs.user_data_dir("Tale", "Razorvine")
+        user_data = user_data_dir("Tale", "Razorvine")
         path = os.path.join(user_data, path)
         return path
 
