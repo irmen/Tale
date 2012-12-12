@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import errno
 import inspect
-import appdirs
+import appdirs   # @todo doesn't work on IronPython, make alternative
 
 
 class VfsError(IOError):

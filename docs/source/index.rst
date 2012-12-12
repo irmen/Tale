@@ -12,9 +12,13 @@ It is a library for building `Interactive Fiction <http://en.wikipedia.org/wiki/
 mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
 Tale is 100% pure Python and runs on Python 2.7 and 3.2+.
-It should also work on Pypy and Ironpython.
+
+It should also work on Pypy and Ironpython, but there are some problems:
 Jython 2.5 is not supported, and Jython 2.7 currently has a few bugs that prevent it to run Tale (Jython issues
 1886, 1887, 1949, 1994, and probably others). Once these get fixed, Tale should work on Jython 2.7 too.
+Currently there's also a problem with Pypy, it crashes with an error caused by some wrong signal call.
+IronPython has issues with the required third party libraries (blinker, appdirs) that cannot be installed properly.
+
 
 .. note::
     The multi-user aspects are on the back burner, I'm mainly focusing on the (single player)
