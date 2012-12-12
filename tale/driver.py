@@ -27,24 +27,6 @@ from . import __version__ as tale_version_str
 from .io import vfs
 from .io import console_io
 
-try:
-    import readline
-except ImportError:
-    pass
-else:
-    readline.parse_and_bind("tab: complete")
-    history = vfs.vfs.get_userdata_dir("tale_input.rlhistory")
-    try:
-        readline.read_history_file(history)
-    except IOError:
-        pass
-    import atexit
-
-    def save_history(historyfile):
-        readline.write_history_file(historyfile)
-
-    atexit.register(save_history, history)
-
 
 @total_ordering
 class Deferred(object):
@@ -180,6 +162,7 @@ class Driver(object):
         self.story = story.Story()
         self.config = util.AttrDict(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        enable_readline(self.config)
         globalcontext.mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
@@ -655,6 +638,29 @@ class Driver(object):
         """Writes any pending output and prompts for input. Returns stripped result."""
         self.write_output(self.player)
         return self.player.io.input(prompt).strip()
+
+
+def enable_readline(config):
+    # enable readline except in certain situation on Pypy,
+    # it causes a crash when using the threaded input mode on Pypy (1.9).
+    if hasattr(sys, "pypy_version_info") and config.server_tick_method == "timer":
+        return
+    try:
+        import readline
+    except ImportError:
+        return
+    readline.parse_and_bind("tab: complete")
+    history = vfs.vfs.get_userdata_dir("tale_input.rlhistory")
+    try:
+        readline.read_history_file(history)
+    except IOError:
+        pass
+    import atexit
+
+    def save_history(historyfile):
+        readline.write_history_file(historyfile)
+
+    atexit.register(save_history, history)
 
 
 def monkeypatch_blinker():

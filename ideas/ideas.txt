@@ -37,6 +37,7 @@ BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single
 BUG: on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
 BUG: on pypy when using readline (linux/osx), and async input thread (servermode=timer),
      driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
+     (code contains a workaround now: readline not enabled on pypy)
 
 Driver write_output and input should probably be moved to the player or even the IO adapter itself.
 
