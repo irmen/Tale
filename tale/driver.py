@@ -32,11 +32,8 @@ try:
 except ImportError:
     pass
 else:
-    history = vfs.vfs.get_userdata_dir("tale_input_history")
-    print("rl vfs: {%s}" % history)
-    history = os.path.expanduser("~/.tale_history")   # XXX use vfs outputdir
-    print("rl old: {%s}" % history)
     readline.parse_and_bind("tab: complete")
+    history = vfs.vfs.get_userdata_dir("tale_input_history")
     try:
         readline.read_history_file(history)
     except IOError:
