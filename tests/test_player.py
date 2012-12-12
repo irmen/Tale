@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import print_function, division, unicode_literals
+import sys
 import unittest
 import tale.globalcontext
 from supportstuff import DummyDriver, MsgTraceNPC
@@ -16,11 +17,18 @@ from tale.player import Player, TextBuffer
 from tale.soul import NonSoulVerb, ParseResults
 from tale.io.console_io import ConsoleIo
 from tale.charbuilder import CharacterBuilder
+from tale.util import AttrDict
+if sys.version_info < (3,0):
+    from StringIO import StringIO
+else:
+    from io import StringIO
 
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.globalcontext.mud_context.driver = DummyDriver()
+        tale.globalcontext.mud_context.config = AttrDict()
+        tale.globalcontext.mud_context.config.server_mode="if"
     def test_init(self):
         player = Player("fritz", "m")
         player.title = "Fritz the great"
@@ -419,6 +427,35 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(room2, room1.player_left_target)
         self.assertEqual(player, room2.player_arrived)
         self.assertEqual(room1, room2.player_arrived_from)
+
+    def test_write_output(self):
+        player = Player("julie", "f")
+        player.io = ConsoleIo()
+        old_stdout = sys.stdout
+        sys.stdout = StringIO()
+        try:
+            player.tell("hello 1", end=True)
+            player.tell("hello 2", end=True)
+            player.write_output()
+            self.assertEqual("  hello 1\n  hello 2\n", sys.stdout.getvalue())
+        finally:
+            sys.stdout = old_stdout
+
+    def test_input(self):
+        player = Player("julie", "f")
+        player.io = ConsoleIo()
+        old_stdout = sys.stdout
+        old_stdin = sys.stdin
+        sys.stdout = StringIO()
+        sys.stdin = StringIO("input text\n")
+        try:
+            player.tell("first this text")
+            x = player.input("inputprompt")
+            self.assertEqual("input text", x)
+            self.assertEqual("  first this text\ninputprompt", sys.stdout.getvalue())  # should have outputted the buffered text
+        finally:
+            sys.stdout = old_stdout
+            sys.stdin = old_stdin
 
 
 class TestTextbuffer(unittest.TestCase):

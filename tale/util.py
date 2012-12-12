@@ -403,14 +403,35 @@ class GameDateTime(object):
         self.clock -= timedelta * self.times_realtime
 
 
-def confirm(question, driver):
+def input_confirm(question, player):
     # @todo this input only works in single player IF mode because it blocks the game
+    if not question.endswith(" "):
+        question += " "
     while True:
-        reply = driver.input(question)
+        reply = player.input(question)
         if reply in ("y", "yes", "sure", "yep"):
             return True
         if reply in ("n", "no", "nope"):
             return False
+        if reply:
+            player.tell("That is not a valid answer.")
+
+
+def input_choice(question, choices, player):
+    """
+    Ask the player to choose out of the given list of choices.
+    You can optionally use the format string '{choices}' to get the list of choices in the question text.
+    """
+    # @todo this input only works in single player IF mode because it blocks the game
+    question = question.format(choices = "/".join(choices))
+    if not question.endswith(" "):
+        question += " "
+    while True:
+        reply = player.input(question)
+        if reply in choices:
+            return reply
+        if reply:
+            player.tell("That is not a valid answer.")
 
 
 class AttrDict(dict):

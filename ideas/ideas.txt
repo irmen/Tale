@@ -39,8 +39,6 @@ BUG: on pypy when using readline (linux/osx), and async input thread (servermode
      driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
      (code contains a workaround now: readline not enabled on pypy)
 
-Driver write_output and input should probably be moved to the player or even the IO adapter itself.
-
 Add <center> text style which centers the line(s) on the screen.
 
 HTTP server mode with HTML+Javascript frontend.

@@ -199,7 +199,7 @@ class Driver(object):
         self.start_create_player(args.transcript)
         self.start_show_motd()
         self.player.look(short=False)
-        self.write_output(self.player)
+        self.player.write_output()
         self.start_player_input()
         while True:
             try:
@@ -235,11 +235,12 @@ class Driver(object):
     def start_create_player(self, transcript):
         io = self.player.io
         if self.config.server_mode == "mud":
-            load_choice = "n"
+            load_saved_game = False
         else:
-            load_choice = self.input("\nDo you want to load a saved game ('n' will start a new game)? ")
+            io.output("")
+            load_saved_game = util.input_confirm("Do you want to load a saved game ('n' will start a new game)?", self.player)
         io.output("")
-        if load_choice == "y":
+        if load_saved_game:
             self.load_saved_game()
             self.player.io = io  # set the I/O adapter for this player
             del io
@@ -259,7 +260,9 @@ class Driver(object):
             elif self.config.server_mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                CharacterBuilder(self).build(self.player)
+                name_info = CharacterBuilder(self.player).build()
+                name_info.apply_to(self.player)
+
             self.player.io = io  # set the I/O adapter for this player
             del io
             if transcript:
@@ -299,7 +302,7 @@ class Driver(object):
         last_loop_time = last_server_tick = time.time()
         while True:
             globalcontext.mud_context.player = self.player
-            self.write_output(self.player)
+            self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
@@ -370,7 +373,7 @@ class Driver(object):
                     deferred()
                 except util.queue.Empty:
                     break
-        self.write_output(self.player)  # flush pending output at server shutdown.
+        self.player.write_output()  # flush pending output at server shutdown.
         ctx = util.Context(driver=self)
         self.player.destroy(ctx)
 
@@ -393,7 +396,7 @@ class Driver(object):
                     deferred = None
             if deferred:
                 deferred(driver=self)
-        self.write_output(self.player)
+        self.player.write_output()
 
     def story_complete_output(self, callback):
         if callback:
@@ -402,19 +405,8 @@ class Driver(object):
             self.player.tell("\n")
             self.story.completion(self.player)
             self.player.tell("\n")
-            self.input("\nPress enter to continue. ")
+            self.player.input("\nPress enter to continue. ")
             self.player.tell("\n")
-
-    def write_output(self, player):
-        """print any buffered player output to their screen"""
-        output = player.get_output()
-        if output:
-            if self.config.server_mode == "if" and player.io.output_line_delay > 0:
-                for line in output.splitlines():
-                    player.io.output(line)
-                    player.io.output_delay()
-            else:
-                player.io.output(output.rstrip())
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -633,11 +625,6 @@ class Driver(object):
         with self.deferreds_lock:
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
-
-    def input(self, prompt=None):
-        """Writes any pending output and prompts for input. Returns stripped result."""
-        self.write_output(self.player)
-        return self.player.io.input(prompt).strip()
 
 
 def enable_readline(config):

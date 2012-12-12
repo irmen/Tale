@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from . import races
 from . import lang
+from . import util
 
 
 class PlayerNaming(object):
@@ -19,44 +20,32 @@ class PlayerNaming(object):
         if self.wizard:
             player.privileges.add("wizard")
         else:
-            if "wizard" in player.privileges:
-                player.privileges.remove("wizard")
+            player.privileges.discard("wizard")
 
 
 class CharacterBuilder(object):
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self, player):
+        self.player = player
 
-    def build(self, target_player=None):
-        while True:
-            choice = self.driver.input("Create default (w)izard, default (p)layer, (c)ustom player? ")
-            if choice == "w":
-                naming = self.create_default_wizard()
-                break
-            elif choice == "p":
-                naming = self.create_default_player()
-                break
-            elif choice == "c":
-                naming = self.create_player_from_info()
-                break
-        if target_player:
-            naming.apply_to(target_player)
-        return naming
+    def build(self):
+        choice = util.input_choice("Create default (w)izard, default (p)layer, (c)ustom player?", ["w", "p", "c"], self.player)
+        if choice == "w":
+            return self.create_default_wizard()
+        elif choice == "p":
+            return self.create_default_player()
+        elif choice == "c":
+            return self.create_player_from_info()
 
     def create_player_from_info(self):
         naming = PlayerNaming()
         while True:
-            naming.name = self.driver.input("Name? ")
+            naming.name = self.player.input("Name? ")
             if naming.name:
                 break
-        naming.gender = self.driver.input("Gender m/f/n? ")[0]
-        while True:
-            self.driver.player.io.output("Player races: " + ", ".join(races.player_races))     # @todo urghhhhh too many indirections
-            naming.race = self.driver.input("Race? ")
-            if naming.race in races.player_races:
-                break
-            self.driver.player.io.output("Unknown race, try again.")  # @todo too many interactions
-        naming.wizard = self.driver.input("Wizard y/n? ") == "y"
+        naming.gender = util.input_choice("Gender {choices}? ", ["m", "f", "n"], self.player)
+        self.player.tell("Player races: " + ", ".join(races.player_races))
+        naming.race = util.input_choice("Race? ", races.player_races, self.player)
+        naming.wizard = util.input_confirm("Wizard y/n? ", self.player)
         naming.description = "A regular person."
         if naming.wizard:
             naming.title = "arch wizard " + lang.capital(naming.name)

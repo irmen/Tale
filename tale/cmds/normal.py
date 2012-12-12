@@ -142,7 +142,7 @@ def do_drop(player, parsed, ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            if util.confirm("Are you sure you want to drop all you are carrying? ", ctx.driver):
+            if util.input_confirm("Are you sure you want to drop all you are carrying?", player):
                 drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
@@ -211,7 +211,7 @@ def do_put(player, parsed, ctx):
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
         if what:
-            if not util.confirm("Are you sure you want to put everything away? ", ctx.driver):
+            if not util.input_confirm("Are you sure you want to put everything away?", player):
                 return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -429,7 +429,7 @@ def do_give(player, parsed, ctx):
             raise ParseError("Give all to who?")
         what = player.inventory
         if what:
-            if not util.confirm("Are you sure you want to give it all away? ", ctx.driver):
+            if not util.input_confirm("Are you sure you want to give it all away?", player):
                 return
         if parsed.args[0] == "all":
             # give all [to] living
@@ -496,7 +496,7 @@ def give_money(player, amount, recipient, driver):
         player.tell("You don't have that amount of wealth.")
     else:
         recipient.allow_give_money(player, amount)
-        if util.confirm("Are you sure you want to give %s away? " % driver.moneyfmt.display(amount), driver):
+        if util.input_confirm("Are you sure you want to give %s away?" % driver.moneyfmt.display(amount), player):
             player.money -= amount
             recipient.money += amount
             player.tell("You gave <living>%s</> %s." % (recipient.title, driver.moneyfmt.display(amount)))
@@ -782,9 +782,9 @@ def do_wait(player, parsed, ctx):
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""
-    if util.confirm("Are you sure you want to quit? ", ctx.driver):
+    if util.input_confirm("Are you sure you want to quit?", player):
         if ctx.config.server_mode != "mud":
-            if util.confirm("Would you like to save your progress? ", ctx.driver):
+            if util.input_confirm("Would you like to save your progress?", player):
                 do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()

@@ -832,7 +832,7 @@ class Soul(object):
                 word = word.rstrip(",")
             if word in ("them", "him", "her", "it"):
                 raise ParseError("It is not clear who you mean.")
-            if word in ("me", "myself"):
+            if word in ("me", "myself", "self"):
                 if include_flag:
                     who_info[player].sequence = who_sequence
                     who_info[player].previous_word = previous_word

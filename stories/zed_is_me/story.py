@@ -58,7 +58,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        self.driver.input("\nPress enter to continue. ")
+        player.input("\nPress enter to continue. ")
         player.tell("\n")
 
     def welcome_savegame(self, player):
@@ -67,7 +67,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        self.driver.input("\nPress enter to continue where you were before. ")
+        player.input("\nPress enter to continue where you were before. ")
         player.tell("\n")
 
     def goodbye(self, player):

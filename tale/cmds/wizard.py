@@ -128,7 +128,7 @@ def do_destroy(player, parsed, ctx):
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not util.confirm("Are you sure you want to destroy %s? " % victim.title, ctx.driver):
+        if not util.input_confirm("Are you sure you want to destroy %s?" % victim.title, player):
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
@@ -157,7 +157,7 @@ def do_clean(player, parsed, ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if util.confirm("Are you sure you want to clean out %s? " % victim.title, ctx.driver):
+        if util.input_confirm("Are you sure you want to clean out %s?" % victim.title, player):
             p("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory

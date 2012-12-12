@@ -16,6 +16,7 @@ from . import hints
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
+from .globalcontext import mud_context
 
 
 DEFAULT_SCREEN_WIDTH = 72
@@ -147,6 +148,22 @@ class Player(base.Living):
         if formatted and self.transcript:
             self.transcript.write(formatted)
         return formatted or None
+
+    def write_output(self):
+        """print any buffered output to the player's screen"""
+        output = self.get_output()
+        if output:
+            if mud_context.config.server_mode == "if" and self.io.output_line_delay > 0:
+                for line in output.splitlines():
+                    self.io.output(line)
+                    self.io.output_delay()
+            else:
+                self.io.output(output.rstrip())
+
+    def input(self, prompt=None):
+        """Writes any pending output and prompts for input. Returns stripped result."""
+        self.write_output()
+        return self.io.input(prompt).strip()
 
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
