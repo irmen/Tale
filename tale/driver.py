@@ -33,7 +33,7 @@ except ImportError:
     pass
 else:
     readline.parse_and_bind("tab: complete")
-    history = vfs.vfs.get_userdata_dir("tale_input_history")
+    history = vfs.vfs.get_userdata_dir("tale_input.rlhistory")
     try:
         readline.read_history_file(history)
     except IOError:
