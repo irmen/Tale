@@ -50,7 +50,9 @@ class TextViewer(Toplevel):
             fixedFont = tkFont.nametofont('TkFixedFont').copy()
             fixedFont["size"]=self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
-        self.commandEntry.bind('<Return>',self.user_cmd) #dismiss dialog
+        self.commandEntry.bind('<Return>',self.user_cmd) 
+        self.commandEntry.bind('<Extended-Return>',self.user_cmd) 
+        self.commandEntry.bind('<KP_Enter>',self.user_cmd)
         self.commandEntry.bind('<F1>', self.f1_pressed)
         self.buttonOk.pack()
         self.scrollbarView.pack(side=RIGHT,fill=Y)
