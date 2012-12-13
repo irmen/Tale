@@ -1,6 +1,7 @@
 from Tkinter import *
 import tkFont
 import tkMessageBox
+import sys
 
 class TextViewer(Toplevel):
     def __init__(self, parent, title, text, modal=True):
@@ -11,8 +12,12 @@ class TextViewer(Toplevel):
                                         parent.winfo_rooty() + 10))
         self.bg = '#f8f8f0'
         self.fg = '#080808'
-        self.font = self.FindFont(['Georgia', 'DejaVu serif', 'Times New Roman'], 11)
-
+        self.fontsize_monospace = 11
+        self.fontsize_normal = 11
+        if sys.platform=="darwin":
+            self.fontsize_monospace += 2
+            self.fontsize_normal += 3
+        self.font = self.FindFont(['Georgia', 'DejaVu serif', 'Times New Roman'], self.fontsize_normal)
         self.CreateWidgets()
         self.title(title)
         self.protocol("WM_DELETE_WINDOW", self.Ok)
@@ -40,10 +45,10 @@ class TextViewer(Toplevel):
         self.textView.config(yscrollcommand=self.scrollbarView.set)
 
         self.commandPrompt = Label(frameCommands, text="> ")
-        fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], 11)
+        fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
             fixedFont = tkFont.nametofont('TkFixedFont').copy()
-            fixedFont["size"]=11
+            fixedFont["size"]=self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
         self.commandEntry.bind('<Return>',self.user_cmd) #dismiss dialog
         self.commandEntry.bind('<F1>', self.f1_pressed)
