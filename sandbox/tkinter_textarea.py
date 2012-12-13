@@ -11,7 +11,7 @@ class TextViewer(Toplevel):
                                         parent.winfo_rooty() + 10))
         self.bg = '#f8f8f0'
         self.fg = '#080808'
-        self.font = ('DejaVu serif', 11)
+        self.font = self.FindFont(['Georgia', 'DejaVu serif', 'Times New Roman'], 11)
 
         self.CreateWidgets()
         self.title(title)
@@ -40,14 +40,8 @@ class TextViewer(Toplevel):
         self.textView.config(yscrollcommand=self.scrollbarView.set)
 
         self.commandPrompt = Label(frameCommands, text="> ")
-        fontfamilies = tkFont.families()
-        if "Consolas" in fontfamilies:
-            fixedFont = tkFont.Font(family='Consolas', size=11)
-        elif "Lucida Console" in fontfamilies:
-            fixedFont = tkFont.Font(family='Lucida Console', size=11)
-        elif "DejaVu Sans Mono" in fontfamilies:
-            fixedFont = tkFont.Font(family='DejaVu Sans Mono', size=11)
-        else:
+        fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], 11)
+        if not fixedFont:
             fixedFont = tkFont.nametofont('TkFixedFont').copy()
             fixedFont["size"]=11
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
@@ -63,6 +57,13 @@ class TextViewer(Toplevel):
         frameText.pack(side=TOP,expand=TRUE,fill=BOTH)
         frameCommands.pack(side=BOTTOM, fill=X)
         self.commandEntry.focus_set()
+
+    def FindFont(self, families, size):
+        fontfamilies = tkFont.families()
+        for family in families:
+            if family in fontfamilies:
+                return tkFont.Font(family=family, size=size)
+        return None
 
     def f1_pressed(self, e):
         self.commandEntry.delete(0, END)
@@ -82,19 +83,21 @@ class TextViewer(Toplevel):
         self.destroy()
 
 
-def view_text(parent, title, text, modal=True):
-    return TextViewer(parent, title, text, modal)
+def view_text(parent, modal=True):
+    story = "StoryName"
+    version = "StoryVersion"
+    window_title = "Tale Interactive Fiction  |  {story} - {version}".format(**locals())
+    initial_text = "Tale text window.\n\n"
+    return TextViewer(parent, window_title, initial_text, modal)
 
 
 if __name__ == '__main__':
     #test the dialog
     root=Tk()
-    root.title('textView test')
-    btn1 = Button(root, text='view_text',
-        command=lambda:view_text(root, 'view_text', "Tale text window.\n\n"))
+    root.title('Tale Interactive Fiction')
+    btn1 = Button(root, text='view_text', command=lambda:view_text(root))
     btn1.pack(side=LEFT)
-    btn3 = Button(root, text='nonmodal view_text',
-        command=lambda:view_text(root, 'nonmodal view_text', "Tale text window\n\n", modal=False))
+    btn3 = Button(root, text='nonmodal view_text', command=lambda:view_text(root, modal=False))
     btn3.pack(side=LEFT)
     close = Button(root, text='Close', command=root.destroy)
     close.pack(side=RIGHT)
