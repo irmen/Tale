@@ -264,6 +264,7 @@ class Driver(object):
                 name_info.apply_to(self.player)
 
             self.player.io = io  # set the I/O adapter for this player
+            self.player.io.do_styles = self.player.screen_styles_enabled
             del io
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)

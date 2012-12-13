@@ -37,6 +37,7 @@ BUG: on python3.3, blinker signals aren't removed properly (!wiretap -clear does
 BUG: on pypy when using readline (linux/osx), and async input thread (servermode=timer),
      driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
      (code contains a workaround now: readline not enabled on pypy)
+BUG: style-tags are counted by the textwrapper when formatting the text, it should ignore them
 
 Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)

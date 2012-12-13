@@ -409,7 +409,7 @@ def input_confirm(question, player):
         question += " "
     while True:
         reply = player.input(question)
-        if reply in ("y", "yes", "sure", "yep"):
+        if reply in ("y", "yes", "sure", "yep", "yeah"):
             return True
         if reply in ("n", "no", "nope"):
             return False

@@ -39,6 +39,7 @@ class Player(base.Living):
         self.previous_commandline = None
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT
+        self.screen_styles_enabled = True
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
         self.story_complete = False
@@ -153,6 +154,7 @@ class Player(base.Living):
         """print any buffered output to the player's screen"""
         output = self.get_output()
         if output:
+            self.io.do_styles = self.screen_styles_enabled  # (re)set this because this setting can be changed dynamically
             if mud_context.config.server_mode == "if" and self.io.output_line_delay > 0:
                 for line in output.splitlines():
                     self.io.output(line)

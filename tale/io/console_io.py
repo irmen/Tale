@@ -96,6 +96,7 @@ class ConsoleIo(object):
 
     def __init__(self):
         self.output_line_delay = 50   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
+        self.do_styles = True
 
     def get_async_input(self, player):
         return AsyncConsoleInput(player)
@@ -111,7 +112,7 @@ class ConsoleIo(object):
         be the case when the player types 'quit', for instance).
         """
         try:
-            print(self.apply_style("\n<dim>>></> "), end="")
+            print(_apply_style("\n<dim>>></> ", self.do_styles), end="")
             cmd = input().lstrip()
             player.store_input_line(cmd)
             if cmd == "quit":
@@ -125,6 +126,7 @@ class ConsoleIo(object):
     def render_output(self, paragraphs, **params):
         """
         Render (format) the given paragraphs to a text representation.
+        It doesn't output anything to the screen; it just returns the text string.
         This implementation expects 2 extra parameters: "indent" and "width".
         """
         if not paragraphs:
@@ -144,8 +146,8 @@ class ConsoleIo(object):
 
     def output(self, *lines):
         """Write some text to the visible output buffer."""
-        for line in self.apply_style(lines=lines):
-            print(line)
+        for line in lines:
+            print(_apply_style(line, self.do_styles))
         sys.stdout.flush()
 
     def output_delay(self):
@@ -153,21 +155,17 @@ class ConsoleIo(object):
         time.sleep(self.output_line_delay / 1000.0)
 
     def break_pressed(self, player):
-        print(self.apply_style(self.CTRL_C_MESSAGE))
+        print(_apply_style(self.CTRL_C_MESSAGE, self.do_styles))
         sys.stdout.flush()
 
-    def _apply_style(self, line):
-        if "<" not in line:
-            return line
-        if style_colors:
-            for tag in style_colors:
-                line = line.replace("<%s>" % tag, style_colors[tag])
-            return line
-        else:
-            return iobase.strip_text_styles(line)
 
-    def apply_style(self, line=None, lines=[]):
-        """Convert style tags to colorama escape sequences suited for console text output"""
-        if line is not None:
-            return self._apply_style(line)
-        return (self._apply_style(line) for line in lines)
+def _apply_style(line, do_styles):
+    """Convert style tags to colorama escape sequences suited for console text output"""
+    if "<" not in line:
+        return line
+    if style_colors and do_styles:
+        for tag in style_colors:
+            line = line.replace("<%s>" % tag, style_colors[tag])
+        return line
+    else:
+        return iobase.strip_text_styles(line)

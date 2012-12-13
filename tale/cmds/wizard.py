@@ -366,9 +366,9 @@ def do_debug(player, parsed, ctx):
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Can't find %s." % name)
-    txt = [repr(obj), "Class defined in: " + inspect.getfile(obj.__class__)]
+    txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
     for varname, value in sorted(vars(obj).items()):
-        txt.append(".%s: %r" % (varname, value))
+        txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
     if obj in ctx.driver.heartbeat_objects:
         txt.append("%s receives heartbeats." % obj.name)
     player.tell(*txt, format=False)

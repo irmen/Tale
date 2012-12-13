@@ -1370,13 +1370,16 @@ def do_config(player, parsed, ctx):
                 player.screen_width = value
             else:
                 raise ActionRefused("Invalid screen width, range is 40..200")
+        elif param == "styles":
+            player.screen_styles_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
         else:
             raise ActionRefused("Invalid parameter name.")
         player.tell("Configuration modified.", end=True)
         player.tell("\n")
     player.tell("Configuration:", end=True)
-    player.tell("  delay (output line delay) = %d" % player.io.output_line_delay, format=False)
-    player.tell("  width (screen width) = %d" % player.screen_width, format=False)
+    player.tell("  delay <dim>(output line delay) =</> %d" % player.io.output_line_delay, format=False)
+    player.tell("  width <dim>(screen width) =</> %d" % player.screen_width, format=False)
+    player.tell("  styles <dim>(enable text styles) =</> %s" % player.screen_styles_enabled, format=False)
 
 
 @cmd("hint")
