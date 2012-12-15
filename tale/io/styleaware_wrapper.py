@@ -9,6 +9,12 @@ import textwrap
 import re
 
 class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
+    """
+    A TextWrapper subclass that doesn't count the length of Tale's style tags
+    when filling up the lines (the style tags don't have visible width).
+    Unfortunately the line filling loop is embedded in a larger method,
+    that we need to override fully (_wrap_chunks)...
+    """
     tag_split_re = re.compile("(<[a-z/]+?>)")
     tag_re = re.compile("<[a-z/]+?>$")
     def _wrap_chunks(self, chunks):
@@ -16,6 +22,7 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
         if self.width <= 0:
             raise ValueError("invalid width %r (must be > 0)" % self.width)
 
+        # split any style tags <abcde> or </> into separate chunks
         chunks2 = []
         for chunk in chunks:
             chunks2.extend(self.tag_split_re.split(chunk))
