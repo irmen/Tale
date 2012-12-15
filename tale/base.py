@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import blinker
-import textwrap
+from textwrap import dedent
 from . import lang
 from . import util
 from .errors import ActionRefused
@@ -84,7 +84,7 @@ class MudObject(object):
         except AttributeError:
             # this can occur if a subclass made title into a property
             self._title = title or name
-        descr = textwrap.dedent(description).strip() if description else ""
+        descr = dedent(description).strip() if description else ""
         try:
             self.description = descr
         except AttributeError:

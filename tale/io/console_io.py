@@ -8,8 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import threading
 import sys
 import time
-import textwrap
-from . import iobase
+from . import styleaware_wrapper, iobase
 try:
     from . import colorama_patched as colorama
     colorama.init()
@@ -132,7 +131,7 @@ class ConsoleIo(object):
         if not paragraphs:
             return None
         indent = " " * params["indent"]
-        wrapper = textwrap.TextWrapper(width=params["width"], fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
+        wrapper = styleaware_wrapper.StyleTagsAwareTextWrapper(width=params["width"], fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
         output = []
         for txt, formatted in paragraphs:
             if formatted:

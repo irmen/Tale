@@ -8,7 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import unittest
 import sys
 import os
-from tale.io import console_io
+from tale.io import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
 
 
@@ -62,6 +62,24 @@ class TestConsoleIo(unittest.TestCase):
         io = console_io.ConsoleIo()
         formatted = io.render_output(output.get_paragraphs(), indent=2, width=45)
         self.assertEqual(expected, formatted)
+
+
+class TextWrapper(unittest.TestCase):
+    def test_wrap(self):
+        w = styleaware_wrapper.StyleTagsAwareTextWrapper(width=20)
+        wrapped = w.fill("This is some text with or without style tags, to see how the wrapping goes.")
+        self.assertEqual("This is some text\n"
+            "with or without\n"
+            "style tags, to see\n"
+            "how the wrapping\n"
+            "goes.", wrapped)
+        wrapped = w.fill("This is <bright>some text</> with <bright>or without</> style tags, <bright>to</> see <bright>how the</> wrapping <bright>goes.</>")
+        wrapped = iobase.strip_text_styles(wrapped)
+        self.assertEqual("This is some text\n"
+                         "with or without\n"
+                         "style tags, to see \n"
+                         "how the wrapping \n"
+                         "goes.", wrapped)
 
 
 if __name__ == '__main__':
