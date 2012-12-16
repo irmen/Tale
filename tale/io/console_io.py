@@ -66,8 +66,8 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def input(self, prompt=None):
         """Ask the player for immediate input."""
-        prompt = _apply_style(prompt, self.do_styles)
-        return input(prompt).strip()
+        print(_apply_style(prompt, self.do_styles), end="")
+        return input().strip()
 
     def input_line(self, player):
         """

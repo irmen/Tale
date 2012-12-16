@@ -41,6 +41,7 @@ class AsyncPlayerInput(threading.Thread):
         super(AsyncPlayerInput, self).__init__()
         self.player = player
         self.daemon = True
+        self.name = "async-input"
         self.enabled = threading.Event()
         self.enabled.clear()
         self._stoploop = False
@@ -59,11 +60,6 @@ class AsyncPlayerInput(threading.Thread):
         if self._stoploop:
             raise SystemExit()
         self.enabled.set()
-
-    def disable(self):
-        if self._stoploop:
-            raise SystemExit()
-        self.enabled.clear()
 
     def stop(self):
         self._stoploop = True

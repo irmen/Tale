@@ -25,8 +25,6 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .io import vfs
-#from .io.console_io import ConsoleIo as IoAdapter
-from .io.tkinter_io import TkinterIo as IoAdapter
 
 
 @total_ordering
@@ -151,6 +149,7 @@ class Driver(object):
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
+        parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         args = parser.parse_args(args)
         if 0 <= args.delay <= 100:
             output_line_delay = args.delay
@@ -200,6 +199,10 @@ class Driver(object):
         self.bind_exits()
         # story has been initialised, create and connect a player
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
+        if args.gui:
+            from .io.tkinter_io import TkinterIo as IoAdapter
+        else:
+            from .io.console_io import ConsoleIo as IoAdapter
         self.player.io = IoAdapter(self.config)
         self.player.io.output_line_delay = output_line_delay
         driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)

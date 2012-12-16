@@ -32,7 +32,6 @@ class TestConsoleIo(unittest.TestCase):
         player = DummyPlayer()
         player.io = io
         a = io.get_async_input(player)
-        a.disable()
         a.enable()
         a.stop()
 
