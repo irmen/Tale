@@ -25,6 +25,7 @@ abbreviations = {
     "x": "examine",
     "exa": "examine",
     "inv": "inventory",
+    "manip": "manipulate",
     "'": "say"
 }
 

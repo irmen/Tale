@@ -5,11 +5,15 @@ GUI input/output using Tkinter.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-from Tkinter import *
-import tkFont
 import threading
 import sys
 import time
+try:
+    from tkinter import *
+    import tkinter.font as tkfont
+except ImportError:
+    from Tkinter import *
+    import tkFont as tkfont
 from . import iobase
 from ..util import queue
 
@@ -188,7 +192,7 @@ class TaleWindow(Toplevel):
         self.commandPrompt = Label(frameCommands, text="> ")
         fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
-            fixedFont = tkFont.nametofont('TkFixedFont').copy()
+            fixedFont = tkfont.nametofont('TkFixedFont').copy()
             fixedFont["size"]=self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
         self.commandEntry.bind('<Return>',self.user_cmd)
@@ -206,10 +210,10 @@ class TaleWindow(Toplevel):
         self.commandEntry.focus_set()
 
     def FindFont(self, families, size):
-        fontfamilies = tkFont.families()
+        fontfamilies = tkfont.families()
         for family in families:
             if family in fontfamilies:
-                return tkFont.Font(family=family, size=size)
+                return tkfont.Font(family=family, size=size)
         return None
 
     def f1_pressed(self, e):
@@ -247,10 +251,10 @@ class TaleGUI(threading.Thread):
         self.server_config = config
         self.cmd_queue = queue.Queue()
         self.root=Tk()
-        self._started = threading.Event()
+        self._gui_started = threading.Event()
         self.start()
-        self._started.wait()
-        del self._started
+        self._gui_started.wait()
+        del self._gui_started
     def run(self):
         window_title = "Tale IF  |  {name} v{version}".format(name=self.server_config.name, version=self.server_config.version)
         self.root.title(window_title)
@@ -263,7 +267,7 @@ class TaleGUI(threading.Thread):
         self.root = None
         self.io.gui_terminated()
     def signal_gui_ready(self):
-        self._started.set()
+        self._gui_started.set()
     def destroy(self):
         def destroy2():
             self.window.destroy()

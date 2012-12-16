@@ -1,7 +1,10 @@
-from Tkinter import *
-import tkFont
-import tkMessageBox
 import sys
+try:
+    from tkinter import *
+    import tkinter.font as tkfont
+except ImportError:
+    from Tkinter import *
+    import tkFont as tkfont
 
 class TextViewer(Toplevel):
     def __init__(self, parent, title, text, modal=True):
@@ -47,7 +50,7 @@ class TextViewer(Toplevel):
         self.commandPrompt = Label(frameCommands, text="> ")
         fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
-            fixedFont = tkFont.nametofont('TkFixedFont').copy()
+            fixedFont = tkfont.nametofont('TkFixedFont').copy()
             fixedFont["size"]=self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
         self.commandEntry.bind('<Return>',self.user_cmd) 
@@ -66,10 +69,11 @@ class TextViewer(Toplevel):
         self.commandEntry.focus_set()
 
     def FindFont(self, families, size):
-        fontfamilies = tkFont.families()
+        fontfamilies = tkfont.families()
+        print(fontfamilies)
         for family in families:
             if family in fontfamilies:
-                return tkFont.Font(family=family, size=size)
+                return tkfont.Font(family=family, size=size)
         return None
 
     def f1_pressed(self, e):
