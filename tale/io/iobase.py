@@ -65,7 +65,6 @@ class AsyncPlayerInput(threading.Thread):
         self._stoploop = True
         self.enabled.set()
         self.join()
-        self.player.io.destroy()
 
 
 class IoAdapterBase(object):

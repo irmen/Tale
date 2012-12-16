@@ -162,8 +162,9 @@ class Driver(object):
             print("Tale is being asked to run directly from the distribution directory, this is not supported.")
             print("Install Tale properly, and/or use the start script from the story directory instead.")
             return
-        # cd into the game directory and load its config and zones
+        # cd into the game directory, add it to the search path, and load its config and zones
         os.chdir(args.game)
+        sys.path.insert(0, '.')
         story = __import__("story", level=0)
         self.story = story.Story()
         self.config = util.AttrDict(self.story.config)
@@ -394,6 +395,7 @@ class Driver(object):
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
                     if self.config.server_tick_method == "timer":
                         self.async_player_input.stop()
+                    self.player.io.destroy()
                     break
                 except Exception:
                     import traceback

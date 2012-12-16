@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# change to the directory where the script sits
+cd $(dirname $0)
+
+if [ -f ../../tale/__init__.py ];
+then
+   #use the tail library found in the project directory a few dirs up
+   export PYTHONPATH=../..:$PYTHONPATH
+fi
+
+# start the game
+python -m tale.driver --game . $*
