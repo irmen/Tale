@@ -81,8 +81,21 @@ class IoAdapterBase(object):
         self.do_styles = True
 
     def get_async_input(self, player):
-        """Get the object that is reading the player's input, asynchronously from the driver's main loop."""
+        """
+        Get the object that is reading the player's input, asynchronously from the driver's main loop.
+        Make sure that the object is active (i.e. restart it if it has been stopped in the meantime).
+        """
         return AsyncPlayerInput(player)
+
+    def mainloop_threads(self, driver_mainloop):
+        """
+        Return a tuple (driver_mainloop_thread, io_adapter_mainloop_callable).
+        The driver_mainloop_thread is the thread object to run the driver mainloop in. If it is None,
+        the driver mainloop is just executed in the main thread (the second field of the tuple must be None too).
+        If the driver_mainloop_thread is a thread object, it is used for the driver main loop.
+        The io_adapter_mainloop_callable will be run in the application's main thread instead.
+        """
+        return None, None
 
     def destroy(self):
         """Called when the I/O adapter is shut down"""

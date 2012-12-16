@@ -125,13 +125,20 @@ class Driver(object):
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
         self.player = None
+        self.config = None
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
-        globalcontext.mud_context.driver = self
-        globalcontext.mud_context.state = self.state
-        globalcontext.mud_context.config = None
+        self.register_global_context()
         cmds.register_all(self.commands)
         monkeypatch_blinker()
+
+    def register_global_context(self):
+        """register the driver and some other stuff in the global thread context"""
+        ctx = globalcontext.mud_context
+        ctx.driver = self
+        ctx.state = self.state
+        ctx.config = self.config
+        ctx.player = self.player
 
     def bind_exits(self):
         for exit in self.unbound_exits:
@@ -142,7 +149,6 @@ class Driver(object):
         # parse args
         parser = argparse.ArgumentParser(description='Parse driver arguments.')
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
-        parser.add_argument('-t', '--transcript', type=str, help='transcript filename')
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         args = parser.parse_args(args)
@@ -164,7 +170,7 @@ class Driver(object):
         self.config = util.AttrDict(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         enable_readline(self.config)
-        globalcontext.mud_context.config = self.config
+        self.register_global_context()
         try:
             story_cmds = __import__("cmds", level=0)
         except (ImportError, ValueError):
@@ -196,8 +202,32 @@ class Driver(object):
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         self.player.io = IoAdapter(self.config)
         self.player.io.output_line_delay = output_line_delay
+        driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)
+        self._io_thread_may_start = threading.Event()
+        if driver_thread is None:
+            assert io_mainloop is None
+            # the driver mainloop is running in the main thread
+            self.startup_main_loop()
+        else:
+            # the driver mainloop is running in a background thread, the io-loop should run in the main thread
+            driver_thread.start()
+            self._io_thread_may_start.wait()
+            del self._io_thread_may_start
+            while True:
+                try:
+                    io_mainloop()
+                    break
+                except KeyboardInterrupt:
+                    self.player.io.break_pressed(self.player)
+                    continue
+            driver_thread.join()
+
+    def startup_main_loop(self):
+        # continues the startup process and kick of the driver's main loop
+        self.register_global_context()    # re-register because we may be running in a new background thread
+        self._io_thread_may_start.set()
         self.start_print_game_intro()
-        self.start_create_player(args.transcript)
+        self.start_create_player()
         self.start_show_motd()
         self.player.look(short=False)
         self.player.write_output()
@@ -233,7 +263,7 @@ class Driver(object):
             io.output("</>")
             io.output("")
 
-    def start_create_player(self, transcript):
+    def start_create_player(self):
         io = self.player.io
         if self.config.server_mode == "mud":
             load_saved_game = False
@@ -245,8 +275,6 @@ class Driver(object):
             self.load_saved_game()
             self.player.io = io  # set the I/O adapter for this player
             del io
-            if transcript:
-                self.player.activate_transcript(transcript, self.vfs)
             self.player.tell("\n")
             if self.config.server_mode == "if":
                 self.story.welcome_savegame(self.player)
@@ -268,8 +296,6 @@ class Driver(object):
             self.player.io.do_styles = self.player.screen_styles_enabled
             del io
             self.player.tell("\n")
-            if transcript:
-                self.player.activate_transcript(transcript, self.vfs)
             # move the player to the starting location
             if "wizard" in self.player.privileges:
                 self.player.move(self.config.startlocation_wizard)
@@ -294,6 +320,7 @@ class Driver(object):
                 self.player.tell("\n")
 
     def start_player_input(self):
+        """(re)start the async player input processing task"""
         if self.config.server_tick_method == "timer":
             self.async_player_input = self.player.io.get_async_input(self.player)
         elif self.config.server_tick_method == "command":
@@ -304,7 +331,7 @@ class Driver(object):
     def main_loop(self):
         last_loop_time = last_server_tick = time.time()
         while True:
-            globalcontext.mud_context.player = self.player
+            globalcontext.mud_context.player = self.player   # @todo hack... is always the same single player for now
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)

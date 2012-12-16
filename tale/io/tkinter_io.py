@@ -30,6 +30,10 @@ class TkinterIo(iobase.IoAdapterBase):
         self.gui = TaleGUI(self, config)
         self.player = None
 
+    def mainloop_threads(self, driver_mainloop):
+        driver_thread = threading.Thread(name="driver", target=driver_mainloop)
+        return driver_thread, self.gui.mainloop
+
     def destroy(self):
         self.gui.destroy()
 
@@ -189,32 +193,23 @@ class TaleWindow(Toplevel):
         self.commandEntry.config(state=DISABLED)
 
 
-class TaleGUI(threading.Thread):
+class TaleGUI(object):
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
-        super(TaleGUI, self).__init__()
-        self.daemon = False
         self.io = io
         self.server_config = config
         self.cmd_queue = queue.Queue()
         self.root=Tk()
-        self._gui_started = threading.Event()
-        self.start()
-        self._gui_started.wait()
-        del self._gui_started
-    def run(self):
         window_title = "Tale IF  |  {name} v{version}".format(name=self.server_config.name, version=self.server_config.version)
         self.root.title(window_title)
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
         self.window = TaleWindow(self, self.root, window_title, "\n\n")
-        self.root.after_idle(self.signal_gui_ready)
         self.root.withdraw()
+    def mainloop(self):
         self.root.mainloop()
         self.window = None
         self.root = None
         self.io.gui_terminated()
-    def signal_gui_ready(self):
-        self._gui_started.set()
     def destroy(self):
         def destroy2():
             self.window.destroy()
