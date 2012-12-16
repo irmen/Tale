@@ -1,6 +1,5 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-BUG: tkinter gui has some input sync problems on linux/osx right at the start and when quiting
 BUG: 'time' is shown across multiple lines in tkinter
 TKinter needs to be able to apply styling to the text.
 Tkinter needs to show non-formatted paragraphs in monospaced font.
@@ -47,6 +46,7 @@ Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
+    <clear>  clears the screen
 
 HTTP server mode with HTML+Javascript frontend.
 Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output.

@@ -204,8 +204,11 @@ class TaleGUI(object):
         self.root.title(window_title)
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
         self.window = TaleWindow(self, self.root, window_title, "\n\n")
+        self.gui_ready = threading.Event()
         self.root.withdraw()
+        self.root.update()
     def mainloop(self):
+        self.root.after(100, lambda: self.gui_ready.set())
         self.root.mainloop()
         self.window = None
         self.root = None
@@ -222,6 +225,7 @@ class TaleGUI(object):
         line = self.cmd_queue.get()
         self.window.write_line(line)
     def write_line(self, line):
+        self.gui_ready.wait()
         if self.root:
             # We put the input data in a queue and generate a virtual envent for the Tk root window.
             # The event handler runs in the correct thread and grabs the data from the queue.
