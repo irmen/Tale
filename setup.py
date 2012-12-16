@@ -41,6 +41,8 @@ An example test/demo story is included in the ``stories`` directory.
     classifiers= [
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
+        "Environment :: MacOS X",
+        "Environment :: Win32 (MS Windows)",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -53,6 +55,7 @@ An example test/demo story is included in the ``stories`` directory.
         "Programming Language :: Python :: 3.3",
         "Topic :: Communications :: Chat",
         "Topic :: Games/Entertainment",
+        "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
     install_requires=["blinker>=1.1", "appdirs"],
