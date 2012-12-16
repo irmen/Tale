@@ -46,17 +46,18 @@ After that, you'll need a story to run it on (tale by itself doesn't do anything
 it's only a framework to build games with).
 There's a demo/example story included in the source distribution, in the ``stories`` directory.
 
-Start the demo story using the supplied ``play_demo`` script.
-You don't have to install anything if you run it using this script.
+Start the demo story using one of the supplied start scripts.
+You don't have to install anything if you run it like this.
 
-You can also start it without the script and by using the tale driver directly, but
-it is recommended to properly install it first.
-It won't work from the distribution's root directory itself. You need to install Tale properly
-and/or invoke it from the start script that belongs to a story.
+You can also start it without the script and by using the tale driver directly, but then
+it is recommended to properly install tale first. This method of launching stories
+won't work from the distribution's root directory itself.
 
-The command is:
+Anyway, the command to do so is: :kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`
+or, using the installed script: :kbd:`$ tale-driver --game <path-to-the-story/demo-directory>`
 
-:kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`
+You can use the ``--help`` argument to see some help about this command.
+You can use ``--gui`` to start the GUI version of the interface rather than the text console version.
 
 The story might prompt you with a couple of questions:
 Choose not to load a saved game (you will have none at first start anyway).
@@ -99,6 +100,8 @@ A random list of the features of the current codebase:
   it can run different games from different directories
 - single-player I.F. mode and multi-player MUD mode (but no multiplayer server yet,
   it's just a difference in active features for now)
+- text console interface or GUI (Tkinter), switchable by command line argument.
+- I/O abstraction layer should make it not too hard to make another interface (I'm planning a html/javascript driven one).
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
 - the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'

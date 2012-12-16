@@ -15,7 +15,7 @@ except ImportError:
     import tkFont as tkfont
 from . import iobase
 from ..util import queue
-
+from .. import __version__ as tale_version
 
 __all__ = ["TkinterIo"]
 
@@ -200,7 +200,11 @@ class TaleGUI(object):
         self.server_config = config
         self.cmd_queue = queue.Queue()
         self.root=Tk()
-        window_title = "Tale IF  |  {name} v{version}".format(name=self.server_config.name, version=self.server_config.version)
+        window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
+            name=self.server_config.name,
+            version=self.server_config.version,
+            taleversion = tale_version
+        )
         self.root.title(window_title)
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
         self.window = TaleWindow(self, self.root, window_title, "\n\n")
