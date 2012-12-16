@@ -28,7 +28,7 @@ class CharacterBuilder(object):
         self.player = player
 
     def build(self):
-        choice = util.input_choice("Create default (w)izard, default (p)layer, (c)ustom player?", ["w", "p", "c"], self.player)
+        choice = util.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"], self.player)
         if choice == "w":
             return self.create_default_wizard()
         elif choice == "p":

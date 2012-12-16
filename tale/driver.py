@@ -238,7 +238,7 @@ class Driver(object):
             load_saved_game = False
         else:
             io.output("")
-            load_saved_game = util.input_confirm("Do you want to load a saved game ('n' will start a new game)?", self.player)
+            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", self.player)
         io.output("")
         if load_saved_game:
             self.load_saved_game()
@@ -266,6 +266,7 @@ class Driver(object):
             self.player.io = io  # set the I/O adapter for this player
             self.player.io.do_styles = self.player.screen_styles_enabled
             del io
+            self.player.tell("\n")
             if transcript:
                 self.player.activate_transcript(transcript, self.vfs)
             # move the player to the starting location

@@ -60,6 +60,11 @@ else:
 
 
 class AsyncConsoleInput(threading.Thread):
+    """
+    Input-task that runs asynchronously (background thread).
+    This is used by the driver when running in timer-mode, where the driver's
+    main loop needs to run separated from this input thread.
+    """
     def __init__(self, player):
         super(AsyncConsoleInput, self).__init__()
         self.player = player
@@ -91,6 +96,9 @@ class AsyncConsoleInput(threading.Thread):
 
 
 class ConsoleIo(object):
+    """
+    I/O adapter for the text-console (standard input/standard output).
+    """
     CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
     def __init__(self):
@@ -98,14 +106,21 @@ class ConsoleIo(object):
         self.do_styles = True
 
     def get_async_input(self, player):
+        """Get the object that is reading the player's input, asynchronously from the driver's main loop."""
         return AsyncConsoleInput(player)
 
     def input(self, prompt=None):
-        return input(prompt)
+        """Ask the player for immediate input."""
+        prompt = _apply_style(prompt, self.do_styles)
+        return input(prompt).strip()
 
     def input_line(self, player):
         """
-        Input a single line of text by the player.
+        Input a single line of text by the player. It is stored in the internal
+        command buffer of the player. The driver's main loop can look into that
+        to see if any input should be processed.
+        This method is called from the driver's main loop (only if running in command-mode)
+        or from the asynchronous input loop (if running in timer-mode).
         Returns True if the input loop should continue as usual.
         Returns False if the input loop should be terminated (this could
         be the case when the player types 'quit', for instance).
@@ -125,8 +140,8 @@ class ConsoleIo(object):
     def render_output(self, paragraphs, **params):
         """
         Render (format) the given paragraphs to a text representation.
-        It doesn't output anything to the screen; it just returns the text string.
-        This implementation expects 2 extra parameters: "indent" and "width".
+        It doesn't output anything to the screen yet; it just returns the text string.
+        This console-implementation expects 2 extra parameters: "indent" and "width".
         """
         if not paragraphs:
             return None
@@ -144,7 +159,7 @@ class ConsoleIo(object):
         return "".join(output)
 
     def output(self, *lines):
-        """Write some text to the visible output buffer."""
+        """Write some text to the screen."""
         for line in lines:
             print(_apply_style(line, self.do_styles))
         sys.stdout.flush()
@@ -154,12 +169,13 @@ class ConsoleIo(object):
         time.sleep(self.output_line_delay / 1000.0)
 
     def break_pressed(self, player):
+        """do something when the player types ctrl-C (break)"""
         print(_apply_style(self.CTRL_C_MESSAGE, self.do_styles))
         sys.stdout.flush()
 
 
 def _apply_style(line, do_styles):
-    """Convert style tags to colorama escape sequences suited for console text output"""
+    """Convert style tags to colorama escape sequences suitable for console text output"""
     if "<" not in line:
         return line
     if style_colors and do_styles:
