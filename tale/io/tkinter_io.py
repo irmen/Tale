@@ -7,7 +7,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
-import time
 try:
     from tkinter import *
     import tkinter.font as tkfont
@@ -21,61 +20,15 @@ from ..util import queue
 __all__ = ["TkinterIo"]
 
 
-class AsyncGUIInput(threading.Thread):
-    """
-    Input-task that runs asynchronously (background thread).
-    This is used by the driver when running in timer-mode, where the driver's
-    main loop needs to run separated from this input thread.
-    """
-    def __init__(self, player):
-        super(AsyncGUIInput, self).__init__()
-        self.player = player
-        self.daemon = True
-        self.enabled = threading.Event()
-        self.enabled.clear()
-        self._stoploop = False
-        self.start()
-
-    def run(self):
-        loop = True
-        while loop:
-            self.enabled.wait()
-            if self._stoploop:
-                break
-            loop = self.player.io.input_line(self.player)
-            self.enabled.clear()
-
-    def enable(self):
-        if self._stoploop:
-            raise SystemExit()
-        self.enabled.set()
-
-    def disable(self):
-        if self._stoploop:
-            raise SystemExit()
-        self.enabled.clear()
-
-    def stop(self):
-        self._stoploop = True
-        self.enabled.set()
-        self.join()
-        self.player.io.destroy()
-
-
-class TkinterIo(object):
+class TkinterIo(iobase.IoAdapterBase):
     """
     Tkinter-GUI based Input/Output adapter.
     """
     def __init__(self, config):
-        self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
-        self.do_styles = True
+        super(TkinterIo, self).__init__(config)
         self.cmd_queue = queue.Queue()
         self.gui = TaleGUI(self, config)
         self.player = None
-
-    def get_async_input(self, player):
-        """Get the object that is reading the player's input, asynchronously from the driver's main loop."""
-        return AsyncGUIInput(player)
 
     def destroy(self):
         self.gui.destroy()
@@ -133,14 +86,6 @@ class TkinterIo(object):
             line = _apply_style(line, self.do_styles)
             self.gui.write_line(line)
 
-    def output_delay(self):
-        """delay the output for a short period"""
-        time.sleep(self.output_line_delay / 1000.0)
-
-    def break_pressed(self, player):
-        """do something when the player types ctrl-C (break)"""
-        pass
-
 
 def _apply_style(line, do_styles):      # @TODO
     """Convert style tags to Tkinter stuff"""
@@ -150,6 +95,7 @@ def _apply_style(line, do_styles):      # @TODO
 
 
 class TaleWindow(Toplevel):
+    """The actual gui-window, containing the output text and the input command bar."""
     def __init__(self, gui, parent, title, text, modal=False):
         Toplevel.__init__(self, parent)
         self.gui = gui
@@ -244,6 +190,7 @@ class TaleWindow(Toplevel):
 
 
 class TaleGUI(threading.Thread):
+    """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
         super(TaleGUI, self).__init__()
         self.daemon = False
@@ -281,6 +228,8 @@ class TaleGUI(threading.Thread):
         self.window.write_line(line)
     def write_line(self, line):
         if self.root:
+            # We put the input data in a queue and generate a virtual envent for the Tk root window.
+            # The event handler runs in the correct thread and grabs the data from the queue.
             self.cmd_queue.put(line)
             self.root.event_generate("<<process_tale_command>>", when='tail')
     def register_cmd(self, cmd):

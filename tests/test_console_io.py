@@ -27,7 +27,11 @@ class TestConsoleIo(unittest.TestCase):
         io.output("line1", "line2")
     def test_async(self):
         io = console_io.ConsoleIo(None)
-        a = io.get_async_input(None)
+        class DummyPlayer(object):
+            pass
+        player = DummyPlayer()
+        player.io = io
+        a = io.get_async_input(player)
         a.disable()
         a.enable()
         a.stop()

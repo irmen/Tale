@@ -1,7 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 BUG: tkinter gui doesn't work on osx/linux because it needs to run in the main thread
-BUG: async io is identical in both io adapters
 BUG: 'time' is shown across multiple lines in tkinter
 TKinter needs to be able to apply styling to the text.
 Tkinter needs to show non-formatted paragraphs in monospaced font.

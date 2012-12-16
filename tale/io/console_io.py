@@ -5,9 +5,7 @@ Console-based input/output.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import threading
 import sys
-import time
 from . import styleaware_wrapper, iobase
 try:
     from . import colorama_patched as colorama
@@ -59,55 +57,12 @@ else:
     style_colors = None
 
 
-class AsyncConsoleInput(threading.Thread):
-    """
-    Input-task that runs asynchronously (background thread).
-    This is used by the driver when running in timer-mode, where the driver's
-    main loop needs to run separated from this input thread.
-    """
-    def __init__(self, player):
-        super(AsyncConsoleInput, self).__init__()
-        self.player = player
-        self.daemon = True
-        self.enabled = threading.Event()
-        self.enabled.clear()
-        self._stoploop = False
-        self.start()
-
-    def run(self):
-        loop = True
-        while loop:
-            self.enabled.wait()
-            if self._stoploop:
-                break
-            loop = self.player.io.input_line(self.player)
-            self.enabled.clear()
-
-    def enable(self):
-        self.enabled.set()
-
-    def disable(self):
-        self.enabled.clear()
-
-    def stop(self):
-        self._stoploop = True
-        self.enabled.set()
-        self.join()
-
-
-class ConsoleIo(object):
+class ConsoleIo(iobase.IoAdapterBase):
     """
     I/O adapter for the text-console (standard input/standard output).
     """
-    CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
-
     def __init__(self, config):
-        self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
-        self.do_styles = True
-
-    def get_async_input(self, player):
-        """Get the object that is reading the player's input, asynchronously from the driver's main loop."""
-        return AsyncConsoleInput(player)
+        super(ConsoleIo, self).__init__(config)
 
     def input(self, prompt=None):
         """Ask the player for immediate input."""
@@ -165,13 +120,9 @@ class ConsoleIo(object):
             print(_apply_style(line, self.do_styles))
         sys.stdout.flush()
 
-    def output_delay(self):
-        """delay the output for a short period"""
-        time.sleep(self.output_line_delay / 1000.0)
-
     def break_pressed(self, player):
         """do something when the player types ctrl-C (break)"""
-        print(_apply_style(self.CTRL_C_MESSAGE, self.do_styles))
+        print(_apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
         sys.stdout.flush()
 
 

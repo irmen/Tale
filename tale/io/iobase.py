@@ -5,6 +5,8 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
+import threading
+import time
 from ..util import basestring_type
 
 
@@ -27,3 +29,99 @@ def strip_text_styles(text):
     if isinstance(text, basestring_type):
         return strip(text)
     return [strip(line) for line in text]
+
+
+class AsyncPlayerInput(threading.Thread):
+    """
+    Input-task that runs asynchronously (background thread).
+    This is used by the driver when running in timer-mode, where the driver's
+    main loop needs to run separated from this input thread.
+    """
+    def __init__(self, player):
+        super(AsyncPlayerInput, self).__init__()
+        self.player = player
+        self.daemon = True
+        self.enabled = threading.Event()
+        self.enabled.clear()
+        self._stoploop = False
+        self.start()
+
+    def run(self):
+        loop = True
+        while loop:
+            self.enabled.wait()
+            if self._stoploop:
+                break
+            loop = self.player.io.input_line(self.player)
+            self.enabled.clear()
+
+    def enable(self):
+        if self._stoploop:
+            raise SystemExit()
+        self.enabled.set()
+
+    def disable(self):
+        if self._stoploop:
+            raise SystemExit()
+        self.enabled.clear()
+
+    def stop(self):
+        self._stoploop = True
+        self.enabled.set()
+        self.join()
+        self.player.io.destroy()
+
+
+class IoAdapterBase(object):
+    """
+    I/O adapter base class
+    """
+    def __init__(self, config):
+        self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
+        self.do_styles = True
+
+    def get_async_input(self, player):
+        """Get the object that is reading the player's input, asynchronously from the driver's main loop."""
+        return AsyncPlayerInput(player)
+
+    def destroy(self):
+        """Called when the I/O adapter is shut down"""
+        pass
+
+    def input(self, prompt=None):
+        """Ask the player for immediate input."""
+        raise NotImplementedError("implement this in subclass")
+
+    def input_line(self, player):
+        """
+        Input a single line of text by the player. It is stored in the internal
+        command buffer of the player. The driver's main loop can look into that
+        to see if any input should be processed.
+        This method is called from the driver's main loop (only if running in command-mode)
+        or from the asynchronous input loop (if running in timer-mode).
+        Returns True if the input loop should continue as usual.
+        Returns False if the input loop should be terminated (this could
+        be the case when the player types 'quit', for instance).
+        """
+        raise NotImplementedError("implement this in subclass")
+
+    def render_output(self, paragraphs, **params):
+        """
+        Render (format) the given paragraphs to a text representation.
+        It doesn't output anything to the screen yet; it just returns the text string.
+        Any style-tags are still embedded in the text.
+        This console-implementation expects 2 extra parameters: "indent" and "width".
+        """
+        raise NotImplementedError("implement this in subclass")
+
+    def output(self, *lines):
+        """Write some text to the screen. Needs to take care of style tags that are embedded."""
+        raise NotImplementedError("implement this in subclass")
+
+    def break_pressed(self, player):
+        """do something when the player types ctrl-C (break)"""
+        pass
+
+    def output_delay(self):
+        """delay the output for a short period"""
+        time.sleep(self.output_line_delay / 1000.0)

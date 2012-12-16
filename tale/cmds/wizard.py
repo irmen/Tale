@@ -14,6 +14,7 @@ import threading
 import gc
 import os
 import platform
+from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import base, lang, util
 from ..player import Player
@@ -172,10 +173,11 @@ def do_clean(player, parsed, ctx):
 
 
 @wizcmd("pdb")
+@disabled_in_gamemode("mud")
 def do_pdb(player, parsed, ctx):
-    """Starts a Python debugging session."""
+    """Starts a Python debugging session. (Only available in IF mode)"""
     import pdb
-    pdb.set_trace()   # @todo: remove this when going multiuser (I don't think you can have a synchronous debug session anymore)
+    pdb.set_trace()
 
 
 @wizcmd("wiretap")
