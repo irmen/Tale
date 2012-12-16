@@ -100,7 +100,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell_formats(self):
         player = Player("fritz", "m")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         player.set_screen_sizes(0, 100)
         player.tell("a b c", format=True)
         player.tell("d e f", format=True)
@@ -123,7 +123,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell_formatted(self):
         player = Player("fritz", "m")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2", "\n")
@@ -158,7 +158,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_peek_output(self):
         player = Player("fritz", "m")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2", 42)
@@ -234,7 +234,7 @@ class TestPlayer(unittest.TestCase):
     def test_wiretap(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("fritz", "m")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         player.set_screen_sizes(0, 100)
         julie = NPC("julie", "f")
         julie.move(attic)
@@ -430,7 +430,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_write_output(self):
         player = Player("julie", "f")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         old_stdout = sys.stdout
         sys.stdout = StringIO()
         try:
@@ -443,7 +443,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_input(self):
         player = Player("julie", "f")
-        player.io = ConsoleIo()
+        player.io = ConsoleIo(None)
         old_stdout = sys.stdout
         old_stdin = sys.stdin
         sys.stdout = StringIO()

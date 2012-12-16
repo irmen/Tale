@@ -25,7 +25,8 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .io import vfs
-from .io import console_io
+#from .io.console_io import ConsoleIo as IoAdapter
+from .io.tkinter_io import TkinterIo as IoAdapter
 
 
 @total_ordering
@@ -193,7 +194,7 @@ class Driver(object):
         self.bind_exits()
         # story has been initialised, create and connect a player
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
-        self.player.io = console_io.ConsoleIo()   # currently the console is the only way a player 'connects' to the driver
+        self.player.io = IoAdapter(self.config)
         self.player.io.output_line_delay = output_line_delay
         self.start_print_game_intro()
         self.start_create_player(args.transcript)

@@ -21,12 +21,12 @@ class TestConsoleIo(unittest.TestCase):
         sys.stdout = self._orig_stdout
 
     def test_basic(self):
-        io = console_io.ConsoleIo()
+        io = console_io.ConsoleIo(None)
         self.assertGreater(io.output_line_delay, 1)
         io.break_pressed(None)
         io.output("line1", "line2")
     def test_async(self):
-        io = console_io.ConsoleIo()
+        io = console_io.ConsoleIo(None)
         a = io.get_async_input(None)
         a.disable()
         a.enable()
@@ -59,7 +59,7 @@ class TestConsoleIo(unittest.TestCase):
   |    y    y  |
   |     z    z |
 """
-        io = console_io.ConsoleIo()
+        io = console_io.ConsoleIo(None)
         formatted = io.render_output(output.get_paragraphs(), indent=2, width=45)
         self.assertEqual(expected, formatted)
 

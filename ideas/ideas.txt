@@ -1,6 +1,10 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Tkinter gui driver (textarea for output, editbox for commands) -> inherit from regular driver.
+BUG: async io is identical in both io adapters
+BUG: 'time' is shown across multiple lines in tkinter
+TKinter needs to be able to apply styling to the text.
+Tkinter needs to show non-formatted paragraphs in monospaced font.
+Add a selector to the driver to choose the IO adapter (instead of hardcoding it). (-gui = tkinter?)
 Add optional picture to every MudObject description. (viewable in gui driver/html version only, ofcourse).
 
 
@@ -38,12 +42,15 @@ BUG: on pypy when using readline (linux/osx), and async input thread (servermode
      driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
      (code contains a workaround now: readline not enabled on pypy)
 
+Support text style tags in the messages files on disk too. (banner, motd, welcome)
+
 Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
+    <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
 
 HTTP server mode with HTML+Javascript frontend.
-Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML-output.
+Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output.
 
 Self-modifying rooms/exits to create a more dynamic game world.
 Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?

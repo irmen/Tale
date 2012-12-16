@@ -101,8 +101,8 @@ class ConsoleIo(object):
     """
     CTRL_C_MESSAGE = "\n* break: Use <quit> if you want to quit."
 
-    def __init__(self):
-        self.output_line_delay = 50   # milliseconds. (set to 0 to disable or to signify: doesn't support this)
+    def __init__(self, config):
+        self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
         self.do_styles = True
 
     def get_async_input(self, player):
@@ -127,7 +127,7 @@ class ConsoleIo(object):
         """
         try:
             print(_apply_style("\n<dim>>></> ", self.do_styles), end="")
-            cmd = input().lstrip()
+            cmd = input().strip()
             player.store_input_line(cmd)
             if cmd == "quit":
                 return False
@@ -141,6 +141,7 @@ class ConsoleIo(object):
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
+        Any style-tags are still embedded in the text.
         This console-implementation expects 2 extra parameters: "indent" and "width".
         """
         if not paragraphs:
@@ -159,7 +160,7 @@ class ConsoleIo(object):
         return "".join(output)
 
     def output(self, *lines):
-        """Write some text to the screen."""
+        """Write some text to the screen. Needs to take care of style tags that are embedded."""
         for line in lines:
             print(_apply_style(line, self.do_styles))
         sys.stdout.flush()
