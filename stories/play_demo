@@ -10,4 +10,4 @@ then
 fi
 
 # start the game
-python -m tale.driver --game demo
+python -m tale.driver --game demo $*

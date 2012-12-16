@@ -11,5 +11,5 @@ SET PYTHONPATH=..;%PYTHONPATH%
 :use_lib_tail
 
 REM start the game
-python -m tale.driver --game zed_is_me
+python -m tale.driver --game zed_is_me %*
 
