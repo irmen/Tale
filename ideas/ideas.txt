@@ -45,6 +45,9 @@ BUG: on pypy when using readline (linux/osx), and async input thread (servermode
 Support text style tags in the messages files on disk too. (banner, motd, welcome).
 Format them nicely, instead of treating them as unformatted (unless they say so themselves with <unf> tags?)
 
+Font selection dialog for Io adapters that support it (tkinter, html)
+Add a
+
 Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.

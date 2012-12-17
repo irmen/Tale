@@ -1,6 +1,6 @@
 """
 Race defintions.
-Races adapted from Dark Souls mudlib (a superset of the races from Nightmare mudlib).
+Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare mudlib).
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)

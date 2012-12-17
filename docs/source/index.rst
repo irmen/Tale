@@ -117,23 +117,24 @@ A random list of the features of the current codebase:
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).
 - uses colorama if available to spice up the console output a bit.
-- game can be saved (and reloaded) - pickle is used to serialize the full game world state
-- save game data is placed in the operating system's user data directory
-- there's a list of 70+ creature races, adapted from the Dark Souls mudlib
+- game can be saved (and reloaded); pickle is used to serialize the full game world state
+- save game data is placed in the operating system's user data directory instead of some random location
+- there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib
 - supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
 - game clock is independent of real-time wall clock, configurable speed and start time
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.
 - it's trivial to give objects a 'heartbeat' (=they will get a call every server tick to do stuff)
 - you can also quite easily schedule calls to be executed at a defined later moment in time
 - easy definition of commands in separate functions
+- uses docstrings to define command help texts
 - command function code is quite compact due to convenient parameters and available methods on the game objects
+- command code gets parse information from the soul parser as parameter; very little parsing needs to be done in the command code itself
 - there's a set of configurable parameters on a per-story basis
 - stories can define their own introduction text and completion texts
 - stories can define their own commands or override existing commands
-- version checks are done on the story files and the save game files to avoid loading data in different versions of the code
+- version checks are done on the story files and the save game files to avoid loading incompatible data
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
-- action and event notification mechanism: objects are notified when things happen (such as the player entering a room,
-  or someone saying a line of text) and can react on that.
+- action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
 - uses the blinker library for internal synchronous signaling (pubsub).
 - contains a simple virtual file system to provide a resource loading / datafile storage facility.
