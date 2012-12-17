@@ -574,7 +574,6 @@ class Living(MudObject):
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
-        self.stats = {}
         self.default_verb = "examine"
         # Make a copy of the race stats, because they can change dynamically.
         # There's no need to copy the whole race data dict because it's available
