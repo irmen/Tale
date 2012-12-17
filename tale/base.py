@@ -64,7 +64,7 @@ class MudObject(object):
     def __init__(self, name, title=None, description=None, short_description=None):
         self.init_names(name, title, description, short_description)
         self.aliases = []
-        self.verbs = {}   # any custom verbs that need to be registered in the location or in the player
+        self.verbs = {}   # any custom verbs that need to be registered in the location or in the player (verb->docstring mapping)
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -296,7 +296,6 @@ class Location(MudObject):
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
         self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
-        self.verbs = {}       # custom verbs are added to this list when they're present in this location
 
     def __contains__(self, obj):
         return obj in self.livings or obj in self.items
