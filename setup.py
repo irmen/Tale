@@ -18,7 +18,7 @@ print("version="+tale.__version__)
 setup_args = dict(
     name='tale',
     version=tale.__version__,
-    packages=['tale', 'tale.cmds', 'tale.items'],
+    packages=['tale', 'tale.cmds', 'tale.items', 'tale.io'],
     package_data={
         'tale': ['soul_adverbs.txt']
         },
