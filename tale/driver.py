@@ -199,6 +199,7 @@ class Driver(object):
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
         # story has been initialised, create and connect a player
+        self.async_player_input = None
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         if args.gui:
             from .io.tkinter_io import TkinterIo as IoAdapter
@@ -217,7 +218,7 @@ class Driver(object):
             driver_thread.start()
             self._io_thread_may_start.wait()
             del self._io_thread_may_start
-            while True:
+            while not self._stop_mainloop:
                 try:
                     io_mainloop()
                     break
@@ -230,13 +231,14 @@ class Driver(object):
         # continues the startup process and kick of the driver's main loop
         self.register_global_context()    # re-register because we may be running in a new background thread
         self._io_thread_may_start.set()
+        self._stop_mainloop = False
         self.start_print_game_intro()
         self.start_create_player()
         self.start_show_motd()
         self.player.look(short=False)
         self.player.write_output()
         self.start_player_input()
-        while True:
+        while not self._stop_mainloop:
             try:
                 self.main_loop()
                 break
@@ -332,9 +334,15 @@ class Driver(object):
         else:
             raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
 
+    def stop_driver(self):
+        """stop the async player input processing task, and the driver mainloop"""
+        self._stop_mainloop = True
+        if self.async_player_input is not None:
+            self.async_player_input.stop()
+
     def main_loop(self):
         last_loop_time = last_server_tick = time.time()
-        while True:
+        while not self._stop_mainloop:
             globalcontext.mud_context.player = self.player   # @todo hack... is always the same single player for now
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":

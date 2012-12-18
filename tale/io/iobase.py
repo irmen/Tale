@@ -64,7 +64,7 @@ class AsyncPlayerInput(threading.Thread):
     def stop(self):
         self._stoploop = True
         self.enabled.set()
-        self.join()
+        self.player.io.break_input_line()
 
 
 class IoAdapterBase(object):
@@ -112,6 +112,10 @@ class IoAdapterBase(object):
         be the case when the player types 'quit', for instance).
         """
         raise NotImplementedError("implement this in subclass")
+
+    def break_input_line(self):
+        """break a pending input_line, if possible"""
+        pass
 
     def render_output(self, paragraphs, **params):
         """

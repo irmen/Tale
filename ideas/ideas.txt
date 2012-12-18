@@ -1,8 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 Interesting link: http://www.brasslantern.org/writers/
-[tkinter] BUG: 'time' is shown across multiple lines
-[tkinter] BUG: welcome text and motd messages (read from file) are not formatted correctly (lines are not concatenated. Related to previous bug)
 [tkinter] Adjust font size of output area on Linux and OSX. (too small)
 [tkinter] implement text styling (instead of stripping it all out)
 [tkinter] show non-formatted paragraphs in monospaced font

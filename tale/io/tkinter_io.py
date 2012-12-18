@@ -7,13 +7,17 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
+import textwrap
 try:
     from tkinter import *
     import tkinter.font as tkfont
+    import tkinter.messagebox as tkmsgbox
 except ImportError:
     from Tkinter import *
     import tkFont as tkfont
+    import tkMessageBox as tkmsgbox
 from . import iobase, vfs
+from .. import globalcontext
 from ..util import queue
 from .. import __version__ as tale_version
 
@@ -29,9 +33,12 @@ class TkinterIo(iobase.IoAdapterBase):
         self.cmd_queue = queue.Queue()
         self.gui = TaleGUI(self, config)
         self.player = None
+        self.textwrapper = textwrap.TextWrapper()
 
     def mainloop_threads(self, driver_mainloop):
         driver_thread = threading.Thread(name="driver", target=driver_mainloop)
+        driver_thread.daemon = True
+        driver_thread.name = "driver"
         return driver_thread, self.gui.mainloop
 
     def destroy(self):
@@ -63,6 +70,10 @@ class TkinterIo(iobase.IoAdapterBase):
             return False
         return True
 
+    def break_input_line(self):
+        """break a pending input_line, if possible"""
+        self.cmd_queue.put("")
+
     def render_output(self, paragraphs, **params):
         """
         Render (format) the given paragraphs to a text representation.
@@ -75,10 +86,10 @@ class TkinterIo(iobase.IoAdapterBase):
         output = []
         for txt, formatted in paragraphs:
             if formatted:
-                # formatted paragraph, just copy the text as is
-                pass
+                # formatted output, munge whitespace (like the console text output does)
+                txt = self.textwrapper._munge_whitespace(txt) + "\n"
             else:
-                # unformatted output, copy as-is?
+                # unformatted paragraph, just copy the text as is ?
                 pass
             assert txt.endswith("\n")
             output.append(txt)
@@ -187,9 +198,10 @@ class TaleWindow(Toplevel):
         self.textView.yview(END)
 
     def quit_button_clicked(self, event=None):
-        self.commandEntry.delete(0, END)
-        self.commandEntry.insert(0, "quit")
-        self.commandEntry.event_generate("<Return>")
+        quit = tkmsgbox.askokcancel("Quit Confirmation", "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?", master=self)
+        if quit:
+            self.gui.destroy(True)
+            self.gui.window_closed()
 
     def disable_input(self):
         self.commandEntry.config(state=DISABLED)
@@ -219,14 +231,19 @@ class TaleGUI(object):
         self.window = None
         self.root = None
         self.io.gui_terminated()
-    def destroy(self):
+    def destroy(self, force=False):
         def destroy2():
             self.window.destroy()
             self.root.destroy()
             self.window = None
             self.root = None
         self.window.disable_input()
-        self.root.after(2000, destroy2)
+        if force:
+            destroy2()
+        else:
+            self.root.after(2000, destroy2)
+    def window_closed(self):
+        globalcontext.mud_context.driver.stop_driver()
     def root_process_cmd(self, event):
         line = self.cmd_queue.get()
         self.window.write_line(line)
