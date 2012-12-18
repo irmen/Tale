@@ -55,10 +55,14 @@ Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
-    <clear>  clears the screen
+    <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
 
 HTTP server mode with HTML+Javascript frontend.
-Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output.
+
+Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output (default on)
+  Use a command line switch to enable it for console output (default off).
+  normal smartypants has a bug and is not python3 compatible so use mdx_smartypants.   However, use fallback to regular smartypants.
+  Using it on Tkinter and console requires converting the html-entity refs (&#????; / &#x????;) to unicode characters first.  html.parser.HTMLParser().unescape(...)
 
 Self-modifying rooms/exits to create a more dynamic game world.
 Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
