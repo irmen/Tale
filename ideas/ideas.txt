@@ -1,10 +1,11 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
+Interesting link: http://www.brasslantern.org/writers/
 [tkinter] BUG: 'time' is shown across multiple lines
+[tkinter] BUG: welcome text and motd messages (read from file) are not formatted correctly (lines are not concatenated. Related to previous bug)
 [tkinter] Adjust font size of output area on Linux and OSX. (too small)
 [tkinter] implement text styling (instead of stripping it all out)
 [tkinter] show non-formatted paragraphs in monospaced font
-[tkinter] Add icon for the gui instead of the default Tk icon.
 Add optional picture to every MudObject description. (viewable in gui driver/html version only, ofcourse).
 
 
@@ -39,12 +40,13 @@ General ideas/TODO:
 -------------------
 BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 BUG: on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
-BUG: on pypy when using readline (linux/osx), and async input thread (servermode=timer),
-     driver.input crashes with:  signal.signal(signal.SIGWINCH, self.old_sigwinch)   ValueError: signal() must be called from the main thread
-     (code contains a workaround now: readline not enabled on pypy)
+BUG: when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
+     (code contains a workaround for the time being: readline not enabled on pypy)
+
+There are too many input() like functions. Reduce.
+Make sure all console input() is always done from the same thread? (fixes pypy crash)
 
 Support text style tags in the messages files on disk too. (banner, motd, welcome).
-Format them nicely, instead of treating them as unformatted (unless they say so themselves with <unf> tags?)
 
 Font selection dialog for Io adapters that support it (tkinter, html)
 Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.

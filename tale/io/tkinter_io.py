@@ -13,7 +13,7 @@ try:
 except ImportError:
     from Tkinter import *
     import tkFont as tkfont
-from . import iobase
+from . import iobase, vfs
 from ..util import queue
 from .. import __version__ as tale_version
 
@@ -126,6 +126,8 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
+        with vfs.vfs.open_read("io/quill_pen_paper.ico") as icon:
+            self.iconbitmap(icon.name)
         if modal:
             self.transient(parent)
             self.grab_set()
