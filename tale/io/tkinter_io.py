@@ -123,9 +123,9 @@ class TaleWindow(Toplevel):
         self.fontsize_monospace = 11
         self.fontsize_normal = 11
         if sys.platform == "darwin":
-            self.fontsize_monospace += 2
-            self.fontsize_normal += 3
-        self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'serif'], self.fontsize_normal)
+            self.fontsize_monospace += 3
+            self.fontsize_normal += 5
+        self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal)
         self.CreateWidgets()
         self.title(title)
         self.protocol("WM_DELETE_WINDOW", self.quit_button_clicked)

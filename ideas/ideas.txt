@@ -1,7 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
 [info] Interesting link: http://www.brasslantern.org/writers/
-[cosmetic,tkinter] Adjust font size of output area on Linux and OSX. (too small)
 [cosmetic,tkinter] implement text styling (instead of stripping it all out)
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
 [feature,tkinter,html] Add optional picture to every MudObject description.
