@@ -14,7 +14,7 @@ try:
 except ImportError:
     # for platforms lacking this module, we have a workaround
     def user_data_dir(appname, appauthor=None, version=None, roaming=False):
-        return os.path.join(os.path.expanduser("~"), appname+"-data")
+        return os.path.join(os.path.expanduser("~"), appname + "-data")
 
 
 class VfsError(IOError):
@@ -33,14 +33,14 @@ class VirtualFileSystem(object):
         except TypeError:
             self.root_path = root_module_or_path
 
-    def validatePath(self, path):
+    def validate_path(self, path):
         if "\\" in path:
             raise VfsError("path must use forward slash '/' as separator, not backward slash '\\'")
         if os.path.isabs(path):
             raise VfsError("path may not be absolute")
 
     def open_read(self, path, mode="r"):
-        self.validatePath(path)
+        self.validate_path(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = os.path.join(self.root_path, path)
         return open(path, mode=mode)
@@ -51,7 +51,7 @@ class VirtualFileSystem(object):
         return path
 
     def open_write(self, path, mode="w"):
-        self.validatePath(path)
+        self.validate_path(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = self.get_userdata_dir(path)
         directory = os.path.dirname(path)
@@ -73,7 +73,7 @@ class VirtualFileSystem(object):
             return f.read()
 
     def load_from_storage(self, path):
-        self.validatePath(path)
+        self.validate_path(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = self.get_userdata_dir(path)
         with open(path, "rb") as f:
@@ -84,7 +84,7 @@ class VirtualFileSystem(object):
             f.write(data)
 
     def delete_storage(self, path):
-        self.validatePath(path)
+        self.validate_path(path)
         path = self.get_userdata_dir(path)
         os.remove(path)
 

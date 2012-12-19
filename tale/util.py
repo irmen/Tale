@@ -423,7 +423,7 @@ def input_choice(question, choices, player):
     You can optionally use the format string '{choices}' to get the list of choices in the question text.
     """
     # @todo this input only works in single player IF mode because it blocks the game
-    question = question.format(choices = "/".join(choices))
+    question = question.format(choices="/".join(choices))
     if not question.endswith(" "):
         question += " "
     while True:

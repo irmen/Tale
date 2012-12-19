@@ -109,7 +109,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 txt = wrapper.fill(txt) + "\n"
             else:
                 # unformatted output, prepend every line with the indent but otherwise leave them alone
-                txt = indent + ("\n"+indent).join(txt.splitlines()) + "\n"
+                txt = indent + ("\n" + indent).join(txt.splitlines()) + "\n"
             assert txt.endswith("\n")
             output.append(txt)
         return "".join(output)

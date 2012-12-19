@@ -13,7 +13,8 @@ from . import util
 
 class PlayerNaming(object):
     wizard = False
-    name = title = gender = race = description =  None
+    name = title = gender = race = description = None
+
     def apply_to(self, player):
         player.init_race(self.race, self.gender)
         player.init_names(self.name, self.title, self.description, None)

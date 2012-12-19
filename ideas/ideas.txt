@@ -1,100 +1,98 @@
 Concepts for single player Interactive Fiction mode:
 ----------------------------------------------------
-Interesting link: http://www.brasslantern.org/writers/
-[tkinter] Adjust font size of output area on Linux and OSX. (too small)
-[tkinter] implement text styling (instead of stripping it all out)
-[tkinter] show non-formatted paragraphs in monospaced font
-Add optional picture to every MudObject description. (viewable in gui driver/html version only, ofcourse).
+[info] Interesting link: http://www.brasslantern.org/writers/
+[cosmetic,tkinter] Adjust font size of output area on Linux and OSX. (too small)
+[cosmetic,tkinter] implement text styling (instead of stripping it all out)
+[cosmetic,tkinter] show non-formatted paragraphs in monospaced font
+[feature,tkinter,html] Add optional picture to every MudObject description.
+[cosmetic,console] Convert images to ascii art. (fabulous.image on linux/osx xterm)
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-BUG: custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
-Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
-New mud-mode save command that immediately triggers the driver to store the player's state.
-Let players define aliases for certain commands (including args) "alias w_s=wield sword"
-Write stuff to a logfile for the server admins.
-Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
-Notify player if mail arrived.
-Simple Bulletin boards. Readonly (except by wizards) and read/write for everyone.
-Pets: tame/befriend/abandon (charisma/luck)
-Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
-Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
-Party: team up with other players and share quest and combat experience
-Skills: stealth, lockpicking, ...
-Vendors and shops: stock, sell stuff, buy stuff, haggle?
-World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
+[BUG] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
+[feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
+[feature] New mud-mode save command that immediately triggers the driver to store the player's state.
+[feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
+[feature] Write stuff to a logfile for the server admins.
+[feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
+[feature] Notify player if mail arrived.
+[feature] Simple Bulletin boards. Readonly (except by wizards) and read/write for everyone.
+[feature] Pets: tame/befriend/abandon (charisma/luck)
+[feature] Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
+[feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
+[feature] Party: team up with other players and share quest and combat experience
+[feature] Skills: stealth, lockpicking, ...
+[feature] Vendors and shops: stock, sell stuff, buy stuff, haggle?
+[feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
 
-Do something with the circlemud xml data:
-  http://www.razorvine.net/download/circlemuddata_converters.zip
-  original from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+[info,feature] Do something with the circlemud xml data:
+    http://www.razorvine.net/download/circlemuddata_converters.zip
+    original from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
-DAMAGE TYPES:
-  blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
-  trauma/wound, suffocation, deathray, EMP, karma, pressure, decompression, inertia
+[info,feature] DAMAGE TYPES:
+    blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
+    trauma/wound, suffocation, deathray, EMP, karma, pressure, decompression, inertia
 
 
 General ideas/TODO:
 -------------------
-BUG: Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
-BUG: on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
-BUG: when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
-     (code contains a workaround for the time being: readline not enabled on pypy)
+[BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
+[BUG] on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
+[BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
+    (code contains a workaround for the time being: readline not enabled on pypy)
 
-There are too many input() like functions. Reduce.
-Make sure all console input() is always done from the same thread? (fixes pypy crash)
+[code,refactor] There are too many input() like functions. Reduce.
+[code,refactor] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
+[code] Make sure all console input() is always done from the same thread? (fixes pypy crash)
+[cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
+[cosmetic,gui] Font selection dialog for Io adapters that support it (tkinter, html)
+[cosmetic,gui] Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
 
-Support text style tags in the messages files on disk too. (banner, motd, welcome).
-
-Font selection dialog for Io adapters that support it (tkinter, html)
-Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
-
-Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
-
-Extra text style tags?
+[cosmetic] Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
     <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
 
-HTTP server mode with HTML+Javascript frontend.
+[feature] HTTP server mode with HTML+Javascript frontend.
 
-Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output (default on)
-  Use a command line switch to enable it for console output (default off).
-  normal smartypants has a bug and is not python3 compatible so use mdx_smartypants.   However, use fallback to regular smartypants.
-  Using it on Tkinter and console requires converting the html-entity refs (&#????; / &#x????;) to unicode characters first.  html.parser.HTMLParser().unescape(...)
+[cosmetic] Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output (default on)
+    Use a command line switch to enable it for console output (default off).
+    normal smartypants has a bug and is not python3 compatible so use mdx_smartypants.   However, use fallback to regular smartypants.
+    Using it on Tkinter and console requires converting the html-entity refs (&#????; / &#x????;) to unicode characters first.  html.parser.HTMLParser().unescape(...)
 
-Self-modifying rooms/exits to create a more dynamic game world.
-Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
+[feature] Self-modifying rooms/exits to create a more dynamic game world.
+    Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
 
-Exits should be defined more clearly, instead of scattered through the code on a per-room basis:
-should there be a single table where all exits are defined? But how to link to code object if it is not a normal plain exit?
-Create a two-way exit that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
+[code,refactor] Exits should be defined more clearly, instead of scattered through the code on a per-room basis.
+[code] Should there be a single table where all exits are defined? But how to link to code object if it is not a normal plain exit?
+[code] Create a two-way exit that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
 
-Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
-(note: less suited for MUDs because other people might interfere with the states)
+[code] Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
+    (note: less suited for MUDs because other people might interfere with the states)
 
-input should be case insensitive (everything except stuff in quotes - the message)
-  commands, adverbs, names - all should be lowercased and compared by lowercase.
+[code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
+    commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources)
+[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources)
 
-Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
-Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
+[feature] Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
+[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
 
-prototypes to extend items/npc instead of inheritance?
-Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
+[code] prototypes to extend items/npc instead of inheritance?
+[code] Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
 
-test what happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
-test what happens with multiple items of same name in room, in inventory, in bag
+[test] what happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
+[test] what happens with multiple items of same name in room, in inventory, in bag
 
-Change living location logic so that livings can sit inside a container item too.
-Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
-+ take <living> can actually work! (take ant, trap rabbit in cage, ...)
+[feature] Change living location logic so that livings can sit inside a container item too.
+    Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
+    + take <living> can actually work! (take ant, trap rabbit in cage, ...)
 
 
-Light/Dark
-----------
+[feature] Light/Dark
+--------------------
 light level in rooms: dark/light? or three states?  (0=pitch black, 0.5=dark/dusk, 1=normal daylight)
 darkness in locations -> can't see location/exits/items/players (unless they're fluorescent, or unless you explicitly examine <direction>?)
 if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit.

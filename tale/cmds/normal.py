@@ -818,7 +818,7 @@ def do_who(player, parsed, ctx):
     if parsed.args == ["am", "i"]:
         # who am i
         raise RetryParse("examine myself")      # 'who am i' -> 'examine myself')
-    if ctx.config.server_mode=="if":
+    if ctx.config.server_mode == "if":
         # in interactive fiction mode, revert to a simple substitute (examine)
         return do_examine(player, parsed, ctx)
     if parsed.args:

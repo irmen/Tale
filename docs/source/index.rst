@@ -170,3 +170,11 @@ Tale is copyright © Irmen de Jong (irmen@razorvine.net | http://www.razorvine.n
 It's licensed under GPL v3, see http://www.gnu.org/licenses/gpl.html
 
 
+API documentation
+-----------------
+
+Preliminary (auto-generated) API documentation:
+
+.. toctree::
+
+   api.rst

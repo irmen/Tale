@@ -31,9 +31,11 @@ setup_args = dict(
 
 It's still being developed and new features are implement along the way,
 but the current version is quite capable of running an interactive fiction story world.
+
+I'm focusing on the single player Interactive Fiction mode for the time being.
 The multi-user aspects of the framework have been put on the back burner for now.
 
-An example test/demo story is included in the ``stories`` directory.
+An example test/demo story is included in the ``stories`` directory of the distribution archive.
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],

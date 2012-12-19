@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import textwrap
 import re
 
+
 class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
     """
     A TextWrapper subclass that doesn't count the length of Tale's style tags
@@ -17,6 +18,7 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
     """
     tag_split_re = re.compile("(<[a-z/]+?>)")
     tag_re = re.compile("<[a-z/]+?>$")
+
     def _wrap_chunks(self, chunks):
         lines = []
         if self.width <= 0:
@@ -63,7 +65,7 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
         return lines
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     w = StyleTagsAwareTextWrapper(width=20)
     print(w.fill("this is some normal text, without any style tags"))
     print(w.fill("this <bright>is some</> <bright>styled</> text, <bright>with</> some <bright>style</> tags"))

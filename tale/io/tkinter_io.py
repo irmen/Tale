@@ -122,7 +122,7 @@ class TaleWindow(Toplevel):
         self.fg = '#080808'
         self.fontsize_monospace = 11
         self.fontsize_normal = 11
-        if sys.platform=="darwin":
+        if sys.platform == "darwin":
             self.fontsize_monospace += 2
             self.fontsize_normal += 3
         self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'serif'], self.fontsize_normal)
@@ -156,19 +156,19 @@ class TaleWindow(Toplevel):
         fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
             fixedFont = tkfont.nametofont('TkFixedFont').copy()
-            fixedFont["size"]=self.fontsize_monospace
+            fixedFont["size"] = self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
-        self.commandEntry.bind('<Return>',self.user_cmd)
-        self.commandEntry.bind('<Extended-Return>',self.user_cmd)
-        self.commandEntry.bind('<KP_Enter>',self.user_cmd)
+        self.commandEntry.bind('<Return>', self.user_cmd)
+        self.commandEntry.bind('<Extended-Return>', self.user_cmd)
+        self.commandEntry.bind('<KP_Enter>', self.user_cmd)
         self.commandEntry.bind('<F1>', self.f1_pressed)
-        self.scrollbarView.pack(side=RIGHT,fill=Y)
-        self.textView.pack(side=LEFT,expand=TRUE,fill=BOTH)
-        self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon', spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20 )
+        self.scrollbarView.pack(side=RIGHT, fill=Y)
+        self.textView.pack(side=LEFT, expand=TRUE, fill=BOTH)
+        self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon', spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20)
         self.commandPrompt.pack(side=LEFT)
         self.commandEntry.pack(side=LEFT, expand=TRUE, fill=X, ipady=1)
 
-        frameText.pack(side=TOP,expand=TRUE,fill=BOTH)
+        frameText.pack(side=TOP, expand=TRUE, fill=BOTH)
         frameCommands.pack(side=BOTTOM, fill=X)
         self.commandEntry.focus_set()
 
@@ -213,11 +213,11 @@ class TaleGUI(object):
         self.io = io
         self.server_config = config
         self.cmd_queue = queue.Queue()
-        self.root=Tk()
+        self.root = Tk()
         window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
             name=self.server_config.name,
             version=self.server_config.version,
-            taleversion = tale_version
+            taleversion=tale_version
         )
         self.root.title(window_title)
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
@@ -225,12 +225,14 @@ class TaleGUI(object):
         self.gui_ready = threading.Event()
         self.root.withdraw()
         self.root.update()
+
     def mainloop(self):
         self.root.after(100, lambda: self.gui_ready.set())
         self.root.mainloop()
         self.window = None
         self.root = None
         self.io.gui_terminated()
+
     def destroy(self, force=False):
         def destroy2():
             self.window.destroy()
@@ -242,11 +244,14 @@ class TaleGUI(object):
             destroy2()
         else:
             self.root.after(2000, destroy2)
+
     def window_closed(self):
         globalcontext.mud_context.driver.stop_driver()
+
     def root_process_cmd(self, event):
         line = self.cmd_queue.get()
         self.window.write_line(line)
+
     def write_line(self, line):
         self.gui_ready.wait()
         if self.root:
@@ -254,5 +259,6 @@ class TaleGUI(object):
             # The event handler runs in the correct thread and grabs the data from the queue.
             self.cmd_queue.put(line)
             self.root.event_generate("<<process_tale_command>>", when='tail')
+
     def register_cmd(self, cmd):
         self.io.cmd_queue.put(cmd)

@@ -36,7 +36,7 @@ class RetrySoulVerb(Exception):
 class RetryParse(Exception):
     """Retry the command as a different one"""
     def __init__(self, command):
-        self.command=command
+        self.command = command
 
 
 class StoryCompleted(Exception):

@@ -421,7 +421,7 @@ def do_server(player, parsed, ctx):
     if hasattr(platform, "python_implementation"):
         implementation = platform.python_implementation()
     else:
-        implementation = "Jython" if os.name=="java" else "???"
+        implementation = "Jython" if os.name == "java" else "???"
     txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))
     txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
