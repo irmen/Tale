@@ -164,6 +164,7 @@ class Player(base.Living):
 
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
+        # @todo this input only works in single player IF mode because it blocks the game
         self.write_output()
         return self.io.input(prompt).strip()
 

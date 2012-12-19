@@ -404,7 +404,9 @@ class GameDateTime(object):
 
 
 def input_confirm(question, player):
-    # @todo this input only works in single player IF mode because it blocks the game
+    """
+    Simple wrapper around player.input to ask the player for a yes/no confirmation. Returns True or False.
+    """
     if not question.endswith(" "):
         question += " "
     while True:
@@ -419,10 +421,9 @@ def input_confirm(question, player):
 
 def input_choice(question, choices, player):
     """
-    Ask the player to choose out of the given list of choices.
+    Simple wrapper around player.input to ask the player for a choice from a set of options.
     You can optionally use the format string '{choices}' to get the list of choices in the question text.
     """
-    # @todo this input only works in single player IF mode because it blocks the game
     question = question.format(choices="/".join(choices))
     if not question.endswith(" "):
         question += " "

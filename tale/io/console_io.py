@@ -65,7 +65,10 @@ class ConsoleIo(iobase.IoAdapterBase):
         super(ConsoleIo, self).__init__(config)
 
     def input(self, prompt=None):
-        """Ask the player for immediate input."""
+        """
+        Ask the player for immediate input. The input is not stored, but returned immediately.
+        (Don't call this directly, use player.input)
+        """
         print(_apply_style(prompt, self.do_styles), end="")
         return input().strip()
 

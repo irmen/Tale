@@ -3,13 +3,15 @@ Concepts for single player Interactive Fiction mode:
 [info] Interesting link: http://www.brasslantern.org/writers/
 [cosmetic,tkinter] implement text styling (instead of stripping it all out)
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
-[feature,tkinter,html] Add optional picture to every MudObject description.
 [cosmetic,console] Convert images to ascii art. (fabulous.image on linux/osx xterm)
+[feature,tkinter,html] Add optional picture to every MudObject description.
+[feature] standalone HTTP server mode with HTML+Javascript frontend.
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [BUG] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
+[BUG] driver.player and driver.async_player_input are globals and this won't work in multi-user mode.
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state.
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
@@ -41,7 +43,7 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code,refactor] There are too many input() like functions. Reduce.
+[code,refactor] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code,refactor] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [code] Make sure all console input() is always done from the same thread? (fixes pypy crash)
 [cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
@@ -53,8 +55,6 @@ General ideas/TODO:
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
     <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
-
-[feature] HTTP server mode with HTML+Javascript frontend.
 
 [cosmetic] Use mdx_smartypants to automatically add some nice typography (quotes etc) when using HTML/tkinter-output (default on)
     Use a command line switch to enable it for console output (default off).

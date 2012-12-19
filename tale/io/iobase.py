@@ -97,7 +97,10 @@ class IoAdapterBase(object):
         pass
 
     def input(self, prompt=None):
-        """Ask the player for immediate input."""
+        """
+        Ask the player for immediate input. The input is not stored, but returned immediately.
+        (Don't call this directly, use player.input)
+        """
         raise NotImplementedError("implement this in subclass")
 
     def input_line(self, player):
