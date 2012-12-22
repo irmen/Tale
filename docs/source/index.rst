@@ -116,7 +116,7 @@ A random list of the features of the current codebase:
 - yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).
-- uses colorama if available to spice up the console output a bit.
+- uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib

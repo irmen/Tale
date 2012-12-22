@@ -16,13 +16,6 @@ if __name__=="__main__":
     raise SystemExit(0)
 
 
-try:
-    import colorama
-except ImportError:
-    print("\n(Note: Tale can use Colorama to add some effects to the console output.")
-    print("You don't have it installed, so Tale will now use plain text output.)\n")
-
-
 class Story(object):
     config = dict(
         name = "Tale Demo",

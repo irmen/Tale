@@ -11,7 +11,7 @@ try:
     from . import colorama_patched as colorama
     colorama.init()
 except ImportError:
-    colorama = None
+    from . import ansi_codes as colorama        # fallback
 
 if sys.version_info < (3, 0):
     input = raw_input
@@ -20,41 +20,41 @@ else:
 
 __all__ = ["ConsoleIo"]
 
+style_colors = {
+    "dim": colorama.Style.DIM,
+    "normal": colorama.Style.NORMAL,
+    "bright": colorama.Style.BRIGHT,
+    "ul": colorama.Style.UNDERLINED,
+    "rev": colorama.Style.REVERSEVID,
+    "/": colorama.Style.RESET_ALL,
+    "blink": colorama.Style.BLINK,
+    "black": colorama.Fore.BLACK,
+    "red": colorama.Fore.RED,
+    "green": colorama.Fore.GREEN,
+    "yellow": colorama.Fore.YELLOW,
+    "blue": colorama.Fore.BLUE,
+    "magenta": colorama.Fore.MAGENTA,
+    "cyan": colorama.Fore.CYAN,
+    "white": colorama.Fore.WHITE,
+    "bg:black": colorama.Back.BLACK,
+    "bg:red": colorama.Back.RED,
+    "bg:green": colorama.Back.GREEN,
+    "bg:yellow": colorama.Back.YELLOW,
+    "bg:blue": colorama.Back.BLUE,
+    "bg:magenta": colorama.Back.MAGENTA,
+    "bg:cyan": colorama.Back.CYAN,
+    "bg:white": colorama.Back.WHITE,
+    "living": colorama.Style.BRIGHT,
+    "player": colorama.Style.BRIGHT,
+    "item": colorama.Style.BRIGHT,
+    "exit": colorama.Style.BRIGHT,
+    "location": colorama.Style.BRIGHT
+}
+assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
 
-if colorama is not None:
-    style_colors = {
-        "dim": colorama.Style.DIM,
-        "normal": colorama.Style.NORMAL,
-        "bright": colorama.Style.BRIGHT,
-        "ul": colorama.Style.UNDERLINED,
-        "rev": colorama.Style.REVERSEVID,
-        "/": colorama.Style.RESET_ALL,
-        "blink": colorama.Style.BLINK,
-        "black": colorama.Fore.BLACK,
-        "red": colorama.Fore.RED,
-        "green": colorama.Fore.GREEN,
-        "yellow": colorama.Fore.YELLOW,
-        "blue": colorama.Fore.BLUE,
-        "magenta": colorama.Fore.MAGENTA,
-        "cyan": colorama.Fore.CYAN,
-        "white": colorama.Fore.WHITE,
-        "bg:black": colorama.Back.BLACK,
-        "bg:red": colorama.Back.RED,
-        "bg:green": colorama.Back.GREEN,
-        "bg:yellow": colorama.Back.YELLOW,
-        "bg:blue": colorama.Back.BLUE,
-        "bg:magenta": colorama.Back.MAGENTA,
-        "bg:cyan": colorama.Back.CYAN,
-        "bg:white": colorama.Back.WHITE,
-        "living": colorama.Style.BRIGHT,
-        "player": colorama.Style.BRIGHT,
-        "item": colorama.Style.BRIGHT,
-        "exit": colorama.Style.BRIGHT,
-        "location": colorama.Style.BRIGHT
-    }
-    assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
-else:
-    style_colors = None
+if sys.platform=="win32":
+    if not hasattr(colorama, "win32") or colorama.win32.windll is None:
+        style_colors.clear()  # running on win32 without colorama ansi support
 
 
 class ConsoleIo(iobase.IoAdapterBase):
@@ -130,7 +130,7 @@ class ConsoleIo(iobase.IoAdapterBase):
 
 
 def _apply_style(line, do_styles):
-    """Convert style tags to colorama escape sequences suitable for console text output"""
+    """Convert style tags to ansi escape sequences suitable for console text output"""
     if "<" not in line:
         return line
     if style_colors and do_styles:

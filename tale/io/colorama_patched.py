@@ -17,8 +17,8 @@ colorama.ansi.AnsiStyle.REVERSEVID = 7
 colorama.ansi.Style = colorama.ansi.AnsiCodes(colorama.ansi.AnsiStyle)
 colorama.Style = colorama.ansi.Style
 
-# patch windows term
-if hasattr(colorama.ansitowin32, "winterm"):
+# patch windows term, if running on windows
+if colorama.win32.windll is not None:
 
     class MonkeypatchedAnsiToWin32(colorama.ansitowin32.AnsiToWin32):
         def get_win32_calls(self):
