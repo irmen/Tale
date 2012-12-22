@@ -8,6 +8,20 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import threading
 import time
 from ..util import basestring_type
+try:
+    import mdx_smartypants
+    smartypants = mdx_smartypants.spants
+except ImportError:
+    try:
+        import smartypants
+    except ImportError:
+        smartypants = None
+try:
+    import HTMLParser
+    unescape_entity = HTMLParser.HTMLParser().unescape
+except ImportError:
+    import html.parser
+    unescape_entity = html.parser.HTMLParser().unescape
 
 
 ALL_COLOR_TAGS = {
@@ -74,6 +88,7 @@ class IoAdapterBase(object):
     def __init__(self, config):
         self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
         self.do_styles = True
+        self.supports_smartquotes = True
 
     def get_async_input(self, player):
         """
@@ -128,6 +143,12 @@ class IoAdapterBase(object):
         This console-implementation expects 2 extra parameters: "indent" and "width".
         """
         raise NotImplementedError("implement this in subclass")
+
+    def smartquotes(self, text):
+        """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
+        if smartypants and self.supports_smartquotes:
+            return unescape_entity(smartypants.smartyPants(text))
+        return text
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""

@@ -63,13 +63,20 @@ class ConsoleIo(iobase.IoAdapterBase):
     """
     def __init__(self, config):
         super(ConsoleIo, self).__init__(config)
+        try:
+            if sys.version_info < (3,0):
+                unichr(8230).encode(sys.stdout.encoding)
+            else:
+                chr(8230).encode(sys.stdout.encoding)
+        except (UnicodeEncodeError, TypeError):
+            self.supports_smartquotes = False
 
     def input(self, prompt=None):
         """
         Ask the player for immediate input. The input is not stored, but returned immediately.
         (Don't call this directly, use player.input)
         """
-        print(_apply_style(prompt, self.do_styles), end="")
+        print(self._apply_style(prompt, self.do_styles), end="")
         return input().strip()
 
     def input_line(self, player):
@@ -84,7 +91,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         be the case when the player types 'quit', for instance).
         """
         try:
-            print(_apply_style("\n<dim>>></> ", self.do_styles), end="")
+            print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
             cmd = input().strip()
             player.store_input_line(cmd)
             if cmd == "quit":
@@ -115,27 +122,26 @@ class ConsoleIo(iobase.IoAdapterBase):
                 txt = indent + ("\n" + indent).join(txt.splitlines()) + "\n"
             assert txt.endswith("\n")
             output.append(txt)
-        return "".join(output)
+        return self.smartquotes("".join(output))
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
         for line in lines:
-            print(_apply_style(line, self.do_styles))
+            print(self._apply_style(line, self.do_styles))
         sys.stdout.flush()
 
     def break_pressed(self, player):
         """do something when the player types ctrl-C (break)"""
-        print(_apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
+        print(self._apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
         sys.stdout.flush()
 
-
-def _apply_style(line, do_styles):
-    """Convert style tags to ansi escape sequences suitable for console text output"""
-    if "<" not in line:
-        return line
-    if style_colors and do_styles:
-        for tag in style_colors:
-            line = line.replace("<%s>" % tag, style_colors[tag])
-        return line
-    else:
-        return iobase.strip_text_styles(line)
+    def _apply_style(self, line, do_styles):
+        """Convert style tags to ansi escape sequences suitable for console text output"""
+        if "<" not in line:
+            return line
+        elif style_colors and do_styles:
+            for tag in style_colors:
+                line = line.replace("<%s>" % tag, style_colors[tag])
+            return line
+        else:
+            return iobase.strip_text_styles(line)

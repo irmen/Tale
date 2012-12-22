@@ -117,6 +117,7 @@ A random list of the features of the current codebase:
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
+- uses smartypants (mdx_smartypants on python3) if available; to automatically render quotes, dashes, ellipsis etc. in a nicer way. Needs chcp 1252+unicode font on windows.
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib

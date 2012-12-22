@@ -235,6 +235,7 @@ class TestPlayer(unittest.TestCase):
         attic = Location("Attic", "A dark attic.")
         player = Player("fritz", "m")
         player.io = ConsoleIo(None)
+        player.io.supports_smartquotes = False
         player.set_screen_sizes(0, 100)
         julie = NPC("julie", "f")
         julie.move(attic)

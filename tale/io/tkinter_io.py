@@ -93,7 +93,7 @@ class TkinterIo(iobase.IoAdapterBase):
                 pass
             assert txt.endswith("\n")
             output.append(txt)
-        return "".join(output)
+        return self.smartquotes("".join(output))
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
