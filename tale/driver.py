@@ -680,17 +680,6 @@ def enable_readline(config):
     except ImportError:
         return
     readline.parse_and_bind("tab: complete")
-    history = vfs.vfs.get_userdata_dir("tale_input.rlhistory")
-    try:
-        readline.read_history_file(history)
-    except IOError:
-        pass
-    import atexit
-
-    def save_history(historyfile):
-        readline.write_history_file(historyfile)
-
-    atexit.register(save_history, history)
 
 
 def monkeypatch_blinker():

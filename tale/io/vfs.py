@@ -49,11 +49,8 @@ class VirtualFileSystem(object):
         user_data = user_data_dir("Tale", "Razorvine")
         path = os.path.join(user_data, path)
         return path
-
-    def open_write(self, path, mode="w"):
-        self.validate_path(path)
-        path = os.path.join(*path.split("/"))   # convert to platform path separator
-        path = self.get_userdata_dir(path)
+        
+    def makedirs(self, path):
         directory = os.path.dirname(path)
         try:
             os.makedirs(directory)    # make sure the path exists
@@ -62,6 +59,12 @@ class VirtualFileSystem(object):
                 pass
             else:
                 raise
+
+    def open_write(self, path, mode="w"):
+        self.validate_path(path)
+        path = os.path.join(*path.split("/"))   # convert to platform path separator
+        path = self.get_userdata_dir(path)
+        self.makedirs(path)
         return open(path, mode=mode)
 
     def load_text(self, path):
