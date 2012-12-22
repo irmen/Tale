@@ -1,21 +1,25 @@
 Race tegen de tijd: anders word je zelf een zombie.
-Om de zoveel tijd moet je een antidote nemen anders verander je direct in een zombie.
+(plot: hoe raakt de speler zo snel mogelijk infected? onverwacht aangevallen, gebeten? Zodat je ook direct leert hoe FLEE werkt?)
+Je moet op zoek naar een antidote die het zombieworden afremt.
+Om de zoveel tijd moet je deze antidote al nemen anders verander je direct in een zombie --> FAIL ending
+Je friend kan deze antidote upgraden tot een definitief geneesmiddel.
 
 zombies lopen rond hier en daar. als ze je zien gaan ze achter je aan.
-FLEE (of evade?) is de enige manier om ze kwijt te raken (normaal weglopen helpt niet ze komen achter je aan).
+FLEE is de enige manier om ze kwijt te raken (normaal weglopen helpt niet: ze komen achter je aan).
+Als je lawaai maakt komen zombies uit naastgelegen locaties ook op je af (wel feedback geven aan de speler dat hij geluid maakte)
 
-1 van de zombies heeft een keycard bij zich waarmee je een deur kunt openmaken. (koelcel bij slager?)
+Zombies die je opeten: een paar happen en je bent direct dood --> FAIL ending
 
-Einde: je redt iemand (partner?) uit de koelcel, maar kan niet voorkomen dat je zelf zombie wordt
-op tijd zorgen dat die persoon weg rent of zelf weg gaan, anders vreet je haar op (=fail ending)
-
+1 van de zombies heeft een keycard bij zich waarmee je een deur kunt openmaken. (storage room ergens)
+Je redt iemand (friend) uit die kamer.
+Deze moet je antidote upgraden tot een definitief geneesmiddel.
+Hij heeft daar iets bij nodig wat je ergens moet vinden (kist die je van iemand moet briben?)
+Als dat niet op tijd lukt wordt je een zombie en vreet je je friend op -> FAIL ending
+Als het wel op tijd lukt (hoe?) dan kun je samen ontsnappen -> SUCCES ending
 
 Extra commands?
-"bribe" ->  geef geld aan iemand die een kist bewaakt -van iemand anders- met spullen erin die je nodig hebt (give $... werkt ook)
-
+"bribe" ->  geef geld aan iemand die een kist bewaakt -van iemand anders- met het geneesmiddel erin dat je nodig hebt (give $... werkt ook)
 Eerst genoeg geld vinden (1x $4,50  1x $5,50 = $10)
 
 YELL-> dit hoor je in de kamer ernaast. Mensen die opgesloten zitten gillen om hulp, dan hoort de speler dat automatisch (zie town crier)
-
-Horror aspecten toevoegen? Zeer mondjesmaat want past niet echt bij zombie survival genre!
-(plotselinge verschijningen/teksten,  veranderende gangen, ...)
+als je zelf yellt dan moeten mensen in de buurt daar op reageren, en zombies ook!

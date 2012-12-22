@@ -3,8 +3,7 @@ Concepts for single player Interactive Fiction mode:
 [info] Interesting link: http://www.brasslantern.org/writers/
 [cosmetic,tkinter] implement text styling (instead of stripping it all out)
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
-[cosmetic,console] Convert images to ascii art. (fabulous.image on linux/osx xterm)
-[feature,tkinter,html] Add optional picture to every MudObject description.
+[feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] standalone HTTP server mode with HTML+Javascript frontend.
 
 
@@ -43,8 +42,10 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code,refactor] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
-[code,refactor] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
+[feature] Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them','its/his/hers/theirs' (as long as they are still in the vicinity)
+
+[code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
+[code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [code] Make sure all console input() is always done from the same thread? (fixes pypy crash)
 [cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
 [cosmetic,gui] Font selection dialog for Io adapters that support it (tkinter, html)
@@ -56,10 +57,10 @@ General ideas/TODO:
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
     <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
 
-[feature] Self-modifying rooms/exits to create a more dynamic game world.
+[code,API] Self-modifying rooms/exits to create a more dynamic game world.
     Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
 
-[code,refactor] Exits should be defined more clearly, instead of scattered through the code on a per-room basis.
+[code,refactor,API] Exits should be defined more clearly, instead of scattered through the code on a per-room basis.
 [code] Should there be a single table where all exits are defined? But how to link to code object if it is not a normal plain exit?
 [code] Create a two-way exit that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
 
@@ -69,9 +70,8 @@ General ideas/TODO:
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
 
-[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources)
+[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources for that)
 
-[feature] Parser: remember previous objects/creatures so you can refer to them as 'it/him/her/them' (as long as they are still in the vicinity)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
 
 [code] prototypes to extend items/npc instead of inheritance?
