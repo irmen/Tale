@@ -64,10 +64,11 @@ class ConsoleIo(iobase.IoAdapterBase):
     def __init__(self, config):
         super(ConsoleIo, self).__init__(config)
         try:
+            encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
             if sys.version_info < (3,0):
-                unichr(8230).encode(sys.stdout.encoding)
+                unichr(8230).encode(encoding)
             else:
-                chr(8230).encode(sys.stdout.encoding)
+                chr(8230).encode(encoding)
         except (UnicodeEncodeError, TypeError):
             self.supports_smartquotes = False
 
