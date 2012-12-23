@@ -9,15 +9,15 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 import tale
-import tale.vfs
+from tale.io.vfs import vfs
 
 if __name__=="__main__":
     # story is invoked as a script, start it in the Tale Driver.
     from tale.driver import Driver
     driver = Driver()
-    with tale.vfs.vfs.open_read("demo/__init__.py") as x:
+    with vfs.open_read("demo/__init__.py") as x:
         gamedir = os.path.dirname(x.name)
-    args = ["-g", gamedir, "--mode", "if"]
+    args = ["-g", gamedir]
     if len(sys.argv) > 1 and sys.argv[1]=="--gui":
         args.append("--gui")
     driver.start(args)
@@ -58,14 +58,17 @@ class Story(object):
 
     def welcome(self, player):
         player.tell("<bright>Welcome to '%s'.</>" % self.config["name"], end=True)
+        player.tell("This is a tiny embedded story to check out a running Tale environment.")
+        player.tell("Try to fool around with your pet, and exit the house to win the game.")
+        player.tell("\n")
         player.tell("\n")
 
     def welcome_savegame(self, player):
         pass  # not supported in demo
 
     def goodbye(self, player):
-        pass
+        player.tell("Thanks for trying out Tale!")
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("Congratulations on finding the exit!")
+        player.tell("Congratulations on finding the exit! Someone else has to look after Garfield now though...")
