@@ -637,14 +637,19 @@ class Driver(object):
         """
         Register a deferred callable (optionally with arguments).
         The owner object, the vargs and the kwargs all must be serializable.
-        Note that the due time is time datetime.datetime *in game time*
+        Note that the due time is datetime.datetime *in game time*
         (not real time!) when the deferred should trigger.
+        Due can also be a number, meaning the number of real-time seconds after the current time.
         Also note that the deferred *always* gets a kwarg 'driver' set to the driver object
         (this makes it easy to register a new deferred on the driver without the need to
         access the global driver object)
         """
-        assert isinstance(due, datetime.datetime)
-        assert due >= self.game_clock.clock
+        if isinstance(due, datetime.datetime):
+            assert due >= self.game_clock.clock
+        else:
+            due = float(due)
+            assert due >= 0.0
+            due = self.game_clock.plus_realtime(datetime.timedelta(seconds=due))
         # to be able to serialize this, we don't store the actual callable object.
         # instead we store its name.
         if not isinstance(callable, util.basestring_type):

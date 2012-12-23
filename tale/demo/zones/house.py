@@ -39,16 +39,14 @@ closet.insert(key, None)
 class Cat(NPC):
     def init(self):
         self.aliases={"cat"}
-        due = mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=2))
-        mud_context.driver.defer(due, self, self.do_purr)
+        mud_context.driver.defer(2, self, self.do_purr)
 
     def do_purr(self, driver):
         if random.random() > 0.5:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
-        due = driver.game_clock.plus_realtime(datetime.timedelta(seconds=random.randint(5, 20)))
-        driver.defer(due, self, self.do_purr)
+        driver.defer(random.randint(5, 20), self, self.do_purr)
 
     def notify_action(self, parsed, actor):
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):

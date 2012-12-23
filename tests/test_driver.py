@@ -8,10 +8,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import unittest
 import heapq
+import datetime
 import tale.driver as the_driver
 import tale.globalcontext
 import tale.cmds.normal
 import tale.cmds.wizard
+import tale.base
+import tale.util
 
 
 class TestDriver(unittest.TestCase):
@@ -33,6 +36,31 @@ class TestDeferreds(unittest.TestCase):
         deferreds = sorted([d1, d2, d3, d4, d5])
         dues = [d.due for d in deferreds]
         self.assertEqual([1, 2, 3, 4, 5], dues)
+
+    def test_numeric_deferreds(self):
+        thing = tale.base.Item("thing")
+        driver = the_driver.Driver()
+        now = datetime.datetime.now()
+        driver.game_clock = tale.util.GameDateTime(now, 1)
+        with self.assertRaises(ValueError):
+            driver.defer(3601, thing, "unexisting_method")
+        with self.assertRaises(ValueError):
+            driver.defer("blerp", thing, "move")
+        driver.defer(3601, thing, "move")
+        deferred = driver.deferreds[0]
+        after = deferred.due - now
+        self.assertEqual(3601, after.seconds)
+
+    def test_datetime_deferreds(self):
+        thing = tale.base.Item("thing")
+        driver = the_driver.Driver()
+        now = datetime.datetime.now()
+        driver.game_clock = tale.util.GameDateTime(now, 1)
+        due = driver.game_clock.plus_realtime(datetime.timedelta(seconds=3601))
+        driver.defer(due, thing, "move")
+        deferred = driver.deferreds[0]
+        after = deferred.due - now
+        self.assertEqual(3601, after.seconds)
 
     def testHeapq(self):
         d1 = the_driver.Deferred(5, "owner", "callable", None, None)
