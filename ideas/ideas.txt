@@ -39,6 +39,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 General ideas/TODO:
 -------------------
 [BUG] demo story; take key; examine it -> it isn't here
+[BUG] demo story: open door; examine it -> it is no longer around
 [BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
 [BUG] on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
