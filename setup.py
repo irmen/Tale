@@ -35,7 +35,12 @@ but the current version is quite capable of running an interactive fiction story
 I'm focusing on the single player Interactive Fiction mode for the time being.
 The multi-user aspects of the framework have been put on the back burner for now.
 
-An example test/demo story is included in the ``stories`` directory of the distribution archive.
+An example test/demo story is included in the ``stories`` directory of the distribution archive. This will require you to extract the source archive manually.
+
+You can also run the tiny embedded test story like this, after you've installed te framework::
+
+    $ python -m tale.demo.story
+
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],
