@@ -1,16 +1,17 @@
 Concepts for single player Interactive Fiction mode:
-----------------------------------------------------
-[info] Interesting link: http://www.brasslantern.org/writers/
+Interesting link: http://www.brasslantern.org/writers/
+------------------------------------------------------
 [cosmetic,tkinter] implement text styling (instead of stripping it all out)
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] standalone HTTP server mode with HTML+Javascript frontend.
 
-
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [BUG] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
 [BUG] driver.player and driver.async_player_input are globals and this won't work in multi-user mode.
+[feature] Pyro interface with standalone remote client (console or GUI).
+[feature] Telnet interface.
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state.
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
@@ -42,44 +43,36 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[publish] sdist -> upload the demo story as a separate file? (can sdist create multiple files?)
+[code] Create a TwoWayExit/TwoWayDoor that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
+    (in the case of Door: how to link both doors to the same state?)
 
+[publish] sdist -> upload the demo story as a separate file? (can sdist create multiple files?)
 [code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [code] Make sure all console input() is always done from the same thread? (fixes pypy crash)
 [cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
 [cosmetic,gui] Font selection dialog for Io adapters that support it (tkinter, html)
 [cosmetic,gui] Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
-
+[cosmetic] Allow story config to override the style colors mapping so they can define their own rendering of <item> for instance
 [cosmetic] Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
     <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
-
 [code,API] Self-modifying rooms/exits to create a more dynamic game world.
     Do this with state transitions through conditional exits? Or actually replace exits/locations with new ones?
-
 [code,refactor,API] Exits should be defined more clearly, instead of scattered through the code on a per-room basis.
-[code] Should there be a single table where all exits are defined? But how to link to code object if it is not a normal plain exit?
-[code] Create a two-way exit that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
-
+[code] Should there be a single table where all exits are defined? But how to link to the exit's class if it is not a base exit?
 [code] Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
     (note: less suited for MUDs because other people might interfere with the states)
-
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
-
 [feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources for that)
-
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
-
 [code] prototypes to extend items/npc instead of inheritance?
 [code] Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
-
 [test] what happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
 [test] what happens with multiple items of same name in room, in inventory, in bag
-
 [feature] Change living location logic so that livings can sit inside a container item too.
     Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
     + take <living> can actually work! (take ant, trap rabbit in cage, ...)
