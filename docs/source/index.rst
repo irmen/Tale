@@ -48,10 +48,10 @@ There's a tiny demo embedded in the library itself, you can start that with::
 
     python -m tale.demo.story   # add --gui to get a GUI interface
 
-There's a larger demo story included in the source distribution, in the ``stories`` directory. But you will have to download
-and extract the source distribution manually to get it.
+Fool around with your pet and try to get out of the house. There's a larger demo story included in the source distribution,
+in the ``stories`` directory. But you will have to download and extract the source distribution manually to get it.
 
-Start the demo story using one of the supplied start scripts. You don't have to install tale first, the script can figure it out.
+Start the demo story using one of the supplied start scripts. You don't have to install Tale first, the script can figure it out.
 
 You can also start it without the script and by using the tale driver directly, but then
 it is recommended to properly install tale first. This method of launching stories
