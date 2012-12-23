@@ -63,7 +63,10 @@ class MudObject(object):
 
     def __init__(self, name, title=None, description=None, short_description=None):
         self.init_names(name, title, description, short_description)
-        self.aliases = []
+        try:
+            self.aliases = []
+        except AttributeError:
+            pass  # when a subclass turned this into a property
         self.verbs = {}   # any custom verbs that need to be registered in the location or in the player (verb->docstring mapping)
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
@@ -499,6 +502,8 @@ class Exit(MudObject):
     Long_description is optional and will be shown instead if the player examines the exit.
     Supplying a direction on the exit is optional. It is only required when adding multiple
     exits on a location by using Location.add_exits().
+    Setting aliases on an exit is not supported, instead you need to register the exit multiple times
+    on the location object with different names.
     """
     def __init__(self, target_location, short_description, long_description=None, direction=None):
         assert target_location is not None
@@ -521,6 +526,8 @@ class Exit(MudObject):
     def __repr__(self):
         targetname = self.target.name if self.bound else self.target
         return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
+
+    aliases = property(doc="can't use aliases on Exit, use multiple registrations in the location instead")
 
     def bind(self, game_zones_module):
         """

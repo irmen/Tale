@@ -347,6 +347,8 @@ class TestDoorsExits(unittest.TestCase):
             exit1.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             exit1.read(None)
+        with self.assertRaises(AttributeError):
+            exit1.aliases = {"doesn't work"}
 
     def test_bind_exit(self):
         class ModuleDummy(object):
@@ -363,6 +365,8 @@ class TestDoorsExits(unittest.TestCase):
 
     def test_title_name(self):
         door = Door("hall", "a locked door", direction="north", locked=True, opened=False)
+        with self.assertRaises(AttributeError):
+            door.aliases={"doesn't work"}
         self.assertEqual("exit to <unbound:hall>", door.name)
         self.assertEqual("Exit to <unbound:hall>", door.title)
         exit = Exit("town.square", "someplace")
