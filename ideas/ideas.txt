@@ -43,8 +43,8 @@ General ideas/TODO:
     (code contains a workaround for the time being: readline not enabled on pypy)
 
 [publish] sdist -> upload the demo story as a separate file? (can sdist create multiple files?)
-[code] embed a test room + exit inside tale itself (python -m tale.demo)
 
+[code,refactor,API] Make defer() easier: also allow integer 'due' param meaning "now plus X seconds"
 [code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [code] Make sure all console input() is always done from the same thread? (fixes pypy crash)

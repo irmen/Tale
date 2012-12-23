@@ -35,7 +35,8 @@ class Story(object):
         epoch = datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
         startlocation_player = "town.square",
         startlocation_wizard = "wizardtower.hall",
-        )
+        savegames_enabled = True
+    )
 
     vfs = None        # will be set by driver init()
     driver = None     # will be set by driver init()

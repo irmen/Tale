@@ -44,17 +44,25 @@ libraries to be available.
 
 After that, you'll need a story to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).
-There's a demo/example story included in the source distribution, in the ``stories`` directory.
+There's a tiny demo embedded in the library itself, you can start that with::
 
-Start the demo story using one of the supplied start scripts.
-You don't have to install anything if you run it like this.
+    python -m tale.demo.story   # add --gui to get a GUI interface
+
+There's a larger demo story included in the source distribution, in the ``stories`` directory. But you will have to download
+and extract the source distribution manually to get it.
+
+Start the demo story using one of the supplied start scripts. You don't have to install tale first, the script can figure it out.
 
 You can also start it without the script and by using the tale driver directly, but then
 it is recommended to properly install tale first. This method of launching stories
 won't work from the distribution's root directory itself.
 
-Anyway, the command to do so is: :kbd:`$ python -m tale.driver --game <path-to-the-story/demo-directory>`
-or, using the installed script: :kbd:`$ tale-driver --game <path-to-the-story/demo-directory>`
+Anyway, the command to do so is::
+
+    $ python -m tale.driver --game <path-to-the-story/demo-directory>`
+
+    # or, with the installed launcher script:
+    $ tale-driver --game <path-to-the-story/demo-directory>`
 
 You can use the ``--help`` argument to see some help about this command.
 You can use ``--gui`` to start the GUI version of the interface rather than the text console version.

@@ -271,7 +271,7 @@ class Driver(object):
 
     def start_create_player(self):
         io = self.player.io
-        if self.config.server_mode == "mud":
+        if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
             io.output("")
@@ -580,6 +580,8 @@ class Driver(object):
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
     def do_save(self, player):
+        if not self.config.savegames_enabled:
+            return
         state = {
             "version": self.config.version,
             "gamestate": self.state,

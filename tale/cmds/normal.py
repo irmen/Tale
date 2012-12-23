@@ -783,7 +783,7 @@ def do_wait(player, parsed, ctx):
 def do_quit(player, parsed, ctx):
     """Quit the game."""
     if util.input_confirm("Are you sure you want to quit?", player):
-        if ctx.config.server_mode != "mud":
+        if ctx.config.server_mode != "mud" and ctx.config.savegames_enabled:
             if util.input_confirm("Would you like to save your progress?", player):
                 do_save(player, parsed, ctx)
         player.tell("\n")
