@@ -553,7 +553,7 @@ class Soul(object):
     Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.
     """
     def __init__(self):
-        pass
+        self.previously_parsed = None
 
     def is_verb(self, verb):
         return verb in VERBS
@@ -831,6 +831,22 @@ class Soul(object):
             if not message_verb and not collect_message:
                 word = word.rstrip(",")
             if word in ("them", "him", "her", "it"):
+                if self.previously_parsed:
+                    # try to connect the pronoun to a previously parsed item/living
+                    who_list = self.match_previously_parsed(player, word)
+                    if who_list:
+                        for who in who_list:
+                            if include_flag:
+                                who_info[who].sequence = who_sequence
+                                who_info[who].previous_word = previous_word
+                                who_sequence += 1
+                                who_order.append(who)
+                            else:
+                                del who_info[who]
+                                who_order.remove(who)
+                    arg_words.append(word)
+                    previous_word = None
+                    continue
                 raise ParseError("It is not clear who you mean.")
             if word in ("me", "myself", "self"):
                 if include_flag:
@@ -987,6 +1003,28 @@ class Soul(object):
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResults(verb, who_info=who_info, who_order=who_order,
-                            adverb=adverb, message=message,
-                            bodypart=bodypart, qualifier=qualifier,
-                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
+            adverb=adverb, message=message, bodypart=bodypart, qualifier=qualifier,
+            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
+
+    def match_previously_parsed(self, player, pronoun):
+        """try to connect the pronoun (it, him, her, them) to a previously parsed item/living"""
+        if pronoun=="them":
+            # plural (any item/living qualifies)
+            matches = list(self.previously_parsed.who_order)
+            for who in matches:
+                if not player.search_item(who.name) and who not in player.location.livings:
+                    player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                    raise ParseError("%s is no longer around." % lang.capital(who.subjective))
+            if matches:
+                player.tell("<dim>(By '%s', it is assumed you mean: %s.)" % (pronoun, lang.join(who.title for who in matches)))
+                return matches
+            else:
+                raise ParseError("It is not clear who you're referring to.")
+        for who in self.previously_parsed.who_order:
+            if pronoun==who.objective:
+                if player.search_item(who.name) or who in player.location.livings:
+                    player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
+                    return [who]
+                player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                raise ParseError("%s is no longer around." % lang.capital(who.subjective))
+        raise ParseError("It is not clear who you're referring to.")

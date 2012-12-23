@@ -113,6 +113,7 @@ A random list of the features of the current codebase:
   when you type 'get the blue pill' when there are multiple pills on the table.
 - you can alter the meaning of a sentence by using words like fail, attempt, don't, suddenly, pretend
 - you can put stuff into a bag and carry the bag, to avoid cluttering your inventory.
+- you can refer to earlier used items and persons by using a pronoun ("examine box / drop it", "examine idiot / slap him").
 - yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).

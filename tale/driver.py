@@ -473,6 +473,7 @@ class Driver(object):
             parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
+            self.player.remember_parsed(parsed)  # success
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -488,6 +489,7 @@ class Driver(object):
                 if parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
                     if handled:
+                        self.player.remember_parsed(parsed)  # success
                         self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
                         parse_error = "Please be more specific."
@@ -498,6 +500,7 @@ class Driver(object):
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
                         func(self.player, parsed, ctx)
+                        self.player.remember_parsed(parsed)  # success
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
@@ -506,6 +509,7 @@ class Driver(object):
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)
                 self.do_socialize(parsed)
+                self.player.remember_parsed(parsed)  # success
             except errors.RetryParse as x:
                 return self.process_player_input(x.command)   # try again but with new command string
 

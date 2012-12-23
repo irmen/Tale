@@ -106,6 +106,10 @@ class Player(base.Living):
         """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
         return self.soul.process_verb_parsed(self, parsed)
 
+    def remember_parsed(self, parsed):
+        """remember the previously parsed data, soul can use this to reference back"""
+        self.soul.previously_parsed = parsed
+
     def tell(self, *messages, **kwargs):
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
@@ -200,7 +204,7 @@ class Player(base.Living):
 
     def clear_wiretaps(self):
         sig = blinker.signal("wiretap")
-        sig.disconnect(self.wiretap_msg)   # XXX doesn't remove all taps on python 3.3
+        sig.disconnect(self.wiretap_msg)   # XXX doesn't remove all taps on python 3.3 (blinker bug?)
 
     def destroy(self, ctx):
         self.activate_transcript(None, None)

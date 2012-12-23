@@ -772,6 +772,48 @@ class TestSoul(unittest.TestCase):
     def testFULL(self):
         pass  # FULL is not yet used
 
+    def testPronounReferences(self):
+        soul = tale.soul.Soul()
+        player = tale.player.Player("julie", "f", "human")
+        room = tale.base.Location("somewhere")
+        room2 = tale.base.Location("somewhere else")
+        player.move(room)
+        max_npc = tale.npc.NPC("Max", "m")
+        kate_npc = tale.npc.NPC("Kate", "f")
+        dino_npc = tale.npc.NPC("dinosaur", "n")
+        targets = [max_npc, kate_npc, dino_npc]
+        player.location.livings = targets
+        newspaper = tale.base.Item("newspaper")
+        player.location.insert(newspaper, player)
+        # her
+        parsed = soul.parse(player, "hug kate")
+        soul.previously_parsed = parsed
+        parsed = soul.parse(player, "kiss her")
+        self.assertEqual(["(By 'her', it is assumed you mean Kate.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(kate_npc, parsed.who_order[0])
+        # it
+        parsed = soul.parse(player, "hug dinosaur")
+        soul.previously_parsed = parsed
+        parsed = soul.parse(player, "kiss it")
+        self.assertEqual(["(By 'it', it is assumed you mean dinosaur.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(dino_npc, parsed.who_order[0])
+        with self.assertRaises(tale.errors.ParseError) as x:
+            parsed = soul.parse(player, "kiss her")
+        self.assertEqual("It is not clear who you're referring to.", str(x.exception))
+        # them
+        parsed = soul.parse(player, "hug kate and dinosaur")
+        soul.previously_parsed = parsed
+        parsed = soul.parse(player, "kiss them")
+        self.assertEqual(["(By 'them', it is assumed you mean: Kate and dinosaur.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual([kate_npc, dino_npc], parsed.who_order)
+        # when no longer around
+        parsed = soul.parse(player, "hug kate")
+        soul.previously_parsed = parsed
+        player.move(room2)
+        with self.assertRaises(tale.errors.ParseError) as x:
+            parsed = soul.parse(player, "kiss her")
+        self.assertEqual("She is no longer around.", str(x.exception))
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
