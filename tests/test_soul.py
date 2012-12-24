@@ -814,6 +814,17 @@ class TestSoul(unittest.TestCase):
             parsed = soul.parse(player, "kiss her")
         self.assertEqual("She is no longer around.", str(x.exception))
 
+    def test_adjust_verbs(self):
+        allowed = ["hug", "ponder", "wait", "kick", "cough", "greet", "poke", "yawn"]
+        remove = ["hug", "kick"]
+        verbs = {"frobnizificate": ( tale.soul.SIMP, None, "frobnizes \nHOW \nAT", "at" )}
+        tale.soul.adjust_available_verbs(allowed_verbs=allowed, remove_verbs=remove, add_verbs=verbs)
+        self.assertEqual({"poke"}, tale.soul.AGGRESSIVE_VERBS )
+        self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS )
+        self.assertEqual(set(), tale.soul.MOVEMENT_VERBS )
+        remaining = sorted(tale.soul.VERBS.keys())
+        self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "wait", "yawn"], remaining)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

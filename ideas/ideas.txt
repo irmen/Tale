@@ -29,7 +29,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 [info,feature] Do something with the circlemud xml data:
     http://www.razorvine.net/download/circlemuddata_converters.zip
-    original from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+    data files from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
 [info,feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
@@ -43,7 +43,6 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code,API] Allow story to override/remove soul verbs, remove_verbs_except([v1,v2,v3,...]), add_verbs([...])
 [code,API] Create a TwoWayExit/TwoWayDoor that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
     (in the case of Door: how to link both doors to the same state?)
 
