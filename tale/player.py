@@ -52,6 +52,7 @@ class Player(base.Living):
         self.transcript = None
         self._output = TextBuffer()
         self.io = None  # will be set to appropriate I/O adapter by the driver
+        self._previous_parsed = None
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -88,6 +89,7 @@ class Player(base.Living):
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
         parsed = self.soul.parse(self, commandline, external_verbs)
+        self._previous_parsed = parsed
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
         if parsed.verb not in soul.NONLIVING_OK_VERBS:
@@ -106,9 +108,9 @@ class Player(base.Living):
         """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
         return self.soul.process_verb_parsed(self, parsed)
 
-    def remember_parsed(self, parsed):
-        """remember the previously parsed data, soul can use this to reference back"""
-        self.soul.previously_parsed = parsed
+    def remember_parsed(self):
+        """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
+        self.soul.previously_parsed = self._previous_parsed
 
     def tell(self, *messages, **kwargs):
         """

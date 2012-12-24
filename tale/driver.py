@@ -348,6 +348,8 @@ class Driver(object):
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
                 self.story_complete_output(self.player.story_complete_callback)
+                self.stop_driver()
+                self.player.io.destroy()
                 break
             if self.async_player_input:
                 self.async_player_input.enable()  # enable player input
@@ -378,12 +380,16 @@ class Driver(object):
                         try:
                             self.player.tell("\n")
                             self.process_player_input(cmd)
+                            self.player.remember_parsed()
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
                                 self.player.tell("You can't go in that direction.")
                             else:
                                 self.player.tell("The verb '%s' is unrecognized." % x.verb)
-                        except (errors.ParseError, errors.ActionRefused) as x:
+                        except errors.ActionRefused as x:
+                            self.player.remember_parsed()
+                            self.player.tell(str(x))
+                        except errors.ParseError as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
                     self.player.io.break_pressed(self.player)
@@ -401,8 +407,7 @@ class Driver(object):
                         self.story.goodbye(self.player)
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
-                    if self.config.server_tick_method == "timer":
-                        self.async_player_input.stop()
+                    self.stop_driver()
                     self.player.io.destroy()
                     break
                 except Exception:
@@ -473,7 +478,6 @@ class Driver(object):
             parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
-            self.player.remember_parsed(parsed)  # success
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -489,7 +493,6 @@ class Driver(object):
                 if parsed.verb in custom_verbs:
                     handled = self.player.location.handle_verb(parsed, self.player)
                     if handled:
-                        self.player.remember_parsed(parsed)  # success
                         self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
                         parse_error = "Please be more specific."
@@ -500,7 +503,6 @@ class Driver(object):
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
                         func(self.player, parsed, ctx)
-                        self.player.remember_parsed(parsed)  # success
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
                     else:
@@ -509,7 +511,6 @@ class Driver(object):
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)
                 self.do_socialize(parsed)
-                self.player.remember_parsed(parsed)  # success
             except errors.RetryParse as x:
                 return self.process_player_input(x.command)   # try again but with new command string
 

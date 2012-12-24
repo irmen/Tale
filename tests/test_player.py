@@ -14,7 +14,7 @@ from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player, TextBuffer
-from tale.soul import NonSoulVerb, ParseResults
+from tale.soul import NonSoulVerb, ParseResult
 from tale.io.console_io import ConsoleIo
 from tale.charbuilder import CharacterBuilder
 from tale.util import AttrDict
@@ -351,7 +351,7 @@ class TestPlayer(unittest.TestCase):
         room.init_inventory([player, chair])
 
         # first check if the handle_verb passes to all objects including inventory
-        parsed = ParseResults("kowabungaa12345")
+        parsed = ParseResult("kowabungaa12345")
         handled = room.handle_verb(parsed, player)
         self.assertFalse(handled)
         self.assertTrue(chair.handle_verb_called)
@@ -365,7 +365,7 @@ class TestPlayer(unittest.TestCase):
         player.init()
         chair.init()
         chair_in_inventory.init()
-        parsed = ParseResults("frobnitz")
+        parsed = ParseResult("frobnitz")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertTrue(chair.handled)
@@ -376,7 +376,7 @@ class TestPlayer(unittest.TestCase):
         player.init()
         chair.init()
         chair_in_inventory.init()
-        parsed = ParseResults("xywobble")
+        parsed = ParseResult("xywobble")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertFalse(chair.handled)
@@ -387,7 +387,7 @@ class TestPlayer(unittest.TestCase):
         player.init()
         chair.init()
         chair_in_inventory.init()
-        parsed = ParseResults("kerwaffle")
+        parsed = ParseResult("kerwaffle")
         handled = room.handle_verb(parsed, player)
         self.assertTrue(handled)
         self.assertFalse(chair.handled)

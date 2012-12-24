@@ -44,7 +44,7 @@ class NonSoulVerb(SoulException):
     to handle the verb by itself instead.
     """
     def __init__(self, parsed):
-        assert isinstance(parsed, ParseResults)
+        assert isinstance(parsed, ParseResult)
         super(NonSoulVerb, self).__init__(parsed.verb)
         self.parsed = parsed
 
@@ -491,7 +491,7 @@ class WhoInfo(object):
         return "[sequence=%d, prev_word=%s]" % (self.sequence, self.previous_word)
 
 
-class ParseResults(object):
+class ParseResult(object):
     __slots__ = ("verb", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized", "unparsed")
 
     def __init__(self, verb, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None, unparsed=""):
@@ -735,7 +735,7 @@ class Soul(object):
         return result_messages(action, action_room)
 
     def parse(self, player, cmd, external_verbs=frozenset()):
-        """Parse a command string, returns a ParseResults object."""
+        """Parse a command string, returns a ParseResult object."""
         qualifier = None
         message_verb = False  # does the verb expect a message?
         external_verb = False  # is it a non-soul verb?
@@ -792,7 +792,7 @@ class Soul(object):
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
                 unparsed = unparsed[len(exit_name):].lstrip()
-                raise NonSoulVerb(ParseResults(verb=exit_name, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
+                raise NonSoulVerb(ParseResult(verb=exit_name, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -1002,7 +1002,7 @@ class Soul(object):
                 verb = who_order[0].default_verb
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
-        return ParseResults(verb, who_info=who_info, who_order=who_order,
+        return ParseResult(verb, who_info=who_info, who_order=who_order,
             adverb=adverb, message=message, bodypart=bodypart, qualifier=qualifier,
             args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
@@ -1030,7 +1030,7 @@ class Soul(object):
             if pronoun=="it":
                 for direction, exit in player.location.exits.items():
                     if exit is who:
-                        player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
+                        player.tell("<dim>(By '%s', it is assumed you mean '%s'.)</>" % (pronoun, direction))
                         return [(who, direction)]
             # not an exit, try an item or a living
             if pronoun==who.objective:

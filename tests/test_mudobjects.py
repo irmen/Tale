@@ -15,7 +15,7 @@ from tale.util import Context
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
-from tale.soul import ParseResults
+from tale.soul import ParseResult
 from tale.io.iobase import strip_text_styles
 
 
@@ -216,7 +216,7 @@ class TestLocations(unittest.TestCase):
         room.notify_player_left(player, room2)
         room.notify_npc_arrived(player, room2)
         room.notify_npc_left(player, room2)
-        parsed = ParseResults("verb")
+        parsed = ParseResult("verb")
         room.notify_action(parsed, player)
 
 
