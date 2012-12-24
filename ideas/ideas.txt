@@ -39,14 +39,12 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[BUG] demo story; take key; examine it -> it isn't here
-[BUG] demo story: open door; examine it -> it is no longer around
-[BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => the verb sayt is unrecognised
+[BUG] many actions are aborted with ActionRefused exception. This doesn't update the previously_parsed data. (open door -> it's locked. examine it -> you mean key?)
+[BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => "the verb sayt is unrecognised"
 [BUG] on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code,API] Improve item/living location in soul.match_previously_parsed (check who.location instead of searching for it)  -> maybe this fixes the BUGs above as well?
 [code,API] Allow story to override/remove soul verbs, remove_verbs_except([v1,v2,v3,...]), add_verbs([...])
 [code,API] Create a TwoWayExit/TwoWayDoor that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
     (in the case of Door: how to link both doors to the same state?)

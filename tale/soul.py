@@ -835,7 +835,7 @@ class Soul(object):
                     # try to connect the pronoun to a previously parsed item/living
                     who_list = self.match_previously_parsed(player, word)
                     if who_list:
-                        for who in who_list:
+                        for who, name in who_list:
                             if include_flag:
                                 who_info[who].sequence = who_sequence
                                 who_info[who].previous_word = previous_word
@@ -844,7 +844,7 @@ class Soul(object):
                             else:
                                 del who_info[who]
                                 who_order.remove(who)
-                    arg_words.append(word)
+                            arg_words.append(name)  # put the replacement-name in the args instead of the pronoun
                     previous_word = None
                     continue
                 raise ParseError("It is not clear who you mean.")
@@ -1007,7 +1007,12 @@ class Soul(object):
             args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
     def match_previously_parsed(self, player, pronoun):
-        """try to connect the pronoun (it, him, her, them) to a previously parsed item/living"""
+        """
+        Try to connect the pronoun (it, him, her, them) to a previously parsed item/living.
+        Returns a list of (who, replacement-name) tuples.
+        The reason we return a replacement-name is that the parser can replace the
+        pronoun by the proper name that would otherwise have been used in that place.
+        """
         if pronoun=="them":
             # plural (any item/living qualifies)
             matches = list(self.previously_parsed.who_order)
@@ -1017,14 +1022,21 @@ class Soul(object):
                     raise ParseError("%s is no longer around." % lang.capital(who.subjective))
             if matches:
                 player.tell("<dim>(By '%s', it is assumed you mean: %s.)" % (pronoun, lang.join(who.title for who in matches)))
-                return matches
+                return [(who, who.name) for who in matches]
             else:
                 raise ParseError("It is not clear who you're referring to.")
         for who in self.previously_parsed.who_order:
+            # first see if it is an exit
+            if pronoun=="it":
+                for direction, exit in player.location.exits.items():
+                    if exit is who:
+                        player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
+                        return [(who, direction)]
+            # not an exit, try an item or a living
             if pronoun==who.objective:
                 if player.search_item(who.name) or who in player.location.livings:
                     player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
-                    return [who]
+                    return [(who, who.name)]
                 player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
                 raise ParseError("%s is no longer around." % lang.capital(who.subjective))
         raise ParseError("It is not clear who you're referring to.")

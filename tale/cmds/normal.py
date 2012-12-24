@@ -602,8 +602,6 @@ def do_examine(player, parsed, ctx):
         return
     item, container = player.locate_item(name)
     if item:
-        # if "wizard" in player.privileges:
-        #    tell(repr(item), end=True)
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
             p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
         if item in player:

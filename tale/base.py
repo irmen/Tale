@@ -414,8 +414,8 @@ class Location(MudObject):
 
     def search_living(self, name):
         """
-        Search for a living in this location by its name (and title, if no names match)
-        If there's more than one match, returns the first
+        Search for a living in this location by its name (and title, if no names match).
+        Is alias-aware. If there's more than one match, returns the first.
         """
         name = name.lower()
         result = [living for living in self.livings if living.name == name]
@@ -745,11 +745,7 @@ class Living(MudObject):
                 location.verbs.pop(verb, None)
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
-        """
-        Searches an item within the 'visible' world around the living including his inventory.
-        If there's more than one hit, just return the first.
-        This is exactly the same as locate_item except it doesn't return the containing object.
-        """
+        """The same as locate_item except it only returns the item, or None."""
         item, container = self.locate_item(name, include_inventory, include_location, include_containers_in_inventory)
         return item  # skip the container
 
