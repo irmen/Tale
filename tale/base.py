@@ -494,7 +494,7 @@ _Limbo = Location("Limbo",
 
 class Exit(MudObject):
     """
-    An 'exit' that connects one location to another.
+    An 'exit' that connects one location to another. It is strictly one-way.
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in game.zones.town).
     If using a string, it will be retrieved and bound at runtime.
@@ -800,8 +800,8 @@ class Living(MudObject):
     def _handle_verb_base(self, parsed, actor):
         """
         Handle a custom verb. Return True if handled, False if not handled.
-        Also checks inventory items. Don't override this one in a subclass,
-        override handle_verb instead.
+        Also checks inventory items. (Don't override this in a subclass,
+        override handle_verb instead)
         """
         if self.handle_verb(parsed, actor):
             return True

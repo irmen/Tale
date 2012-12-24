@@ -141,7 +141,7 @@ class Driver(object):
     def bind_exits(self):
         for exit in self.unbound_exits:
             exit.bind(self.zones)
-        self.unbound_exits = []
+        del self.unbound_exits
 
     def start(self, args):
         # parse args

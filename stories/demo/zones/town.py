@@ -110,7 +110,7 @@ alley.exits["second door"] = alley.exits["door two"]
 alley.exits["third door"] = alley.exits["door three"]
 alley.exits["fourth door"] = alley.exits["door four"]
 alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
-square.exits["alley"] = Exit(alley, "There's an alley to the south.")
+square.exits["alley"] = Exit(alley, "There's an alley to the south.", "It looks like a very small alley, but you can walk through it.")
 square.exits["south"] = square.exits["alley"]
 
 
@@ -152,6 +152,9 @@ lane.exits["door"] = end_door
 
 
 class Computer(Item):
+    def init(self):
+        self.aliases = {"keyboard", "screen", "wires"}
+
     def allow_item_move(self, actor, verb="move"):
         raise ActionRefused("You can't %s the computer." % verb)
 
@@ -201,7 +204,7 @@ class Computer(Item):
             if "hi" in parsed.args or "hello" in parsed.args:
                 self.process_typed_command("hello", "", actor)
             else:
-                actor.tell("The computer beeps softly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
+                actor.tell("The computer beeps quietly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
 
     def handle_verb(self, parsed, actor):
         if parsed.verb == "hack":
@@ -240,7 +243,6 @@ computer.verbs = {
     "type": "Enter some text.",
     "enter": "Enter some text.",
 }
-computer.aliases = {"keyboard", "screen"}
 alley.insert(computer, None)
 
 
