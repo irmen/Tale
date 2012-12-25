@@ -66,7 +66,7 @@ You can also run the tiny embedded test story like this, after you've installed 
         "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
-    install_requires=["blinker>=1.1", "appdirs"],
+    install_requires=["blinker>=1.1", "appdirs", "os"],    # last one is dummy to fix egg requirements.txt
     requires=["blinker", "appdirs"]
 )
 
