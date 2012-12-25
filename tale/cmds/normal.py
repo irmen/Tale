@@ -623,10 +623,10 @@ def do_examine(player, parsed, ctx):
                 p("It's empty.")
     elif name in player.location.exits:
         p("It seems you can go there:")
-        p(player.location.exits[name].description)
+        p("<exit>"+player.location.exits[name].description+"</>")
     elif name in abbreviations and abbreviations[name] in player.location.exits:
         p("It seems you can go there:")
-        p(player.location.exits[abbreviations[name]].description)
+        p("<exit>"+player.location.exits[abbreviations[name]].description+"</>")
     else:
         raise ActionRefused("%s isn't here." % name)
 

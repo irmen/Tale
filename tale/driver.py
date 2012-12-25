@@ -140,7 +140,7 @@ class Driver(object):
 
     def bind_exits(self):
         for exit in self.unbound_exits:
-            exit.bind(self.zones)
+            exit._bind_target(self.zones)
         del self.unbound_exits
 
     def start(self, args):

@@ -25,9 +25,9 @@ class TestLocations(unittest.TestCase):
         self.hall = Location("Main hall", "A very large hall.")
         self.attic = Location("Attic", "A dark attic.")
         self.street = Location("Street", "An endless street.")
-        self.hall.exits["up"] = Exit(self.attic, "A ladder leads up.")
-        self.hall.exits["door"] = Exit(self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
-        self.hall.exits["east"] = self.hall.exits["door"]
+        e1 = Exit("up", self.attic, "A ladder leads up.")
+        e2 = Exit(["door", "east"], self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
+        self.hall.add_exits([e1, e2])
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label", short_description="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
@@ -222,23 +222,23 @@ class TestLocations(unittest.TestCase):
 
 class TestDoorsExits(unittest.TestCase):
     def test_state(self):
-        Door("xyz", "short desc", locked=False, opened=False)
-        Door("xyz", "short desc", locked=False, opened=True)
-        Door("xyz", "short desc", locked=True, opened=False)
+        Door("out", "xyz", "short desc", locked=False, opened=False)
+        Door("out", "xyz", "short desc", locked=False, opened=True)
+        Door("out", "xyz", "short desc", locked=True, opened=False)
         with self.assertRaises(ValueError):
-            Door("xyz", "short desc", locked=True, opened=True)
+            Door("out", "xyz", "short desc", locked=True, opened=True)
 
     def test_actions(self):
         player = Player("julie", "f")
         hall = Location("hall")
         attic = Location("attic")
-        unbound_exit = Exit("foo.bar", "a random exit")
+        unbound_exit = Exit("random", "foo.bar", "a random exit")
         with self.assertRaises(Exception):
             self.assertFalse(unbound_exit.allow_passage(player))  # should fail because not bound
-        exit1 = Exit(attic, "first ladder to attic")
+        exit1 = Exit("ladder", attic, "first ladder to attic")
         exit1.allow_passage(player)
 
-        door = Door(hall, "open unlocked door", direction="north", locked=False, opened=True)
+        door = Door("north", hall, "open unlocked door", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # fail, it's already open
         self.assertEqual("It's already open.", str(x.exception))
@@ -251,7 +251,7 @@ class TestDoorsExits(unittest.TestCase):
             door.unlock(None, player)  # fail, it's not locked
         self.assertEqual("It's not locked.", str(x.exception))
 
-        door = Door(hall, "open locked door", direction="north", locked=False, opened=True)
+        door = Door("north", hall, "open locked door", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # fail, it's already open
         self.assertEqual("It's already open.", str(x.exception))
@@ -266,7 +266,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual("You don't seem to have the means to unlock it.", str(x.exception))
         self.assertTrue(door.locked)
 
-        door = Door(hall, "closed unlocked door", direction="north", locked=False, opened=False)
+        door = Door("north", hall, "closed unlocked door", locked=False, opened=False)
         door.open(None, player)
         self.assertTrue(door.opened)
         door.close(None, player)
@@ -275,7 +275,7 @@ class TestDoorsExits(unittest.TestCase):
             door.close(None, player)  # it's already closed
         self.assertEqual("It's already closed.", str(x.exception))
 
-        door = Door(hall, "closed locked door", direction="north", locked=True, opened=False)
+        door = Door("north", hall, "closed locked door", locked=True, opened=False)
         with self.assertRaises(ActionRefused) as x:
             door.open(None, player)  # can't open it, it's locked
         self.assertEqual("You try to open it, but it's locked.", str(x.exception))
@@ -283,12 +283,12 @@ class TestDoorsExits(unittest.TestCase):
             door.close(None, player)  # it's already closed
         self.assertEqual("It's already closed.", str(x.exception))
 
-        door = Door(hall, "Some door.", direction="north")
+        door = Door("north", hall, "Some door.")
         self.assertEqual("Some door.", door.short_description)
         self.assertEqual("Some door. It is open and unlocked.", door.description)
         self.assertTrue(door.opened)
         self.assertFalse(door.locked)
-        door = Door(hall, "Some door.", "This is a peculiar door leading north.", direction="north")
+        door = Door("north", hall, "Some door.", "This is a peculiar door leading north.")
         self.assertEqual("Some door.", door.short_description)
         self.assertEqual("This is a peculiar door leading north. It is open and unlocked.", door.description)
 
@@ -297,7 +297,7 @@ class TestDoorsExits(unittest.TestCase):
         key = Item("key", "door key")
         key.door_code = 12345
         hall = Location("hall")
-        door = Door(hall, "a locked door", direction="north", locked=True, opened=False)
+        door = Door("north", hall, "a locked door", locked=True, opened=False)
         with self.assertRaises(ActionRefused):
             door.unlock(None, player)
         with self.assertRaises(ActionRefused):
@@ -318,17 +318,15 @@ class TestDoorsExits(unittest.TestCase):
     def test_exits(self):
         hall = Location("hall")
         attic = Location("attic")
-        exit1 = Exit(attic, "The first ladder leads to the attic.")
-        exit2 = Exit(attic, "Second ladder to attic.", direction="up")
-        exit3 = Exit(attic, "Third ladder to attic.", direction="ladder")
-        exit4 = Exit(attic, "A window.", "A window, maybe if you open it you can get out?", "window")
-        with self.assertRaises(ValueError):
-            hall.add_exits([exit1])    # direction must be specified
-        hall.add_exits([exit2, exit3, exit4])
+        exit1 = Exit("ladder1", attic, "The first ladder leads to the attic.")
+        exit2 = Exit("up", attic, "Second ladder to attic.")
+        exit3 = Exit("ladder3", attic, "Third ladder to attic.")
+        exit4 = Exit("window", attic, "A window.", "A window, maybe if you open it you can get out?")
+        hall.add_exits([exit1, exit2, exit3, exit4])
         self.assertTrue(hall.exits["up"] is exit2)
-        self.assertTrue(hall.exits["ladder"] is exit3)
+        self.assertTrue(hall.exits["ladder3"] is exit3)
         self.assertTrue(hall.exits["window"] is exit4)
-        self.assertEqual(['[hall]', 'Third ladder to attic. Second ladder to attic. A window.'], strip_text_styles(hall.look()))
+        self.assertEqual(['[hall]', 'The first ladder leads to the attic. Third ladder to attic. Second ladder to attic. A window.'], strip_text_styles(hall.look()))
         self.assertEqual("Third ladder to attic.", exit3.description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.description)
         with self.assertRaises(ActionRefused):
@@ -347,8 +345,6 @@ class TestDoorsExits(unittest.TestCase):
             exit1.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             exit1.read(None)
-        with self.assertRaises(AttributeError):
-            exit1.aliases = {"doesn't work"}
 
     def test_bind_exit(self):
         class ModuleDummy(object):
@@ -356,30 +352,40 @@ class TestDoorsExits(unittest.TestCase):
         zones = ModuleDummy()
         zones.town = ModuleDummy()
         zones.town.square = Location("square")
-        exit = Exit("town.square", "someplace")
+        exit = Exit("square", "town.square", "someplace")
         self.assertFalse(exit.bound)
-        exit.bind(zones)
+        exit._bind_target(zones)
         self.assertTrue(exit.bound)
         self.assertTrue(zones.town.square is exit.target)
-        exit.bind(zones)
+        exit._bind_target(zones)
 
     def test_title_name(self):
-        door = Door("hall", "a locked door", direction="north", locked=True, opened=False)
-        with self.assertRaises(AttributeError):
-            door.aliases={"doesn't work"}
-        self.assertEqual("exit to <unbound:hall>", door.name)
+        door = Door("north", "hall", "a locked door", locked=True, opened=False)
+        self.assertEqual("north", door.name)
         self.assertEqual("Exit to <unbound:hall>", door.title)
-        exit = Exit("town.square", "someplace")
-        self.assertEqual("exit to <unbound:town.square>", exit.name)
+        exit = Exit("outside", "town.square", "someplace")
+        self.assertEqual("outside", exit.name)
         self.assertEqual("Exit to <unbound:town.square>", exit.title)
         class ModuleDummy(object):
             pass
         zones = ModuleDummy()
         zones.town = ModuleDummy()
         zones.town.square = Location("square")
-        exit.bind(zones)
+        exit._bind_target(zones)
         self.assertEqual("Exit to square", exit.title)
         self.assertEqual("exit to square", exit.name)
+
+    def test_aliases(self):
+        loc = Location("hall", "empty hall")
+        exit = Exit("up", "attic", "ladder to attic")
+        door = Door("door", "street", "door to street")
+        exit2 = Exit(["down", "hatch", "manhole"], "underground", "hatch to underground")
+        door2 = Door(["east", "garden"], "garden", "door east to garden")
+        self.assertEqual("up", exit.name)
+        self.assertEqual("door", door.name)
+        loc.add_exits([exit, door, exit2, door2])
+        self.assertEqual({"up", "door", "down", "hatch", "manhole", "east", "garden"}, set(loc.exits.keys()))
+        self.assertEqual(loc.exits["down"], loc.exits["hatch"])
 
 
 class TestLiving(unittest.TestCase):
@@ -551,7 +557,7 @@ class TestDestroy(unittest.TestCase):
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat", "n", race="rodent")
-        loc.exits = {"north": Exit("somewhere", "somewhere")}
+        loc.add_exits([Exit("north", "somewhere", "exit to somewhere")])
         player = Player("julie", "f")
         player.privileges = {"wizard"}
         player.create_wiretap(loc)

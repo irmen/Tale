@@ -41,4 +41,3 @@ class Style(object):
     REVERSEVID  = _escapeseq(7)
     NORMAL      = _escapeseq(22)
     RESET_ALL   = _escapeseq(0)
-

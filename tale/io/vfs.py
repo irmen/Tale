@@ -49,7 +49,7 @@ class VirtualFileSystem(object):
         user_data = user_data_dir("Tale", "Razorvine")
         path = os.path.join(user_data, path)
         return path
-        
+
     def makedirs(self, path):
         directory = os.path.dirname(path)
         try:

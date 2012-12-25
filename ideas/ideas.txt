@@ -44,11 +44,6 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code,API] should exit be able to bind itself to a location, instead of manipulating the exits dict directly?
-    (requires to always specify the direction, and may enable the use of exit aliases)
-[code,API] Create a TwoWayExit/TwoWayDoor that connects 2 locations to each other in one go? (by creating 2 Exits/Doors internally?)
-    (in the case of Door: how to link both doors to the same state?)
-
 [code] 'invisible' objects that the player can examine and manipulate, but not move.
     They're not mentioned in a 'look' but can be accessed if referenced directly.
     This allows for a car with an engine and doors, where only the car is mentioned in a 'look'.

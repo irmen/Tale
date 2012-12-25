@@ -44,12 +44,11 @@ kitchen = Location("Tower kitchen",
     prepare their meals the old-fashioned way. The kitchen looks small but tidy.
     """)
 
-hall.exits["up"] = Exit(attic, "A small ladder leads up through a hole in the ceiling.")
-hall.exits["ladder"] = hall.exits["up"]
-hall.exits["door"] = Exit("town.lane", "A heavy wooden door to the east blocks the noises from the street outside.")
-hall.exits["east"] = hall.exits["door"]
-hall.exits["north"] = Exit(kitchen, "A door to the north leads to the kitchen.")
-kitchen.exits["south"] = Exit(hall, "A door to the south leads back to the hall.")
+hall.add_exits([
+    Exit(["up", "ladder"], attic, "A small ladder leads up through a hole in the ceiling."),
+    Exit(["door", "east"], "town.lane", "A heavy wooden door to the east blocks the noises from the street outside."),
+    Exit("north", kitchen, "A door to the north leads to the kitchen.")
+])
 
-attic.exits["down"] = Exit(hall, "A small ladder leads back down to the hall.")
-attic.exits["ladder"] = attic.exits["down"]
+kitchen.add_exits([Exit("south", hall, "A door to the south leads back to the hall.")])
+attic.add_exits([Exit(["down", "ladder"], hall, "A small ladder leads back down to the hall.")])

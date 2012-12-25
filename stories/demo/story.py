@@ -80,4 +80,3 @@ class Story(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
-

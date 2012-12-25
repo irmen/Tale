@@ -5,7 +5,6 @@ Creatures living in the central town.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import datetime
 import random
 from tale import lang
 from tale.npc import NPC, Monster

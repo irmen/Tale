@@ -27,8 +27,7 @@ lane = Location("Lane of Magicks",
     you can't see any houses or other landmarks. The road seems to go on forever though.
     """)
 
-square.exits["north"] = Exit(lane, "A long straight lane leads north towards the horizon.")
-square.exits["lane"] = square.exits["north"]
+square.add_exits([Exit(["north", "lane"], lane, "A long straight lane leads north towards the horizon.")])
 
 paper = clone(newspaper)
 paper.aliases = {"paper"}
@@ -60,7 +59,7 @@ cursed_gem = CursedGem("black gem", "a black gem")
 cursed_gem.aliases={"gem"}
 normal_gem = Item("blue gem", "a blue gem")
 normal_gem.aliases={"gem"}
-lane.exits["south"] = Exit(square, "The town square lies to the south.")
+lane.add_exits([Exit("south", square, "The town square lies to the south.")])
 
 
 class WizardTowerEntry(Exit):
@@ -70,7 +69,7 @@ class WizardTowerEntry(Exit):
         else:
             raise ActionRefused("You can't go that way, the force-field is impenetrable.")
 
-lane.exits["west"] = WizardTowerEntry("wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")
+lane.add_exits([WizardTowerEntry("west", "wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
 
 towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.")
@@ -95,23 +94,20 @@ square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonl
 class AlleyOfDoors(Location):
     def notify_player_arrived(self, player, previous_location):
         if previous_location is self:
-            player.tell("Weird. That door seemed to go back to the same place you came from.")
+            player.tell("...Weird... The door you just entered seems to go back to the same place you came from...")
 
 alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
-door1 = Door(alley, "There's a door marked 'door one'.", long_description=descr, direction="door one", locked=False, opened=True)
-door2 = Door(alley, "There's a door marked 'door two'.", long_description=descr, direction="door two", locked=True, opened=False)
-door3 = Door(alley, "There's a door marked 'door three'.", long_description=descr, direction="door three", locked=False, opened=False)
-door4 = Door(alley, "There's a door marked 'door four'.", long_description=descr, direction="door four", locked=True, opened=False)
+door1 = Door(["first door", "door one"], alley, "There's a door marked 'door one'.", long_description=descr, locked=False, opened=True)
+door2 = Door(["second door", "door two"], alley, "There's a door marked 'door two'.", long_description=descr, locked=True, opened=False)
+door3 = Door(["third door", "door three"], alley, "There's a door marked 'door three'.", long_description=descr, locked=False, opened=False)
+door4 = Door(["fourth door", "door four"], alley, "There's a door marked 'door four'.", long_description=descr, locked=True, opened=False)
+alley.add_exits([
+    door1, door2, door3, door4,
+    Exit(["north", "square"], square, "You can go north which brings you back to the square."),
+])
 
-alley.add_exits([door1, door2, door3, door4])
-alley.exits["first door"] = alley.exits["door one"]
-alley.exits["second door"] = alley.exits["door two"]
-alley.exits["third door"] = alley.exits["door three"]
-alley.exits["fourth door"] = alley.exits["door four"]
-alley.exits["north"] = Exit(square, "You can go north which brings you back to the square.")
-square.exits["alley"] = Exit(alley, "There's an alley to the south.", "It looks like a very small alley, but you can walk through it.")
-square.exits["south"] = square.exits["alley"]
+square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south.", "It looks like a very small alley, but you can walk through it.")])
 
 
 class GameEnd(Location):
@@ -145,11 +141,9 @@ class EndDoor(Door):
         if not self.locked:
             actor.hints.state("unlocked_enddoor", "The way to freedom lies before you!")
 
-end_door = EndDoor(game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
+end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
 end_door.door_code = 999
-lane.exits["east"] = end_door
-lane.exits["door"] = end_door
-
+lane.add_exits([end_door])
 
 class Computer(Item):
     def init(self):
@@ -161,9 +155,9 @@ class Computer(Item):
     @property
     def description(self):
         return "It seems to be connected to the four doors. "  \
-                + self.screen_text()  \
-                + " There's also a small keyboard to type commands. " \
-                + " On the side of the screen there's a large sticker with 'say hello' written on it."
+            + self.screen_text()  \
+            + " There's also a small keyboard to type commands. " \
+            + " On the side of the screen there's a large sticker with 'say hello' written on it."
 
     def screen_text(self):
         txt = ["The screen of the computer reads:  \""]
@@ -188,11 +182,17 @@ class Computer(Item):
                 message = "UNKNOWN DOOR"
             else:
                 if command == "unlock":
-                    door.locked = False
-                    message = doorname.upper() + " UNLOCKED"
+                    if door.locked:
+                        door.locked = False
+                        message = doorname.upper() + " UNLOCKED"
+                    else:
+                        message = "COMMAND INVALID - DOOR ALREADY UNLOCKED"
                 else:
-                    door.locked = True
-                    message = doorname.upper() + " LOCKED"
+                    if door.locked:
+                        message = "COMMAND INVALID - DOOR ALREADY LOCKED"
+                    else:
+                        door.locked = True
+                        message = doorname.upper() + " LOCKED"
         else:
             message = "INVALID COMMAND"
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)

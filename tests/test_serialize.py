@@ -58,8 +58,8 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(set(), x.items)
         # now add some exits and a second location, and try again
         room2 = base.Location("room2", "description")
-        exit1 = base.Exit(room2, "to room2", direction="room2")
-        exit2 = base.Exit(room, "back to room", direction="room")
+        exit1 = base.Exit("room2", room2, "to room2")
+        exit2 = base.Exit("room", room, "back to room")
         room.add_exits([exit1])
         room2.add_exits([exit2])
         [r1, r2] = serializecycle([room, room2])
@@ -74,16 +74,17 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(r2, exit1.target)
         self.assertEqual(r1, exit2.target)
     def test_exits_and_doors(self):
-        o = base.Exit("target", "somewhere", direction="east")
+        o = base.Exit("east", "target", "somewhere")
         x = serializecycle(o)
         self.assertFalse(x.bound)
         self.assertEqual("target", x.target)
         self.assertEqual("somewhere", x.short_description)
-        self.assertEqual("east", x.direction)
-        o = base.Door("target", "somewhere", direction="east", locked=True, opened=False)
+        self.assertEqual("east", x.name)
+        o = base.Door("east", "target", "somewhere", locked=True, opened=False)
         self.assertEqual("somewhere It is closed and locked.", o.description)
         x = serializecycle(o)
         self.assertEqual("target", x.target)
+        self.assertEqual("east", x.name)
         self.assertEqual("somewhere It is closed and locked.", x.description)
     def test_living_npc_monster(self):
         o = base.Living("name", "n", title="title", description="description", race="dragon")
@@ -128,6 +129,5 @@ class TestSerializing(unittest.TestCase):
         h.init([hints.Hint("start", None, None, "first")])
 
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     unittest.main()

@@ -63,10 +63,7 @@ class MudObject(object):
 
     def __init__(self, name, title=None, description=None, short_description=None):
         self.init_names(name, title, description, short_description)
-        try:
-            self.aliases = []
-        except AttributeError:
-            pass  # when a subclass turned this into a property
+        self.aliases = set()
         self.verbs = {}   # any custom verbs that need to be registered in the location or in the player (verb->docstring mapping)
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
@@ -327,15 +324,11 @@ class Location(MudObject):
         self.exits.clear()
 
     def add_exits(self, exits):
-        """
-        Adds every exit from the sequence as an exit to this room.
-        It is required that the exits have their direction attribute set.
-        """
+        """Adds every exit from the sequence as an exit to this room."""
         for exit in exits:
-            if exit.direction:
-                self.exits[exit.direction] = exit
-            else:
-                raise ValueError("exit.direction must be specified: " + str(exit))
+            exit.bind(self)
+            # note: we're not simply adding it to the .exits dict here, because
+            # the exit may have aliases defined that it wants to be known as also.
 
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
@@ -495,27 +488,30 @@ _Limbo = Location("Limbo",
 class Exit(MudObject):
     """
     An 'exit' that connects one location to another. It is strictly one-way.
+    Directions can be a single string or a sequence of directions (all meaning the same exit).
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in game.zones.town).
     If using a string, it will be retrieved and bound at runtime.
     Short_description will be shown when the player looks around the room.
     Long_description is optional and will be shown instead if the player examines the exit.
-    Supplying a direction on the exit is optional. It is only required when adding multiple
-    exits on a location by using Location.add_exits().
-    Setting aliases on an exit is not supported, instead you need to register the exit multiple times
-    on the location object with different names.
+    The exit's direction is stored as its name attribute (if more than one, the rest are aliases).
     """
-    def __init__(self, target_location, short_description, long_description=None, direction=None):
-        assert target_location is not None
+    def __init__(self, directions, target_location, short_description, long_description=None):
         assert isinstance(target_location, (Location, util.basestring_type)), "target must be a Location or a string"
+        if isinstance(directions, util.basestring_type):
+            direction = directions
+            aliases = frozenset()
+        else:
+            direction = directions[0]
+            aliases = frozenset(directions[1:])
         self.target = target_location
         self.bound = isinstance(target_location, Location)
-        self.direction = direction      # direction can be None! Don't depend on it!
         if self.bound:
             title = "Exit to " + self.target.title
         else:
             title = "Exit to <unbound:%s>" % self.target
-        super(Exit, self).__init__(title, description=long_description, short_description=short_description)
+        super(Exit, self).__init__(direction, title=title, description=long_description, short_description=short_description)
+        self.aliases = aliases
         try:
             self.description = self.description or self.short_description
         except AttributeError:
@@ -527,9 +523,15 @@ class Exit(MudObject):
         targetname = self.target.name if self.bound else self.target
         return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
 
-    aliases = property(doc="can't use aliases on Exit, use multiple registrations in the location instead")
+    def bind(self, location):
+        """Binds the exit to a location."""
+        assert isinstance(location, Location)
+        directions = self.aliases | {self.name}
+        for direction in directions:
+            assert direction not in location.exits
+            location.exits[direction] = self
 
-    def bind(self, game_zones_module):
+    def _bind_target(self, game_zones_module):
         """
         Binds the exit to the actual target_location object.
         Usually called by the driver before it starts player interaction.
@@ -885,12 +887,12 @@ class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, target_location, short_description, long_description=None, direction=None, locked=False, opened=True):
+    def __init__(self, directions, target_location, short_description, long_description=None, locked=False, opened=True):
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_description or short_description
         self.door_code = None   # you can set this to any code that a key must match to unlock the door
-        super(Door, self).__init__(target_location, short_description, long_description, direction)
+        super(Door, self).__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
 
@@ -909,7 +911,7 @@ class Door(Exit):
     def __repr__(self):
         target = self.target.name if self.bound else self.target
         locked = "locked" if self.locked else "open"
-        return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.direction, target, locked, id(self))
+        return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.name, target, locked, id(self))
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through this door?"""
@@ -926,11 +928,7 @@ class Door(Exit):
         else:
             self.opened = True
             actor.tell("You opened it.")
-            who = lang.capital(actor.title)
-            if self.direction:
-                actor.tell_others("{Title} opened the exit %s." % self.direction)
-            else:
-                actor.tell_others("{Title} opened an exit.")
+            actor.tell_others("{Title} opened the exit %s." % self.name)
 
     def close(self, item, actor):
         """Close the door with optional item. Notifies actor and room of this event."""
@@ -938,11 +936,7 @@ class Door(Exit):
             raise ActionRefused("It's already closed.")
         self.opened = False
         actor.tell("You closed it.")
-        who = lang.capital(actor.title)
-        if self.direction:
-            actor.tell_others("{Title} closed the exit %s." % self.direction)
-        else:
-            actor.tell_others("{Title} closed an exit.")
+        actor.tell_others("{Title} closed the exit %s." % self.name)
 
     def lock(self, item, actor):
         """Lock the door with the proper key."""
@@ -961,11 +955,7 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
         actor.tell("Your %s fits, it is now locked." % key.title)
-        if self.direction:
-            what = "the exit %s" % self.direction
-        else:
-            what = "an exit"
-        actor.tell_others("{Title} locked %s with %s." % (what, lang.a(key.title)))
+        actor.tell_others("{Title} locked the exit %s with %s." % (self.name, lang.a(key.title)))
 
     def unlock(self, item, actor):
         """Unlock the door with the proper key."""
@@ -984,11 +974,7 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
         actor.tell("Your %s fits, it is now unlocked." % key.title)
-        if self.direction:
-            what = "the exit %s" % self.direction
-        else:
-            what = "an exit"
-        actor.tell_others("{Title} unlocked %s with %s." % (what, lang.a(key.title)))
+        actor.tell_others("{Title} unlocked the exit %s with %s." % (self.name, lang.a(key.title)))
 
     def check_key(self, item):
         """Check if the item is a proper key for this door (based on door_code)"""
