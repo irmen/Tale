@@ -818,12 +818,24 @@ class TestSoul(unittest.TestCase):
         allowed = ["hug", "ponder", "wait", "kick", "cough", "greet", "poke", "yawn"]
         remove = ["hug", "kick"]
         verbs = {"frobnizificate": ( tale.soul.SIMP, None, "frobnizes \nHOW \nAT", "at" )}
-        tale.soul.adjust_available_verbs(allowed_verbs=allowed, remove_verbs=remove, add_verbs=verbs)
-        self.assertEqual({"poke"}, tale.soul.AGGRESSIVE_VERBS )
-        self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS )
-        self.assertEqual(set(), tale.soul.MOVEMENT_VERBS )
-        remaining = sorted(tale.soul.VERBS.keys())
-        self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "wait", "yawn"], remaining)
+        # keep original values to put back after tests
+        ORIG_VERBS = tale.soul.VERBS.copy()
+        ORIG_AGGRESSIVE_VERBS = tale.soul.AGGRESSIVE_VERBS.copy()
+        ORIG_NONLIVING_OK_VERBS = tale.soul.NONLIVING_OK_VERBS.copy()
+        ORIG_MOVEMENT_VERBS = tale.soul.MOVEMENT_VERBS.copy()
+        try:
+            tale.soul.adjust_available_verbs(allowed_verbs=allowed, remove_verbs=remove, add_verbs=verbs)
+            self.assertEqual({"poke"}, tale.soul.AGGRESSIVE_VERBS )
+            self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS )
+            self.assertEqual(set(), tale.soul.MOVEMENT_VERBS )
+            remaining = sorted(tale.soul.VERBS.keys())
+            self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "wait", "yawn"], remaining)
+        finally:
+            # restore original values
+            tale.soul.VERBS = ORIG_VERBS
+            tale.soul.AGGRESSIVE_VERBS = ORIG_AGGRESSIVE_VERBS
+            tale.soul.NONLIVING_OK_VERBS = ORIG_NONLIVING_OK_VERBS
+            tale.soul.MOVEMENT_VERBS = ORIG_MOVEMENT_VERBS
 
 
 if __name__ == "__main__":
