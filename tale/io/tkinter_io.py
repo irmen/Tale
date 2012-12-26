@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import threading
 import sys
+import re
 import textwrap
 try:
     from tkinter import *
@@ -49,7 +50,6 @@ class TkinterIo(iobase.IoAdapterBase):
 
     def input(self, prompt=None):
         """Ask the player for immediate input."""
-        prompt = _apply_style(prompt, self.do_styles)
         self.gui.write_line(prompt)
         return self.cmd_queue.get().strip()
 
@@ -90,6 +90,7 @@ class TkinterIo(iobase.IoAdapterBase):
                 txt = self.textwrapper._munge_whitespace(txt) + "\n"
             else:
                 # unformatted paragraph, just copy the text as is ?
+                # @todo do something with monospaced font?
                 pass
             assert txt.endswith("\n")
             output.append(txt)
@@ -98,15 +99,7 @@ class TkinterIo(iobase.IoAdapterBase):
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
         for line in lines:
-            line = _apply_style(line, self.do_styles)
             self.gui.write_line(line)
-
-
-def _apply_style(line, do_styles):      # @TODO
-    """Convert style tags to Tkinter stuff"""
-    if "<" not in line:
-        return line
-    return iobase.strip_text_styles(line)
 
 
 class TaleWindow(Toplevel):
@@ -126,6 +119,8 @@ class TaleWindow(Toplevel):
             self.fontsize_monospace += 3
             self.fontsize_normal += 5
         self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal)
+        self.boldFond = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, weight=tkfont.BOLD)
+        self.underlinedFond = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, underlined=True)
         self.CreateWidgets()
         self.title(title)
         self.protocol("WM_DELETE_WINDOW", self.quit_button_clicked)
@@ -164,19 +159,46 @@ class TaleWindow(Toplevel):
         self.commandEntry.bind('<F1>', self.f1_pressed)
         self.scrollbarView.pack(side=RIGHT, fill=Y)
         self.textView.pack(side=LEFT, expand=TRUE, fill=BOTH)
+        # configure the text tags
         self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon', spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20)
+        self.textView.tag_configure('dim', foreground='brown')
+        self.textView.tag_configure('bright', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('ul', foreground='black', font=self.underlinedFond)
+        self.textView.tag_configure('rev', foreground=self.bg, background=self.fg)
+        self.textView.tag_configure('living', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('player', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('item', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('exit', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('location', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('black', foreground='black')
+        self.textView.tag_configure('red', foreground='red')
+        self.textView.tag_configure('green', foreground='green')
+        self.textView.tag_configure('yellow', foreground='yellow')
+        self.textView.tag_configure('blue', foreground='blue')
+        self.textView.tag_configure('magenta', foreground='magenta')
+        self.textView.tag_configure('cyan', foreground='cyan')
+        self.textView.tag_configure('white', foreground='white')
+        self.textView.tag_configure('bg:black', background='black')
+        self.textView.tag_configure('bg:red', background='red')
+        self.textView.tag_configure('bg:green', background='green')
+        self.textView.tag_configure('bg:yellow', background='yellow')
+        self.textView.tag_configure('bg:blue', background='blue')
+        self.textView.tag_configure('bg:magenta', background='magenta')
+        self.textView.tag_configure('bg:cyan', background='cyan')
+        self.textView.tag_configure('bg:white', background='white')
+
+        # pack
         self.commandPrompt.pack(side=LEFT)
         self.commandEntry.pack(side=LEFT, expand=TRUE, fill=X, ipady=1)
-
         frameText.pack(side=TOP, expand=TRUE, fill=BOTH)
         frameCommands.pack(side=BOTTOM, fill=X)
         self.commandEntry.focus_set()
 
-    def FindFont(self, families, size):
+    def FindFont(self, families, size, weight=tkfont.NORMAL, slant=tkfont.ROMAN, underlined=False):
         fontfamilies = tkfont.families()
         for family in families:
             if family in fontfamilies:
-                return tkfont.Font(family=family, size=size)
+                return tkfont.Font(family=family, size=size, weight=weight, slant=slant, underline=underlined)
         return None
 
     def f1_pressed(self, e):
@@ -186,15 +208,31 @@ class TaleWindow(Toplevel):
 
     def user_cmd(self, e):
         cmd = self.commandEntry.get()
-        self.write_line("")
-        self.write_line(cmd, tag="userinput")
+        self.write_line("", self.gui.io.do_styles)
+        self.write_line("<userinput>%s</>" % cmd, True)
         self.gui.register_cmd(cmd)
         self.commandEntry.delete(0, END)
 
-    def write_line(self, line, tag=None):
-        self.textView.config(state=NORMAL)
-        self.textView.insert(END, line + "\n", tag)
-        self.textView.config(state=DISABLED)
+    def write_line(self, line, do_styles):
+        if do_styles:
+            words = re.split(r"(<\S+?>)", line)
+            self.textView.config(state=NORMAL)
+            tag = None
+            for word in words:
+                match = re.match(r"<(\S+?)>$", word)
+                if match:
+                    tag = match.group(1)
+                    if tag=="/":
+                        tag = None
+                    continue
+                self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
+            self.textView.insert(END, "\n")
+            self.textView.config(state=DISABLED)
+        else:
+            line = iobase.strip_text_styles(line)
+            self.textView.config(state=NORMAL)
+            self.textView.insert(END, line + "\n")
+            self.textView.config(state=DISABLED)
         self.textView.yview(END)
 
     def quit_button_clicked(self, event=None):
@@ -250,12 +288,12 @@ class TaleGUI(object):
 
     def root_process_cmd(self, event):
         line = self.cmd_queue.get()
-        self.window.write_line(line)
+        self.window.write_line(line, self.io.do_styles)
 
     def write_line(self, line):
         self.gui_ready.wait()
         if self.root:
-            # We put the input data in a queue and generate a virtual envent for the Tk root window.
+            # We put the input data in a queue and generate a virtual event for the Tk root window.
             # The event handler runs in the correct thread and grabs the data from the queue.
             self.cmd_queue.put(line)
             self.root.event_generate("<<process_tale_command>>", when='tail')

@@ -1,8 +1,8 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
-[cosmetic,tkinter] implement text styling (instead of stripping it all out)
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
+[tkinter] command history (up/down).
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] Add optional sound clip to locations
 [feature] standalone HTTP server mode with HTML+Javascript frontend.
@@ -44,9 +44,13 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code] 'invisible' objects that the player can examine and manipulate, but not move.
-    They're not mentioned in a 'look' but can be accessed if referenced directly.
+[code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object. (only Items?)
+    They're not mentioned in a general 'look' but can be accessed if referenced directly by name.
+    Other objects/livings descriptions may ofcourse mention them as clues.
     This allows for a car with an engine and doors, where only the car is mentioned in a 'look'.
+    It is lightweight (no logic, only descriptions). Moving the owning object moves all its parts along with it.
+    This requires adding code to all places an item is searched.... (it needs to search the parts too now)
+    Interaction with the part is done by owner object's handle_part_verb?
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
 [cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
@@ -64,12 +68,17 @@ General ideas/TODO:
     (note: less suited for MUDs because other people might interfere with the states)
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
-[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too. (don't use setuptools pkg_resources for that)
-[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell? (Sate Machine = overkill for a simple question state)?
+[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too: use module.__loader__.get_data(...)
+[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?
+    Sate Machine = overkill for a simple question state?
+    But it needs to work eventually in a multi user system...
 [code] prototypes to extend items/npc instead of inheritance?
-[code] Use a DSL to define the basic world stuff? (including ASCII-art parser to easily define mazes/dungeons)
-[test] what happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
-[test] what happens with multiple items of same name in room, in inventory, in bag
+[code] Use a DSL to define the basic world stuff, and convert it to python source
+[test] double names.
+    What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
+    What happens with multiple items of same name in room, in inventory, in bag
+    make a little menu that gives an enumerated choice of the stuff with the same name?
+
 [feature] Change living location logic so that livings can sit inside a container item too.
     Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
     + take <living> can actually work! (take ant, trap rabbit in cage, ...)
