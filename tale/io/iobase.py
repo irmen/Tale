@@ -88,6 +88,7 @@ class IoAdapterBase(object):
     def __init__(self, config):
         self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
         self.do_styles = True
+        self.do_smartquotes = True
         self.supports_smartquotes = True
 
     def get_async_input(self, player):
@@ -110,6 +111,13 @@ class IoAdapterBase(object):
     def destroy(self):
         """Called when the I/O adapter is shut down"""
         pass
+
+    def critical_error(self, message="Critical Error. Shutting down."):
+        """called when the driver encountered a critical error and the session needs to shut down"""
+        import traceback, sys
+        tb = traceback.format_exc()
+        print(message, file=sys.stderr)
+        print(tb, file=sys.stderr)
 
     def input(self, prompt=None):
         """
@@ -146,7 +154,7 @@ class IoAdapterBase(object):
 
     def smartquotes(self, text):
         """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
-        if smartypants and self.supports_smartquotes:
+        if smartypants and self.supports_smartquotes and self.do_smartquotes:
             return unescape_entity(smartypants.smartyPants(text))
         return text
 

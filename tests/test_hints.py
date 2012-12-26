@@ -20,35 +20,35 @@ class TestHints(unittest.TestCase):
         self.assertIsNone(h.hint(self.player))
         h.init([])
         self.assertIsNone(h.hint(self.player))
-        h.state("state1")
+        h.checkpoint("state1")
         self.assertIsNone(h.hint(self.player))
 
-    def test_state(self):
+    def test_checkpoint(self):
         h = HintSystem()
         h.init([
-            Hint("start", None, None, "first"),
-            Hint("state2", None, None, "second"),
-            Hint("state4", None, None, "third"),
+            Hint("start", None, "first"),
+            Hint("state2", None, "second"),
+            Hint("state4", None, "third"),
         ])
         self.assertTrue(h.has_hints())
         self.assertIsNone(h.hint(self.player))
-        h.state("start")
+        h.checkpoint("start")
         self.assertEqual("first", h.hint(self.player))
-        h.state("state1")
+        h.checkpoint("state1")
         self.assertEqual("first", h.hint(self.player))
-        h.state("state2")
+        h.checkpoint("state2")
         self.assertEqual("second", h.hint(self.player))
-        h.state("state3")
+        h.checkpoint("state3")
         self.assertEqual("second", h.hint(self.player))
-        h.state("state4")
+        h.checkpoint("state4")
         self.assertEqual("third", h.hint(self.player))
 
     def test_location(self):
         h = HintSystem()
         h.init([
-            Hint(None, None, None, "first"),
-            Hint(None, "loc1", None, "second"),
-            Hint(None, "loc2", None, "third"),
+            Hint(None, None, "first"),
+            Hint(None, "loc1", "second"),
+            Hint(None, "loc2", "third"),
         ])
         self.assertEqual("first", h.hint(self.player))
         self.player.location = "loc999"
@@ -58,37 +58,40 @@ class TestHints(unittest.TestCase):
         self.player.location = "loc2"
         self.assertEqual("third", h.hint(self.player))
 
-    def test_filter_and_multi(self):
+    def test_active_and_multi(self):
         h = HintSystem()
-        def filter1(states, player):
-            return "1" in states
-        def filter2(states, player):
-            return "2" in states and not "3" in states
-        def filterAll(states, player):
-            return "1" in states and "2" in states and "3" in states and "4" in states
+        class Hint1(Hint):
+            def active(self, checkpoints, player):
+                return "1" in checkpoints
+        class Hint2(Hint):
+            def active(self, checkpoints, player):
+                return "2" in checkpoints and not "3" in checkpoints
+        class Hint3(Hint):
+            def active(self, checkpoints, player):
+                return "1" in checkpoints and  "2" in checkpoints and "3" in checkpoints and "4" in checkpoints
         h.init([
-            Hint(None, None, filter1, "first"),
-            Hint(None, None, filter2, "second"),
-            Hint(None, None, filterAll, "third"),
+            Hint1(None, None, "first"),
+            Hint2(None, None, "second"),
+            Hint3(None, None, "third"),
         ])
         self.assertIsNone(h.hint(self.player))
-        h.state("1")
+        h.checkpoint("1")
         self.assertEqual("first", h.hint(self.player))
-        h.state("2")
+        h.checkpoint("2")
         self.assertEqual("first second", h.hint(self.player))
-        h.state("3")
+        h.checkpoint("3")
         self.assertEqual("first", h.hint(self.player))
-        h.state("4")
+        h.checkpoint("4")
         self.assertEqual("first third", h.hint(self.player))
 
     def test_recap(self):
         h = HintSystem()
         self.assertEqual([], h.recap())
-        h.state("state1", "recap one")
+        h.checkpoint("state1", "recap one")
         self.assertEqual(["recap one"], h.recap())
-        h.state("state1", "recap two")
+        h.checkpoint("state1", "recap two")
         self.assertEqual(["recap one"], h.recap())
-        h.state("state2", "recap three")
+        h.checkpoint("state2", "recap three")
         self.assertEqual(["recap one", "recap three"], h.recap())
 
 

@@ -218,6 +218,7 @@ class Driver(object):
             driver_thread.start()
             self._io_thread_may_start.wait()
             del self._io_thread_may_start
+            time.sleep(0.1)
             while not self._stop_mainloop:
                 try:
                     io_mainloop()
@@ -232,19 +233,23 @@ class Driver(object):
         self.register_global_context()    # re-register because we may be running in a new background thread
         self._io_thread_may_start.set()
         self._stop_mainloop = False
-        self.start_print_game_intro()
-        self.start_create_player()
-        self.start_show_motd()
-        self.player.look(short=False)
-        self.player.write_output()
-        self.start_player_input()
-        while not self._stop_mainloop:
-            try:
-                self.main_loop()
-                break
-            except KeyboardInterrupt:
-                self.player.io.break_pressed(self.player)
-                continue
+        try:
+            self.start_print_game_intro()
+            self.start_create_player()
+            self.start_show_motd()
+            self.player.look(short=False)
+            self.player.write_output()
+            self.start_player_input()
+            while not self._stop_mainloop:
+                try:
+                    self.main_loop()
+                    break
+                except KeyboardInterrupt:
+                    self.player.io.break_pressed(self.player)
+                    continue
+        except:
+            self.player.io.critical_error()
+            self._stop_mainloop = True
 
     def start_print_game_intro(self):
         io = self.player.io
@@ -300,6 +305,7 @@ class Driver(object):
 
             self.player.io = io  # set the I/O adapter for this player
             self.player.io.do_styles = self.player.screen_styles_enabled
+            self.player.io.do_smartquotes = self.player.smartquotes_enabled
             del io
             self.player.tell("\n")
             # move the player to the starting location

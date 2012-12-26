@@ -126,7 +126,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(i1, i2)
     def test_Hints(self):
         h = hints.HintSystem()
-        h.init([hints.Hint("start", None, None, "first")])
+        h.init([hints.Hint("start", None, "first")])
 
 
 if __name__=='__main__':

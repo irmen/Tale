@@ -354,7 +354,7 @@ class Location(MudObject):
 
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
-        paragraphs = ["<location><bright>[" + self.name + "]</>"]
+        paragraphs = ["<location>[" + self.name + "]</>"]
         if short:
             if self.exits:
                 paragraphs.append("<exit>Exits</>: " + ", ".join(sorted(set(self.exits.keys()))))

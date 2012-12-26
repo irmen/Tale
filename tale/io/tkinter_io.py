@@ -36,6 +36,15 @@ class TkinterIo(iobase.IoAdapterBase):
         self.player = None
         self.textwrapper = textwrap.TextWrapper()
 
+    def critical_error(self, message="Critical Error. Shutting down."):
+        """called when the driver encountered a critical error and the session needs to shut down"""
+        super(TkinterIo, self).critical_error(message)
+        import traceback
+        tb = traceback.format_exc()
+        self.output("<bright><red>%s</>\n" % message)
+        self.output("<rev>"+tb+"</>")
+        self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
+
     def mainloop_threads(self, driver_mainloop):
         driver_thread = threading.Thread(name="driver", target=driver_mainloop)
         driver_thread.daemon = True
@@ -169,7 +178,7 @@ class TaleWindow(Toplevel):
         self.textView.tag_configure('player', foreground='black', font=self.boldFond)
         self.textView.tag_configure('item', foreground='black', font=self.boldFond)
         self.textView.tag_configure('exit', foreground='black', font=self.boldFond)
-        self.textView.tag_configure('location', foreground='black', font=self.boldFond)
+        self.textView.tag_configure('location', foreground='navy', font=self.boldFond)
         self.textView.tag_configure('black', foreground='black')
         self.textView.tag_configure('red', foreground='red')
         self.textView.tag_configure('green', foreground='green')

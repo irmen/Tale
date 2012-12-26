@@ -52,8 +52,8 @@ class Story(object):
         You can set the hint texts on the player object, or change the state object, etc.
         """
         player.hints.init([
-            Hint(None, None, None, "Find a way to open the door that leads to the exit of the game."),
-            Hint("unlocked_enddoor", None, None, "Step out through the door into the freedom!")
+            Hint(None, None, "Find a way to open the door that leads to the exit of the game."),
+            Hint("unlocked_enddoor", None, "Step out through the door into the freedom!")
         ])
 
     def welcome(self, player):

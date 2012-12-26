@@ -1370,6 +1370,8 @@ def do_config(player, parsed, ctx):
                 raise ActionRefused("Invalid screen width, range is 40..200")
         elif param == "styles":
             player.screen_styles_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
+        elif param == "smartquotes":
+            player.smartquotes_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
         else:
             raise ActionRefused("Invalid parameter name.")
         player.tell("Configuration modified.", end=True)
@@ -1378,6 +1380,7 @@ def do_config(player, parsed, ctx):
     player.tell("  delay <dim>(output line delay) =</> %d" % player.io.output_line_delay, format=False)
     player.tell("  width <dim>(screen width) =</> %d" % player.screen_width, format=False)
     player.tell("  styles <dim>(enable text styles) =</> %s" % player.screen_styles_enabled, format=False)
+    player.tell("  smartquotes <dim>(use typographic quotes) =</> %s" % player.smartquotes_enabled, format=False)
 
 
 @cmd("hint")

@@ -139,7 +139,9 @@ class EndDoor(Door):
     def unlock(self, item, actor):
         super(EndDoor, self).unlock(item, actor)
         if not self.locked:
-            actor.hints.state("unlocked_enddoor", "The way to freedom lies before you!")
+            if "unlocked_enddoor" not in actor.hints.checkpoints:
+                globalcontext.mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+            actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
 end_door.door_code = 999
@@ -245,12 +247,13 @@ computer.verbs = {
 }
 alley.insert(computer, None)
 
-
 class DoorKey(Item):
     def notify_moved(self, source_container, target_container, actor):
         player = globalcontext.mud_context.player
         if target_container is player or target_container in player:
-            player.hints.state("got_doorkey", "You've found something that might open the exit.")
+            if "got_doorkey" not in actor.hints.checkpoints:
+                globalcontext.mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+            player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
 
 doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
 doorkey.door_code = end_door.door_code
