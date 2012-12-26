@@ -250,6 +250,7 @@ class Driver(object):
         except:
             self.player.io.critical_error()
             self._stop_mainloop = True
+            raise
 
     def start_print_game_intro(self):
         io = self.player.io
