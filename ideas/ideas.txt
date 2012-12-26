@@ -54,6 +54,7 @@ General ideas/TODO:
 [cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
 [code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
+[code] use yield (generators) for player command processing? should make it a lot easier to build conversational state, and yes/no question dialogs...
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [code] Make sure all console input() is always done from the same thread? (fixes pypy crash)
 [cosmetic,gui] Font selection dialog for Io adapters that support it (tkinter, html)
@@ -63,14 +64,12 @@ General ideas/TODO:
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
     <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
-[code] Finite-state-machine to support multi-phase actions (such as a short dialog with an npc)?
-    (note: less suited for MUDs because other people might interfere with the states)
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
 [feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too: use module.__loader__.get_data(...)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?
-    Sate Machine = overkill for a simple question state?
-    But it needs to work eventually in a multi user system...
+    Sate Machine = overkill for a simple question state?   So.... yield? (http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/)
+    And it needs to work eventually in a multi user system...
 [code] prototypes to extend items/npc instead of inheritance?
 [code] Use a DSL to define the basic world stuff, and convert it to python source
 [test] double names.
