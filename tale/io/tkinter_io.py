@@ -9,6 +9,7 @@ import threading
 import sys
 import re
 import textwrap
+import collections
 try:
     from tkinter import *
     import tkinter.font as tkfont
@@ -143,6 +144,10 @@ class TaleWindow(Toplevel):
 
         with vfs.vfs.open_read("io/quill_pen_paper.ico") as icon:
             self.iconbitmap(icon.name)
+
+        self.history = collections.deque(maxlen=100)
+        self.history.append("")
+        self.history_idx = 0
         if modal:
             self.transient(parent)
             self.grab_set()
@@ -166,6 +171,8 @@ class TaleWindow(Toplevel):
         self.commandEntry.bind('<Extended-Return>', self.user_cmd)
         self.commandEntry.bind('<KP_Enter>', self.user_cmd)
         self.commandEntry.bind('<F1>', self.f1_pressed)
+        self.commandEntry.bind('<Up>', self.up_pressed)
+        self.commandEntry.bind('<Down>', self.down_pressed)
         self.scrollbarView.pack(side=RIGHT, fill=Y)
         self.textView.pack(side=LEFT, expand=TRUE, fill=BOTH)
         # configure the text tags
@@ -215,12 +222,27 @@ class TaleWindow(Toplevel):
         self.commandEntry.insert(0, "help")
         self.commandEntry.event_generate("<Return>")
 
+    def up_pressed(self, e):
+        self.history_idx = max(0, self.history_idx-1)
+        if self.history_idx < len(self.history):
+            self.commandEntry.delete(0, END)
+            self.commandEntry.insert(0, self.history[self.history_idx])
+
+    def down_pressed(self, e):
+        self.history_idx = min(len(self.history) - 1, self.history_idx+1)
+        if self.history_idx < len(self.history):
+            self.commandEntry.delete(0, END)
+            self.commandEntry.insert(0, self.history[self.history_idx])
+
     def user_cmd(self, e):
         cmd = self.commandEntry.get()
         self.write_line("", self.gui.io.do_styles)
         self.write_line("<userinput>%s</>" % cmd, True)
         self.gui.register_cmd(cmd)
         self.commandEntry.delete(0, END)
+        if cmd != self.history[-1]:
+            self.history.append(cmd)
+        self.history_idx = len(self.history)
 
     def write_line(self, line, do_styles):
         if do_styles:

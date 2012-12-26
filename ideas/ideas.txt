@@ -2,7 +2,7 @@ Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
 [cosmetic,tkinter] show non-formatted paragraphs in monospaced font
-[tkinter] command history (up/down).
+[BUG] tkinter doesn't stop anymore when app is exited (caused by critical error handler???)   (alt-f4)
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] Add optional sound clip to locations
 [feature] standalone HTTP server mode with HTML+Javascript frontend.
