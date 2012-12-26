@@ -331,3 +331,11 @@ class TaleGUI(object):
 
     def register_cmd(self, cmd):
         self.io.cmd_queue.put(cmd)
+
+
+def show_error_dialog(title, message):
+    """show a modal error dialog"""
+    root=Tk()
+    root.withdraw()
+    tkmsgbox.showerror(title, message)
+    root.destroy()

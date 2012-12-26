@@ -151,6 +151,17 @@ class Driver(object):
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         args = parser.parse_args(args)
+        try:
+            self._start(args)
+        except Exception:
+            if args.gui:
+                import traceback
+                tb = traceback.format_exc()
+                from .io import tkinter_io
+                tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n"+tb)
+            raise
+
+    def _start(self, args):
         if 0 <= args.delay <= 100:
             output_line_delay = args.delay
         else:
