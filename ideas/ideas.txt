@@ -44,6 +44,8 @@ General ideas/TODO:
     (code contains a workaround for the time being: readline not enabled on pypy)
 
 [code] Add more items to items.basic
+    (such as an extensible generic box-like item that you need to open/close to put stuff in)
+    Take ideas from objects in other mudlibs
 [code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object. (only Items?)
     They're not mentioned in a general 'look' but can be accessed if referenced directly by name.
     Other objects/livings descriptions may ofcourse mention them as clues.
