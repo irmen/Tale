@@ -2,113 +2,113 @@
 Tale API
 ********
 
-Base classes
-------------
+:mod:`tale.base` --- Base classes
+---------------------------------
 .. automodule:: tale.base
     :members:
 
-Character builder
------------------
+:mod:`tale.charbuilder` --- Character builder
+---------------------------------------------
 .. automodule:: tale.charbuilder
     :members:
 
-Game driver
------------
+:mod:`tale.driver` --- Game driver/server
+-----------------------------------------
 .. automodule:: tale.driver
     :members:
 
-Exceptions
-----------
+:mod:`tale.errors` --- Exceptions
+---------------------------------
 .. automodule:: tale.errors
     :members:
 
-Global context
---------------
+:mod:`tale.globalcontext` --- Global context
+--------------------------------------------
 .. automodule:: tale.globalcontext
     :members:
 
-Hint system
------------
+:mod:`tale.hints` --- Hint system
+---------------------------------
 .. automodule:: tale.hints
     :members:
 
-Language utilities
-------------------
+:mod:`tale.lang` --- Language utilities
+---------------------------------------
 .. automodule:: tale.lang
     :members:
 
-Non-player Characters
----------------------
+:mod:`tale.npc` --- Non-player Characters
+-----------------------------------------
 .. automodule:: tale.npc
     :members:
 
-Players
--------
+:mod:`tale.player` --- Players
+------------------------------
 .. automodule:: tale.player
     :members:
 
-Races and creature attributes
------------------------------
+:mod:`tale.races` --- Races and creature attributes
+---------------------------------------------------
 .. automodule:: tale.races
     :members:
 
-Soul command parser
--------------------
+:mod:`tale.soul` --- Soul command parser
+----------------------------------------
 .. automodule:: tale.soul
     :members:
 
-Generic utilities
------------------
+:mod:`tale.util` --- Generic utilities
+--------------------------------------
 .. automodule:: tale.util
     :members:
 
-In-game commands
-----------------
+:mod:`tale.cmds` --- In-game commands
+-------------------------------------
 .. automodule:: tale.cmds
     :members:
 
-Command definition utilities
-----------------------------
+:mod:`tale.cmds.decorators` --- Command definition utilities
+------------------------------------------------------------
 .. automodule:: tale.cmds.decorators
     :members:
 
-Normal commands
----------------
+:mod:`tale.cmds.normal` --- Normal player commands
+--------------------------------------------------
 .. automodule:: tale.cmds.normal
     :members:
 
-Wizard commands
----------------
+:mod:`tale.cmds.wizard` --- Wizard commands
+-------------------------------------------
 .. automodule:: tale.cmds.wizard
     :members:
 
-Base classes for I/O
---------------------
+:mod:`tale.io.iobase` --- Base classes for I/O
+----------------------------------------------
 .. automodule:: tale.io.iobase
     :members:
 
-Text-console I/O
-----------------
+:mod:`tale.io.console_io` --- Text-console I/O
+----------------------------------------------
 .. automodule:: tale.io.console_io
     :members:
 
-Tkinter GUI I/O
----------------
+:mod:`tale.io.tkinter_io` --- Tkinter GUI I/O
+---------------------------------------------
 .. automodule:: tale.io.tkinter_io
     :members:
 
-Text wrapping
--------------
+:mod:`tale.io.styleaware_wrapper` --- Text wrapping
+---------------------------------------------------
 .. automodule:: tale.io.styleaware_wrapper
     :members:
 
-Virtual File System
--------------------
+:mod:`tale.io.vfs` --- Virtual File System
+------------------------------------------
 .. automodule:: tale.io.vfs
     :members:
 
-Item definitions
-----------------
+:mod:`tale.items.basic` --- Item definitions
+--------------------------------------------
 .. automodule:: tale.items.basic
     :members:
 
