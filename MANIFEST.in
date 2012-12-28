@@ -3,6 +3,7 @@ include MANIFEST.in
 recursive-include tests *
 recursive-include ideas *
 recursive-include stories *
+recursive-include docs *
 prune sandbox
 prune stories/zed_is_me
 exclude stories/play_zed_is_me*
