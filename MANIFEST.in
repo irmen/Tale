@@ -1,5 +1,7 @@
 include LICENSE.txt
 include MANIFEST.in
+include tale/soul_adverbs.txt
+include tale/io/quill_pen_paper.ico
 recursive-include tests *
 recursive-include ideas *
 recursive-include stories *
