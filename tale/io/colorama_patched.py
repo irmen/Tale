@@ -33,7 +33,14 @@ if colorama.win32.windll is not None:
             term._fore, term._back = term._back, term._fore
             term.set_console(on_stderr=on_stderr)
 
+    __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
+    def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
+        if type(char) is int:
+            char = chr(char)
+        __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
+
     import colorama.initialise
+    colorama.win32.FillConsoleOutputCharacter = Monkeypatched_FillConsoleOutputCharacter
     colorama.ansitowin32.AnsiToWin32 = MonkeypatchedAnsiToWin32
     colorama.initialise.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32
     colorama.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32
@@ -42,6 +49,7 @@ from colorama import *
 
 if __name__ == "__main__":
     colorama.init()
+    print("\x1b[1;1H\x1b[2J-----------------colorama test----------------")
     print(colorama.Style.BRIGHT + "bright" + colorama.Style.RESET_ALL)
     print(colorama.Style.UNDERLINED + "underlined" + colorama.Style.RESET_ALL)
     print(colorama.Style.BLINK + "blink" + colorama.Style.RESET_ALL)

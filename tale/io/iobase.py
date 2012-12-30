@@ -112,6 +112,10 @@ class IoAdapterBase(object):
         """Called when the I/O adapter is shut down"""
         pass
 
+    def clear_screen(self):
+        """Clear the screen"""
+        pass
+
     def critical_error(self, message="Critical Error. Shutting down."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         import traceback, sys

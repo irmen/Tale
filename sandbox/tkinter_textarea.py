@@ -41,7 +41,8 @@ class TextViewer(Toplevel):
         frameText = Frame(self, relief=SUNKEN, height=700)
         frameCommands = Frame(self, relief=SUNKEN)
         frameButtons = Frame(self)
-        self.buttonOk = Button(frameButtons, text='Close', command=self.Ok, takefocus=FALSE)
+        self.buttonOk = Button(frameButtons, text='Close', command=lambda b=1: self.Ok(b), takefocus=FALSE)
+        self.buttonTwo = Button(frameButtons, text='Close2', command=lambda b=2: self.Ok(b), takefocus=FALSE)
         self.scrollbarView = Scrollbar(frameText, orient=VERTICAL, takefocus=FALSE, highlightthickness=0)
         self.textView = Text(frameText, wrap=WORD, highlightthickness=0, fg=self.fg, bg=self.bg, font=self.font, padx=8, pady=8)
         self.scrollbarView.config(command=self.textView.yview)
@@ -58,6 +59,7 @@ class TextViewer(Toplevel):
         self.commandEntry.bind('<KP_Enter>',self.user_cmd)
         self.commandEntry.bind('<F1>', self.f1_pressed)
         self.buttonOk.pack()
+        self.buttonTwo.pack()
         self.scrollbarView.pack(side=RIGHT,fill=Y)
         self.textView.pack(side=LEFT,expand=TRUE,fill=BOTH)
         self.commandPrompt.pack(side=LEFT)
@@ -90,7 +92,8 @@ class TextViewer(Toplevel):
         self.commandEntry.delete(0, END)
 
 
-    def Ok(self, event=None):
+    def Ok(self, button):
+        print("button:",button)
         self.destroy()
 
 

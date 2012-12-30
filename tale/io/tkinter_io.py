@@ -37,6 +37,10 @@ class TkinterIo(iobase.IoAdapterBase):
         self.player = None
         self.textwrapper = textwrap.TextWrapper()
 
+    def clear_screen(self):
+        """Clear the screen"""
+        self.gui.clear_screen()
+
     def critical_error(self, message="Critical Error. Shutting down."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         super(TkinterIo, self).critical_error(message)
@@ -244,6 +248,11 @@ class TaleWindow(Toplevel):
             self.history.append(cmd)
         self.history_idx = len(self.history)
 
+    def clear_text(self):
+        self.textView.config(state=NORMAL)
+        self.textView.delete(1.0, END)
+        self.textView.config(state=DISABLED)
+
     def write_line(self, line, do_styles):
         if do_styles:
             words = re.split(r"(<\S+?>)", line)
@@ -290,7 +299,8 @@ class TaleGUI(object):
         )
         self.root.title(window_title)
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
-        self.window = TaleWindow(self, self.root, window_title, "\n\n")
+        self.root.bind("<<clear_tale_screen>>", self.root_clear_screen)
+        self.window = TaleWindow(self, self.root, window_title, "")
         self.gui_ready = threading.Event()
         self.root.withdraw()
         self.root.update()
@@ -320,6 +330,13 @@ class TaleGUI(object):
     def root_process_cmd(self, event):
         line = self.cmd_queue.get()
         self.window.write_line(line, self.io.do_styles)
+
+    def root_clear_screen(self, event):
+        self.window.clear_text()
+
+    def clear_screen(self):
+        if self.root:
+            self.root.event_generate("<<clear_tale_screen>>", when='tail')
 
     def write_line(self, line):
         self.gui_ready.wait()

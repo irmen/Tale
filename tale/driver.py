@@ -145,7 +145,12 @@ class Driver(object):
 
     def start(self, args):
         # parse args
-        parser = argparse.ArgumentParser(description='Parse driver arguments.')
+        parser = argparse.ArgumentParser(description=
+            """
+            Tale framework %s game driver. Use this to launch a game and specify some settings.
+            Sometimes the game will provide its own startup script that invokes this automatically.
+            If it doesn't, refer to the options to see how to launch it manually instead.
+            """ % tale_version_str)
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
@@ -218,6 +223,7 @@ class Driver(object):
             from .io.console_io import ConsoleIo as IoAdapter
         self.player.io = IoAdapter(self.config)
         self.player.io.output_line_delay = output_line_delay
+        self.player.io.clear_screen()
         driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)
         self._io_thread_may_start = threading.Event()
         if driver_thread is None:

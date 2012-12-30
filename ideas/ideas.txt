@@ -66,7 +66,7 @@ General ideas/TODO:
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
     <line>   add a horizontal line break.
     <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
-    <clear>  clears the screen (needs fix for http://code.google.com/p/colorama/issues/detail?id=35)
+    <clear>  clears the screen
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
 [feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too: use module.__loader__.get_data(...)

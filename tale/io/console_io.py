@@ -72,6 +72,10 @@ class ConsoleIo(iobase.IoAdapterBase):
         except (UnicodeEncodeError, TypeError):
             self.supports_smartquotes = False
 
+    def clear_screen(self):
+        """Clear the screen"""
+        print("\033[1;1H\033[2J", end="")
+
     def input(self, prompt=None):
         """
         Ask the player for immediate input. The input is not stored, but returned immediately.
