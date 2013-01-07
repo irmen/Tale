@@ -288,6 +288,7 @@ class TaleWindow(Toplevel):
 class TaleGUI(object):
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
+        self.gui_ready = threading.Event()
         self.io = io
         self.server_config = config
         self.cmd_queue = queue.Queue()
@@ -301,12 +302,13 @@ class TaleGUI(object):
         self.root.bind("<<process_tale_command>>", self.root_process_cmd)
         self.root.bind("<<clear_tale_screen>>", self.root_clear_screen)
         self.window = TaleWindow(self, self.root, window_title, "")
-        self.gui_ready = threading.Event()
         self.root.withdraw()
         self.root.update()
 
     def mainloop(self):
-        self.root.after(100, lambda: self.gui_ready.set())
+        def signal_gui_ready():
+            self.root.after_idle(lambda: self.gui_ready.set())
+        self.root.after(200, signal_gui_ready)
         self.root.mainloop()
         self.window = None
         self.root = None

@@ -5,6 +5,7 @@ Monkeypatch colorama to support a few additional text styles
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
+import sys
 import colorama
 import colorama.ansi
 import colorama.winterm
@@ -35,8 +36,9 @@ if colorama.win32.windll is not None:
 
     __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
     def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
-        if type(char) is int:
-            char = chr(char)
+        if sys.version_info < (3,0):
+            if type(char) is int:
+                char = chr(char)
         __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
 
     import colorama.initialise
