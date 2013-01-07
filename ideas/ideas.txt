@@ -38,11 +38,16 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[BUG] colorama fillconsole crashes on python3.3 when converting the space using TCHAR ("one character string expected")
+[BUG] Sometimes the Tkinter gui crashes at startup (text event gets delivered before GUI is initialized??)
 [BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => "the verb sayt is unrecognised"
 [BUG] on python3.3, blinker signals aren't removed properly (!wiretap -clear doesn't work)
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
+[code, API] path-finding: GOTO <location/living/item> (must have examined it before, to remember it. See also next idea).
+[code, API] search/find: keep track of stuff you've encountered and mention that if the player searches for something
+    (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
 [code] Add more items to items.basic
     (such as an extensible generic box-like item that you need to open/close to put stuff in)
     Take ideas from objects in other mudlibs

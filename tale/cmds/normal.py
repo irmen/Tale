@@ -68,7 +68,7 @@ def do_inventory(player, parsed, ctx):
         player.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
 
 
-@cmd("locate", "search")
+@cmd("locate", "search", "find")
 def do_locate(player, parsed, ctx):
     """Try to locate a specific item, creature or player."""
     p = player.tell
