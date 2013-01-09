@@ -10,9 +10,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 if __name__=="__main__":
     # story is invoked as a script, start it in the Tale Driver.
+    import sys
     from tale.driver import Driver
     driver = Driver()
-    driver.start(["-g", "."])
+    driver.start(["-g", sys.path[0]])
     raise SystemExit(0)
 
 

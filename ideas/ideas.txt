@@ -43,7 +43,7 @@ General ideas/TODO:
 [BUG] when using readline, pypy crashes due to input being done from different threads (https://bugs.pypy.org/issue1349)
     (code contains a workaround for the time being: readline not enabled on pypy)
 
-[code, API] path-finding: GOTO <location/living/item> (must have examined it before, to remember it. See also next idea).
+[code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
 [code] Add more items to items.basic
