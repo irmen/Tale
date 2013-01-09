@@ -274,12 +274,12 @@ class Driver(object):
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
-            io.output("\n<bright>" + banner + "</>\n")
+            io.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
         except IOError:
             # no banner provided by the game, print default game header
             io.output("")
             io.output("")
-            io.output("<bright>")
+            io.output("<monospaced><bright>")
             msg = "'%s'" % self.config.name
             io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
@@ -289,7 +289,7 @@ class Driver(object):
             io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
                 io.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
-            io.output("</>")
+            io.output("</></monospaced>")
             io.output("")
 
     def start_create_player(self):

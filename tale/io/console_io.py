@@ -48,7 +48,9 @@ style_colors = {
     "player": colorama.Style.BRIGHT,
     "item": colorama.Style.BRIGHT,
     "exit": colorama.Style.BRIGHT,
-    "location": colorama.Style.BRIGHT
+    "location": colorama.Style.BRIGHT,
+    "monospaced": "",  # we assume the console is already monospaced font
+    "/monospaced": ""
 }
 assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
 

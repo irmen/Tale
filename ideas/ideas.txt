@@ -1,7 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
-[cosmetic,tkinter] show non-formatted paragraphs in monospaced font
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] Add optional sound clip to locations
 [feature] standalone HTTP server mode with HTML+Javascript frontend.
@@ -57,7 +56,7 @@ General ideas/TODO:
     This requires adding code to all places an item is searched.... (it needs to search the parts too now)
     Interaction with the part is done by owner object's handle_part_verb?
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
-[cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).
+[cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).  (remove hardcoded <monospaced> from banner then)
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
 [code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code] use yield (generators) for player command processing? should make it a lot easier to build conversational state, and yes/no question dialogs...
@@ -67,8 +66,7 @@ General ideas/TODO:
 [cosmetic,gui] Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
 [cosmetic] Extra text style tags?
     <center> text style which centers the line(s) on the screen. (paragraph-level? just like 'formatted'?)
-    <line>   add a horizontal line break.
-    <unf>    force a new unformatted paragraph (i.e. use monospace font, don't wrap/justify text)
+    <unf>    force a new unformatted paragraph?
     <clear>  clears the screen
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.

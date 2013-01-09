@@ -103,8 +103,7 @@ class TkinterIo(iobase.IoAdapterBase):
                 # formatted output, munge whitespace (like the console text output does)
                 txt = self.textwrapper._munge_whitespace(txt) + "\n"
             else:
-                # unformatted paragraph, just copy the text as is ?
-                # @todo do something with monospaced font?
+                # unformatted paragraph, just leave the text as-is (don't textwrap it)
                 pass
             assert txt.endswith("\n")
             output.append(txt)
@@ -190,6 +189,7 @@ class TaleWindow(Toplevel):
         self.textView.tag_configure('item', foreground='black', font=self.boldFond)
         self.textView.tag_configure('exit', foreground='black', font=self.boldFond)
         self.textView.tag_configure('location', foreground='navy', font=self.boldFond)
+        self.textView.tag_configure('monospaced', font=fixedFont)
         self.textView.tag_configure('black', foreground='black')
         self.textView.tag_configure('red', foreground='red')
         self.textView.tag_configure('green', foreground='green')
@@ -262,7 +262,13 @@ class TaleWindow(Toplevel):
                 match = re.match(r"<(\S+?)>$", word)
                 if match:
                     tag = match.group(1)
-                    if tag=="/":
+                    if tag=="monospaced":
+                        self.textView.mark_set("begin_monospaced", INSERT)
+                        self.textView.mark_gravity("begin_monospaced", LEFT)
+                    elif tag=="/monospaced":
+                        self.textView.tag_add("monospaced", "begin_monospaced", INSERT)
+                        tag = None
+                    elif tag=="/":
                         tag = None
                     continue
                 self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
