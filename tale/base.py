@@ -146,6 +146,10 @@ class MudObject(object):
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
+    def combine(self, other, actor):
+        # combine the other item with us
+        raise ActionRefused("You can't combine these.")
+
     def read(self, actor):
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")

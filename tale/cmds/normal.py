@@ -252,6 +252,20 @@ def do_put(player, parsed, ctx):
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
+@cmd("combine")
+def do_combine(player, parsed, ctx):
+    """Combine two items you are carrying."""
+    if len(parsed.who_info) != 2:
+        raise ParseError("Combine what with what?")
+    item1, item2 = tuple(parsed.who_info)
+    if item1 not in player or item2 not in player:
+        raise ActionRefused("You are not carrying both, try to pick them up first.")
+    try:
+        item2.combine(item1, player)
+    except ActionRefused:
+        item1.combine(item2, player)
+
+
 @cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, ctx):
     """Take something (or all things) from something or someone else. Stealing and robbing is frowned upon, to say the least."""
@@ -1041,6 +1055,12 @@ def do_use(player, parsed, ctx):
     if not parsed.who_order:
         raise ActionRefused("Use what?")
     if len(parsed.who_order) > 1:
+        # check if there are exactly 2 items mentioned that the player is carrying, assume 'combine' in that case
+        if len(parsed.who_info)==2:
+            item1, item2 = tuple(parsed.who_info)
+            if item1 in player and item2 in player:
+                player.tell("<dim>(It is assumed that you want to combine them.)</>")
+                return do_combine(player, parsed, ctx)
         subj = "them"
     else:
         who = parsed.who_order[0]
