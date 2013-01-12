@@ -145,8 +145,10 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
-        with vfs.vfs.open_read("io/quill_pen_paper.ico") as icon:
-            self.iconbitmap(icon.name)
+        with vfs.vfs.open_read("io/quill_pen_paper.gif") as icon:
+            img = PhotoImage(file=icon.name)
+            self.tk.call('wm', 'iconphoto', self, img)
+            #self.iconbitmap(name)
 
         self.history = collections.deque(maxlen=100)
         self.history.append("")
