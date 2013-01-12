@@ -21,7 +21,7 @@ setup_args = dict(
     packages=['tale', 'tale.cmds', 'tale.items', 'tale.io', 'tale.demo', 'tale.demo.zones'],
     package_data={
         'tale': ['soul_adverbs.txt'],
-        'tale.io': ['quill_pen_paper.ico']
+        'tale.io': ['quill_pen_paper.ico', 'quill_pen_paper.gif']
     },
     url='http://packages.python.org/tale',
     license='GPL v3',
