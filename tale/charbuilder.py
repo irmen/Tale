@@ -14,10 +14,12 @@ from . import util
 class PlayerNaming(object):
     wizard = False
     name = title = gender = race = description = None
+    money = 0.0
 
     def apply_to(self, player):
         player.init_race(self.race, self.gender)
         player.init_names(self.name, self.title, self.description, None)
+        player.money = self.money
         if self.wizard:
             player.privileges.add("wizard")
         else:
@@ -61,6 +63,7 @@ class CharacterBuilder(object):
         naming.gender = "m"
         naming.race = "human"
         naming.title = "arch wizard " + lang.capital(naming.name)
+        naming.money = 40.35
         return naming
 
     def create_default_player(self):
@@ -71,4 +74,5 @@ class CharacterBuilder(object):
         naming.description = "A regular person."
         naming.gender = "m"
         naming.race = "human"
+        naming.money = 0.0
         return naming

@@ -71,7 +71,10 @@ class MudObject(object):
         self.init()
 
     def init(self):
-        """Secondary initialization/customization. You can easily override this in a subclass."""
+        """
+        Secondary initialization/customization. Invoked after all required initialization has been done.
+        You can easily override this in a subclass.
+        """
         pass
 
     def init_names(self, name, title, description, short_description):
@@ -115,7 +118,7 @@ class MudObject(object):
 
     def show_inventory(self, actor, ctx):
         """show the object's inventory to the actor"""
-        raise ActionRefused("Can't find %s." % self.name)
+        raise ActionRefused("You can't look inside of that.")
 
     def register_heartbeat(self):
         """register this object with the driver to receive heartbeats"""
@@ -168,8 +171,8 @@ class Item(MudObject):
     Root class of all Items in the mud world. Items are physical objects.
     Items can usually be moved, carried, or put inside other items.
     They have a name and optional short and longer descriptions.
-    You can test for containment with 'in': item in bag (but the containment
-    is always empty and so it will always return False for a regular Item)
+    Regular items cannot contain other things, so it makes to sense
+    to check containment.
     """
     def init(self):
         self.contained_in = None
@@ -265,6 +268,7 @@ class Item(MudObject):
         self.destroy(ctx)
 
     def show_inventory(self, actor, ctx):
+        """show the object's contents to the actor"""
         if self.inventory:
             actor.tell("It contains:", end=True)
             for item in self.inventory:
@@ -605,6 +609,12 @@ class Living(MudObject):
         self.objective = lang.OBJECTIVE[self.gender]
         self.race = race
 
+    def init_inventory(self, items):
+        """Set the living's initial inventory"""
+        assert len(self.__inventory) == 0
+        for item in items:
+            self.insert(item, self)
+
     def __getstate__(self):
         state = dict(self.__dict__)
         return state
@@ -671,6 +681,7 @@ class Living(MudObject):
         self.destroy(ctx)
 
     def show_inventory(self, actor, ctx):
+        """show the living's inventory to the actor"""
         name = lang.capital(self.title)
         if self.inventory:
             actor.tell(name, "is carrying:", end=True)
@@ -678,15 +689,17 @@ class Living(MudObject):
                 actor.tell("  " + item.title, format=False)
         else:
             actor.tell(name, "is carrying nothing.")
-        actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
+        if ctx.config.money_type:
+            actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
 
-    def tell(self, *messages):
+    def tell(self, *messages, **kwargs):
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
         livings the default is to do nothing.
         They could react on it but this is not advisable because you will need
         to parse the string again to figure out what happened...
+        kwargs is ignored for Livings.
         """
         tap = blinker.signal("wiretap")
         for msg in messages:
@@ -840,7 +853,7 @@ class Container(Item):
     """
     def init(self):
         super(Container, self).init()
-        self.__inventory = set()  # override the frozenset() from Item to allow true containment here
+        self.__inventory = set()
 
     def init_inventory(self, items):
         """Set the container's initial inventory"""
@@ -848,15 +861,6 @@ class Container(Item):
         self.__inventory = set(items)
         for item in items:
             item.contained_in = self
-
-    @property
-    def title(self):
-        if isinstance(self.contained_in, Living):
-            if self.__inventory:
-                return self._title + " <dim>(containing things)</>"
-            else:
-                return self._title + " <dim>(empty)</>"
-        return self._title
 
     @property
     def inventory(self):

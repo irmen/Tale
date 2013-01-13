@@ -8,10 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals
 import unittest
 import datetime
+import blinker
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
-from tale.util import Context
+from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
@@ -446,6 +447,45 @@ class TestLiving(unittest.TestCase):
         self.assertEqual("its", living.possessive)
         self.assertEqual("it", living.subjective)
         self.assertEqual("n", living.gender)
+    def test_tell(self):
+        messages=[]
+        def collector(sender, message):
+            messages.append(message)
+        tap = blinker.signal("wiretap")
+        tap.connect(collector)
+        julie = Living("julie", "f", race="human")
+        julie.tell("msg1", "msg2")
+        julie.tell("msg3", "msg4", ignored_arg=42)
+        self.assertEqual(["msg1", "msg2", "msg3", "msg4"], messages)
+    def test_show_inventory(self):
+        messages=[]
+        def collector(sender, message):
+            messages.append(message)
+        tap = blinker.signal("wiretap")
+        tap.connect(collector)
+        class Ctx(object):
+            class Config(object):
+                pass
+            config = Config()
+        class MoneyDriverDummy(object):
+            pass
+        ctx=Ctx()
+        ctx.config.money_type = "modern"
+        ctx.driver = MoneyDriverDummy()
+        ctx.driver.moneyfmt = MoneyFormatter(ctx.config.money_type)
+        julie = Living("julie", "f", race="human")
+        item1 = Item("key")
+        julie.init_inventory([item1])
+        julie.money = 9.23
+        julie.show_inventory(julie, ctx)
+        text = " ".join(msg.strip() for msg in messages)
+        self.assertEqual("Julie is carrying: key Money in possession: 9 dollar and 23 cent.", text)
+        ctx.config.money_type = None
+        ctx.driver.moneyfmt = None
+        messages=[]
+        julie.show_inventory(julie, ctx)
+        text = " ".join(msg.strip() for msg in messages)
+        self.assertEqual("Julie is carrying: key", text)
 
 
 class TestNPC(unittest.TestCase):
@@ -677,11 +717,11 @@ class TestContainer(unittest.TestCase):
         self.assertEqual("a small leather bag", bag.description)
         bag.move(player, player)
         self.assertEqual("bag", bag.name)
-        self.assertEqual("leather bag (empty)", strip_text_styles(bag.title))
+        self.assertEqual("leather bag", strip_text_styles(bag.title))
         self.assertEqual("a small leather bag", strip_text_styles(bag.description))
         stone.move(bag, player)
         self.assertEqual("bag", bag.name)
-        self.assertEqual("leather bag (containing things)", strip_text_styles(bag.title))
+        self.assertEqual("leather bag", strip_text_styles(bag.title))
         self.assertEqual("a small leather bag", strip_text_styles(bag.description))
 
 

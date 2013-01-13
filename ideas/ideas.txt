@@ -9,6 +9,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [BUG] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
 [BUG] driver.player and driver.async_player_input are globals and this won't work in multi-user mode.
+[feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] Pyro interface with standalone remote client (console or GUI).
 [feature] Telnet interface.
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
@@ -44,7 +45,7 @@ General ideas/TODO:
 
 [feature] show command aliases separated (and dim) from the real command verbs in the help
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
-[code, API] search/find: keep track of stuff you've encountered and mention that if the player searches for something
+[code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
 [code] Add more items to items.basic
     (such as an extensible generic box-like item that you need to open/close to put stuff in)

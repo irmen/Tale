@@ -65,7 +65,8 @@ def do_inventory(player, parsed, ctx):
                 player.tell("  <item>%s</>" % item.title, format=False)
         else:
             player.tell("You are carrying nothing.")
-        player.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
+        if ctx.config.money_type:
+            player.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(player.money, zero_msg="you are broke"))
 
 
 @cmd("locate", "search", "find")
@@ -427,12 +428,13 @@ def do_give(player, parsed, ctx):
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
     if len(parsed.who_order) == 1:
-        try:
-            # first try if the first one or two words can be interpreted as an amount of money
-            money = ctx.driver.moneyfmt.parse(parsed.unrecognized)
-            return give_money(player, money, parsed.who_order[0], ctx.driver)
-        except (ValueError, ParseError):
-            pass
+        # first try if the first one or two words can be interpreted as an amount of money
+        if ctx.config.money_type:
+            try:
+                money = ctx.driver.moneyfmt.parse(parsed.unrecognized)
+                return give_money(player, money, parsed.who_order[0], ctx.driver)
+            except (ValueError, ParseError):
+                pass
     if parsed.unrecognized:
         raise ParseError("You don't have %s." % lang.join(parsed.unrecognized))
     if player.inventory_size == 0:
