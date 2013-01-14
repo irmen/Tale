@@ -391,6 +391,7 @@ assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
 
 MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run", "move"}     # used to move through an exit
 
+
 def adjust_available_verbs(allowed_verbs=None, remove_verbs=[], add_verbs={}):
     """Adjust the available verbs"""
     global VERBS, AGGRESSIVE_VERBS, NONLIVING_OK_VERBS, MOVEMENT_VERBS
@@ -399,7 +400,7 @@ def adjust_available_verbs(allowed_verbs=None, remove_verbs=[], add_verbs={}):
             if not v in VERBS:
                 raise KeyError(v)
         allowed_verbs = set(allowed_verbs)
-        VERBS = {v:k for v, k in VERBS.items() if v in allowed_verbs}
+        VERBS = {v: k for v, k in VERBS.items() if v in allowed_verbs}
         AGGRESSIVE_VERBS &= allowed_verbs
         NONLIVING_OK_VERBS &= allowed_verbs
         MOVEMENT_VERBS &= allowed_verbs

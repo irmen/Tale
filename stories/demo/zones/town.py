@@ -147,6 +147,7 @@ end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sig
 end_door.door_code = 999
 lane.add_exits([end_door])
 
+
 class Computer(Item):
     def init(self):
         self.aliases = {"keyboard", "screen", "wires"}
@@ -247,6 +248,7 @@ computer.verbs = {
 }
 alley.insert(computer, None)
 
+
 class DoorKey(Item):
     def notify_moved(self, source_container, target_container, actor):
         player = globalcontext.mud_context.player
@@ -254,6 +256,7 @@ class DoorKey(Item):
             if "got_doorkey" not in actor.hints.checkpoints:
                 globalcontext.mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
+
 
 doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
 doorkey.door_code = end_door.door_code

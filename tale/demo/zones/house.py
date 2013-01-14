@@ -14,6 +14,7 @@ from tale.lang import capital
 
 # define the various locations
 
+
 class GameEnd(Location):
     def init(self):
         pass

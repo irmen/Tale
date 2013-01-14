@@ -7,6 +7,7 @@ from tale.base import Location, Exit, Door
 
 # define the locations
 
+
 class GameEnd(Location):
     def init(self):
         pass

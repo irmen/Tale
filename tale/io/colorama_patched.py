@@ -35,8 +35,9 @@ if colorama.win32.windll is not None:
             term.set_console(on_stderr=on_stderr)
 
     __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
+
     def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
-        if sys.version_info < (3,0):
+        if sys.version_info < (3, 0):
             if type(char) is int:
                 char = chr(char)
         __orig_FillConsoleOutputCharacter(stream_id, char, length, start)

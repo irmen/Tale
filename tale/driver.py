@@ -145,8 +145,7 @@ class Driver(object):
 
     def start(self, args):
         # parse args
-        parser = argparse.ArgumentParser(description=
-            """
+        parser = argparse.ArgumentParser(description="""
             Tale framework %s game driver. Use this to launch a game and specify some settings.
             Sometimes the game will provide its own startup script that invokes this automatically.
             If it doesn't, refer to the options to see how to launch it manually instead.
@@ -163,7 +162,7 @@ class Driver(object):
                 import traceback
                 tb = traceback.format_exc()
                 from .io import tkinter_io
-                tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n"+tb)
+                tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
     def _start(self, args):

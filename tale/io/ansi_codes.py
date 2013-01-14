@@ -5,6 +5,7 @@ Fallback ansi escape sequence definitions, used when 'colorama' is not installed
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 def _escapeseq(code):
     return "\033[" + str(code) + "m"
 

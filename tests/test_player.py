@@ -18,7 +18,7 @@ from tale.soul import NonSoulVerb, ParseResult
 from tale.io.console_io import ConsoleIo
 from tale.charbuilder import CharacterBuilder
 from tale.util import AttrDict
-if sys.version_info < (3,0):
+if sys.version_info < (3, 0):
     from StringIO import StringIO
 else:
     from io import StringIO

@@ -67,7 +67,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         super(ConsoleIo, self).__init__(config)
         try:
             encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
-            if sys.version_info < (3,0):
+            if sys.version_info < (3, 0):
                 unichr(8230).encode(encoding)
             else:
                 chr(8230).encode(encoding)

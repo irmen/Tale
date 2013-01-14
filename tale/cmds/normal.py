@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import inspect
 import datetime
 import random
+import itertools
 from .. import lang
 from .. import soul
 from .. import races
@@ -20,6 +21,7 @@ from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, Retr
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
 
 all_commands = {}
+cmds_aliases = {}   # commands -> tuple of aliases
 abbreviations = {}   # will be injected
 
 
@@ -39,6 +41,7 @@ def cmd(command, *aliases):
             if not hasattr(func, "enable_notify_action"):
                 func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
             all_commands[command] = func
+            cmds_aliases[command] = aliases
             for alias in aliases:
                 if alias in all_commands:
                     raise ValueError("command defined more than once: " + alias)
@@ -528,8 +531,10 @@ def do_help(player, parsed, ctx):
     else:
         all_verbs = ctx.driver.get_current_verbs()
         verb_help = {}   # verb -> [list of abbrs]
+        aliases = frozenset(itertools.chain(*cmds_aliases.values()))
         for verb in all_verbs:
-            verb_help[verb] = []
+            if verb not in aliases:
+                verb_help[verb] = []
         abbrevs = dict(abbreviations)
         for abbr, verb in abbreviations.items():
             if verb in verb_help:
@@ -542,12 +547,19 @@ def do_help(player, parsed, ctx):
             cmds_help.append(verb)
         player.tell("<bright>Available commands:</>")
         player.tell(", ".join(sorted(cmds_help)), end=True)
+        player.tell("\n")
+        if aliases:
+            player.tell("<bright>Synonyms:</> a different word for one of the commands mentioned above. Makes typing a bit more natural sometimes. The synonyms are: ")
+            player.tell(", ".join(sorted(aliases)), end=True)
+            player.tell("\n")
         player.tell("<bright>Abbreviations:</>")
         player.tell(", ".join(sorted("%s=%s" % (a, v) for a, v in abbrevs.items())), end=True)
+        player.tell("\n")
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
         player.tell("To see all possible verbs ask 'what is emotes' (?emotes).", end=True)
         if player.hints.has_hints():
+            player.tell("\n")
             player.tell("<bright>Hints:</>")
             player.tell("When you're stuck, you can use the 'hint' command to try to get a clue about what to do next.")
 
@@ -1321,9 +1333,11 @@ def do_turn(player, parsed, ctx):
     do_manipulate(player, parsed, ctx)
 
 
-@cmd("move", "shove", "swivel", "shift", "manipulate", "rotate", "press", "poke", "push")
+@cmd("move", "shove", "swivel", "shift", "manipulate", "manip", "rotate", "press", "poke", "push")
 def do_manipulate(player, parsed, ctx):
     """Manipulate something."""
+    if parsed.verb == "manip":
+        parsed.verb = "manipulate"
     if len(parsed.who_order) == 1:
         what = parsed.who_order[0]
         try:
