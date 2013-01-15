@@ -256,11 +256,17 @@ def do_put(player, parsed, ctx):
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
-@cmd("combine")
+@cmd("combine", "attach", "apply", "install")
 def do_combine(player, parsed, ctx):
     """Combine two items you are carrying."""
     if len(parsed.who_info) != 2:
-        raise ParseError("Combine what with what?")
+        messages = {
+            "combine": "Combine what with what?",
+            "attach": "Attach what to what?",
+            "apply": "Apply what to what?",
+            "install": "Install what on what?"
+        }
+        raise ParseError(messages[parsed.verb])
     item1, item2 = tuple(parsed.who_info)
     if item1 not in player or item2 not in player:
         raise ActionRefused("You are not carrying both, try to pick them up first.")

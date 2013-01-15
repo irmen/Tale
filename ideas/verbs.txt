@@ -54,12 +54,10 @@ teach
 
 ITEM ACTIONS
 ------------
-attach, apply, install, use X on/with Y
-    use something on something else:  -> Y.combine(X, actor)
-uninstall, unattach, remove
+detach, remove
     break stuff apart again
     remove X = remove weapon/armour (see unwield/unwear)
-    remove X from Y = unattach stuff --> Y.remove(X, actor)
+    remove X from Y = detach stuff --> Y.detach(X, actor)
     
 capture, catch
     capture creature with an object (catch mouse with/in a trap)
