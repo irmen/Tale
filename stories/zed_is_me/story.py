@@ -76,6 +76,7 @@ class Story(object):
         """goodbye text when player quits the game"""
         player.tell("Goodbye. Please come back again soon to finish the story.")
         player.tell("\n")
+        player.tell("\n")
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""

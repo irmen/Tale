@@ -58,6 +58,9 @@ if sys.platform=="win32":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
         style_colors.clear()  # running on win32 without colorama ansi support
 
+if sys.platform=="cli":
+    style_colors.clear()  # IronPython doesn't support console colors at all
+
 
 class ConsoleIo(iobase.IoAdapterBase):
     """
@@ -76,7 +79,10 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def clear_screen(self):
         """Clear the screen"""
-        print("\033[1;1H\033[2J", end="")
+        if style_colors:
+            print("\033[1;1H\033[2J", end="")
+        else:
+            print("\n" * 5)
 
     def input(self, prompt=None):
         """
