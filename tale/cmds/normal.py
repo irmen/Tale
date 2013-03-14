@@ -1436,7 +1436,7 @@ def do_hint(player, parsed, ctx):
 
 
 @cmd("recap")
-def do_hint(player, parsed, ctx):
+def do_recap(player, parsed, ctx):
     """
     Shows the key events or actions that have happened so that you might
     get back up to speed with the story so far.
