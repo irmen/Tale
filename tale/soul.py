@@ -297,6 +297,8 @@ VERBS = {
 "flip":     ( SIMP, None, "flip$ \nHOW head over heels" ),
 "cry":      ( DEUX, None, "cry \nHOW", "cries \nHOW" ),
 "ah":       ( DEUX, None, "go 'ah' \nHOW", "goes 'ah' \nHOW" ),
+"halt!":     ( DEUX, None, "go 'Halt! Hammerzeit!' \nHOW", "goes 'Halt! Hammerzeit!' \nHOW" ),
+"stop!":     ( DEUX, None, "go 'Stop! Hammertime!' \nHOW", "goes 'Stop! Hammertime!' \nHOW" ),
 "clear":    ( SIMP, None, "clear$ \nYOUR throat \nHOW" ),
 "sob":      ( SHRT, None, "" ),
 "lag":      ( SHRT, ( "helplessly", ), "" ),
