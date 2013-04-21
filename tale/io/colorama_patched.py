@@ -11,6 +11,12 @@ import colorama.ansi
 import colorama.winterm
 import colorama.ansitowin32
 
+# version check
+if colorama.VERSION < "0.2.4":
+    import warnings
+    warnings.warn("Incompatible colorama version {0} found, need at least 0.2.4".format(colorama.VERSION), RuntimeWarning)
+    raise ImportError("not using colorama")
+
 # patch in extra ansi styles
 colorama.ansi.AnsiStyle.UNDERLINED = 4
 colorama.ansi.AnsiStyle.BLINK = 5
@@ -37,9 +43,11 @@ if colorama.win32.windll is not None:
     __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
 
     def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
-        if sys.version_info < (3, 0):
-            if type(char) is int:
-                char = chr(char)
+        # original code is buggy as hell here, mixing up bytes/str/int on Python 2.x/3.x
+        if sys.version_info >= (3, 0) and type(char) is str:
+            char = char.encode("ascii")
+        elif type(char) is int:
+            char = chr(char)
         __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
 
     import colorama.initialise
