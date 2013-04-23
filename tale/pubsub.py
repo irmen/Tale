@@ -1,5 +1,6 @@
 """
-Pubsub signaling.
+Simple synchronous Pubsub signaling.
+Uses weakrefs to not needlessly lock subscribers/topics in memory.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
@@ -13,6 +14,7 @@ __all__=["topic", "unsubscribe_all", "Listener"]
 all_topics = {}
 
 def topic(name):
+    """Create a topic object (singleton). Name can be a string or a sequence type."""
     with threading.Lock():
         if name in all_topics:
             return all_topics[name]
@@ -20,6 +22,7 @@ def topic(name):
         return instance
 
 def unsubscribe_all(subscriber):
+    """unsubscribe the given subscriber object from all topics that it may have been subscribed to."""
     for topic in all_topics.values():
         topic.unsubscribe(subscriber)
 

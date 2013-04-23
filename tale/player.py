@@ -117,11 +117,10 @@ class Player(base.Living, pubsub.Listener):
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
-        If you want to output a paragraph separator, either set end=True or tell a single '\n'.
+        If you want to output a paragraph separator, either set end=True or tell a single newline.
         If you provide format=False, this paragraph of text won't be formatted when it is outputted,
         and whitespace is untouched. An empty string isn't outputted at all.
-        Multiple messages are separated by a space.
-        The player object is returned so you can chain calls.
+        Multiple messages are separated by a space. The player object is returned so you can chain calls.
         """
         super(Player, self).tell(*messages)
         if messages == ("\n",):

@@ -58,7 +58,7 @@ Tale API
     :members:
 
 :mod:`tale.pubsub` --- Simple synchronous pubsub/event mechanism
---------------------------------------
+----------------------------------------------------------------
 .. automodule:: tale.pubsub
     :members:
 
