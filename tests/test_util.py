@@ -4,7 +4,7 @@ Unit tests for util functions
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import print_function, division, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 import datetime
 import unittest
 from tale import util, globalcontext
@@ -162,14 +162,17 @@ class TestUtil(unittest.TestCase):
         road.add_exits([Exit("south", plaza, "plaza to the south")])
         house.add_exits([Exit("door", plaza, "door to the plaza"), Exit("ladder", attic, "dusty attic")])
         attic.add_exits([Exit("ladder", house, "the house")])
-        wiretap = Wiretap()
+        wiretap_plaza = Wiretap(plaza)
+        wiretap_road = Wiretap(road)
+        wiretap_house = Wiretap(house)
+        wiretap_attic = Wiretap(attic)
         util.message_nearby_locations(plaza, "boing")
-        self.assertTrue("plaza" not in wiretap.senders, "location itself shouldn't send the broadcast msg")
-        self.assertTrue(("road", "boing") in wiretap.msgs)
-        self.assertTrue(("road", "The sound is coming from the south.") in wiretap.msgs, "road should give sound direction")
-        self.assertTrue(("house", "boing") in wiretap.msgs)
-        self.assertTrue(("house", "You can't hear where the sound is coming from.") in wiretap.msgs, "in the house you can't locate the sound direction")
-        self.assertTrue("attic" not in wiretap.senders, "the attic is too far away to receive msgs")
+        self.assertEqual([], wiretap_plaza.msgs, "the plaza doesnt receive tells")
+        self.assertEqual([], wiretap_attic.msgs, "the attic is too far away to receive msgs")
+        self.assertTrue(("road", "boing") in wiretap_road.msgs)
+        self.assertTrue(("road", "The sound is coming from the south.") in wiretap_road.msgs, "road should give sound direction")
+        self.assertTrue(("house", "boing") in wiretap_house.msgs)
+        self.assertTrue(("house", "You can't hear where the sound is coming from.") in wiretap_house.msgs, "in the house you can't locate the sound direction")
 
     def test_formatdocstring(self):
         d = "hai"

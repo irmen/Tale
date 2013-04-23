@@ -128,7 +128,6 @@ class Driver(object):
         self.server_loop_durations = collections.deque(maxlen=10)
         self.register_global_context()
         cmds.register_all(self.commands)
-        monkeypatch_blinker()
 
     def register_global_context(self):
         """register the driver and some other stuff in the global thread context"""
@@ -715,22 +714,6 @@ def enable_readline(config):
     except ImportError:
         return
     readline.parse_and_bind("tab: complete")
-
-
-def monkeypatch_blinker():
-    """
-    On Pypy: monkeypatch blinker to use a namespace based on dict instead of weakvaluedict
-    See blinker issue: https://bitbucket.org/jek/blinker/issue/7
-    """
-    if hasattr(sys, "pypy_version_info"):
-        import blinker
-        if getattr(blinker.signal.im_class, "_tale_monkeypatch", False):
-            return  # already patched
-
-        class MonkeyPatchedNamespace(dict, blinker.Namespace):
-            _tale_monkeypatch = True
-
-        blinker.signal = MonkeyPatchedNamespace().signal
 
 
 if __name__ == "__main__":

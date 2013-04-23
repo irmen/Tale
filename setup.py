@@ -67,8 +67,8 @@ You can also run the tiny embedded test story like this, after you've installed 
         "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
-    install_requires=["blinker>=1.1", "appdirs"],
-    requires=["blinker", "appdirs"]
+    install_requires=["appdirs"],
+    requires=["appdirs"]
 )
 
 if using_setuptools:

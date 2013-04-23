@@ -5,10 +5,9 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import datetime
-import blinker
 from tale.globalcontext import mud_context
 from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
@@ -18,6 +17,7 @@ from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResult
 from tale.io.iobase import strip_text_styles
+from tale import pubsub
 
 
 class TestLocations(unittest.TestCase):
@@ -153,7 +153,7 @@ class TestLocations(unittest.TestCase):
             hall.insert(12345, julie)
         self.assertEqual(_Limbo, rat1.location)
         self.assertFalse(rat1 in hall.livings)
-        wiretap = Wiretap()
+        wiretap = Wiretap(hall)
         hall.insert(rat1, julie)
         self.assertEqual(hall, rat1.location)
         self.assertTrue(rat1 in hall.livings)
@@ -389,6 +389,15 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual(loc.exits["down"], loc.exits["hatch"])
 
 
+class PubsubCollector(pubsub.Listener):
+    def __init__(self):
+        self.messages=[]
+    def pubsub_event(self, topicname, event):
+        name, message = event
+        self.messages.append(message)
+    def clear(self):
+        self.messages=[]
+
 class TestLiving(unittest.TestCase):
     def test_contains(self):
         orc = Living("orc", "m", race="orc")
@@ -415,7 +424,8 @@ class TestLiving(unittest.TestCase):
         attic = Location("attic")
         rat = Living("rat", "n", race="rodent")
         hall.init_inventory([rat])
-        wiretap = Wiretap()
+        wiretap_hall = Wiretap(hall)
+        wiretap_attic = Wiretap(attic)
         self.assertTrue(rat in hall.livings)
         self.assertFalse(rat in attic.livings)
         self.assertEqual(hall, rat.location)
@@ -423,14 +433,17 @@ class TestLiving(unittest.TestCase):
         self.assertTrue(rat in attic.livings)
         self.assertFalse(rat in hall.livings)
         self.assertEqual(attic, rat.location)
-        self.assertEqual([("hall", "Rat leaves."), ("attic", "Rat arrives.")], wiretap.msgs)
+        self.assertEqual([("hall", "Rat leaves.")], wiretap_hall.msgs)
+        self.assertEqual([("attic", "Rat arrives.")], wiretap_attic.msgs)
         # now try silent
-        wiretap.clear()
+        wiretap_hall.clear()
+        wiretap_attic.clear()
         rat.move(hall, silent=True)
         self.assertTrue(rat in hall.livings)
         self.assertFalse(rat in attic.livings)
         self.assertEqual(hall, rat.location)
-        self.assertEqual([], wiretap.msgs)
+        self.assertEqual([], wiretap_hall.msgs)
+        self.assertEqual([], wiretap_attic.msgs)
     def test_lang(self):
         living = Living("julie", "f", race="human")
         self.assertEqual("her", living.objective)
@@ -448,21 +461,14 @@ class TestLiving(unittest.TestCase):
         self.assertEqual("it", living.subjective)
         self.assertEqual("n", living.gender)
     def test_tell(self):
-        messages=[]
-        def collector(sender, message):
-            messages.append(message)
-        tap = blinker.signal("wiretap")
-        tap.connect(collector)
         julie = Living("julie", "f", race="human")
+        tap = julie.get_wiretap()
+        collector = PubsubCollector()
+        tap.subscribe(collector)
         julie.tell("msg1", "msg2")
         julie.tell("msg3", "msg4", ignored_arg=42)
-        self.assertEqual(["msg1", "msg2", "msg3", "msg4"], messages)
+        self.assertEqual(["msg1", "msg2", "msg3", "msg4"], collector.messages)
     def test_show_inventory(self):
-        messages=[]
-        def collector(sender, message):
-            messages.append(message)
-        tap = blinker.signal("wiretap")
-        tap.connect(collector)
         class Ctx(object):
             class Config(object):
                 pass
@@ -474,17 +480,20 @@ class TestLiving(unittest.TestCase):
         ctx.driver = MoneyDriverDummy()
         ctx.driver.moneyfmt = MoneyFormatter(ctx.config.money_type)
         julie = Living("julie", "f", race="human")
+        tap = julie.get_wiretap()
+        collector = PubsubCollector()
+        tap.subscribe(collector)
         item1 = Item("key")
         julie.init_inventory([item1])
         julie.money = 9.23
         julie.show_inventory(julie, ctx)
-        text = " ".join(msg.strip() for msg in messages)
+        text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key Money in possession: 9 dollar and 23 cent.", text)
         ctx.config.money_type = None
         ctx.driver.moneyfmt = None
-        messages=[]
+        collector.clear()
         julie.show_inventory(julie, ctx)
-        text = " ".join(msg.strip() for msg in messages)
+        text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key", text)
 
 
@@ -751,7 +760,7 @@ class TestItem(unittest.TestCase):
         stone = Item("stone")
         hall.init_inventory([person, key])
         stone.move(hall, person)
-        wiretap = Wiretap()
+        wiretap = Wiretap(hall)
         self.assertTrue(person in hall)
         self.assertTrue(key in hall)
         key.contained_in = person   # hack to force move to actually check the source container

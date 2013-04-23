@@ -6,10 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-import blinker
 from textwrap import dedent
 from . import lang
 from . import util
+from . import pubsub
 from .errors import ActionRefused
 from .races import races
 from .globalcontext import mud_context
@@ -338,6 +338,10 @@ class Location(MudObject):
             # note: we're not simply adding it to the .exits dict here, because
             # the exit may have aliases defined that it wants to be known as also.
 
+    def get_wiretap(self):
+        """get a wiretap for this location"""
+        return pubsub.topic(("wiretap-location", self.name))
+
     def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
@@ -357,8 +361,8 @@ class Location(MudObject):
             else:
                 living.tell(room_msg)
         if room_msg:
-            tap = blinker.signal("wiretap")
-            tap.send(self.name, message=room_msg)
+            tap = self.get_wiretap()
+            tap.send((self.name, room_msg))
 
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
@@ -692,6 +696,10 @@ class Living(MudObject):
         if ctx.config.money_type:
             actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
 
+    def get_wiretap(self):
+        """get a wiretap for this living"""
+        return pubsub.topic(("wiretap-living", self.name))
+
     def tell(self, *messages, **kwargs):
         """
         Every living thing in the mud can receive one or more action messages.
@@ -701,9 +709,9 @@ class Living(MudObject):
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
         """
-        tap = blinker.signal("wiretap")
+        tap = self.get_wiretap()
         for msg in messages:
-            tap.send(self.name, message=msg)
+            tap.send((self.name, msg))
 
     def tell_others(self, *messages):
         """

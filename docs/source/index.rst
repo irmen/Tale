@@ -38,8 +38,8 @@ Getting started
 ---------------
 Install tale, preferably using ``pip install tale``. You can also download the source, and then execute ``python setup.py install``.
 
-Tale requires the `blinker <http://pypi.python.org/pypi/blinker/>`_ and `appdirs <http://pypi.python.org/pypi/appdirs/>`_
-libraries to be available.
+Tale requires the  `appdirs <http://pypi.python.org/pypi/appdirs/>`_
+library to sensibly store data files such as savegames.
 
 After that, you'll need a story to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).
@@ -145,8 +145,8 @@ A random list of the features of the current codebase:
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
-- uses the blinker library for internal synchronous signaling (pubsub).
 - contains a simple virtual file system to provide a resource loading / datafile storage facility.
+- provides a simple synchronous pubsub/event signaling mechanism
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways

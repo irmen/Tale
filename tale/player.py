@@ -8,11 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from threading import Event
 import time
-import blinker
 from . import base
 from . import soul
 from . import lang
 from . import hints
+from . import pubsub
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
@@ -24,7 +24,7 @@ DEFAULT_SCREEN_INDENT = 2
 DEFAULT_SCREEN_DELAY = 40
 
 
-class Player(base.Living):
+class Player(base.Living, pubsub.Listener):
     """
     Player controlled entity.
     Has a Soul for social interaction.
@@ -201,15 +201,16 @@ class Player(base.Living):
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
             raise SecurityViolation("wiretap requires wizard privilege")
-        tap = blinker.signal("wiretap")
-        tap.connect(self.wiretap_msg, sender=target.name)
+        tap = target.get_wiretap()
+        tap.subscribe(self)
 
-    def wiretap_msg(self, sender, message=None):
+    def pubsub_event(self, topicname, event):
+        sender, message = event
         self.tell("[wiretapped from '%s': %s]" % (sender, message), end=True)
 
     def clear_wiretaps(self):
-        sig = blinker.signal("wiretap")
-        sig.disconnect(self.wiretap_msg)   # XXX doesn't remove all taps on python 3.3 (blinker bug?)
+        # clear all wiretaps that this player has
+        pubsub.unsubscribe_all(self)
 
     def destroy(self, ctx):
         self.activate_transcript(None, None)

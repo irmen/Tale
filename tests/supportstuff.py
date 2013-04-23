@@ -7,12 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
-import blinker
 from tale import npc
-from tale import driver
-
-driver.monkeypatch_blinker()
-
+from tale import pubsub
 
 class DummyDriver(object):
     def __init__(self):
@@ -39,12 +35,13 @@ class DummyDriver(object):
         self.after_player_queue = []
 
 
-class Wiretap(object):
-    def __init__(self):
+class Wiretap(pubsub.Listener):
+    def __init__(self, target):
         self.clear()
-        tap = blinker.signal("wiretap")
-        tap.connect(self.tell)
-    def tell(self, sender, message):
+        tap = target.get_wiretap()
+        tap.subscribe(self)
+    def pubsub_event(self, topicname, event):
+        sender, message = event
         self.msgs.append((sender, message))
         self.senders.append(sender)
     def clear(self):
