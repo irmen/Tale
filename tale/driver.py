@@ -705,10 +705,6 @@ class Driver(object):
 
 
 def enable_readline(config):
-    # enable readline except in certain situation on Pypy,
-    # it causes a crash when using the threaded input mode on Pypy (1.9).
-    if hasattr(sys, "pypy_version_info") and config.server_tick_method == "timer":
-        return
     try:
         import readline
     except ImportError:
