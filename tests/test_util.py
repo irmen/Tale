@@ -12,7 +12,7 @@ from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
 from tale.io.vfs import VirtualFileSystem, VfsError
-from supportstuff import DummyDriver, Wiretap
+from tests.supportstuff import DummyDriver, Wiretap
 
 
 class TestUtil(unittest.TestCase):

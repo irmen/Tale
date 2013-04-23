@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 import datetime
 from tale.globalcontext import mud_context
-from supportstuff import DummyDriver, MsgTraceNPC, Wiretap
+from tests.supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused

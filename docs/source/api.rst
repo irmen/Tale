@@ -57,6 +57,11 @@ Tale API
 .. automodule:: tale.soul
     :members:
 
+:mod:`tale.pubsub` --- Simple synchronous pubsub/event mechanism
+--------------------------------------
+.. automodule:: tale.pubsub
+    :members:
+
 :mod:`tale.util` --- Generic utilities
 --------------------------------------
 .. automodule:: tale.util
