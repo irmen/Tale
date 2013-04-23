@@ -4,11 +4,11 @@ Unit tests for serialization
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import print_function, division, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import pickle
 from tale import globalcontext, races, base, npc, soul, player, util, hints
-from supportstuff import DummyDriver
+from tests.supportstuff import DummyDriver
 
 
 def serializecycle(obj):

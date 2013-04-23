@@ -5,11 +5,11 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 import sys
 import unittest
 import tale.globalcontext
-from supportstuff import DummyDriver, MsgTraceNPC
+from tests.supportstuff import DummyDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC

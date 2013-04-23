@@ -5,7 +5,7 @@ Unit tests for the Soul
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals
+from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import tale.globalcontext
 import tale.base
@@ -13,7 +13,7 @@ import tale.soul
 import tale.player
 import tale.npc
 import tale.errors
-from supportstuff import DummyDriver
+from tests.supportstuff import DummyDriver
 
 
 class TestSoul(unittest.TestCase):
