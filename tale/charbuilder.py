@@ -12,9 +12,10 @@ from . import util
 
 
 class PlayerNaming(object):
-    wizard = False
-    name = title = gender = race = description = None
-    money = 0.0
+    def __init__(self):
+        self.wizard = False
+        self.name = self.title = self.gender = self.race = self.description = None
+        self.money = 0.0
 
     def apply_to(self, player):
         player.init_race(self.race, self.gender)

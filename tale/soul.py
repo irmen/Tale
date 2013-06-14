@@ -239,6 +239,9 @@ VERBS = {
 "taunt":    ( PREV, None, "" ),
 "strangle": ( PREV, None, "" ),
 "hate":     ( PREV, None, "" ),
+"kill":     ( PREV, None, "" ),
+"attack":   ( PREV, None, "" ),
+"fight":    ( PREV, None, "" ),
 "fondle":   ( PREV, None, "" ),
 "nominate": ( PREV, None, "" ),
 "startle":  ( PREV, None, "" ),
@@ -363,8 +366,8 @@ VERBS = {
 assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second specifier in verb list must be None or tuple, not str"
 
 AGGRESSIVE_VERBS = {
-    "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "finger", "fondle", "french",
-    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "insult", "jerk", "jiggle", "kick", "kiss", "knee",
+    "attack", "barf", "bitch", "bite", "bonk", "bop", "bump", "burp", "caress", "chase", "curse", "feel", "fight", "finger", "fondle", "french",
+    "grease", "grimace", "grope", "growl", "guffaw", "handshake", "hit", "hold", "hug", "insult", "jerk", "jiggle", "kick", "kill", "kiss", "knee",
     "knock", "lick", "mock", "nibble", "nudge", "oil", "pat", "pet", "pinch", "poke", "pounce", "puke", "push", "pull",
     "punch", "rotate", "rub", "ruffle", "scowl", "scratch", "shake", "shove", "slap", "smooch", "sneer", "snigger",
     "snuggle", "spank", "spill", "spit", "spray", "squeeze", "startle", "stomp", "strangle", "stroke", "surprise",

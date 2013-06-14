@@ -276,9 +276,19 @@ def do_combine(player, parsed, ctx):
         item1.combine(item2, player)
 
 
+@cmd("loot", "pilfer", "sack")
+def do_loot(player, parsed, ctx):
+    """Take all things from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
+    if len(parsed.args) != 1:
+        raise ParseError("Loot what?")
+    if len(parsed.who_order) > 1:
+        raise ParseError("Please be more specific, you can only loot from one thing at a time.")
+    raise RetryParse("take all from "+parsed.who_order[0].name)
+
+
 @cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, ctx):
-    """Take something (or all things) from something or someone else. Stealing and robbing is frowned upon, to say the least."""
+    """Take something (or all things) from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
     p = player.tell
     if len(parsed.args) == 0:
         raise ParseError("Take what?")

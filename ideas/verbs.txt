@@ -4,20 +4,20 @@ broadcast
     like shout, except overrides all blocking
 anchor, unanchor
     anchor something so that it cannot leave its location
-godmode
+god
     god mode on/off (can't take damage)
-invis, vis
-    makes you invisible to all players of lower level under all circumstances
-quell, peace  (unquell, unpeace)
-    stop all fights in your environment   (resume fights)
+invis
+    makes you invisible to all players of lower level under all circumstances (again to turn visible again)
+quell, peace
+    stop all fights in your environment   (again to resume fights)
 reset
     reset an object to initial state (....how? where do we store initial state?)
 resurrect
     return a dead person or creature to the land of the living
-wizlist
+wizards
     shows list of all known active wizard users
 zap
-    deal a massive amount of damage to a creature
+    deal a massive amount of damage to a creature (death ray)
     
 
 PLAYER STUFF
@@ -40,8 +40,9 @@ skills
     the skills you have
 spells
     the spells you know
-attack, stop attack[ing]/stop combat
-    start/stop combat
+(attack/kill/fight), stop attack[ing]/stop combat/stop fight[ing]
+    start/stop combat. When engaged in combat, the target is
+    'remembered' for subsequent attack commands
 cast
     cast a spell on a creature or an object
 learn
@@ -72,7 +73,7 @@ hunger/thirst
     show hunger/thirst status
 
 empty
-    remove substance from a vessel
+    remove substance from a vessel  (empty cmd already exists to take everything out of a container)
 fill
     fill a vessel with a substance
  
@@ -81,7 +82,7 @@ light, burn
 extinguish, douse
     extinguish a light source
     
-lockpick
+lockpick/pick [lock]
     open a lock with force or with a tool
 
 wear, put on, take off, unwear, remove

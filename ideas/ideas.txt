@@ -7,11 +7,12 @@ Interesting link: http://www.brasslantern.org/writers/
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-[BUG] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
-[BUG] driver.player and driver.async_player_input are globals and this won't work in multi-user mode.
+[BUG,multiuser] custom verbs are registered on the location.verbs list. This won't work in multi-user mode.
+[BUG,multiuser] driver.player and driver.async_player_input are globals and this won't work in multi-user mode.
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] Pyro interface with standalone remote client (console or GUI).
 [feature] Telnet interface.
+[feature] SSH interface via Paramiko?
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state.
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
@@ -33,11 +34,13 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 [info,feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
-    trauma/wound, suffocation, deathray, EMP, karma, pressure, decompression, inertia
+    trauma/wound, suffocation, deathray (zap-command), EMP, karma, pressure, decompression, inertia
 
 
 General ideas/TODO:
 -------------------
+[BUG] Parser: <say I dont get it> -> 'it' is treated special => "by it, it is assumed...."
+[BUG] Parser: <say i z> -> 'i' is treated special => "Perhaps you meant irmen?"
 [BUG] Parser: <say "I don't get it"> -> it thinks the message stops at the single quote in "don't". => "the verb sayt is unrecognised"
 
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).

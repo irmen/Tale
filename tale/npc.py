@@ -51,6 +51,7 @@ class Monster(NPC):
         """
         Starts attacking the given living until death ensues on either side
         """
+        # @TODO actual fight
         name = lang.capital(self.title)
         room_msg = "%s starts attacking %s!" % (name, victim.title)
         victim_msg = "%s starts attacking you!" % name
