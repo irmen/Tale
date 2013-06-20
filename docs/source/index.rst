@@ -112,6 +112,7 @@ A random list of the features of the current codebase:
   while testing/debugging the game.
 - the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'
 - the soul has 250+ 'emotes' such as bounce and shrug.
+- the command line input and the gui version both support tab-completion of commands. (command line requires readline/pyreadline for this)
 - it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
   it out in full (gives a list of suggestions if multiple words match).
 - it knows about bodyparts that you can target certain actions (such as kick or pat) at.
