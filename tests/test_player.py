@@ -16,6 +16,7 @@ from tale.npc import NPC
 from tale.player import Player, TextBuffer
 from tale.soul import NonSoulVerb, ParseResult
 from tale.io.console_io import ConsoleIo
+from tale.io.iobase import TabCompleter
 from tale.charbuilder import CharacterBuilder
 from tale.util import AttrDict
 if sys.version_info < (3, 0):
@@ -527,6 +528,26 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual("human", p.race)
         self.assertEqual("m", p.gender)
         self.assertEqual("arch wizard Irmen", p.title)
+
+
+class TestTabCompletion(unittest.TestCase):
+    def test_complete_c(self):
+        player = Player("fritz", "m")
+        driver = DummyDriver()
+        completer = TabCompleter(driver, player)
+        result = completer.complete("c")
+        self.assertGreater(len(result), 20)
+        self.assertTrue("cackle" in result)
+        self.assertTrue("criticize" in result)
+        result = completer.complete("h")
+        self.assertGreater(len(result), 10)
+        self.assertTrue("hiss" in result)
+
+    def test_complete_one(self):
+        player = Player("fritz", "m")
+        driver = DummyDriver()
+        completer = TabCompleter(driver, player)
+        self.assertEqual(["criticize"], completer.complete("critic"))
 
 
 if __name__ == '__main__':

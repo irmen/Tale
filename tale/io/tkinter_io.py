@@ -318,7 +318,6 @@ class TaleGUI(object):
 
     def install_tab_completion(self, completer):
         def tab_pressed(event):
-            print(repr(event.widget.get()))
             begin, _, prefix = event.widget.get().rpartition(" ")
             candidates = completer.complete(prefix=prefix)
             if candidates:

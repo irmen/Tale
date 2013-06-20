@@ -33,6 +33,8 @@ class DummyDriver(object):
         for callable, vargs, kwargs in self.after_player_queue:
             callable(*vargs, **kwargs)
         self.after_player_queue = []
+    def get_current_verbs(self):
+        return {}
 
 
 class Wiretap(pubsub.Listener):
