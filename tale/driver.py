@@ -25,6 +25,7 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .io import vfs
+from .io.iobase import TabCompleter
 
 
 @total_ordering
@@ -183,7 +184,6 @@ class Driver(object):
         self.story = story.Story()
         self.config = util.AttrDict(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        enable_readline(self.config)
         self.register_global_context()
         try:
             story_cmds = __import__("cmds", level=0)
@@ -222,6 +222,7 @@ class Driver(object):
         self.player.io = IoAdapter(self.config)
         self.player.io.output_line_delay = output_line_delay
         self.player.io.clear_screen()
+        self.player.io.install_tab_completion(TabCompleter(self, self.player))
         driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)
         self._io_thread_may_start = threading.Event()
         if driver_thread is None:
@@ -702,14 +703,6 @@ class Driver(object):
         with self.deferreds_lock:
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
-
-
-def enable_readline(config):
-    try:
-        import readline
-    except ImportError:
-        return
-    readline.parse_and_bind("tab: complete")
 
 
 if __name__ == "__main__":

@@ -56,6 +56,9 @@ class TkinterIo(iobase.IoAdapterBase):
         driver_thread.name = "driver"
         return driver_thread, self.gui.mainloop
 
+    def install_tab_completion(self, completer):
+        self.gui.install_tab_completion(completer)
+
     def destroy(self):
         self.gui.destroy()
 
@@ -312,6 +315,25 @@ class TaleGUI(object):
         self.window = TaleWindow(self, self.root, window_title, "")
         self.root.withdraw()
         self.root.update()
+
+    def install_tab_completion(self, completer):
+        def tab_pressed(event):
+            print(repr(event.widget.get()))
+            begin, _, prefix = event.widget.get().rpartition(" ")
+            candidates = completer.complete(prefix=prefix)
+            if candidates:
+                if len(candidates)==1:
+                    # replace text by the only possible candidate
+                    event.widget.delete(0, END)
+                    if begin:
+                        event.widget.insert(0, begin + " " + candidates[0] + " ")
+                    else:
+                        event.widget.insert(0, candidates[0] + " ")
+                else:
+                    self.write_line("\n<ul>possible words:</> ")
+                    self.write_line("<monospaced>"+"   ".join(candidates)+"</>\n")
+            return "break"  # stop event propagation
+        self.window.commandEntry.bind('<Tab>', tab_pressed)
 
     def mainloop(self):
         def signal_gui_ready():

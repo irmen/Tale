@@ -84,6 +84,15 @@ class ConsoleIo(iobase.IoAdapterBase):
         else:
             print("\n" * 5)
 
+    def install_tab_completion(self, completer):
+        """Install tab completion using readline, if available"""
+        try:
+            import readline
+            readline.set_completer(completer.complete)
+            readline.parse_and_bind("tab: complete")
+        except ImportError:
+            return
+
     def input(self, prompt=None):
         """
         Ask the player for immediate input. The input is not stored, but returned immediately.

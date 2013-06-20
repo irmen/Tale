@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import threading
 import time
 from ..util import basestring_type
+from .. import soul
 try:
     import mdx_smartypants
     smartypants = mdx_smartypants.spants
@@ -116,6 +117,10 @@ class IoAdapterBase(object):
         """Clear the screen"""
         pass
 
+    def install_tab_completion(self, completer):
+        """Install and enable tab-command-completion if possible"""
+        pass
+
     def critical_error(self, message="Critical Error. Shutting down."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         import traceback, sys
@@ -173,3 +178,35 @@ class IoAdapterBase(object):
     def output_delay(self):
         """delay the output for a short period"""
         time.sleep(self.output_line_delay / 1000.0)
+
+
+class TabCompleter(object):
+    """
+    Class used to provide tab-completion on the command line.
+    """
+    def __init__(self, driver, player):
+        self.driver = driver
+        self.player = player
+        self.candidates=[]
+        self.prefix=None
+    def complete(self, prefix, index=None):
+        if not prefix:
+            return
+        if prefix != self.prefix:
+            # new prefix, recalculate candidates
+            verbs = [verb for verb in self.driver.get_current_verbs() if verb.startswith(prefix)]
+            livings = [living.name for living in self.player.location.livings if living.name.startswith(prefix)]
+            livings_aliases = [alias for living in self.player.location.livings for alias in living.aliases if alias.startswith(prefix)]
+            items = [item.name for item in self.player.location.items if item.name.startswith(prefix)]
+            items_aliases = [alias for item in self.player.location.items for alias in item.aliases if alias.startswith(prefix)]
+            exits = [exit for exit in self.player.location.exits if exit.startswith(prefix)]
+            inventory = [item.name for item in self.player.inventory if item.name.startswith(prefix)]
+            inventory_aliases = [alias for item in self.player.inventory for alias in item.aliases if alias.startswith(prefix)]
+            emotes = [verb for verb in soul.VERBS if verb.startswith(prefix)]
+            self.candidates = sorted(verbs+livings+items+exits+inventory+emotes+livings_aliases+items_aliases+inventory_aliases)
+        try:
+            if index is None:
+                return self.candidates
+            return self.candidates[index]
+        except IndexError:
+            return None
