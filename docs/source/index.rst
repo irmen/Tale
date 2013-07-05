@@ -27,7 +27,7 @@ Ironpython works but doesn't support console text colors.
     but in the meantime, use the source, Luke.
 
 Tale can be found on Pypi as `tale <http://pypi.python.org/pypi/tale/>`_.
-Read only source repository (subversion): ``svn://svn.razorvine.net/Various/Tale``
+The source is on Github: https://github.com/irmen/Tale
 
 If you're interested, follow `my blog about developing Tale <http://www.razorvine.net/blog/user/irmen/category/17>`_
 (some of the articles are in Dutch but I'll stick to English for the newer ones)
