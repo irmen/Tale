@@ -1,5 +1,7 @@
 """
-Patch broken stuff in Jython (2.7b1+) to get Tale to work
+Patch broken stuff in Jython (2.7b1+) to get Tale to work.
+Once the official Jython 2.7 has these issues fixed, this
+patching code can be removed.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
