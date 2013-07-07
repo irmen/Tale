@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
+import os
 from . import styleaware_wrapper, iobase
 try:
     from . import colorama_patched as colorama
@@ -58,8 +59,8 @@ if sys.platform=="win32":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
         style_colors.clear()  # running on win32 without colorama ansi support
 
-if sys.platform=="cli":
-    style_colors.clear()  # IronPython doesn't support console colors at all
+if sys.platform=="cli" or os.name=="java":
+    style_colors.clear()  # IronPython and Jython don't support console colors at all
 
 
 class ConsoleIo(iobase.IoAdapterBase):

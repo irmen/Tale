@@ -9,3 +9,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 # might need, it's too easy to cause circular dependencies
 
 __version__ = "1.2"
+
+from . import jythonpatch   # patch some stuff in jython, if needed
+

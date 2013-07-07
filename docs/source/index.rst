@@ -13,10 +13,8 @@ mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
 Tale is 100% pure Python and runs on Python 2.7 and 3.2+.
 
-It should also work on Pypy and Ironpython. There are a few problems though:
-Jython 2.5 is not supported, and Jython 2.7 currently has a few bugs that prevent it to run Tale (Jython issues
-1949, 1994). Once these get fixed, Tale should work on Jython 2.7 too.
-Ironpython works but doesn't support console text colors.
+It should also work on Pypy, Jython 2.7, and Ironpython. Console text colors are not supported
+on Ironpython and Jython however.
 
 .. note::
     The multi-user aspects are on the back burner, I'm mainly focusing on the (single player)
