@@ -230,24 +230,49 @@ class TestUtil(unittest.TestCase):
         self.assertTrue(item in player)
         self.assertFalse(item in player2)
 
-    def test_gametime(self):
-        gt = util.GameDateTime(datetime.datetime(2012, 4, 19, 14, 0, 0))
-        span = datetime.timedelta(hours=1, minutes=10, seconds=5)
-        dt2 = gt.plus_realtime(span)
-        self.assertIsInstance(dt2, datetime.datetime)
-        self.assertEqual(datetime.datetime(2012, 4, 19, 15, 10, 5), dt2)
-        gt.times_realtime = 5
-        dt2 = gt.plus_realtime(span)
-        self.assertEqual(datetime.datetime(2012, 4, 19, 19, 50, 25), dt2)
-        gt.add_realtime(span)
-        self.assertEqual(datetime.datetime(2012, 4, 19, 19, 50, 25), gt.clock)
-        gt = util.GameDateTime(datetime.datetime.now(), 99)
-        self.assertEqual(99, gt.times_realtime)
-        gt = util.GameDateTime(datetime.datetime(2012, 4, 19, 14, 0, 0), times_realtime=99)
-        gt.add_gametime(datetime.timedelta(hours=1, minutes=10, seconds=5))
-        self.assertEqual(datetime.datetime(2012, 4, 19, 15, 10, 5), gt.clock)
-        gt.sub_gametime(datetime.timedelta(hours=2, minutes=20, seconds=30))
-        self.assertEqual(datetime.datetime(2012, 4, 19, 12, 49, 35), gt.clock)
+    def test_gametime_realtime(self):
+        epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
+        gt = util.GameDateTime(epoch)  # realtime=1
+        self.assertEqual(1, gt.times_realtime)
+        self.assertEqual(epoch, gt.clock)
+        # test realtime plus/minus
+        gt2 = gt.plus_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertNotEqual(gt2, gt.clock)
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 2, 30), gt2)
+        gt2 = gt.minus_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 13, 57, 30), gt2)
+        # test realtime add/sub
+        gt.add_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 2, 30), gt.clock)
+        gt.sub_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(epoch, gt.clock)
+        # test gametime add/sub
+        gt.add_gametime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 2, 30), gt.clock)
+        gt.sub_gametime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(epoch, gt.clock)
+
+    def test_gametime_notrealtime(self):
+        epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
+        gt = util.GameDateTime(epoch, times_realtime=5)  # not realtime, 5 times as fast
+        self.assertEqual(5, gt.times_realtime)
+        self.assertEqual(epoch, gt.clock)
+        # test realtime plus/minus (so in game-time, it should be 5 times faster)
+        gt2 = gt.plus_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertNotEqual(gt2, gt.clock)
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 12, 30), gt2)
+        gt2 = gt.minus_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 13, 47, 30), gt2)
+        # test realtime add/sub (so in game-time, it should be 5 times faster)
+        gt.add_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 12, 30), gt.clock)
+        gt.sub_realtime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(epoch, gt.clock)
+        # test gametime add/sub (directly manipulates the -ingame- clock, so no surprises here)
+        gt.add_gametime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(datetime.datetime(2012, 4, 19, 14, 2, 30), gt.clock)
+        gt.sub_gametime(datetime.timedelta(minutes=2, seconds=30))
+        self.assertEqual(epoch, gt.clock)
 
     def test_parsetime(self):
         self.assertEqual(datetime.time(hour=13, minute=22, second=58), util.parse_time(["13:22:58"]))

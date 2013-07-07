@@ -33,6 +33,7 @@ class Deferred(object):
     __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
 
     def __init__(self, due, owner, callable, vargs, kwargs):
+        assert due is None or isinstance(due, datetime.datetime)
         self.due = due   # in game time
         self.owner = owner
         self.callable = callable
@@ -45,7 +46,12 @@ class Deferred(object):
     def __lt__(self, other):
         return self.due < other.due   # deferreds must be sortable
 
-    def due_secs(self, game_clock, realtime=False):
+    def when_due(self, game_clock, realtime=False):
+        """
+        In what timeframe is this deferred due to occur? (timedelta)
+        Normally it is in terms of game-time, but if you pass realtime=True,
+        you will get the real-time timedelta.
+        """
         secs = (self.due - game_clock.clock).total_seconds()
         if realtime:
             secs = int(secs / game_clock.times_realtime)

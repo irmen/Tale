@@ -28,14 +28,19 @@ class TestDriver(unittest.TestCase):
 
 class TestDeferreds(unittest.TestCase):
     def testSortable(self):
-        d1 = the_driver.Deferred(5, "owner", "callable", None, None)
-        d2 = the_driver.Deferred(2, "owner", "callable", None, None)
-        d3 = the_driver.Deferred(4, "owner", "callable", None, None)
-        d4 = the_driver.Deferred(1, "owner", "callable", None, None)
-        d5 = the_driver.Deferred(3, "owner", "callable", None, None)
+        t1 = datetime.datetime(1995, 1, 1)
+        t2 = datetime.datetime(1996, 1, 1)
+        t3 = datetime.datetime(1997, 1, 1)
+        t4 = datetime.datetime(1998, 1, 1)
+        t5 = datetime.datetime(1999, 1, 1)
+        d1 = the_driver.Deferred(t5, "owner", "callable", None, None)
+        d2 = the_driver.Deferred(t2, "owner", "callable", None, None)
+        d3 = the_driver.Deferred(t4, "owner", "callable", None, None)
+        d4 = the_driver.Deferred(t1, "owner", "callable", None, None)
+        d5 = the_driver.Deferred(t3, "owner", "callable", None, None)
         deferreds = sorted([d1, d2, d3, d4, d5])
         dues = [d.due for d in deferreds]
-        self.assertEqual([1, 2, 3, 4, 5], dues)
+        self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def test_numeric_deferreds(self):
         thing = tale.base.Item("thing")
@@ -63,17 +68,22 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual(3601, after.seconds)
 
     def testHeapq(self):
-        d1 = the_driver.Deferred(5, "owner", "callable", None, None)
-        d2 = the_driver.Deferred(2, "owner", "callable", None, None)
-        d3 = the_driver.Deferred(4, "owner", "callable", None, None)
-        d4 = the_driver.Deferred(1, "owner", "callable", None, None)
-        d5 = the_driver.Deferred(3, "owner", "callable", None, None)
+        t1 = datetime.datetime(1995, 1, 1)
+        t2 = datetime.datetime(1996, 1, 1)
+        t3 = datetime.datetime(1997, 1, 1)
+        t4 = datetime.datetime(1998, 1, 1)
+        t5 = datetime.datetime(1999, 1, 1)
+        d1 = the_driver.Deferred(t5, "owner", "callable", None, None)
+        d2 = the_driver.Deferred(t2, "owner", "callable", None, None)
+        d3 = the_driver.Deferred(t4, "owner", "callable", None, None)
+        d4 = the_driver.Deferred(t1, "owner", "callable", None, None)
+        d5 = the_driver.Deferred(t3, "owner", "callable", None, None)
         heap = [d1, d2, d3, d4, d5]
         heapq.heapify(heap)
         dues = []
         while heap:
             dues.append(heapq.heappop(heap).due)
-        self.assertEqual([1, 2, 3, 4, 5], dues)
+        self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def testCallable(self):
         class Thing(object):
@@ -83,13 +93,45 @@ class TestDeferreds(unittest.TestCase):
                 assert driver is the_driver
                 self.x.append(value)
         t = Thing()
-        d = the_driver.Deferred(1, t, "append", [42], None)
+        d = the_driver.Deferred(None, t, "append", [42], None)
         d(driver=the_driver)
         self.assertEqual([42], t.x)
         t = Thing()
-        d = the_driver.Deferred(1, None, t.append, [42], None)
+        d = the_driver.Deferred(None, None, t.append, [42], None)
         d(driver=the_driver)
         self.assertEqual([42], t.x)
+
+    def testDue_realtime(self):
+        # test due timings where the gameclock == realtime clock
+        game_clock = tale.util.GameDateTime(datetime.datetime(2013, 7, 18, 15, 29, 59, 123))
+        due = game_clock.plus_realtime(datetime.timedelta(seconds=60))
+        d = the_driver.Deferred(due, None, "callable", None, None)
+        result = d.when_due(game_clock)
+        self.assertIsInstance(result, datetime.timedelta)
+        self.assertEqual(datetime.timedelta(seconds=60), result)
+        result = d.when_due(game_clock, True)   # realtime
+        self.assertEqual(datetime.timedelta(seconds=60), result)
+        game_clock.add_gametime(datetime.timedelta(seconds=20))   # +20 gametime seconds
+        result = d.when_due(game_clock)   # not realtime (game time)
+        self.assertEqual(datetime.timedelta(seconds=40), result)
+        result = d.when_due(game_clock, True)   # realtime
+        self.assertEqual(datetime.timedelta(seconds=40), result)
+
+    def testDue_gametime(self):
+        # test due timings where the gameclock == 10 times realtime clock
+        game_clock = tale.util.GameDateTime(datetime.datetime(2013, 7, 18, 15, 29, 59, 123), 10)   # 10 times realtime
+        due = game_clock.plus_realtime(datetime.timedelta(seconds=60))      # due in (realtime) 60 seconds (600 gametime seconds)
+        d = the_driver.Deferred(due, None, "callable", None, None)
+        result = d.when_due(game_clock)   # not realtime
+        self.assertIsInstance(result, datetime.timedelta)
+        self.assertEqual(datetime.timedelta(seconds=10*60), result)
+        result = d.when_due(game_clock, True)   # realtime
+        self.assertEqual(datetime.timedelta(seconds=60), result)
+        game_clock.add_gametime(datetime.timedelta(seconds=20))   # +20 gametime seconds (=2 realtime seconds)
+        result = d.when_due(game_clock)   # not realtime (game time)
+        self.assertEqual(datetime.timedelta(seconds=580), result)
+        result = d.when_due(game_clock, True)   # realtime
+        self.assertEqual(datetime.timedelta(seconds=58), result)
 
 
 class TestVarious(unittest.TestCase):

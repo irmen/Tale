@@ -363,6 +363,7 @@ class GameDateTime(object):
     """
     The datetime class that tracks game time.
     times_realtime means how much faster the game time is running than real time.
+    The internal 'clock' tracks the time in game-time (not real-time).
     """
     def __init__(self, datetime, times_realtime=1):
         assert times_realtime >= 0
