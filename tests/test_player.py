@@ -527,10 +527,10 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual("Test", p.title)
         pn.apply_to(p)
         self.assertTrue("wizard" in p.privileges)
-        self.assertEqual("irmen", p.name)
+        self.assertEqual("rinzwind", p.name)
         self.assertEqual("human", p.race)
         self.assertEqual("m", p.gender)
-        self.assertEqual("arch wizard Irmen", p.title)
+        self.assertEqual("arch wizard Rinzwind", p.title)
 
 
 class TestTabCompletion(unittest.TestCase):

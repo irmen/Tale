@@ -429,7 +429,7 @@ def do_server(player, parsed, ctx):
         txt.append("Game time: %s   (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
         txt.append("Game time: %s" % ctx.clock)
-    if sys.platform == "cli":
+    if sys.platform == "cli" or os.name=="java":
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))

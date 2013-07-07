@@ -58,7 +58,7 @@ class CharacterBuilder(object):
     def create_default_wizard(self):
         #@todo these hardcoded names eventually need to go
         naming = PlayerNaming()
-        naming.name = "irmen"
+        naming.name = "rinzwind"
         naming.wizard = True
         naming.description = "This wizard looks very important."
         naming.gender = "m"
@@ -70,7 +70,7 @@ class CharacterBuilder(object):
     def create_default_player(self):
         #@todo these hardcoded names eventually need to go
         naming = PlayerNaming()
-        naming.name = "irmen"
+        naming.name = "joe"
         naming.wizard = False
         naming.description = "A regular person."
         naming.gender = "m"

@@ -100,6 +100,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         (Don't call this directly, use player.input)
         """
         print(self._apply_style(prompt, self.do_styles), end="")
+        sys.stdout.flush()
         return input().strip()
 
     def input_line(self, player):
@@ -115,6 +116,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         """
         try:
             print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
+            sys.stdout.flush()
             cmd = input().strip()
             player.store_input_line(cmd)
             if cmd == "quit":
