@@ -32,7 +32,6 @@ setup_args = dict(
 
 It's still being developed and new features are implement along the way,
 but the current version is quite capable of running an interactive fiction story world.
-
 Development is currently focused on the single player Interactive Fiction mode.
 The multi-user (MUD) aspects of the framework have been put on the back burner for now.
 
@@ -43,6 +42,7 @@ You can also run the tiny embedded test story like this, after you've installed 
 
     $ python -m tale.demo.story
 
+The source code repository is on Github: https://github.com/irmen/Tale
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],
