@@ -501,7 +501,7 @@ def poss_replacement(actor, target, observer):
             return lang.possessive(target.title)
 
 
-_message_regex = re.compile(r"(^|\s)['\"]([^'\"]+?)['\"]")
+_quoted_message_regex = re.compile(r"('(?P<msg1>.*)')|(\"(?P<msg2>.*)\")")    # greedy single-or-doublequoted string match
 _skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "onto",
                "the", "with", "from", "after", "before", "under", "above", "next"}
 
@@ -776,9 +776,9 @@ class Soul(object):
         unparsed = cmd
 
         # a substring enclosed in quotes will be extracted as the message
-        m = _message_regex.search(cmd)
+        m = _quoted_message_regex.search(cmd)
         if m:
-            message = [m.group(2).strip()]
+            message = [(m.group("msg1") or m.group("msg2")).strip()]
             cmd = cmd[:m.start()] + cmd[m.end():]
 
         if not cmd:

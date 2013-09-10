@@ -74,6 +74,7 @@ class Deferred(object):
 class Commands(object):
     def __init__(self):
         self.commands_per_priv = {None: {}}
+        self.no_soul_parsing = set()
 
     def add(self, verb, func, privilege=None):
         self.validateFunc(func)
@@ -104,6 +105,7 @@ class Commands(object):
     def adjust_available_commands(self, story_config):
         # disable commands flagged with the given game_mode
         # disable soul verbs flagged with override
+        # mark non-soul commands
         for cmds in self.commands_per_priv.values():
             for cmd, func in list(cmds.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
@@ -111,6 +113,8 @@ class Commands(object):
                     del cmds[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]
+                if getattr(func, "no_soul_parse", False):
+                    self.no_soul_parsing.add(cmd)
 
 
 def version_tuple(v_str):
@@ -497,14 +501,18 @@ class Driver(object):
             _verb = cmds.abbreviations[_verb]
             cmd = "".join([_verb, _sep, _rest])
 
-        # Parse the command by using the soul.
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
         command_verbs = self.commands.get(self.player.privileges)
         custom_verbs = set(self.player.location.verbs)
-        all_verbs = set(command_verbs) | custom_verbs
         try:
-            parsed = self.player.parse(cmd, external_verbs=all_verbs)
+            if _verb in self.commands.no_soul_parsing:
+                # don't use the soul to parse it further
+                raise soul.NonSoulVerb(soul.ParseResult(_verb, unparsed=_rest.strip()))
+            else:
+                # Parse the command by using the soul.
+                all_verbs = set(command_verbs) | custom_verbs
+                parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.do_socialize(parsed)
         except soul.NonSoulVerb as x:

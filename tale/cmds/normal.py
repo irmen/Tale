@@ -18,7 +18,7 @@ from .. import base
 from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
-from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul
+from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
 
 all_commands = {}
 cmds_aliases = {}   # commands -> tuple of aliases
@@ -753,11 +753,12 @@ def do_yell(player, parsed, ctx):
 
 
 @cmd("say")
+@no_soul_parse
 def do_say(player, parsed, ctx):
     """Say something to people near you."""
     if not parsed.unparsed:
         raise ActionRefused("Say what?")
-    message = parsed.unparsed
+    message = parsed.unparsed    # this command is marked @no_soul_parse so everything on the cmd line ends up in here
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "."
     target = ""

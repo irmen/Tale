@@ -67,3 +67,9 @@ def overrides_soul(func):
     """decorator to let the command override (hide) the corresponding soul command"""
     func.overrides_soul = True
     return func
+
+
+def no_soul_parse(func):
+    """decorator to tell the command processor to skip the soul parse step and just treat the whole input as plain string"""
+    func.no_soul_parse = True
+    return func
