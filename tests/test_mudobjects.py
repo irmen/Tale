@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import datetime
-from tale.globalcontext import mud_context
 from tests.supportstuff import DummyDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from tale.util import Context, MoneyFormatter
@@ -17,7 +16,7 @@ from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResult
 from tale.io.iobase import strip_text_styles
-from tale import pubsub
+from tale import pubsub, mud_context
 
 
 class TestLocations(unittest.TestCase):

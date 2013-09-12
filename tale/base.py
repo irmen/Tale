@@ -10,9 +10,9 @@ from textwrap import dedent
 from . import lang
 from . import util
 from . import pubsub
+from . import mud_context
 from .errors import ActionRefused
 from .races import races
-from .globalcontext import mud_context
 
 """
 object hierarchy:

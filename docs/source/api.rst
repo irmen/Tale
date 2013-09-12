@@ -22,11 +22,6 @@ Tale API
 .. automodule:: tale.errors
     :members:
 
-:mod:`tale.globalcontext` --- Global context
---------------------------------------------
-.. automodule:: tale.globalcontext
-    :members:
-
 :mod:`tale.hints` --- Hint system
 ---------------------------------
 .. automodule:: tale.hints

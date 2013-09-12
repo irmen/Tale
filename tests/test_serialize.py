@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import pickle
-from tale import globalcontext, races, base, npc, soul, player, util, hints
+from tale import mud_context, races, base, npc, soul, player, util, hints
 from tests.supportstuff import DummyDriver
 
 
@@ -18,7 +18,7 @@ def serializecycle(obj):
 
 class TestSerializing(unittest.TestCase):
     def setUp(self):
-        globalcontext.mud_context.driver = DummyDriver()
+        mud_context.driver = DummyDriver()
 
     def assert_base_attrs(self, obj):
         self.assertEqual("name", obj.name)

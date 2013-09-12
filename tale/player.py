@@ -13,10 +13,10 @@ from . import soul
 from . import lang
 from . import hints
 from . import pubsub
+from . import mud_context
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
-from .globalcontext import mud_context
 
 
 DEFAULT_SCREEN_WIDTH = 72

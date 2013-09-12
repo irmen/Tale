@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
-import tale.globalcontext
+import tale
 import tale.base
 import tale.soul
 import tale.player
@@ -18,7 +18,7 @@ from tests.supportstuff import DummyDriver
 
 class TestSoul(unittest.TestCase):
     def setUp(self):
-        tale.globalcontext.mud_context.driver = DummyDriver()
+        tale.mud_context.driver = DummyDriver()
 
     def testSpacify(self):
         soul = tale.soul.Soul()

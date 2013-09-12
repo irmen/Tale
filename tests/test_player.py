@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 import os
 import unittest
-import tale.globalcontext
+import tale
 from tests.supportstuff import DummyDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
@@ -28,9 +28,9 @@ else:
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
-        tale.globalcontext.mud_context.driver = DummyDriver()
-        tale.globalcontext.mud_context.config = AttrDict()
-        tale.globalcontext.mud_context.config.server_mode="if"
+        tale.mud_context.driver = DummyDriver()
+        tale.mud_context.config = AttrDict()
+        tale.mud_context.config.server_mode="if"
     def test_init(self):
         player = Player("fritz", "m")
         player.title = "Fritz the great"
@@ -424,7 +424,7 @@ class TestPlayer(unittest.TestCase):
         room2 = LocationNotify("room2")
         room1.insert(player, player)
         player.move(room2)
-        tale.globalcontext.mud_context.driver.execute_after_player_actions()
+        tale.mud_context.driver.execute_after_player_actions()
         self.assertEqual(room2, player.location)
         self.assertEqual(player, room1.player_left)
         self.assertEqual(room2, room1.player_left_target)

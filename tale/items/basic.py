@@ -8,8 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from ..base import Item, Container
 from ..errors import ActionRefused
-from ..globalcontext import mud_context
-from .. import lang
+from .. import lang, mud_context
 
 
 class TrashCan(Container):

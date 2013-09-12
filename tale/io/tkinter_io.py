@@ -19,7 +19,7 @@ except ImportError:
     import tkFont as tkfont
     import tkMessageBox as tkmsgbox
 from . import iobase, vfs
-from .. import globalcontext
+from .. import mud_context
 from ..util import queue
 from .. import __version__ as tale_version
 
@@ -356,7 +356,7 @@ class TaleGUI(object):
             self.root.after(2000, destroy2)
 
     def window_closed(self):
-        globalcontext.mud_context.driver.stop_driver()
+        mud_context.driver.stop_driver()
 
     def root_process_cmd(self, event):
         line = self.cmd_queue.get()

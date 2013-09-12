@@ -6,12 +6,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
 import random
-from tale import lang
+from tale import lang, mud_context
 from tale.npc import NPC, Monster
 from tale.base import heartbeat
 from tale.util import message_nearby_locations
 from tale.errors import ActionRefused
-from tale import globalcontext
 
 
 @heartbeat
@@ -40,7 +39,7 @@ class TownCrier(NPC):
     def init(self):
         # note: this npc uses the deferred feature to yell stuff at certain moments.
         # This is the preferred way (it's efficient).
-        globalcontext.mud_context.driver.defer(2, self, self.do_cry)
+        mud_context.driver.defer(2, self, self.do_cry)
 
     def do_cry(self, driver):
         self.tell_others("{Title} yells: welcome everyone!")
@@ -63,8 +62,8 @@ class TownCrier(NPC):
 class WalkingRat(Monster):
     def init(self):
         super(WalkingRat, self).init()
-        globalcontext.mud_context.driver.defer(2, self, self.do_idle_action)
-        globalcontext.mud_context.driver.defer(4, self, self.do_random_move)
+        mud_context.driver.defer(2, self, self.do_idle_action)
+        mud_context.driver.defer(4, self, self.do_random_move)
 
     def do_idle_action(self, driver):
         if random.random() < 0.5:

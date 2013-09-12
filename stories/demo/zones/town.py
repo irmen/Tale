@@ -11,7 +11,7 @@ from tale.npc import NPC
 from tale.errors import ActionRefused, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.util import clone
-from tale import globalcontext
+from tale import mud_context
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -140,7 +140,7 @@ class EndDoor(Door):
         super(EndDoor, self).unlock(item, actor)
         if not self.locked:
             if "unlocked_enddoor" not in actor.hints.checkpoints:
-                globalcontext.mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+                mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
             actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
@@ -251,10 +251,10 @@ alley.insert(computer, None)
 
 class DoorKey(Item):
     def notify_moved(self, source_container, target_container, actor):
-        player = globalcontext.mud_context.player
+        player = mud_context.player
         if target_container is player or target_container in player:
             if "got_doorkey" not in actor.hints.checkpoints:
-                globalcontext.mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+                mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
 
 

@@ -17,7 +17,7 @@ import heapq
 import inspect
 import argparse
 import pickle
-from . import globalcontext
+from . import mud_context
 from . import errors
 from . import util
 from . import soul
@@ -137,16 +137,15 @@ class Driver(object):
         self.config = None
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
-        self.register_global_context()
+        self.register_in_mud_context()
         cmds.register_all(self.commands)
 
-    def register_global_context(self):
+    def register_in_mud_context(self):
         """register the driver and some other stuff in the global thread context"""
-        ctx = globalcontext.mud_context
-        ctx.driver = self
-        ctx.state = self.state
-        ctx.config = self.config
-        ctx.player = self.player
+        mud_context.driver = self
+        mud_context.state = self.state
+        mud_context.config = self.config
+        mud_context.player = self.player
 
     def bind_exits(self):
         for exit in self.unbound_exits:
@@ -194,7 +193,7 @@ class Driver(object):
         self.story = story.Story()
         self.config = util.AttrDict(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        self.register_global_context()
+        self.register_in_mud_context()
         try:
             story_cmds = __import__("cmds", level=0)
         except (ImportError, ValueError):
@@ -256,7 +255,7 @@ class Driver(object):
 
     def startup_main_loop(self):
         # continues the startup process and kick of the driver's main loop
-        self.register_global_context()    # re-register because we may be running in a new background thread
+        self.register_in_mud_context()    # re-register because we may be running in a new background thread
         self._io_thread_may_start.set()
         self._stop_mainloop = False
         try:
@@ -376,7 +375,7 @@ class Driver(object):
     def main_loop(self):
         last_loop_time = last_server_tick = time.time()
         while not self._stop_mainloop:
-            globalcontext.mud_context.player = self.player   # @todo hack... is always the same single player for now
+            mud_context.player = self.player   # @todo hack... is always the same single player for now
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)

@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import random
 from tale.base import Location, Exit, Door, Item
 from tale.npc import NPC
-from tale.globalcontext import mud_context
+from tale import mud_context
 from tale.lang import capital
 
 # define the various locations

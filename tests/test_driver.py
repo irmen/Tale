@@ -10,7 +10,6 @@ import unittest
 import heapq
 import datetime
 import tale.driver as the_driver
-import tale.globalcontext
 import tale.cmds.normal
 import tale.cmds.wizard
 import tale.base
@@ -21,9 +20,9 @@ class TestDriver(unittest.TestCase):
     def testAttributes(self):
         d = the_driver.Driver()
         self.assertEqual({}, d.state)
-        self.assertEqual({}, tale.globalcontext.mud_context.state)
-        self.assertTrue(tale.globalcontext.mud_context.state is d.state)
-        self.assertEqual(d, tale.globalcontext.mud_context.driver)
+        self.assertEqual({}, tale.mud_context.state)
+        self.assertTrue(tale.mud_context.state is d.state)
+        self.assertEqual(d, tale.mud_context.driver)
 
 
 class TestDeferreds(unittest.TestCase):

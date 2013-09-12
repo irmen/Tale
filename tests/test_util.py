@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import datetime
 import unittest
-from tale import util, globalcontext
+from tale import util, mud_context
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
@@ -17,7 +17,7 @@ from tests.supportstuff import DummyDriver, Wiretap
 
 class TestUtil(unittest.TestCase):
     def setUp(self):
-        globalcontext.mud_context.driver = DummyDriver()
+        mud_context.driver = DummyDriver()
 
     def test_print_location(self):
         p = Player("julie", "f")
