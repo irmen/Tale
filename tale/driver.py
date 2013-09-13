@@ -191,7 +191,9 @@ class Driver(object):
         sys.path.insert(0, '.')
         story = __import__("story", level=0)
         self.story = story.Story()
-        self.config = util.AttrDict(self.story.config)
+        if args.mode not in self.story.config["supported_modes"]:
+            raise ValueError("driver mode '%s' not supported by this story" % args.mode)
+        self.config = util.ReadonlyAttributes(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         self.register_in_mud_context()
         try:
@@ -219,6 +221,7 @@ class Driver(object):
             self.config.gametime_to_realtime = 1
         assert self.config.server_tick_time > 0
         assert self.config.max_wait_hours >= 0
+        self.config.lock()   # make the config read-only
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
         # story has been initialised, create and connect a player
@@ -455,6 +458,7 @@ class Driver(object):
                     break
         self.player.write_output()  # flush pending output at server shutdown.
         ctx = util.Context(driver=self)
+        ctx.lock()
         self.player.destroy(ctx)
 
     def server_tick(self):
@@ -538,6 +542,7 @@ class Driver(object):
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
+                        ctx.lock()
                         func(self.player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)

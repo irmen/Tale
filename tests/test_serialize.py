@@ -111,22 +111,22 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(42, x.money)
         self.assertIsNone(x.io)
     def test_attrdict(self):
-        s = util.AttrDict(a=42, b="hello", c=[1, 2, 3])
+        s = util.ReadonlyAttributes(a=42, b="hello", c=[1, 2, 3])
+        s.lock()
         x = serializecycle(s)
         self.assertEqual(s, x)
-        i1 = list(s.items())
-        i2 = list(x.items())
-        self.assertEqual(i1, i2)
+        self.assertEqual(vars(s), vars(x))
     def test_Context(self):
         c = util.Context(driver=1, state=2)
+        c.lock()
         x = serializecycle(c)
         self.assertEqual(c, x)
-        i1 = list(c.items())
-        i2 = list(x.items())
-        self.assertEqual(i1, i2)
+        self.assertEqual(vars(c), vars(x))
     def test_Hints(self):
         h = hints.HintSystem()
         h.init([hints.Hint("start", None, "first")])
+        import os
+        os.environ
 
 
 if __name__=='__main__':

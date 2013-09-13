@@ -436,26 +436,36 @@ def input_choice(question, choices, player):
             player.tell("That is not a valid answer.")
 
 
-class AttrDict(dict):
-    """A dict-like object that supports accessing its members as attributes."""
+class ReadonlyAttributes(object):
+    """
+    A container object that supports accessing its members as attributes.
+    It can be 'locked' which makes it read-only.
+    """
+    __locked = False
     def __init__(self, *vargs, **kwargs):
         if vargs:
             assert len(vargs) == 1
             assert not kwargs
             source = vargs[0]
-            assert isinstance(source, dict)
         else:
             source = kwargs
-        dict.__init__(self, source)
         self.__dict__.update(source)
 
-    def __setitem__(self, key, value):
-        dict.__setitem__(self, key, value)
-        self.__dict__[key] = value
+    def __setattr__(self, key, value):
+        if self.__locked:
+            raise TypeError("this object is read-only")
+        else:
+            self.__dict__[key] = value
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def lock(self):
+        self.__locked = True
 
 
-class Context(AttrDict):
-    """The context used for every command function and obj.destroy"""
+class Context(ReadonlyAttributes):
+    """The context used for every command function and obj.destroy. It is read-only."""
     driver = None
     clock = None
     config = None

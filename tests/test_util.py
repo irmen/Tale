@@ -292,27 +292,29 @@ class TestUtil(unittest.TestCase):
             util.parse_time(["some_weird_occasion"])
 
     def test_attrdict(self):
-        ad = util.AttrDict(a=42, b="hello")
-        self.assertEqual([42, 42], [ad.a, ad["a"]])
-        self.assertEqual(["hello", "hello"], [ad.b, ad["b"]])
-        ad.a = 999
-        ad["b"] = "bye"
-        self.assertEqual(999, ad.a)
-        self.assertEqual("bye", ad.b)
-        d = {"a": 1, "b": 2}
-        ad = util.AttrDict(d)
-        self.assertEqual([1, 2], [ad.a, ad.b])
+        ad = util.ReadonlyAttributes(a=42, b="hello")
+        self.assertEqual(42, ad.a)
+        self.assertEqual("hello", ad.b)
+        self.assertEqual({"a":42, "b":"hello"}, vars(ad))
+        with self.assertRaises(AttributeError):
+            _ = ad.doesnotexist
+        ad.x=99
+        ad.lock()
+        with self.assertRaises(TypeError):
+            ad.x=88
 
     def test_context(self):
         ctx = util.Context(driver=1, clock=2)
         self.assertEqual(1, ctx.driver)
         self.assertEqual(2, ctx.clock)
-        self.assertEqual(1, ctx["driver"])
-        self.assertEqual(2, ctx["clock"])
         self.assertIsNone(ctx.state)
         self.assertIsNone(ctx.config)
         with self.assertRaises(AttributeError):
             _ = ctx.doesnotexist
+        ctx.x=99
+        ctx.lock()
+        with self.assertRaises(TypeError):
+            ctx.x=88
 
 
 if __name__ == '__main__':
