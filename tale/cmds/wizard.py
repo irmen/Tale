@@ -10,13 +10,12 @@ import datetime
 import inspect
 import functools
 import sys
-import threading
 import gc
 import os
 import platform
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util
+from .. import base, lang, util, threadsupport
 from ..player import Player
 from .. import __version__
 
@@ -433,7 +432,7 @@ def do_server(player, parsed, ctx):
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))
-    txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
+    txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threadsupport.active_count()))
     txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (config.server_mode, len(ctx.driver.all_players()), len(driver.heartbeat_objects), len(driver.deferreds)))
     if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)

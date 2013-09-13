@@ -5,9 +5,9 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import threading
 import time
 from ..util import basestring_type
+from .. import threadsupport
 from .. import soul
 try:
     import mdx_smartypants
@@ -46,7 +46,7 @@ def strip_text_styles(text):
     return [strip(line) for line in text]
 
 
-class AsyncPlayerInput(threading.Thread):
+class AsyncPlayerInput(threadsupport.Thread):
     """
     Input-task that runs asynchronously (background thread).
     This is used by the driver when running in timer-mode, where the driver's
@@ -57,7 +57,7 @@ class AsyncPlayerInput(threading.Thread):
         self.player = player
         self.daemon = True
         self.name = "async-input"
-        self.enabled = threading.Event()
+        self.enabled = threadsupport.Event()
         self.enabled.clear()
         self._stoploop = False
         self.start()

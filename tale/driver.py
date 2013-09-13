@@ -12,11 +12,11 @@ import datetime
 import sys
 import time
 import os
-import threading
 import heapq
 import inspect
 import argparse
 import pickle
+from . import threadsupport
 from . import mud_context
 from . import errors
 from . import util
@@ -129,7 +129,7 @@ class Driver(object):
         self.state = {}  # global game state variables
         self.unbound_exits = []
         self.deferreds = []  # heapq
-        self.deferreds_lock = threading.Lock()
+        self.deferreds_lock = threadsupport.Lock()
         self.notification_queue = util.queue.Queue()
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
@@ -195,6 +195,8 @@ class Driver(object):
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
         self.config = util.ReadonlyAttributes(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        if self.config.server_tick_method != "command" and not threadsupport.has_threads:
+            raise RuntimeError("sorry, story with async/timer tick_method needs proper threading support")
         self.register_in_mud_context()
         try:
             story_cmds = __import__("cmds", level=0)
@@ -236,7 +238,7 @@ class Driver(object):
         self.player.io.clear_screen()
         self.player.io.install_tab_completion(TabCompleter(self, self.player))
         driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)
-        self._io_thread_may_start = threading.Event()
+        self._io_thread_may_start = threadsupport.Event()
         if driver_thread is None:
             assert io_mainloop is None
             # the driver mainloop is running in the main thread

@@ -6,8 +6,9 @@ Uses weakrefs to not needlessly lock subscribers/topics in memory.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import threading
 import weakref
+from . import threadsupport
+
 
 __all__=["topic", "unsubscribe_all", "Listener"]
 
@@ -15,7 +16,7 @@ all_topics = {}
 
 def topic(name):
     """Create a topic object (singleton). Name can be a string or a sequence type."""
-    with threading.Lock():
+    with threadsupport.Lock():
         if name in all_topics:
             return all_topics[name]
         instance = all_topics[name] = __Topic(name)

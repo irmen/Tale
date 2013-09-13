@@ -5,7 +5,6 @@ GUI input/output using Tkinter.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import threading
 import sys
 import re
 import textwrap
@@ -20,6 +19,7 @@ except ImportError:
     import tkMessageBox as tkmsgbox
 from . import iobase, vfs
 from .. import mud_context
+from .. import threadsupport
 from ..util import queue
 from .. import __version__ as tale_version
 
@@ -51,7 +51,7 @@ class TkinterIo(iobase.IoAdapterBase):
         self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
 
     def mainloop_threads(self, driver_mainloop):
-        driver_thread = threading.Thread(name="driver", target=driver_mainloop)
+        driver_thread = threadsupport.Thread(name="driver", target=driver_mainloop)
         driver_thread.daemon = True
         driver_thread.name = "driver"
         return driver_thread, self.gui.mainloop
@@ -299,7 +299,7 @@ class TaleWindow(Toplevel):
 class TaleGUI(object):
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
-        self.gui_ready = threading.Event()
+        self.gui_ready = threadsupport.Event()
         self.io = io
         self.server_config = config
         self.cmd_queue = queue.Queue()

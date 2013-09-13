@@ -6,7 +6,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-from threading import Event
 import time
 from . import base
 from . import soul
@@ -17,6 +16,7 @@ from . import mud_context
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
+from .threadsupport import Event
 
 
 DEFAULT_SCREEN_WIDTH = 72
