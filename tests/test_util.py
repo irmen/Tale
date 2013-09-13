@@ -307,7 +307,6 @@ class TestUtil(unittest.TestCase):
         ctx = util.Context(driver=1, clock=2)
         self.assertEqual(1, ctx.driver)
         self.assertEqual(2, ctx.clock)
-        self.assertIsNone(ctx.state)
         self.assertIsNone(ctx.config)
         with self.assertRaises(AttributeError):
             _ = ctx.doesnotexist

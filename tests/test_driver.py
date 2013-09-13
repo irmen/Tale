@@ -17,13 +17,11 @@ import tale.util
 
 
 class TestDriver(unittest.TestCase):
-    def testAttributes(self):
+    def testGlobalContext(self):
         d = the_driver.Driver()
-        self.assertEqual({}, d.state)
-        self.assertEqual({}, tale.mud_context.state)
-        self.assertTrue(tale.mud_context.state is d.state)
+        self.assertIsNone(tale.mud_context.player)
+        self.assertIsNone(tale.mud_context.config)
         self.assertEqual(d, tale.mud_context.driver)
-
 
 class TestDeferreds(unittest.TestCase):
     def testSortable(self):

@@ -126,7 +126,6 @@ class Driver(object):
 
     def __init__(self):
         self.heartbeat_objects = set()
-        self.state = {}  # global game state variables
         self.unbound_exits = []
         self.deferreds = []  # heapq
         self.deferreds_lock = threadsupport.Lock()
@@ -141,9 +140,11 @@ class Driver(object):
         cmds.register_all(self.commands)
 
     def register_in_mud_context(self):
-        """register the driver and some other stuff in the global thread context"""
+        """
+        Register the driver and some other stuff in the global thread context.
+        These are unique per thread (=per player).
+        """
         mud_context.driver = self
-        mud_context.state = self.state
         mud_context.config = self.config
         mud_context.player = self.player
 
@@ -470,7 +471,7 @@ class Driver(object):
         # 3) deferreds
         # 4) write buffered output to the screen.
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
-        ctx = {"driver": self, "clock": self.game_clock, "state": self.state}
+        ctx = {"driver": self, "clock": self.game_clock}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
         if self.deferreds:
@@ -543,7 +544,7 @@ class Driver(object):
                         self.go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, state=self.state)
+                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock)
                         ctx.lock()
                         func(self.player, parsed, ctx)
                         if func.enable_notify_action:
@@ -628,7 +629,6 @@ class Driver(object):
             return
         state = {
             "version": self.config.version,
-            "gamestate": self.state,
             "player": self.player,
             "deferreds": self.deferreds,
             "clock": self.game_clock,
@@ -657,7 +657,6 @@ class Driver(object):
                 print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
-            self.state = state["gamestate"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]

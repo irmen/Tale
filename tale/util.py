@@ -469,4 +469,3 @@ class Context(ReadonlyAttributes):
     driver = None
     clock = None
     config = None
-    state = None
