@@ -305,13 +305,8 @@ class TestPlayer(unittest.TestCase):
     def test_story_complete(self):
         player = Player("fritz", "m")
         self.assertFalse(player.story_complete)
-        self.assertIsNone(player.story_complete_callback)
         player.story_completed()
         self.assertTrue(player.story_complete)
-        self.assertIsNone(player.story_complete_callback)
-        player.story_completed("huzzah")
-        self.assertTrue(player.story_complete)
-        self.assertEqual("huzzah", player.story_complete_callback)
 
     def test_handle_and_notify_action(self):
         class SpecialPlayer(Player):

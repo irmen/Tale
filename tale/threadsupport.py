@@ -21,3 +21,4 @@ Lock = threading.Lock
 Thread = threading.Thread
 local = threading.local
 active_count = threading.active_count
+current_thread = threading.current_thread

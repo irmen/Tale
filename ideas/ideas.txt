@@ -12,7 +12,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Telnet interface.
 [feature] SSH interface via Paramiko?
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
-[feature] New mud-mode save command that immediately triggers the driver to store the player's state.
+[feature] New mud-mode save command that immediately triggers the driver to store the player's state. (already have this for IF-mode)
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
 [feature] Write stuff to a logfile for the server admins.
 [feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
@@ -43,17 +43,17 @@ General ideas/TODO:
 [code] Add more items to items.basic
     (such as an extensible generic box-like item that you need to open/close to put stuff in)
     Take ideas from objects in other mudlibs
-[feature] when X.combine(Y) -> make it possible to 'produce' a new object that replaces both X and Y
+[feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
-[code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object. (only Items?)
+[code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object.
     They're not mentioned in a general 'look' but can be accessed if referenced directly by name.
-    Other objects/livings descriptions may ofcourse mention them as clues.
+    Other objects/livings/locations descriptions may ofcourse mention them as clues.
     This allows for a car with an engine and doors, where only the car is mentioned in a 'look'.
+    Or a garden with trees which have branches you can examine, but only
     It is lightweight (no logic, only descriptions). Moving the owning object moves all its parts along with it.
     This requires adding code to all places an item is searched.... (it needs to search the parts too now)
-    Interaction with the part is done by owner object's handle_part_verb?
+    Interaction with the part is done by owner object's handle_part_verb? (which by default only prints a description?)
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
-[cosmetic] Support text style tags in the messages files on disk too. (banner, motd, welcome).  (remove hardcoded <monospaced> from banner then)
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
 [code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code] use yield (generators) for player command processing? should make it a lot easier to build conversational state, and yes/no question dialogs...

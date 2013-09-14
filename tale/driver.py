@@ -26,6 +26,7 @@ from . import player
 from . import __version__ as tale_version_str
 from .io import vfs
 from .io.iobase import TabCompleter
+from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 
 @total_ordering
@@ -122,6 +123,11 @@ def version_tuple(v_str):
 
 
 class Driver(object):
+    """
+    The Mud 'driver'.
+    Reads story file and config, initializes game state.
+    Handles main game loop, player connections, and loading/saving of game state.
+    """
     directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
 
     def __init__(self):
@@ -140,28 +146,27 @@ class Driver(object):
         cmds.register_all(self.commands)
 
     def register_in_mud_context(self):
-        """
-        Register the driver and some other stuff in the global thread context.
-        These are unique per thread (=per player).
-        """
+        # Register the driver and some other stuff in the global thread context.
+        # These are unique per thread (=per player).
         mud_context.driver = self
         mud_context.config = self.config
         mud_context.player = self.player
 
     def bind_exits(self):
+        # convert textual exit strings to actual exit object bindings
         for exit in self.unbound_exits:
             exit._bind_target(self.zones)
         del self.unbound_exits
 
     def start(self, args):
-        # parse args
+        """Parse the command line arguments and start the driver accordingly."""
         parser = argparse.ArgumentParser(description="""
             Tale framework %s game driver. Use this to launch a game and specify some settings.
             Sometimes the game will provide its own startup script that invokes this automatically.
             If it doesn't, refer to the options to see how to launch it manually instead.
             """ % tale_version_str)
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
-        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=player.DEFAULT_SCREEN_DELAY)
+        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         args = parser.parse_args(args)
@@ -234,11 +239,12 @@ class Driver(object):
             from .io.tkinter_io import TkinterIo as IoAdapter
         else:
             from .io.console_io import ConsoleIo as IoAdapter
-        self.player.io = IoAdapter(self.config)
-        self.player.io.output_line_delay = output_line_delay
-        self.player.io.clear_screen()
-        self.player.io.install_tab_completion(TabCompleter(self, self.player))
-        driver_thread, io_mainloop = self.player.io.mainloop_threads(self.startup_main_loop)
+        io = IoAdapter(self.config)
+        io.output_line_delay = output_line_delay
+        io.clear_screen()
+        io.install_tab_completion(TabCompleter(self, self.player))
+        driver_thread, io_mainloop = io.mainloop_threads(self.startup_main_loop)
+        self.player.io = io
         self._io_thread_may_start = threadsupport.Event()
         if driver_thread is None:
             assert io_mainloop is None
@@ -255,7 +261,7 @@ class Driver(object):
                     io_mainloop()
                     break
                 except KeyboardInterrupt:
-                    self.player.io.break_pressed(self.player)
+                    self.player.io.break_pressed()
                     continue
             driver_thread.join()
 
@@ -265,26 +271,27 @@ class Driver(object):
         self._io_thread_may_start.set()
         self._stop_mainloop = False
         try:
-            self.start_print_game_intro()
-            self.start_create_player()
-            self.start_show_motd()
+            self.print_game_intro(self.player)
+            self.create_player(self.player)
+            self.show_motd(self.player)
             self.player.look(short=False)
             self.player.write_output()
-            self.start_player_input()
+            self.start_player_input(self.player)
             while not self._stop_mainloop:
                 try:
                     self.main_loop()
                     break
                 except KeyboardInterrupt:
-                    self.player.io.break_pressed(self.player)
+                    self.player.io.break_pressed()
                     continue
         except:
             self.player.io.critical_error()
             self._stop_mainloop = True
             raise
 
-    def start_print_game_intro(self):
-        io = self.player.io
+    def print_game_intro(self, player):
+        # prints the intro screen of the game
+        io = player.io
         try:
             banner = self.vfs.load_text("messages/banner.txt")
             # print game banner as supplied by the game
@@ -295,78 +302,77 @@ class Driver(object):
             io.output("")
             io.output("<monospaced><bright>")
             msg = "'%s'" % self.config.name
-            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
-            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
             io.output("")
             msg = "written by %s" % self.config.author
-            io.output(msg.center(player.DEFAULT_SCREEN_WIDTH))
+            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
-                io.output(self.config.author_address.center(player.DEFAULT_SCREEN_WIDTH))
+                io.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
             io.output("</></monospaced>")
             io.output("")
 
-    def start_create_player(self):
-        io = self.player.io
+    def create_player(self, player):
+        # lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
-            io.output("")
-            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", self.player)
-        io.output("")
+            player.io.output("")
+            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", player)
+        player.io.output("")
         if load_saved_game:
-            self.load_saved_game()
-            self.player.io = io  # set the I/O adapter for this player
-            del io
-            self.player.tell("\n")
+            io = player.io  # save the I/O
+            player = self.load_saved_game()
+            player.io = io  # reset the I/O
+            player.tell("\n")
             if self.config.server_mode == "if":
-                self.story.welcome_savegame(self.player)
+                self.story.welcome_savegame(player)
             else:
-                self.player.tell("Welcome back to %s, %s." % (self.config.name, self.player.title))
-            self.player.tell("\n")
+                player.tell("Welcome back to %s, %s." % (self.config.name, player.title))
+            player.tell("\n")
         else:
             if self.config.server_mode == "if" and self.config.player_name:
                 # interactive fiction mode, create the player from the game's config
-                self.player.init_names(self.config.player_name, None, None, None)
-                self.player.init_race(self.config.player_race, self.config.player_gender)
+                player.init_names(self.config.player_name, None, None, None)
+                player.init_race(self.config.player_race, self.config.player_gender)
             elif self.config.server_mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                name_info = CharacterBuilder(self.player).build()
-                name_info.apply_to(self.player)
+                name_info = CharacterBuilder(player).build()
+                name_info.apply_to(player)
 
-            self.player.io = io  # set the I/O adapter for this player
-            self.player.io.do_styles = self.player.screen_styles_enabled
-            self.player.io.do_smartquotes = self.player.smartquotes_enabled
-            del io
-            self.player.tell("\n")
+            player.io.do_styles = player.screen_styles_enabled
+            player.io.do_smartquotes = player.smartquotes_enabled
+            player.tell("\n")
             # move the player to the starting location
-            if "wizard" in self.player.privileges:
-                self.player.move(self.config.startlocation_wizard)
+            if "wizard" in player.privileges:
+                player.move(self.config.startlocation_wizard)
             else:
-                self.player.move(self.config.startlocation_player)
-            self.player.tell("\n")
+                player.move(self.config.startlocation_player)
+            player.tell("\n")
             if self.config.server_mode == "if":
-                self.story.welcome(self.player)
+                self.story.welcome(player)
             else:
-                self.player.tell("Welcome to %s, %s." % (self.config.name, self.player.title), end=True)
-            self.player.tell("\n")
-        self.story.init_player(self.player)
+                player.tell("Welcome to %s, %s." % (self.config.name, player.title), end=True)
+            player.tell("\n")
+        self.story.init_player(player)
 
-    def start_show_motd(self):
+    def show_motd(self, player):
+        """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         if self.config.server_mode != "if":
             motd, mtime = util.get_motd(self.vfs)
             if motd:
-                self.player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
-                self.player.tell("\n")
-                self.player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
-                self.player.tell("\n")
-                self.player.tell("\n")
+                player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
+                player.tell("\n")
+                player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
+                player.tell("\n")
+                player.tell("\n")
 
-    def start_player_input(self):
+    def start_player_input(self, player):
         """(re)start the async player input processing task"""
         if self.config.server_tick_method == "timer":
-            self.async_player_input = self.player.io.get_async_input(self.player)
+            self.async_player_input = player.io.get_async_input(player)
         elif self.config.server_tick_method == "command":
             self.async_player_input = None  # player input is done in the same thread as the game loop
         else:
@@ -379,13 +385,17 @@ class Driver(object):
             self.async_player_input.stop()
 
     def main_loop(self):
+        """
+        The game loop.
+        Until the game is exited, it processes player input, and prints the resulting output.
+        """
         last_loop_time = last_server_tick = time.time()
         while not self._stop_mainloop:
             mud_context.player = self.player   # @todo hack... is always the same single player for now
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
-                self.story_complete_output(self.player.story_complete_callback)
+                self.story_complete_output()
                 self.stop_driver()
                 self.player.io.destroy()
                 break
@@ -430,16 +440,16 @@ class Driver(object):
                         except errors.ParseError as x:
                             self.player.tell(str(x))
                 except KeyboardInterrupt:
-                    self.player.io.break_pressed(self.player)
+                    self.player.io.break_pressed()
                     continue
                 except EOFError:
                     continue
                 except errors.StoryCompleted as ex:
                     if self.config.server_mode == "if":
                         # congratulations ;-)
-                        self.player.story_completed(ex.callback)
+                        self.player.story_completed()
                     else:
-                        pass   # in mud mode, the game can't be completed
+                        pass   # in mud mode, the game can't be 'completed' in this way
                 except errors.SessionExit:
                     if self.config.server_mode == "if":
                         self.story.goodbye(self.player)
@@ -465,11 +475,13 @@ class Driver(object):
         self.player.destroy(ctx)
 
     def server_tick(self):
-        # Do everything that the server needs to do every tick.
-        # 1) game clock
-        # 2) heartbeats
-        # 3) deferreds
-        # 4) write buffered output to the screen.
+        """
+        Do everything that the server needs to do every tick.
+        1) game clock
+        2) heartbeats
+        3) deferreds
+        4) write buffered output to the screen.
+        """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = {"driver": self, "clock": self.game_clock}
         for object in self.heartbeat_objects:
@@ -485,15 +497,13 @@ class Driver(object):
                 deferred(driver=self)
         self.player.write_output()
 
-    def story_complete_output(self, callback):
-        if callback:
-            callback(self.player, self.config, self)
-        else:
-            self.player.tell("\n")
-            self.story.completion(self.player)
-            self.player.tell("\n")
-            self.player.input("\nPress enter to continue. ")
-            self.player.tell("\n")
+    def story_complete_output(self):
+        # prints
+        self.player.tell("\n")
+        self.story.completion(self.player)
+        self.player.tell("\n")
+        self.player.input("\nPress enter to continue. ")
+        self.player.tell("\n")
 
     def process_player_input(self, cmd):
         if not cmd:
@@ -665,6 +675,7 @@ class Driver(object):
             if self.config.display_gametime:
                 self.player.tell("Game time:", self.game_clock)
             self.player.tell("\n")
+            return self.player
 
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)

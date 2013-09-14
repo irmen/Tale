@@ -27,7 +27,7 @@ outside = GameEnd("Outside", "You escaped the house.")
 livingroom.add_exits([
     Exit("small room", room1, "There's a small room in your house."),
     Exit("large room", room2, "There's a large room in your house."),
-    Door("door", outside, "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.", opened=False)
+    Door(["door", "garden"], outside, "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.", opened=False)
 ])
 room1.add_exits([Exit("living room", livingroom, "You can see the living room.")])
 room2.add_exits([Exit("living room", livingroom, "You can see the living room.")])

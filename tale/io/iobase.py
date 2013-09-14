@@ -96,6 +96,7 @@ class IoAdapterBase(object):
         """
         Get the object that is reading the player's input, asynchronously from the driver's main loop.
         Make sure that the object is active (i.e. restart it if it has been stopped in the meantime).
+        This is not used when the server tick method is command-driven instead of timer based.
         """
         return AsyncPlayerInput(player)
 
@@ -171,7 +172,7 @@ class IoAdapterBase(object):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
         raise NotImplementedError("implement this in subclass")
 
-    def break_pressed(self, player):
+    def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
         pass
 

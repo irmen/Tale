@@ -120,16 +120,9 @@ class GameEnd(Location):
         # This means the player never actually enters this location
         # (because the insert call aborts with an exception)
         # raise StoryCompleted(self.completion)
-        player.story_completed(self.completion)
+        player.story_completed()
         # setting the status on the player is usually better,
         # it allows the driver to complete the last player action normally.
-
-    def completion(self, player, config, driver):
-        player.tell("\n")
-        player.tell("This is the game-specific GAME OVER callback.")
-        player.tell("It's just here as an example, we now call the normal routine:")
-        player.tell("\n")
-        driver.story_complete_output(None)
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")

@@ -23,7 +23,7 @@ class TestConsoleIo(unittest.TestCase):
     def test_basic(self):
         io = console_io.ConsoleIo(None)
         self.assertGreater(io.output_line_delay, 1)
-        io.break_pressed(None)
+        io.break_pressed()
         io.output("line1", "line2")
     def test_async(self):
         io = console_io.ConsoleIo(None)

@@ -17,11 +17,7 @@ from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
 from .threadsupport import Event
-
-
-DEFAULT_SCREEN_WIDTH = 72
-DEFAULT_SCREEN_INDENT = 2
-DEFAULT_SCREEN_DELAY = 40
+from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 
 
 class Player(base.Living, pubsub.Listener):
@@ -44,7 +40,6 @@ class Player(base.Living, pubsub.Listener):
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
         self.story_complete = False
-        self.story_complete_callback = None
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -74,10 +69,12 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = indent
         self.screen_width = width
 
-    def story_completed(self, callback=None):
-        """The player completed the story. Set some flags"""
+    def story_completed(self):
+        """
+        Call this when the player completed the story.
+        It will trigger the game's ending/game-over sequence.
+        """
         self.story_complete = True
-        self.story_complete_callback = callback
 
     def parse(self, commandline, external_verbs=frozenset()):
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""

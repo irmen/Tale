@@ -41,5 +41,4 @@ class RetryParse(Exception):
 
 class StoryCompleted(Exception):
     """The story has been completed by the player. (I.F. mode only). (Immediate game end!)"""
-    def __init__(self, callback=None):
-        self.callback = callback
+    pass

@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import sys
 import os
 from . import styleaware_wrapper, iobase
+from ..threadsupport import current_thread
 try:
     from . import colorama_patched as colorama
     colorama.init()
@@ -122,7 +123,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             if cmd == "quit":
                 return False
         except KeyboardInterrupt:
-            self.break_pressed(player)
+            self.break_pressed()
         except EOFError:
             pass
         return True
@@ -155,8 +156,13 @@ class ConsoleIo(iobase.IoAdapterBase):
             print(self._apply_style(line, self.do_styles))
         sys.stdout.flush()
 
-    def break_pressed(self, player):
+    def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
+        if current_thread().name != "MainThread":
+            # ony trigger the ^C handling if we're running in the main thread,
+            # otherwise we could get two triggers (one from the async i/o thread, and
+            # one from the main thread)
+            return
         print(self._apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
         sys.stdout.flush()
 
