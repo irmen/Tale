@@ -9,12 +9,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 from tale import npc
 from tale import pubsub
+from tale import util
 
 class DummyDriver(object):
     def __init__(self):
         self.heartbeats = set()
         self.exits = []
-        self.game_clock = datetime.datetime.now()
+        self.game_clock = util.GameDateTime(datetime.datetime.now())
         self.deferreds = []
         self.after_player_queue = []
     def register_heartbeat(self, obj):

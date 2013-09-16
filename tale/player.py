@@ -138,7 +138,7 @@ class Player(base.Living, pubsub.Listener):
     def get_output_paragraphs_raw(self):
         """
         Gets the accumulated output paragraphs in raw form.
-        This is for test purposes. No text styles are included.
+        This is for test purposes. No text styles are included. No IO adapter needs to be initialized.
         """
         paragraphs = self._output.get_paragraphs(clear=True)
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]

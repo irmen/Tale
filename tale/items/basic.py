@@ -6,15 +6,28 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
+import textwrap
 from ..base import Item, Container
 from ..errors import ActionRefused
 from .. import lang, mud_context
 
 
-class TrashCan(Container):
+
+class Boxlike(Container):
+    """
+    Container base class/prototype. The container can be opened/closed.
+    Only if it is open you can put stuff in it or take stuff out of it.
+    You can set a couple of txt_ attributes that change the visual aspect of this object.
+    """
     def init(self):
-        super(TrashCan, self).init()
+        super(Boxlike, self).init()
         self.opened = False
+        self.txt_title_closed = self._title
+        self.txt_title_open_filled = "filled " + self._title
+        self.txt_title_open_empty = "empty " + self._title
+        self.txt_descr_closed = "It looks old. The lid is closed."
+        self.txt_descr_open_filled = "It is a %s, with an open lid, and there's something in it." % self.name
+        self.txt_descr_open_empty = "It is a %s, with an open lid." % self.name
 
     def allow_item_move(self, actor, verb="move"):
         raise ActionRefused("You can't %s %s." % (verb, self.title))
@@ -22,67 +35,74 @@ class TrashCan(Container):
     @property
     def title(self):
         if self.opened:
-            return "filled trashcan" if self.inventory_size else "empty trashcan"
+            return self.txt_title_open_filled if self.inventory_size else self.txt_title_open_empty
         else:
-            return "trashcan"
+            return self.txt_title_closed
 
     @property
     def description(self):
         if self.opened:
             if self.inventory_size:
-                return "It is a trash can, with an open lid, and it stinks!"
+                return self.txt_descr_open_filled
             else:
-                return "It is a trash can, with an open lid."
+                return self.txt_descr_open_empty
         else:
-            status = "It's lid is open." if self.opened else "It's closed."
-            return "It looks worn and rusty. " + status
+            return self.txt_descr_closed
 
     def open(self, item, actor):
         if self.opened:
             raise ActionRefused("It's already open.")
         self.opened = True
-        actor.tell("You opened the %s." % self.title)
-        actor.tell_others("{Title} opened the %s." % self.title)
+        actor.tell("You opened the %s." % self.name)
+        actor.tell_others("{Title} opened the %s." % self.name)
 
     def close(self, item, actor):
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False
-        actor.tell("You closed the %s." % self.title)
-        actor.tell_others("{Title} closed the %s." % self.title)
+        actor.tell("You closed the %s." % self.name)
+        actor.tell_others("{Title} closed the %s." % self.name)
 
     @property
     def inventory(self):
         if self.opened:
-            return super(TrashCan, self).inventory
+            return super(Boxlike, self).inventory
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     @property
     def inventory_size(self):
         if self.opened:
-            return super(TrashCan, self).inventory_size
+            return super(Boxlike, self).inventory_size
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     def insert(self, item, actor):
         if self.opened:
-            super(TrashCan, self).insert(item, actor)
+            super(Boxlike, self).insert(item, actor)
         else:
-            raise ActionRefused("You can't put things in the trashcan: you should open it first.")
+            raise ActionRefused("You can't put things in the %s: you should open it first." % self.title)
 
     def remove(self, item, actor):
         if self.opened:
-            super(TrashCan, self).remove(item, actor)
+            super(Boxlike, self).remove(item, actor)
         else:
-            raise ActionRefused("You can't take things from the trashcan: you should open it first.")
+            raise ActionRefused("You can't take things from the %s: you should open it first." % self.title)
 
 
 class GameClock(Item):
+    def init(self):
+        super(GameClock, self).init()
+        self.use_locale = True
+
     @property
     def description(self):
         if mud_context.config.display_gametime:
-            return "It reads: " + str(mud_context.driver.game_clock)
+            if self.use_locale:
+                display = mud_context.driver.game_clock.clock.strftime("%c")
+            else:
+                display = mud_context.driver.game_clock.clock.strftime("%Y-%m-%d %H:%M:%S")
+            return "It reads: " + display
         else:
             return "It looks broken."
 
@@ -100,17 +120,26 @@ class GameClock(Item):
 
 
 class Newspaper(Item):
+    def init(self):
+        super(Newspaper, self).init()
+        self.article = '''
+        "Last year's Less Popular Sports."
+        "Any fan will tell you the big-name leagues aren't the whole sporting world.
+         As time expired on last year, we take a look at major accomplishments, happenings,
+         and developments in the less popular sports."
+        It looks like a boring article, you have better things to do.
+        '''
+        self.article = textwrap.dedent(self.article)
+
     def read(self, actor):
-        actor.tell("The newspaper reads: \"Last year's Less Popular Sports.\"", end=True)
-        actor.tell("\"Any fan will tell you the big-name leagues aren't the whole sporting world. "
-                   "As time expired on last year, we take a look at major accomplishments, happenings, "
-                   "and developments in the less popular sports.\"")
-        actor.tell("It looks like a boring article, you have better things to do.")
+        actor.tell("The newspaper reads:", end=True)
+        actor.tell(self.article)
 
 
 newspaper = Newspaper("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
-trashcan = TrashCan("trashcan", "dented steel trashcan")
+trashcan = Boxlike("trashcan", "dented steel trashcan")
+trashcan.txt_descr_open_filled="It is a %s, with an open lid, and it stinks." % trashcan._title
 gameclock = GameClock("clock")

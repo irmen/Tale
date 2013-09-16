@@ -40,9 +40,7 @@ General ideas/TODO:
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
-[code] Add more items to items.basic
-    (such as an extensible generic box-like item that you need to open/close to put stuff in)
-    Take ideas from objects in other mudlibs
+[code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
 [feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
 [code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object.
