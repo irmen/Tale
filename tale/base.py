@@ -237,16 +237,16 @@ class Item(MudObject):
         """Does the item allow to be moved by someone? (yes; no ActionRefused is raised)"""
         pass
 
-    def open(self, item, actor):
+    def open(self, actor, item=None):
         raise ActionRefused("You can't open that.")
 
-    def close(self, item, actor):
+    def close(self, actor, item=None):
         raise ActionRefused("You can't close that.")
 
-    def lock(self, item, actor):
+    def lock(self, actor, item=None):
         raise ActionRefused("You can't lock that.")
 
-    def unlock(self, item, actor):
+    def unlock(self, actor, item=None):
         raise ActionRefused("You can't unlock that.")
 
     def wiz_clone(self, actor):
@@ -565,16 +565,16 @@ class Exit(MudObject):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
         assert self.bound
 
-    def open(self, item, actor):
+    def open(self, actor, item=None):
         raise ActionRefused("You can't open that.")
 
-    def close(self, item, actor):
+    def close(self, actor, item=None):
         raise ActionRefused("You can't close that.")
 
-    def lock(self, item, actor):
+    def lock(self, actor, item=None):
         raise ActionRefused("You can't lock that.")
 
-    def unlock(self, item, actor):
+    def unlock(self, actor, item=None):
         raise ActionRefused("You can't unlock that.")
 
     def manipulate(self, verb, actor):
@@ -935,7 +935,7 @@ class Door(Exit):
         if not self.opened:
             raise ActionRefused("You can't go there; it's closed.")
 
-    def open(self, item, actor):
+    def open(self, actor, item=None):
         """Open the door with optional item. Notifies actor and room of this event."""
         if self.opened:
             raise ActionRefused("It's already open.")
@@ -946,7 +946,7 @@ class Door(Exit):
             actor.tell("You opened it.")
             actor.tell_others("{Title} opened the exit %s." % self.name)
 
-    def close(self, item, actor):
+    def close(self, actor, item=None):
         """Close the door with optional item. Notifies actor and room of this event."""
         if not self.opened:
             raise ActionRefused("It's already closed.")
@@ -954,8 +954,8 @@ class Door(Exit):
         actor.tell("You closed it.")
         actor.tell_others("{Title} closed the exit %s." % self.name)
 
-    def lock(self, item, actor):
-        """Lock the door with the proper key."""
+    def lock(self, actor, item=None):
+        """Lock the door with the proper key (optional)."""
         if self.locked:
             raise ActionRefused("It's already locked.")
         if item:
@@ -973,8 +973,8 @@ class Door(Exit):
         actor.tell("Your %s fits, it is now locked." % key.title)
         actor.tell_others("{Title} locked the exit %s with %s." % (self.name, lang.a(key.title)))
 
-    def unlock(self, item, actor):
-        """Unlock the door with the proper key."""
+    def unlock(self, actor, item=None):
+        """Unlock the door with the proper key (optional)."""
         if not self.locked:
             raise ActionRefused("It's not locked.")
         if item:

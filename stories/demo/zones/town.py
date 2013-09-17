@@ -129,8 +129,8 @@ game_end = GameEnd("Game End", "It seems like it is game over!")
 
 
 class EndDoor(Door):
-    def unlock(self, item, actor):
-        super(EndDoor, self).unlock(item, actor)
+    def unlock(self, actor, item):
+        super(EndDoor, self).unlock(actor, item)
         if not self.locked:
             if "unlocked_enddoor" not in actor.hints.checkpoints:
                 mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")

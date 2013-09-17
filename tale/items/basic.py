@@ -49,14 +49,14 @@ class Boxlike(Container):
         else:
             return self.txt_descr_closed
 
-    def open(self, item, actor):
+    def open(self, actor, item=None):
         if self.opened:
             raise ActionRefused("It's already open.")
         self.opened = True
         actor.tell("You opened the %s." % self.name)
         actor.tell_others("{Title} opened the %s." % self.name)
 
-    def close(self, item, actor):
+    def close(self, actor, item=None):
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False

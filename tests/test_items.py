@@ -54,13 +54,13 @@ class TestItems(unittest.TestCase):
         thing = base.Item("thing")
         with self.assertRaises(ActionRefused):
             t.insert(thing, self.actor)
-        t.open(None, self.actor)
+        t.open(self.actor)
         t.insert(thing, self.actor)
         self.assertTrue(thing in t)
-        t.close(None, self.actor)
+        t.close(self.actor)
         with self.assertRaises(ActionRefused):
             t.remove(thing, self.actor)
-        t.open(None, self.actor)
+        t.open(self.actor)
         t.remove(thing, self.actor)
         self.assertFalse(thing in t)
 

@@ -907,7 +907,7 @@ def do_open(player, parsed, ctx):
             with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
                 raise ActionRefused("You don't have <item>%s</>." % lang.a(with_item_name))
-        getattr(what, parsed.verb)(with_item, player)
+        getattr(what, parsed.verb)(player, with_item)
         # no need to tell the player or the room, because the verb handler already did this
     else:
         raise ActionRefused("You don't see %s." % lang.a(what_name))

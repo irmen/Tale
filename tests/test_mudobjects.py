@@ -240,47 +240,47 @@ class TestDoorsExits(unittest.TestCase):
 
         door = Door("north", hall, "open unlocked door", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
-            door.open(None, player)  # fail, it's already open
+            door.open(player)  # fail, it's already open
         self.assertEqual("It's already open.", str(x.exception))
-        door.close(None, player)
+        door.close(player)
         self.assertFalse(door.opened, "must be closed")
         with self.assertRaises(ActionRefused) as x:
-            door.lock(None, player)  # default door can't be locked
+            door.lock(player)  # default door can't be locked
         self.assertEqual("You don't seem to have the means to lock it.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
-            door.unlock(None, player)  # fail, it's not locked
+            door.unlock(player)  # fail, it's not locked
         self.assertEqual("It's not locked.", str(x.exception))
 
         door = Door("north", hall, "open locked door", locked=False, opened=True)
         with self.assertRaises(ActionRefused) as x:
-            door.open(None, player)  # fail, it's already open
+            door.open(player)  # fail, it's already open
         self.assertEqual("It's already open.", str(x.exception))
-        door.close(None, player)
+        door.close(player)
         door.locked = True
         with self.assertRaises(ActionRefused) as x:
-            door.lock(None, player)  # it's already locked
+            door.lock(player)  # it's already locked
         self.assertEqual("It's already locked.", str(x.exception))
         self.assertTrue(door.locked)
         with self.assertRaises(ActionRefused) as x:
-            door.unlock(None, player)  # you can't unlock it
+            door.unlock(player)  # you can't unlock it
         self.assertEqual("You don't seem to have the means to unlock it.", str(x.exception))
         self.assertTrue(door.locked)
 
         door = Door("north", hall, "closed unlocked door", locked=False, opened=False)
-        door.open(None, player)
+        door.open(player)
         self.assertTrue(door.opened)
-        door.close(None, player)
+        door.close(player)
         self.assertFalse(door.opened)
         with self.assertRaises(ActionRefused) as x:
-            door.close(None, player)  # it's already closed
+            door.close(player)  # it's already closed
         self.assertEqual("It's already closed.", str(x.exception))
 
         door = Door("north", hall, "closed locked door", locked=True, opened=False)
         with self.assertRaises(ActionRefused) as x:
-            door.open(None, player)  # can't open it, it's locked
+            door.open(player)  # can't open it, it's locked
         self.assertEqual("You try to open it, but it's locked.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
-            door.close(None, player)  # it's already closed
+            door.close(player)  # it's already closed
         self.assertEqual("It's already closed.", str(x.exception))
 
         door = Door("north", hall, "Some door.")
@@ -299,20 +299,20 @@ class TestDoorsExits(unittest.TestCase):
         hall = Location("hall")
         door = Door("north", hall, "a locked door", locked=True, opened=False)
         with self.assertRaises(ActionRefused):
-            door.unlock(None, player)
+            door.unlock(player)
         with self.assertRaises(ActionRefused):
-            door.unlock(key, player)
+            door.unlock(player, key)
         door.door_code = 12345
         self.assertTrue(door.locked)
-        door.unlock(key, player)
+        door.unlock(player, key)
         self.assertFalse(door.locked)
         door.locked = True
         with self.assertRaises(ActionRefused):
-            door.unlock(None, player)
+            door.unlock(player)
         key.move(player, player)
-        door.unlock(None, player)
+        door.unlock(player)
         self.assertFalse(door.locked)
-        door.lock(None, player)
+        door.lock(player)
         self.assertTrue(door.locked)
 
     def test_exits(self):
