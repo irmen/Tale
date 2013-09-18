@@ -233,7 +233,6 @@ class Driver(object):
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
         # story has been initialised, create and connect a player
-        self.async_player_input = None
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         if args.gui:
             from .io.tkinter_io import TkinterIo as IoAdapter
@@ -372,17 +371,16 @@ class Driver(object):
     def start_player_input(self, player):
         """(re)start the async player input processing task"""
         if self.config.server_tick_method == "timer":
-            self.async_player_input = player.io.get_async_input(player)
+            player.start_async_input()   # handle player input in a separate thread
         elif self.config.server_tick_method == "command":
-            self.async_player_input = None  # player input is done in the same thread as the game loop
+            pass  # player input is done in the same thread as the game loop
         else:
             raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
 
     def stop_driver(self):
         """stop the async player input processing task, and the driver mainloop"""
         self._stop_mainloop = True
-        if self.async_player_input is not None:
-            self.async_player_input.stop()
+        self.player.stop_async_input()
 
     def main_loop(self):
         """
@@ -399,8 +397,7 @@ class Driver(object):
                 self.stop_driver()
                 self.player.io.destroy()
                 break
-            if self.async_player_input:
-                self.async_player_input.enable()  # enable player input
+            self.player.restart_async_input()
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
                 # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()

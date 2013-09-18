@@ -49,6 +49,7 @@ class Player(base.Living, pubsub.Listener):
         self._output = TextBuffer()
         self.io = None  # will be set to appropriate I/O adapter by the driver
         self._previous_parsed = None
+        self.async_input = None
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -166,6 +167,20 @@ class Player(base.Living, pubsub.Listener):
                     self.io.output_delay()
             else:
                 self.io.output(output.rstrip())
+
+    def start_async_input(self):
+        """Activates the asynchronous input mechanism"""
+        self.async_input = self.io.get_async_input(self)
+
+    def restart_async_input(self):
+        """Restarts the async input mechanism if it was stopped earlier"""
+        if self.async_input:
+            self.async_input.enable()  # enable player input
+
+    def stop_async_input(self):
+        """Deactivates async input (if it was enabled earlier)"""
+        if self.async_input:
+            self.async_input.stop()
 
     def input(self, prompt=None):
         """Writes any pending output and prompts for input. Returns stripped result."""
