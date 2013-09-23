@@ -16,7 +16,7 @@ import heapq
 import inspect
 import argparse
 import pickle
-from . import threadsupport
+import threading
 from . import mud_context
 from . import errors
 from . import util
@@ -134,7 +134,7 @@ class Driver(object):
         self.heartbeat_objects = set()
         self.unbound_exits = []
         self.deferreds = []  # heapq
-        self.deferreds_lock = threadsupport.Lock()
+        self.deferreds_lock = threading.Lock()
         self.notification_queue = util.queue.Queue()
         server_started = datetime.datetime.now()
         self.server_started = server_started.replace(microsecond=0)
@@ -201,8 +201,6 @@ class Driver(object):
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
         self.config = util.ReadonlyAttributes(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        if self.config.server_tick_method != "command" and not threadsupport.has_threads:
-            raise RuntimeError("sorry, story with async/timer tick_method needs proper threading support")
         self.register_in_mud_context()
         try:
             story_cmds = __import__("cmds", level=0)
@@ -236,38 +234,22 @@ class Driver(object):
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         if args.gui:
             from .io.tkinter_io import TkinterIo as IoAdapter
+            io = IoAdapter(self.config)
         else:
             from .io.console_io import ConsoleIo as IoAdapter
-        io = IoAdapter(self.config)
+            io = IoAdapter(self.config)
         io.output_line_delay = output_line_delay
         io.clear_screen()
         io.install_tab_completion(TabCompleter(self, self.player))
-        driver_thread, io_mainloop = io.mainloop_threads(self.startup_main_loop)
         self.player.io = io
-        self._io_thread_may_start = threadsupport.Event()
-        if driver_thread is None:
-            assert io_mainloop is None
-            # the driver mainloop is running in the main thread
-            self.startup_main_loop()
-        else:
-            # the driver mainloop is running in a background thread, the io-loop should run in the main thread
-            driver_thread.start()
-            self._io_thread_may_start.wait()
-            del self._io_thread_may_start
-            time.sleep(0.1)
-            while not self._stop_mainloop:
-                try:
-                    io_mainloop()
-                    break
-                except KeyboardInterrupt:
-                    self.player.io.break_pressed()
-                    continue
-            driver_thread.join()
+        # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
+        driver_thread = threading.Thread(name="driver", target=self.startup_main_loop, daemon=True)
+        driver_thread.start()
+        io.mainloop(self.player)
 
     def startup_main_loop(self):
-        # continues the startup process and kick of the driver's main loop
+        # continues the startup process and kick off the driver's main loop
         self.register_in_mud_context()    # re-register because we may be running in a new background thread
-        self._io_thread_may_start.set()
         self._stop_mainloop = False
         try:
             self.print_game_intro(self.player)
@@ -275,7 +257,6 @@ class Driver(object):
             self.show_motd(self.player)
             self.player.look(short=False)
             self.player.write_output()
-            self.start_player_input(self.player)
             while not self._stop_mainloop:
                 try:
                     self.main_loop()
@@ -317,9 +298,9 @@ class Driver(object):
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
-            player.io.output("")
+            player.tell("\n")
             load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", player)
-        player.io.output("")
+        player.tell("\n")
         if load_saved_game:
             io = player.io  # save the I/O
             player = self.load_saved_game()
@@ -368,19 +349,13 @@ class Driver(object):
                 player.tell("\n")
                 player.tell("\n")
 
-    def start_player_input(self, player):
-        """(re)start the async player input processing task"""
-        if self.config.server_tick_method == "timer":
-            player.start_async_input()   # handle player input in a separate thread
-        elif self.config.server_tick_method == "command":
-            pass  # player input is done in the same thread as the game loop
-        else:
-            raise ValueError("invalid server_tick_method: " + self.config.server_tick_method)
-
     def stop_driver(self):
-        """stop the async player input processing task, and the driver mainloop"""
+        """stop the driver mainloop"""
         self._stop_mainloop = True
-        self.player.stop_async_input()
+        self.player.write_output()  # flush pending output at server shutdown.
+        ctx = util.Context(driver=self)
+        ctx.lock()
+        self.player.destroy(ctx)
 
     def main_loop(self):
         """
@@ -395,9 +370,7 @@ class Driver(object):
                 # congratulations ;-)
                 self.story_complete_output()
                 self.stop_driver()
-                self.player.io.destroy()
                 break
-            self.player.restart_async_input()
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
                 # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
@@ -408,10 +381,12 @@ class Driver(object):
                 loop_duration = time.time() - last_loop_time
 
             if self.config.server_tick_method == "timer":
+                # check if input is available
                 has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                self.player.io.input_line(self.player)
-                has_input = self.player.input_is_available.is_set()
+                # wait till the user has entered some input
+                self.player.input_is_available.wait()
+                has_input = True
                 before = time.time()
                 self.server_tick()
                 self.server_loop_durations.append(time.time() - before)
@@ -453,7 +428,6 @@ class Driver(object):
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
                     self.stop_driver()
-                    self.player.io.destroy()
                     break
                 except Exception:
                     import traceback
@@ -466,10 +440,6 @@ class Driver(object):
                     deferred()
                 except util.queue.Empty:
                     break
-        self.player.write_output()  # flush pending output at server shutdown.
-        ctx = util.Context(driver=self)
-        ctx.lock()
-        self.player.destroy(ctx)
 
     def server_tick(self):
         """
@@ -495,7 +465,6 @@ class Driver(object):
         self.player.write_output()
 
     def story_complete_output(self):
-        # prints
         self.player.tell("\n")
         self.story.completion(self.player)
         self.player.tell("\n")

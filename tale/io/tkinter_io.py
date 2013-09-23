@@ -9,6 +9,7 @@ import sys
 import re
 import textwrap
 import collections
+import threading
 try:
     from tkinter import *
     import tkinter.font as tkfont
@@ -19,7 +20,6 @@ except ImportError:
     import tkMessageBox as tkmsgbox
 from . import iobase, vfs
 from .. import mud_context
-from .. import threadsupport
 from ..util import queue
 from .. import __version__ as tale_version
 
@@ -32,10 +32,12 @@ class TkinterIo(iobase.IoAdapterBase):
     """
     def __init__(self, config):
         super(TkinterIo, self).__init__(config)
-        self.cmd_queue = queue.Queue()
         self.gui = TaleGUI(self, config)
-        self.player = None
         self.textwrapper = textwrap.TextWrapper()
+
+    def mainloop(self, player):
+        """Main event loop for this I/O adapter"""
+        self.gui.mainloop(player)
 
     def clear_screen(self):
         """Clear the screen"""
@@ -50,12 +52,6 @@ class TkinterIo(iobase.IoAdapterBase):
         self.output("<rev>"+tb+"</>")
         self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
 
-    def mainloop_threads(self, driver_mainloop):
-        driver_thread = threadsupport.Thread(name="driver", target=driver_mainloop)
-        driver_thread.daemon = True
-        driver_thread.name = "driver"
-        return driver_thread, self.gui.mainloop
-
     def install_tab_completion(self, completer):
         self.gui.install_tab_completion(completer)
 
@@ -65,31 +61,9 @@ class TkinterIo(iobase.IoAdapterBase):
     def gui_terminated(self):
         self.gui = None
 
-    def input(self, prompt=None):
-        """Ask the player for immediate input."""
-        self.gui.write_line(prompt)
-        return self.cmd_queue.get().strip()
-
-    def input_line(self, player):
-        """
-        Input a single line of text by the player. It is stored in the internal
-        command buffer of the player. The driver's main loop can look into that
-        to see if any input should be processed.
-        This method is called from the driver's main loop (only if running in command-mode)
-        or from the asynchronous input loop (if running in timer-mode).
-        Returns True if the input loop should continue as usual.
-        Returns False if the input loop should be terminated (this could
-        be the case when the player types 'quit', for instance).
-        """
-        cmd = self.cmd_queue.get().strip()
-        player.store_input_line(cmd)
-        if cmd == "quit":
-            return False
-        return True
-
-    def break_input_line(self):
-        """break a pending input_line, if possible"""
-        self.cmd_queue.put("")
+    def abort_all_input(self, player):
+        """abort any blocking input, if at all possible"""
+        player.store_input_line("")
 
     def render_output(self, paragraphs, **params):
         """
@@ -116,6 +90,10 @@ class TkinterIo(iobase.IoAdapterBase):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
         for line in lines:
             self.gui.write_line(line)
+
+    def output_no_newline(self, text):
+        """Like output, but just writes a single line, without end-of-line."""
+        self.gui.write_line(text)
 
 
 class TaleWindow(Toplevel):
@@ -299,10 +277,10 @@ class TaleWindow(Toplevel):
 class TaleGUI(object):
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
-        self.gui_ready = threadsupport.Event()
+        self.gui_ready = threading.Event()
         self.io = io
         self.server_config = config
-        self.cmd_queue = queue.Queue()
+        self.line_queue = queue.Queue()
         self.root = Tk()
         window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
             name=self.server_config.name,
@@ -334,13 +312,15 @@ class TaleGUI(object):
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
-    def mainloop(self):
+    def mainloop(self, player):
         def signal_gui_ready():
             self.root.after_idle(lambda: self.gui_ready.set())
+        self.player = player
         self.root.after(200, signal_gui_ready)
         self.root.mainloop()
         self.window = None
         self.root = None
+        self.player = None
         self.io.gui_terminated()
 
     def destroy(self, force=False):
@@ -349,17 +329,19 @@ class TaleGUI(object):
             self.root.destroy()
             self.window = None
             self.root = None
-        self.window.disable_input()
+            self.player = None
+        if self.window:
+            self.window.disable_input()
         if force:
             destroy2()
-        else:
+        elif self.root:
             self.root.after(2000, destroy2)
 
     def window_closed(self):
         mud_context.driver.stop_driver()
 
     def root_process_cmd(self, event):
-        line = self.cmd_queue.get()
+        line = self.line_queue.get()
         self.window.write_line(line, self.io.do_styles)
 
     def root_clear_screen(self, event):
@@ -374,11 +356,11 @@ class TaleGUI(object):
         if self.root:
             # We put the input data in a queue and generate a virtual event for the Tk root window.
             # The event handler runs in the correct thread and grabs the data from the queue.
-            self.cmd_queue.put(line)
+            self.line_queue.put(line)
             self.root.event_generate("<<process_tale_command>>", when='tail')
 
     def register_cmd(self, cmd):
-        self.io.cmd_queue.put(cmd)
+        self.player.store_input_line(cmd)
 
 
 def show_error_dialog(title, message):

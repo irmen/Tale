@@ -25,15 +25,6 @@ class TestConsoleIo(unittest.TestCase):
         self.assertGreater(io.output_line_delay, 1)
         io.break_pressed()
         io.output("line1", "line2")
-    def test_async(self):
-        io = console_io.ConsoleIo(None)
-        class DummyPlayer(object):
-            pass
-        player = DummyPlayer()
-        player.io = io
-        a = io.get_async_input(player)
-        a.enable()
-        a.stop()
 
     def test_text(self):
         output = TextBuffer()

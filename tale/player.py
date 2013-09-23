@@ -16,7 +16,7 @@ from . import mud_context
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
 from .io.iobase import strip_text_styles
-from .threadsupport import Event
+from threading import Event
 from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 
 
@@ -49,7 +49,6 @@ class Player(base.Living, pubsub.Listener):
         self._output = TextBuffer()
         self.io = None  # will be set to appropriate I/O adapter by the driver
         self._previous_parsed = None
-        self.async_input = None
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__,
@@ -168,25 +167,16 @@ class Player(base.Living, pubsub.Listener):
             else:
                 self.io.output(output.rstrip())
 
-    def start_async_input(self):
-        """Activates the asynchronous input mechanism"""
-        self.async_input = self.io.get_async_input(self)
-
-    def restart_async_input(self):
-        """Restarts the async input mechanism if it was stopped earlier"""
-        if self.async_input:
-            self.async_input.enable()  # enable player input
-
-    def stop_async_input(self):
-        """Deactivates async input (if it was enabled earlier)"""
-        if self.async_input:
-            self.async_input.stop()
-
     def input(self, prompt=None):
-        """Writes any pending output and prompts for input. Returns stripped result."""
-        # @todo this input only works in single player IF mode because it blocks the game
+        """
+        Writes any pending output and prompts for input. Returns stripped result.
+        Note that input processing takes place asynchronously so this method just prints
+        the input prompt, and sits around waiting for a result to appear in the input buffer.
+        """
         self.write_output()
-        return self.io.input(prompt).strip()
+        self.io.output_no_newline(prompt)
+        self.input_is_available.wait()
+        return self.get_next_input()
 
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
@@ -226,13 +216,18 @@ class Player(base.Living, pubsub.Listener):
     def destroy(self, ctx):
         self.activate_transcript(None, None)
         super(Player, self).destroy(ctx)
-        self.soul = None   # truly die ;-)
+        del self.soul   # truly die ;-)
+        if self.io:
+            self.io.stop_main_loop = True
+            self.io.destroy()
+            self.io.abort_all_input(self)
 
     def allow_give_money(self, actor, amount):
         """Do we accept money? Raise ActionRefused if not."""
         pass
 
     def get_pending_input(self):
+        """return the full set of lines in the input buffer (if any)"""
         result = []
         self.input_is_available.clear()
         try:
@@ -241,12 +236,26 @@ class Player(base.Living, pubsub.Listener):
         except queue.Empty:
             return result
 
+    def get_next_input(self):
+        """
+        Return just the next single line in the input buffer (if any, otherwise returns None)
+        This is useful for instance when you require an immediate answer to a printed question.
+        """
+        try:
+            result = self._input.get_nowait()
+            if self._input.qsize()==0:
+                self.input_is_available.clear()
+            return result.strip()
+        except queue.Empty:
+            return None
+
     def store_input_line(self, cmd):
+        """store a line of entered text in the input command buffer"""
         self._input.put(cmd)
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)
         self.input_is_available.set()
-        self.turns += 1
+        self.turns += 1   # @todo this is not the best spot to count turns, change it (only on correct cmd parse for instance?)
 
     def activate_transcript(self, file, vfs):
         if file:

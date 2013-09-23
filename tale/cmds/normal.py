@@ -832,7 +832,6 @@ def do_quit(player, parsed, ctx):
         player.tell("\n")
         raise SessionExit()
     player.tell("Good, thank you for staying.")
-    ctx.driver.start_player_input(player)   # because the 'quit' command has terminated the player input
 
 
 def print_item_removal(player, item, container, print_parentheses=True):

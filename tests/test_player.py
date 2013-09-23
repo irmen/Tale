@@ -440,22 +440,18 @@ class TestPlayer(unittest.TestCase):
             sys.stdout = old_stdout
 
     def test_input(self):
-        if os.name=="java":
-            self.skipTest("jython can't replace stdin")
         player = Player("julie", "f")
         player.io = ConsoleIo(None)
         old_stdout = sys.stdout
-        old_stdin = sys.stdin
         sys.stdout = StringIO()
-        sys.stdin = StringIO("input text\n")
         try:
             player.tell("first this text")
+            player.store_input_line("input text\n")
             x = player.input("inputprompt")
             self.assertEqual("input text", x)
             self.assertEqual("  first this text\ninputprompt", sys.stdout.getvalue())  # should have outputted the buffered text
         finally:
             sys.stdout = old_stdout
-            sys.stdin = old_stdin
 
 
 class TestTextbuffer(unittest.TestCase):

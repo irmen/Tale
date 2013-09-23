@@ -7,7 +7,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import time
 from ..util import basestring_type
-from .. import threadsupport
 from .. import soul
 try:
     import mdx_smartypants
@@ -46,42 +45,6 @@ def strip_text_styles(text):
     return [strip(line) for line in text]
 
 
-class AsyncPlayerInput(threadsupport.Thread):
-    """
-    Input-task that runs asynchronously (background thread).
-    This is used by the driver when running in timer-mode, where the driver's
-    main loop needs to run separated from this input thread.
-    """
-    def __init__(self, player):
-        super(AsyncPlayerInput, self).__init__()
-        self.player = player
-        self.daemon = True
-        self.name = "async-input"
-        self.enabled = threadsupport.Event()
-        self.enabled.clear()
-        self._stoploop = False
-        self.start()
-
-    def run(self):
-        loop = True
-        while loop:
-            self.enabled.wait()
-            if self._stoploop:
-                break
-            loop = self.player.io.input_line(self.player)
-            self.enabled.clear()
-
-    def enable(self):
-        if self._stoploop:
-            raise SystemExit()
-        self.enabled.set()
-
-    def stop(self):
-        self._stoploop = True
-        self.enabled.set()
-        self.player.io.break_input_line()
-
-
 class IoAdapterBase(object):
     """
     I/O adapter base class
@@ -92,27 +55,13 @@ class IoAdapterBase(object):
         self.do_smartquotes = True
         self.supports_smartquotes = True
 
-    def get_async_input(self, player):
-        """
-        Get the object that is reading the player's input, asynchronously from the driver's main loop.
-        Make sure that the object is active (i.e. restart it if it has been stopped in the meantime).
-        This is not used when the server tick method is command-driven instead of timer based.
-        """
-        return AsyncPlayerInput(player)
-
-    def mainloop_threads(self, driver_mainloop):
-        """
-        Return a tuple (driver_mainloop_thread, io_adapter_mainloop_callable).
-        The driver_mainloop_thread is the thread object to run the driver mainloop in. If it is None,
-        the driver mainloop is just executed in the main thread (the second field of the tuple must be None too).
-        If the driver_mainloop_thread is a thread object, it is used for the driver main loop.
-        The io_adapter_mainloop_callable will be run in the application's main thread instead.
-        """
-        return None, None
-
     def destroy(self):
         """Called when the I/O adapter is shut down"""
         pass
+
+    def mainloop(self, player):
+        """Main event loop for this I/O adapter"""
+        raise NotImplementedError("implement this in subclass")
 
     def clear_screen(self):
         """Clear the screen"""
@@ -129,28 +78,8 @@ class IoAdapterBase(object):
         print(message, file=sys.stderr)
         print(tb, file=sys.stderr)
 
-    def input(self, prompt=None):
-        """
-        Ask the player for immediate input. The input is not stored, but returned immediately.
-        (Don't call this directly, use player.input)
-        """
-        raise NotImplementedError("implement this in subclass")
-
-    def input_line(self, player):
-        """
-        Input a single line of text by the player. It is stored in the internal
-        command buffer of the player. The driver's main loop can look into that
-        to see if any input should be processed.
-        This method is called from the driver's main loop (only if running in command-mode)
-        or from the asynchronous input loop (if running in timer-mode).
-        Returns True if the input loop should continue as usual.
-        Returns False if the input loop should be terminated (this could
-        be the case when the player types 'quit', for instance).
-        """
-        raise NotImplementedError("implement this in subclass")
-
-    def break_input_line(self):
-        """break a pending input_line, if possible"""
+    def abort_all_input(self, player):
+        """abort any blocking input, if at all possible"""
         pass
 
     def render_output(self, paragraphs, **params):
@@ -170,6 +99,10 @@ class IoAdapterBase(object):
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
+        raise NotImplementedError("implement this in subclass")
+
+    def output_no_newline(self, text):
+        """Like output, but just writes a single line, without end-of-line."""
         raise NotImplementedError("implement this in subclass")
 
     def break_pressed(self):

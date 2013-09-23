@@ -53,10 +53,8 @@ General ideas/TODO:
     Interaction with the part is done by owner object's handle_part_verb? (which by default only prints a description?)
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[code,refactor,API] Player.input/io.input is an immediate-input method that blocks. Rewrite it to use io.input_line?
 [code] use yield (generators) for player command processing? should make it a lot easier to build conversational state, and yes/no question dialogs...
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
-[code] Make sure all console input() is always done from the same thread?
 [cosmetic,gui] Font selection dialog for Io adapters that support it (tkinter, html)
 [cosmetic,gui] Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
 [cosmetic] Extra text style tags?

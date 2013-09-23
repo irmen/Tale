@@ -10,7 +10,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 __version__ = "1.3"
 
-from . import threadsupport
+import threading
 from . import jythonpatch   # patch some stuff in jython, if needed
 
-mud_context = threadsupport.local()
+mud_context = threading.local()

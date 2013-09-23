@@ -7,8 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import os
+import threading
 from . import styleaware_wrapper, iobase
-from ..threadsupport import current_thread
 try:
     from . import colorama_patched as colorama
     colorama.init()
@@ -78,6 +78,23 @@ class ConsoleIo(iobase.IoAdapterBase):
                 chr(8230).encode(encoding)
         except (UnicodeEncodeError, TypeError):
             self.supports_smartquotes = False
+        self.stop_main_loop = False
+
+    def mainloop(self, player):
+        """Main event loop for the console I/O adapter"""
+        while not self.stop_main_loop:
+            # Input a single line of text by the player. It is stored in the internal
+            # command buffer of the player. The driver's main loop can look into that
+            # to see if any input should be processed.
+            try:
+                print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
+                sys.stdout.flush()
+                cmd = input().strip()
+                player.store_input_line(cmd)
+            except KeyboardInterrupt:
+                self.break_pressed()
+            except EOFError:
+                pass
 
     def clear_screen(self):
         """Clear the screen"""
@@ -95,38 +112,14 @@ class ConsoleIo(iobase.IoAdapterBase):
         except ImportError:
             return
 
-    def input(self, prompt=None):
-        """
-        Ask the player for immediate input. The input is not stored, but returned immediately.
-        (Don't call this directly, use player.input)
-        """
-        print(self._apply_style(prompt, self.do_styles), end="")
-        sys.stdout.flush()
-        return input().strip()
-
-    def input_line(self, player):
-        """
-        Input a single line of text by the player. It is stored in the internal
-        command buffer of the player. The driver's main loop can look into that
-        to see if any input should be processed.
-        This method is called from the driver's main loop (only if running in command-mode)
-        or from the asynchronous input loop (if running in timer-mode).
-        Returns True if the input loop should continue as usual.
-        Returns False if the input loop should be terminated (this could
-        be the case when the player types 'quit', for instance).
-        """
-        try:
-            print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
-            sys.stdout.flush()
-            cmd = input().strip()
-            player.store_input_line(cmd)
-            if cmd == "quit":
-                return False
-        except KeyboardInterrupt:
-            self.break_pressed()
-        except EOFError:
-            pass
-        return True
+    def abort_all_input(self, player):
+        """abort any blocking input, if at all possible"""
+        # This requires some drastic measures unfortunately.
+        # The main thread is stuck in a blocking input (reading from stdin)
+        # You really can't seem to interrupt that. So we terminate the process forcefully.
+        player.store_input_line("")
+        import signal, os
+        os.kill(os.getpid(), signal.SIGINT)
 
     def render_output(self, paragraphs, **params):
         """
@@ -151,14 +144,19 @@ class ConsoleIo(iobase.IoAdapterBase):
         return self.smartquotes("".join(output))
 
     def output(self, *lines):
-        """Write some text to the screen. Needs to take care of style tags that are embedded."""
+        """Write some text to the screen. Takes care of style tags that are embedded."""
         for line in lines:
             print(self._apply_style(line, self.do_styles))
         sys.stdout.flush()
 
+    def output_no_newline(self, text):
+        """Like output, but just writes a single line, without end-of-line."""
+        print(self._apply_style(text, self.do_styles), end="")
+        sys.stdout.flush()
+
     def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
-        if current_thread().name != "MainThread":
+        if threading.current_thread().name != "MainThread":
             # ony trigger the ^C handling if we're running in the main thread,
             # otherwise we could get two triggers (one from the async i/o thread, and
             # one from the main thread)
