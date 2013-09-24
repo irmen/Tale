@@ -362,6 +362,7 @@ class Driver(object):
         The game loop.
         Until the game is exited, it processes player input, and prints the resulting output.
         """
+        has_input = True
         last_loop_time = last_server_tick = time.time()
         while not self._stop_mainloop:
             mud_context.player = self.player   # @todo hack... is always the same single player for now
@@ -380,12 +381,15 @@ class Driver(object):
             else:
                 loop_duration = time.time() - last_loop_time
 
+            if has_input:
+                # print the input prompt
+                self.player.io.write_input_prompt()
+
+            # check for player input:
             if self.config.server_tick_method == "timer":
-                # check if input is available
                 has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                # wait till the user has entered some input
-                self.player.input_is_available.wait()
+                self.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
                 before = time.time()
                 self.server_tick()

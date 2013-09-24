@@ -105,6 +105,10 @@ class IoAdapterBase(object):
         """Like output, but just writes a single line, without end-of-line."""
         raise NotImplementedError("implement this in subclass")
 
+    def write_input_prompt(self):
+        """write the input prompt '>>'"""
+        pass
+
     def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
         pass

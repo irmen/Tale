@@ -87,8 +87,9 @@ class ConsoleIo(iobase.IoAdapterBase):
             # command buffer of the player. The driver's main loop can look into that
             # to see if any input should be processed.
             try:
-                print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
-                sys.stdout.flush()
+                # note that we don't print any prompt ">>", that needs to be done
+                # by the main thread that handles screen *output*
+                # (otherwise the prompt will often appear before any regular screen output)
                 cmd = input().strip()
                 player.store_input_line(cmd)
             except KeyboardInterrupt:
@@ -153,6 +154,10 @@ class ConsoleIo(iobase.IoAdapterBase):
         """Like output, but just writes a single line, without end-of-line."""
         print(self._apply_style(text, self.do_styles), end="")
         sys.stdout.flush()
+
+    def write_input_prompt(self):
+        """write the input prompt '>>'"""
+        print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
 
     def break_pressed(self):
         """do something when the player types ctrl-C (break)"""

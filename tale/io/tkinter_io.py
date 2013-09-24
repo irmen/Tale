@@ -222,14 +222,16 @@ class TaleWindow(Toplevel):
             self.commandEntry.insert(0, self.history[self.history_idx])
 
     def user_cmd(self, e):
-        cmd = self.commandEntry.get()
-        self.write_line("", self.gui.io.do_styles)
-        self.write_line("<userinput>%s</>" % cmd, True)
+        cmd = self.commandEntry.get().strip()
+        if cmd:
+            self.write_line("", self.gui.io.do_styles)
+            self.write_line("<userinput>%s</>" % cmd, True)
         self.gui.register_cmd(cmd)
         self.commandEntry.delete(0, END)
-        if cmd != self.history[-1]:
-            self.history.append(cmd)
-        self.history_idx = len(self.history)
+        if cmd:
+            if cmd != self.history[-1]:
+                self.history.append(cmd)
+            self.history_idx = len(self.history)
 
     def clear_text(self):
         self.textView.config(state=NORMAL)
