@@ -158,6 +158,7 @@ class ConsoleIo(iobase.IoAdapterBase):
     def write_input_prompt(self):
         """write the input prompt '>>'"""
         print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
+        sys.stdout.flush()
 
     def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
@@ -165,6 +166,9 @@ class ConsoleIo(iobase.IoAdapterBase):
             # ony trigger the ^C handling if we're running in the main thread,
             # otherwise we could get two triggers (one from the async i/o thread, and
             # one from the main thread)
+            return
+        if self.stop_main_loop:
+            # don't write the feedback if the loop is already stopping
             return
         print(self._apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
         sys.stdout.flush()
