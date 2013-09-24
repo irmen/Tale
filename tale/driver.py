@@ -243,7 +243,8 @@ class Driver(object):
         io.install_tab_completion(TabCompleter(self, self.player))
         self.player.io = io
         # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
-        driver_thread = threading.Thread(name="driver", target=self.startup_main_loop, daemon=True)
+        driver_thread = threading.Thread(name="driver", target=self.startup_main_loop)
+        driver_thread.daemon = True
         driver_thread.start()
         io.mainloop(self.player)
 
