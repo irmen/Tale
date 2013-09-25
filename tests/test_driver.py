@@ -16,13 +16,6 @@ import tale.base
 import tale.util
 
 
-class TestDriver(unittest.TestCase):
-    def testGlobalContext(self):
-        d = the_driver.Driver()
-        self.assertIsNone(tale.mud_context.player)
-        self.assertIsNone(tale.mud_context.config)
-        self.assertEqual(d, tale.mud_context.driver)
-
 class TestDeferreds(unittest.TestCase):
     def testSortable(self):
         t1 = datetime.datetime(1995, 1, 1)

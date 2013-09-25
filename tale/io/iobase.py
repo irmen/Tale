@@ -54,18 +54,23 @@ class IoAdapterBase(object):
         self.do_styles = True
         self.do_smartquotes = True
         self.supports_smartquotes = True
+        self.player = None
 
     def destroy(self):
         """Called when the I/O adapter is shut down"""
         pass
 
-    def mainloop(self, player):
+    def mainloop(self):
         """Main event loop for this I/O adapter"""
         raise NotImplementedError("implement this in subclass")
 
     def clear_screen(self):
         """Clear the screen"""
         pass
+
+    def switch_player(self, player):
+        """Update the reference to the player object"""
+        self.player = player
 
     def install_tab_completion(self, completer):
         """Install and enable tab-command-completion if possible"""

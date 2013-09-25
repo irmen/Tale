@@ -80,7 +80,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             self.supports_smartquotes = False
         self.stop_main_loop = False
 
-    def mainloop(self, player):
+    def mainloop(self):
         """Main event loop for the console I/O adapter"""
         while not self.stop_main_loop:
             # Input a single line of text by the player. It is stored in the internal
@@ -91,7 +91,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # by the main thread that handles screen *output*
                 # (otherwise the prompt will often appear before any regular screen output)
                 cmd = input().strip()
-                player.store_input_line(cmd)
+                self.player.store_input_line(cmd)
             except KeyboardInterrupt:
                 self.break_pressed()
             except EOFError:

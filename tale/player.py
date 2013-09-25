@@ -255,7 +255,6 @@ class Player(base.Living, pubsub.Listener):
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)
         self.input_is_available.set()
-        self.turns += 1   # @todo this is not the best spot to count turns, change it (only on correct cmd parse for instance?)
 
     def activate_transcript(self, file, vfs):
         if file:

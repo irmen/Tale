@@ -20,7 +20,6 @@ except ImportError:
     import tkMessageBox as tkmsgbox
 from . import iobase, vfs
 from .. import mud_context
-from ..util import queue
 from .. import __version__ as tale_version
 
 __all__ = ["TkinterIo"]
@@ -35,9 +34,9 @@ class TkinterIo(iobase.IoAdapterBase):
         self.gui = TaleGUI(self, config)
         self.textwrapper = textwrap.TextWrapper()
 
-    def mainloop(self, player):
+    def mainloop(self):
         """Main event loop for this I/O adapter"""
-        self.gui.mainloop(player)
+        self.gui.mainloop()
 
     def clear_screen(self):
         """Clear the screen"""
@@ -138,6 +137,7 @@ class TaleWindow(Toplevel):
             self.transient(parent)
             self.grab_set()
             self.wait_window()
+        self.update_lock = threading.Lock()
 
     def CreateWidgets(self):
         frameText = Frame(self, relief=SUNKEN, height=700)
@@ -234,37 +234,39 @@ class TaleWindow(Toplevel):
             self.history_idx = len(self.history)
 
     def clear_text(self):
-        self.textView.config(state=NORMAL)
-        self.textView.delete(1.0, END)
-        self.textView.config(state=DISABLED)
+        with self.update_lock:
+            self.textView.config(state=NORMAL)
+            self.textView.delete(1.0, END)
+            self.textView.config(state=DISABLED)
 
     def write_line(self, line, do_styles):
-        if do_styles:
-            words = re.split(r"(<\S+?>)", line)
-            self.textView.config(state=NORMAL)
-            tag = None
-            for word in words:
-                match = re.match(r"<(\S+?)>$", word)
-                if match:
-                    tag = match.group(1)
-                    if tag=="monospaced":
-                        self.textView.mark_set("begin_monospaced", INSERT)
-                        self.textView.mark_gravity("begin_monospaced", LEFT)
-                    elif tag=="/monospaced":
-                        self.textView.tag_add("monospaced", "begin_monospaced", INSERT)
-                        tag = None
-                    elif tag=="/":
-                        tag = None
-                    continue
-                self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
-            self.textView.insert(END, "\n")
-            self.textView.config(state=DISABLED)
-        else:
-            line = iobase.strip_text_styles(line)
-            self.textView.config(state=NORMAL)
-            self.textView.insert(END, line + "\n")
-            self.textView.config(state=DISABLED)
-        self.textView.yview(END)
+        with self.update_lock:
+            if do_styles:
+                words = re.split(r"(<\S+?>)", line)
+                self.textView.config(state=NORMAL)
+                tag = None
+                for word in words:
+                    match = re.match(r"<(\S+?)>$", word)
+                    if match:
+                        tag = match.group(1)
+                        if tag=="monospaced":
+                            self.textView.mark_set("begin_monospaced", INSERT)
+                            self.textView.mark_gravity("begin_monospaced", LEFT)
+                        elif tag=="/monospaced":
+                            self.textView.tag_add("monospaced", "begin_monospaced", INSERT)
+                            tag = None
+                        elif tag=="/":
+                            tag = None
+                        continue
+                    self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
+                self.textView.insert(END, "\n")
+                self.textView.config(state=DISABLED)
+            else:
+                line = iobase.strip_text_styles(line)
+                self.textView.config(state=NORMAL)
+                self.textView.insert(END, line + "\n")
+                self.textView.config(state=DISABLED)
+            self.textView.yview(END)
 
     def quit_button_clicked(self, event=None):
         quit = tkmsgbox.askokcancel("Quit Confirmation", "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?", master=self)
@@ -279,10 +281,8 @@ class TaleWindow(Toplevel):
 class TaleGUI(object):
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
-        self.gui_ready = threading.Event()
         self.io = io
         self.server_config = config
-        self.line_queue = queue.Queue()
         self.root = Tk()
         window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
             name=self.server_config.name,
@@ -290,8 +290,6 @@ class TaleGUI(object):
             taleversion=tale_version
         )
         self.root.title(window_title)
-        self.root.bind("<<process_tale_command>>", self.root_process_cmd)
-        self.root.bind("<<clear_tale_screen>>", self.root_clear_screen)
         self.window = TaleWindow(self, self.root, window_title, "")
         self.root.withdraw()
         self.root.update()
@@ -314,15 +312,10 @@ class TaleGUI(object):
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
-    def mainloop(self, player):
-        def signal_gui_ready():
-            self.root.after_idle(lambda: self.gui_ready.set())
-        self.player = player
-        self.root.after(200, signal_gui_ready)
+    def mainloop(self):
         self.root.mainloop()
         self.window = None
         self.root = None
-        self.player = None
         self.io.gui_terminated()
 
     def destroy(self, force=False):
@@ -331,7 +324,6 @@ class TaleGUI(object):
             self.root.destroy()
             self.window = None
             self.root = None
-            self.player = None
         if self.window:
             self.window.disable_input()
         if force:
@@ -342,27 +334,16 @@ class TaleGUI(object):
     def window_closed(self):
         mud_context.driver.stop_driver()
 
-    def root_process_cmd(self, event):
-        line = self.line_queue.get()
-        self.window.write_line(line, self.io.do_styles)
-
-    def root_clear_screen(self, event):
-        self.window.clear_text()
-
     def clear_screen(self):
         if self.root:
-            self.root.event_generate("<<clear_tale_screen>>", when='tail')
+            self.root.after_idle(lambda: self.window.clear_text())
 
     def write_line(self, line):
-        self.gui_ready.wait()
         if self.root:
-            # We put the input data in a queue and generate a virtual event for the Tk root window.
-            # The event handler runs in the correct thread and grabs the data from the queue.
-            self.line_queue.put(line)
-            self.root.event_generate("<<process_tale_command>>", when='tail')
+            self.root.after_idle(lambda: self.window.write_line(line, self.io.do_styles))
 
     def register_cmd(self, cmd):
-        self.player.store_input_line(cmd)
+        mud_context.player.store_input_line(cmd)
 
 
 def show_error_dialog(title, message):

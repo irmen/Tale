@@ -10,7 +10,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 __version__ = "1.3"
 
-import threading
 from . import jythonpatch   # patch some stuff in jython, if needed
 
-mud_context = threading.local()
+class _MudContext(object):
+    pass
+
+mud_context = _MudContext()
+

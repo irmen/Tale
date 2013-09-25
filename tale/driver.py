@@ -142,15 +142,7 @@ class Driver(object):
         self.config = None
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
-        self.register_in_mud_context()
         cmds.register_all(self.commands)
-
-    def register_in_mud_context(self):
-        # Register the driver and some other stuff in the global thread context.
-        # These are unique per thread (=per player).
-        mud_context.driver = self
-        mud_context.config = self.config
-        mud_context.player = self.player
 
     def bind_exits(self):
         # convert textual exit strings to actual exit object bindings
@@ -201,7 +193,9 @@ class Driver(object):
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
         self.config = util.ReadonlyAttributes(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        self.register_in_mud_context()
+        # Register the driver and some other stuff in the global context.
+        mud_context.driver = self
+        mud_context.config = self.config
         try:
             story_cmds = __import__("cmds", level=0)
         except (ImportError, ValueError):
@@ -232,6 +226,7 @@ class Driver(object):
         self.bind_exits()
         # story has been initialised, create and connect a player
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
+        mud_context.player = self.player
         if args.gui:
             from .io.tkinter_io import TkinterIo as IoAdapter
             io = IoAdapter(self.config)
@@ -242,16 +237,17 @@ class Driver(object):
         io.clear_screen()
         io.install_tab_completion(TabCompleter(self, self.player))
         self.player.io = io
+        io.switch_player(self.player)
         # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
         driver_thread = threading.Thread(name="driver", target=self.startup_main_loop)
         driver_thread.daemon = True
         driver_thread.start()
-        io.mainloop(self.player)
+        io.mainloop()
 
     def startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
-        self.register_in_mud_context()    # re-register because we may be running in a new background thread
         self._stop_mainloop = False
+        time.sleep(0.1)
         try:
             self.print_game_intro(self.player)
             self.create_player(self.player)
@@ -305,6 +301,7 @@ class Driver(object):
         if load_saved_game:
             io = player.io  # save the I/O
             player = self.load_saved_game()
+            io.switch_player(player)
             player.io = io  # reset the I/O
             player.tell("\n")
             if self.config.server_mode == "if":
@@ -365,8 +362,8 @@ class Driver(object):
         """
         has_input = True
         last_loop_time = last_server_tick = time.time()
+        mud_context.player = self.player   # @todo hack... is always the same single player for now
         while not self._stop_mainloop:
-            mud_context.player = self.player   # @todo hack... is always the same single player for now
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
@@ -495,12 +492,14 @@ class Driver(object):
         try:
             if _verb in self.commands.no_soul_parsing:
                 # don't use the soul to parse it further
+                self.player.turns += 1
                 raise soul.NonSoulVerb(soul.ParseResult(_verb, unparsed=_rest.strip()))
             else:
                 # Parse the command by using the soul.
                 all_verbs = set(command_verbs) | custom_verbs
                 parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
+            self.player.turns += 1
             self.do_socialize(parsed)
         except soul.NonSoulVerb as x:
             parsed = x.parsed
@@ -508,6 +507,7 @@ class Driver(object):
                 # for now, qualifiers are only supported on soul-verbs (emotes).
                 raise errors.ParseError("That action doesn't support qualifiers.")
             # Execute non-soul verb. First try directions, then the rest.
+            self.player.turns += 1
             try:
                 # Check if the verb is a custom verb and try to handle that.
                 # If it remains unhandled, check if it is a normal verb, and handle that.
@@ -638,6 +638,7 @@ class Driver(object):
                 print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 raise SystemExit(10)
             self.player = state["player"]
+            mud_context.player = self.player
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
