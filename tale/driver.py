@@ -181,7 +181,7 @@ class Driver(object):
         path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
             # The tale library is being loaded from the current directory, this is not supported.
-            print("Tale is being asked to run directly from the distribution directory, this is not supported.")
+            print("Tale is being asked to run directly from the current directory, this is not supported.")
             print("Install Tale properly, and/or use the start script from the story directory instead.")
             return
         # cd into the game directory, add it to the search path, and load its config and zones

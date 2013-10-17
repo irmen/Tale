@@ -31,6 +31,7 @@ class Story(object):
         author_address = "irmen@razorvine.net",
         version = tale.__version__,      # arbitrary but is used to check savegames for compatibility
         requires_tale = tale.__version__,  # tale library required to run the game
+        supported_modes = {"if", "mud"}, # what driver modes (if/mud) are supported by this story
         player_name = "julie",           # set a name to create a prebuilt player, None to use the character builder
         player_gender = "f",             # m/f/n
         player_race = "human",           # default is "human" ofcourse, but you can select something else if you want

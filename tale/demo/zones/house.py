@@ -60,6 +60,11 @@ class Cat(NPC):
             self.tell_others("{Title} curls up in a ball and purrs contently.")
         elif parsed.verb in ("hello", "hi", "greet"):
             self.tell_others("{Title} stares at you incomprehensibly.")
+        else:
+            message = (parsed.message or parsed.unparsed).lower()
+            if self.name in message:
+                self.tell_others("{Title} looks up at you.")
+
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")
 livingroom.insert(cat, None)
