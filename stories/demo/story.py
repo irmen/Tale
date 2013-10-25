@@ -38,6 +38,7 @@ class Story(object):
         startlocation_player = "town.square",
         startlocation_wizard = "wizardtower.hall",
         savegames_enabled = True,
+	supported_modes = ["if"]
     )
 
     vfs = None        # will be set by driver init()
