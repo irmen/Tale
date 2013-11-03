@@ -8,7 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 from tale.hints import Hint
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
     import sys
     from tale.driver import Driver
@@ -19,25 +19,25 @@ if __name__=="__main__":
 
 class Story(object):
     config = dict(
-        name = "Tale Demo",
-        author = "Irmen de Jong",
-        author_address = "irmen@razorvine.net",
-        version = "1.0",                 # arbitrary but is used to check savegames for compatibility
-        requires_tale = "1.4",           # tale library required to run the game
-        supported_modes = {"if", "mud"}, # what driver modes (if/mud) are supported by this story
-        player_name = None,              # set a name to create a prebuilt player, None to use the character builder
-        player_gender = None,            # m/f/n
-        player_race = None,              # default is "human" ofcourse, but you can select something else if you want
-        money_type = "modern",           # money type modern/fantasy/None
-        server_tick_method = "timer",    # 'command' (waits for player entry) or 'timer' (async timer driven)
-        server_tick_time = 1.0,          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        gametime_to_realtime = 5,        # meaning: game time is X times the speed of real time (only used with "timer" tick method)
-        max_wait_hours = 2,              # the max. number of hours (gametime) the player is allowed to wait
-        display_gametime = True,         # enable/disable display of the game time at certain moments
-        epoch = datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
-        startlocation_player = "town.square",
-        startlocation_wizard = "wizardtower.hall",
-        savegames_enabled = True,
+        name="Tale Demo",
+        author="Irmen de Jong",
+        author_address="irmen@razorvine.net",
+        version="1.0",                  # arbitrary but is used to check savegames for compatibility
+        requires_tale="1.4",            # tale library required to run the game
+        supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
+        player_name=None,               # set a name to create a prebuilt player, None to use the character builder
+        player_gender=None,             # m/f/n
+        player_race=None,               # default is "human" ofcourse, but you can select something else if you want
+        money_type="modern",            # money type modern/fantasy/None
+        server_tick_method="timer",     # 'command' (waits for player entry) or 'timer' (async timer driven)
+        server_tick_time=1.0,           # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
+        gametime_to_realtime=5,         # meaning: game time is X times the speed of real time (only used with "timer" tick method)
+        max_wait_hours=2,               # the max. number of hours (gametime) the player is allowed to wait
+        display_gametime=True,          # enable/disable display of the game time at certain moments
+        epoch=datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
+        startlocation_player="town.square",
+        startlocation_wizard="wizardtower.hall",
+        savegames_enabled=True,
     )
 
     vfs = None        # will be set by driver init()

@@ -56,11 +56,11 @@ style_colors = {
 }
 assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
 
-if sys.platform=="win32":
+if sys.platform == "win32":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
         style_colors.clear()  # running on win32 without colorama ansi support
 
-if sys.platform=="cli" or os.name=="java":
+if sys.platform == "cli" or os.name == "java":
     style_colors.clear()  # IronPython and Jython don't support console colors at all
 
 

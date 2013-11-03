@@ -10,9 +10,10 @@ import weakref
 import threading
 
 
-__all__=["topic", "unsubscribe_all", "Listener"]
+__all__ = ["topic", "unsubscribe_all", "Listener"]
 
 all_topics = {}
+
 
 def topic(name):
     """Create a topic object (singleton). Name can be a string or a sequence type."""
@@ -21,6 +22,7 @@ def topic(name):
             return all_topics[name]
         instance = all_topics[name] = __Topic(name)
         return instance
+
 
 def unsubscribe_all(subscriber):
     """unsubscribe the given subscriber object from all topics that it may have been subscribed to."""
@@ -51,7 +53,7 @@ class __Topic(object):
     def send(self, event):
         results = []
         for subber_ref in self.subscribers:
-            subber=subber_ref()
+            subber = subber_ref()
             if subber is not None:
                 results.append(subber.pubsub_event(self.name, event))
         return results

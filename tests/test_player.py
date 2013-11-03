@@ -29,8 +29,9 @@ else:
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = DummyDriver()
-        tale.mud_context.config = ReadonlyAttributes({"server_mode":"if"})
+        tale.mud_context.config = ReadonlyAttributes({"server_mode": "if"})
         tale.mud_context.config.lock()
+
     def test_init(self):
         player = Player("fritz", "m")
         player.title = "Fritz the great"
@@ -41,6 +42,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("m", player.gender)
         self.assertEqual(set(), player.privileges)
         self.assertTrue(1 < player.stats["agi"] < 100)
+
     def test_tell(self):
         player = Player("fritz", "m")
         player.tell(None)
@@ -314,6 +316,7 @@ class TestPlayer(unittest.TestCase):
                 self.handled = False
                 self.handle_verb_called = False
                 self.notify_called = False
+
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
                 if parsed.verb in self.verbs:
@@ -321,16 +324,20 @@ class TestPlayer(unittest.TestCase):
                     return True
                 else:
                     return False
+
             def notify_action(self, parsed, actor):
                 self.notify_called = True
+
         player = SpecialPlayer("julie", "f")
         player.verbs["xywobble"] = ""
         room = Location("room")
+
         class Chair(Item):
             def init(self):
                 self.handled = False
                 self.handle_verb_called = False
                 self.notify_called = False
+
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
                 if parsed.verb in self.verbs:
@@ -338,8 +345,10 @@ class TestPlayer(unittest.TestCase):
                     return True
                 else:
                     return False
+
             def notify_action(self, parsed, actor):
                 self.notify_called = True
+
         chair_in_inventory = Chair("littlechair")
         chair_in_inventory.verbs["kerwaffle"] = ""
         player.insert(chair_in_inventory, player)
@@ -405,15 +414,19 @@ class TestPlayer(unittest.TestCase):
             def notify_npc_left(self, npc, target_location):
                 self.npc_left = npc
                 self.npc_left_target = target_location
+
             def notify_npc_arrived(self, npc, previous_location):
                 self.npc_arrived = npc
                 self.npc_arrived_from = previous_location
+
             def notify_player_left(self, player, target_location):
                 self.player_left = player
                 self.player_left_target = target_location
+
             def notify_player_arrived(self, player, previous_location):
                 self.player_arrived = player
                 self.player_arrived_from = previous_location
+
         player = Player("julie", "f")
         room1 = LocationNotify("room1")
         room2 = LocationNotify("room2")
@@ -510,6 +523,7 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertFalse(pn.wizard)
         pn = b.create_default_wizard()
         self.assertTrue(pn.wizard)
+
     def test_apply_to(self):
         b = CharacterBuilder(None)
         p = Player("test", "n")

@@ -9,15 +9,18 @@ import unittest
 import gc
 from tale.pubsub import topic, unsubscribe_all, Listener
 
+
 class Subber(Listener):
     def __init__(self, name):
-        self.messages=[]
+        self.messages = []
         self.name = name
+
     def pubsub_event(self, topicname, event):
         self.messages.append((topicname, event))
         return self.name
+
     def clear(self):
-        self.messages=[]
+        self.messages = []
 
 
 class TestPubsub(unittest.TestCase):
@@ -67,13 +70,16 @@ class TestPubsub(unittest.TestCase):
     def test_weakrefs2(self):
         class Wiretap(Listener):
             def __init__(self):
-                self.messages=[]
+                self.messages = []
+
             def create_tap(self):
                 tap = topic("wiretaptest")
                 tap.subscribe(self)
+
             def pubsub_event(self, topicname, event):
                 self.messages.append((topicname, event))
                 return 99
+
         wiretap = Wiretap()
         wiretap.create_tap()
         t = topic("wiretaptest")
@@ -104,7 +110,6 @@ class TestPubsub(unittest.TestCase):
         s2.send("two")
         s3.send("three")
         self.assertEqual([], subber.messages)
-
 
 
 if __name__ == '__main__':

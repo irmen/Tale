@@ -243,7 +243,7 @@ class Player(base.Living, pubsub.Listener):
         """
         try:
             result = self._input.get_nowait()
-            if self._input.qsize()==0:
+            if self._input.qsize() == 0:
                 self.input_is_available.clear()
             return result.strip()
         except queue.Empty:

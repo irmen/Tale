@@ -16,6 +16,7 @@ class TestConsoleIo(unittest.TestCase):
     def setUp(self):
         self._orig_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w")
+
     def tearDown(self):
         sys.stdout.close()
         sys.stdout = self._orig_stdout
@@ -63,10 +64,10 @@ class TextWrapper(unittest.TestCase):
         w = styleaware_wrapper.StyleTagsAwareTextWrapper(width=20)
         wrapped = w.fill("This is some text with or without style tags, to see how the wrapping goes.")
         self.assertEqual("This is some text\n"
-            "with or without\n"
-            "style tags, to see\n"
-            "how the wrapping\n"
-            "goes.", wrapped)
+                         "with or without\n"
+                         "style tags, to see\n"
+                         "how the wrapping\n"
+                         "goes.", wrapped)
         wrapped = w.fill("This is <bright>some text</> with <bright>or without</> style tags, <bright>to</> see <bright>how the</> wrapping <bright>goes.</>")
         wrapped = iobase.strip_text_styles(wrapped)
         self.assertEqual("This is some text\n"

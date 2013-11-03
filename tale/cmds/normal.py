@@ -283,7 +283,7 @@ def do_loot(player, parsed, ctx):
         raise ParseError("Loot what?")
     if len(parsed.who_order) > 1:
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
-    raise RetryParse("take all from "+parsed.who_order[0].name)
+    raise RetryParse("take all from " + parsed.who_order[0].name)
 
 
 @cmd("take", "get", "steal", "rob")
@@ -474,7 +474,7 @@ def do_give(player, parsed, ctx):
             return give_stuff(player, what, parsed.args[0])
 
     # give one or more specific items.
-    if  len([who for who in parsed.who_order if isinstance(who, base.Living)]) > 1:
+    if len([who for who in parsed.who_order if isinstance(who, base.Living)]) > 1:
         # if there's more than one living, it's not clear who to give stuff to
         raise ActionRefused("It's not clear who you want to give things to.")
     if isinstance(parsed.who_order[0], base.Living):
@@ -667,10 +667,10 @@ def do_examine(player, parsed, ctx):
                 p("It's empty.")
     elif name in player.location.exits:
         p("It seems you can go there:")
-        p("<exit>"+player.location.exits[name].description+"</>")
+        p("<exit>" + player.location.exits[name].description + "</>")
     elif name in abbreviations and abbreviations[name] in player.location.exits:
         p("It seems you can go there:")
-        p("<exit>"+player.location.exits[abbreviations[name]].description+"</>")
+        p("<exit>" + player.location.exits[abbreviations[name]].description + "</>")
     else:
         raise ActionRefused("%s isn't here." % name)
 
@@ -1086,7 +1086,7 @@ def do_use(player, parsed, ctx):
         raise ActionRefused("Use what?")
     if len(parsed.who_order) > 1:
         # check if there are exactly 2 items mentioned that the player is carrying, assume 'combine' in that case
-        if len(parsed.who_info)==2:
+        if len(parsed.who_info) == 2:
             item1, item2 = tuple(parsed.who_info)
             if item1 in player and item2 in player:
                 player.tell("<dim>(It is assumed that you want to combine them.)</>")

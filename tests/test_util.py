@@ -295,13 +295,13 @@ class TestUtil(unittest.TestCase):
         ad = util.ReadonlyAttributes(a=42, b="hello")
         self.assertEqual(42, ad.a)
         self.assertEqual("hello", ad.b)
-        self.assertEqual({"a":42, "b":"hello"}, vars(ad))
+        self.assertEqual({"a": 42, "b": "hello"}, vars(ad))
         with self.assertRaises(AttributeError):
             _ = ad.doesnotexist
-        ad.x=99
+        ad.x = 99
         ad.lock()
         with self.assertRaises(TypeError):
-            ad.x=88
+            ad.x = 88
 
     def test_context(self):
         ctx = util.Context(driver=1, clock=2)
@@ -310,10 +310,10 @@ class TestUtil(unittest.TestCase):
         self.assertIsNone(ctx.config)
         with self.assertRaises(AttributeError):
             _ = ctx.doesnotexist
-        ctx.x=99
+        ctx.x = 99
         ctx.lock()
         with self.assertRaises(TypeError):
-            ctx.x=88
+            ctx.x = 88
 
 
 if __name__ == '__main__':

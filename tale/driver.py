@@ -33,11 +33,11 @@ from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 class Deferred(object):
     __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
 
-    def __init__(self, due, owner, callable, vargs, kwargs):
+    def __init__(self, due, owner, callable_obj, vargs, kwargs):
         assert due is None or isinstance(due, datetime.datetime)
         self.due = due   # in game time
         self.owner = owner
-        self.callable = callable
+        self.callable = callable_obj
         self.vargs = vargs
         self.kwargs = kwargs
 
@@ -49,7 +49,7 @@ class Deferred(object):
 
     def when_due(self, game_clock, realtime=False):
         """
-        In what timeframe is this deferred due to occur? (timedelta)
+        In what time is this deferred due to occur? (timedelta)
         Normally it is in terms of game-time, but if you pass realtime=True,
         you will get the real-time timedelta.
         """
@@ -67,9 +67,9 @@ class Deferred(object):
             self.callable(*self.vargs, **self.kwargs)
         else:
             # deferred callable is stored as a name, so we need to obtain the actual function
-            callable = getattr(self.owner, self.callable, None)
-            if callable:
-                callable(*self.vargs, **self.kwargs)
+            func = getattr(self.owner, self.callable, None)
+            if func:
+                func(*self.vargs, **self.kwargs)
 
 
 class Commands(object):
@@ -143,6 +143,8 @@ class Driver(object):
         self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
         cmds.register_all(self.commands)
+        self.zones = None
+        self.moneyfmt = None
 
     def bind_exits(self):
         # convert textual exit strings to actual exit object bindings
@@ -161,6 +163,7 @@ class Driver(object):
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
+        parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
         args = parser.parse_args(args)
         try:
             self._start(args)
@@ -233,16 +236,19 @@ class Driver(object):
         else:
             from .io.console_io import ConsoleIo as IoAdapter
             io = IoAdapter(self.config)
-        io.output_line_delay = output_line_delay
-        io.clear_screen()
-        io.install_tab_completion(TabCompleter(self, self.player))
-        self.player.io = io
-        io.switch_player(self.player)
-        # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
-        driver_thread = threading.Thread(name="driver", target=self.startup_main_loop)
-        driver_thread.daemon = True
-        driver_thread.start()
-        io.mainloop()
+        if args.verify:
+            print("Verified '%s': all seems to be fine." % self.story.config["name"])
+        else:
+            io.output_line_delay = output_line_delay
+            io.clear_screen()
+            io.install_tab_completion(TabCompleter(self, self.player))
+            self.player.io = io
+            io.switch_player(self.player)
+            # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
+            driver_thread = threading.Thread(name="driver", target=self.startup_main_loop)
+            driver_thread.daemon = True
+            driver_thread.start()
+            io.mainloop()
 
     def startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop

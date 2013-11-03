@@ -48,7 +48,7 @@ class TkinterIo(iobase.IoAdapterBase):
         import traceback
         tb = traceback.format_exc()
         self.output("<bright><red>%s</>\n" % message)
-        self.output("<rev>"+tb+"</>")
+        self.output("<rev>" + tb + "</>")
         self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
 
     def install_tab_completion(self, completer):
@@ -210,13 +210,13 @@ class TaleWindow(Toplevel):
         self.commandEntry.event_generate("<Return>")
 
     def up_pressed(self, e):
-        self.history_idx = max(0, self.history_idx-1)
+        self.history_idx = max(0, self.history_idx - 1)
         if self.history_idx < len(self.history):
             self.commandEntry.delete(0, END)
             self.commandEntry.insert(0, self.history[self.history_idx])
 
     def down_pressed(self, e):
-        self.history_idx = min(len(self.history) - 1, self.history_idx+1)
+        self.history_idx = min(len(self.history) - 1, self.history_idx + 1)
         if self.history_idx < len(self.history):
             self.commandEntry.delete(0, END)
             self.commandEntry.insert(0, self.history[self.history_idx])
@@ -249,13 +249,13 @@ class TaleWindow(Toplevel):
                     match = re.match(r"<(\S+?)>$", word)
                     if match:
                         tag = match.group(1)
-                        if tag=="monospaced":
+                        if tag == "monospaced":
                             self.textView.mark_set("begin_monospaced", INSERT)
                             self.textView.mark_gravity("begin_monospaced", LEFT)
-                        elif tag=="/monospaced":
+                        elif tag == "/monospaced":
                             self.textView.tag_add("monospaced", "begin_monospaced", INSERT)
                             tag = None
-                        elif tag=="/":
+                        elif tag == "/":
                             tag = None
                         continue
                     self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
@@ -299,7 +299,7 @@ class TaleGUI(object):
             begin, _, prefix = event.widget.get().rpartition(" ")
             candidates = completer.complete(prefix=prefix)
             if candidates:
-                if len(candidates)==1:
+                if len(candidates) == 1:
                     # replace text by the only possible candidate
                     event.widget.delete(0, END)
                     if begin:
@@ -308,7 +308,7 @@ class TaleGUI(object):
                         event.widget.insert(0, candidates[0] + " ")
                 else:
                     self.write_line("\n<ul>possible words:</> ")
-                    self.write_line("<monospaced>"+"   ".join(candidates)+"</>\n")
+                    self.write_line("<monospaced>" + "   ".join(candidates) + "</>\n")
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
@@ -348,7 +348,7 @@ class TaleGUI(object):
 
 def show_error_dialog(title, message):
     """show a modal error dialog"""
-    root=Tk()
+    root = Tk()
     root.withdraw()
     tkmsgbox.showerror(title, message)
     root.destroy()

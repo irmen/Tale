@@ -11,14 +11,14 @@ import sys
 import tale
 from tale.io.vfs import vfs
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
     from tale.driver import Driver
     driver = Driver()
     with vfs.open_read("demo/__init__.py") as x:
         gamedir = os.path.dirname(x.name)
     args = ["-g", gamedir]
-    if len(sys.argv) > 1 and sys.argv[1]=="--gui":
+    if len(sys.argv) > 1 and sys.argv[1] == "--gui":
         args.append("--gui")
     driver.start(args)
     raise SystemExit(0)
@@ -26,25 +26,25 @@ if __name__=="__main__":
 
 class Story(object):
     config = dict(
-        name = "Tale demo story",
-        author = "Irmen de Jong",
-        author_address = "irmen@razorvine.net",
-        version = tale.__version__,      # arbitrary but is used to check savegames for compatibility
-        requires_tale = tale.__version__,  # tale library required to run the game
-        supported_modes = {"if", "mud"}, # what driver modes (if/mud) are supported by this story
-        player_name = "julie",           # set a name to create a prebuilt player, None to use the character builder
-        player_gender = "f",             # m/f/n
-        player_race = "human",           # default is "human" ofcourse, but you can select something else if you want
-        money_type = "modern",           # money type modern/fantasy
-        server_tick_method = "timer",    # 'command' (waits for player entry) or 'timer' (async timer driven)
-        server_tick_time = 1.0,          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        gametime_to_realtime = 5,        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
-        max_wait_hours = 2,              # the max. number of hours (gametime) the player is allowed to wait (>=0)
-        display_gametime = True,         # enable/disable display of the game time at certain moments
-        epoch = None,                    # start date/time of the game clock
-        startlocation_player = "house.livingroom",
-        startlocation_wizard = "house.livingroom",
-        savegames_enabled = False
+        name="Tale demo story",
+        author="Irmen de Jong",
+        author_address="irmen@razorvine.net",
+        version=tale.__version__,        # arbitrary but is used to check savegames for compatibility
+        requires_tale=tale.__version__,  # tale library required to run the game
+        supported_modes={"if", "mud"},   # what driver modes (if/mud) are supported by this story
+        player_name="julie",             # set a name to create a prebuilt player, None to use the character builder
+        player_gender="f",               # m/f/n
+        player_race="human",             # default is "human" ofcourse, but you can select something else if you want
+        money_type="modern",             # money type modern/fantasy
+        server_tick_method="timer",      # 'command' (waits for player entry) or 'timer' (async timer driven)
+        server_tick_time=1.0,            # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
+        gametime_to_realtime=5,          # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
+        max_wait_hours=2,                # the max. number of hours (gametime) the player is allowed to wait (>=0)
+        display_gametime=True,           # enable/disable display of the game time at certain moments
+        epoch=None,                      # start date/time of the game clock
+        startlocation_player="house.livingroom",
+        startlocation_wizard="house.livingroom",
+        savegames_enabled=False
     )
 
     vfs = None        # will be set by driver init()

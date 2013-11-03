@@ -195,11 +195,11 @@ class TestLocations(unittest.TestCase):
         self.assertEqual({"frobnitz": "c2", "xywobble": "p1"}, room.verbs)
 
         player.insert(chair_in_inventory, player)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1", "kowabooga": "c3" }, room.verbs)
+        self.assertEqual({"frobnitz": "c2", "xywobble": "p1", "kowabooga": "c3"}, room.verbs)
         room2 = Location("room2")
         self.assertEqual({}, room2.verbs)
         chair1.move(room2, player)
-        self.assertEqual({"xywobble": "p1", "kowabooga": "c3" }, room.verbs)
+        self.assertEqual({"xywobble": "p1", "kowabooga": "c3"}, room.verbs)
         self.assertEqual({"frobnitz": "c1"}, room2.verbs)
         chair2.move(room2, player)
         self.assertEqual({"xywobble": "p1", "kowabooga": "c3"}, room.verbs)
@@ -366,8 +366,10 @@ class TestDoorsExits(unittest.TestCase):
         exit = Exit("outside", "town.square", "someplace")
         self.assertEqual("outside", exit.name)
         self.assertEqual("Exit to <unbound:town.square>", exit.title)
+
         class ModuleDummy(object):
             pass
+
         zones = ModuleDummy()
         zones.town = ModuleDummy()
         zones.town.square = Location("square")
@@ -390,12 +392,15 @@ class TestDoorsExits(unittest.TestCase):
 
 class PubsubCollector(pubsub.Listener):
     def __init__(self):
-        self.messages=[]
+        self.messages = []
+
     def pubsub_event(self, topicname, event):
         name, message = event
         self.messages.append(message)
+
     def clear(self):
-        self.messages=[]
+        self.messages = []
+
 
 class TestLiving(unittest.TestCase):
     def test_contains(self):
@@ -406,6 +411,7 @@ class TestLiving(unittest.TestCase):
         self.assertTrue(axe in orc.inventory)
         self.assertEqual(1, orc.inventory_size)
         self.assertEqual(1, len(orc.inventory))
+
     def test_allowance(self):
         orc = Living("orc", "m", race="half-orc")
         idiot = NPC("idiot", "m")
@@ -418,6 +424,7 @@ class TestLiving(unittest.TestCase):
         self.assertTrue("can't take" in str(x.exception))
         orc.remove(axe, orc)
         self.assertFalse(axe in orc)
+
     def test_move(self):
         hall = Location("hall")
         attic = Location("attic")
@@ -443,6 +450,7 @@ class TestLiving(unittest.TestCase):
         self.assertEqual(hall, rat.location)
         self.assertEqual([], wiretap_hall.msgs)
         self.assertEqual([], wiretap_attic.msgs)
+
     def test_lang(self):
         living = Living("julie", "f", race="human")
         self.assertEqual("her", living.objective)
@@ -459,6 +467,7 @@ class TestLiving(unittest.TestCase):
         self.assertEqual("its", living.possessive)
         self.assertEqual("it", living.subjective)
         self.assertEqual("n", living.gender)
+
     def test_tell(self):
         julie = Living("julie", "f", race="human")
         tap = julie.get_wiretap()
@@ -467,14 +476,17 @@ class TestLiving(unittest.TestCase):
         julie.tell("msg1", "msg2")
         julie.tell("msg3", "msg4", ignored_arg=42)
         self.assertEqual(["msg1", "msg2", "msg3", "msg4"], collector.messages)
+
     def test_show_inventory(self):
         class Ctx(object):
             class Config(object):
                 pass
             config = Config()
+
         class MoneyDriverDummy(object):
             pass
-        ctx=Ctx()
+
+        ctx = Ctx()
         ctx.config.money_type = "modern"
         ctx.driver = MoneyDriverDummy()
         ctx.driver.moneyfmt = MoneyFormatter(ctx.config.money_type)
@@ -524,15 +536,19 @@ class TestNPC(unittest.TestCase):
             def notify_npc_left(self, npc, target_location):
                 self.npc_left = npc
                 self.npc_left_target = target_location
+
             def notify_npc_arrived(self, npc, previous_location):
                 self.npc_arrived = npc
                 self.npc_arrived_from = previous_location
+
             def notify_player_left(self, player, target_location):
                 self.player_left = player
                 self.player_left_target = target_location
+
             def notify_player_arrived(self, player, previous_location):
                 self.player_arrived = player
                 self.player_arrived_from = previous_location
+
         npc = NPC("rat", "m", race="rodent")
         room1 = LocationNotify("room1")
         room2 = LocationNotify("room2")
@@ -556,11 +572,13 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("key", item.name)
         self.assertEqual("KEY", item.title)
         self.assertEqual("", item.description)
+
     def test_title(self):
         item = Item("key", "rusty old key")
         self.assertEqual("key", item.name)
         self.assertEqual("rusty old key", item.title)
         self.assertEqual("", item.description)
+
     def test_description(self):
         item = Item("key", "rusty old key", "a small old key that's rusted")
         self.assertEqual("key", item.name)
@@ -576,13 +594,16 @@ class TestDescriptions(unittest.TestCase):
 
     def test_dynamic_description_by_using_property(self):
         import time
+
         class DynamicThing(Item):
             @property
             def description(self):
                 return "The watch shows %f" % time.time()
+
             @property
             def title(self):
                 return "a watch showing %f" % time.time()
+
         watch = DynamicThing("watch")
         title1 = watch.title
         descr1 = watch.description
@@ -596,10 +617,12 @@ class TestDescriptions(unittest.TestCase):
 class TestDestroy(unittest.TestCase):
     def setUp(self):
         mud_context.driver = DummyDriver()
+
     def test_destroy_base(self):
         ctx = Context()
         o = MudObject("x")
         o.destroy(ctx)
+
     def test_destroy_loc(self):
         ctx = Context()
         loc = Location("loc")
@@ -678,6 +701,7 @@ class TestContainer(unittest.TestCase):
         self.assertFalse(key in bag)
         with self.assertRaises(KeyError):
             bag.remove("not_existing", npc)
+
     def test_allowance(self):
         bag = Container("bag")
         key = Item("key")
@@ -696,6 +720,7 @@ class TestContainer(unittest.TestCase):
         self.assertFalse(key in bag)
         with self.assertRaises(ActionRefused):
             bag in key
+
     def test_inventory(self):
         bag = Container("bag")
         key = Item("key")
@@ -716,6 +741,7 @@ class TestContainer(unittest.TestCase):
             bag.inventory = None
         with self.assertRaises(AttributeError):
             bag.inventory.add(5)
+
     def test_title(self):
         bag = Container("bag", "leather bag", "a small leather bag")
         stone = Item("stone")
@@ -751,6 +777,7 @@ class TestItem(unittest.TestCase):
             key.inventory
         with self.assertRaises(ActionRefused):
             key.inventory_size
+
     def test_move(self):
         hall = Location("hall")
         person = Living("person", "m", race="human")
@@ -773,12 +800,14 @@ class TestItem(unittest.TestCase):
         with self.assertRaises(ActionRefused) as x:
             key.move(monster, person)
         self.assertTrue("not a good idea" in str(x.exception))
+
     def test_lang(self):
         thing = Item("thing")
         self.assertEqual("it", thing.objective)
         self.assertEqual("its", thing.possessive)
         self.assertEqual("it", thing.subjective)
         self.assertEqual("n", thing.gender)
+
     def test_location(self):
         thingy = Item("thing")
         with self.assertRaises(TypeError):

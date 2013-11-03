@@ -12,8 +12,8 @@ __version__ = "1.4"
 
 from . import jythonpatch   # patch some stuff in jython, if needed
 
+
 class _MudContext(object):
     pass
 
 mud_context = _MudContext()
-

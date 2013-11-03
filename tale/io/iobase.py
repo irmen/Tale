@@ -130,8 +130,9 @@ class TabCompleter(object):
     def __init__(self, driver, player):
         self.driver = driver
         self.player = player
-        self.candidates=[]
-        self.prefix=None
+        self.candidates = []
+        self.prefix = None
+
     def complete(self, prefix, index=None):
         if not prefix:
             return
@@ -146,7 +147,7 @@ class TabCompleter(object):
             inventory = [item.name for item in self.player.inventory if item.name.startswith(prefix)]
             inventory_aliases = [alias for item in self.player.inventory for alias in item.aliases if alias.startswith(prefix)]
             emotes = [verb for verb in soul.VERBS if verb.startswith(prefix)]
-            self.candidates = sorted(verbs+livings+items+exits+inventory+emotes+livings_aliases+items_aliases+inventory_aliases)
+            self.candidates = sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases)
         try:
             if index is None:
                 return self.candidates

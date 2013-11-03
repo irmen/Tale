@@ -817,7 +817,7 @@ class TestSoul(unittest.TestCase):
     def test_adjust_verbs(self):
         allowed = ["hug", "ponder", "wait", "kick", "cough", "greet", "poke", "yawn"]
         remove = ["hug", "kick"]
-        verbs = {"frobnizificate": ( tale.soul.SIMP, None, "frobnizes \nHOW \nAT", "at" )}
+        verbs = {"frobnizificate": (tale.soul.SIMP, None, "frobnizes \nHOW \nAT", "at")}
         # keep original values to put back after tests
         ORIG_VERBS = tale.soul.VERBS.copy()
         ORIG_AGGRESSIVE_VERBS = tale.soul.AGGRESSIVE_VERBS.copy()
@@ -825,9 +825,9 @@ class TestSoul(unittest.TestCase):
         ORIG_MOVEMENT_VERBS = tale.soul.MOVEMENT_VERBS.copy()
         try:
             tale.soul.adjust_available_verbs(allowed_verbs=allowed, remove_verbs=remove, add_verbs=verbs)
-            self.assertEqual({"poke"}, tale.soul.AGGRESSIVE_VERBS )
-            self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS )
-            self.assertEqual(set(), tale.soul.MOVEMENT_VERBS )
+            self.assertEqual({"poke"}, tale.soul.AGGRESSIVE_VERBS)
+            self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS)
+            self.assertEqual(set(), tale.soul.MOVEMENT_VERBS)
             remaining = sorted(tale.soul.VERBS.keys())
             self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "wait", "yawn"], remaining)
         finally:

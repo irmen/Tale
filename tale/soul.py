@@ -1029,8 +1029,8 @@ class Soul(object):
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResult(verb, who_info=who_info, who_order=who_order,
-            adverb=adverb, message=message, bodypart=bodypart, qualifier=qualifier,
-            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
+                           adverb=adverb, message=message, bodypart=bodypart, qualifier=qualifier,
+                           args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
     def match_previously_parsed(self, player, pronoun):
         """
@@ -1039,7 +1039,7 @@ class Soul(object):
         The reason we return a replacement-name is that the parser can replace the
         pronoun by the proper name that would otherwise have been used in that place.
         """
-        if pronoun=="them":
+        if pronoun == "them":
             # plural (any item/living qualifies)
             matches = list(self.previously_parsed.who_order)
             for who in matches:
@@ -1053,13 +1053,13 @@ class Soul(object):
                 raise ParseError("It is not clear who you're referring to.")
         for who in self.previously_parsed.who_order:
             # first see if it is an exit
-            if pronoun=="it":
+            if pronoun == "it":
                 for direction, exit in player.location.exits.items():
                     if exit is who:
                         player.tell("<dim>(By '%s', it is assumed you mean '%s'.)</>" % (pronoun, direction))
                         return [(who, direction)]
             # not an exit, try an item or a living
-            if pronoun==who.objective:
+            if pronoun == who.objective:
                 if player.search_item(who.name) or who in player.location.livings:
                     player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
                     return [(who, who.name)]

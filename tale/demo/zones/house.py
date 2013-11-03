@@ -45,7 +45,7 @@ closet.add_exits([Exit("living room", livingroom, "You can see the living room."
 
 class Cat(NPC):
     def init(self):
-        self.aliases={"cat"}
+        self.aliases = {"cat"}
         mud_context.driver.defer(4, self, self.do_purr)
 
     def do_purr(self, driver):

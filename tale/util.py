@@ -442,6 +442,7 @@ class ReadonlyAttributes(object):
     It can be 'locked' which makes it read-only.
     """
     __locked = False
+
     def __init__(self, *vargs, **kwargs):
         if vargs:
             assert len(vargs) == 1

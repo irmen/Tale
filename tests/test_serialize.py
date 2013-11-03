@@ -34,6 +34,7 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         self.assert_base_attrs(x)
         self.assertEqual(["alias"], x.aliases)
+
     def test_items_and_container(self):
         o = base.Item("name", "title", "description")
         o.aliases = ["alias"]
@@ -50,6 +51,7 @@ class TestSerializing(unittest.TestCase):
         o = base.Armour("a")
         x = serializecycle(o)
         self.assertEqual("a", x.name)
+
     def test_location(self):
         room = base.Location("room", "description")
         x = serializecycle(room)
@@ -73,6 +75,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("back to room", exit2.short_description)
         self.assertEqual(r2, exit1.target)
         self.assertEqual(r1, exit2.target)
+
     def test_exits_and_doors(self):
         o = base.Exit("east", "target", "somewhere")
         x = serializecycle(o)
@@ -86,6 +89,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("target", x.target)
         self.assertEqual("east", x.name)
         self.assertEqual("somewhere It is closed and locked.", x.description)
+
     def test_living_npc_monster(self):
         o = base.Living("name", "n", title="title", description="description", race="dragon")
         x = serializecycle(o)
@@ -98,30 +102,34 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(m)
         self.assert_base_attrs(x)
         self.assertTrue(x.aggressive)
+
     def test_player_and_soul(self):
         o = soul.Soul()
         x = serializecycle(o)
         self.assertIsNotNone(x)
         p = player.Player("name", "n", description="description")
-        p.title="title"
+        p.title = "title"
         p.money = 42
         p.io = "IO-dummy"
         x = serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
         self.assertIsNone(x.io)
+
     def test_attrdict(self):
         s = util.ReadonlyAttributes(a=42, b="hello", c=[1, 2, 3])
         s.lock()
         x = serializecycle(s)
         self.assertEqual(s, x)
         self.assertEqual(vars(s), vars(x))
+
     def test_Context(self):
         c = util.Context(driver=1, state=2)
         c.lock()
         x = serializecycle(c)
         self.assertEqual(c, x)
         self.assertEqual(vars(c), vars(x))
+
     def test_Hints(self):
         h = hints.HintSystem()
         h.init([hints.Hint("start", None, "first")])
@@ -129,5 +137,5 @@ class TestSerializing(unittest.TestCase):
         os.environ
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

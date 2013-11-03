@@ -21,7 +21,7 @@ class TestItems(unittest.TestCase):
         self.actor = player.Player("julie", "f")
 
     def test_gameclock(self):
-        mud_context.driver.game_clock = util.GameDateTime(datetime.datetime(2013,9,17, 13, 52, 30))
+        mud_context.driver.game_clock = util.GameDateTime(datetime.datetime(2013, 9, 17, 13, 52, 30))
         c = basic.gameclock
         c.use_locale = False
         mud_context.config.display_gametime = False

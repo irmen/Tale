@@ -79,9 +79,11 @@ class TestDeferreds(unittest.TestCase):
         class Thing(object):
             def __init__(self):
                 self.x = []
+
             def append(self, value, driver):
                 assert driver is the_driver
                 self.x.append(value)
+
         t = Thing()
         d = the_driver.Deferred(None, t, "append", [42], None)
         d(driver=the_driver)
@@ -114,7 +116,7 @@ class TestDeferreds(unittest.TestCase):
         d = the_driver.Deferred(due, None, "callable", None, None)
         result = d.when_due(game_clock)   # not realtime
         self.assertIsInstance(result, datetime.timedelta)
-        self.assertEqual(datetime.timedelta(seconds=10*60), result)
+        self.assertEqual(datetime.timedelta(seconds=10 * 60), result)
         result = d.when_due(game_clock, True)   # realtime
         self.assertEqual(datetime.timedelta(seconds=60), result)
         game_clock.add_gametime(datetime.timedelta(seconds=20))   # +20 gametime seconds (=2 realtime seconds)
