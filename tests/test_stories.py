@@ -8,6 +8,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 from tale import driver
 from tale import soul
+from tale.util import ReadonlyAttributes
 import tale
 import os
 import imp
@@ -16,36 +17,34 @@ import sys
 
 class TestStory(object):
     def setUp(self):
-        self.olddir = os.getcwd()
-        os.chdir(self.directory)
         imp.reload(soul)
-        sys.path.insert(0, '.')
+        sys.path.insert(0, self.directory)
 
     def tearDown(self):
-        os.chdir(self.olddir)
         del sys.path[0]
-        del sys.modules["story"]
+        if "story" in sys.modules:
+            del sys.modules["story"]
 
-    def test_load_config(self):
+    def test_story(self):
         story = __import__("story", level=0)
         s = story.Story()
         self.assertEqual(19, len(s.config))
-
-    def test_story(self):
         d = driver.Driver()
-        d.start(["-v", "-g", "."])
+        args = ReadonlyAttributes(delay=1, verify=True, mode="if", gui=None, game=None)
+        d._start(args, story)
+        self.assertTrue(d.verified_ok)
 
 
 class TestBuiltinDemoStory(TestStory, unittest.TestCase):
-    directory = os.path.join(os.path.dirname(tale.__file__), "demo")
+    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "demo"))
 
 
 class TestZedStory(TestStory, unittest.TestCase):
-    directory = os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me")
+    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me"))
 
 
 class TestDemoStory(TestStory, unittest.TestCase):
-    directory = os.path.join(os.path.dirname(tale.__file__), "../stories/demo")
+    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/demo"))
 
 
 if __name__ == '__main__':

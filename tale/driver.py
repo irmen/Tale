@@ -165,6 +165,13 @@ class Driver(object):
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
         args = parser.parse_args(args)
+        # first check the driver launch directory
+        path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
+        if path_for_driver == os.path.abspath("tale"):
+            # The tale library is being loaded from the current directory, this is not supported.
+            print("Tale is being asked to run directly from the current directory, this is not supported.")
+            print("Install Tale properly, and/or use the start script from the story directory instead.")
+            return
         try:
             self._start(args)
         except Exception:
@@ -175,22 +182,20 @@ class Driver(object):
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
-    def _start(self, args):
+    def _start(self, args, story=None):
         if 0 <= args.delay <= 100:
             output_line_delay = args.delay
         else:
             raise ValueError("invalid delay, valid range is 0-100")
 
-        path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
-        if path_for_driver == os.path.abspath("tale"):
-            # The tale library is being loaded from the current directory, this is not supported.
-            print("Tale is being asked to run directly from the current directory, this is not supported.")
-            print("Install Tale properly, and/or use the start script from the story directory instead.")
-            return
+        # determine game directory from storymodule, if provided
+        if story:
+            args.game = os.path.abspath(os.path.dirname(story.__file__))
         # cd into the game directory, add it to the search path, and load its config and zones
         os.chdir(args.game)
         sys.path.insert(0, '.')
-        story = __import__("story", level=0)
+        if story is None:
+            story = __import__("story", level=0)
         self.story = story.Story()
         if args.mode not in self.story.config["supported_modes"]:
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
@@ -238,6 +243,7 @@ class Driver(object):
             io = IoAdapter(self.config)
         if args.verify:
             print("Verified '%s': all seems to be fine." % self.story.config["name"])
+            self.verified_ok = True
         else:
             io.output_line_delay = output_line_delay
             io.clear_screen()
