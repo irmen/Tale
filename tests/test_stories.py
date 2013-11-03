@@ -41,11 +41,11 @@ class TestBuiltinDemoStory(TestStory, unittest.TestCase):
 
 
 class TestZedStory(TestStory, unittest.TestCase):
-    directory = "../stories/zed_is_me"
+    directory = os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me")
 
 
 class TestDemoStory(TestStory, unittest.TestCase):
-    directory = "../stories/demo"
+    directory = os.path.join(os.path.dirname(tale.__file__), "../stories/demo")
 
 
 if __name__ == '__main__':
