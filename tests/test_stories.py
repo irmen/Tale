@@ -7,23 +7,22 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 from tale import driver
-from tale import soul
 from tale.util import ReadonlyAttributes
 import tale
 import os
-import imp
 import sys
 
 
 class TestStory(object):
     def setUp(self):
-        imp.reload(soul)
         sys.path.insert(0, self.directory)
+        self.verbs = tale.soul.VERBS.copy()
 
     def tearDown(self):
         del sys.path[0]
         if "story" in sys.modules:
             del sys.modules["story"]
+        tale.soul.VERBS = self.verbs
 
     def test_story(self):
         story = __import__("story", level=0)
