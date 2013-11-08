@@ -19,9 +19,12 @@ class TestStory(object):
         self.verbs = tale.soul.VERBS.copy()
 
     def tearDown(self):
+        # this is a bit of a hack, to "clean up" after a story test.
+        # it more or less gets the job done to be able to load the next story.
         del sys.path[0]
-        if "story" in sys.modules:
-            del sys.modules["story"]
+        for module in list(sys.modules.keys()):
+            if module.startswith("zones") or module=="story":
+                del sys.modules[module]
         tale.soul.VERBS = self.verbs
 
     def test_story(self):
