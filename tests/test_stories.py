@@ -11,7 +11,8 @@ import sys
 import tale
 from tale import driver, mud_context
 from tale.util import ReadonlyAttributes
-from supportstuff import DummyDriver
+from tests.supportstuff import DummyDriver
+
 
 mud_context.driver = DummyDriver()
 import tale.demo.story
