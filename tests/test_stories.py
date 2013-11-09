@@ -14,52 +14,57 @@ from tale.util import ReadonlyAttributes
 from tests.supportstuff import DummyDriver
 
 
-mud_context.driver = DummyDriver()
-import tale.demo.story
-import tale.demo.zones.house
-
-
 class StoryCaseBase(object):
     def setUp(self):
         self.verbs = tale.soul.VERBS.copy()
-        self.modules=set(sys.modules.keys())
+        sys.path.insert(0, self.directory)
+        mud_context.driver = DummyDriver()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
         # it more or less gets the job done to be able to load the next story.
         del sys.path[0]
-        for module in list(sys.modules.keys()):
-            if module.startswith("zones") or module=="story" or module=="cmds":
-                del sys.modules[module]
         tale.soul.VERBS = self.verbs
-
-    def test_story(self):
-        d = driver.Driver()
-        args = ReadonlyAttributes(delay=1, verify=True, mode="if", gui=None, game=self.directory)
-        d._start(args)
-        self.assertEqual(19, len(d.story.config))
-        self.assertTrue(d.verified_ok)
+        for m in list(sys.modules.keys()):
+            if m.startswith("zones") or m=="story":
+                del sys.modules[m]
 
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me"))
+    def test_story(self):
+        import story
+        s = story.Story()
+        self.assertEqual("Zed is me", s.config["name"])
+        self.assertEqual(19, len(s.config))
+    def test_zones(self):
+        import zones.house
+        self.assertEqual("Living room", zones.house.livingroom.name)
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/demo"))
+    def test_story(self):
+        import story
+        s = story.Story()
+        self.assertEqual("Tale Demo", s.config["name"])
+        self.assertEqual(19, len(s.config))
+    def test_zones(self):
+        import zones.town
+        import zones.wizardtower
+        self.assertEqual("Alley of doors", zones.town.alley.name)
+        self.assertEqual("Tower kitchen", zones.wizardtower.kitchen.name)
 
 
-@unittest.skipIf(sys.version_info>=(3,0), "cannot test builtin story with python 3")
-class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "demo"))
-
-
-class TestBuiltinDemoStoryBasic(unittest.TestCase):
-    def test_basic_story_properties(self):
+class TestBuiltinDemoStory(unittest.TestCase):
+    def test_story(self):
+        import tale.demo.story
         s = tale.demo.story.Story()
         self.assertEqual(19, len(s.config))
+        self.assertEqual("Tale demo story", s.config["name"])
+    def test_zones(self):
+        import tale.demo.zones.house
         self.assertEqual("garfield", tale.demo.zones.house.cat.name)
-    
 
 
 if __name__ == '__main__':
