@@ -13,7 +13,7 @@ import os
 import sys
 
 
-class TestStory(object):
+class StoryCaseBase(object):
     def setUp(self):
         sys.path.insert(0, self.directory)
         self.verbs = tale.soul.VERBS.copy()
@@ -37,15 +37,15 @@ class TestStory(object):
         self.assertTrue(d.verified_ok)
 
 
-class TestBuiltinDemoStory(TestStory, unittest.TestCase):
+class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "demo"))
 
 
-class TestZedStory(TestStory, unittest.TestCase):
+class TestZedStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me"))
 
 
-class TestDemoStory(TestStory, unittest.TestCase):
+class TestDemoStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/demo"))
 
 
