@@ -9,8 +9,7 @@ import unittest
 import os
 import sys
 import tale
-from tale import driver, mud_context
-from tale.util import ReadonlyAttributes
+from tale import driver, mud_context, util
 from tests.supportstuff import DummyDriver
 
 
@@ -19,6 +18,7 @@ class StoryCaseBase(object):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = DummyDriver()
+        mud_context.config = util.ReadonlyAttributes()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -56,7 +56,8 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
         self.assertEqual("Tower kitchen", zones.wizardtower.kitchen.name)
 
 
-class TestBuiltinDemoStory(unittest.TestCase):
+class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
+    directory = "."
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
