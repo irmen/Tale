@@ -7,7 +7,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division, unicode_literals, absolute_import
 import sys
-import os
 import unittest
 import tale
 from tests.supportstuff import DummyDriver, MsgTraceNPC

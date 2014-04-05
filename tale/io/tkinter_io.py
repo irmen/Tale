@@ -119,16 +119,16 @@ class TaleWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.quit_button_clicked)
         self.parent = parent
         self.textView.focus_set()
-        #key bindings for this dialog
-        #self.bind('<Return>',self.Ok) #dismiss dialog
-        #self.bind('<Escape>',self.Ok) #dismiss dialog
+        # key bindings for this dialog
+        # self.bind('<Return>',self.Ok) #dismiss dialog
+        # self.bind('<Escape>',self.Ok) #dismiss dialog
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
         with vfs.vfs.open_read("io/quill_pen_paper.gif") as icon:
             img = PhotoImage(file=icon.name)
             self.tk.call('wm', 'iconphoto', self, img)
-            #self.iconbitmap(name)
+            # self.iconbitmap(name)
 
         self.history = collections.deque(maxlen=100)
         self.history.append("")

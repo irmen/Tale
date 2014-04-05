@@ -29,6 +29,9 @@ else:
         return next(iterable)
 
 
+queue.Queue()
+
+
 def roll_die(number=1, sides=6):
     """rolls a number (max 20) of dice with configurable number of sides"""
     assert 1 <= number <= 20

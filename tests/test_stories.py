@@ -9,7 +9,7 @@ import unittest
 import os
 import sys
 import tale
-from tale import driver, mud_context, util
+from tale import mud_context, util
 from tests.supportstuff import DummyDriver
 
 
@@ -26,7 +26,7 @@ class StoryCaseBase(object):
         del sys.path[0]
         tale.soul.VERBS = self.verbs
         for m in list(sys.modules.keys()):
-            if m.startswith("zones") or m=="story":
+            if m.startswith("zones") or m == "story":
                 del sys.modules[m]
 
 

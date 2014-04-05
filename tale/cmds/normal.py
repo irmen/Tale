@@ -1400,8 +1400,6 @@ def do_gameinfo(player, parsed, ctx):
 @cmd("config")
 def do_config(player, parsed, ctx):
     """Show or change player configuration parameters."""
-    config = ctx.config
-    driver = ctx.driver
     if parsed.args:
         if len(parsed.args) != 1:
             raise ParseError("Configure what? Usage is: config parameter=value")

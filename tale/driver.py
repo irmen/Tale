@@ -107,11 +107,11 @@ class Commands(object):
         # disable commands flagged with the given game_mode
         # disable soul verbs flagged with override
         # mark non-soul commands
-        for cmds in self.commands_per_priv.values():
-            for cmd, func in list(cmds.items()):
+        for commands in self.commands_per_priv.values():
+            for cmd, func in list(commands.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
                 if story_config.server_mode == disabled_mode:
-                    del cmds[cmd]
+                    del commands[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]
                 if getattr(func, "no_soul_parse", False):
@@ -425,7 +425,7 @@ class Driver(object):
                     continue
                 except EOFError:
                     continue
-                except errors.StoryCompleted as ex:
+                except errors.StoryCompleted:
                     if self.config.server_mode == "if":
                         # congratulations ;-)
                         self.player.story_completed()

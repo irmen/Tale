@@ -40,7 +40,7 @@ def wizcmd(command, *aliases):
 
         @functools.wraps(func)
         def executewizcommand(player, parsed, ctx):
-            if not "wizard" in player.privileges:
+            if "wizard" not in player.privileges:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, ctx)
 

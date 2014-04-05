@@ -37,7 +37,7 @@ def wizcmd(func):
     # If changes are made, make sure to update both occurrences
     @functools.wraps(func)
     def executewizcommand(player, parsed, ctx):
-        if not "wizard" in player.privileges:
+        if "wizard" not in player.privileges:
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)
 

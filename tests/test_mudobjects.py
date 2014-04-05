@@ -414,8 +414,6 @@ class TestLiving(unittest.TestCase):
 
     def test_allowance(self):
         orc = Living("orc", "m", race="half-orc")
-        idiot = NPC("idiot", "m")
-        player = Player("julie", "f")
         axe = Weapon("axe")
         orc.insert(axe, orc)
         self.assertTrue(axe in orc)

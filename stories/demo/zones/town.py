@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door, Item, Container
 from tale.npc import NPC
-from tale.errors import ActionRefused, StoryCompleted
+from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.util import clone
 from tale import mud_context
@@ -36,7 +36,7 @@ paper.short_description = "Last day's newspaper lies on the floor."
 
 class CursedGem(Item):
     def move(self, target, actor, silent=False, is_player=False, verb="move"):
-        if self.contained_in is actor and not "wizard" in actor.privileges:
+        if self.contained_in is actor and "wizard" not in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
         super(CursedGem, self).move(target, actor, verb=verb)
 
@@ -50,15 +50,16 @@ class RemoveOnlyBox(Container):
     def insert(self, item, actor):
         raise ActionRefused("No matter how hard you try, you can't fit %s in the box." % item.title)
 
+
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
 normal_gem = clone(gem)
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("black gem", "a black gem")
-cursed_gem.aliases={"gem"}
+cursed_gem.aliases = {"gem"}
 normal_gem = Item("blue gem", "a blue gem")
-normal_gem.aliases={"gem"}
+normal_gem.aliases = {"gem"}
 lane.add_exits([Exit("south", square, "The town square lies to the south.")])
 
 
@@ -69,8 +70,8 @@ class WizardTowerEntry(Exit):
         else:
             raise ActionRefused("You can't go that way, the force-field is impenetrable.")
 
-lane.add_exits([WizardTowerEntry("west", "wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
+lane.add_exits([WizardTowerEntry("west", "wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
 towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.")
 towncrier.aliases = {"crier", "town crier"}
@@ -95,6 +96,7 @@ class AlleyOfDoors(Location):
     def notify_player_arrived(self, player, previous_location):
         if previous_location is self:
             player.tell("...Weird... The door you just entered seems to go back to the same place you came from...")
+
 
 alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
@@ -136,6 +138,7 @@ class EndDoor(Door):
                 mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
             actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
+
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
 end_door.door_code = 999
 lane.add_exits([end_door])
@@ -150,10 +153,10 @@ class Computer(Item):
 
     @property
     def description(self):
-        return "It seems to be connected to the four doors. "  \
-            + self.screen_text()  \
-            + " There's also a small keyboard to type commands. " \
-            + " On the side of the screen there's a large sticker with 'say hello' written on it."
+        return "It seems to be connected to the four doors. " \
+               + self.screen_text() \
+               + " There's also a small keyboard to type commands. " \
+               + " On the side of the screen there's a large sticker with 'say hello' written on it."
 
     def screen_text(self):
         txt = ["The screen of the computer reads:  \""]

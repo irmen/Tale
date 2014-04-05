@@ -67,7 +67,7 @@ class TestHints(unittest.TestCase):
 
         class Hint2(Hint):
             def active(self, checkpoints, player):
-                return "2" in checkpoints and not "3" in checkpoints
+                return "2" in checkpoints and "3" not in checkpoints
 
         class Hint3(Hint):
             def active(self, checkpoints, player):

@@ -169,7 +169,7 @@ VERBS = {
 "wait":      ( SIMP, None, "wait$ \nHOW", ""),   # replaced by a command
 "grease":    ( SIMP, ("like a shiatsu",), "grease$ \nWHO \nHOW"),
 "oil":       ( SIMP, ("like a shiatsu",), "oil$ \nWHO \nHOW"),
-#"search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),    # replaced by a command
+# "search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),    # replaced by a command
 "sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 "smell":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 
@@ -245,7 +245,7 @@ VERBS = {
 "fondle":   ( PREV, None, "" ),
 "nominate": ( PREV, None, "" ),
 "startle":  ( PREV, None, "" ),
-#"lift":     ( PREV, ( "from the floor", ), "" ),   # doesn't fit game mechanics
+# "lift":     ( PREV, ( "from the floor", ), "" ),   # doesn't fit game mechanics
 "turn":     ( PREV, None, "\nYOUR head towards" ),
 "squeeze":  ( PREV, ( "fondly", ), "" ),
 "comfort":  ( PREV, None, "" ),
@@ -254,7 +254,7 @@ VERBS = {
 "hit":      ( PHYS, ( None, None, "in the face" ), "" ),
 "kick":     ( PHYS, ( "hard", ), "" ),
 "tackle":   ( SIMP, None, "tackle$ \nWHO \nHOW", "" ),
-#"tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),     # replaced by a command
+# "tell":     ( SIMP, None, "tell$ \nWHO \nMSG", "" ),     # replaced by a command
 "spank":    ( PHYS, ( None, None, "on the butt" ), "" ),
 "pat":      ( PHYS, ( None, None, "on the head" ), "" ),
 "punch":    ( DEUX, ( None, None, "in the eye" ), "punch \nWHO \nHOW \nWHERE", "punches \nWHO \nHOW \nWHERE" ),
@@ -402,7 +402,7 @@ def adjust_available_verbs(allowed_verbs=None, remove_verbs=[], add_verbs={}):
     global VERBS, AGGRESSIVE_VERBS, NONLIVING_OK_VERBS, MOVEMENT_VERBS
     if allowed_verbs is not None:
         for v in allowed_verbs:
-            if not v in VERBS:
+            if v not in VERBS:
                 raise KeyError(v)
         allowed_verbs = set(allowed_verbs)
         VERBS = {v: k for v, k in VERBS.items() if v in allowed_verbs}

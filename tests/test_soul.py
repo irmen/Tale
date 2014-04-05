@@ -21,7 +21,6 @@ class TestSoul(unittest.TestCase):
         tale.mud_context.driver = DummyDriver()
 
     def testSpacify(self):
-        soul = tale.soul.Soul()
         self.assertEqual("", tale.soul.spacify(""))
         self.assertEqual(" abc", tale.soul.spacify("abc"))
         self.assertEqual(" abc", tale.soul.spacify(" abc"))
@@ -95,30 +94,30 @@ class TestSoul(unittest.TestCase):
         julie = tale.base.Living("julie", "f", race="human")
         harry = tale.base.Living("harry", "m", race="human")
         self.assertEqual("yourself", tale.soul.who_replacement(player, player, player))  # you kick yourself
-        self.assertEqual("himself",  tale.soul.who_replacement(player, player, julie))   # fritz kicks himself
-        self.assertEqual("harry",    tale.soul.who_replacement(player, harry, player))   # you kick harry
-        self.assertEqual("harry",    tale.soul.who_replacement(player, harry, julie))    # fritz kicks harry
-        self.assertEqual("harry",    tale.soul.who_replacement(player, harry, None))     # fritz kicks harry
-        self.assertEqual("you",      tale.soul.who_replacement(julie, player, player))  # julie kicks you
-        self.assertEqual("Fritz",    tale.soul.who_replacement(julie, player, harry))   # julie kicks fritz
-        self.assertEqual("harry",    tale.soul.who_replacement(julie, harry, player))   # julie kicks harry
-        self.assertEqual("you",      tale.soul.who_replacement(julie, harry, harry))    # julie kicks you
-        self.assertEqual("harry",    tale.soul.who_replacement(julie, harry, None))     # julie kicks harry
+        self.assertEqual("himself", tale.soul.who_replacement(player, player, julie))   # fritz kicks himself
+        self.assertEqual("harry", tale.soul.who_replacement(player, harry, player))   # you kick harry
+        self.assertEqual("harry", tale.soul.who_replacement(player, harry, julie))    # fritz kicks harry
+        self.assertEqual("harry", tale.soul.who_replacement(player, harry, None))     # fritz kicks harry
+        self.assertEqual("you", tale.soul.who_replacement(julie, player, player))  # julie kicks you
+        self.assertEqual("Fritz", tale.soul.who_replacement(julie, player, harry))   # julie kicks fritz
+        self.assertEqual("harry", tale.soul.who_replacement(julie, harry, player))   # julie kicks harry
+        self.assertEqual("you", tale.soul.who_replacement(julie, harry, harry))    # julie kicks you
+        self.assertEqual("harry", tale.soul.who_replacement(julie, harry, None))     # julie kicks harry
 
     def testPoss(self):
         player = tale.player.Player("fritz", "m")
         julie = tale.base.Living("julie", "f", race="human")
         harry = tale.base.Living("harry", "m", race="human")
         self.assertEqual("your own", tale.soul.poss_replacement(player, player, player))  # your own foot
-        self.assertEqual("his own",  tale.soul.poss_replacement(player, player, julie))   # his own foot
-        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, player))   # harrys foot
-        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, julie))    # harrys foot
-        self.assertEqual("harry's",  tale.soul.poss_replacement(player, harry, None))     # harrys foot
-        self.assertEqual("your",     tale.soul.poss_replacement(julie, player, player))   # your foot
-        self.assertEqual("Fritz's",  tale.soul.poss_replacement(julie, player, harry))    # fritz' foot
-        self.assertEqual("harry's",  tale.soul.poss_replacement(julie, harry, player))    # harrys foot
-        self.assertEqual("your",     tale.soul.poss_replacement(julie, harry, harry))     # your foot
-        self.assertEqual("harry's",  tale.soul.poss_replacement(julie, harry, None))      # harrys foot
+        self.assertEqual("his own", tale.soul.poss_replacement(player, player, julie))   # his own foot
+        self.assertEqual("harry's", tale.soul.poss_replacement(player, harry, player))   # harrys foot
+        self.assertEqual("harry's", tale.soul.poss_replacement(player, harry, julie))    # harrys foot
+        self.assertEqual("harry's", tale.soul.poss_replacement(player, harry, None))     # harrys foot
+        self.assertEqual("your", tale.soul.poss_replacement(julie, player, player))   # your foot
+        self.assertEqual("Fritz's", tale.soul.poss_replacement(julie, player, harry))    # fritz' foot
+        self.assertEqual("harry's", tale.soul.poss_replacement(julie, harry, player))    # harrys foot
+        self.assertEqual("your", tale.soul.poss_replacement(julie, harry, harry))     # your foot
+        self.assertEqual("harry's", tale.soul.poss_replacement(julie, harry, None))      # harrys foot
 
     def testGender(self):
         soul = tale.soul.Soul()
@@ -183,8 +182,8 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("smile", verb)
         self.assertEqual(3, len(who))
         self.assertEqual(set(targets), set(who), "player should not be in targets")
-        self.assertTrue("philip" in player_msg and "hairy cat" in player_msg and "Kate" in player_msg and not "yourself" in player_msg)
-        self.assertTrue("philip" in room_msg and "hairy cat" in room_msg and "Kate" in room_msg and not "herself" in room_msg)
+        self.assertTrue("philip" in player_msg and "hairy cat" in player_msg and "Kate" in player_msg and "yourself" not in player_msg)
+        self.assertTrue("philip" in room_msg and "hairy cat" in room_msg and "Kate" in room_msg and "herself" not in room_msg)
         self.assertEqual("Julie smiles confusedly at you.", target_msg)
 
     def testWhoInfo(self):
@@ -839,5 +838,5 @@ class TestSoul(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

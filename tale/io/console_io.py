@@ -119,7 +119,8 @@ class ConsoleIo(iobase.IoAdapterBase):
         # The main thread is stuck in a blocking input (reading from stdin)
         # You really can't seem to interrupt that. So we terminate the process forcefully.
         player.store_input_line("")
-        import signal, os
+        import signal
+        import os
         os.kill(os.getpid(), signal.SIGINT)
 
     def render_output(self, paragraphs, **params):

@@ -11,9 +11,9 @@ try:
     using_setuptools = True
 except ImportError:
     from distutils.core import setup
-    using_setuptools=False
+    using_setuptools = False
 
-print("version="+tale.__version__)
+print("version=" + tale.__version__)
 
 setup_args = dict(
     name='tale',
@@ -47,7 +47,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],
     platforms="any",
-    classifiers= [
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Environment :: MacOS X",
@@ -72,6 +72,6 @@ The source code repository is on Github: https://github.com/irmen/Tale
 )
 
 if using_setuptools:
-    setup_args["test_suite"]="nose.collector"    # use Nose to run unittests
+    setup_args["test_suite"] = "nose.collector"    # use Nose to run unittests
 
 setup(**setup_args)

@@ -32,7 +32,7 @@ class VillageIdiot(NPC):
             else:
                 title = lang.capital(self.title)
                 self.location.tell("%s drools on %s." % (title, target.title),
-                    specific_targets=[target], specific_target_msg="%s drools on you." % title)
+                                   specific_targets=[target], specific_target_msg="%s drools on you." % title)
 
 
 class TownCrier(NPC):
