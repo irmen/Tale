@@ -315,6 +315,12 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(TypeError):
             ctx.x = 88
 
+    def test_versiontuple(self):
+        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3"))
+        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3-dev"))
+        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3@124"))
+        self.assertEqual((111, 222, 333), util.version_tuple("111.222.333"))
+
 
 if __name__ == '__main__':
     unittest.main()

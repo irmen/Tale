@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import unittest
 import sys
 import os
+import io
 from tale.io import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
 
@@ -15,7 +16,7 @@ from tale.player import TextBuffer
 class TestConsoleIo(unittest.TestCase):
     def setUp(self):
         self._orig_stdout = sys.stdout
-        sys.stdout = open(os.devnull, "w")
+        sys.stdout = io.open(os.devnull, "w")
 
     def tearDown(self):
         sys.stdout.close()

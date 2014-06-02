@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 import random
 import os
+import re
 import time
 import sys
 import copy
@@ -30,6 +31,11 @@ else:
 
 
 queue.Queue()
+
+
+def version_tuple(v_str):
+    v_str = re.match(r"([\d.]+)", v_str).group(1)
+    return tuple(int(n) for n in v_str.split('.'))
 
 
 def roll_die(number=1, sides=6):

@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import os
+import io
 import errno
 import inspect
 try:
@@ -43,7 +44,7 @@ class VirtualFileSystem(object):
         self.validate_path(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = os.path.join(self.root_path, path)
-        return open(path, mode=mode)
+        return io.open(path, mode=mode)
 
     def get_userdata_dir(self, path):
         user_data = user_data_dir("Tale", "Razorvine")
@@ -65,7 +66,7 @@ class VirtualFileSystem(object):
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = self.get_userdata_dir(path)
         self.makedirs(path)
-        return open(path, mode=mode)
+        return io.open(path, mode=mode)
 
     def load_text(self, path):
         with self.open_read(path, mode="U") as f:
@@ -79,7 +80,7 @@ class VirtualFileSystem(object):
         self.validate_path(path)
         path = os.path.join(*path.split("/"))   # convert to platform path separator
         path = self.get_userdata_dir(path)
-        with open(path, "rb") as f:
+        with io.open(path, "rb") as f:
             return f.read()
 
     def write_to_storage(self, path, data):

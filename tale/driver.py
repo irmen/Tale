@@ -118,10 +118,6 @@ class Commands(object):
                     self.no_soul_parsing.add(cmd)
 
 
-def version_tuple(v_str):
-    return tuple(int(n) for n in v_str.split('.'))
-
-
 class Driver(object):
     """
     The Mud 'driver'.
@@ -206,8 +202,8 @@ class Driver(object):
         else:
             story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config)
-        tale_version = version_tuple(tale_version_str)
-        tale_version_required = version_tuple(self.config.requires_tale)
+        tale_version = util.version_tuple(tale_version_str)
+        tale_version_required = util.version_tuple(self.config.requires_tale)
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
@@ -307,16 +303,21 @@ class Driver(object):
         player.tell("\n")
         if load_saved_game:
             io = player.io  # save the I/O
-            player = self.load_saved_game()
-            io.switch_player(player)
-            player.io = io  # reset the I/O
-            player.tell("\n")
-            if self.config.server_mode == "if":
-                self.story.welcome_savegame(player)
+            loaded_player = self.load_saved_game()
+            if loaded_player:
+                io.switch_player(loaded_player)
+                player = loaded_player
+                player.io = io  # reset the I/O
+                player.tell("\n")
+                if self.config.server_mode == "if":
+                    self.story.welcome_savegame(player)
+                else:
+                    player.tell("Welcome back to %s, %s." % (self.config.name, player.title))
+                player.tell("\n")
             else:
-                player.tell("Welcome back to %s, %s." % (self.config.name, player.title))
-            player.tell("\n")
-        else:
+                load_saved_game = False
+
+        if not load_saved_game:
             if self.config.server_mode == "if" and self.config.player_name:
                 # interactive fiction mode, create the player from the game's config
                 player.init_names(self.config.player_name, None, None, None)
@@ -635,10 +636,13 @@ class Driver(object):
             savegame = self.vfs.load_from_storage(self.config.name.lower() + ".savegame")
             state = pickle.loads(savegame)
             del savegame
-        except (IOError, pickle.PickleError) as x:
+        except pickle.PickleError as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)
             raise SystemExit(10)
+        except IOError:
+            print("No saved game data found.")
+            return None
         else:
             if state["version"] != self.config.version:
                 print("This saved game data was from a different version of the game and cannot be used.")
