@@ -109,7 +109,11 @@ class ConsoleIo(iobase.IoAdapterBase):
         try:
             import readline
             readline.set_completer(completer.complete)
-            readline.parse_and_bind("tab: complete")
+            if "libedit" in readline.__doc__:
+                # this is for osx pythons with libedit instead of gnu readline
+                readline.parse_and_bind("bind ^I rl_complete")
+            else:
+                readline.parse_and_bind("tab: complete")
         except ImportError:
             return
 
