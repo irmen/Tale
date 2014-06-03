@@ -71,6 +71,7 @@ class ConsoleIo(iobase.IoAdapterBase):
     def __init__(self, config):
         super(ConsoleIo, self).__init__(config)
         try:
+            # try to output a unicode character used by smartypants for nicer formatting
             encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
             if sys.version_info < (3, 0):
                 unichr(8230).encode(encoding)

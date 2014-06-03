@@ -9,13 +9,9 @@ import time
 from ..util import basestring_type
 from .. import soul
 try:
-    import mdx_smartypants
-    smartypants = mdx_smartypants.spants
+    import smartypants
 except ImportError:
-    try:
-        import smartypants
-    except ImportError:
-        smartypants = None
+    smartypants = None
 try:
     import HTMLParser
     unescape_entity = HTMLParser.HTMLParser().unescape
@@ -53,7 +49,7 @@ class IoAdapterBase(object):
         self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
         self.do_styles = True
         self.do_smartquotes = True
-        self.supports_smartquotes = True
+        self.supports_smartquotes = smartypants is not None
         self.player = None
 
     def destroy(self):
@@ -98,8 +94,8 @@ class IoAdapterBase(object):
 
     def smartquotes(self, text):
         """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
-        if smartypants and self.supports_smartquotes and self.do_smartquotes:
-            return unescape_entity(smartypants.smartyPants(text))
+        if self.supports_smartquotes and self.do_smartquotes:
+            return unescape_entity(smartypants.smartypants(text))
         return text
 
     def output(self, *lines):
