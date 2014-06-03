@@ -636,9 +636,10 @@ class Driver(object):
             savegame = self.vfs.load_from_storage(self.config.name.lower() + ".savegame")
             state = pickle.loads(savegame)
             del savegame
-        except pickle.PickleError as x:
+        except (pickle.PickleError, ValueError, TypeError) as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)
+            self.stop_driver()
             raise SystemExit(10)
         except IOError:
             print("No saved game data found.")
@@ -647,6 +648,7 @@ class Driver(object):
             if state["version"] != self.config.version:
                 print("This saved game data was from a different version of the game and cannot be used.")
                 print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                self.stop_driver()
                 raise SystemExit(10)
             self.player = state["player"]
             mud_context.player = self.player

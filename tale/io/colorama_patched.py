@@ -6,15 +6,18 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
+from .. import util
 import colorama
 import colorama.ansi
 import colorama.winterm
 import colorama.ansitowin32
+import colorama.win32
 
 # version check
-if colorama.VERSION < "0.2.4":
+colorama_version = util.version_tuple(getattr(colorama, "VERSION", None) or getattr(colorama, "__version__"))
+if colorama_version < (0, 3, 1):
     import warnings
-    warnings.warn("Incompatible colorama version {0} found, need at least 0.2.4".format(colorama.VERSION), RuntimeWarning)
+    warnings.warn("Incompatible colorama version {0} found, need at least 0.3.1".format(colorama_version), RuntimeWarning)
     raise ImportError("not using colorama")
 
 # patch in extra ansi styles
@@ -24,7 +27,7 @@ colorama.ansi.AnsiStyle.REVERSEVID = 7
 colorama.ansi.Style = colorama.ansi.AnsiCodes(colorama.ansi.AnsiStyle)
 colorama.Style = colorama.ansi.Style
 
-# patch windows term, if running on windows
+# patch windows stuff, if running on windows
 if colorama.win32.windll is not None:
 
     class MonkeypatchedAnsiToWin32(colorama.ansitowin32.AnsiToWin32):
@@ -40,21 +43,24 @@ if colorama.win32.windll is not None:
             term._fore, term._back = term._back, term._fore
             term.set_console(on_stderr=on_stderr)
 
-    __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
+    colorama.win32.COORD = colorama.win32.wintypes._COORD
 
-    def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
-        # original code is buggy as hell here, mixing up bytes/str/int on Python 2.x/3.x
-        if sys.version_info >= (3, 0) and type(char) is str:
-            char = char.encode("ascii")
-        elif type(char) is int:
-            char = chr(char)
-        __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
+    if sys.version_info >= (3, 0):
+        # this function is mixing up bytes/str/int on Python 2.x/3.x, patch it
+        __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
+        def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
+            if type(char) is str:
+                char = char.encode("ascii")
+            elif type(char) is int:
+                char = bytes([char])
+            __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
 
-    import colorama.initialise
-    colorama.win32.FillConsoleOutputCharacter = Monkeypatched_FillConsoleOutputCharacter
+        import colorama.initialise
+        colorama.win32.FillConsoleOutputCharacter = Monkeypatched_FillConsoleOutputCharacter
     colorama.ansitowin32.AnsiToWin32 = MonkeypatchedAnsiToWin32
     colorama.initialise.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32
     colorama.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32
+
 
 from colorama import *
 
