@@ -9,9 +9,12 @@ import time
 from ..util import basestring_type
 from .. import soul
 try:
-    import smartypants
+    from smartypants import smartypants
 except ImportError:
-    smartypants = None
+    try:
+        from smartypants import smartyPants as smartypants   # old api
+    except ImportError:
+        smartypants = None
 try:
     import HTMLParser
     unescape_entity = HTMLParser.HTMLParser().unescape
@@ -95,7 +98,7 @@ class IoAdapterBase(object):
     def smartquotes(self, text):
         """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
         if self.supports_smartquotes and self.do_smartquotes:
-            return unescape_entity(smartypants.smartypants(text))
+            return unescape_entity(smartypants(text))
         return text
 
     def output(self, *lines):

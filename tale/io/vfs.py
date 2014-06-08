@@ -47,7 +47,7 @@ class VirtualFileSystem(object):
         return io.open(path, mode=mode)
 
     def get_userdata_dir(self, path):
-        user_data = user_data_dir("Tale", "Razorvine")
+        user_data = user_data_dir("Tale", "Razorvine", roaming=True)
         path = os.path.join(user_data, path)
         return path
 

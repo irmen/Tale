@@ -6,39 +6,51 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 
-def _escapeseq(code):
-    return "\033[" + str(code) + "m"
+def ansi_escapes(clazz):
+    for name, code in clazz.colors.items():
+        escape_seq = "\033[" + str(code) + "m"
+        setattr(clazz, name, escape_seq)
+    return clazz
 
 
+@ansi_escapes
 class Fore(object):
-    BLACK   = _escapeseq(30)
-    RED     = _escapeseq(31)
-    GREEN   = _escapeseq(32)
-    YELLOW  = _escapeseq(33)
-    BLUE    = _escapeseq(34)
-    MAGENTA = _escapeseq(35)
-    CYAN    = _escapeseq(36)
-    WHITE   = _escapeseq(37)
-    RESET   = _escapeseq(39)
+    colors = {
+        "BLACK": 30,
+        "RED": 31,
+        "GREEN": 32,
+        "YELLOW": 33,
+        "BLUE": 34,
+        "MAGENTA": 35,
+        "CYAN": 36,
+        "WHITE": 37,
+        "RESET": 39
+    }
 
 
+@ansi_escapes
 class Back(object):
-    BLACK   = _escapeseq(40)
-    RED     = _escapeseq(41)
-    GREEN   = _escapeseq(42)
-    YELLOW  = _escapeseq(43)
-    BLUE    = _escapeseq(44)
-    MAGENTA = _escapeseq(45)
-    CYAN    = _escapeseq(46)
-    WHITE   = _escapeseq(47)
-    RESET   = _escapeseq(49)
+    colors = {
+        "BLACK": 40,
+        "RED": 41,
+        "GREEN": 42,
+        "YELLOW": 43,
+        "BLUE": 44,
+        "MAGENTA": 45,
+        "CYAN": 46,
+        "WHITE": 47,
+        "RESET": 49
+    }
 
 
+@ansi_escapes
 class Style(object):
-    BRIGHT      = _escapeseq(1)
-    DIM         = _escapeseq(2)
-    UNDERLINED  = _escapeseq(4)
-    BLINK       = _escapeseq(5)
-    REVERSEVID  = _escapeseq(7)
-    NORMAL      = _escapeseq(22)
-    RESET_ALL   = _escapeseq(0)
+    colors = {
+        "BRIGHT": 1,
+        "DIM": 2,
+        "UNDERLINED": 4,
+        "BLINK": 5,
+        "REVERSEVID": 7,
+        "NORMAL": 22,
+        "RESET_ALL": 0
+    }
