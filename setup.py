@@ -45,7 +45,7 @@ You can also run the tiny embedded test story like this, after you've installed 
 The source code repository is on Github: https://github.com/irmen/Tale
 """,
     keywords="mud, mudlib, interactive fiction, text adventure",
-    scripts=["scripts/tale-driver.cmd", "scripts/tale-driver"],
+    scripts=["scripts/tale-run.cmd", "scripts/tale-run"],
     platforms="any",
     classifiers=[
         "Development Status :: 3 - Alpha",

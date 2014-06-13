@@ -60,7 +60,7 @@ Anyway, the command to do so is::
     $ python -m tale.main --game <path-to-the-story/demo-directory>`
 
     # or, with the installed launcher script:
-    $ tale-driver --game <path-to-the-story/demo-directory>`
+    $ tale-run --game <path-to-the-story/demo-directory>`
 
 You can use the ``--help`` argument to see some help about this command.
 You can use ``--gui`` to start the GUI version of the interface rather than the text console version.

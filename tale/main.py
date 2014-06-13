@@ -18,6 +18,6 @@ def run_story(story_path, gui=False):
 
 
 if __name__ == "__main__":
-    # module is started as a script, run the driver
+    # module is started as a script, run the driver and let it parse all cmd line arguments
     Driver().start(sys.argv[1:])
     raise SystemExit(0)
