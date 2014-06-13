@@ -18,7 +18,7 @@ from tale.soul import NonSoulVerb, ParseResult
 from tale.io.console_io import ConsoleIo
 from tale.io.iobase import TabCompleter
 from tale.charbuilder import CharacterBuilder
-from tale.util import ReadonlyAttributes
+from tale.driver import StoryConfig
 if sys.version_info < (3, 0):
     from StringIO import StringIO
 else:
@@ -28,8 +28,7 @@ else:
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = DummyDriver()
-        tale.mud_context.config = ReadonlyAttributes({"server_mode": "if"})
-        tale.mud_context.config.lock()
+        tale.mud_context.config = StoryConfig(server_mode="if")
 
     def test_init(self):
         player = Player("fritz", "m")

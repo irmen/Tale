@@ -20,7 +20,10 @@ try:
     unescape_entity = HTMLParser.HTMLParser().unescape
 except ImportError:
     import html.parser
-    unescape_entity = html.parser.HTMLParser().unescape
+    if hasattr(html.parser, "unescape"):
+        unescape_entity = html.parser.unescape  # 3.4+
+    else:
+        unescape_entity = html.parser.HTMLParser().unescape
 
 
 ALL_COLOR_TAGS = {

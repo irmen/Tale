@@ -57,7 +57,7 @@ won't work from the distribution's root directory itself.
 
 Anyway, the command to do so is::
 
-    $ python -m tale.driver --game <path-to-the-story/demo-directory>`
+    $ python -m tale.main --game <path-to-the-story/demo-directory>`
 
     # or, with the installed launcher script:
     $ tale-driver --game <path-to-the-story/demo-directory>`

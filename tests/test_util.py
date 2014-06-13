@@ -291,29 +291,15 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(ParseError):
             util.parse_time(["some_weird_occasion"])
 
-    def test_attrdict(self):
-        ad = util.ReadonlyAttributes(a=42, b="hello")
-        self.assertEqual(42, ad.a)
-        self.assertEqual("hello", ad.b)
-        self.assertEqual({"a": 42, "b": "hello"}, vars(ad))
-        with self.assertRaises(AttributeError):
-            _ = ad.doesnotexist
-        ad.x = 99
-        ad.lock()
-        with self.assertRaises(TypeError):
-            ad.x = 88
-
     def test_context(self):
-        ctx = util.Context(driver=1, clock=2)
+        ctx = util.Context(driver=1, clock=2, config=None)
         self.assertEqual(1, ctx.driver)
         self.assertEqual(2, ctx.clock)
         self.assertIsNone(ctx.config)
         with self.assertRaises(AttributeError):
             _ = ctx.doesnotexist
         ctx.x = 99
-        ctx.lock()
-        with self.assertRaises(TypeError):
-            ctx.x = 88
+        self.assertEqual(99, ctx.x)
 
     def test_versiontuple(self):
         self.assertEqual((1, 2, 3), util.version_tuple("1.2.3"))

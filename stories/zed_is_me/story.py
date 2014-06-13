@@ -7,18 +7,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 # @todo: this game is not yet finished and is excluded in the MANIFEST.in for now
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-
-if __name__ == "__main__":
-    # story is invoked as a script, start it in the Tale Driver.
-    import sys
-    from tale.driver import Driver
-    driver = Driver()
-    driver.start(["-g", sys.path[0]])
-    raise SystemExit(0)
+import sys
+from tale.driver import StoryConfig
+from tale.main import run_story
 
 
 class Story(object):
-    config = dict(
+    config = StoryConfig(
         name="Zed is me",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
@@ -57,7 +52,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("<bright>Welcome to '%s'.</>" % self.config["name"], end=True)
+        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
@@ -66,7 +61,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("<bright>Welcome back to '%s'.</>" % self.config["name"], end=True)
+        player.tell("<bright>Welcome back to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
@@ -90,3 +85,8 @@ class Story(object):
             if paragraph.startswith("\n"):
                 player.tell("\n")
             player.tell(paragraph, end=True)
+
+
+if __name__ == "__main__":
+    # story is invoked as a script, start it in the Tale Driver.
+    run_story(sys.path[0])

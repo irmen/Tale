@@ -188,9 +188,9 @@ class Driver(object):
         sys.path.insert(0, '.')
         story = __import__("story", level=0)
         self.story = story.Story()
-        if args.mode not in self.story.config["supported_modes"]:
+        if args.mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
-        self.config = util.ReadonlyAttributes(self.story.config)
+        self.config = StoryConfig.copy_from(self.story.config)
         self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         # Register the driver and some other stuff in the global context.
         mud_context.driver = self
@@ -220,7 +220,6 @@ class Driver(object):
             self.config.gametime_to_realtime = 1
         assert self.config.server_tick_time > 0
         assert self.config.max_wait_hours >= 0
-        self.config.lock()   # make the config read-only
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.bind_exits()
         # story has been initialised, create and connect a player
@@ -233,7 +232,8 @@ class Driver(object):
             from .io.console_io import ConsoleIo as IoAdapter
             io = IoAdapter(self.config)
         if args.verify:
-            print("Verified '%s': all seems to be fine." % self.story.config["name"])
+            print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
+            print("Verified, all seems to be fine.")
             self.verified_ok = True
         else:
             io.output_line_delay = output_line_delay
@@ -359,8 +359,7 @@ class Driver(object):
         """stop the driver mainloop"""
         self._stop_mainloop = True
         self.player.write_output()  # flush pending output at server shutdown.
-        ctx = util.Context(driver=self)
-        ctx.lock()
+        ctx = util.Context(driver=self, clock=None, config=self.config)
         self.player.destroy(ctx)
 
     def main_loop(self):
@@ -534,7 +533,6 @@ class Driver(object):
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock)
-                        ctx.lock()
                         func(self.player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(self.player.location.notify_action, parsed, self.player)
@@ -720,6 +718,41 @@ class Driver(object):
             heapq.heapify(self.deferreds)
 
 
-if __name__ == "__main__":
-    driver = Driver()
-    driver.start(sys.argv[1:])
+class StoryConfig(object):
+    config_items = {
+        "name",
+        "author",
+        "author_address",
+        "version",
+        "requires_tale",
+        "supported_modes",
+        "player_name",
+        "player_gender",
+        "player_race",
+        "money_type",
+        "server_tick_method",
+        "server_tick_time",
+        "gametime_to_realtime",
+        "max_wait_hours",
+        "display_gametime",
+        "epoch",
+        "startlocation_player",
+        "startlocation_wizard",
+        "savegames_enabled",
+        "server_mode"
+    }
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            if k in self.config_items:
+                setattr(self, k, v)
+            else:
+                raise AttributeError("unrecognised config attribute: "+k)
+
+    def __eq__(self, other):
+        return vars(self) == vars(other)
+
+    @staticmethod
+    def copy_from(config):
+        assert isinstance(config, StoryConfig)
+        return StoryConfig(**vars(config))

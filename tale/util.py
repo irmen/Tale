@@ -445,37 +445,12 @@ def input_choice(question, choices, player):
             player.tell("That is not a valid answer.")
 
 
-class ReadonlyAttributes(object):
-    """
-    A container object that supports accessing its members as attributes.
-    It can be 'locked' which makes it read-only.
-    """
-    __locked = False
-
-    def __init__(self, *vargs, **kwargs):
-        if vargs:
-            assert len(vargs) == 1
-            assert not kwargs
-            source = vargs[0]
-        else:
-            source = kwargs
-        self.__dict__.update(source)
-
-    def __setattr__(self, key, value):
-        if self.__locked:
-            raise TypeError("this object is read-only")
-        else:
-            self.__dict__[key] = value
+class Context(object):
+    """A new instance of this context is passed to every command function and obj.destroy."""
+    def __init__(self, driver, clock, config):
+        self.driver = driver
+        self.clock = clock
+        self.config = config
 
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def lock(self):
-        self.__locked = True
-
-
-class Context(ReadonlyAttributes):
-    """The context used for every command function and obj.destroy. It is read-only."""
-    driver = None
-    clock = None
-    config = None
+        return vars(self) == vars(other)

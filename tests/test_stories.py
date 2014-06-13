@@ -9,7 +9,8 @@ import unittest
 import os
 import sys
 import tale
-from tale import mud_context, util
+from tale import mud_context
+from tale.driver import StoryConfig
 from tests.supportstuff import DummyDriver
 
 
@@ -18,7 +19,7 @@ class StoryCaseBase(object):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = DummyDriver()
-        mud_context.config = util.ReadonlyAttributes()
+        mud_context.config = StoryConfig()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -35,8 +36,8 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual("Zed is me", s.config["name"])
-        self.assertEqual(19, len(s.config))
+        self.assertEqual("Zed is me", s.config.name)
+        self.assertEqual(19, len(vars(s.config)))
     def test_zones(self):
         import zones.house
         self.assertEqual("Living room", zones.house.livingroom.name)
@@ -47,8 +48,8 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual("Tale Demo", s.config["name"])
-        self.assertEqual(19, len(s.config))
+        self.assertEqual(19, len(vars(s.config)))
+        self.assertEqual("Tale Demo", s.config.name)
     def test_zones(self):
         import zones.town
         import zones.wizardtower
@@ -61,8 +62,10 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
-        self.assertEqual(19, len(s.config))
-        self.assertEqual("Tale demo story", s.config["name"])
+        self.assertEqual(19, len(vars(s.config)))
+        self.assertEqual("Tale demo story", s.config.name)
+        config = StoryConfig.copy_from(s.config)
+        self.assertEqual(config.author_address, s.config.author_address)
     def test_zones(self):
         import tale.demo.zones.house
         self.assertEqual("garfield", tale.demo.zones.house.cat.name)

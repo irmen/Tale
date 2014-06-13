@@ -10,22 +10,12 @@ import os
 import sys
 import tale
 from tale.io.vfs import vfs
-
-if __name__ == "__main__":
-    # story is invoked as a script, start it in the Tale Driver.
-    from tale.driver import Driver
-    driver = Driver()
-    with vfs.open_read("demo/__init__.py") as x:
-        gamedir = os.path.dirname(x.name)
-    args = ["-g", gamedir]
-    if len(sys.argv) > 1 and sys.argv[1] == "--gui":
-        args.append("--gui")
-    driver.start(args)
-    raise SystemExit(0)
+from tale.driver import StoryConfig
+from tale.main import run_story
 
 
 class Story(object):
-    config = dict(
+    config = StoryConfig(
         name="Tale demo story",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
@@ -58,7 +48,7 @@ class Story(object):
         player.money = 12.65
 
     def welcome(self, player):
-        player.tell("<bright>Welcome to '%s'.</>" % self.config["name"], end=True)
+        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to fool around with your pet, and exit the house to win the game.")
         player.tell("\n")
@@ -73,3 +63,11 @@ class Story(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("Congratulations on finding the exit! Someone else has to look after Garfield now though...")
+
+
+if __name__ == "__main__":
+    # story is invoked as a script, start it in the Tale Driver.
+    with vfs.open_read("demo/__init__.py") as x:
+        gamedir = os.path.dirname(x.name)
+    gui = len(sys.argv) > 1 and sys.argv[1] == "--gui"
+    run_story(gamedir, gui)

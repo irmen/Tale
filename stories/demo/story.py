@@ -6,19 +6,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
+import sys
 from tale.hints import Hint
-
-if __name__ == "__main__":
-    # story is invoked as a script, start it in the Tale Driver.
-    import sys
-    from tale.driver import Driver
-    driver = Driver()
-    driver.start(["-g", sys.path[0]])
-    raise SystemExit(0)
+from tale.driver import StoryConfig
+from tale.main import run_story
 
 
 class Story(object):
-    config = dict(
+    config = StoryConfig(
         name="Tale Demo",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
@@ -60,7 +55,7 @@ class Story(object):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("<bright>Welcome to %s.</>" % self.config["name"], end=True)
+        player.tell("<bright>Welcome to %s.</>" % self.config.name, end=True)
         player.tell("\n")
         player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -68,7 +63,7 @@ class Story(object):
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("<bright>Welcome back to %s.</>" % self.config["name"], end=True)
+        player.tell("<bright>Welcome back to %s.</>" % self.config.name, end=True)
         player.tell("\n")
         player.tell(self.vfs.load_text("messages/welcome.txt"))
         player.tell("\n")
@@ -83,3 +78,8 @@ class Story(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
+
+
+if __name__ == "__main__":
+    # story is invoked as a script, start it in the Tale Driver.
+    run_story(sys.path[0])
