@@ -140,5 +140,4 @@ rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
 trashcan = Boxlike("trashcan", "dented steel trashcan")
-trashcan.txt_descr_open_filled = "It is a %s, with an open lid, and it stinks." % trashcan._title
 gameclock = GameClock("clock")

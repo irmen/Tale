@@ -3,18 +3,7 @@ Mudlib base objects.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
-"""
 
-from __future__ import absolute_import, print_function, division, unicode_literals
-from textwrap import dedent
-from . import lang
-from . import util
-from . import pubsub
-from . import mud_context
-from .errors import ActionRefused
-from .races import races
-
-"""
 object hierarchy:
 
 MudObject
@@ -45,6 +34,15 @@ Except Location: it separates the items and livings it contains internally.
 Use its enter/leave methods instead.
 """
 
+from __future__ import absolute_import, print_function, division, unicode_literals
+from textwrap import dedent
+from . import lang
+from . import util
+from . import pubsub
+from . import mud_context
+from .errors import ActionRefused
+from .races import races
+
 
 class MudObject(object):
     """
@@ -61,7 +59,40 @@ class MudObject(object):
     objective = "it"
     gender = "n"
 
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
+    def short_description(self):
+        return self._short_description
+
+    @short_description.setter
+    def short_description(self, value):
+        self._short_description = value
+
     def __init__(self, name, title=None, description=None, short_description=None):
+        self._name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
         self.aliases = set()
         self.verbs = {}   # any custom verbs that need to be registered in the location or in the player (verb->docstring mapping)
@@ -79,25 +110,12 @@ class MudObject(object):
 
     def init_names(self, name, title, description, short_description):
         """(re)set the name and description attributes"""
-        self.name = name.lower()
+        self._name = name.lower()
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
-        try:
-            self.title = title or name
-        except AttributeError:
-            # this can occur if a subclass made title into a property
-            self._title = title or name
-        descr = dedent(description).strip() if description else ""
-        try:
-            self.description = descr
-        except AttributeError:
-            # this can occur if a subclass made description into a property
-            self._description = descr
-        try:
-            self.short_description = short_description
-        except AttributeError:
-            # this can occur if a subclass made short_description into a property
-            self._short_description = short_description
+        self._title = title or name
+        self._description = dedent(description).strip() if description else ""
+        self._short_description = short_description
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
@@ -522,13 +540,9 @@ class Exit(MudObject):
             title = "Exit to " + self.target.title
         else:
             title = "Exit to <unbound:%s>" % self.target
+        long_description = long_description or short_description
         super(Exit, self).__init__(direction, title=title, description=long_description, short_description=short_description)
         self.aliases = aliases
-        try:
-            self.description = self.description or self.short_description
-        except AttributeError:
-            # can occur when someone made description into a property
-            pass
         mud_context.driver.register_exit(self)
 
     def __repr__(self):
