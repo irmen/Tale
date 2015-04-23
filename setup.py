@@ -67,11 +67,10 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
-    install_requires=["appdirs"],
-    requires=["appdirs"]
+    install_requires=["appdirs", "colorama>=0.3.3", "smartypants>=1.8.6"]
 )
 
 if using_setuptools:
-    setup_args["test_suite"] = "nose.collector"    # use Nose to run unittests
+    setup_args["test_suite"] = "tests"
 
 setup(**setup_args)

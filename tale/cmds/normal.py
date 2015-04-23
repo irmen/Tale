@@ -1465,7 +1465,7 @@ def do_teststyles(player, parsed, ctx):
         ("dim", "<dim>This is DIM.</>"),
         ("bright", "<bright>This is BRIGHT.</>"),
         ("ul", "<ul>This is UNDERLINED.</>"),
-        ("rev", "<rev>This is RERVERSE VIDEO.</>"),
+        ("rev", "<rev>This is REVERSE VIDEO.</>"),
         ("blink", "<blink>This is BLINKING.</>"),
         ("black", "<black>This is BLACK.</> (black text)"),
         ("red", "<red>This is RED.</>"),

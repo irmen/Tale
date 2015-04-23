@@ -17,6 +17,7 @@ import inspect
 import argparse
 import pickle
 import threading
+import distutils.version
 from . import mud_context
 from . import errors
 from . import util
@@ -202,8 +203,8 @@ class Driver(object):
         else:
             story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config)
-        tale_version = util.version_tuple(tale_version_str)
-        tale_version_required = util.version_tuple(self.config.requires_tale)
+        tale_version = distutils.version.LooseVersion(tale_version_str)
+        tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
         if tale_version < tale_version_required:
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
@@ -747,7 +748,7 @@ class StoryConfig(object):
             if k in self.config_items:
                 setattr(self, k, v)
             else:
-                raise AttributeError("unrecognised config attribute: "+k)
+                raise AttributeError("unrecognised config attribute: " + k)
 
     def __eq__(self, other):
         return vars(self) == vars(other)

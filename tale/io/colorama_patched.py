@@ -5,20 +5,12 @@ Monkeypatch colorama to support a few additional text styles
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import sys
-from .. import util
 import colorama
 import colorama.ansi
 import colorama.winterm
 import colorama.ansitowin32
 import colorama.win32
 
-# version check
-colorama_version = util.version_tuple(getattr(colorama, "VERSION", None) or getattr(colorama, "__version__"))
-if colorama_version < (0, 3, 1):
-    import warnings
-    warnings.warn("Incompatible colorama version {0} found, need at least 0.3.1".format(colorama_version), RuntimeWarning)
-    raise ImportError("not using colorama")
 
 # patch in extra ansi styles
 colorama.ansi.AnsiStyle.UNDERLINED = 4
@@ -44,19 +36,7 @@ if colorama.win32.windll is not None:
             term.set_console(on_stderr=on_stderr)
 
     colorama.win32.COORD = colorama.win32.wintypes._COORD
-
-    if sys.version_info >= (3, 0):
-        # this function is mixing up bytes/str/int on Python 2.x/3.x, patch it
-        __orig_FillConsoleOutputCharacter = colorama.win32.FillConsoleOutputCharacter
-        def Monkeypatched_FillConsoleOutputCharacter(stream_id, char, length, start):
-            if type(char) is str:
-                char = char.encode("ascii")
-            elif type(char) is int:
-                char = bytes([char])
-            __orig_FillConsoleOutputCharacter(stream_id, char, length, start)
-
-        import colorama.initialise
-        colorama.win32.FillConsoleOutputCharacter = Monkeypatched_FillConsoleOutputCharacter
+    import colorama.initialise
     colorama.ansitowin32.AnsiToWin32 = MonkeypatchedAnsiToWin32
     colorama.initialise.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32
     colorama.AnsiToWin32 = colorama.ansitowin32.AnsiToWin32

@@ -418,10 +418,7 @@ def do_server(player, parsed, ctx):
     minutes, seconds = divmod(seconds, 60)
     pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
-    if hasattr(platform, "python_implementation"):
-        implementation = platform.python_implementation()
-    else:
-        implementation = "Jython" if os.name == "java" else "???"
+    implementation = platform.python_implementation()
     txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))
     txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
     txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
@@ -429,7 +426,7 @@ def do_server(player, parsed, ctx):
         txt.append("Game time: %s   (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
         txt.append("Game time: %s" % ctx.clock)
-    if sys.platform == "cli" or os.name == "java":
+    if sys.platform == "cli":
         gc_objects = "??"
     else:
         gc_objects = str(len(gc.get_objects()))

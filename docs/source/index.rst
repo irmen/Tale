@@ -12,8 +12,6 @@ It is a library for building `Interactive Fiction <http://en.wikipedia.org/wiki/
 mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
 Tale is 100% pure Python and runs on Python 2.7 and 3.2+.
-It should also work on Pypy, Jython 2.7, and Ironpython. Console text colors are not supported
-on Ironpython and Jython however.
 
 You can run Tale in console mode, where it is a pure text interface running in your
 console window. But you can also run Tale in a simple GUI application (built with Tkinter).

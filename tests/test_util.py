@@ -301,12 +301,6 @@ class TestUtil(unittest.TestCase):
         ctx.x = 99
         self.assertEqual(99, ctx.x)
 
-    def test_versiontuple(self):
-        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3"))
-        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3-dev"))
-        self.assertEqual((1, 2, 3), util.version_tuple("1.2.3@124"))
-        self.assertEqual((111, 222, 333), util.version_tuple("111.222.333"))
-
 
 if __name__ == '__main__':
     unittest.main()

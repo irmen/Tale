@@ -60,8 +60,8 @@ if sys.platform == "win32":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
         style_colors.clear()  # running on win32 without colorama ansi support
 
-if sys.platform == "cli" or os.name == "java":
-    style_colors.clear()  # IronPython and Jython don't support console colors at all
+if sys.platform == "cli":
+    style_colors.clear()  # IronPython doesn't support console colors at all via colorama
 
 
 class ConsoleIo(iobase.IoAdapterBase):
@@ -106,11 +106,13 @@ class ConsoleIo(iobase.IoAdapterBase):
             print("\n" * 5)
 
     def install_tab_completion(self, completer):
-        """Install tab completion using readline, if available"""
+        """Install tab completion using readline, if available, and if not running on windows (it behaves weird)"""
+        if os.name == "nt":
+            return
         try:
             import readline
             readline.set_completer(completer.complete)
-            if "libedit" in readline.__doc__:
+            if readline.__doc__ and "libedit" in readline.__doc__:
                 # this is for osx pythons with libedit instead of gnu readline
                 readline.parse_and_bind("bind ^I rl_complete")
             else:
