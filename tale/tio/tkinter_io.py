@@ -125,7 +125,7 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
-        with vfs.vfs.open_read("io/quill_pen_paper.gif") as icon:
+        with vfs.vfs.open_read("tio/quill_pen_paper.gif") as icon:      # XXX can't we get the path in a more reliable manner?
             img = PhotoImage(file=icon.name)
             self.tk.call('wm', 'iconphoto', self, img)
             # self.iconbitmap(name)
