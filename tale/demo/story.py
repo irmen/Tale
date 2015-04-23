@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 import tale
-from tale.io.vfs import vfs
+from tale.tio.vfs import vfs
 from tale.driver import StoryConfig
 from tale.main import run_story
 

@@ -11,7 +11,7 @@ from tale import util, mud_context
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
-from tale.io.vfs import VirtualFileSystem, VfsError
+from tale.tio.vfs import VirtualFileSystem, VfsError
 from tests.supportstuff import DummyDriver, Wiretap
 
 

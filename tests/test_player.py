@@ -15,8 +15,8 @@ from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
 from tale.player import Player, TextBuffer
 from tale.soul import NonSoulVerb, ParseResult
-from tale.io.console_io import ConsoleIo
-from tale.io.iobase import TabCompleter
+from tale.tio.console_io import ConsoleIo
+from tale.tio.iobase import TabCompleter
 from tale.charbuilder import CharacterBuilder
 from tale.driver import StoryConfig
 if sys.version_info < (3, 0):

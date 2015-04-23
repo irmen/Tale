@@ -8,7 +8,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import unittest
 import sys
 import io
-from tale.io import console_io, styleaware_wrapper, iobase
+from tale.tio import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
 
 

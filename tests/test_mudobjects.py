@@ -15,7 +15,7 @@ from tale.errors import ActionRefused
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResult
-from tale.io.iobase import strip_text_styles
+from tale.tio.iobase import strip_text_styles
 from tale import pubsub, mud_context
 
 

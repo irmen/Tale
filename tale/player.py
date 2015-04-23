@@ -15,9 +15,9 @@ from . import pubsub
 from . import mud_context
 from .errors import SecurityViolation, ActionRefused, ParseError
 from .util import queue
-from .io.iobase import strip_text_styles
+from .tio.iobase import strip_text_styles
 from threading import Event
-from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
+from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 
 
 class Player(base.Living, pubsub.Listener):

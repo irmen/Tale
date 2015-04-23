@@ -25,9 +25,9 @@ from . import soul
 from . import cmds
 from . import player
 from . import __version__ as tale_version_str
-from .io import vfs
-from .io.iobase import TabCompleter
-from .io import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
+from .tio import vfs
+from .tio.iobase import TabCompleter
+from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 
 @total_ordering
@@ -175,7 +175,7 @@ class Driver(object):
             if args.gui:
                 import traceback
                 tb = traceback.format_exc()
-                from .io import tkinter_io
+                from .tio import tkinter_io
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
@@ -227,10 +227,10 @@ class Driver(object):
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         mud_context.player = self.player
         if args.gui:
-            from .io.tkinter_io import TkinterIo as IoAdapter
+            from .tio.tkinter_io import TkinterIo as IoAdapter
             io = IoAdapter(self.config)
         else:
-            from .io.console_io import ConsoleIo as IoAdapter
+            from .tio.console_io import ConsoleIo as IoAdapter
             io = IoAdapter(self.config)
         if args.verify:
             print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
