@@ -22,30 +22,15 @@ else:
 
 __all__ = ["ConsoleIo"]
 
-style_colors = {
+style_words = {
     "dim": colorama.Style.DIM,
     "normal": colorama.Style.NORMAL,
     "bright": colorama.Style.BRIGHT,
     "ul": colorama.Style.UNDERLINED,
+    "it": colorama.Style.ITALIC,
     "rev": colorama.Style.REVERSEVID,
     "/": colorama.Style.RESET_ALL,
     "blink": colorama.Style.BLINK,
-    "black": colorama.Fore.BLACK,
-    "red": colorama.Fore.RED,
-    "green": colorama.Fore.GREEN,
-    "yellow": colorama.Fore.YELLOW,
-    "blue": colorama.Fore.BLUE,
-    "magenta": colorama.Fore.MAGENTA,
-    "cyan": colorama.Fore.CYAN,
-    "white": colorama.Fore.WHITE,
-    "bg:black": colorama.Back.BLACK,
-    "bg:red": colorama.Back.RED,
-    "bg:green": colorama.Back.GREEN,
-    "bg:yellow": colorama.Back.YELLOW,
-    "bg:blue": colorama.Back.BLUE,
-    "bg:magenta": colorama.Back.MAGENTA,
-    "bg:cyan": colorama.Back.CYAN,
-    "bg:white": colorama.Back.WHITE,
     "living": colorama.Style.BRIGHT,
     "player": colorama.Style.BRIGHT,
     "item": colorama.Style.BRIGHT,
@@ -54,14 +39,14 @@ style_colors = {
     "monospaced": "",  # we assume the console is already monospaced font
     "/monospaced": ""
 }
-assert len(set(style_colors.keys()) ^ iobase.ALL_COLOR_TAGS) == 0, "mismatch in list of style tags"
+assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
 if sys.platform == "win32":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
-        style_colors.clear()  # running on win32 without colorama ansi support
+        style_words.clear()  # running on win32 without colorama ansi support
 
 if sys.platform == "cli":
-    style_colors.clear()  # IronPython doesn't support console colors at all via colorama
+    style_words.clear()  # IronPython doesn't support console styling at all
 
 
 class ConsoleIo(iobase.IoAdapterBase):
@@ -71,13 +56,16 @@ class ConsoleIo(iobase.IoAdapterBase):
     def __init__(self, config):
         super(ConsoleIo, self).__init__(config)
         try:
-            # try to output a unicode character used by smartypants for nicer formatting
+            # try to output a unicode character such as smartypants uses for nicer formatting
             encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
             if sys.version_info < (3, 0):
                 unichr(8230).encode(encoding)
             else:
                 chr(8230).encode(encoding)
         except (UnicodeEncodeError, TypeError):
+            self.supports_smartquotes = False
+        if sys.platform == "win32":
+            # the windows console by default can't output nice unicode quote characters, so we disable that feature
             self.supports_smartquotes = False
         self.stop_main_loop = False
 
@@ -100,14 +88,14 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def clear_screen(self):
         """Clear the screen"""
-        if style_colors:
+        if style_words:
             print("\033[1;1H\033[2J", end="")
         else:
             print("\n" * 5)
 
     def install_tab_completion(self, completer):
         """Install tab completion using readline, if available, and if not running on windows (it behaves weird)"""
-        if os.name == "nt":
+        if sys.platform == "win32":
             return
         try:
             import readline
@@ -185,9 +173,9 @@ class ConsoleIo(iobase.IoAdapterBase):
         """Convert style tags to ansi escape sequences suitable for console text output"""
         if "<" not in line:
             return line
-        elif style_colors and do_styles:
-            for tag in style_colors:
-                line = line.replace("<%s>" % tag, style_colors[tag])
+        elif style_words and do_styles:
+            for tag in style_words:
+                line = line.replace("<%s>" % tag, style_words[tag])
             return line
         else:
             return iobase.strip_text_styles(line)

@@ -13,6 +13,7 @@ import colorama.win32
 
 
 # patch in extra ansi styles
+colorama.ansi.AnsiStyle.ITALIC = 3
 colorama.ansi.AnsiStyle.UNDERLINED = 4
 colorama.ansi.AnsiStyle.BLINK = 5
 colorama.ansi.AnsiStyle.REVERSEVID = 7
@@ -50,6 +51,7 @@ if __name__ == "__main__":
     print(colorama.Style.BRIGHT + "bright" + colorama.Style.RESET_ALL)
     print(colorama.Style.UNDERLINED + "underlined" + colorama.Style.RESET_ALL)
     print(colorama.Style.BLINK + "blink" + colorama.Style.RESET_ALL)
+    print(colorama.Style.ITALIC + "italic" + colorama.Style.RESET_ALL)
     print(colorama.Fore.YELLOW + colorama.Back.RED + "yellow on red" + colorama.Style.RESET_ALL)
     print(colorama.Style.REVERSEVID + "reversevid" + colorama.Style.RESET_ALL)
     print(colorama.Fore.YELLOW + colorama.Back.RED + colorama.Style.REVERSEVID + "yellow on red, reversed" + colorama.Style.RESET_ALL)

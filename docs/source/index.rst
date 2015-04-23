@@ -38,7 +38,17 @@ Install tale, preferably using ``pip install tale``. You can also download the s
 Tale requires the  `appdirs <http://pypi.python.org/pypi/appdirs/>`_
 library to sensibly store data files such as savegames.
 
-After that, you'll need a story to run it on (tale by itself doesn't do anything,
+It requires the  `smartypants <http://pypi.python.org/pypi/smartypants/>`_
+library to print out nicely formatted quotes and dashes.
+This is not used by default on windows when you're using the plain console interface, because the windows console needs some user tweaking to
+be able to display this correctly (you need to ``chcp 1252`` and you have to use a unicode console font instead of the default)
+
+On Windows, it requires the  `colorama <http://pypi.python.org/pypi/colorama/>`_
+library to print out text accents (bold, bright, underlined, reversevideo etc).
+This library is not needed on other operating systems.
+
+
+After all that, you'll need a story to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).
 There's a tiny demo embedded in the library itself, you can start that with::
 
@@ -123,7 +133,7 @@ A random list of the features of the current codebase:
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
-- uses smartypants if available; to automatically render quotes, dashes, ellipsis etc. in a nicer way. Needs chcp 1252+unicode font on windows.
+- uses smartypants to automatically render quotes, dashes, ellipsis etc. in a nicer way. This requires chcp 1252+unicode console font on windows.
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib

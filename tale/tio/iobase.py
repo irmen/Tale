@@ -22,10 +22,8 @@ except ImportError:
         unescape_entity = html.parser.HTMLParser().unescape
 
 
-ALL_COLOR_TAGS = {
-    "dim", "normal", "bright", "ul", "rev", "blink", "/",
-    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
-    "bg:black", "bg:red", "bg:green", "bg:yellow", "bg:blue", "bg:magenta", "bg:cyan", "bg:white",
+ALL_STYLE_TAGS = {
+    "dim", "normal", "bright", "ul", "it", "rev", "blink", "/",
     "living", "player", "item", "exit", "location", "monospaced", "/monospaced"
 }
 
@@ -35,7 +33,7 @@ def strip_text_styles(text):
     def strip(text):
         if "<" not in text:
             return text
-        for tag in ALL_COLOR_TAGS:
+        for tag in ALL_STYLE_TAGS:
             text = text.replace("<%s>" % tag, "")
         return text
     if isinstance(text, basestring_type):

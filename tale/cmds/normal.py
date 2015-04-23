@@ -1459,39 +1459,23 @@ def do_recap(player, parsed, ctx):
 
 @cmd("@teststyles")
 def do_teststyles(player, parsed, ctx):
-    """Test the text output styling (styles and colors)."""
+    """Test the text output styling."""
     style_tests = [
         ("normal", "This is NORMAL."),
         ("dim", "<dim>This is DIM.</>"),
         ("bright", "<bright>This is BRIGHT.</>"),
         ("ul", "<ul>This is UNDERLINED.</>"),
+        ("it", "<it>This is ITALIC.</>"),
         ("rev", "<rev>This is REVERSE VIDEO.</>"),
         ("blink", "<blink>This is BLINKING.</>"),
-        ("black", "<black>This is BLACK.</> (black text)"),
-        ("red", "<red>This is RED.</>"),
-        ("green", "<green>This is GREEN.</>"),
-        ("yellow", "<yellow>This is YELLOW.</>"),
-        ("blue", "<blue>This is BLUE.</>"),
-        ("magenta", "<magenta>This is MAGENTA.</>"),
-        ("cyan", "<cyan>This is CYAN.</>"),
-        ("white", "<white>This is WHITE.</> (white text)"),
-        ("bg:black", "<bg:black>This is BG:BLACK.</> (black background)"),
-        ("bg:red", "<bg:red>This is BG:RED.</>"),
-        ("bg:green", "<bg:green>This is BG:GREEN.</>"),
-        ("bg:yellow", "<bg:yellow>This is BG:YELLOW.</>"),
-        ("bg:blue", "<bg:blue>This is BG:BLUE.</>"),
-        ("bg:magenta", "<bg:magenta>This is BG:MAGENTA.</>"),
-        ("bg:cyan", "<bg:cyan>This is BG:CYAN.</>"),
-        ("bg:white", "<bg:white>This is BG:WHITE.</> (white background)"),
         ("living", "<living>This is LIVING.</>"),
         ("player", "<player>This is PLAYER.</>"),
         ("item", "<item>This is ITEM.</>"),
         ("exit", "<exit>This is EXIT.</>"),
-        ("(combined)", "<green><bg:blue><ul><bright>Bright green on blue, underlined. <rev>(reverse video)</>")
+        ("(combined)", "<ul><bright>Bright underlined. <rev>(and reverse video even)</>")
     ]
-    player.tell("Text style and coloring tests. Depending on the capabilities of the output device,")
-    player.tell("you should see various colors and text formatting styles being used.")
-    player.tell("If you're on a text console and don't see any colors, make sure the 'colorama' Python module is installed.")
-    player.tell("Note that some styles are not widely supported (blink, italic).", end=True)
+    player.tell("Text style tests. Depending on the capabilities of the output device,")
+    player.tell("you should see various text formatting styles being used.")
+    player.tell("Note that some styles are not widely supported (blink, italic, underlined).", end=True)
     for style, example in style_tests:
         player.tell("  %-15s %s" % (style, example), format=False)
