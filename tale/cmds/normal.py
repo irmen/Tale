@@ -1451,6 +1451,12 @@ def do_recap(player, parsed, ctx):
         player.tell("There's not much to say about the events thus far.")
 
 
+@cmd("@cls")
+def do_cls(player, parsed, ctx):
+    """Clears the screen (if the output device supports it)."""
+    player.io.clear_screen()
+
+
 @cmd("@teststyles")
 def do_teststyles(player, parsed, ctx):
     """Test the text output styling."""

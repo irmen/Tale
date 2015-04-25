@@ -208,30 +208,33 @@ class TestUtil(unittest.TestCase):
         vfs = VirtualFileSystem(".", readonly=False)
         with self.assertRaises(IOError):
             _ = vfs["test_doesnt_exist_999.txt"]
-        vfs.write("unittest.txt", "Test1\nTest2\n")
+        vfs["unittest.txt"] = "Test1\nTest2\n"
         rsc = vfs["unittest.txt"]
         self.assertEqual("Test1\nTest2\n", rsc.data)
         self.assertEqual("text/plain", rsc.mimetype)
         self.assertEqual(12, len(rsc))
         self.assertEqual("unittest.txt", rsc.name)
         self.assertIsNotNone(rsc.mtime)
-        vfs.write("unittest.txt", "Test1\nTest2\n")
+        vfs["unittest.txt"] = "Test1\nTest2\n"
         rsc = vfs["unittest.txt"]
         self.assertEqual("Test1\nTest2\n", rsc.data)
-        vfs.write("unittest.jpg", b"imagedata\nblob")
+        vfs["unittest.jpg"] = b"imagedata\nblob"
         rsc = vfs["unittest.jpg"]
         self.assertEqual(b"imagedata\nblob", rsc.data)
         self.assertTrue(rsc.mimetype in ("image/jpeg", "image/pjpeg"))
         self.assertEqual(14, len(rsc))
         self.assertEqual("unittest.jpg", rsc.name)
         self.assertIsNotNone(rsc.mtime)
+        vfs["unittest.jpg"] = rsc
+        del vfs["unittest.txt"]
+        del vfs["unittest.jpg"]
 
     def test_vfs_readonly(self):
         vfs = VirtualFileSystem(".")
         with self.assertRaises(VfsError):
             vfs.open_write("test.txt")
         with self.assertRaises(VfsError):
-            vfs.write("test.txt", "data")
+            vfs["test.txt"] = "data"
 
     def test_vfs_write_stream(self):
         vfs = VirtualFileSystem(".", readonly=False)
@@ -244,6 +247,7 @@ class TestUtil(unittest.TestCase):
         with vfs.open_write("unittest.txt", append=True) as f:
             f.write("appended")
         self.assertEqual("overwrittenappended", vfs["unittest.txt"].data)
+        del vfs["unittest.txt"]
 
     def test_clone(self):
         item = Item("thing", "description")

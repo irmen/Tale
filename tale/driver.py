@@ -638,7 +638,7 @@ class Driver(object):
             "config": self.config
         }
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
-        self.user_resources.write(self.config.name.lower() + ".savegame", savedata)
+        self.user_resources[self.config.name.lower() + ".savegame"] = savedata
         player.tell("Game saved.")
         if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)

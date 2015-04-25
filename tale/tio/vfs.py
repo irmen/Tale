@@ -43,6 +43,7 @@ class VirtualFileSystem(object):
     Simple filesystem abstraction.
     Loads resource files embedded inside a package directory.
     If not readonly, you can write data as well.
+    The API is loosely based on a dict.
     """
     def __init__(self, root_module_or_path, readonly=True):
         self.readonly = readonly
@@ -80,6 +81,31 @@ class VirtualFileSystem(object):
             mtime = time.asctime(time.localtime(mtime))
             return Resource(name, f.read(), mimetype, mtime)
 
+    def __setitem__(self, name, data):
+        """
+        Stores the data on the given resource name.
+        Overwrites an existing resource if any.
+        You can provide a resource object to save, or the data directly (str or bytes).
+        """
+        if self.readonly:
+            raise VfsError("attempt to write a read-only vfs")
+        self.__validate_path(name)
+        if isinstance(data, Resource):
+            data = data.data
+        with self.open_write(name) as f:
+            f.write(data)
+
+    def __delitem__(self, name):
+        """Deletes the given resource"""
+        if self.readonly:
+            raise VfsError("attempt to write a read-only vfs")
+        self.__validate_path(name)
+        phys_path = os.path.normpath(os.path.join(self.root_path, name))
+        try:
+            os.remove(phys_path)
+        except IOError:
+            pass
+
     def open_write(self, name, append=False):
         """returns a writable file io stream"""
         if self.readonly:
@@ -97,14 +123,6 @@ class VirtualFileSystem(object):
         if mimetype.startswith("text/"):
             return io.open(phys_path, mode="at" if append else "wt", encoding="utf-8", newline="\n")
         return io.open(phys_path, mode="ab" if append else "wb")
-
-    def write(self, name, data):
-        """Stores the data on the given resource name. Overwrites an existing resource if any."""
-        if self.readonly:
-            raise VfsError("attempt to write a read-only vfs")
-        self.__validate_path(name)
-        with self.open_write(name) as f:
-            f.write(data)
 
 
 # create a readonly resource loader for Tale's own internal resources:
