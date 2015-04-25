@@ -18,7 +18,7 @@ class Story(object):
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
         version="0.5",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="1.4",            # tale library required to run the game
+        requires_tale="1.5",            # tale library required to run the game
         supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
         player_name="julie",            # set a name to create a prebuilt player, None to use the character builder
         player_gender="f",              # m/f/n
@@ -35,13 +35,11 @@ class Story(object):
         savegames_enabled=True
     )
 
-    vfs = None        # will be set by driver init()
     driver = None     # will be set by driver init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
-        self.vfs = driver.vfs
 
     def init_player(self, player):
         """
@@ -81,7 +79,8 @@ class Story(object):
         # self.display_text_file(player, "messages/completion_failed.txt")
 
     def display_text_file(self, player, filename):
-        for paragraph in self.vfs.load_text(filename).split("\n\n"):
+        text = self.driver.resources[filename].data
+        for paragraph in text.split("\n\n"):
             if paragraph.startswith("\n"):
                 player.tell("\n")
             player.tell(paragraph, end=True)

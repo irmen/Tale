@@ -259,7 +259,7 @@ class Player(base.Living, pubsub.Listener):
         if file:
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
-            self.transcript = vfs.open_write(file, mode="a")
+            self.transcript = vfs.open_write(file, append=True)
             self.tell("Transcript is being written to", self.transcript.name)
             self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
         else:

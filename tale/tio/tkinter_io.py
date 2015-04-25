@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import re
+import os
 import textwrap
 import collections
 import threading
@@ -18,7 +19,7 @@ except ImportError:
     from Tkinter import *
     import tkFont as tkfont
     import tkMessageBox as tkmsgbox
-from . import iobase, vfs
+from . import iobase
 from .. import mud_context
 from .. import __version__ as tale_version
 
@@ -126,10 +127,9 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
-        with vfs.vfs.open_read("tio/quill_pen_paper.gif") as icon:      # XXX can't we get the path in a more reliable manner?
-            img = PhotoImage(file=icon.name)
-            self.tk.call('wm', 'iconphoto', self, img)
-            # self.iconbitmap(name)
+        img = PhotoImage(file=os.path.join(os.path.dirname(__file__), "quill_pen_paper.gif"))
+        self.tk.call('wm', 'iconphoto', self, img)
+        # self.iconbitmap(name)
 
         self.history = collections.deque(maxlen=100)
         self.history.append("")

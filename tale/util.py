@@ -8,8 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
 import random
-import os
-import time
 import sys
 import copy
 from . import lang
@@ -192,23 +190,6 @@ class MoneyFormatter(object):
                             raise ParseError("What amount?")
                 return self.money_to_float(coins)
         raise ParseError("That is not an amount of money.")
-
-
-def get_motd(vfs):
-    """
-    Read the MOTD from its fixed location, and return it and its modification timestamp.
-    If it's not there, return None for both.
-    """
-    try:
-        with vfs.open_read("messages/motd.txt") as motd:
-            message = motd.read().rstrip()
-            if not message:
-                return None, None
-            mtime = os.fstat(motd.fileno()).st_mtime
-            mtime = time.asctime(time.localtime(mtime))
-            return message, mtime
-    except IOError:
-        return None, None
 
 
 def message_nearby_locations(source_location, message):

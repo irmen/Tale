@@ -1143,13 +1143,7 @@ def do_coin(player, parsed, ctx):
 @disabled_in_gamemode("if")
 def do_motd(player, parsed, ctx):
     """Show the message-of-the-day again."""
-    motd, mtime = util.get_motd(ctx.driver.vfs)
-    if motd:
-        player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
-        player.tell("\n")
-        player.tell(motd)
-    else:
-        player.tell("There's currently no message-of-the-day.")
+    ctx.driver.show_motd(player, notify_no_motd=True)
 
 
 @cmd("flee")
@@ -1213,7 +1207,7 @@ def do_transcript(player, parsed, ctx):
     elif not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
     else:
-        player.activate_transcript(parsed.args[0], ctx.driver.vfs)
+        player.activate_transcript(parsed.args[0], ctx.driver.resources)
 
 
 @cmd("show")

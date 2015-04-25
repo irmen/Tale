@@ -17,6 +17,7 @@ import inspect
 import argparse
 import pickle
 import threading
+import appdirs
 import distutils.version
 from . import mud_context
 from . import errors
@@ -142,6 +143,11 @@ class Driver(object):
         cmds.register_all(self.commands)
         self.zones = None
         self.moneyfmt = None
+        self.resources = self.user_resources = None
+        self.story = None
+        self.game_clock = None
+        self.verified_ok = None
+        self._stop_mainloop = True
 
     def bind_exits(self):
         # convert textual exit strings to actual exit object bindings
@@ -166,6 +172,7 @@ class Driver(object):
         path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
             # The tale library is being loaded from the current directory, this is not supported.
+            # (it causes import conflicts with the tale imports stated in the story source files)
             print("Tale is being asked to run directly from the current directory, this is not supported.")
             print("Install Tale properly, and/or use the start script from the story directory instead.")
             return
@@ -209,7 +216,8 @@ class Driver(object):
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
-        self.vfs = vfs.VirtualFileSystem(story)
+        self.resources = vfs.VirtualFileSystem(args.game)   # read-only story resources
+        self.user_resources = vfs.VirtualFileSystem(appdirs.user_data_dir("Tale", "Razorvine", roaming=True), readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
         import zones
         self.zones = zones
@@ -274,10 +282,10 @@ class Driver(object):
         # prints the intro screen of the game
         io = player.io
         try:
-            banner = self.vfs.load_text("messages/banner.txt")
+            banner = self.resources["messages/banner.txt"].data
             # print game banner as supplied by the game
             io.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
-        except IOError:
+        except IOError as x:
             # no banner provided by the game, print default game header
             io.output("")
             io.output("")
@@ -345,16 +353,22 @@ class Driver(object):
             player.tell("\n")
         self.story.init_player(player)
 
-    def show_motd(self, player):
+    def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         if self.config.server_mode != "if":
-            motd, mtime = util.get_motd(self.vfs)
-            if motd:
-                player.tell("<bright>Message-of-the-day, last modified on %s:</>" % mtime, end=True)
+            try:
+                motd = self.resources["messages/motd.txt"]
+                message = motd.data.rstrip()
+            except IOError:
+                message = None
+            if message:
+                player.tell("<bright>Message-of-the-day, last modified on %s:</>" % motd.mtime, end=True)
                 player.tell("\n")
-                player.tell(motd, end=True, format=True)  # for now, the motd is displayed *with* formatting
+                player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
                 player.tell("\n")
                 player.tell("\n")
+            elif notify_no_motd:
+                player.tell("There's currently no message-of-the-day.")
 
     def stop_driver(self):
         """stop the driver mainloop"""
@@ -624,7 +638,7 @@ class Driver(object):
             "config": self.config
         }
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
-        self.vfs.write_to_storage(self.config.name.lower() + ".savegame", savedata)
+        self.user_resources.write(self.config.name.lower() + ".savegame", savedata)
         player.tell("Game saved.")
         if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)
@@ -632,7 +646,7 @@ class Driver(object):
 
     def load_saved_game(self):
         try:
-            savegame = self.vfs.load_from_storage(self.config.name.lower() + ".savegame")
+            savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
             state = pickle.loads(savegame)
             del savegame
         except (pickle.PickleError, ValueError, TypeError) as x:

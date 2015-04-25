@@ -9,7 +9,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 import tale
-from tale.tio.vfs import vfs
 from tale.driver import StoryConfig
 from tale.main import run_story
 
@@ -37,12 +36,10 @@ class Story(object):
         savegames_enabled=False
     )
 
-    vfs = None        # will be set by driver init()
     driver = None     # will be set by driver init()
 
     def init(self, driver):
         self.driver = driver
-        self.vfs = driver.vfs
 
     def init_player(self, player):
         player.money = 12.65
@@ -67,7 +64,6 @@ class Story(object):
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
-    with vfs.open_read("demo/__init__.py") as x:
-        gamedir = os.path.dirname(x.name)
+    gamedir = os.path.dirname(__file__)
     gui = len(sys.argv) > 1 and sys.argv[1] == "--gui"
     run_story(gamedir, gui)

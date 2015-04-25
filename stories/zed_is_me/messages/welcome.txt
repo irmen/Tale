@@ -10,7 +10,8 @@ business with the outside world.
 The biggest employer in the town is a company called 'ArtiGrow', making fertilizer.
 Unfortunately, it has suffered financial problems for quite a while now
 and had to lay off a lot of their staff. There aren't many vacancies
-elsewhere, so a lot of these people sit at home pondering what to do.
+elsewhere, so a lot of these people sit at home pondering what to do...
 
 
 You're one of them.
+

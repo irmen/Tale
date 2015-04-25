@@ -17,8 +17,8 @@ class Story(object):
         name="Tale Demo",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
-        version="1.0",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="1.4",            # tale library required to run the game
+        version="1.1",                  # arbitrary but is used to check savegames for compatibility
+        requires_tale="1.5",            # tale library required to run the game
         supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
         player_name=None,               # set a name to create a prebuilt player, None to use the character builder
         player_gender=None,             # m/f/n
@@ -35,13 +35,11 @@ class Story(object):
         savegames_enabled=True,
     )
 
-    vfs = None        # will be set by driver init()
     driver = None     # will be set by driver init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
-        self.vfs = driver.vfs
 
     def init_player(self, player):
         """
@@ -57,7 +55,7 @@ class Story(object):
         """welcome text when player enters a new game"""
         player.tell("<bright>Welcome to %s.</>" % self.config.name, end=True)
         player.tell("\n")
-        player.tell(self.vfs.load_text("messages/welcome.txt"))
+        player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
         player.tell("\n")
 
@@ -65,7 +63,7 @@ class Story(object):
         """welcome text when player enters the game after loading a saved game"""
         player.tell("<bright>Welcome back to %s.</>" % self.config.name, end=True)
         player.tell("\n")
-        player.tell(self.vfs.load_text("messages/welcome.txt"))
+        player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
         player.tell("\n")
 

@@ -102,8 +102,8 @@ Tale API
 .. automodule:: tale.io.styleaware_wrapper
     :members:
 
-:mod:`tale.io.vfs` --- Virtual File System
-------------------------------------------
+:mod:`tale.io.vfs` --- Virtual File System to load Resources
+------------------------------------------------------------
 .. automodule:: tale.io.vfs
     :members:
 
