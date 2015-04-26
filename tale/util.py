@@ -158,7 +158,7 @@ class MoneyFormatter(object):
         return result
 
     def parse(self, words):
-        """Convert a parsed sequence of words to the amount of money it represents (foat)"""
+        """Convert a parsed sequence of words to the amount of money it represents (float)"""
         if len(words) == 1:
             try:
                 return self.money_to_float(words[0])
@@ -170,26 +170,24 @@ class MoneyFormatter(object):
             except ValueError:
                 pass
         coins = {}
-        # @todo optimize the loop below
-        for word in words:
-            if word in self.money_words:
-                # check if all words are either a number (currency) or a moneyword
-                amount = None
-                for word in words:
-                    if word in self.money_words:
-                        if amount:
-                            if word in coins:
-                                raise ParseError("What amount?")
-                            coins[word] = amount
-                            amount = None
-                        else:
+        if set(words) & self.money_words:
+            # check if all words are either a number (currency) or a money word
+            amount = None
+            for word in words:
+                if word in self.money_words:
+                    if amount:
+                        if word in coins:
                             raise ParseError("What amount?")
+                        coins[word] = amount
+                        amount = None
                     else:
-                        try:
-                            amount = float(word)
-                        except ValueError:
-                            raise ParseError("What amount?")
-                return self.money_to_float(coins)
+                        raise ParseError("What amount?")
+                else:
+                    try:
+                        amount = float(word)
+                    except ValueError:
+                        raise ParseError("What amount?")
+            return self.money_to_float(coins)
         raise ParseError("That is not an amount of money.")
 
 
