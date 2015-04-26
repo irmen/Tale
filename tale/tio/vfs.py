@@ -8,10 +8,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import os
 import io
-import time
 import errno
-import inspect
 import mimetypes
+import pkgutil
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources", "userdata"]
 
@@ -21,12 +20,11 @@ class VfsError(IOError):
 
 
 class Resource(object):
-    """Simple container of a resource name, its data (string or binary) and some bits of metadata"""
-    def __init__(self, name, data, mimetype, mtime):
+    """Simple container of a resource name, its data (string or binary) and the mime type"""
+    def __init__(self, name, data, mimetype):
         self.name = name
         self.data = data
         self.mimetype = mimetype
-        self.mtime = mtime
 
     def __repr__(self):
         return "<Resource %s from %s, size=%d>" % (self.mimetype, self.name, len(self.data))
@@ -40,23 +38,34 @@ class Resource(object):
 
 class VirtualFileSystem(object):
     """
-    Simple filesystem abstraction.
-    Loads resource files embedded inside a package directory.
-    If not readonly, you can write data as well.
-    The API is loosely based on a dict.
+    Simple filesystem abstraction. Loads resource files embedded inside a package directory.
+    If not readonly, you can write data as well. The API is loosely based on a dict.
+    Can be based off an already imported module, or from a file system path somewhere else.
     """
-    def __init__(self, root_module_or_path, readonly=True):
+    def __init__(self, root_package=None, root_path=None, readonly=True):
+        if root_package is not None and root_path is not None:
+            raise ValueError("specify only one root argument")
+        if not readonly and not root_path:
+            raise ValueError("Read-write vfs requires path string")
         self.readonly = readonly
-        if inspect.ismodule(root_module_or_path):
-            if not readonly:
-                raise TypeError("Read-write vfs requires explicit path string")
-            self.root_path = os.path.dirname(inspect.getabsfile(root_module_or_path))
+        if root_path:
+            self.root = os.path.abspath(os.path.normpath(root_path))
+            self.use_pkgutil = False
+            if not os.path.isdir(self.root):
+                raise VfsError("root path doesn't exist")
+            if not os.access(self.root, os.R_OK):
+                raise VfsError("no read access")
         else:
-            self.root_path = os.path.normpath(root_module_or_path)
-        if not os.path.isdir(self.root_path):
-            raise VfsError("root path doesn't exist")
-        if not os.access(self.root_path, os.R_OK):
-            raise VfsError("no read access")
+            try:
+                test = pkgutil.get_data(root_package, "@dummy@")
+            except IOError:
+                test = "okay"
+            except ImportError:
+                test = None
+            if test is None:
+                raise VfsError("root package cannot be accessed")
+            self.root = root_package
+            self.use_pkgutil = True
 
     @staticmethod
     def __validate_path(path):
@@ -75,11 +84,16 @@ class VirtualFileSystem(object):
         else:
             mode = "rb"
             encoding = None
-        phys_path = os.path.normpath(os.path.join(self.root_path, name))
-        with io.open(phys_path, mode=mode, encoding=encoding) as f:
-            mtime = os.fstat(f.fileno()).st_mtime
-            mtime = time.asctime(time.localtime(mtime))
-            return Resource(name, f.read(), mimetype, mtime)
+        if self.use_pkgutil:
+            # package resource access
+            data = pkgutil.get_data(self.root, name)
+            with io.StringIO(data.decode(encoding), newline=None) as f:
+                return Resource(name, f.read(), mimetype)
+        else:
+            # direct filesystem access
+            phys_path = os.path.normpath(os.path.join(self.root, name))
+            with io.open(phys_path, mode=mode, encoding=encoding) as f:
+                return Resource(name, f.read(), mimetype)
 
     def __setitem__(self, name, data):
         """
@@ -100,9 +114,8 @@ class VirtualFileSystem(object):
         if self.readonly:
             raise VfsError("attempt to write a read-only vfs")
         self.__validate_path(name)
-        phys_path = os.path.normpath(os.path.join(self.root_path, name))
         try:
-            os.remove(phys_path)
+            os.remove(os.path.join(self.root, name))
         except IOError:
             pass
 
@@ -111,7 +124,7 @@ class VirtualFileSystem(object):
         if self.readonly:
             raise VfsError("attempt to write to a read-only vfs")
         self.__validate_path(name)
-        phys_path = os.path.normpath(os.path.join(self.root_path, name))
+        phys_path = os.path.normpath(os.path.join(self.root, name))
         dirname = os.path.dirname(phys_path)
         try:
             if dirname:
@@ -126,4 +139,4 @@ class VirtualFileSystem(object):
 
 
 # create a readonly resource loader for Tale's own internal resources:
-internal_resources = VirtualFileSystem(os.path.join(os.path.dirname(__file__), os.path.pardir))
+internal_resources = VirtualFileSystem(root_package="tale")

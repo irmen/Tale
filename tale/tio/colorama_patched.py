@@ -20,9 +20,8 @@ colorama.ansi.AnsiStyle.REVERSEVID = 7
 colorama.ansi.Style = colorama.ansi.AnsiCodes(colorama.ansi.AnsiStyle)
 colorama.Style = colorama.ansi.Style
 
-# patch windows stuff, if running on windows
-if colorama.win32.windll is not None:
-
+# Patch in a trick to use reverse video on windows console
+if colorama.win32.windll is not None and not hasattr(colorama.ansitowin32.AnsiToWin32, "style_reverse_vid"):
     class MonkeypatchedAnsiToWin32(colorama.ansitowin32.AnsiToWin32):
         def get_win32_calls(self):
             result = super(MonkeypatchedAnsiToWin32, self).get_win32_calls() or {}

@@ -18,7 +18,7 @@ class Story(object):
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
         version="1.1",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="1.5",            # tale library required to run the game
+        requires_tale="1.6",            # tale library required to run the game
         supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
         player_name=None,               # set a name to create a prebuilt player, None to use the character builder
         player_gender=None,             # m/f/n
@@ -33,6 +33,7 @@ class Story(object):
         startlocation_player="town.square",
         startlocation_wizard="wizardtower.hall",
         savegames_enabled=True,
+        license_file="messages/license.txt"
     )
 
     driver = None     # will be set by driver init()

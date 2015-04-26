@@ -1373,7 +1373,7 @@ def do_read(player, parsed, ctx):
 
 
 @cmd("license")
-def do_gameinfo(player, parsed, ctx):
+def do_license(player, parsed, ctx):
     """Show information about the game and about Tale, and show the software license."""
     t = player.tell
     # version info
@@ -1383,6 +1383,8 @@ def do_gameinfo(player, parsed, ctx):
     t("is written by <bright>%s%s</>," % (config.author, author_addr))
     t("and is using Tale framework v%s." % tale_version_string, end=True)
     t("\n")
+    # print optional game specific license info
+    ctx.driver.show_story_license(player)
     # print GPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)
     t("Copyright (C) 2012  Irmen de Jong.</>", end=True)

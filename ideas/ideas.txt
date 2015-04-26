@@ -63,7 +63,6 @@ General ideas/TODO:
     <clear>  clears the screen
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
-[feature] Load story from a zipfile. VFS should thus be able to load resources from a zipfile too: use module.__loader__.get_data(...)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?
     Sate Machine = overkill for a simple question state?   So.... yield? (http://eli.thegreenplace.net/2009/08/29/co-routines-as-an-alternative-to-state-machines/)
     And it needs to work eventually in a multi user system...

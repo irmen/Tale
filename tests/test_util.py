@@ -191,7 +191,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("first\n  second\n    third", util.format_docstring(d))
 
     def test_vfs_load_and_names(self):
-        vfs = VirtualFileSystem(util)
+        vfs = VirtualFileSystem(root_package="os")
         with self.assertRaises(VfsError):
             _ = vfs["a\\b"]
         with self.assertRaises(VfsError):
@@ -200,12 +200,20 @@ class TestUtil(unittest.TestCase):
             _ = vfs["normal/text"]
         with self.assertRaises(IOError):
             _ = vfs["normal/image"]
-        vfs = VirtualFileSystem(".")
+        vfs = VirtualFileSystem(root_path=".")
         with self.assertRaises(IOError):
             _ = vfs["test_doesnt_exist_999.txt"]
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_path="@@@does/not/exist.foo@@@")
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_package="non.existing.package.name")
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_package="non_existing_package_name")
 
     def test_vfs_storage(self):
-        vfs = VirtualFileSystem(".", readonly=False)
+        with self.assertRaises(ValueError):
+            _ = VirtualFileSystem(root_package="os", readonly=False)
+        vfs = VirtualFileSystem(root_path=".", readonly=False)
         with self.assertRaises(IOError):
             _ = vfs["test_doesnt_exist_999.txt"]
         vfs["unittest.txt"] = "Test1\nTest2\n"
@@ -214,7 +222,6 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("text/plain", rsc.mimetype)
         self.assertEqual(12, len(rsc))
         self.assertEqual("unittest.txt", rsc.name)
-        self.assertIsNotNone(rsc.mtime)
         vfs["unittest.txt"] = "Test1\nTest2\n"
         rsc = vfs["unittest.txt"]
         self.assertEqual("Test1\nTest2\n", rsc.data)
@@ -224,20 +231,19 @@ class TestUtil(unittest.TestCase):
         self.assertTrue(rsc.mimetype in ("image/jpeg", "image/pjpeg"))
         self.assertEqual(14, len(rsc))
         self.assertEqual("unittest.jpg", rsc.name)
-        self.assertIsNotNone(rsc.mtime)
         vfs["unittest.jpg"] = rsc
         del vfs["unittest.txt"]
         del vfs["unittest.jpg"]
 
     def test_vfs_readonly(self):
-        vfs = VirtualFileSystem(".")
+        vfs = VirtualFileSystem(root_path=".")
         with self.assertRaises(VfsError):
             vfs.open_write("test.txt")
         with self.assertRaises(VfsError):
             vfs["test.txt"] = "data"
 
     def test_vfs_write_stream(self):
-        vfs = VirtualFileSystem(".", readonly=False)
+        vfs = VirtualFileSystem(root_path=".", readonly=False)
         with vfs.open_write("unittest.txt") as f:
             f.write("test write")
         self.assertEqual("test write", vfs["unittest.txt"].data)

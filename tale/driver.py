@@ -191,15 +191,20 @@ class Driver(object):
             output_line_delay = args.delay
         else:
             raise ValueError("invalid delay, valid range is 0-100")
-        # cd into the game directory, add it to the search path, and load its config and zones
-        os.chdir(args.game)
-        sys.path.insert(0, '.')
+        if os.path.isdir(args.game):
+            # cd into the game directory (we can import it then), and load its config and zones
+            os.chdir(args.game)
+        elif os.path.isfile(args.game):
+            # the game argument points to a file, assume it is a zipfile, add it to the import path
+            sys.path.insert(0, args.game)
+        else:
+            raise IOError("Cannot find specified game")
         story = __import__("story", level=0)
         self.story = story.Story()
         if args.mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story" % args.mode)
         self.config = StoryConfig.copy_from(self.story.config)
-        self.config.server_mode = args.mode   # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         # Register the driver and some other stuff in the global context.
         mud_context.driver = self
         mud_context.config = self.config
@@ -216,8 +221,9 @@ class Driver(object):
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
-        self.resources = vfs.VirtualFileSystem(args.game)   # read-only story resources
-        self.user_resources = vfs.VirtualFileSystem(appdirs.user_data_dir("Tale", "Razorvine", roaming=True), readonly=False)  # r/w to the local 'user data' directory
+        self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
+        user_data_dir = appdirs.user_data_dir("Tale", "Razorvine", roaming=True)
+        self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
         import zones
         self.zones = zones
@@ -263,7 +269,8 @@ class Driver(object):
         try:
             self.print_game_intro(self.player)
             self.create_player(self.player)
-            self.show_motd(self.player)
+            if self.config.server_mode != "if":
+                self.show_motd(self.player)
             self.player.look(short=False)
             self.player.write_output()
             while not self._stop_mainloop:
@@ -355,20 +362,25 @@ class Driver(object):
 
     def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
-        if self.config.server_mode != "if":
-            try:
-                motd = self.resources["messages/motd.txt"]
-                message = motd.data.rstrip()
-            except IOError:
-                message = None
-            if message:
-                player.tell("<bright>Message-of-the-day, last modified on %s:</>" % motd.mtime, end=True)
-                player.tell("\n")
-                player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
-                player.tell("\n")
-                player.tell("\n")
-            elif notify_no_motd:
-                player.tell("There's currently no message-of-the-day.")
+        try:
+            motd = self.resources["messages/motd.txt"]
+            message = motd.data.rstrip()
+        except IOError:
+            message = None
+        if message:
+            player.tell("<bright>Message-of-the-day:</>", end=True)
+            player.tell("\n")
+            player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
+            player.tell("\n")
+            player.tell("\n")
+        elif notify_no_motd:
+            player.tell("There's currently no message-of-the-day.")
+
+    def show_story_license(self, player):
+        """Prints optional additional license information supplied by the story"""
+        if self.config.license_file:
+            player.tell(self.resources[self.config.license_file].data, end=True)
+            player.tell("\n")
 
     def stop_driver(self):
         """stop the driver mainloop"""
@@ -754,10 +766,13 @@ class StoryConfig(object):
         "startlocation_player",
         "startlocation_wizard",
         "savegames_enabled",
-        "server_mode"
+        "license_file"
     }
 
     def __init__(self, **kwargs):
+        difference = self.config_items ^ kwargs.keys()
+        if difference:
+            raise ValueError("invalid story config; mismatch in config arguments: "+str(difference))
         for k, v in kwargs.items():
             if k in self.config_items:
                 setattr(self, k, v)

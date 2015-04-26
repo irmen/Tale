@@ -33,7 +33,8 @@ class Story(object):
         epoch=None,                      # start date/time of the game clock
         startlocation_player="house.livingroom",
         startlocation_wizard="house.livingroom",
-        savegames_enabled=False
+        savegames_enabled=False,
+        license_file=None
     )
 
     driver = None     # will be set by driver init()
