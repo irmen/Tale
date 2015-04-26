@@ -119,7 +119,10 @@ class TestSerializing(unittest.TestCase):
         self.assertIsNone(x.io)
 
     def test_storyconfig(self):
-        s = StoryConfig(server_mode="if", display_gametime=True, name="test")
+        s = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        s.server_mode = "if"
+        s.display_gametime = True
+        s.name = "test"
         x = serializecycle(s)
         self.assertEqual(s, x)
 

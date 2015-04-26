@@ -13,14 +13,15 @@ import threading
 __all__ = ["topic", "unsubscribe_all", "Listener"]
 
 all_topics = {}
+__topic_lock = threading.Lock()
 
 
 def topic(name):
-    """Create a topic object (singleton). Name can be a string or a sequence type."""
-    with threading.Lock():
+    """Create a topic object (singleton). Name can be a string or a tuple."""
+    with __topic_lock:
         if name in all_topics:
             return all_topics[name]
-        instance = all_topics[name] = __Topic(name)
+        instance = all_topics[name] = Topic(name)
         return instance
 
 
@@ -37,7 +38,7 @@ class Listener(object):
         raise NotImplementedError("implement this in subclass")
 
 
-class __Topic(object):
+class Topic(object):
     def __init__(self, name):
         self.name = name
         self.subscribers = set()

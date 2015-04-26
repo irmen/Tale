@@ -19,7 +19,7 @@ class StoryCaseBase(object):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = DummyDriver()
-        mud_context.config = StoryConfig()
+        mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -37,7 +37,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
         import story
         s = story.Story()
         self.assertEqual("Zed is me", s.config.name)
-        self.assertEqual(19, len(vars(s.config)))
+        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
     def test_zones(self):
         import zones.house
         self.assertEqual("Living room", zones.house.livingroom.name)
@@ -48,7 +48,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual(19, len(vars(s.config)))
+        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
         self.assertEqual("Tale Demo", s.config.name)
     def test_zones(self):
         import zones.town
@@ -62,7 +62,7 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
-        self.assertEqual(19, len(vars(s.config)))
+        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
         self.assertEqual("Tale demo story", s.config.name)
         config = StoryConfig.copy_from(s.config)
         self.assertEqual(config.author_address, s.config.author_address)

@@ -770,7 +770,7 @@ class StoryConfig(object):
     }
 
     def __init__(self, **kwargs):
-        difference = self.config_items ^ kwargs.keys()
+        difference = self.config_items ^ set(kwargs)
         if difference:
             raise ValueError("invalid story config; mismatch in config arguments: "+str(difference))
         for k, v in kwargs.items():

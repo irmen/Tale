@@ -28,7 +28,8 @@ else:
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = DummyDriver()
-        tale.mud_context.config = StoryConfig(server_mode="if")
+        tale.mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        tale.mud_context.config.server_mode = "if"
 
     def test_init(self):
         player = Player("fritz", "m")

@@ -18,7 +18,7 @@ from tale.driver import StoryConfig
 class TestItems(unittest.TestCase):
     def setUp(self):
         mud_context.driver = DummyDriver()
-        mud_context.config = StoryConfig()
+        mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
         self.actor = player.Player("julie", "f")
 
     def test_gameclock(self):
