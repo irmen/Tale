@@ -194,6 +194,7 @@ class Driver(object):
         if os.path.isdir(args.game):
             # cd into the game directory (we can import it then), and load its config and zones
             os.chdir(args.game)
+            sys.path.insert(0, os.curdir)
         elif os.path.isfile(args.game):
             # the game argument points to a file, assume it is a zipfile, add it to the import path
             sys.path.insert(0, args.game)
@@ -697,9 +698,9 @@ class Driver(object):
         if not exit.bound:
             self.unbound_exits.append(exit)
 
-    def defer(self, due, owner, callable, *vargs, **kwargs):
+    def defer(self, due, owner, target, *vargs, **kwargs):
         """
-        Register a deferred callable (optionally with arguments).
+        Register a deferred callable target (optionally with arguments).
         The owner object, the vargs and the kwargs all must be serializable.
         Note that the due time is datetime.datetime *in game time*
         (not real time!) when the deferred should trigger.
@@ -716,13 +717,13 @@ class Driver(object):
             due = self.game_clock.plus_realtime(datetime.timedelta(seconds=due))
         # to be able to serialize this, we don't store the actual callable object.
         # instead we store its name.
-        if not isinstance(callable, util.basestring_type):
-            callable = callable.__name__
+        if not isinstance(target, util.basestring_type):
+            target = target.__name__
         # check that callable is in fact a function on the owner object
-        func = getattr(owner, callable, None)
+        func = getattr(owner, target, None)
         if func:
             assert inspect.ismethod(func) or inspect.isfunction(func)
-            deferred = Deferred(due, owner, callable, vargs, kwargs)
+            deferred = Deferred(due, owner, target, vargs, kwargs)
             # we skip the pickle check because it is extremely inefficient.....:
             # pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
             with self.deferreds_lock:
@@ -730,13 +731,13 @@ class Driver(object):
             return
         raise ValueError("unknown callable on owner object")
 
-    def after_player_action(self, callable, *vargs, **kwargs):
+    def after_player_action(self, target, *vargs, **kwargs):
         """
-        Register a deferred callable (optionally with arguments) in the queue
+        Register a deferred callable target (optionally with arguments) in the queue
         of events that will be executed immediately *after* the player's own actions
         have been completed.
         """
-        deferred = Deferred(None, None, callable, vargs, kwargs)
+        deferred = Deferred(None, None, target, vargs, kwargs)
         self.notification_queue.put(deferred)
 
     def remove_deferreds(self, owner):
@@ -746,6 +747,7 @@ class Driver(object):
 
 
 class StoryConfig(object):
+    """Container for the configuration settings for a Story"""
     config_items = {
         "name",
         "author",

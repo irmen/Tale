@@ -170,6 +170,7 @@ class MoneyFormatter(object):
             except ValueError:
                 pass
         coins = {}
+        # @todo optimize the loop below
         for word in words:
             if word in self.money_words:
                 # check if all words are either a number (currency) or a moneyword
@@ -335,9 +336,9 @@ def format_docstring(docstring):
     return '\n'.join(trimmed)
 
 
-def clone(object):
+def clone(obj):
     """Create a copy of an existing MudObject"""
-    return copy.deepcopy(object)
+    return copy.deepcopy(obj)
 
 
 class GameDateTime(object):
@@ -346,10 +347,10 @@ class GameDateTime(object):
     times_realtime means how much faster the game time is running than real time.
     The internal 'clock' tracks the time in game-time (not real-time).
     """
-    def __init__(self, datetime, times_realtime=1):
+    def __init__(self, date_time, times_realtime=1):
         assert times_realtime >= 0
         self.times_realtime = times_realtime
-        self.clock = datetime
+        self.clock = date_time
 
     def __str__(self):
         return str(self.clock)
