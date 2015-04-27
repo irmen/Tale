@@ -48,14 +48,14 @@ closet.add_exits([Exit("living room", livingroom, "You can see the living room."
 class Cat(NPC):
     def init(self):
         self.aliases = {"cat"}
-        mud_context.driver.defer(4, self, self.do_purr)
+        mud_context.driver.defer(4, self.do_purr)
 
     def do_purr(self, driver):
         if random.random() > 0.5:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
-        driver.defer(random.randint(5, 20), self, self.do_purr)
+        driver.defer(random.randint(5, 20), self.do_purr)
 
     def notify_action(self, parsed, actor):
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):

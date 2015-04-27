@@ -13,7 +13,6 @@ import sys
 import time
 import os
 import heapq
-import inspect
 import argparse
 import pickle
 import threading
@@ -33,13 +32,12 @@ from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 @total_ordering
 class Deferred(object):
-    __slots__ = ("due", "owner", "callable", "vargs", "kwargs")
-
-    def __init__(self, due, owner, callable_obj, vargs, kwargs):
+    def __init__(self, due, action, vargs, kwargs):
         assert due is None or isinstance(due, datetime.datetime)
+        assert callable(action)
         self.due = due   # in game time
-        self.owner = owner
-        self.callable = callable_obj
+        self.owner = getattr(action, "__self__", None)
+        self.action = action.__name__    # store name instead of object, to make this serializable
         self.vargs = vargs
         self.kwargs = kwargs
 
@@ -66,10 +64,10 @@ class Deferred(object):
             self.kwargs["driver"] = kwargs["driver"]  # always add a 'driver' keyword argument for convenience
         if self.owner is None:
             # deferred callable is stored as a normal callable object
-            self.callable(*self.vargs, **self.kwargs)
+            self.action(*self.vargs, **self.kwargs)
         else:
             # deferred callable is stored as a name, so we need to obtain the actual function
-            func = getattr(self.owner, self.callable, None)
+            func = getattr(self.owner, self.action, None)
             if func:
                 func(*self.vargs, **self.kwargs)
 
@@ -711,46 +709,35 @@ class Driver(object):
         if not exit.bound:
             self.unbound_exits.append(exit)
 
-    def defer(self, due, owner, target, *vargs, **kwargs):
+    def defer(self, due, action, *vargs, **kwargs):
         """
-        Register a deferred callable target (optionally with arguments).
-        The owner object, the vargs and the kwargs all must be serializable.
-        Note that the due time is datetime.datetime *in game time*
-        (not real time!) when the deferred should trigger.
-        Due can also be a number, meaning the number of real-time seconds after the current time.
+        Register a deferred callable action (optionally with arguments).
+        The vargs and the kwargs all must be serializable.
+        Note that the due time is datetime.datetime *in game time* (not real time!)
+        when the deferred should trigger. It can also be a number, meaning the number
+        of real-time seconds after the current time.
         Also note that the deferred *always* gets a kwarg 'driver' set to the driver object
         (this makes it easy to register a new deferred on the driver without the need to
         access the global driver object)
         """
+        assert callable(action)
         if isinstance(due, datetime.datetime):
             assert due >= self.game_clock.clock
         else:
             due = float(due)
             assert due >= 0.0
             due = self.game_clock.plus_realtime(datetime.timedelta(seconds=due))
-        # to be able to serialize this, we don't store the actual callable object.
-        # instead we store its name.
-        if not isinstance(target, util.basestring_type):
-            target = target.__name__
-        # check that callable is in fact a function on the owner object
-        func = getattr(owner, target, None)
-        if func:
-            assert inspect.ismethod(func) or inspect.isfunction(func)
-            deferred = Deferred(due, owner, target, vargs, kwargs)
-            # we skip the pickle check because it is extremely inefficient.....:
-            # pickle.dumps(deferred, pickle.HIGHEST_PROTOCOL)  # make sure the data can be serialized
-            with self.deferreds_lock:
-                heapq.heappush(self.deferreds, deferred)
-            return
-        raise ValueError("unknown callable on owner object")
+        deferred = Deferred(due, action, vargs, kwargs)
+        with self.deferreds_lock:
+            heapq.heappush(self.deferreds, deferred)
 
-    def after_player_action(self, target, *vargs, **kwargs):
+    def after_player_action(self, action, *vargs, **kwargs):
         """
-        Register a deferred callable target (optionally with arguments) in the queue
+        Register a deferred callable action (optionally with arguments) in the queue
         of events that will be executed immediately *after* the player's own actions
         have been completed.
         """
-        deferred = Deferred(None, None, target, vargs, kwargs)
+        deferred = Deferred(None, action, vargs, kwargs)
         self.notification_queue.put(deferred)
 
     def remove_deferreds(self, owner):
