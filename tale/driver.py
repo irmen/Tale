@@ -204,6 +204,11 @@ class Driver(object):
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
         user_data_dir = appdirs.user_data_dir("Tale", "Razorvine", roaming=True)
+        if not os.path.isdir(user_data_dir):
+            try:
+                os.makedirs(user_data_dir, mode=0o700)
+            except os.error:
+                pass
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
         import zones
@@ -242,7 +247,7 @@ class Driver(object):
             print("Verified, all seems to be fine.")
             return
         io.output_line_delay = output_line_delay
-        io.clear_screen()
+        # XXX io.clear_screen()
         io.install_tab_completion(TabCompleter(self, new_player))
         new_player.io = io
         io.set_player(new_player)

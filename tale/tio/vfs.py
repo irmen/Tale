@@ -52,9 +52,9 @@ class VirtualFileSystem(object):
             self.root = os.path.abspath(os.path.normpath(root_path))
             self.use_pkgutil = False
             if not os.path.isdir(self.root):
-                raise VfsError("root path doesn't exist")
+                raise VfsError("root path doesn't exist: ", self.root)
             if not os.access(self.root, os.R_OK):
-                raise VfsError("no read access")
+                raise VfsError("no read access: ", self.root)
         else:
             try:
                 test = pkgutil.get_data(root_package, "@dummy@")
