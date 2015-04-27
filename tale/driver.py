@@ -139,6 +139,7 @@ class Driver(object):
         self.server_loop_durations = collections.deque(maxlen=10)
         self.commands = Commands()
         cmds.register_all(self.commands)
+        self.all_players = {}   # maps playername to player object
         self.zones = None
         self.moneyfmt = None
         self.resources = self.user_resources = None
@@ -225,14 +226,17 @@ class Driver(object):
         for x in self.unbound_exits:
             x._bind_target(self.zones)
         del self.unbound_exits
-        # story has been initialised, create and connect a player
-        mud_context.player = new_player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
+        # story has been initialised, create I/O and connect a new player
         if args.gui:
             from .tio.tkinter_io import TkinterIo as IoAdapter
             io = IoAdapter(self.config)
         else:
             from .tio.console_io import ConsoleIo as IoAdapter
             io = IoAdapter(self.config)
+        connect_name = "<connecting_%d>" % id(io)  # unique temporary name
+        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        mud_context.player = new_player
+        self.all_players[new_player.name] = new_player   # @todo this is just a single player for now
         try:
             if self.unbound_exits:
                 raise RuntimeError("not all exits are bound")
@@ -258,11 +262,11 @@ class Driver(object):
         self.__stop_mainloop = False
         time.sleep(0.1)
         try:
-            for player in self.all_players():
+            for player in self.all_players.values():
                 self.__print_game_intro(player)
-            p = mud_context.player = self.__create_player(mud_context.player)  # @todo make it truly multi player
+            p = mud_context.player = self.__create_player(mud_context.player)  # @todo make it multi player
             if self.config.server_mode != "if":
-                self.show_motd(player)
+                self.show_motd(p)
             p.look(short=False)
             p.write_output()
             while not self.__stop_mainloop:
@@ -311,12 +315,12 @@ class Driver(object):
             load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", player)
         player.tell("\n")
         if load_saved_game:
-            io = player.io  # save the I/O
+            io_old = player.io  # save the I/O so we can reset it later...
             loaded_player = self.__load_saved_game()
             if loaded_player:
                 player = loaded_player
-                io.set_player(player)
-                player.io = io  # reset the I/O
+                io_old.set_player(player)
+                player.io = io_old  # ...reset the I/O
                 player.tell("\n")
                 if self.config.server_mode == "if":
                     self.story.welcome_savegame(player)
@@ -325,7 +329,6 @@ class Driver(object):
                 player.tell("\n")
             else:
                 load_saved_game = False
-
         if not load_saved_game:
             if self.config.server_mode == "if" and self.config.player_name:
                 # interactive fiction mode, create the player from the game's config
@@ -335,6 +338,8 @@ class Driver(object):
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
                 name_info = CharacterBuilder(player).build()
+                del self.all_players[player.name]
+                self.all_players[name_info.name] = player
                 name_info.apply_to(player)
 
             player.io.do_styles = player.screen_styles_enabled
@@ -361,9 +366,10 @@ class Driver(object):
         """
         self.__stop_mainloop = True
         ctx = util.Context(driver=self, clock=None, config=self.config)
-        for player in self.all_players():
+        for player in self.all_players.values():
             player.write_output()
             player.destroy(ctx)
+        self.all_players.clear()
         mud_context.player = None
 
     def __main_loop(self):
@@ -475,7 +481,7 @@ class Driver(object):
                     deferred = None
             if deferred:
                 deferred(driver=self)
-        for player in self.all_players():
+        for player in self.all_players.values():
             player.write_output()
 
     def __story_complete_output(self, player):
@@ -606,20 +612,21 @@ class Driver(object):
                 print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 self._stop_driver()
                 raise SystemExit(10)
-            # Because loading a game is strictly for single player 'if' mode,
-            # we load a new player and simply replace the global player with this one.
-            # @todo better player tracking in the driver
-            mud_context.player = new_player = state["player"]
+            # Because loading a complete saved game is strictly for single player 'if' mode,
+            # we load a new player and simply replace all players with this one.
+            player = state["player"]
+            mud_context.player = player
+            self.all_players = {player.name: player}
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
             self.config = state["config"]
-            new_player.tell("\n")
-            new_player.tell("Game loaded.")
+            player.tell("\n")
+            player.tell("Game loaded.")
             if self.config.display_gametime:
-                new_player.tell("Game time:", self.game_clock)
-            new_player.tell("\n")
-            return new_player
+                player.tell("Game time:", self.game_clock)
+            player.tell("\n")
+            return player
 
     def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
@@ -644,18 +651,11 @@ class Driver(object):
             player.tell("\n")
 
     def search_player(self, name):
-        """Look through all the logged in players for one with the given name"""
-        for player in self.all_players():
-            if player.name == name:
-                return player
-        return None
-
-    def all_players(self):
-        """return all players"""
-        #@ todo this is just a stub now, make truly multi player
-        if mud_context.player:
-            return [mud_context.player]
-        return []
+        """
+        Look through all the logged in players for one with the given name.
+        Returns None if no one is known with that name.
+        """
+        return self.all_players.get(name)
 
     def get_current_verbs(self, player):
         """return a dict of all currently recognised verbs, and their help text"""

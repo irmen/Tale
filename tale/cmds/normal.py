@@ -880,7 +880,7 @@ def do_who(player, parsed, ctx):
     else:
         # print all players
         player.tell("All players currently in the game:", end=True)
-        for player in ctx.driver.all_players():  # list of all players
+        for player in ctx.driver.all_players.values():  # list of all players
             player.tell("<player>%s</> (%s): currently in '<location>%s</>'." % (lang.capital(player.name), player.title, player.location.name), end=True)
 
 
