@@ -18,6 +18,7 @@ import argparse
 import pickle
 import threading
 import types
+import traceback
 import appdirs
 import distutils.version
 from . import mud_context
@@ -194,7 +195,6 @@ class Driver(object):
             self.__start(args)
         except Exception:
             if args.gui:
-                import traceback
                 tb = traceback.format_exc()
                 from .tio import tkinter_io
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
@@ -487,16 +487,19 @@ class Driver(object):
                     self._stop_driver()
                     break
                 except Exception:
-                    import traceback
                     txt = "* internal error:\n" + traceback.format_exc()
                     p.tell(txt, format=False)
             # call any queued event notification handlers
             while True:
                 try:
                     deferred = self.notification_queue.get_nowait()
-                    deferred()
                 except util.queue.Empty:
                     break
+                else:
+                    try:
+                        deferred()
+                    except Exception:
+                        self.__report_deferred_exception(deferred)
 
     def __server_tick(self):
         """
@@ -523,9 +526,18 @@ class Driver(object):
             if deferred:
                 # calling the deferred needs to be outside the lock because it can reschedule a new deferred
                 ctx = util.Context(driver=self, clock=self.game_clock, config=self.config)
-                deferred(ctx=ctx)  # call the deferred and provide a context object
+                try:
+                    deferred(ctx=ctx)  # call the deferred and provide a context object
+                except Exception:
+                    self.__report_deferred_exception(deferred)
+
         for player in self.all_players.values():
             player.write_output()
+
+    def __report_deferred_exception(self, deferred):
+        print("\n* Exception while executing deferred {0}:".format(deferred), file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+        print("(continuing...)", file=sys.stderr)
 
     def __story_complete_output(self, player):
         player.tell("\n")
@@ -779,6 +791,8 @@ class Driver(object):
         Register a deferred callable action (optionally with arguments) in the queue
         of events that will be executed immediately *after* the player's own actions
         have been completed.
+        Note that there is a slight difference with defer(): in our case the called
+        action will _not_ have an automatic ctx kwarg added when called.
         """
         deferred = Deferred(None, action, vargs, kwargs)
         self.notification_queue.put(deferred)
