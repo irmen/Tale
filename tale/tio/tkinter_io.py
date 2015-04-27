@@ -329,7 +329,7 @@ class TaleGUI(object):
             self.root.after_idle(lambda: self.window.write_line(line, self.io.do_styles))
 
     def register_cmd(self, cmd):
-        mud_context.player.store_input_line(cmd)
+        self.io.player.store_input_line(cmd)
 
 
 def show_error_dialog(title, message):

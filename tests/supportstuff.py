@@ -43,7 +43,7 @@ class DummyDriver(object):
             callable(*vargs, **kwargs)
         self.after_player_queue = []
 
-    def get_current_verbs(self):
+    def get_current_verbs(self, player):
         return {}
 
 

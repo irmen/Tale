@@ -116,7 +116,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         player.store_input_line("")
         import signal
         import os
-        os.kill(os.getpid(), signal.SIGINT)
+        os.kill(os.getpid(), signal.SIGINT)     # XXX this kills the whole process, not nice in multi player
 
     def render_output(self, paragraphs, **params):
         """

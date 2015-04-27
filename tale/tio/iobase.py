@@ -64,7 +64,7 @@ class IoAdapterBase(object):
         """Clear the screen"""
         pass
 
-    def switch_player(self, player):
+    def set_player(self, player):
         """Update the reference to the player object"""
         self.player = player
 
@@ -133,7 +133,7 @@ class TabCompleter(object):
             return
         if prefix != self.prefix:
             # new prefix, recalculate candidates
-            verbs = [verb for verb in self.driver.get_current_verbs() if verb.startswith(prefix)]
+            verbs = [verb for verb in self.driver.get_current_verbs(self.player) if verb.startswith(prefix)]
             livings = [living.name for living in self.player.location.livings if living.name.startswith(prefix)]
             livings_aliases = [alias for living in self.player.location.livings for alias in living.aliases if alias.startswith(prefix)]
             items = [item.name for item in self.player.location.items if item.name.startswith(prefix)]

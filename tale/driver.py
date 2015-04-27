@@ -134,12 +134,10 @@ class Driver(object):
         self.deferreds = []  # heapq
         self.deferreds_lock = threading.Lock()
         self.notification_queue = util.queue.Queue()
-        server_started = datetime.datetime.now()
-        self.server_started = server_started.replace(microsecond=0)
-        self.player = None
+        self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.config = None
-        self.commands = Commands()
         self.server_loop_durations = collections.deque(maxlen=10)
+        self.commands = Commands()
         cmds.register_all(self.commands)
         self.zones = None
         self.moneyfmt = None
@@ -228,8 +226,7 @@ class Driver(object):
             x._bind_target(self.zones)
         del self.unbound_exits
         # story has been initialised, create and connect a player
-        self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
-        mud_context.player = self.player
+        mud_context.player = new_player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         if args.gui:
             from .tio.tkinter_io import TkinterIo as IoAdapter
             io = IoAdapter(self.config)
@@ -247,9 +244,9 @@ class Driver(object):
             return
         io.output_line_delay = output_line_delay
         io.clear_screen()
-        io.install_tab_completion(TabCompleter(self, self.player))
-        self.player.io = io
-        io.switch_player(self.player)
+        io.install_tab_completion(TabCompleter(self, new_player))
+        new_player.io = io
+        io.set_player(new_player)
         # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
         driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
         driver_thread.daemon = True
@@ -261,21 +258,22 @@ class Driver(object):
         self.__stop_mainloop = False
         time.sleep(0.1)
         try:
-            self.__print_game_intro(self.player)
-            self.__create_player(self.player)
+            for player in self.all_players():
+                self.__print_game_intro(player)
+            p = mud_context.player = self.__create_player(mud_context.player)  # @todo make it truly multi player
             if self.config.server_mode != "if":
-                self.show_motd(self.player)
-            self.player.look(short=False)
-            self.player.write_output()
+                self.show_motd(player)
+            p.look(short=False)
+            p.write_output()
             while not self.__stop_mainloop:
                 try:
                     self.__main_loop()
                     break
                 except KeyboardInterrupt:
-                    self.player.io.break_pressed()
+                    p.io.break_pressed()
                     continue
         except:
-            self.player.io.critical_error()
+            p.io.critical_error()
             self.__stop_mainloop = True
             raise
 
@@ -304,7 +302,8 @@ class Driver(object):
             io.output("")
 
     def __create_player(self, player):
-        # lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
+        # Lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
+        # Returns the active player or a new player object if something has changed.
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
@@ -315,8 +314,8 @@ class Driver(object):
             io = player.io  # save the I/O
             loaded_player = self.__load_saved_game()
             if loaded_player:
-                io.switch_player(loaded_player)
                 player = loaded_player
+                io.set_player(player)
                 player.io = io  # reset the I/O
                 player.tell("\n")
                 if self.config.server_mode == "if":
@@ -353,13 +352,19 @@ class Driver(object):
                 player.tell("Welcome to %s, %s." % (self.config.name, player.title), end=True)
             player.tell("\n")
         self.story.init_player(player)
+        return player
 
     def _stop_driver(self):
-        """stop the driver mainloop in an orderly fashion. (called for instance when user closes the game window)"""
+        """
+        Stop the driver mainloop in an orderly fashion.
+        Flushes any pending output to the players, then closes down.
+        """
         self.__stop_mainloop = True
-        self.player.write_output()  # flush pending output at server shutdown.
         ctx = util.Context(driver=self, clock=None, config=self.config)
-        self.player.destroy(ctx)
+        for player in self.all_players():
+            player.write_output()
+            player.destroy(ctx)
+        mud_context.player = None
 
     def __main_loop(self):
         """
@@ -368,12 +373,12 @@ class Driver(object):
         """
         has_input = True
         last_loop_time = last_server_tick = time.time()
-        mud_context.player = self.player   # @todo hack... is always the same single player for now
         while not self.__stop_mainloop:
-            self.player.write_output()
-            if self.player.story_complete and self.config.server_mode == "if":
+            p = mud_context.player      # @todo loop over every player (multi player)
+            p.write_output()
+            if p.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
-                self.__story_complete_output()
+                self.__story_complete_output(p)
                 self._stop_driver()
                 break
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
@@ -387,13 +392,13 @@ class Driver(object):
 
             if has_input:
                 # print the input prompt
-                self.player.io.write_input_prompt()
+                p.io.write_input_prompt()
 
             # check for player input:
             if self.config.server_tick_method == "timer":
-                has_input = self.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
+                has_input = p.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
             elif self.config.server_tick_method == "command":
-                self.player.input_is_available.wait()   # blocking wait until playered entered something
+                p.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
                 before = time.time()
                 self.__server_tick()
@@ -402,45 +407,45 @@ class Driver(object):
             last_loop_time = time.time()
             if has_input:
                 try:
-                    for cmd in self.player.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
+                    for cmd in p.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
                         if not cmd:
                             continue
                         try:
-                            self.player.tell("\n")
-                            self.__process_player_input(cmd)
-                            self.player.remember_parsed()
+                            p.tell("\n")
+                            self.__process_player_input(p, cmd)
+                            p.remember_parsed()
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
-                                self.player.tell("You can't go in that direction.")
+                                p.tell("You can't go in that direction.")
                             else:
-                                self.player.tell("The verb '%s' is unrecognized." % x.verb)
+                                p.tell("The verb '%s' is unrecognized." % x.verb)
                         except errors.ActionRefused as x:
-                            self.player.remember_parsed()
-                            self.player.tell(str(x))
+                            p.remember_parsed()
+                            p.tell(str(x))
                         except errors.ParseError as x:
-                            self.player.tell(str(x))
+                            p.tell(str(x))
                 except KeyboardInterrupt:
-                    self.player.io.break_pressed()
+                    p.io.break_pressed()
                     continue
                 except EOFError:
                     continue
                 except errors.StoryCompleted:
                     if self.config.server_mode == "if":
                         # congratulations ;-)
-                        self.player.story_completed()
+                        p.story_completed()
                     else:
                         pass   # in mud mode, the game can't be 'completed' in this way
                 except errors.SessionExit:
                     if self.config.server_mode == "if":
-                        self.story.goodbye(self.player)
+                        self.story.goodbye(p)
                     else:
-                        self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
+                        p.tell("Goodbye, %s. Please come back again soon." % p.title, end=True)
                     self._stop_driver()
                     break
                 except Exception:
                     import traceback
                     txt = "* internal error:\n" + traceback.format_exc()
-                    self.player.tell(txt, format=False)
+                    p.tell(txt, format=False)
             # call any queued event notification handlers
             while True:
                 try:
@@ -470,16 +475,17 @@ class Driver(object):
                     deferred = None
             if deferred:
                 deferred(driver=self)
-        self.player.write_output()
+        for player in self.all_players():
+            player.write_output()
 
-    def __story_complete_output(self):
-        self.player.tell("\n")
-        self.story.completion(self.player)
-        self.player.tell("\n")
-        self.player.input("\nPress enter to continue. ")
-        self.player.tell("\n")
+    def __story_complete_output(self, player):
+        player.tell("\n")
+        self.story.completion(player)
+        player.tell("\n")
+        player.input("\nPress enter to continue. ")
+        player.tell("\n")
 
-    def __process_player_input(self, cmd):
+    def __process_player_input(self, player, cmd):
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
@@ -493,27 +499,27 @@ class Driver(object):
 
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
-        command_verbs = self.commands.get(self.player.privileges)
-        custom_verbs = set(self.player.location.verbs)
+        command_verbs = self.commands.get(player.privileges)
+        custom_verbs = set(player.location.verbs)
         try:
             if _verb in self.commands.no_soul_parsing:
                 # don't use the soul to parse it further
-                self.player.turns += 1
+                player.turns += 1
                 raise soul.NonSoulVerb(soul.ParseResult(_verb, unparsed=_rest.strip()))
             else:
                 # Parse the command by using the soul.
                 all_verbs = set(command_verbs) | custom_verbs
-                parsed = self.player.parse(cmd, external_verbs=all_verbs)
+                parsed = player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
-            self.player.turns += 1
-            self.__do_socialize(parsed)
+            player.turns += 1
+            self.__do_socialize(player, parsed)
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
                 # for now, qualifiers are only supported on soul-verbs (emotes).
                 raise errors.ParseError("That action doesn't support qualifiers.")
             # Execute non-soul verb. First try directions, then the rest.
-            self.player.turns += 1
+            player.turns += 1
             try:
                 # Check if the verb is a custom verb and try to handle that.
                 # If it remains unhandled, check if it is a normal verb, and handle that.
@@ -521,26 +527,26 @@ class Driver(object):
                 parse_error = "That doesn't make much sense."
                 handled = False
                 if parsed.verb in custom_verbs:
-                    handled = self.player.location.handle_verb(parsed, self.player)
+                    handled = player.location.handle_verb(parsed, player)
                     if handled:
-                        self.after_player_action(self.player.location.notify_action, parsed, self.player)
+                        self.after_player_action(player.location.notify_action, parsed, player)
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
-                    if parsed.verb in self.player.location.exits:
-                        self.__go_through_exit(self.player, parsed.verb)
+                    if parsed.verb in player.location.exits:
+                        self.__go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock)
-                        func(self.player, parsed, ctx)
+                        func(player, parsed, ctx)
                         if func.enable_notify_action:
-                            self.after_player_action(self.player.location.notify_action, parsed, self.player)
+                            self.after_player_action(player.location.notify_action, parsed, player)
                     else:
                         raise errors.ParseError(parse_error)
-            except errors.RetrySoulVerb as x:
+            except errors.RetrySoulVerb:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
-                self.player.validate_socialize_targets(parsed)
-                self.__do_socialize(parsed)
+                player.validate_socialize_targets(parsed)
+                self.__do_socialize(player, parsed)
             except errors.RetryParse as x:
                 return self.__process_player_input(x.command)   # try again but with new command string
 
@@ -562,21 +568,26 @@ class Driver(object):
                 location = getattr(location, name)
         return location
 
-    def __do_socialize(self, parsed):
-        who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
-        self.player.tell(player_message)
-        self.player.location.tell(room_message, self.player, who, target_message)
-        self.after_player_action(self.player.location.notify_action, parsed, self.player)
+    def __do_socialize(self, player, parsed):
+        """
+        The player issued a soul verb such as 'ponder'. Socialize with the environment to handle this.
+        Some verbs may trigger a response or action from something or someone else.
+        """
+        who, player_message, room_message, target_message = player.socialize_parsed(parsed)
+        player.tell(player_message)
+        player.location.tell(room_message, player, who, target_message)
+        self.after_player_action(player.location.notify_action, parsed, player)
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
-            # We need to check the qualifier, it might void the actual action :)
+            # We need to check the verb qualifier, it might void the actual action :)
             if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
-                        living.start_attack(self.player)
+                        self.after_player_action(living.start_attack, player)
 
     def __load_saved_game(self):
+        assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"
         try:
             savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
             state = pickle.loads(savegame)
@@ -595,17 +606,20 @@ class Driver(object):
                 print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
                 self._stop_driver()
                 raise SystemExit(10)
-            self.player = state["player"]
-            mud_context.player = self.player
+            # Because loading a game is strictly for single player 'if' mode,
+            # we load a new player and simply replace the global player with this one.
+            # @todo better player tracking in the driver
+            mud_context.player = new_player = state["player"]
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
             self.config = state["config"]
-            self.player.tell("Game loaded.")
+            new_player.tell("\n")
+            new_player.tell("Game loaded.")
             if self.config.display_gametime:
-                self.player.tell("Game time:", self.game_clock)
-            self.player.tell("\n")
-            return self.player
+                new_player.tell("Game time:", self.game_clock)
+            new_player.tell("\n")
+            return new_player
 
     def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
@@ -631,19 +645,23 @@ class Driver(object):
 
     def search_player(self, name):
         """Look through all the logged in players for one with the given name"""
-        if self.player.name == name:
-            return self.player
+        for player in self.all_players():
+            if player.name == name:
+                return player
         return None
 
     def all_players(self):
         """return all players"""
-        return [self.player]
+        #@ todo this is just a stub now, make truly multi player
+        if mud_context.player:
+            return [mud_context.player]
+        return []
 
-    def get_current_verbs(self):
+    def get_current_verbs(self, player):
         """return a dict of all currently recognised verbs, and their help text"""
-        normal_verbs = self.commands.get(self.player.privileges)
+        normal_verbs = self.commands.get(player.privileges)
         verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
-        verbs.update(self.player.location.verbs)  # add the custom verbs
+        verbs.update(player.location.verbs)  # add the custom verbs
         return verbs
 
     def do_wait(self, duration):
@@ -668,7 +686,7 @@ class Driver(object):
             return
         state = {
             "version": self.config.version,
-            "player": self.player,
+            "player": player,
             "deferreds": self.deferreds,
             "clock": self.game_clock,
             "heartbeats": self.heartbeat_objects,
