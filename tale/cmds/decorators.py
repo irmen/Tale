@@ -1,3 +1,10 @@
+# coding=utf-8
+"""
+Decorator functions to help with defining commands.
+
+'Tale' mud driver, mudlib and interactive fiction framework
+Copyright by Irmen de Jong (irmen@razorvine.net)
+"""
 from __future__ import absolute_import, print_function, division, unicode_literals
 import inspect
 import functools

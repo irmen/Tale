@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Demo story.
 
@@ -22,12 +23,12 @@ class Story(object):
         supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
         player_name=None,               # set a name to create a prebuilt player, None to use the character builder
         player_gender=None,             # m/f/n
-        player_race=None,               # default is "human" ofcourse, but you can select something else if you want
+        player_race=None,               # default is "human" of course, but you can select something else if you want
         money_type="modern",            # money type modern/fantasy/None
         server_tick_method="timer",     # 'command' (waits for player entry) or 'timer' (async timer driven)
         server_tick_time=1.0,           # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
         gametime_to_realtime=5,         # meaning: game time is X times the speed of real time (only used with "timer" tick method)
-        max_wait_hours=2,               # the max. number of hours (gametime) the player is allowed to wait
+        max_wait_hours=2,               # the max. number of hours (game time) the player is allowed to wait
         display_gametime=True,          # enable/disable display of the game time at certain moments
         epoch=datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
         startlocation_player="town.square",

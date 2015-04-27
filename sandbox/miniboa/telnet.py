@@ -82,8 +82,8 @@ WONT    = chr(252)      # Wont; deny option request
 DO      = chr(253)      # Do = Request or confirm remote option
 DONT    = chr(254)      # Don't = Demand or confirm option halt
 IAC     = chr(255)      # Interpret as Command
-SEND    = chr(001)      # Sub-process negotiation SEND command
-IS      = chr(000)      # Sub-process negotiation IS command
+SEND    = chr(1)      # Sub-process negotiation SEND command
+IS      = chr(0)      # Sub-process negotiation IS command
 
 #--[ Telnet Options ]----------------------------------------------------------
 

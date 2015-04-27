@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Simple synchronous Pubsub signaling.
 Uses weakrefs to not needlessly lock subscribers/topics in memory.

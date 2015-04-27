@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 The actual mudlib 'world' code
 

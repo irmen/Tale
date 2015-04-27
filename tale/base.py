@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Mudlib base objects.
 
@@ -573,7 +574,7 @@ class Exit(MudObject):
                 for name in target_module.split("."):
                     module = getattr(module, name)
                 target = getattr(module, target_object)
-            except AttributeError as x:
+            except AttributeError:
                 raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" % (target_module, target_object, self.short_description))
             assert isinstance(target, Location)
             self.target = target

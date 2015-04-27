@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 The Wizard Tower, which is the place where Wizards start/log in
 

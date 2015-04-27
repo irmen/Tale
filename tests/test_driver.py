@@ -11,12 +11,18 @@ import heapq
 import datetime
 import os
 import inspect
+import pickle
 import tale.driver as the_driver
 import tale.cmds.normal
 import tale.cmds.wizard
 import tale.base
 import tale.util
 import tale.demo
+from tests.supportstuff import Thing
+
+
+def module_level_func(ctx=None):
+    pass
 
 
 class TestDeferreds(unittest.TestCase):
@@ -77,18 +83,32 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def testCallable(self):
-        class Thing(object):
-            def __init__(self):
-                self.x = []
-
-            def append(self, value, ctx):
-                assert ctx.driver == "driver"
-                self.x.append(value)
-
+        def plain_function(ctx=None):
+            return ctx
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
-        d(ctx=tale.util.Context(driver="driver", clock=None, config=None))
+        ctx = tale.util.Context(driver="driver", clock=None, config=None)
+        d(ctx=ctx)
         self.assertEqual([42], t.x)
+        d = the_driver.Deferred(None, module_level_func, [], None)
+        d(ctx=ctx)
+        d = the_driver.Deferred(None, os.getcwd, [], None)
+        with self.assertRaises(TypeError) as x:
+            d(ctx=ctx)
+        self.assertEqual("getcwd() takes no keyword arguments", str(x.exception))
+        with self.assertRaises(ValueError):
+            the_driver.Deferred(None, plain_function, [], None)
+        with self.assertRaises(ValueError):
+            d = the_driver.Deferred(None, lambda a, ctx=None: 1, [42], None)
+
+    def testSerializable(self):
+        target = Thing()
+        deferreds = [the_driver.Deferred(datetime.datetime.now(), target.append, [1, 2, 3], {"kwarg": 42}),
+                     the_driver.Deferred(datetime.datetime.now(), os.getcwd, [], None),
+                     the_driver.Deferred(datetime.datetime.now(), module_level_func, [], None)]
+        ser = pickle.dumps(deferreds, pickle.HIGHEST_PROTOCOL)
+        data = pickle.loads(ser)
+        self.assertEqual(deferreds, data)
 
     def testDue_realtime(self):
         # test due timings where the gameclock == realtime clock

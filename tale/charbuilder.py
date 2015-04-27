@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Character builder for multi-user mode.
 

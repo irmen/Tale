@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Creatures living in the central town.
 

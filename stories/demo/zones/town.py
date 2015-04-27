@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 The central town, which is the place where mud players start/log in
 
@@ -218,7 +219,7 @@ class Computer(Item):
             if parsed.who_info and self not in parsed.who_info:
                 raise ActionRefused("You need to type it on the computer.")
             if parsed.message:
-                # type "blabla" on computer (message between quotes)
+                # type "bla bla" on computer (message between quotes)
                 action, _, door = parsed.message.partition(" ")
                 self.process_typed_command(action, door, actor)
                 return True

@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Non-Player-Character classes
 

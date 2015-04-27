@@ -12,7 +12,6 @@ from tale.driver import StoryConfig
 from tests.supportstuff import TestDriver
 
 
-
 def serializecycle(obj):
     ser = pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
     return pickle.loads(ser)

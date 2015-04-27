@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Console-based input/output.
 
@@ -7,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import os
+import signal
 import threading
 from . import styleaware_wrapper, iobase
 try:
@@ -114,8 +116,6 @@ class ConsoleIo(iobase.IoAdapterBase):
         # The main thread is stuck in a blocking input (reading from stdin)
         # You really can't seem to interrupt that. So we terminate the process forcefully.
         player.store_input_line("")
-        import signal
-        import os
         os.kill(os.getpid(), signal.SIGINT)     # XXX this kills the whole process, not nice in multi player
 
     def render_output(self, paragraphs, **params):

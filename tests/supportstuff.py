@@ -13,6 +13,15 @@ from tale import util
 from tale import driver
 
 
+class Thing(object):
+    def __init__(self):
+        self.x = []
+
+    def append(self, value, ctx):
+        assert ctx.driver == "driver"
+        self.x.append(value)
+
+
 class TestDriver(driver.Driver):
     def __init__(self):
         super(TestDriver, self).__init__()

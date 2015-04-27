@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Mud driver (server).
 
@@ -16,6 +17,7 @@ import heapq
 import argparse
 import pickle
 import threading
+import types
 import appdirs
 import distutils.version
 from . import mud_context
@@ -32,17 +34,37 @@ from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 @total_ordering
 class Deferred(object):
+    """
+    Represents a callable action that will be invoked (with the given arguments) sometime in the future.
+    This object captures the action that must be invoked in a way that is serializable.
+    That means that you can't pass all types of callables, there are a few that are not
+    serializable (lambda's and scoped functions). They will trigger an error if you use those.
+    """
     def __init__(self, due, action, vargs, kwargs):
         assert due is None or isinstance(due, datetime.datetime)
         assert callable(action)
         self.due = due   # in game time
-        self.owner = getattr(action, "__self__")
+        self.owner = getattr(action, "__self__", None)
+        if isinstance(self.owner, types.ModuleType):
+            # encode a module simply by its name
+            self.owner = "module:" + self.owner.__name__
+        if self.owner is None:
+            action_module = getattr(action, "__module__", None)
+            if action_module:
+                if hasattr(sys.modules[action_module], action.__name__):
+                    self.owner = "module:" + action_module
+                else:
+                    # a callable was passed that we cannot serialize.
+                    raise ValueError("cannot use scoped functions or lambdas as deferred: " + str(action))
+            else:
+                raise ValueError("cannot determine action's owner object: " + str(action))
         self.action = action.__name__    # store name instead of object, to make this serializable
         self.vargs = vargs
         self.kwargs = kwargs
 
     def __eq__(self, other):
-        return self.due == other.due
+        return self.due == other.due and type(self.owner) == type(other.owner)\
+            and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
 
     def __lt__(self, other):
         return self.due < other.due   # deferreds must be sortable
@@ -62,11 +84,24 @@ class Deferred(object):
         self.kwargs = self.kwargs or {}
         if "ctx" in kwargs:
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
-        # deferred action is stored as the name of the function to call,
-        # so we need to obtain the actual function from the owner object.
-        func = getattr(self.owner, self.action, None)
-        if func:
+        if isinstance(self.action, util.basestring_type):
+            # deferred action is stored as the name of the function to call,
+            # so we need to obtain the actual function from the owner object.
+            if isinstance(self.owner, util.basestring_type):
+                if self.owner.startswith("module:"):
+                    # the owner refers to a module
+                    self.owner = sys.modules[self.owner[7:]]
+                else:
+                    raise RuntimeError("invalid owner specifier: "+self.owner)
+            func = getattr(self.owner, self.action)
             func(*self.vargs, **self.kwargs)
+        else:
+            self.action(*self.vargs, **self.kwargs)
+        # our lifetime has ended, remove references:
+        del self.owner
+        del self.action
+        del self.kwargs
+        del self.vargs
 
 
 class Commands(object):
@@ -247,7 +282,7 @@ class Driver(object):
             print("Verified, all seems to be fine.")
             return
         io.output_line_delay = output_line_delay
-        # XXX io.clear_screen()
+        io.clear_screen()
         io.install_tab_completion(TabCompleter(self, new_player))
         new_player.io = io
         io.set_player(new_player)
@@ -261,9 +296,10 @@ class Driver(object):
         # continues the startup process and kick off the driver's main loop
         self.__stop_mainloop = False
         time.sleep(0.1)
+        p = None
         try:
-            for player in self.all_players.values():
-                self.__print_game_intro(player)
+            for p in self.all_players.values():
+                self.__print_game_intro(p)
             p = mud_context.player = self.__create_player(mud_context.player)  # @todo make it multi player
             if self.config.server_mode != "if":
                 self.show_motd(p)
@@ -277,7 +313,8 @@ class Driver(object):
                     p.io.break_pressed()
                     continue
         except:
-            p.io.critical_error()
+            if p:
+                p.io.critical_error()
             self.__stop_mainloop = True
             raise
 
@@ -288,7 +325,7 @@ class Driver(object):
             banner = self.resources["messages/banner.txt"].data
             # print game banner as supplied by the game
             io.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
-        except IOError as x:
+        except IOError:
             # no banner provided by the game, print default game header
             io.output("")
             io.output("")
@@ -379,6 +416,7 @@ class Driver(object):
         """
         has_input = True
         last_loop_time = last_server_tick = time.time()
+        loop_duration = 1.0
         while not self.__stop_mainloop:
             p = mud_context.player      # @todo loop over every player (multi player)
             p.write_output()
@@ -721,9 +759,9 @@ class Driver(object):
         Note that the due time is datetime.datetime *in game time* (not real time!)
         when the deferred should trigger. It can also be a number, meaning the number
         of real-time seconds after the current time.
-        Also note that the deferred *always* gets a kwarg 'driver' set to the driver object
-        (this makes it easy to register a new deferred on the driver without the need to
-        access the global driver object)
+        Also note that the deferred *always* gets a kwarg 'ctx' set to a Context object.
+        This is often useful, for instance you can register a new deferred on the
+        ctx.driver without having to access a global driver object.
         """
         assert callable(action)
         if isinstance(due, datetime.datetime):

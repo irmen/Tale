@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 """
 A player's 'soul', which provides a lot of possible emotes (verbs).
 

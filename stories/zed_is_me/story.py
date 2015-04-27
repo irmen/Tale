@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 'Zed is me' -  a Zombie survival adventure
 

@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Textwrapper that doesn't count the length of the embedded formatting tags.
 

@@ -33,11 +33,13 @@ class StoryCaseBase(object):
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me"))
+
     def test_story(self):
         import story
         s = story.Story()
         self.assertEqual("Zed is me", s.config.name)
         self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
+
     def test_zones(self):
         import zones.house
         self.assertEqual("Living room", zones.house.livingroom.name)
@@ -45,11 +47,13 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
     directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/demo"))
+
     def test_story(self):
         import story
         s = story.Story()
         self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
         self.assertEqual("Tale Demo", s.config.name)
+
     def test_zones(self):
         import zones.town
         import zones.wizardtower
@@ -59,6 +63,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     directory = "."
+
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
@@ -66,6 +71,7 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
         self.assertEqual("Tale demo story", s.config.name)
         config = StoryConfig.copy_from(s.config)
         self.assertEqual(config.author_address, s.config.author_address)
+
     def test_zones(self):
         import tale.demo.zones.house
         self.assertEqual("garfield", tale.demo.zones.house.cat.name)

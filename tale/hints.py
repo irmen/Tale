@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Hints system.
 Provides clues about what to do next, based on what the player
