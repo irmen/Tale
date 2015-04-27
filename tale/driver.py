@@ -161,14 +161,6 @@ class Driver(object):
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
         args = parser.parse_args(command_line_args)
-        # first check the driver launch directory
-        path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
-        if path_for_driver == os.path.abspath("tale"):
-            # The tale library is being loaded from the current directory, this is not supported.
-            # (it causes import conflicts with the tale imports stated in the story source files)
-            print("Tale is being asked to run directly from the current directory, this is not supported.")
-            print("Install Tale properly, and/or use the start script from the story directory instead.")
-            return
         try:
             self.__start(args)
         except Exception:
