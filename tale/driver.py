@@ -472,14 +472,16 @@ class Driver(object):
         ctx = {"driver": self, "clock": self.game_clock}
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
-        if self.deferreds:
+        while self.deferreds:
+            deferred = None
             with self.deferreds_lock:
                 deferred = self.deferreds[0]
                 if deferred.due <= self.game_clock.clock:
                     deferred = heapq.heappop(self.deferreds)
                 else:
-                    deferred = None
+                    break
             if deferred:
+                # calling the deferred needs to be outside the lock because it can reschedule a new deferred
                 deferred(driver=self)
         for player in self.all_players.values():
             player.write_output()

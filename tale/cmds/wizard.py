@@ -452,7 +452,7 @@ def do_events(player, parsed, ctx):
     txt.append("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
     txt.append("<monospaced>")
     txt.append("<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                  </>")
-    for d in driver.deferreds:
+    for d in sorted(driver.deferreds):
         txt.append(("%-7s <dim>|</> %-20s<dim>|</> %s") % (d.when_due(ctx.clock, realtime=True), d.callable, d.owner))
     txt.append("</monospaced>")
     player.tell(*txt, format=False)
