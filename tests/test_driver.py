@@ -9,11 +9,14 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import unittest
 import heapq
 import datetime
+import os
+import inspect
 import tale.driver as the_driver
 import tale.cmds.normal
 import tale.cmds.wizard
 import tale.base
 import tale.util
+import tale.demo
 
 
 class TestDeferreds(unittest.TestCase):
@@ -138,6 +141,11 @@ class TestVarious(unittest.TestCase):
         for cmd in tale.cmds.wizard.all_commands.values():
             self.assertIsNotNone(cmd.__doc__)
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
+
+    def testStoryVerify(self):
+        gamedir = os.path.dirname(inspect.getabsfile(tale.demo))
+        d = the_driver.Driver()
+        d.start(["--game", gamedir, "--verify"])
 
 
 if __name__ == "__main__":

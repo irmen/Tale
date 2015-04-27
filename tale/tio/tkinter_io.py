@@ -318,7 +318,7 @@ class TaleGUI(object):
             self.root.after(2000, destroy2)
 
     def window_closed(self):
-        mud_context.driver.stop_driver()
+        mud_context.driver._stop_driver()
 
     def clear_screen(self):
         if self.root:

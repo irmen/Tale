@@ -814,7 +814,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("She is no longer around.", str(x.exception))
 
     def test_adjust_verbs(self):
-        allowed = ["hug", "ponder", "wait", "kick", "cough", "greet", "poke", "yawn"]
+        allowed = ["hug", "ponder", "sit", "kick", "cough", "greet", "poke", "yawn"]
         remove = ["hug", "kick"]
         verbs = {"frobnizificate": (tale.soul.SIMP, None, "frobnizes \nHOW \nAT", "at")}
         # keep original values to put back after tests
@@ -828,7 +828,7 @@ class TestSoul(unittest.TestCase):
             self.assertEqual({"yawn"}, tale.soul.NONLIVING_OK_VERBS)
             self.assertEqual(set(), tale.soul.MOVEMENT_VERBS)
             remaining = sorted(tale.soul.VERBS.keys())
-            self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "wait", "yawn"], remaining)
+            self.assertEqual(["cough", "frobnizificate", "greet", "poke", "ponder", "sit", "yawn"], remaining)
         finally:
             # restore original values
             tale.soul.VERBS = ORIG_VERBS

@@ -146,16 +146,9 @@ class Driver(object):
         self.resources = self.user_resources = None
         self.story = None
         self.game_clock = None
-        self.verified_ok = None
-        self._stop_mainloop = True
+        self.__stop_mainloop = True
 
-    def bind_exits(self):
-        # convert textual exit strings to actual exit object bindings
-        for exit in self.unbound_exits:
-            exit._bind_target(self.zones)
-        del self.unbound_exits
-
-    def start(self, args):
+    def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
         parser = argparse.ArgumentParser(description="""
             Tale framework %s game driver. Use this to launch a game and specify some settings.
@@ -167,7 +160,7 @@ class Driver(object):
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
-        args = parser.parse_args(args)
+        args = parser.parse_args(command_line_args)
         # first check the driver launch directory
         path_for_driver = os.path.abspath(os.path.dirname(inspect.getfile(Driver)))
         if path_for_driver == os.path.abspath("tale"):
@@ -177,7 +170,7 @@ class Driver(object):
             print("Install Tale properly, and/or use the start script from the story directory instead.")
             return
         try:
-            self._start(args)
+            self.__start(args)
         except Exception:
             if args.gui:
                 import traceback
@@ -186,7 +179,8 @@ class Driver(object):
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
-    def _start(self, args):
+    def __start(self, args):
+        """Start the driver from a parsed set of arguments"""
         if 0 <= args.delay <= 100:
             output_line_delay = args.delay
         else:
@@ -228,8 +222,8 @@ class Driver(object):
         self.story.init(self)
         import zones
         self.zones = zones
-        self.config.startlocation_player = self.lookup_location(self.config.startlocation_player)
-        self.config.startlocation_wizard = self.lookup_location(self.config.startlocation_wizard)
+        self.config.startlocation_player = self.__lookup_location(self.config.startlocation_player)
+        self.config.startlocation_wizard = self.__lookup_location(self.config.startlocation_wizard)
         if self.config.server_tick_method == "command":
             # If the server tick is synchronized with player commands, this factor needs to be 1,
             # because at every command entered the game time simply advances 1 x server_tick_time.
@@ -237,7 +231,10 @@ class Driver(object):
         assert self.config.server_tick_time > 0
         assert self.config.max_wait_hours >= 0
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
-        self.bind_exits()
+        # convert textual exit strings to actual exit object bindings
+        for x in self.unbound_exits:
+            x._bind_target(self.zones)
+        del self.unbound_exits
         # story has been initialised, create and connect a player
         self.player = player.Player("<connecting>", "n", "elemental", "This player is still connecting.")
         mud_context.player = self.player
@@ -247,46 +244,50 @@ class Driver(object):
         else:
             from .tio.console_io import ConsoleIo as IoAdapter
             io = IoAdapter(self.config)
+        try:
+            if self.unbound_exits:
+                raise RuntimeError("not all exits are bound")
+        except AttributeError:
+            pass
         if args.verify:
             print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
             print("Verified, all seems to be fine.")
-            self.verified_ok = True
-        else:
-            io.output_line_delay = output_line_delay
-            io.clear_screen()
-            io.install_tab_completion(TabCompleter(self, self.player))
-            self.player.io = io
-            io.switch_player(self.player)
-            # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
-            driver_thread = threading.Thread(name="driver", target=self.startup_main_loop)
-            driver_thread.daemon = True
-            driver_thread.start()
-            io.mainloop()
+            return
+        io.output_line_delay = output_line_delay
+        io.clear_screen()
+        io.install_tab_completion(TabCompleter(self, self.player))
+        self.player.io = io
+        io.switch_player(self.player)
+        # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
+        driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
+        driver_thread.daemon = True
+        driver_thread.start()
+        io.mainloop()
 
-    def startup_main_loop(self):
+    def __startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
-        self._stop_mainloop = False
+        self.__stop_mainloop = False
         time.sleep(0.1)
         try:
-            self.print_game_intro(self.player)
-            self.create_player(self.player)
+            self.__print_game_intro(self.player)
+            self.__create_player(self.player)
             if self.config.server_mode != "if":
                 self.show_motd(self.player)
             self.player.look(short=False)
             self.player.write_output()
-            while not self._stop_mainloop:
+            while not self.__stop_mainloop:
                 try:
-                    self.main_loop()
+                    self.__main_loop()
                     break
                 except KeyboardInterrupt:
                     self.player.io.break_pressed()
                     continue
         except:
             self.player.io.critical_error()
-            self._stop_mainloop = True
+            self.__stop_mainloop = True
             raise
 
-    def print_game_intro(self, player):
+    def __print_game_intro(self, player):
         # prints the intro screen of the game
         io = player.io
         try:
@@ -310,7 +311,7 @@ class Driver(object):
             io.output("</></monospaced>")
             io.output("")
 
-    def create_player(self, player):
+    def __create_player(self, player):
         # lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
@@ -320,7 +321,7 @@ class Driver(object):
         player.tell("\n")
         if load_saved_game:
             io = player.io  # save the I/O
-            loaded_player = self.load_saved_game()
+            loaded_player = self.__load_saved_game()
             if loaded_player:
                 io.switch_player(loaded_player)
                 player = loaded_player
@@ -361,36 +362,14 @@ class Driver(object):
             player.tell("\n")
         self.story.init_player(player)
 
-    def show_motd(self, player, notify_no_motd=False):
-        """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
-        try:
-            motd = self.resources["messages/motd.txt"]
-            message = motd.data.rstrip()
-        except IOError:
-            message = None
-        if message:
-            player.tell("<bright>Message-of-the-day:</>", end=True)
-            player.tell("\n")
-            player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
-            player.tell("\n")
-            player.tell("\n")
-        elif notify_no_motd:
-            player.tell("There's currently no message-of-the-day.")
-
-    def show_story_license(self, player):
-        """Prints optional additional license information supplied by the story"""
-        if self.config.license_file:
-            player.tell(self.resources[self.config.license_file].data, end=True)
-            player.tell("\n")
-
-    def stop_driver(self):
-        """stop the driver mainloop"""
-        self._stop_mainloop = True
+    def _stop_driver(self):
+        """stop the driver mainloop in an orderly fashion. (called for instance when user closes the game window)"""
+        self.__stop_mainloop = True
         self.player.write_output()  # flush pending output at server shutdown.
         ctx = util.Context(driver=self, clock=None, config=self.config)
         self.player.destroy(ctx)
 
-    def main_loop(self):
+    def __main_loop(self):
         """
         The game loop.
         Until the game is exited, it processes player input, and prints the resulting output.
@@ -398,17 +377,17 @@ class Driver(object):
         has_input = True
         last_loop_time = last_server_tick = time.time()
         mud_context.player = self.player   # @todo hack... is always the same single player for now
-        while not self._stop_mainloop:
+        while not self.__stop_mainloop:
             self.player.write_output()
             if self.player.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
-                self.story_complete_output()
-                self.stop_driver()
+                self.__story_complete_output()
+                self._stop_driver()
                 break
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
                 # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
                 last_server_tick = time.time()
-                self.server_tick()
+                self.__server_tick()
                 loop_duration_with_server_tick = time.time() - last_loop_time
                 self.server_loop_durations.append(loop_duration_with_server_tick)
             else:
@@ -425,7 +404,7 @@ class Driver(object):
                 self.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
                 before = time.time()
-                self.server_tick()
+                self.__server_tick()
                 self.server_loop_durations.append(time.time() - before)
 
             last_loop_time = time.time()
@@ -436,7 +415,7 @@ class Driver(object):
                             continue
                         try:
                             self.player.tell("\n")
-                            self.process_player_input(cmd)
+                            self.__process_player_input(cmd)
                             self.player.remember_parsed()
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
@@ -464,7 +443,7 @@ class Driver(object):
                         self.story.goodbye(self.player)
                     else:
                         self.player.tell("Goodbye, %s. Please come back again soon." % self.player.title, end=True)
-                    self.stop_driver()
+                    self._stop_driver()
                     break
                 except Exception:
                     import traceback
@@ -478,7 +457,7 @@ class Driver(object):
                 except util.queue.Empty:
                     break
 
-    def server_tick(self):
+    def __server_tick(self):
         """
         Do everything that the server needs to do every tick.
         1) game clock
@@ -501,14 +480,14 @@ class Driver(object):
                 deferred(driver=self)
         self.player.write_output()
 
-    def story_complete_output(self):
+    def __story_complete_output(self):
         self.player.tell("\n")
         self.story.completion(self.player)
         self.player.tell("\n")
         self.player.input("\nPress enter to continue. ")
         self.player.tell("\n")
 
-    def process_player_input(self, cmd):
+    def __process_player_input(self, cmd):
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
@@ -535,7 +514,7 @@ class Driver(object):
                 parsed = self.player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             self.player.turns += 1
-            self.do_socialize(parsed)
+            self.__do_socialize(parsed)
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -557,7 +536,7 @@ class Driver(object):
                         parse_error = "Please be more specific."
                 if not handled:
                     if parsed.verb in self.player.location.exits:
-                        self.go_through_exit(self.player, parsed.verb)
+                        self.__go_through_exit(self.player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock)
@@ -569,24 +548,17 @@ class Driver(object):
             except errors.RetrySoulVerb as x:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 self.player.validate_socialize_targets(parsed)
-                self.do_socialize(parsed)
+                self.__do_socialize(parsed)
             except errors.RetryParse as x:
-                return self.process_player_input(x.command)   # try again but with new command string
+                return self.__process_player_input(x.command)   # try again but with new command string
 
-    def get_current_verbs(self):
-        """return a dict of all currently recognised verbs, and their help text"""
-        normal_verbs = self.commands.get(self.player.privileges)
-        verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
-        verbs.update(self.player.location.verbs)  # add the custom verbs
-        return verbs
-
-    def go_through_exit(self, player, direction):
+    def __go_through_exit(self, player, direction):
         exit = player.location.exits[direction]
         exit.allow_passage(player)
         player.move(exit.target)
         player.look()
 
-    def lookup_location(self, location_name):
+    def __lookup_location(self, location_name):
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
@@ -598,7 +570,7 @@ class Driver(object):
                 location = getattr(location, name)
         return location
 
-    def do_socialize(self, parsed):
+    def __do_socialize(self, parsed):
         who, player_message, room_message, target_message = self.player.socialize_parsed(parsed)
         self.player.tell(player_message)
         self.player.location.tell(room_message, self.player, who, target_message)
@@ -612,6 +584,59 @@ class Driver(object):
                     if getattr(living, "aggressive", False):
                         living.start_attack(self.player)
 
+    def __load_saved_game(self):
+        try:
+            savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
+            state = pickle.loads(savegame)
+            del savegame
+        except (pickle.PickleError, ValueError, TypeError) as x:
+            print("There was a problem loading the saved game data:")
+            print(type(x).__name__, x)
+            self._stop_driver()
+            raise SystemExit(10)
+        except IOError:
+            print("No saved game data found.")
+            return None
+        else:
+            if state["version"] != self.config.version:
+                print("This saved game data was from a different version of the game and cannot be used.")
+                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                self._stop_driver()
+                raise SystemExit(10)
+            self.player = state["player"]
+            mud_context.player = self.player
+            self.deferreds = state["deferreds"]
+            self.game_clock = state["clock"]
+            self.heartbeat_objects = state["heartbeats"]
+            self.config = state["config"]
+            self.player.tell("Game loaded.")
+            if self.config.display_gametime:
+                self.player.tell("Game time:", self.game_clock)
+            self.player.tell("\n")
+            return self.player
+
+    def show_motd(self, player, notify_no_motd=False):
+        """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
+        try:
+            motd = self.resources["messages/motd.txt"]
+            message = motd.data.rstrip()
+        except IOError:
+            message = None
+        if message:
+            player.tell("<bright>Message-of-the-day:</>", end=True)
+            player.tell("\n")
+            player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
+            player.tell("\n")
+            player.tell("\n")
+        elif notify_no_motd:
+            player.tell("There's currently no message-of-the-day.")
+
+    def show_story_license(self, player):
+        """Prints optional additional license information supplied by the story"""
+        if self.config.license_file:
+            player.tell(self.resources[self.config.license_file].data, end=True)
+            player.tell("\n")
+
     def search_player(self, name):
         """Look through all the logged in players for one with the given name"""
         if self.player.name == name:
@@ -622,6 +647,13 @@ class Driver(object):
         """return all players"""
         return [self.player]
 
+    def get_current_verbs(self):
+        """return a dict of all currently recognised verbs, and their help text"""
+        normal_verbs = self.commands.get(self.player.privileges)
+        verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
+        verbs.update(self.player.location.verbs)  # add the custom verbs
+        return verbs
+
     def do_wait(self, duration):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times,
@@ -630,13 +662,13 @@ class Driver(object):
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick
             self.game_clock.add_gametime(duration)
-            self.server_tick()
+            self.__server_tick()
             return True, None      # uneventful
         num_ticks = int(duration.seconds / self.config.gametime_to_realtime / self.config.server_tick_time)
         if num_ticks < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_ticks):
-            self.server_tick()
+            self.__server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
     def do_save(self, player):
@@ -656,37 +688,6 @@ class Driver(object):
         if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)
         player.tell("\n")
-
-    def load_saved_game(self):
-        try:
-            savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
-            state = pickle.loads(savegame)
-            del savegame
-        except (pickle.PickleError, ValueError, TypeError) as x:
-            print("There was a problem loading the saved game data:")
-            print(type(x).__name__, x)
-            self.stop_driver()
-            raise SystemExit(10)
-        except IOError:
-            print("No saved game data found.")
-            return None
-        else:
-            if state["version"] != self.config.version:
-                print("This saved game data was from a different version of the game and cannot be used.")
-                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
-                self.stop_driver()
-                raise SystemExit(10)
-            self.player = state["player"]
-            mud_context.player = self.player
-            self.deferreds = state["deferreds"]
-            self.game_clock = state["clock"]
-            self.heartbeat_objects = state["heartbeats"]
-            self.config = state["config"]
-            self.player.tell("Game loaded.")
-            if self.config.display_gametime:
-                self.player.tell("Game time:", self.game_clock)
-            self.player.tell("\n")
-            return self.player
 
     def register_heartbeat(self, mudobj):
         self.heartbeat_objects.add(mudobj)

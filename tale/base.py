@@ -525,6 +525,7 @@ class Exit(MudObject):
     Short_description will be shown when the player looks around the room.
     Long_description is optional and will be shown instead if the player examines the exit.
     The exit's direction is stored as its name attribute (if more than one, the rest are aliases).
+    Note that the exit's origin is not stored in the exit object.
     """
     def __init__(self, directions, target_location, short_description, long_description=None):
         assert isinstance(target_location, (Location, util.basestring_type)), "target must be a Location or a string"
@@ -543,6 +544,8 @@ class Exit(MudObject):
         long_description = long_description or short_description
         super(Exit, self).__init__(direction, title=title, description=long_description, short_description=short_description)
         self.aliases = aliases
+        # The driver needs to know about all exits,
+        # it will hook them all up once initialization is complete.
         mud_context.driver.register_exit(self)
 
     def __repr__(self):
@@ -566,9 +569,12 @@ class Exit(MudObject):
         if not self.bound:
             target_module, target_object = self.target.rsplit(".", 1)
             module = game_zones_module
-            for name in target_module.split("."):
-                module = getattr(module, name)
-            target = getattr(module, target_object)
+            try:
+                for name in target_module.split("."):
+                    module = getattr(module, name)
+                target = getattr(module, target_object)
+            except AttributeError as x:
+                raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" % (target_module, target_object, self.short_description))
             assert isinstance(target, Location)
             self.target = target
             self.title = "Exit to " + target.title

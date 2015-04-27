@@ -1113,8 +1113,15 @@ def do_dice(player, parsed, ctx):
         sides = 6
     else:
         try:
-            n, _, s = parsed.args[0].partition("d")
-            number, sides = int(n), int(s)
+            if 'd' in parsed.args[0]:
+                n, _, s = parsed.args[0].partition("d")
+                number, sides = int(n), int(s)
+            else:
+                if parsed.args[0] == 'a':
+                    number = 1
+                else:
+                    number = int(parsed.args[0])
+                sides = 6
         except ValueError:
             raise ActionRefused("What kind of dice do you want to roll (such as 3d6)?")
     if not (1 <= number <= 20 and sides >= 2):
