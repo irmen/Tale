@@ -12,12 +12,12 @@ from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
 from tale.tio.vfs import VirtualFileSystem, VfsError
-from tests.supportstuff import DummyDriver, Wiretap
+from tests.supportstuff import TestDriver, Wiretap
 
 
 class TestUtil(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = DummyDriver()
+        mud_context.driver = TestDriver()
 
     def test_print_location(self):
         p = Player("julie", "f")

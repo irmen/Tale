@@ -9,7 +9,7 @@ import unittest
 import pickle
 from tale import mud_context, races, base, npc, soul, player, util, hints
 from tale.driver import StoryConfig
-from tests.supportstuff import DummyDriver
+from tests.supportstuff import TestDriver
 
 
 
@@ -20,7 +20,7 @@ def serializecycle(obj):
 
 class TestSerializing(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = DummyDriver()
+        mud_context.driver = TestDriver()
 
     def assert_base_attrs(self, obj):
         self.assertEqual("name", obj.name)

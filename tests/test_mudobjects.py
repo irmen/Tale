@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import datetime
-from tests.supportstuff import DummyDriver, MsgTraceNPC, Wiretap
+from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
 from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused
@@ -21,7 +21,7 @@ from tale import pubsub, mud_context
 
 class TestLocations(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = DummyDriver()
+        mud_context.driver = TestDriver()
         self.hall = Location("Main hall", "A very large hall.")
         self.attic = Location("Attic", "A dark attic.")
         self.street = Location("Street", "An endless street.")
@@ -614,7 +614,7 @@ class TestDescriptions(unittest.TestCase):
 
 class TestDestroy(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = DummyDriver()
+        mud_context.driver = TestDriver()
 
     def test_destroy_base(self):
         ctx = Context(None, None, None)
@@ -672,10 +672,10 @@ class TestDestroy(unittest.TestCase):
         player = Player("julie", "f")
         wolf = Monster("wolf", "m")
         loc = Location("loc")
-        mud_context.driver.defer(datetime.datetime.now(), thing, "method")
-        mud_context.driver.defer(datetime.datetime.now(), player, "method")
-        mud_context.driver.defer(datetime.datetime.now(), wolf, "method")
-        mud_context.driver.defer(datetime.datetime.now(), loc, "method")
+        mud_context.driver.defer(datetime.datetime.now(), thing, "register_heartbeat")
+        mud_context.driver.defer(datetime.datetime.now(), player, "register_heartbeat")
+        mud_context.driver.defer(datetime.datetime.now(), wolf, "register_heartbeat")
+        mud_context.driver.defer(datetime.datetime.now(), loc, "register_heartbeat")
         self.assertEqual(4, len(mud_context.driver.deferreds))
         thing.destroy(ctx)
         player.destroy(ctx)

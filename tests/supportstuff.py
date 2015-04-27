@@ -10,41 +10,22 @@ import datetime
 from tale import npc
 from tale import pubsub
 from tale import util
+from tale import driver
 
 
-class DummyDriver(object):
+class TestDriver(driver.Driver):
     def __init__(self):
-        self.heartbeats = set()
-        self.exits = []
+        super(TestDriver, self).__init__()
+        # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
-        self.deferreds = []
-        self.after_player_queue = []
-
-    def register_heartbeat(self, obj):
-        self.heartbeats.add(obj)
-
-    def unregister_heartbeat(self, obj):
-        self.heartbeats.discard(obj)
-
-    def register_exit(self, exit):
-        self.exits.append(exit)
-
-    def defer(self, due, owner, callable, *vargs, **kwargs):
-        self.deferreds.append((due, owner, callable))
-
-    def remove_deferreds(self, owner):
-        self.deferreds = [(d[0], d[1], d[2]) for d in self.deferreds if d[1] is not owner]
-
-    def after_player_action(self, callable, *vargs, **kwargs):
-        self.after_player_queue.append((callable, vargs, kwargs))
 
     def execute_after_player_actions(self):
-        for callable, vargs, kwargs in self.after_player_queue:
-            callable(*vargs, **kwargs)
-        self.after_player_queue = []
-
-    def get_current_verbs(self, player):
-        return {}
+        while True:
+            try:
+                deferred = self.notification_queue.get_nowait()
+                deferred()
+            except util.queue.Empty:
+                break
 
 
 class Wiretap(pubsub.Listener):

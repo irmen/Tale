@@ -11,14 +11,14 @@ import sys
 import tale
 from tale import mud_context
 from tale.driver import StoryConfig
-from tests.supportstuff import DummyDriver
+from tests.supportstuff import TestDriver
 
 
 class StoryCaseBase(object):
     def setUp(self):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
-        mud_context.driver = DummyDriver()
+        mud_context.driver = TestDriver()
         mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
 
     def tearDown(self):

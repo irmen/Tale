@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 import unittest
 import tale
-from tests.supportstuff import DummyDriver, MsgTraceNPC
+from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
@@ -27,7 +27,7 @@ else:
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = DummyDriver()
+        tale.mud_context.driver = TestDriver()
         tale.mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
         tale.mud_context.config.server_mode = "if"
 
@@ -540,7 +540,7 @@ class TestCharacterBuilder(unittest.TestCase):
 class TestTabCompletion(unittest.TestCase):
     def test_complete_c(self):
         player = Player("fritz", "m")
-        driver = DummyDriver()
+        driver = TestDriver()
         completer = TabCompleter(driver, player)
         result = completer.complete("c")
         self.assertGreater(len(result), 20)
@@ -552,7 +552,7 @@ class TestTabCompletion(unittest.TestCase):
 
     def test_complete_one(self):
         player = Player("fritz", "m")
-        driver = DummyDriver()
+        driver = TestDriver()
         completer = TabCompleter(driver, player)
         self.assertEqual(["criticize"], completer.complete("critic"))
 

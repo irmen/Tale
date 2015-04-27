@@ -13,12 +13,12 @@ import tale.soul
 import tale.player
 import tale.npc
 import tale.errors
-from tests.supportstuff import DummyDriver
+from tests.supportstuff import TestDriver
 
 
 class TestSoul(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = DummyDriver()
+        tale.mud_context.driver = TestDriver()
 
     def testSpacify(self):
         self.assertEqual("", tale.soul.spacify(""))
