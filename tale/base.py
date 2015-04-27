@@ -4,28 +4,28 @@ Mudlib base objects.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 
-object hierarchy:
+object hierarchy::
 
-MudObject
-  |
-  +-- Location
-  |
-  +-- Item
-  |     |
-  |     +-- Weapon
-  |     +-- Armour
-  |     +-- Container
-  |
-  +-- Living
-  |     |
-  |     +-- Player
-  |     +-- NPC
-  |          |
-  |          +-- Monster
-  |
-  +-- Exit
-        |
-        +-- Door
+    MudObject
+      |
+      +-- Location
+      |
+      +-- Item
+      |     |
+      |     +-- Weapon
+      |     +-- Armour
+      |     +-- Container
+      |
+      +-- Living
+      |     |
+      |     +-- Player
+      |     +-- NPC
+      |          |
+      |          +-- Monster
+      |
+      +-- Exit
+            |
+            +-- Door
 
 
 Every object that can hold other objects does so in its "inventory" (a set).

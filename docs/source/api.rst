@@ -82,29 +82,29 @@ Tale API
 .. automodule:: tale.cmds.wizard
     :members:
 
-:mod:`tale.io.iobase` --- Base classes for I/O
+:mod:`tale.tio.iobase` --- Base classes for I/O
+-----------------------------------------------
+.. automodule:: tale.tio.iobase
+    :members:
+
+:mod:`tale.tio.console_io` --- Text-console I/O
+-----------------------------------------------
+.. automodule:: tale.tio.console_io
+    :members:
+
+:mod:`tale.tio.tkinter_io` --- Tkinter GUI I/O
 ----------------------------------------------
-.. automodule:: tale.io.iobase
+.. automodule:: tale.tio.tkinter_io
     :members:
 
-:mod:`tale.io.console_io` --- Text-console I/O
-----------------------------------------------
-.. automodule:: tale.io.console_io
+:mod:`tale.tio.styleaware_wrapper` --- Text wrapping
+----------------------------------------------------
+.. automodule:: tale.tio.styleaware_wrapper
     :members:
 
-:mod:`tale.io.tkinter_io` --- Tkinter GUI I/O
----------------------------------------------
-.. automodule:: tale.io.tkinter_io
-    :members:
-
-:mod:`tale.io.styleaware_wrapper` --- Text wrapping
----------------------------------------------------
-.. automodule:: tale.io.styleaware_wrapper
-    :members:
-
-:mod:`tale.io.vfs` --- Virtual File System to load Resources
-------------------------------------------------------------
-.. automodule:: tale.io.vfs
+:mod:`tale.tio.vfs` --- Virtual File System to load Resources
+-------------------------------------------------------------
+.. automodule:: tale.tio.vfs
     :members:
 
 :mod:`tale.items.basic` --- Item definitions

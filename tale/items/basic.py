@@ -16,7 +16,7 @@ class Boxlike(Container):
     """
     Container base class/prototype. The container can be opened/closed.
     Only if it is open you can put stuff in it or take stuff out of it.
-    You can set a couple of txt_ attributes that change the visual aspect of this object.
+    You can set a couple of txt attributes that change the visual aspect of this object.
     """
     def init(self):
         super(Boxlike, self).init()

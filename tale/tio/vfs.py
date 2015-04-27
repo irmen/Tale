@@ -12,7 +12,7 @@ import errno
 import mimetypes
 import pkgutil
 
-__all__ = ["VfsError", "VirtualFileSystem", "internal_resources", "userdata"]
+__all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
 
 class VfsError(IOError):
