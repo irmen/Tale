@@ -36,7 +36,7 @@ class Deferred(object):
         assert due is None or isinstance(due, datetime.datetime)
         assert callable(action)
         self.due = due   # in game time
-        self.owner = getattr(action, "__self__", None)
+        self.owner = getattr(action, "__self__")
         self.action = action.__name__    # store name instead of object, to make this serializable
         self.vargs = vargs
         self.kwargs = kwargs
@@ -60,16 +60,13 @@ class Deferred(object):
 
     def __call__(self, *args, **kwargs):
         self.kwargs = self.kwargs or {}
-        if "driver" in kwargs:
-            self.kwargs["driver"] = kwargs["driver"]  # always add a 'driver' keyword argument for convenience
-        if self.owner is None:
-            # deferred callable is stored as a normal callable object
-            self.action(*self.vargs, **self.kwargs)
-        else:
-            # deferred callable is stored as a name, so we need to obtain the actual function
-            func = getattr(self.owner, self.action, None)
-            if func:
-                func(*self.vargs, **self.kwargs)
+        if "ctx" in kwargs:
+            self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
+        # deferred action is stored as the name of the function to call,
+        # so we need to obtain the actual function from the owner object.
+        func = getattr(self.owner, self.action, None)
+        if func:
+            func(*self.vargs, **self.kwargs)
 
 
 class Commands(object):
@@ -473,14 +470,17 @@ class Driver(object):
         while self.deferreds:
             deferred = None
             with self.deferreds_lock:
-                deferred = self.deferreds[0]
-                if deferred.due <= self.game_clock.clock:
-                    deferred = heapq.heappop(self.deferreds)
-                else:
-                    break
+                if self.deferreds:
+                    deferred = self.deferreds[0]
+                    if deferred.due <= self.game_clock.clock:
+                        deferred = heapq.heappop(self.deferreds)
+                    else:
+                        deferred = None
+                        break
             if deferred:
                 # calling the deferred needs to be outside the lock because it can reschedule a new deferred
-                deferred(driver=self)
+                ctx = util.Context(driver=self, clock=self.game_clock, config=self.config)
+                deferred(ctx=ctx)  # call the deferred and provide a context object
         for player in self.all_players.values():
             player.write_output()
 

@@ -453,6 +453,6 @@ def do_events(player, parsed, ctx):
     txt.append("<monospaced>")
     txt.append("<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                  </>")
     for d in sorted(driver.deferreds):
-        txt.append(("%-7s <dim>|</> %-20s<dim>|</> %s") % (d.when_due(ctx.clock, realtime=True), d.callable, d.owner))
+        txt.append(("%-7s <dim>|</> %-20s<dim>|</> %s") % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
     txt.append("</monospaced>")
     player.tell(*txt, format=False)

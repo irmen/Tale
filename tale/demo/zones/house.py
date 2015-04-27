@@ -50,12 +50,12 @@ class Cat(NPC):
         self.aliases = {"cat"}
         mud_context.driver.defer(4, self.do_purr)
 
-    def do_purr(self, driver):
+    def do_purr(self, ctx):
         if random.random() > 0.5:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
-        driver.defer(random.randint(5, 20), self.do_purr)
+        ctx.driver.defer(random.randint(5, 20), self.do_purr)
 
     def notify_action(self, parsed, actor):
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):

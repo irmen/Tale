@@ -41,10 +41,10 @@ class TownCrier(NPC):
         # This is the preferred way (it's efficient).
         mud_context.driver.defer(2, self.do_cry)
 
-    def do_cry(self, driver):
+    def do_cry(self, ctx):
         self.tell_others("{Title} yells: welcome everyone!")
         message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
-        driver.defer(random.randint(20, 40), self.do_cry)
+        ctx.driver.defer(random.randint(20, 40), self.do_cry)
 
     def notify_action(self, parsed, actor):
         greet = False
@@ -65,14 +65,14 @@ class WalkingRat(Monster):
         mud_context.driver.defer(2, self.do_idle_action)
         mud_context.driver.defer(4, self.do_random_move)
 
-    def do_idle_action(self, driver):
+    def do_idle_action(self, ctx):
         if random.random() < 0.5:
             self.tell_others("{Title} wiggles %s tail." % self.possessive)
         else:
             self.tell_others("{Title} sniffs around and moves %s whiskers." % self.possessive)
-        driver.defer(random.randint(5, 15), self.do_idle_action)
+        ctx.driver.defer(random.randint(5, 15), self.do_idle_action)
 
-    def do_random_move(self, driver):
+    def do_random_move(self, ctx):
         directions_with_way_back = [d for d, e in self.location.exits.items() if e.target.exits]  # avoid traps
         for tries in range(3):
             direction = random.choice(directions_with_way_back)
@@ -85,4 +85,4 @@ class WalkingRat(Monster):
                 self.tell_others("{Title} scurries away to the %s." % direction)
                 self.move(exit.target, self)
                 break
-        driver.defer(random.randint(10, 20), self.do_random_move)
+        ctx.driver.defer(random.randint(10, 20), self.do_random_move)

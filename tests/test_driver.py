@@ -26,11 +26,11 @@ class TestDeferreds(unittest.TestCase):
         t3 = datetime.datetime(1997, 1, 1)
         t4 = datetime.datetime(1998, 1, 1)
         t5 = datetime.datetime(1999, 1, 1)
-        d1 = the_driver.Deferred(t5, lambda: 1, None, None)
-        d2 = the_driver.Deferred(t2, lambda: 1, None, None)
-        d3 = the_driver.Deferred(t4, lambda: 1, None, None)
-        d4 = the_driver.Deferred(t1, lambda: 1, None, None)
-        d5 = the_driver.Deferred(t3, lambda: 1, None, None)
+        d1 = the_driver.Deferred(t5, os.getcwd, None, None)
+        d2 = the_driver.Deferred(t2, os.getcwd, None, None)
+        d3 = the_driver.Deferred(t4, os.getcwd, None, None)
+        d4 = the_driver.Deferred(t1, os.getcwd, None, None)
+        d5 = the_driver.Deferred(t3, os.getcwd, None, None)
         deferreds = sorted([d1, d2, d3, d4, d5])
         dues = [d.due for d in deferreds]
         self.assertEqual([t1, t2, t3, t4, t5], dues)
@@ -64,11 +64,11 @@ class TestDeferreds(unittest.TestCase):
         t3 = datetime.datetime(1997, 1, 1)
         t4 = datetime.datetime(1998, 1, 1)
         t5 = datetime.datetime(1999, 1, 1)
-        d1 = the_driver.Deferred(t5, lambda: 1, None, None)
-        d2 = the_driver.Deferred(t2, lambda: 1, None, None)
-        d3 = the_driver.Deferred(t4, lambda: 1, None, None)
-        d4 = the_driver.Deferred(t1, lambda: 1, None, None)
-        d5 = the_driver.Deferred(t3, lambda: 1, None, None)
+        d1 = the_driver.Deferred(t5, os.getcwd, None, None)
+        d2 = the_driver.Deferred(t2, os.getcwd, None, None)
+        d3 = the_driver.Deferred(t4, os.getcwd, None, None)
+        d4 = the_driver.Deferred(t1, os.getcwd, None, None)
+        d5 = the_driver.Deferred(t3, os.getcwd, None, None)
         heap = [d1, d2, d3, d4, d5]
         heapq.heapify(heap)
         dues = []
@@ -81,20 +81,20 @@ class TestDeferreds(unittest.TestCase):
             def __init__(self):
                 self.x = []
 
-            def append(self, value, driver):
-                assert driver is the_driver
+            def append(self, value, ctx):
+                assert ctx.driver == "driver"
                 self.x.append(value)
 
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
-        d(driver=the_driver)
+        d(ctx=tale.util.Context(driver="driver", clock=None, config=None))
         self.assertEqual([42], t.x)
 
     def testDue_realtime(self):
         # test due timings where the gameclock == realtime clock
         game_clock = tale.util.GameDateTime(datetime.datetime(2013, 7, 18, 15, 29, 59, 123))
         due = game_clock.plus_realtime(datetime.timedelta(seconds=60))
-        d = the_driver.Deferred(due, lambda: 1, None, None)
+        d = the_driver.Deferred(due, os.getcwd, None, None)
         result = d.when_due(game_clock)
         self.assertIsInstance(result, datetime.timedelta)
         self.assertEqual(datetime.timedelta(seconds=60), result)
@@ -110,7 +110,7 @@ class TestDeferreds(unittest.TestCase):
         # test due timings where the gameclock == 10 times realtime clock
         game_clock = tale.util.GameDateTime(datetime.datetime(2013, 7, 18, 15, 29, 59, 123), 10)   # 10 times realtime
         due = game_clock.plus_realtime(datetime.timedelta(seconds=60))      # due in (realtime) 60 seconds (600 gametime seconds)
-        d = the_driver.Deferred(due, lambda: 1, None, None)
+        d = the_driver.Deferred(due, os.getcwd, None, None)
         result = d.when_due(game_clock)   # not realtime
         self.assertIsInstance(result, datetime.timedelta)
         self.assertEqual(datetime.timedelta(seconds=10 * 60), result)
