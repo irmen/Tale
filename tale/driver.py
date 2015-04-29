@@ -609,7 +609,7 @@ class Driver(object):
                 player.validate_socialize_targets(parsed)
                 self.__do_socialize(player, parsed)
             except errors.RetryParse as x:
-                return self.__process_player_input(x.command)   # try again but with new command string
+                return self.__process_player_input(player, x.command)   # try again but with new command string
 
     def __go_through_exit(self, player, direction):
         exit = player.location.exits[direction]
