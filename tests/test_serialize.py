@@ -111,11 +111,9 @@ class TestSerializing(unittest.TestCase):
         p = player.Player("name", "n", description="description")
         p.title = "title"
         p.money = 42
-        p.pc = "PC-dummy"    # @todo temporarily
         x = serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
-        self.assertIsNone(x.pc)
 
     def test_storyconfig(self):
         s = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config

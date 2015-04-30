@@ -298,16 +298,15 @@ class Driver(object):
         # continues the startup process and kick off the driver's main loop
         self.__stop_mainloop = False
         time.sleep(0.01)
-        player = conn = None
+        conn = None
         try:
             for conn in self.all_players.values():
                 self.__print_game_intro(conn)
             self.__create_player()  # @todo make it multi player
-            player = mud_context.player
             conn = mud_context.conn
             if self.config.server_mode != "if":
                 self.show_motd(player)
-            player.look(short=False)
+            conn.player.look(short=False)   # force a 'look' command to get our bearings
             conn.write_output()
             while not self.__stop_mainloop:
                 try:
@@ -360,7 +359,6 @@ class Driver(object):
             loaded_player = self.__load_saved_game()
             if loaded_player:
                 conn.player = player = loaded_player
-                player.pc = conn  # @ todo rewire connection to player, find a different solution?
                 player.tell("\n")
                 if self.config.server_mode == "if":
                     self.story.welcome_savegame(player)

@@ -788,13 +788,13 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "hug kate")
         soul.previously_parsed = parsed
         parsed = soul.parse(player, "kiss her")
-        self.assertEqual(["(By 'her', it is assumed you mean Kate.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(["(By 'her', it is assumed you mean Kate.)\n"], player.test_get_output_paragraphs())
         self.assertEqual(kate_npc, parsed.who_order[0])
         # it
         parsed = soul.parse(player, "hug dinosaur")
         soul.previously_parsed = parsed
         parsed = soul.parse(player, "kiss it")
-        self.assertEqual(["(By 'it', it is assumed you mean dinosaur.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(["(By 'it', it is assumed you mean dinosaur.)\n"], player.test_get_output_paragraphs())
         self.assertEqual(dino_npc, parsed.who_order[0])
         with self.assertRaises(tale.errors.ParseError) as x:
             parsed = soul.parse(player, "kiss her")
@@ -803,7 +803,7 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "hug kate and dinosaur")
         soul.previously_parsed = parsed
         parsed = soul.parse(player, "kiss them")
-        self.assertEqual(["(By 'them', it is assumed you mean: Kate and dinosaur.)\n"], player.get_output_paragraphs_raw())
+        self.assertEqual(["(By 'them', it is assumed you mean: Kate and dinosaur.)\n"], player.test_get_output_paragraphs())
         self.assertEqual([kate_npc, dino_npc], parsed.who_order)
         # when no longer around
         parsed = soul.parse(player, "hug kate")

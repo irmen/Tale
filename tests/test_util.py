@@ -30,18 +30,18 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(Exception):
             util.print_object_location(p, None, None)
         util.print_object_location(p, key, None)
-        self.assertEqual(["(It's not clear where key is).\n"], p.get_output_paragraphs_raw())
+        self.assertEqual(["(It's not clear where key is).\n"], p.test_get_output_paragraphs())
         util.print_object_location(p, key, None, print_parentheses=False)
-        self.assertEqual(["It's not clear where key is.\n"], p.get_output_paragraphs_raw())
+        self.assertEqual(["It's not clear where key is.\n"], p.test_get_output_paragraphs())
         util.print_object_location(p, key, bag)
-        result = "".join(p.get_output_paragraphs_raw())
+        result = "".join(p.test_get_output_paragraphs())
         self.assertTrue("in bag" in result and "in your inventory" in result)
         util.print_object_location(p, key, room)
-        self.assertTrue("in your current location" in "".join(p.get_output_paragraphs_raw()))
+        self.assertTrue("in your current location" in "".join(p.test_get_output_paragraphs()))
         util.print_object_location(p, bag, p)
-        self.assertTrue("in your inventory" in "".join(p.get_output_paragraphs_raw()))
+        self.assertTrue("in your inventory" in "".join(p.test_get_output_paragraphs()))
         util.print_object_location(p, p, room)
-        self.assertTrue("in your current location" in "".join(p.get_output_paragraphs_raw()))
+        self.assertTrue("in your current location" in "".join(p.test_get_output_paragraphs()))
 
     def test_moneydisplay(self):
         # fantasy

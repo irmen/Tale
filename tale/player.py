@@ -50,7 +50,6 @@ class Player(base.Living, pubsub.Listener):
         self.transcript = None
         self._output = TextBuffer()
         self._previous_parsed = None
-        self.pc = None  # @todo temporary location for the PlayerConnection and it's io object
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
@@ -58,7 +57,7 @@ class Player(base.Living, pubsub.Listener):
     def __getstate__(self):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["_input", "_output", "input_is_available", "transcript", "pc"]:   # @todo temporarily include pc
+        for name in ["_input", "_output", "input_is_available", "transcript"]:
             del state[name]
         return state
 
@@ -128,22 +127,6 @@ class Player(base.Living, pubsub.Listener):
                 self._output.print(str(msg), **kwargs)
         return self
 
-    def peek_output_paragraphs_raw(self):
-        """
-        Returns a copy of the output paragraphs that sit in the buffer so far
-        This is for test purposes. No text styles are included.
-        """
-        paragraphs = self._output.get_paragraphs(clear=False)
-        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
-
-    def get_output_paragraphs_raw(self):
-        """
-        Gets the accumulated output paragraphs in raw form.
-        This is for test purposes. No text styles are included. No IO adapter needs to be initialized.
-        """
-        paragraphs = self._output.get_paragraphs(clear=True)
-        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
-
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
         if short is None:
@@ -198,19 +181,6 @@ class Player(base.Living, pubsub.Listener):
         except queue.Empty:
             return result
 
-    def get_next_input(self):
-        """
-        Return just the next single line in the input buffer (if any, otherwise returns None)
-        This is useful for instance when you require an immediate answer to a printed question.
-        """
-        try:
-            result = self._input.get_nowait()
-            if self._input.qsize() == 0:
-                self.input_is_available.clear()
-            return result.strip()
-        except queue.Empty:
-            return None
-
     def store_input_line(self, cmd):
         """store a line of entered text in the input command buffer"""
         self._input.put(cmd)
@@ -232,8 +202,29 @@ class Player(base.Living, pubsub.Listener):
                 self.transcript = None
                 self.tell("Transcript ended.")
 
+    def test_peek_output_paragraphs(self):
+        """
+        Returns a copy of the output paragraphs that sit in the buffer so far
+        This is for test purposes. No text styles are included.
+        """
+        paragraphs = self._output.get_paragraphs(clear=False)
+        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
+
+    def test_get_output_paragraphs(self):
+        """
+        Gets the accumulated output paragraphs in raw form.
+        This is for test purposes. No text styles are included.
+        """
+        paragraphs = self._output.get_paragraphs(clear=True)
+        return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
+
 
 class TextBuffer(object):
+    """
+    Buffered output for the text that the player will see on the screen.
+    The buffer queues up output text into paragraphs.
+    Notice that no actual output formatting is done here, that is performed elsewhere.
+    """
     class Paragraph(object):
         def __init__(self, format=True):
             self.format = format
@@ -338,7 +329,7 @@ class PlayerConnection(object):
         self.write_output()
         self.io.output_no_newline(prompt)
         self.player.input_is_available.wait()
-        return self.player.get_next_input()
+        return self.player.get_pending_input()[0].strip()   # use just the first line
 
     def write_input_prompt(self):
         self.io.write_input_prompt()

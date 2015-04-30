@@ -27,17 +27,17 @@ class TestItems(unittest.TestCase):
         c.use_locale = False
         mud_context.config.display_gametime = False
         c.read(self.actor)
-        out = self.actor.get_output_paragraphs_raw()[0]
+        out = self.actor.test_get_output_paragraphs()[0]
         self.assertEqual("It looks broken.\n", out)
         mud_context.config.display_gametime = True
         c.read(self.actor)
-        out = self.actor.get_output_paragraphs_raw()[0]
+        out = self.actor.test_get_output_paragraphs()[0]
         self.assertEqual("It reads: 2013-09-17 13:52:30\n", out)
 
     def test_newspaper(self):
         n = basic.newspaper
         n.read(self.actor)
-        out = self.actor.get_output_paragraphs_raw()[0]
+        out = self.actor.test_get_output_paragraphs()[0]
         self.assertTrue(out.startswith("The newspaper reads:"))
 
     def test_pouch(self):
