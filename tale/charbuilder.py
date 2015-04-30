@@ -22,18 +22,17 @@ class PlayerNaming(object):
         player.init_race(self.race, self.gender)
         player.init_names(self.name, self.title, self.description, None)
         player.money = self.money
+        player.privileges.discard("wizard")
         if self.wizard:
             player.privileges.add("wizard")
-        else:
-            player.privileges.discard("wizard")
 
 
 class CharacterBuilder(object):
-    def __init__(self, player):
-        self.player = player
+    def __init__(self, conn):
+        self.conn = conn
 
     def build(self):
-        choice = util.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"], self.player)
+        choice = util.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"], self.conn)
         if choice == "w":
             return self.create_default_wizard()
         elif choice == "p":
@@ -44,13 +43,13 @@ class CharacterBuilder(object):
     def create_player_from_info(self):
         naming = PlayerNaming()
         while True:
-            naming.name = self.player.input("Name? ")
+            naming.name = self.conn.input("Name? ")
             if naming.name:
                 break
-        naming.gender = util.input_choice("Gender {choices}? ", ["m", "f", "n"], self.player)
-        self.player.tell("Player races: " + ", ".join(races.player_races))
-        naming.race = util.input_choice("Race? ", races.player_races, self.player)
-        naming.wizard = util.input_confirm("Wizard y/n? ", self.player)
+        naming.gender = util.input_choice("Gender {choices}? ", ["m", "f", "n"], self.conn)
+        self.conn.output("Player races: " + ", ".join(races.player_races))
+        naming.race = util.input_choice("Race? ", races.player_races, self.conn)
+        naming.wizard = util.input_confirm("Wizard y/n? ", self.conn)
         naming.description = "A regular person."
         if naming.wizard:
             naming.title = "arch wizard " + lang.capital(naming.name)

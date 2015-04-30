@@ -170,7 +170,7 @@ class Driver(object):
         self.server_loop_durations = collections.deque(maxlen=10)
         self.commands = Commands()
         cmds.register_all(self.commands)
-        self.all_players = {}   # maps playername to player object
+        self.all_players = {}   # maps playername to player connection object
         self.zones = None
         self.moneyfmt = None
         self.resources = self.user_resources = None
@@ -202,10 +202,6 @@ class Driver(object):
 
     def __start(self, args):
         """Start the driver from a parsed set of arguments"""
-        if 0 <= args.delay <= 100:
-            output_line_delay = args.delay
-        else:
-            raise ValueError("invalid delay, valid range is 0-100")
         if os.path.isdir(args.game):
             # cd into the game directory (we can import it then), and load its config and zones
             os.chdir(args.game)
@@ -262,16 +258,21 @@ class Driver(object):
             x._bind_target(self.zones)
         del self.unbound_exits
         # story has been initialised, create I/O and connect a new player
-        if args.gui:
-            from .tio.tkinter_io import TkinterIo as IoAdapter
-            io = IoAdapter(self.config)
-        else:
-            from .tio.console_io import ConsoleIo as IoAdapter
-            io = IoAdapter(self.config)
-        connect_name = "<connecting_%d>" % id(io)  # unique temporary name
+        # @todo this is just a single player for now
+        connection = player.PlayerConnection()
+        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        if args.gui:
+            from .tio.tkinter_io import TkinterIo
+            io = TkinterIo(self.config, connection)
+        else:
+            from .tio.console_io import ConsoleIo
+            io = ConsoleIo(connection)
+        connection.player = new_player
+        connection.io = io
+        self.all_players[new_player.name] = connection
         mud_context.player = new_player
-        self.all_players[new_player.name] = new_player   # @todo this is just a single player for now
+        mud_context.conn = connection
         try:
             if self.unbound_exits:
                 raise RuntimeError("not all exits are bound")
@@ -281,83 +282,85 @@ class Driver(object):
             print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
             print("Verified, all seems to be fine.")
             return
-        io.output_line_delay = output_line_delay
-        io.clear_screen()
-        io.install_tab_completion(TabCompleter(self, new_player))
-        new_player.io = io
-        io.set_player(new_player)
+        if 0 <= args.delay <= 100:
+            new_player.output_line_delay = args.delay
+        else:
+            raise ValueError("invalid delay, valid range is 0-100")
+        connection.install_tab_completion(TabCompleter(self, new_player))
+        connection.clear_screen()
         # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
         driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
         driver_thread.daemon = True
         driver_thread.start()
-        io.mainloop()
+        connection.mainloop()
 
     def __startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
         self.__stop_mainloop = False
-        time.sleep(0.1)
-        p = None
+        time.sleep(0.01)
+        player = conn = None
         try:
-            for p in self.all_players.values():
-                self.__print_game_intro(p)
-            p = mud_context.player = self.__create_player(mud_context.player)  # @todo make it multi player
+            for conn in self.all_players.values():
+                self.__print_game_intro(conn)
+            self.__create_player()  # @todo make it multi player
+            player = mud_context.player
+            conn = mud_context.conn
             if self.config.server_mode != "if":
-                self.show_motd(p)
-            p.look(short=False)
-            p.write_output()
+                self.show_motd(player)
+            player.look(short=False)
+            conn.write_output()
             while not self.__stop_mainloop:
                 try:
                     self.__main_loop()
                     break
                 except KeyboardInterrupt:
-                    p.io.break_pressed()
+                    conn.break_pressed()
                     continue
         except:
-            if p:
-                p.io.critical_error()
+            if conn:
+                conn.critical_error()
             self.__stop_mainloop = True
             raise
 
-    def __print_game_intro(self, player):
+    def __print_game_intro(self, player_connection):
         # prints the intro screen of the game
-        io = player.io
         try:
             banner = self.resources["messages/banner.txt"].data
             # print game banner as supplied by the game
-            io.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
+            player_connection.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
         except IOError:
             # no banner provided by the game, print default game header
-            io.output("")
-            io.output("")
-            io.output("<monospaced><bright>")
+            player_connection.output("")
+            player_connection.output("")
+            player_connection.output("<monospaced><bright>")
             msg = "'%s'" % self.config.name
-            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
+            player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
             msg = "v%s" % self.config.version
-            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
-            io.output("")
+            player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
+            player_connection.output("")
             msg = "written by %s" % self.config.author
-            io.output(msg.center(DEFAULT_SCREEN_WIDTH))
+            player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
             if self.config.author_address:
-                io.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
-            io.output("</></monospaced>")
-            io.output("")
+                player_connection.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
+            player_connection.output("</></monospaced>")
+            player_connection.output("")
 
-    def __create_player(self, player):
+    def __create_player(self):
         # Lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
         # Returns the active player or a new player object if something has changed.
+        player = mud_context.player
+        conn = mud_context.conn
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
             player.tell("\n")
-            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", player)
+            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", conn)
         player.tell("\n")
         if load_saved_game:
-            io_old = player.io  # save the I/O so we can reset it later...
             loaded_player = self.__load_saved_game()
             if loaded_player:
-                player = loaded_player
-                io_old.set_player(player)
-                player.io = io_old  # ...reset the I/O
+                conn.player = player = loaded_player
+                player.pc = conn  # @ todo rewire connection to player, find a different solution?
                 player.tell("\n")
                 if self.config.server_mode == "if":
                     self.story.welcome_savegame(player)
@@ -374,13 +377,10 @@ class Driver(object):
             elif self.config.server_mode == "mud" or not self.config.player_name:
                 # mud mode, or if mode without player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
-                name_info = CharacterBuilder(player).build()
+                name_info = CharacterBuilder(conn).build()
                 del self.all_players[player.name]
-                self.all_players[name_info.name] = player
+                self.all_players[name_info.name] = conn
                 name_info.apply_to(player)
-
-            player.io.do_styles = player.screen_styles_enabled
-            player.io.do_smartquotes = player.smartquotes_enabled
             player.tell("\n")
             # move the player to the starting location
             if "wizard" in player.privileges:
@@ -402,10 +402,10 @@ class Driver(object):
         Flushes any pending output to the players, then closes down.
         """
         self.__stop_mainloop = True
-        ctx = util.Context(driver=self, clock=None, config=self.config)
-        for player in self.all_players.values():
-            player.write_output()
-            player.destroy(ctx)
+        ctx = util.Context(driver=self, clock=None, config=self.config, player_connection=mud_context.conn)
+        for conn in self.all_players.values():
+            conn.write_output()
+            conn.destroy(ctx)
         self.all_players.clear()
         mud_context.player = None
 
@@ -419,10 +419,11 @@ class Driver(object):
         loop_duration = 1.0
         while not self.__stop_mainloop:
             p = mud_context.player      # @todo loop over every player (multi player)
-            p.write_output()
+            conn = mud_context.conn
+            conn.write_output()
             if p.story_complete and self.config.server_mode == "if":
                 # congratulations ;-)
-                self.__story_complete_output(p)
+                self.__story_complete_output(p, conn)
                 self._stop_driver()
                 break
             if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
@@ -435,8 +436,7 @@ class Driver(object):
                 loop_duration = time.time() - last_loop_time
 
             if has_input:
-                # print the input prompt
-                p.io.write_input_prompt()
+                conn.write_input_prompt()
 
             # check for player input:
             if self.config.server_tick_method == "timer":
@@ -456,7 +456,7 @@ class Driver(object):
                             continue
                         try:
                             p.tell("\n")
-                            self.__process_player_input(p, cmd)
+                            self.__process_player_input(p, cmd, conn)
                             p.remember_parsed()
                         except soul.UnknownVerbException as x:
                             if x.verb in self.directions:
@@ -469,7 +469,7 @@ class Driver(object):
                         except errors.ParseError as x:
                             p.tell(str(x))
                 except KeyboardInterrupt:
-                    p.io.break_pressed()
+                    conn.break_pressed()
                     continue
                 except EOFError:
                     continue
@@ -510,7 +510,7 @@ class Driver(object):
         4) write buffered output to the screen.
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
-        ctx = {"driver": self, "clock": self.game_clock}
+        ctx = util.Context(driver=self, clock=self.game_clock, config=self.config, player_connection=mud_context.conn)
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
         while self.deferreds:
@@ -525,28 +525,26 @@ class Driver(object):
                         break
             if deferred:
                 # calling the deferred needs to be outside the lock because it can reschedule a new deferred
-                ctx = util.Context(driver=self, clock=self.game_clock, config=self.config)
                 try:
                     deferred(ctx=ctx)  # call the deferred and provide a context object
                 except Exception:
                     self.__report_deferred_exception(deferred)
-
-        for player in self.all_players.values():
-            player.write_output()
+        for conn in self.all_players.values():
+            conn.write_output()
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred {0}:".format(deferred), file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
         print("(continuing...)", file=sys.stderr)
 
-    def __story_complete_output(self, player):
+    def __story_complete_output(self, player, conn):
         player.tell("\n")
         self.story.completion(player)
         player.tell("\n")
-        player.input("\nPress enter to continue. ")
+        conn.input("\nPress enter to continue. ")
         player.tell("\n")
 
-    def __process_player_input(self, player, cmd):
+    def __process_player_input(self, player, cmd, conn):
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
@@ -598,7 +596,7 @@ class Driver(object):
                         self.__go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock)
+                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, player_connection=conn)
                         func(player, parsed, ctx)
                         if func.enable_notify_action:
                             self.after_player_action(player.location.notify_action, parsed, player)
@@ -609,7 +607,7 @@ class Driver(object):
                 player.validate_socialize_targets(parsed)
                 self.__do_socialize(player, parsed)
             except errors.RetryParse as x:
-                return self.__process_player_input(player, x.command)   # try again but with new command string
+                return self.__process_player_input(player, x.command, conn)   # try again but with new command string
 
     def __go_through_exit(self, player, direction):
         exit = player.location.exits[direction]
@@ -710,7 +708,8 @@ class Driver(object):
         Look through all the logged in players for one with the given name.
         Returns None if no one is known with that name.
         """
-        return self.all_players.get(name)
+        conn = self.all_players.get(name)
+        return conn.player if conn else None
 
     def get_current_verbs(self, player):
         """return a dict of all currently recognised verbs, and their help text"""
@@ -738,6 +737,7 @@ class Driver(object):
 
     def do_save(self, player):
         if not self.config.savegames_enabled:
+            player.tell("It is not possible to save your progress.")
             return
         state = {
             "version": self.config.version,

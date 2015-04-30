@@ -87,7 +87,7 @@ class TestDeferreds(unittest.TestCase):
             return ctx
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
-        ctx = tale.util.Context(driver="driver", clock=None, config=None)
+        ctx = tale.util.Context(driver="driver", clock=None, config=None, player_connection=None)
         d(ctx=ctx)
         self.assertEqual([42], t.x)
         d = the_driver.Deferred(None, module_level_func, [], None)

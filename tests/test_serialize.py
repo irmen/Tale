@@ -111,11 +111,11 @@ class TestSerializing(unittest.TestCase):
         p = player.Player("name", "n", description="description")
         p.title = "title"
         p.money = 42
-        p.io = "IO-dummy"
+        p.pc = "PC-dummy"    # @todo temporarily
         x = serializecycle(p)
         self.assert_base_attrs(x)
         self.assertEqual(42, x.money)
-        self.assertIsNone(x.io)
+        self.assertIsNone(x.pc)
 
     def test_storyconfig(self):
         s = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
@@ -126,7 +126,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(s, x)
 
     def test_Context(self):
-        c = util.Context(driver=1, clock=2, config=3)
+        c = util.Context(driver=1, clock=2, config=3, player_connection=4)
         x = serializecycle(c)
         self.assertEqual(c, x)
         self.assertEqual(vars(c), vars(x))
@@ -134,8 +134,8 @@ class TestSerializing(unittest.TestCase):
     def test_Hints(self):
         h = hints.HintSystem()
         h.init([hints.Hint("start", None, "first")])
-        import os
-        os.environ
+        x = serializecycle(h)
+        self.assertEqual(h.all_hints, x.all_hints)
 
 
 if __name__ == '__main__':

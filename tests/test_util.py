@@ -333,7 +333,7 @@ class TestUtil(unittest.TestCase):
             util.parse_time(["some_weird_occasion"])
 
     def test_context(self):
-        ctx = util.Context(driver=1, clock=2, config=None)
+        ctx = util.Context(driver=1, clock=2, config=None, player_connection=None)
         self.assertEqual(1, ctx.driver)
         self.assertEqual(2, ctx.clock)
         self.assertIsNone(ctx.config)

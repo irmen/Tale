@@ -55,8 +55,8 @@ class ConsoleIo(iobase.IoAdapterBase):
     """
     I/O adapter for the text-console (standard input/standard output).
     """
-    def __init__(self, config):
-        super(ConsoleIo, self).__init__(config)
+    def __init__(self, player_connection):
+        super(ConsoleIo, self).__init__(player_connection)
         try:
             # try to output a unicode character such as smartypants uses for nicer formatting
             encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
@@ -71,7 +71,10 @@ class ConsoleIo(iobase.IoAdapterBase):
             self.supports_smartquotes = False
         self.stop_main_loop = False
 
-    def mainloop(self):
+    def __repr__(self):
+        return "<ConsoleIo @ 0x%x, local console, pid %d>" % (id(self), os.getpid())
+
+    def mainloop(self, player_connection):
         """Main event loop for the console I/O adapter"""
         while not self.stop_main_loop:
             # Input a single line of text by the player. It is stored in the internal
@@ -82,7 +85,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # by the main thread that handles screen *output*
                 # (otherwise the prompt will often appear before any regular screen output)
                 cmd = input().strip()
-                self.player.store_input_line(cmd)
+                player_connection.player.store_input_line(cmd)
             except KeyboardInterrupt:
                 self.break_pressed()
             except EOFError:

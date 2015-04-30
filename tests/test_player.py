@@ -13,7 +13,7 @@ from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
-from tale.player import Player, TextBuffer
+from tale.player import Player, TextBuffer, PlayerConnection
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import TabCompleter
@@ -41,6 +41,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("m", player.gender)
         self.assertEqual(set(), player.privileges)
         self.assertTrue(1 < player.stats["agi"] < 100)
+        self.assertGreater(player.output_line_delay, 1)
 
     def test_tell(self):
         player = Player("fritz", "m")
@@ -103,49 +104,49 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell_formats(self):
         player = Player("fritz", "m")
-        player.io = ConsoleIo(None)
+        pc = PlayerConnection(player, ConsoleIo(None))
         player.set_screen_sizes(0, 100)
         player.tell("a b c", format=True)
         player.tell("d e f", format=True)
         self.assertEqual(["a b c\nd e f\n"], player.get_output_paragraphs_raw())
         player.tell("a b c", format=True)
         player.tell("d e f", format=True)
-        self.assertEqual("a b c d e f\n", player.get_output())
+        self.assertEqual("a b c d e f\n", pc.get_output())
         player.tell("a b c", format=False)
         player.tell("d e f", format=False)
         self.assertEqual(["a b c\nd e f\n"], player.get_output_paragraphs_raw())
         player.tell("a b c", format=False)
         player.tell("d e f", format=False)
-        self.assertEqual("a b c\nd e f\n", player.get_output())
+        self.assertEqual("a b c\nd e f\n", pc.get_output())
         player.tell("a b c", format=True)
         player.tell("d e f", format=False)
         self.assertEqual(["a b c\n", "d e f\n"], player.get_output_paragraphs_raw())
         player.tell("a b c", format=True)
         player.tell("d e f", format=False)
-        self.assertEqual("a b c\nd e f\n", player.get_output())
+        self.assertEqual("a b c\nd e f\n", pc.get_output())
 
     def test_tell_formatted(self):
         player = Player("fritz", "m")
-        player.io = ConsoleIo(None)
+        pc = PlayerConnection(player, ConsoleIo(None))
         player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2", "\n")
         player.tell("hello\nnewline")
         player.tell("\n")  # paragraph separator
         player.tell("ints", 42, 999)
-        self.assertEqual("line1 line2  hello newline\nints 42 999\n", player.get_output())
+        self.assertEqual("line1 line2  hello newline\nints 42 999\n", pc.get_output())
         player.tell("para1", end=False)
         player.tell("para2", end=True)
         player.tell("para3")
         player.tell("\n")
         player.tell("para4", "\n", "para5")
-        self.assertEqual("para1 para2\npara3\npara4  para5\n", player.get_output())
+        self.assertEqual("para1 para2\npara3\npara4  para5\n", pc.get_output())
         player.tell("word " * 30)
-        self.assertNotEqual(("word " * 30).strip(), player.get_output())
+        self.assertNotEqual(("word " * 30).strip(), pc.get_output())
         player.tell("word " * 30, format=False)
-        self.assertEqual(("word " * 30) + "\n", player.get_output())  # when format=False output should be unformatted
+        self.assertEqual(("word " * 30) + "\n", pc.get_output())  # when format=False output should be unformatted
         player.tell("   xyz   \n  123", format=False)
-        self.assertEqual("   xyz   \n  123\n", player.get_output())
+        self.assertEqual("   xyz   \n  123\n", pc.get_output())
         player.tell("line1", end=True)
         player.tell("\n")
         player.tell("line2", end=True)
@@ -157,17 +158,7 @@ class TestPlayer(unittest.TestCase):
         player.tell("line2", end=True)
         player.tell("\n")
         player.tell("\n")
-        self.assertEqual("line1\n\nline2\n\n\n", player.get_output())
-
-    def test_peek_output(self):
-        player = Player("fritz", "m")
-        player.io = ConsoleIo(None)
-        player.set_screen_sizes(0, 100)
-        player.tell("line1")
-        player.tell("line2", 42)
-        self.assertEqual(["line1\nline2\n42\n"], player.peek_output_paragraphs_raw())
-        self.assertEqual("line1 line2 42\n", player.get_output())
-        self.assertEqual([], player.peek_output_paragraphs_raw())
+        self.assertEqual("line1\n\nline2\n\n\n", pc.get_output())
 
     def test_look(self):
         player = Player("fritz", "m")
@@ -237,8 +228,9 @@ class TestPlayer(unittest.TestCase):
     def test_wiretap(self):
         attic = Location("Attic", "A dark attic.")
         player = Player("fritz", "m")
-        player.io = ConsoleIo(None)
-        player.io.supports_smartquotes = False
+        io = ConsoleIo(None)
+        io.supports_smartquotes = False
+        pc = PlayerConnection(player, io)
         player.set_screen_sizes(0, 100)
         julie = NPC("julie", "f")
         julie.move(attic)
@@ -253,7 +245,7 @@ class TestPlayer(unittest.TestCase):
         player.create_wiretap(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
-        output = player.get_output()
+        output = pc.get_output()
         self.assertTrue("[wiretapped from 'Attic': message for room]" in output)
         self.assertTrue("[wiretapped from 'julie': message for julie]" in output)
         self.assertTrue("[wiretapped from 'julie': message for room]" in output)
@@ -438,32 +430,55 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player, room2.player_arrived)
         self.assertEqual(room1, room2.player_arrived_from)
 
-    def test_write_output(self):
-        player = Player("julie", "f")
-        player.io = ConsoleIo(None)
-        old_stdout = sys.stdout
-        sys.stdout = StringIO()
-        try:
-            player.tell("hello 1", end=True)
-            player.tell("hello 2", end=True)
-            player.write_output()
-            self.assertEqual("  hello 1\n  hello 2\n", sys.stdout.getvalue())
-        finally:
-            sys.stdout = old_stdout
+
+class TestPlayerConnection(unittest.TestCase):
+    def setUp(self):
+        tale.mud_context.driver = TestDriver()
+        tale.mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        tale.mud_context.config.server_mode = "if"
 
     def test_input(self):
         player = Player("julie", "f")
-        player.io = ConsoleIo(None)
+        pc = PlayerConnection(player, ConsoleIo(None))
         old_stdout = sys.stdout
         sys.stdout = StringIO()
         try:
             player.tell("first this text")
             player.store_input_line("input text\n")
-            x = player.input("inputprompt")
+            x = pc.input("inputprompt")
             self.assertEqual("input text", x)
             self.assertEqual("  first this text\ninputprompt", sys.stdout.getvalue())  # should have outputted the buffered text
         finally:
             sys.stdout = old_stdout
+
+    def test_peek_output(self):
+        player = Player("fritz", "m")
+        pc = PlayerConnection(player, ConsoleIo(None))
+        player.set_screen_sizes(0, 100)
+        player.tell("line1")
+        player.tell("line2", 42)
+        self.assertEqual(["line1\nline2\n42\n"], player.peek_output_paragraphs_raw())
+        self.assertEqual("line1 line2 42\n", pc.get_output())
+        self.assertEqual([], player.peek_output_paragraphs_raw())
+
+    def test_write_output(self):
+        player = Player("julie", "f")
+        pc = PlayerConnection(player, ConsoleIo(None))
+        old_stdout = sys.stdout
+        sys.stdout = StringIO()
+        try:
+            player.tell("hello 1", end=True)
+            player.tell("hello 2", end=True)
+            pc.write_output()
+            self.assertEqual("  hello 1\n  hello 2\n", sys.stdout.getvalue())
+        finally:
+            sys.stdout = old_stdout
+
+    def test_destroy(self):
+        pc = PlayerConnection(None, ConsoleIo(None))
+        pc.destroy(tale.util.Context(tale.mud_context.driver, None, None, None))
+        self.assertIsNone(pc.player)
+        self.assertIsNone(pc.io)
 
 
 class TestTextbuffer(unittest.TestCase):

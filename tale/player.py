@@ -38,6 +38,7 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = DEFAULT_SCREEN_INDENT
         self.screen_styles_enabled = True
         self.smartquotes_enabled = True
+        self.output_line_delay = 50   # milliseconds.
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
         self.story_complete = False
@@ -48,8 +49,8 @@ class Player(base.Living, pubsub.Listener):
         self.input_is_available = Event()
         self.transcript = None
         self._output = TextBuffer()
-        self.io = None  # will be set to appropriate I/O adapter by the driver
         self._previous_parsed = None
+        self.pc = None  # @todo temporary location for the PlayerConnection and it's io object
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
@@ -57,7 +58,7 @@ class Player(base.Living, pubsub.Listener):
     def __getstate__(self):
         state = super(Player, self).__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["_input", "_output", "input_is_available", "transcript", "io"]:
+        for name in ["_input", "_output", "input_is_available", "transcript", "pc"]:   # @todo temporarily include pc
             del state[name]
         return state
 
@@ -143,41 +144,6 @@ class Player(base.Living, pubsub.Listener):
         paragraphs = self._output.get_paragraphs(clear=True)
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
-    def get_output(self):
-        """
-        Gets the accumulated output lines, formats them nicely, and clears the buffer.
-        If there is nothing to be outputted, None is returned.
-        """
-        formatted = self.io.render_output(self._output.get_paragraphs(), width=self.screen_width, indent=self.screen_indent)
-        if formatted and self.transcript:
-            self.transcript.write(formatted)
-        return formatted or None
-
-    def write_output(self):
-        """print any buffered output to the player's screen"""
-        output = self.get_output()
-        if output:
-            # (re)set a few io parameters because they can be changed dynamically
-            self.io.do_styles = self.screen_styles_enabled
-            self.io.do_smartquotes = self.smartquotes_enabled
-            if mud_context.config.server_mode == "if" and self.io.output_line_delay > 0:
-                for line in output.splitlines():
-                    self.io.output(line)
-                    self.io.output_delay()
-            else:
-                self.io.output(output.rstrip())
-
-    def input(self, prompt=None):
-        """
-        Writes any pending output and prompts for input. Returns stripped result.
-        Note that input processing takes place asynchronously so this method just prints
-        the input prompt, and sits around waiting for a result to appear in the input buffer.
-        """
-        self.write_output()
-        self.io.output_no_newline(prompt)
-        self.input_is_available.wait()
-        return self.get_next_input()
-
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
         if short is None:
@@ -217,10 +183,6 @@ class Player(base.Living, pubsub.Listener):
         self.activate_transcript(None, None)
         super(Player, self).destroy(ctx)
         del self.soul   # truly die ;-)
-        if self.io:
-            self.io.stop_main_loop = True
-            self.io.destroy()
-            self.io.abort_all_input(self)
 
     def allow_give_money(self, actor, amount):
         """Do we accept money? Raise ActionRefused if not."""
@@ -327,3 +289,82 @@ class TextBuffer(object):
         if clear:
             self.init()
         return paragraphs
+
+
+class PlayerConnection(object):
+    """
+    Represents a player and the i/o connection that is used for him/her.
+    Provides high level i/o operations to input commands and write output for the player.
+    Other code should not have to call the i/o adapter directly.
+    """
+    def __init__(self, player=None, io=None):
+        self.player = player
+        self.io = io
+
+    def get_output(self):
+        """
+        Gets the accumulated output lines, formats them nicely, and clears the buffer.
+        If there is nothing to be outputted, None is returned.
+        """
+        formatted = self.io.render_output(self.player._output.get_paragraphs(), width=self.player.screen_width, indent=self.player.screen_indent)
+        if formatted and self.player.transcript:
+            self.player.transcript.write(formatted)
+        return formatted or None
+
+    def write_output(self):
+        """print any buffered output to the player's screen"""
+        output = self.get_output()
+        if output:
+            # (re)set a few io parameters because they can be changed dynamically
+            self.io.do_styles = self.player.screen_styles_enabled
+            self.io.do_smartquotes = self.player.smartquotes_enabled
+            if mud_context.config.server_mode == "if" and self.player.output_line_delay > 0:
+                for line in output.rstrip().splitlines():
+                    self.io.output(line)
+                    time.sleep(self.player.output_line_delay / 1000.0)  # delay the output for a short period
+            else:
+                self.io.output(output.rstrip())
+
+    def output(self, *lines):
+        """directly writes the given text to the player's screen, without buffering"""
+        self.io.output(*lines)
+
+    def input(self, prompt=None):
+        """
+        Writes any pending output and prompts for input. Returns stripped result.
+        Note that input processing takes place asynchronously so this method just prints
+        the input prompt, and sits around waiting for a result to appear in the input buffer.
+        """
+        self.write_output()
+        self.io.output_no_newline(prompt)
+        self.player.input_is_available.wait()
+        return self.player.get_next_input()
+
+    def write_input_prompt(self):
+        self.io.write_input_prompt()
+
+    def clear_screen(self):
+        self.io.clear_screen()
+
+    def break_pressed(self):
+        self.io.break_pressed()
+
+    def critical_error(self):
+        self.io.critical_error()
+
+    def install_tab_completion(self, completer):
+        self.io.install_tab_completion(completer)
+
+    def mainloop(self):
+        return self.io.mainloop(self)
+
+    def destroy(self, ctx):
+        if self.io:
+            self.io.stop_main_loop = True
+            self.io.destroy()
+            if self.player:
+                self.io.abort_all_input(self.player)
+            self.io = None
+        if self.player:
+            self.player.destroy(ctx)
+            self.player = None

@@ -131,7 +131,7 @@ def do_destroy(player, parsed, ctx):
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not util.input_confirm("Are you sure you want to destroy %s?" % victim.title, player):
+        if not util.input_confirm("Are you sure you want to destroy %s?" % victim.title, ctx.conn):
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
@@ -160,7 +160,7 @@ def do_clean(player, parsed, ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if util.input_confirm("Are you sure you want to clean out %s?" % victim.title, player):
+        if util.input_confirm("Are you sure you want to clean out %s?" % victim.title, ctx.conn):
             p("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
@@ -410,7 +410,7 @@ def do_server(player, parsed, ctx):
     """Dump some server information."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["<bright>Server information:</>"]
+    txt = ["<bright>Server information:</>", "-" * 19]
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
     uptime = realtime - driver.server_started
@@ -420,23 +420,26 @@ def do_server(player, parsed, ctx):
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     implementation = platform.python_implementation()
     txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))
-    txt.append("Tale library: %s   Game version: %s %s" % (__version__, config.name, config.version))
-    txt.append("Real time: %s   Uptime: %d:%02d:%02d" % (realtime, hours, minutes, seconds))
+    txt.append("Tale library:   %s" % __version__)
+    txt.append("Game version:   %s %s" % (config.name, config.version))
+    txt.append("Uptime:         %d:%02d:%02d  (since %s)" % (hours, minutes, seconds, driver.server_started))
+    txt.append("Server mode:    %s" % config.server_mode)
+    txt.append("Real time:      %s" % realtime)
     if config.server_tick_method == "timer":
-        txt.append("Game time: %s   (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
+        txt.append("Game time:      %s  (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
-        txt.append("Game time: %s" % ctx.clock)
-    if sys.platform == "cli":
-        gc_objects = "??"
-    else:
-        gc_objects = str(len(gc.get_objects()))
-    txt.append("Number of GC objects: %s   Number of threads: %s" % (gc_objects, threading.active_count()))
-    txt.append("Mode: %s   Players: %d   Heartbeats: %d   Deferreds: %d" % (config.server_mode, len(ctx.driver.all_players), len(driver.heartbeat_objects), len(driver.deferreds)))
+        txt.append("Game time:      %s" % ctx.clock)
+    gc_objects = "??" if sys.platform == "cli" else str(len(gc.get_objects()))
+    txt.append("Python objects: %s" % gc_objects)
+    txt.append("Players:        %d" % len(ctx.driver.all_players))
+    txt.append("Heartbeats:     %d" % len(driver.heartbeat_objects))
+    txt.append("Deferreds:      %d" % len(driver.deferreds))
+    txt.append("Loop tick:      %.1f sec" % config.server_tick_time)
     if config.server_tick_method == "timer":
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
-        txt.append("Server loop tick: %.1f sec   Loop duration: %.2f sec." % (config.server_tick_time, avg_loop_duration))
+        txt.append("Loop duration:  %.2f sec. (avg)" % avg_loop_duration)
     elif config.server_tick_method == "command":
-        txt.append("Server loop tick: %.1f sec   (command driven)." % config.server_tick_time)
+        txt.append("Loop duration:  n/a (command driven)")
     player.tell(*txt, format=False)
 
 

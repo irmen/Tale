@@ -11,6 +11,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import sys
 from tale.driver import StoryConfig
 from tale.main import run_story
+from tale import mud_context
 
 
 class Story(object):
@@ -56,7 +57,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        player.input("\nPress enter to continue. ")
+        mud_context.conn.input("\nPress enter to continue. ")
         player.tell("\n")
 
     def welcome_savegame(self, player):
@@ -65,7 +66,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        player.input("\nPress enter to continue where you were before. ")
+        mud_context.conn.input("\nPress enter to continue where you were before. ")
         player.tell("\n")
 
     def goodbye(self, player):

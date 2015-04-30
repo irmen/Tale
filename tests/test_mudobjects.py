@@ -617,12 +617,12 @@ class TestDestroy(unittest.TestCase):
         mud_context.driver = TestDriver()
 
     def test_destroy_base(self):
-        ctx = Context(None, None, None)
+        ctx = Context(None, None, None, None)
         o = MudObject("x")
         o.destroy(ctx)
 
     def test_destroy_loc(self):
-        ctx = Context(None, None, None)
+        ctx = Context(None, None, None, None)
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat", "n", race="rodent")
@@ -644,7 +644,7 @@ class TestDestroy(unittest.TestCase):
         self.assertEqual(_Limbo, liv.location)
 
     def test_destroy_player(self):
-        ctx = Context(None, None, None)
+        ctx = Context(None, None, None, None)
         loc = Location("loc")
         player = Player("julie", "f")
         player.privileges = {"wizard"}
@@ -663,11 +663,11 @@ class TestDestroy(unittest.TestCase):
 
     def test_destroy_item(self):
         thing = Item("thing")
-        ctx = Context(driver=mud_context.driver, clock=None, config=None)
+        ctx = Context(driver=mud_context.driver, clock=None, config=None, player_connection=None)
         thing.destroy(ctx)
 
     def test_destroy_deferreds(self):
-        ctx = Context(driver=mud_context.driver, clock=None, config=None)
+        ctx = Context(driver=mud_context.driver, clock=None, config=None, player_connection=None)
         thing = Item("thing")
         player = Player("julie", "f")
         wolf = Monster("wolf", "m")
@@ -850,7 +850,7 @@ class TestMudObject(unittest.TestCase):
             x.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             x.read(None)
-        x.destroy(Context(None, None, None))
+        x.destroy(Context(None, None, None, None))
 
 
 if __name__ == '__main__':

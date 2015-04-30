@@ -31,14 +31,17 @@ class TkinterIo(iobase.IoAdapterBase):
     """
     Tkinter-GUI based Input/Output adapter.
     """
-    def __init__(self, config):
-        super(TkinterIo, self).__init__(config)
+    def __init__(self, config, player_connection):
+        super(TkinterIo, self).__init__(player_connection)
         self.gui = TaleGUI(self, config)
         self.textwrapper = textwrap.TextWrapper()
 
-    def mainloop(self):
+    def __repr__(self):
+        return "<TkinterIo @ 0x%x>" % id(self)
+
+    def mainloop(self, player_connection):
         """Main event loop for this I/O adapter"""
-        self.gui.mainloop()
+        self.gui.mainloop(player_connection)
 
     def clear_screen(self):
         """Clear the screen"""
@@ -299,8 +302,8 @@ class TaleGUI(object):
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
-    def mainloop(self):
-        self.root.mainloop()
+    def mainloop(self, player_connection):
+        self.root.mainloop()   # tkinter main loop
         self.window = None
         self.root = None
         self.io.gui_terminated()
@@ -330,7 +333,7 @@ class TaleGUI(object):
             self.root.after_idle(lambda: self.window.write_line(line, self.io.do_styles))
 
     def register_cmd(self, cmd):
-        self.io.player.store_input_line(cmd)
+        self.io.player_connection.player.store_input_line(cmd)
 
 
 def show_error_dialog(title, message):

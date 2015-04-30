@@ -28,6 +28,9 @@ class Hint(object):
         """override and return True/False to enable/disable the hint for specific checkpoints or player state"""
         return None  # default implementation does nothing
 
+    def __eq__(self, other):
+        return vars(self) == vars(other)
+
 
 class HintSystem(object):
     def __init__(self):

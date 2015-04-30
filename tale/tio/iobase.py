@@ -6,7 +6,6 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import time
 import sys
 import traceback
 from ..util import basestring_type
@@ -46,28 +45,23 @@ class IoAdapterBase(object):
     """
     I/O adapter base class
     """
-    def __init__(self, config):
-        self.output_line_delay = 50   # milliseconds. (will be overwritten by the game driver)
+    def __init__(self, player_connection):
         self.do_styles = True
         self.do_smartquotes = True
         self.supports_smartquotes = True
-        self.player = None
+        self.player_connection = player_connection
 
     def destroy(self):
         """Called when the I/O adapter is shut down"""
         pass
 
-    def mainloop(self):
+    def mainloop(self, player_connection):
         """Main event loop for this I/O adapter"""
         raise NotImplementedError("implement this in subclass")
 
     def clear_screen(self):
         """Clear the screen"""
         pass
-
-    def set_player(self, player):
-        """Update the reference to the player object"""
-        self.player = player
 
     def install_tab_completion(self, completer):
         """Install and enable tab-command-completion if possible"""
@@ -113,10 +107,6 @@ class IoAdapterBase(object):
     def break_pressed(self):
         """do something when the player types ctrl-C (break)"""
         pass
-
-    def output_delay(self):
-        """delay the output for a short period"""
-        time.sleep(self.output_line_delay / 1000.0)
 
 
 class TabCompleter(object):

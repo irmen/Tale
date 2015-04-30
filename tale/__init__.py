@@ -15,4 +15,13 @@ __version__ = "1.7.dev0"
 class _MudContext(object):
     pass
 
+
+"""
+The mud_context is a global container for the following attributes,
+that will be set (by the driver) to the correct current instances:
+ - driver   (driver)
+ - conn     (player connection)
+ - player   (player itself)
+ - config   (story config)
+"""
 mud_context = _MudContext()

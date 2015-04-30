@@ -385,23 +385,23 @@ class GameDateTime(object):
         self.clock -= timedelta * self.times_realtime
 
 
-def input_confirm(question, player):
+def input_confirm(question, conn):
     """
     Simple wrapper around player.input to ask the player for a yes/no confirmation. Returns True or False.
     """
     if not question.endswith(" "):
         question += " "
     while True:
-        reply = player.input(question)
+        reply = conn.input(question)
         if reply in ("y", "yes", "sure", "yep", "yeah"):
             return True
         if reply in ("n", "no", "nope"):
             return False
         if reply:
-            player.tell("That is not a valid answer.")
+            conn.output("That is not a valid answer.")
 
 
-def input_choice(question, choices, player):
+def input_choice(question, choices, conn):
     """
     Simple wrapper around player.input to ask the player for a choice from a set of options.
     You can optionally use the format string '{choices}' to get the list of choices in the question text.
@@ -410,19 +410,23 @@ def input_choice(question, choices, player):
     if not question.endswith(" "):
         question += " "
     while True:
-        reply = player.input(question)
+        reply = conn.input(question)
         if reply in choices:
             return reply
         if reply:
-            player.tell("That is not a valid answer.")
+            conn.output("That is not a valid answer.")
 
 
 class Context(object):
-    """A new instance of this context is passed to every command function and obj.destroy."""
-    def __init__(self, driver, clock, config):
+    """
+    A new instance of this context is passed to every command function and obj.destroy.
+    Note that the player object isn't in here because it is already explicitly passed to these functions.
+    """
+    def __init__(self, driver, clock, config, player_connection):
         self.driver = driver
         self.clock = clock
         self.config = config
+        self.conn = player_connection
 
     def __eq__(self, other):
         return vars(self) == vars(other)

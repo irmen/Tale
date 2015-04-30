@@ -147,7 +147,7 @@ def do_drop(player, parsed, ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            if util.input_confirm("Are you sure you want to drop all you are carrying?", player):
+            if util.input_confirm("Are you sure you want to drop all you are carrying?", ctx.conn):
                 drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
@@ -216,7 +216,7 @@ def do_put(player, parsed, ctx):
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
         if what:
-            if not util.input_confirm("Are you sure you want to put everything away?", player):
+            if not util.input_confirm("Are you sure you want to put everything away?", ctx.conn):
                 return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -465,7 +465,7 @@ def do_give(player, parsed, ctx):
             raise ParseError("Give all to who?")
         what = player.inventory
         if what:
-            if not util.input_confirm("Are you sure you want to give it all away?", player):
+            if not util.input_confirm("Are you sure you want to give it all away?", ctx.conn):
                 return
         if parsed.args[0] == "all":
             # give all [to] living
@@ -532,7 +532,7 @@ def give_money(player, amount, recipient, driver):
         player.tell("You don't have that amount of wealth.")
     else:
         recipient.allow_give_money(player, amount)
-        if util.input_confirm("Are you sure you want to give %s away?" % driver.moneyfmt.display(amount), player):
+        if util.input_confirm("Are you sure you want to give %s away?" % driver.moneyfmt.display(amount), ctx.conn):
             player.money -= amount
             recipient.money += amount
             player.tell("You gave <living>%s</> %s." % (recipient.title, driver.moneyfmt.display(amount)))
@@ -826,9 +826,9 @@ def do_wait(player, parsed, ctx):
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""
-    if util.input_confirm("Are you sure you want to quit?", player):
+    if util.input_confirm("Are you sure you want to quit?", ctx.conn):
         if ctx.config.server_mode != "mud" and ctx.config.savegames_enabled:
-            if util.input_confirm("Would you like to save your progress?", player):
+            if util.input_confirm("Would you like to save your progress?", ctx.conn):
                 do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()
@@ -881,8 +881,19 @@ def do_who(player, parsed, ctx):
     else:
         # print all players
         player.tell("All players currently in the game:", end=True)
-        for player in ctx.driver.all_players.values():  # list of all players
-            player.tell("<player>%s</> (%s): currently in '<location>%s</>'." % (lang.capital(player.name), player.title, player.location.name), end=True)
+        player.tell("\n")
+        if "wizard" in player.privileges:
+            # wizard also sees the connection information
+            for conn in ctx.driver.all_players.values():
+                p = conn.player
+                p.tell("<player>%s</> (%s)" % (lang.capital(p.name), p.title), end=True)
+                p.tell("| location: <location>%s</>" % p.location.name, end=True)
+                p.tell("| connection: %r" % conn.io, end=True)
+        else:
+            # normal players only see player names and location.
+            for conn in ctx.driver.all_players.values():
+                p = conn.player
+                p.tell("<player>%s</> (%s): currently in '<location>%s</>'." % (lang.capital(p.name), p.title, p.location.name), end=True)
 
 
 @cmd("open", "close", "lock", "unlock")
@@ -1200,9 +1211,12 @@ def do_save(player, parsed, ctx):
 @disabled_in_gamemode("mud")
 def do_load(player, parsed, ctx):
     """Load a previously saved game."""
-    player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
-                "and start it again. During startup, select the appropriate option to start from a saved game,",
-                "or start a new game.")
+    if ctx.config.savegames_enabled:
+        player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
+                    "and start it again. During startup, select the appropriate option to start from a saved game,",
+                    "or start a new game.")
+    else:
+        player.tell("It is not possible to save or restore your progress.")
 
 
 @cmd("transcript")
@@ -1413,7 +1427,7 @@ def do_config(player, parsed, ctx):
         if param == "delay":
             value = int(value)
             if 0 <= value <= 100:
-                player.io.output_line_delay = value
+                player.output_line_delay = value
             else:
                 raise ActionRefused("Invalid delay value, range is 0..100")
         elif param == "width":
@@ -1431,7 +1445,7 @@ def do_config(player, parsed, ctx):
         player.tell("Configuration modified.", end=True)
         player.tell("\n")
     player.tell("Configuration:", end=True)
-    player.tell("  delay <dim>(output line delay) =</> %d" % player.io.output_line_delay, format=False)
+    player.tell("  delay <dim>(output line delay) =</> %d" % player.output_line_delay, format=False)
     player.tell("  width <dim>(screen width) =</> %d" % player.screen_width, format=False)
     player.tell("  styles <dim>(enable text styles) =</> %s" % player.screen_styles_enabled, format=False)
     player.tell("  smartquotes <dim>(use typographic quotes) =</> %s" % player.smartquotes_enabled, format=False)
@@ -1464,7 +1478,7 @@ def do_recap(player, parsed, ctx):
 @cmd("@cls")
 def do_cls(player, parsed, ctx):
     """Clears the screen (if the output device supports it)."""
-    player.io.clear_screen()
+    ctx.conn.clear_screen()
 
 
 @cmd("@teststyles")
