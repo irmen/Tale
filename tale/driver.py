@@ -557,7 +557,7 @@ class Driver(object):
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
         command_verbs = self.commands.get(player.privileges)
-        custom_verbs = set(player.location.verbs)
+        custom_verbs = set(self.current_custom_verbs(player))
         try:
             if _verb in self.commands.no_soul_parsing:
                 # don't use the soul to parse it further
@@ -679,6 +679,20 @@ class Driver(object):
             player.tell("\n")
             return player
 
+    def current_custom_verbs(self, player):
+        """returns dict of the currently recognised custom verbs (verb->helptext mapping)"""
+        verbs = player.verbs.copy()
+        verbs.update(player.location.verbs)
+        for living in player.location.livings:
+            verbs.update(living.verbs)
+        for item in player.inventory:
+            verbs.update(item.verbs)
+        for item in player.location.items:
+            verbs.update(item.verbs)
+        for exit in set(player.location.exits.values()):
+            verbs.update(exit.verbs)
+        return verbs
+
     def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         try:
@@ -713,13 +727,13 @@ class Driver(object):
         """return a dict of all currently recognised verbs, and their help text"""
         normal_verbs = self.commands.get(player.privileges)
         verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
-        verbs.update(player.location.verbs)  # add the custom verbs
+        verbs.update(self.current_custom_verbs(player))
         return verbs
 
     def do_wait(self, duration):
         # let time pass, duration is in game time (not real time).
-        # We do let the game tick for the correct number of times,
-        # however @todo: be able to detect if something happened during the wait
+        # We do let the game tick for the correct number of times.
+        # @todo be able to detect if something happened during the wait
         if self.config.gametime_to_realtime == 0:
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick

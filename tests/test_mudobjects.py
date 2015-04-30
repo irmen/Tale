@@ -176,6 +176,8 @@ class TestLocations(unittest.TestCase):
     def test_custom_verbs(self):
         player = Player("julie", "f")
         player.verbs["xywobble"] = "p1"
+        monster = Monster("snake", "f")
+        monster.verbs["snakeverb"] = "s1"
         room = Location("room")
         chair1 = Item("chair1")
         chair1.verbs["frobnitz"] = "c1"
@@ -183,30 +185,17 @@ class TestLocations(unittest.TestCase):
         chair2.verbs["frobnitz"] = "c2"
         chair_in_inventory = Item("chair3")
         chair_in_inventory.verbs["kowabooga"] = "c3"
-        room.init_inventory([chair1, player, chair2])
-
-        # check inventory NOT affecting player custom verbs, but DOES affect location verbs
-        self.assertEqual({"xywobble": "p1"}, player.verbs)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1"}, room.verbs)
-        player.insert(chair_in_inventory, player)
-        self.assertEqual({"xywobble": "p1"}, player.verbs)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1", "kowabooga": "c3"}, room.verbs)
-        player.remove(chair_in_inventory, player)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1"}, room.verbs)
-
-        player.insert(chair_in_inventory, player)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1", "kowabooga": "c3"}, room.verbs)
-        room2 = Location("room2")
-        self.assertEqual({}, room2.verbs)
-        chair1.move(room2, player)
-        self.assertEqual({"xywobble": "p1", "kowabooga": "c3"}, room.verbs)
-        self.assertEqual({"frobnitz": "c1"}, room2.verbs)
-        chair2.move(room2, player)
-        self.assertEqual({"xywobble": "p1", "kowabooga": "c3"}, room.verbs)
-        self.assertEqual({"frobnitz": "c2"}, room2.verbs)
-        player.move(room2)
-        self.assertEqual({}, room.verbs)
-        self.assertEqual({"frobnitz": "c2", "xywobble": "p1", "kowabooga": "c3"}, room2.verbs)
+        box_in_inventory = Item("box")
+        box_in_inventory.verbs["boxverb"] = "c4"
+        player.init_inventory([box_in_inventory, chair_in_inventory])
+        exit = Exit("e", "dummy", None, None)
+        exit.verbs["exitverb"] = "c5"
+        room.init_inventory([chair1, player, chair2, monster])
+        room.add_exits([exit])
+        custom_verbs = mud_context.driver.current_custom_verbs(player)
+        all_verbs = mud_context.driver.get_current_verbs(player)
+        self.assertEqual({"xywobble", "snakeverb", "frobnitz", "kowabooga", "boxverb", "exitverb"}, set(custom_verbs))
+        self.assertEqual(set(), set(custom_verbs) - set(all_verbs))
 
     def test_notify(self):
         room = Location("room")

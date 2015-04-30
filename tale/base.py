@@ -96,7 +96,7 @@ class MudObject(object):
         self._name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
         self.aliases = set()
-        self.verbs = {}   # any custom verbs that need to be recognised (verb->docstring mapping)
+        self.verbs = {}   # any custom verbs that need to be recognised (verb->docstring mapping. Verb handling is done via handle_verb() callbacks)
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -457,7 +457,6 @@ class Location(MudObject):
         else:
             raise TypeError("can only add Living or Item")
         obj.location = self
-        self.verbs.update(obj.verbs)    # register custom verbs   @todo don't update verbs globally; this won't work in multiplayer
 
     def remove(self, obj, actor):
         """Remove obj from this location (either a Living or an Item)"""
@@ -468,8 +467,6 @@ class Location(MudObject):
         else:
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
-        for verb in obj.verbs:
-            self.verbs.pop(verb, None)     # unregister custom verbs   @todo fix this, won't work in multiplayer
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
@@ -478,6 +475,7 @@ class Location(MudObject):
             handled = any(item.handle_verb(parsed, actor) for item in self.items)
             if not handled:
                 handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
+        # XXX does this correctly handle items in player inventory that have custom verbs?
         return handled
 
     def notify_action(self, parsed, actor):
@@ -664,7 +662,6 @@ class Living(MudObject):
             assert isinstance(item, Item)
             self.__inventory.add(item)
             item.contained_in = self
-            self.location.verbs.update(item.verbs)   # register custom verbs   @todo fix this, doesn't work in multiplayer
         else:
             raise ActionRefused("You can't do that.")
 
@@ -673,8 +670,6 @@ class Living(MudObject):
         if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
             item.contained_in = None
-            for verb in item.verbs:
-                self.location.verbs.pop(verb, None)     # unregister custom verbs   @todo fix this, doesn't work in multiplayer
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
@@ -758,8 +753,6 @@ class Living(MudObject):
             self.location.remove(self, actor)
             try:
                 target.insert(self, actor)
-                self.unregister_all_inventory_verbs(original_location)
-                self.register_all_inventory_verbs(target)
             except:
                 # insert in target failed, put back in original location
                 original_location.insert(self, actor)
@@ -780,17 +773,6 @@ class Living(MudObject):
             mud_context.driver.after_player_action(target.notify_player_arrived, self, original_location)
         else:
             mud_context.driver.after_player_action(target.notify_npc_arrived, self, original_location)
-
-    def register_all_inventory_verbs(self, location):
-        """When moving the living to a new location, register all inventory custom verbs"""
-        for item in self.__inventory:
-            location.verbs.update(item.verbs)   # @todo fix this, doesn't work in multiplayer
-
-    def unregister_all_inventory_verbs(self, location):
-        """When removing the living from a location, unregister all inventory custom verbs"""
-        for item in self.__inventory:
-            for verb in item.verbs:
-                location.verbs.pop(verb, None)      # @todo fix this, doesn't work in multiplayer
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """The same as locate_item except it only returns the item, or None."""
