@@ -569,7 +569,7 @@ class Driver(object):
                 parsed = player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             player.turns += 1
-            self.__do_socialize(player, parsed)
+            player.do_socialize_cmd(parsed, self)
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -603,7 +603,7 @@ class Driver(object):
             except errors.RetrySoulVerb:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 player.validate_socialize_targets(parsed)
-                self.__do_socialize(player, parsed)
+                player.do_socialize_cmd(parsed, self)
             except errors.RetryParse as x:
                 return self.__process_player_input(player, x.command, conn)   # try again but with new command string
 
@@ -624,24 +624,6 @@ class Driver(object):
                 __import__(modulename)
                 location = getattr(location, name)
         return location
-
-    def __do_socialize(self, player, parsed):
-        """
-        The player issued a soul verb such as 'ponder'. Socialize with the environment to handle this.
-        Some verbs may trigger a response or action from something or someone else.
-        """
-        who, player_message, room_message, target_message = player.socialize_parsed(parsed)
-        player.tell(player_message)
-        player.location.tell(room_message, player, who, target_message)
-        self.after_player_action(player.location.notify_action, parsed, player)
-        if parsed.verb in soul.AGGRESSIVE_VERBS:
-            # usually monsters immediately attack,
-            # other npcs may choose to attack or to ignore it
-            # We need to check the verb qualifier, it might void the actual action :)
-            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
-                for living in who:
-                    if getattr(living, "aggressive", False):
-                        self.after_player_action(living.start_attack, player)
 
     def __load_saved_game(self):
         assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"

@@ -13,7 +13,6 @@ import functools
 import sys
 import gc
 import platform
-import threading
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from .. import base, lang, util
@@ -460,3 +459,25 @@ def do_events(player, parsed, ctx):
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
     txt.append("</monospaced>")
     player.tell(*txt, format=False)
+
+
+@wizcmd("force")
+def do_force(player, parsed, ctx):
+    """Force another living being into performing a given command."""
+    if len(parsed.args) < 2:
+        raise ParseError("Force whom to do what?")
+    target = parsed.who_order[0]
+    verb = parsed.args[1]
+    # simple check for verb validness
+    if verb not in ctx.driver.get_current_verbs(target) and not player.soul.is_verb(verb):
+        raise ParseError("You cannot let them do '%s'; I don't know thatverb." % verb)
+    cmd = parsed.unparsed.partition(verb)
+    cmd = cmd[1] + cmd[2]
+    if isinstance(target, Player):
+        room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
+        target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
+        player.tell("You coerce <player>%s</> into following your orders." % target.title)
+        player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
+        target.store_input_line(cmd)   # insert the command into the target player's input buffer
+    else:
+        player.tell("Target is not a player, don't know yet how to force it to do something.")    # @todo fix force for non-player livings

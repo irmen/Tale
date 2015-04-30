@@ -127,6 +127,24 @@ class Player(base.Living, pubsub.Listener):
                 self._output.print(str(msg), **kwargs)
         return self
 
+    def do_socialize_cmd(self, parsed, driver):
+        """
+        A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
+        Some verbs may trigger a response or action from something or someone else.
+        """
+        who, actor_message, room_message, target_message = self.socialize_parsed(parsed)
+        self.tell(actor_message)
+        self.location.tell(room_message, self, who, target_message)
+        driver.after_player_action(self.location.notify_action, parsed, self)
+        if parsed.verb in soul.AGGRESSIVE_VERBS:
+            # usually monsters immediately attack,
+            # other npcs may choose to attack or to ignore it
+            # We need to check the verb qualifier, it might void the actual action :)
+            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
+                for living in who:
+                    if getattr(living, "aggressive", False):
+                        driver.after_player_action(living.start_attack, self)
+
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""
         if short is None:
