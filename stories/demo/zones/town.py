@@ -238,7 +238,7 @@ class Computer(Item):
 
 computer = Computer("computer", short_description="A computer is connected to the doors via a couple of wires.")
 computer.verbs = {
-    # register some custom verbs. You can overwrite existing verbs, so be careful.
+    # register some custom verbs. You can redefine existing verbs, so be careful.
     "hack": "Attempt to hack an electronic device.",
     "type": "Enter some text.",
     "enter": "Enter some text.",

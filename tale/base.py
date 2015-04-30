@@ -96,7 +96,7 @@ class MudObject(object):
         self._name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
         self.aliases = set()
-        self.verbs = {}   # any custom verbs that need to be registered in the location or in the player (verb->docstring mapping)
+        self.verbs = {}   # any custom verbs that need to be recognised (verb->docstring mapping)
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -457,7 +457,7 @@ class Location(MudObject):
         else:
             raise TypeError("can only add Living or Item")
         obj.location = self
-        self.verbs.update(obj.verbs)    # register custom verbs
+        self.verbs.update(obj.verbs)    # register custom verbs   @todo don't update verbs globally; this won't work in multiplayer
 
     def remove(self, obj, actor):
         """Remove obj from this location (either a Living or an Item)"""
@@ -469,7 +469,7 @@ class Location(MudObject):
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
         for verb in obj.verbs:
-            self.verbs.pop(verb, None)     # unregister custom verbs
+            self.verbs.pop(verb, None)     # unregister custom verbs   @todo fix this, won't work in multiplayer
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
@@ -664,7 +664,7 @@ class Living(MudObject):
             assert isinstance(item, Item)
             self.__inventory.add(item)
             item.contained_in = self
-            self.location.verbs.update(item.verbs)   # register custom verbs
+            self.location.verbs.update(item.verbs)   # register custom verbs   @todo fix this, doesn't work in multiplayer
         else:
             raise ActionRefused("You can't do that.")
 
@@ -674,7 +674,7 @@ class Living(MudObject):
             self.__inventory.remove(item)
             item.contained_in = None
             for verb in item.verbs:
-                self.location.verbs.pop(verb, None)     # unregister custom verbs
+                self.location.verbs.pop(verb, None)     # unregister custom verbs   @todo fix this, doesn't work in multiplayer
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
@@ -784,13 +784,13 @@ class Living(MudObject):
     def register_all_inventory_verbs(self, location):
         """When moving the living to a new location, register all inventory custom verbs"""
         for item in self.__inventory:
-            location.verbs.update(item.verbs)
+            location.verbs.update(item.verbs)   # @todo fix this, doesn't work in multiplayer
 
     def unregister_all_inventory_verbs(self, location):
         """When removing the living from a location, unregister all inventory custom verbs"""
         for item in self.__inventory:
             for verb in item.verbs:
-                location.verbs.pop(verb, None)
+                location.verbs.pop(verb, None)      # @todo fix this, doesn't work in multiplayer
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """The same as locate_item except it only returns the item, or None."""
