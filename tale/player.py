@@ -9,12 +9,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import time
 from . import base
-from . import soul
 from . import lang
 from . import hints
 from . import pubsub
 from . import mud_context
-from .errors import SecurityViolation, ActionRefused, ParseError
+from .errors import SecurityViolation, ActionRefused
 from .util import queue
 from .tio.iobase import strip_text_styles
 from threading import Event
@@ -32,7 +31,6 @@ class Player(base.Living, pubsub.Listener):
         self.turns = 0
         self.state = {}
         self.hints = hints.HintSystem()
-        self.previous_commandline = None
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT
         self.screen_styles_enabled = True
@@ -48,7 +46,6 @@ class Player(base.Living, pubsub.Listener):
         self.input_is_available = Event()
         self.transcript = None
         self._output = TextBuffer()
-        self._previous_parsed = None
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
@@ -74,36 +71,6 @@ class Player(base.Living, pubsub.Listener):
         It will trigger the game's ending/game-over sequence.
         """
         self.story_complete = True
-
-    def parse(self, commandline, external_verbs=frozenset()):
-        """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
-        if commandline == "again":
-            # special case, repeat previous command
-            if self.previous_commandline:
-                commandline = self.previous_commandline
-                self.tell("<dim>(repeat: %s)</>" % commandline, end=True)
-            else:
-                raise ActionRefused("Can't repeat your previous action.")
-        self.previous_commandline = commandline
-        parsed = self.soul.parse(self, commandline, external_verbs)
-        self._previous_parsed = parsed
-        if external_verbs and parsed.verb in external_verbs:
-            raise soul.NonSoulVerb(parsed)
-        if parsed.verb not in soul.NONLIVING_OK_VERBS:
-            # check if any of the targeted objects is a non-living
-            if not all(isinstance(who, base.Living) for who in parsed.who_order):
-                raise soul.NonSoulVerb(parsed)
-        self.validate_socialize_targets(parsed)
-        return parsed
-
-    def validate_socialize_targets(self, parsed):
-        """check if any of the targeted objects is an exit"""
-        if any(isinstance(w, base.Exit) for w in parsed.who_info):
-            raise ParseError("That doesn't make much sense.")
-
-    def remember_parsed(self):
-        """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
-        self.soul.previously_parsed = self._previous_parsed
 
     def tell(self, *messages, **kwargs):
         """

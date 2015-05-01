@@ -144,7 +144,7 @@ VERBS = {
 "apologize": ( DEFA, None, "", "to" ),
 "sorry":     ( SIMP, None, "apologize$ \nAT \nHOW", "to" ),
 "complain":  ( DEFA, None, "", "about" ),
-"rotate":    ( PERS, None, "rotate$ \nHOW", "rotate$ \nWHO \nHOW" ),
+"rotate":    ( PERS, None, "rotate$ \nHOW", "rotate$ \nWHO \nHOW" ),        # overridden by a cmd
 "excuse":    ( PERS, None, " \nHOW excuse$ \nMYself", " \nHOW excuse$ \nMYself to \nWHO" ),
 "beg":       ( PERS, None, "beg$ \nHOW", "beg$ \nWHO for mercy \nHOW" ),
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),

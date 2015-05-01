@@ -175,6 +175,7 @@ def do_clean(player, parsed, ctx):
 @disabled_in_gamemode("mud")
 def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session. (Only available in IF mode)"""
+    # @todo suspend the game input for as long as pdb is running
     import pdb
     pdb.set_trace()
 
@@ -480,5 +481,6 @@ def do_force(player, parsed, ctx):
     if isinstance(target, Player):
         target.store_input_line(cmd)   # insert the command into the target player's input buffer
     else:
-        target_parsed = player.parse(cmd)   # re-parse the actual command for the target
-        ctx.driver.after_player_action(target.do_socialize_cmd, target_parsed, ctx.driver)
+        # re-parse and execute the actual command for the target, from the viewpoint of the current player!
+        target_parsed = player.parse(cmd)
+        ctx.driver.after_player_action(lambda: target.do_socialize_cmd(target_parsed))

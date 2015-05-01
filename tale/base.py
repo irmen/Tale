@@ -42,7 +42,7 @@ from . import util
 from . import pubsub
 from . import mud_context
 from . import soul
-from .errors import ActionRefused
+from .errors import ActionRefused, ParseError
 from .races import races
 
 
@@ -624,6 +624,8 @@ class Living(MudObject):
         for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
             self.stats[stat_name] = stat_avg
         self.__inventory = set()
+        self.previous_commandline = None
+        self._previous_parsed = None
         super(Living, self).__init__(name, title, description, short_description)
 
     def init_race(self, race, gender):
@@ -743,15 +745,50 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def do_socialize_cmd(self, parsed, driver):
+    def parse(self, commandline, external_verbs=frozenset()):
+        """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
+        if commandline == "again":
+            # special case, repeat previous command
+            if self.previous_commandline:
+                commandline = self.previous_commandline
+                self.tell("<dim>(repeat: %s)</>" % commandline, end=True)
+            else:
+                raise ActionRefused("Can't repeat your previous action.")
+        self.previous_commandline = commandline
+        parsed = self.soul.parse(self, commandline, external_verbs)
+        self._previous_parsed = parsed
+        if external_verbs and parsed.verb in external_verbs:
+            raise soul.NonSoulVerb(parsed)
+        if parsed.verb not in soul.NONLIVING_OK_VERBS:
+            # check if any of the targeted objects is a non-living
+            if not all(isinstance(who, Living) for who in parsed.who_order):
+                raise soul.NonSoulVerb(parsed)
+        self.validate_socialize_targets(parsed)
+        return parsed
+
+    def validate_socialize_targets(self, parsed):
+        """check if any of the targeted objects is an exit"""
+        if any(isinstance(w, Exit) for w in parsed.who_info):
+            raise ParseError("That doesn't make much sense.")
+
+    def remember_parsed(self):
+        """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
+        self.soul.previously_parsed = self._previous_parsed
+
+    def do_socialize(self, cmdline, external_verbs=frozenset()):
+        """perform a command line with a socialize/soul verb on the living's behalf"""
+        parsed = self.parse(cmdline, external_verbs=external_verbs)
+        self.do_socialize_cmd(parsed)
+
+    def do_socialize_cmd(self, parsed):
         """
         A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
         Some verbs may trigger a response or action from something or someone else.
         """
-        who, actor_message, room_message, target_message = self.socialize_parsed(parsed)
+        who, actor_message, room_message, target_message = self.soul.process_verb_parsed(self, parsed)
         self.tell(actor_message)
         self.location.tell(room_message, self, who, target_message)
-        driver.after_player_action(self.location.notify_action, parsed, self)
+        mud_context.driver.after_player_action(lambda: self.location.notify_action(parsed, self))
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
@@ -759,13 +796,7 @@ class Living(MudObject):
             if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
-                        driver.after_player_action(living.start_attack, self)
-
-    def socialize_parsed(self, parsed):
-        """
-        Feed the parse results we've already got into the Soul. (This avoids re-parsing the command string)
-        """
-        return self.soul.process_verb_parsed(self, parsed)
+                        mud_context.driver.after_player_action(lambda: living.start_attack(self))
 
     def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """
@@ -787,18 +818,18 @@ class Living(MudObject):
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
             # queue event
             if is_player:
-                mud_context.driver.after_player_action(original_location.notify_player_left, self, target)
+                mud_context.driver.after_player_action(lambda: original_location.notify_player_left(self, target))
             else:
-                mud_context.driver.after_player_action(original_location.notify_npc_left, self, target)
+                mud_context.driver.after_player_action(lambda: original_location.notify_npc_left(self, target))
         else:
             target.insert(self, actor)
         if not silent:
             target.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
         # queue event
         if is_player:
-            mud_context.driver.after_player_action(target.notify_player_arrived, self, original_location)
+            mud_context.driver.after_player_action(lambda: target.notify_player_arrived(self, original_location))
         else:
-            mud_context.driver.after_player_action(target.notify_npc_arrived, self, original_location)
+            mud_context.driver.after_player_action(lambda: target.notify_npc_arrived(self, original_location))
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """The same as locate_item except it only returns the item, or None."""

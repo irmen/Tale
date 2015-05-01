@@ -164,7 +164,7 @@ class Driver(object):
         self.unbound_exits = []
         self.deferreds = []  # heapq
         self.deferreds_lock = threading.Lock()
-        self.notification_queue = util.queue.Queue()
+        self.action_queue = util.queue.Queue()
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.config = None
         self.server_loop_durations = collections.deque(maxlen=10)
@@ -449,7 +449,7 @@ class Driver(object):
             last_loop_time = time.time()
             if has_input:
                 try:
-                    for cmd in p.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd/tick?
+                    for cmd in p.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd per tick to prevent flooding/abuse?
                         if not cmd:
                             continue
                         try:
@@ -490,14 +490,14 @@ class Driver(object):
             # call any queued event notification handlers
             while True:
                 try:
-                    deferred = self.notification_queue.get_nowait()
+                    action = self.action_queue.get_nowait()
                 except util.queue.Empty:
                     break
                 else:
                     try:
-                        deferred()
+                        action()
                     except Exception:
-                        self.__report_deferred_exception(deferred)
+                        self.__report_deferred_exception(action)
 
     def __server_tick(self):
         """
@@ -531,7 +531,7 @@ class Driver(object):
             conn.write_output()
 
     def __report_deferred_exception(self, deferred):
-        print("\n* Exception while executing deferred {0}:".format(deferred), file=sys.stderr)
+        print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
         print("(continuing...)", file=sys.stderr)
 
@@ -569,7 +569,7 @@ class Driver(object):
                 parsed = player.parse(cmd, external_verbs=all_verbs)
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             player.turns += 1
-            player.do_socialize_cmd(parsed, self)
+            player.do_socialize_cmd(parsed)
         except soul.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
@@ -586,7 +586,7 @@ class Driver(object):
                 if parsed.verb in custom_verbs:
                     handled = player.location.handle_verb(parsed, player)
                     if handled:
-                        self.after_player_action(player.location.notify_action, parsed, player)
+                        self.after_player_action(lambda: player.location.notify_action(parsed, player))
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -597,13 +597,13 @@ class Driver(object):
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, player_connection=conn)
                         func(player, parsed, ctx)
                         if func.enable_notify_action:
-                            self.after_player_action(player.location.notify_action, parsed, player)
+                            self.after_player_action(lambda: player.location.notify_action(parsed, player))
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb:
                 # cmd decided it can't deal with the parsed stuff and that it needs to be retried as soul emote.
                 player.validate_socialize_targets(parsed)
-                player.do_socialize_cmd(parsed, self)
+                player.do_socialize_cmd(parsed)
             except errors.RetryParse as x:
                 return self.__process_player_input(player, x.command, conn)   # try again but with new command string
 
@@ -780,16 +780,12 @@ class Driver(object):
         with self.deferreds_lock:
             heapq.heappush(self.deferreds, deferred)
 
-    def after_player_action(self, action, *vargs, **kwargs):
+    def after_player_action(self, action):
         """
-        Register a deferred callable action (optionally with arguments) in the queue
-        of events that will be executed immediately *after* the player's own actions
-        have been completed.
-        Note that there is a slight difference with defer(): in our case the called
-        action will _not_ have an automatic ctx kwarg added when called.
+        Register a callable action in the queue to be called later,
+        but directly *after* the player's own actions have been completed.
         """
-        deferred = Deferred(None, action, vargs, kwargs)
-        self.notification_queue.put(deferred)
+        self.action_queue.put(action)
 
     def remove_deferreds(self, owner):
         with self.deferreds_lock:

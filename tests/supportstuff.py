@@ -31,8 +31,8 @@ class TestDriver(driver.Driver):
     def execute_after_player_actions(self):
         while True:
             try:
-                deferred = self.notification_queue.get_nowait()
-                deferred()
+                action = self.action_queue.get_nowait()
+                action()
             except util.queue.Empty:
                 break
 

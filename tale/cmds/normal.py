@@ -957,24 +957,24 @@ def do_what(player, parsed, ctx):
         found = True
         parsed = soul.ParseResult(name)
         parsed.who_order = [player]
-        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
+        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It is a soul emote you can do. <dim>%s: %s</>" % (name, playermessage))
         if name in soul.AGGRESSIVE_VERBS:
             p("It might be regarded as offensive to certain people or beings.")
     if name in soul.BODY_PARTS:
         found = True
         parsed = soul.ParseResult("pat", who_order=[player], bodypart=name, message="hi")
-        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
+        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It denotes a body part. <dim>pat myself %s -> %s</>" % (name, playermessage))
     if name in soul.ACTION_QUALIFIERS:
         found = True
         parsed = soul.ParseResult("smile", qualifier=name)
-        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
+        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It is a qualifier for something. <dim>%s smile -> %s</>" % (name, playermessage))
     if name in lang.ADVERBS:
         found = True
         parsed = soul.ParseResult("smile", adverb=name)
-        _, playermessage, roommessage, _ = player.socialize_parsed(parsed)
+        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("That's an adverb you can use with the soul emote commands.")
         p("<dim>smile %s -> %s</>" % (name, playermessage))
     if name in races.races:

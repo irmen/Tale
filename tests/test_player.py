@@ -267,7 +267,7 @@ class TestPlayer(unittest.TestCase):
         parsed = player.parse("wave all")
         self.assertEqual("wave", parsed.verb)
         self.assertEqual([julie], parsed.who_order)
-        who, playermsg, roommsg, targetmsg = player.socialize_parsed(parsed)
+        who, playermsg, roommsg, targetmsg = player.soul.process_verb_parsed(player, parsed)
         self.assertEqual({julie}, who)
         self.assertEqual("You wave happily at julie.", playermsg)
         with self.assertRaises(tale.soul.UnknownVerbException):

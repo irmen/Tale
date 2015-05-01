@@ -136,7 +136,7 @@ class EndDoor(Door):
         super(EndDoor, self).unlock(actor, item)
         if not self.locked:
             if "unlocked_enddoor" not in actor.hints.checkpoints:
-                mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+                mud_context.driver.after_player_action(lambda: actor.tell("<dim>(You will remember this event.)</>"))
             actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
 
@@ -251,7 +251,7 @@ class DoorKey(Item):
         player = mud_context.player
         if target_container is player or target_container in player:
             if "got_doorkey" not in actor.hints.checkpoints:
-                mud_context.driver.after_player_action(actor.tell, "<dim>(You will remember this event.)</>")
+                mud_context.driver.after_player_action(lambda: actor.tell("<dim>(You will remember this event.)</>"))
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
 
 

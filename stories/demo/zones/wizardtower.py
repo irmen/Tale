@@ -10,6 +10,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import random
 from tale.base import Location, Exit, Item, heartbeat
 from tale.npc import Monster
+import tale.lang
 
 
 hall = Location("Main hall of the Tower of Magic",
@@ -24,8 +25,13 @@ key = Item("key", "rusty key", "An old rusty key without a label.")
 @heartbeat
 class Drone(Monster):
     def heartbeat(self, ctx):
-        if random.random() < 0.1:
-            self.location.tell("The drone hums softly.")
+        rand = random.random()
+        if rand < 0.07:
+            self.do_socialize("twitch erra")
+        elif rand < 0.14:
+            self.do_socialize("rotate random")
+        elif rand < 0.21:
+            self.location.tell("%s hums softly." % tale.lang.capital(self.title))
 
 
 drone = Drone("drone", "n", race="bot", title="mindless drone", description="A stupid metallic drone. It just hovers here with no apparent reason.")
