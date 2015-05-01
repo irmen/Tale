@@ -476,7 +476,6 @@ class Location(MudObject):
             handled = any(item.handle_verb(parsed, actor) for item in self.items)
             if not handled:
                 handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
-        # XXX does this correctly handle items in player inventory that have custom verbs?
         return handled
 
     def notify_action(self, parsed, actor):

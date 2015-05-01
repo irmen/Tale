@@ -200,6 +200,30 @@ class Driver(object):
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
+    def __connect_player(self, use_gui_interface, line_delay):
+        # @todo this is just a single player for now
+        connection = player.PlayerConnection()
+        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
+        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        if use_gui_interface:
+            from .tio.tkinter_io import TkinterIo
+            io = TkinterIo(self.config, connection)
+        else:
+            from .tio.console_io import ConsoleIo
+            io = ConsoleIo(connection)
+        connection.player = new_player
+        connection.io = io
+        self.all_players[new_player.name] = connection
+        try:
+            if self.unbound_exits:
+                raise RuntimeError("not all exits are bound")
+        except AttributeError:
+            pass
+        new_player.output_line_delay = line_delay
+        connection.install_tab_completion(TabCompleter(self, new_player))
+        connection.clear_screen()
+        return connection
+
     def __start(self, args):
         """Start the driver from a parsed set of arguments"""
         if os.path.isdir(args.game):
@@ -257,42 +281,21 @@ class Driver(object):
         for x in self.unbound_exits:
             x._bind_target(self.zones)
         del self.unbound_exits
-        # story has been initialised, create I/O and connect a new player
-        # @todo this is just a single player for now
-        connection = player.PlayerConnection()
-        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
-        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        if args.gui:
-            from .tio.tkinter_io import TkinterIo
-            io = TkinterIo(self.config, connection)
-        else:
-            from .tio.console_io import ConsoleIo
-            io = ConsoleIo(connection)
-        connection.player = new_player
-        connection.io = io
-        self.all_players[new_player.name] = connection
-        mud_context.player = new_player
-        mud_context.conn = connection
-        try:
-            if self.unbound_exits:
-                raise RuntimeError("not all exits are bound")
-        except AttributeError:
-            pass
         if args.verify:
             print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
             print("Verified, all seems to be fine.")
             return
-        if 0 <= args.delay <= 100:
-            new_player.output_line_delay = args.delay
-        else:
+        # story has been initialised, connect a player
+        if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
-        connection.install_tab_completion(TabCompleter(self, new_player))
-        connection.clear_screen()
-        # the driver mainloop is running in a background thread, the io-loop/gui-event-loop runs in the main thread
+        connection = self.__connect_player(args.gui, args.delay)
+        mud_context.player = connection.player
+        mud_context.conn = connection
+        # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
         driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
         driver_thread.daemon = True
         driver_thread.start()
-        connection.mainloop()
+        connection.mainloop()   # XXX this is still for just one player
 
     def __startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
@@ -305,7 +308,7 @@ class Driver(object):
             self.__create_player()  # @todo make it multi player
             conn = mud_context.conn
             if self.config.server_mode != "if":
-                self.show_motd(player)
+                self.show_motd(conn.player)
             conn.player.look(short=False)   # force a 'look' command to get our bearings
             conn.write_output()
             while not self.__stop_mainloop:
