@@ -29,7 +29,6 @@ class Player(base.Living, pubsub.Listener):
     def __init__(self, name, gender, race="human", description=None, short_description=None):
         title = lang.capital(name)
         super(Player, self).__init__(name, gender, race, title, description, short_description)
-        self.soul = soul.Soul()
         self.turns = 0
         self.state = {}
         self.hints = hints.HintSystem()
@@ -102,10 +101,6 @@ class Player(base.Living, pubsub.Listener):
         if any(isinstance(w, base.Exit) for w in parsed.who_info):
             raise ParseError("That doesn't make much sense.")
 
-    def socialize_parsed(self, parsed):
-        """Don't re-parse the command string, but directly feed the parse results we've already got into the Soul"""
-        return self.soul.process_verb_parsed(self, parsed)
-
     def remember_parsed(self):
         """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
         self.soul.previously_parsed = self._previous_parsed
@@ -126,24 +121,6 @@ class Player(base.Living, pubsub.Listener):
             for msg in messages:
                 self._output.print(str(msg), **kwargs)
         return self
-
-    def do_socialize_cmd(self, parsed, driver):
-        """
-        A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
-        Some verbs may trigger a response or action from something or someone else.
-        """
-        who, actor_message, room_message, target_message = self.socialize_parsed(parsed)
-        self.tell(actor_message)
-        self.location.tell(room_message, self, who, target_message)
-        driver.after_player_action(self.location.notify_action, parsed, self)
-        if parsed.verb in soul.AGGRESSIVE_VERBS:
-            # usually monsters immediately attack,
-            # other npcs may choose to attack or to ignore it
-            # We need to check the verb qualifier, it might void the actual action :)
-            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
-                for living in who:
-                    if getattr(living, "aggressive", False):
-                        driver.after_player_action(living.start_attack, self)
 
     def look(self, short=None):
         """look around in your surroundings (exclude player from livings)"""

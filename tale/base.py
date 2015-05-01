@@ -41,6 +41,7 @@ from . import lang
 from . import util
 from . import pubsub
 from . import mud_context
+from . import soul
 from .errors import ActionRefused
 from .races import races
 
@@ -610,6 +611,7 @@ class Living(MudObject):
     """
     def __init__(self, name, gender, race, title=None, description=None, short_description=None):
         self.init_race(race, gender)
+        self.soul = soul.Soul()
         self.location = _Limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
@@ -740,6 +742,30 @@ class Living(MudObject):
         for msg in messages:
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
+
+    def do_socialize_cmd(self, parsed, driver):
+        """
+        A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
+        Some verbs may trigger a response or action from something or someone else.
+        """
+        who, actor_message, room_message, target_message = self.socialize_parsed(parsed)
+        self.tell(actor_message)
+        self.location.tell(room_message, self, who, target_message)
+        driver.after_player_action(self.location.notify_action, parsed, self)
+        if parsed.verb in soul.AGGRESSIVE_VERBS:
+            # usually monsters immediately attack,
+            # other npcs may choose to attack or to ignore it
+            # We need to check the verb qualifier, it might void the actual action :)
+            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
+                for living in who:
+                    if getattr(living, "aggressive", False):
+                        driver.after_player_action(living.start_attack, self)
+
+    def socialize_parsed(self, parsed):
+        """
+        Feed the parse results we've already got into the Soul. (This avoids re-parsing the command string)
+        """
+        return self.soul.process_verb_parsed(self, parsed)
 
     def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """

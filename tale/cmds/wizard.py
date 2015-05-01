@@ -473,11 +473,12 @@ def do_force(player, parsed, ctx):
         raise ParseError("You cannot let them do '%s'; I don't know thatverb." % verb)
     cmd = parsed.unparsed.partition(verb)
     cmd = cmd[1] + cmd[2]
+    room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
+    target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
+    player.tell("You coerce <player>%s</> into following your orders." % target.title)
+    player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
     if isinstance(target, Player):
-        room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
-        target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
-        player.tell("You coerce <player>%s</> into following your orders." % target.title)
-        player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
         target.store_input_line(cmd)   # insert the command into the target player's input buffer
     else:
-        player.tell("Target is not a player, don't know yet how to force it to do something.")    # @todo fix force for non-player livings
+        target_parsed = player.parse(cmd)   # re-parse the actual command for the target
+        ctx.driver.after_player_action(target.do_socialize_cmd, target_parsed, ctx.driver)
