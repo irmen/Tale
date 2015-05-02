@@ -200,30 +200,6 @@ class Driver(object):
                 tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
             raise
 
-    def __connect_player(self, use_gui_interface, line_delay):
-        # @todo this is just a single player for now
-        connection = player.PlayerConnection()
-        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
-        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        if use_gui_interface:
-            from .tio.tkinter_io import TkinterIo
-            io = TkinterIo(self.config, connection)
-        else:
-            from .tio.console_io import ConsoleIo
-            io = ConsoleIo(connection)
-        connection.player = new_player
-        connection.io = io
-        self.all_players[new_player.name] = connection
-        try:
-            if self.unbound_exits:
-                raise RuntimeError("not all exits are bound")
-        except AttributeError:
-            pass
-        new_player.output_line_delay = line_delay
-        connection.install_tab_completion(TabCompleter(self, new_player))
-        connection.clear_screen()
-        return connection
-
     def __start(self, args):
         """Start the driver from a parsed set of arguments"""
         if os.path.isdir(args.game):
@@ -285,44 +261,57 @@ class Driver(object):
             print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
             print("Verified, all seems to be fine.")
             return
-        # story has been initialised, connect a player
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
-        connection = self.__connect_player(args.gui, args.delay)
-        mud_context.player = connection.player
-        mud_context.conn = connection
         # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
+        mud_context.conn = mud_context.player = None
         driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
         driver_thread.daemon = True
         driver_thread.start()
+        # story has been initialised, connect a player
+        connection = self.__connect_player(args.gui, args.delay)
+        mud_context.player = connection.player
+        mud_context.conn = connection
         connection.mainloop()   # XXX this is still for just one player
 
     def __startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
         self.__stop_mainloop = False
-        time.sleep(0.01)
-        conn = None
+        while not mud_context.conn:     # XXX wait for player to connect
+            time.sleep(0.1)
         try:
-            for conn in self.all_players.values():
-                self.__print_game_intro(conn)
-            self.__create_player()  # @todo make it multi player
-            conn = mud_context.conn
+            self.__create_player(mud_context.conn)  # @todo make it multi player
             if self.config.server_mode != "if":
-                self.show_motd(conn.player)
-            conn.player.look(short=False)   # force a 'look' command to get our bearings
-            conn.write_output()
+                self.show_motd(mud_context.player)
+            mud_context.player.look(short=False)   # force a 'look' command to get our bearings
+            mud_context.conn.write_output()
             while not self.__stop_mainloop:
-                try:
-                    self.__main_loop()
-                    break
-                except KeyboardInterrupt:
-                    conn.break_pressed()
-                    continue
+                self.__main_loop()
         except:
-            if conn:
-                conn.critical_error()
+            for conn in self.all_players.values():
+                conn.io.critical_error()
             self.__stop_mainloop = True
             raise
+
+    def __connect_player(self, use_gui_interface, line_delay):
+        # @todo this is just a single player for now
+        connection = player.PlayerConnection()
+        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
+        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        if use_gui_interface:
+            from .tio.tkinter_io import TkinterIo
+            io = TkinterIo(self.config, connection)
+        else:
+            from .tio.console_io import ConsoleIo
+            io = ConsoleIo(connection)
+        connection.player = new_player
+        connection.io = io
+        self.all_players[new_player.name] = connection
+        new_player.output_line_delay = line_delay
+        connection.install_tab_completion(TabCompleter(self, new_player))
+        connection.clear_screen()
+        self.__print_game_intro(connection)
+        return connection
 
     def __print_game_intro(self, player_connection):
         # prints the intro screen of the game
@@ -347,11 +336,9 @@ class Driver(object):
             player_connection.output("</></monospaced>")
             player_connection.output("")
 
-    def __create_player(self):
+    def __create_player(self, conn):
         # Lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
-        # Returns the active player or a new player object if something has changed.
-        player = mud_context.player
-        conn = mud_context.conn
+        player = conn.player
         if self.config.server_mode == "mud" or not self.config.savegames_enabled:
             load_saved_game = False
         else:
@@ -395,7 +382,6 @@ class Driver(object):
                 player.tell("Welcome to %s, %s." % (self.config.name, player.title), end=True)
             player.tell("\n")
         self.story.init_player(player)
-        return player
 
     def _stop_driver(self):
         """
@@ -469,10 +455,7 @@ class Driver(object):
                             p.tell(str(x))
                         except errors.ParseError as x:
                             p.tell(str(x))
-                except KeyboardInterrupt:
-                    conn.break_pressed()
-                    continue
-                except EOFError:
+                except (KeyboardInterrupt, EOFError):
                     continue
                 except errors.StoryCompleted:
                     if self.config.server_mode == "if":
@@ -652,7 +635,7 @@ class Driver(object):
             # we load a new player and simply replace all players with this one.
             player = state["player"]
             mud_context.player = player
-            self.all_players = {player.name: player}
+            self.all_players = {player.name: mud_context.conn}
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
