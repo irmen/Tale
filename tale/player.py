@@ -319,7 +319,7 @@ class PlayerConnection(object):
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
-            if self.player:
+            if self.player and mud_context.config.server_mode == "if":
                 self.io.abort_all_input(self.player)
             self.io = None
         if self.player:

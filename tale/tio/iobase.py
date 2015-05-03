@@ -108,6 +108,10 @@ class IoAdapterBase(object):
         """do something when the player types ctrl-C (break)"""
         pass
 
+    def pause(self, unpause=False):
+        """pause/ unpause the input loop"""
+        raise NotImplementedError("implement this in subclass")
+
 
 class TabCompleter(object):
     """

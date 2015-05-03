@@ -43,6 +43,9 @@ class TkinterIo(iobase.IoAdapterBase):
         """Main event loop for this I/O adapter"""
         self.gui.mainloop(player_connection)
 
+    def pause(self, unpause=False):
+        self.gui.pause(unpause)
+
     def clear_screen(self):
         """Clear the screen"""
         self.gui.clear_screen()
@@ -307,6 +310,12 @@ class TaleGUI(object):
         self.window = None
         self.root = None
         self.io.gui_terminated()
+
+    def pause(self, unpause=False):
+        if unpause:
+            self.write_line("---- session continues ----")
+        else:
+            self.write_line("---- session paused ----")
 
     def destroy(self, force=False):
         def destroy2():

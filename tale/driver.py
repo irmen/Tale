@@ -296,7 +296,7 @@ class Driver(object):
             else:
                 # multi player MUD
                 #@todo build this
-                #self.show_motd(mud_context.player)   # XXX
+                #self.show_motd(mud_context.player)
                 #mud_context.player.look(short=False)   # force a 'look' command to get our bearings
                 #mud_context.conn.write_output()
                 while not self.__stop_mainloop:
@@ -481,13 +481,15 @@ class Driver(object):
     def __server_loop_process_player_input(self, conn):
         p = conn.player
         assert p.input_is_available.is_set()
-        for cmd in p.get_pending_input():   # @todo hmm, all at once or limit player to 1 cmd per tick to prevent flooding/abuse?
+        for cmd in p.get_pending_input():
             if not cmd:
                 continue
             try:
                 p.tell("\n")
                 self.__process_player_command(cmd, p, conn)
                 p.remember_parsed()
+                # to avoid flooding/abuse, we stop the loop after processing one command.
+                break
             except soul.UnknownVerbException as x:
                 if x.verb in self.directions:
                     p.tell("You can't go in that direction.")

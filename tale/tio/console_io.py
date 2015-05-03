@@ -70,6 +70,8 @@ class ConsoleIo(iobase.IoAdapterBase):
             # the windows console by default can't output nice unicode quote characters, so we disable that feature
             self.supports_smartquotes = False
         self.stop_main_loop = False
+        self.input_not_paused = threading.Event()
+        self.input_not_paused.set()
 
     def __repr__(self):
         return "<ConsoleIo @ 0x%x, local console, pid %d>" % (id(self), os.getpid())
@@ -80,6 +82,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             # Input a single line of text by the player. It is stored in the internal
             # command buffer of the player. The driver's main loop can look into that
             # to see if any input should be processed.
+            self.input_not_paused.wait()
             try:
                 # note that we don't print any prompt ">>", that needs to be done
                 # by the main thread that handles screen *output*
@@ -90,6 +93,12 @@ class ConsoleIo(iobase.IoAdapterBase):
                 self.break_pressed()
             except EOFError:
                 pass
+
+    def pause(self, unpause=False):
+        if unpause:
+            self.input_not_paused.set()
+        else:
+            self.input_not_paused.clear()
 
     def clear_screen(self):
         """Clear the screen"""

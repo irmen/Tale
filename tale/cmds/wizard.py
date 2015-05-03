@@ -175,9 +175,12 @@ def do_clean(player, parsed, ctx):
 @disabled_in_gamemode("mud")
 def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session. (Only available in IF mode)"""
-    # @todo suspend the game input for as long as pdb is running
+    ctx.conn.io.pause()
+    print("------------Entering PDB debugger session-------------")
     import pdb
     pdb.set_trace()
+    print("------------Leaving PDB debugger session--------------")
+    ctx.conn.io.pause(unpause=True)
 
 
 @wizcmd("wiretap")
