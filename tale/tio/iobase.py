@@ -50,6 +50,7 @@ class IoAdapterBase(object):
         self.do_smartquotes = True
         self.supports_smartquotes = True
         self.player_connection = player_connection
+        self.stop_main_loop = False
 
     def destroy(self):
         """Called when the I/O adapter is shut down"""

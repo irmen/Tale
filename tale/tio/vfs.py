@@ -88,8 +88,11 @@ class VirtualFileSystem(object):
         if self.use_pkgutil:
             # package resource access
             data = pkgutil.get_data(self.root, name)
-            with io.StringIO(data.decode(encoding), newline=None) as f:
-                return Resource(name, f.read(), mimetype)
+            if encoding:
+                with io.StringIO(data.decode(encoding), newline=None) as f:
+                    return Resource(name, f.read(), mimetype)
+            else:
+                return Resource(name, data, mimetype)
         else:
             # direct filesystem access
             phys_path = os.path.normpath(os.path.join(self.root, name))

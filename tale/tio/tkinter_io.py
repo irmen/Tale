@@ -21,6 +21,7 @@ except ImportError:
     import tkFont as tkfont
     import tkMessageBox as tkmsgbox
 from . import iobase
+from . import vfs
 from .. import mud_context
 from .. import __version__ as tale_version
 
@@ -134,7 +135,7 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
-        img = PhotoImage(file=os.path.join(os.path.dirname(__file__), "quill_pen_paper.gif"))
+        img = PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
         self.tk.call('wm', 'iconphoto', self, img)
         # self.iconbitmap(name)
 
