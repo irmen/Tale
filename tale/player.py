@@ -253,6 +253,7 @@ class PlayerConnection(object):
     def __init__(self, player=None, io=None):
         self.player = player
         self.io = io
+        self.need_new_input_prompt = True
 
     def get_output(self):
         """
@@ -291,10 +292,13 @@ class PlayerConnection(object):
         self.write_output()
         self.io.output_no_newline(prompt)
         self.player.input_is_available.wait()
+        self.need_new_input_prompt = True
         return self.player.get_pending_input()[0].strip()   # use just the first line
 
     def write_input_prompt(self):
-        self.io.write_input_prompt()
+        if self.need_new_input_prompt:
+            self.io.write_input_prompt()
+            self.need_new_input_prompt = False
 
     def clear_screen(self):
         self.io.clear_screen()
