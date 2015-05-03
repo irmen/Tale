@@ -189,6 +189,7 @@ class Driver(object):
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
+        parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
         args = parser.parse_args(command_line_args)
         try:
@@ -267,7 +268,7 @@ class Driver(object):
             raise ValueError("invalid delay, valid range is 0-100")
         if self.config.server_mode == "if":
             # create the single player mode player automatically
-            connection = self.__connect_player(args.gui, args.delay)
+            connection = self.__connect_player(args.gui, args.web, args.delay)
             mud_context.player = connection.player
             mud_context.conn = connection
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
@@ -307,13 +308,17 @@ class Driver(object):
             self.__stop_mainloop = True
             raise
 
-    def __connect_player(self, use_gui_interface, line_delay):
+    def __connect_player(self, use_gui_interface, use_web_interface, line_delay):
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
         if use_gui_interface:
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.config, connection)
+        elif use_web_interface:
+            assert self.config.server_mode == "if"  # XXX
+            from .tio.if_browser_io import HttpIo
+            io = HttpIo(connection)
         else:
             from .tio.console_io import ConsoleIo
             io = ConsoleIo(connection)
