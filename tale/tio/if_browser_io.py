@@ -75,7 +75,10 @@ class HttpIo(iobase.IoAdapterBase):
 
     def mainloop(self, player_connection):
         import webbrowser
-        webbrowser.open("http://%s:%d/tale/" % self.server.server_address)
+        from threading import Thread
+        url = "http://%s:%d/tale/" % self.server.server_address
+        t = Thread(target=webbrowser.open, args=(url, ))
+        t.start()
         while not self.stop_main_loop:
             self.server.handle_request()
 
@@ -204,6 +207,7 @@ class HttpIo(iobase.IoAdapterBase):
             if cmd and "autocomplete" in parameters:
                 self.text_to_browser.append("Suggestions: " + str(self.completer.complete(cmd)))
             else:
+                self.text_to_browser.append("<br><pre>   %s</pre>" % cmd)
                 self.player_connection.player.store_input_line(cmd)
             return self.wsgi_redirect_other(start_response, "../tale/")
         elif path.startswith("static/"):
