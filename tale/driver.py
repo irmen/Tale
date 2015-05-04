@@ -356,7 +356,7 @@ class Driver(object):
                     player_connection.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
                 player_connection.output("</></monospaced>")
                 player_connection.output("")
-        if not player_connection and self.config.server_mode == "mud":
+        if not player_connection:
             print("\n")
             print("Tale library: %s" % tale_version_str)
             print("MudLib:       '%s' v%s" % (self.config.name, self.config.version))

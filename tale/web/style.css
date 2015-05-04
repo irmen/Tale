@@ -28,3 +28,42 @@ p, pre {
     padding: 0pt;
     margin: 0 0 0.5ex 0;
 }
+
+.txt-bright {
+    color: darkgreen;
+    font-weight: bold;
+}
+.txt-normal {}
+.txt-dim {
+    color: brown;
+}
+.txt-ul {
+    text-decoration: underline;
+}
+.txt-it {
+    font-style: italic;
+}
+.txt-rev {
+    background-color: darkslateblue;
+    color: white;
+}
+.txt-living {}
+.txt-player {}
+.txt-item {}
+.txt-exit {
+    color: maroon;
+    font-weight: bold;
+}
+.txt-location {
+    color: navy;
+    font-weight: bold;
+}
+.txt-userinput {
+    color: maroon;
+    font-family: Consolas, Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+    font-style: italic;
+    padding-left: 2em;
+    padding-top: 1em;
+    display: block;
+}
+

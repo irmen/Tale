@@ -9,6 +9,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import textwrap
 import re
 
+tag_split_re = re.compile("(<[a-z/]+?>)")
+tag_re = re.compile("<[a-z/]+?>$")
+
 
 class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
     """
@@ -17,9 +20,6 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
     Unfortunately the line filling loop is embedded in a larger method,
     that we need to override fully (_wrap_chunks)...
     """
-    tag_split_re = re.compile("(<[a-z/]+?>)")
-    tag_re = re.compile("<[a-z/]+?>$")
-
     def _wrap_chunks(self, chunks):
         lines = []
         if self.width <= 0:
@@ -28,7 +28,7 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
         # split any style tags <abcde> or </> into separate chunks
         chunks2 = []
         for chunk in chunks:
-            chunks2.extend(self.tag_split_re.split(chunk))
+            chunks2.extend(tag_split_re.split(chunk))
         chunks = chunks2
         del chunks2
 
@@ -49,7 +49,7 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
                 if not chunk:
                     chunks.pop()
                     continue
-                l = 0 if self.tag_re.match(chunk) else len(chunk)   # don't count length of any styling tags
+                l = 0 if tag_re.match(chunk) else len(chunk)   # don't count length of any styling tags
                 if cur_len + l <= width:
                     cur_line.append(chunks.pop())
                     cur_len += l

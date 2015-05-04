@@ -12,6 +12,7 @@ import json
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
+from .styleaware_wrapper import tag_split_re
 from .. import mud_context
 try:
     from html import escape as html_escape
@@ -20,31 +21,6 @@ except ImportError:
 
 
 __all__ = ["HttpIo"]
-
-
-style_words = {
-    "dim": "",
-    "normal": "",
-    "bright": "",
-    "ul": "",
-    "it": "",
-    "rev": "",
-    "/": "",
-    "blink": "",
-    "living": "",
-    "player": "",
-    "item": "",
-    "exit": "",
-    "location": "",
-    "monospaced": "{{pre}}",
-    "/monospaced": "{{/pre}}"
-}
-escaped_styles_to_html = {
-    "{{pre}}": "<pre>",
-    "{{/pre}}": "</pre>"
-}
-
-assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
 
 def singlyfy_parameters(parameters):
@@ -77,6 +53,7 @@ class HttpIo(iobase.IoAdapterBase):
         import webbrowser
         from threading import Thread
         url = "http://%s:%d/tale/" % self.server.server_address
+        print("\nPoint your browser to the following url: ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))
         t.start()
         while not self.stop_main_loop:
@@ -90,7 +67,7 @@ class HttpIo(iobase.IoAdapterBase):
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
-            text = self._convert_to_html(text)
+            text = convert_to_html(text, self.smartquotes)
             if text == "\n":
                 text = "<br>"
             if formatted:
@@ -103,24 +80,10 @@ class HttpIo(iobase.IoAdapterBase):
             self.output_no_newline(line)
 
     def output_no_newline(self, text):
-        text = self._convert_to_html(text)
+        text = convert_to_html(text, self.smartquotes)
         if text == "\n":
             text = "<br>"
         self.text_to_browser.append("<p>" + text + "</p>\n")
-
-    def _convert_to_html(self, line):
-        """Convert style tags to html"""
-        if "<" not in line:
-            return line
-        elif style_words:
-            for tag, replacement in style_words.items():
-                line = line.replace("<%s>" % tag, replacement)
-            line = html_escape(line)
-            for tag, replacement in escaped_styles_to_html.items():
-                line = line.replace(tag, replacement)
-            return line
-        else:
-            return html_escape(iobase.strip_text_styles(line))
 
     def wsgi_app(self, environ, start_response):
         method = environ.get("REQUEST_METHOD")
@@ -190,6 +153,7 @@ class HttpIo(iobase.IoAdapterBase):
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                       ('Pragma', 'no-cache'),
                                       ('Expires', '0')])
+            text.insert(0, "<!-- @tale-location:@ {{%s}} -->" % self.player_connection.player.location.title)
             if "fullpage" not in parameters:
                 return (t.encode("utf-8") for t in text)
             else:
@@ -207,7 +171,8 @@ class HttpIo(iobase.IoAdapterBase):
             if cmd and "autocomplete" in parameters:
                 self.text_to_browser.append("Suggestions: " + str(self.completer.complete(cmd)))
             else:
-                self.text_to_browser.append("<br><pre>   %s</pre>" % cmd)
+                cmd = html_escape(cmd, False)
+                self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
                 self.player_connection.player.store_input_line(cmd)
             return self.wsgi_redirect_other(start_response, "../tale/")
         elif path.startswith("static/"):
@@ -222,7 +187,7 @@ class HttpIo(iobase.IoAdapterBase):
 
     def wsgi_is_asset_allowed(self, path):
         return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
-               or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
+            or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
 
     def wsgi_serve_static(self, path, environ, start_response):
         headers = []
@@ -248,3 +213,56 @@ class HttpIo(iobase.IoAdapterBase):
             data = resource.data.encode("utf-8")
         start_response('200 OK', headers)
         return [data]
+
+
+style_tags_html = {
+    "<dim>": ("<span class='txt-dim'>", "</span>"),
+    "<normal>": ("<span class='txt-normal'>", "</span>"),
+    "<bright>": ("<span class='txt-bright'>", "</span>"),
+    "<ul>": ("<span class='txt-ul'>", "</span>"),
+    "<it>": ("<span class='txt-it'>", "</span>"),
+    "<rev>": ("<span class='txt-rev'>", "</span>"),
+    "</>": None,
+    "<living>": ("<span class='txt-living'>", "</span>"),
+    "<player>": ("<span class='txt-player'>", "</span>"),
+    "<item>": ("<span class='txt-item'>", "</span>"),
+    "<exit>": ("<span class='txt-exit'>", "</span>"),
+    "<location>": ("<span class='txt-location'>", "</span>"),
+    "<monospaced>": ("\n<pre>", "</pre>\n")
+}
+
+
+def convert_to_html(line, smartquotes=lambda x: x):
+    """Convert style tags to html"""
+    chunks = tag_split_re.split(line)
+    if len(chunks) == 1:
+        # optimization in case there are no markup tags in the text at all
+        return html_escape(smartquotes(line), False)
+    result = []
+    close_tags_stack = []
+    chunks.append("</>")   # add a reset-all-styles sentinel
+    for chunk in chunks:
+        html_tags = style_tags_html.get(chunk)
+        if html_tags:
+            chunk = html_tags[0]
+            close_tags_stack.append(html_tags[1])
+        elif chunk == "</>":
+            while close_tags_stack:
+                result.append(close_tags_stack.pop())
+            continue
+        elif chunk:
+            if chunk.startswith("</"):
+                chunk = "<" + chunk[2:]
+                html_tags = style_tags_html.get(chunk)
+                if html_tags:
+                    chunk = html_tags[1]
+                    if close_tags_stack:
+                        close_tags_stack.pop()
+            else:
+                # normal text (not a tag)
+                # smartypants replaces '\\' by '\' so ideally shouldn't be used on monospaced output...
+                if style_tags_html["<monospaced>"][1] not in close_tags_stack:
+                    chunk = smartquotes(chunk)
+                chunk = html_escape(chunk, False)
+        result.append(chunk)
+    return "".join(result)

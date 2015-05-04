@@ -23,7 +23,7 @@ except ImportError:
 
 
 ALL_STYLE_TAGS = {
-    "dim", "normal", "bright", "ul", "it", "rev", "blink", "/",
+    "dim", "normal", "bright", "ul", "it", "rev", "/",
     "living", "player", "item", "exit", "location", "monospaced", "/monospaced"
 }
 
@@ -87,10 +87,13 @@ class IoAdapterBase(object):
         """
         raise NotImplementedError("implement this in subclass")
 
-    def smartquotes(self, text):
+    def smartquotes(self, text, escaped_entities=False):
         """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
         if self.supports_smartquotes and self.do_smartquotes:
-            return unescape_entity(smartypants(text))
+            quoted = smartypants(text)
+            if escaped_entities:
+                return quoted
+            return unescape_entity(quoted)
         return text
 
     def output(self, *lines):
