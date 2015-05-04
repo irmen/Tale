@@ -95,7 +95,7 @@ class TestDeferreds(unittest.TestCase):
         d = the_driver.Deferred(None, os.getcwd, [], None)
         with self.assertRaises(TypeError) as x:
             d(ctx=ctx)
-        self.assertEqual("getcwd() takes no keyword arguments", str(x.exception))
+        self.assertTrue(str(x.exception).startswith("getcwd() takes no"))
         with self.assertRaises(ValueError):
             the_driver.Deferred(None, plain_function, [], None)
         with self.assertRaises(ValueError):
