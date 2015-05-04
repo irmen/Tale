@@ -3,7 +3,6 @@ Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] Add optional sound clip to locations
-[feature] standalone HTTP server mode with HTML+Javascript frontend.
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------

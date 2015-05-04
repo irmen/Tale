@@ -6,14 +6,16 @@ Webbrowser based I/O for a single player ('if') story.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division
-from wsgiref.simple_server import make_server
+from wsgiref.simple_server import make_server, WSGIRequestHandler
 import cgi
 import json
+import logging
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
 from .styleaware_wrapper import tag_split_re
 from .. import mud_context
+from .. import __version__ as tale_version_str
 try:
     from html import escape as html_escape
 except ImportError:
@@ -34,6 +36,12 @@ def singlyfy_parameters(parameters):
     return parameters
 
 
+class CustomRequestHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        msg = format % args
+        logging.getLogger("tale.wsgi").debug(msg)
+
+
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface
@@ -41,7 +49,7 @@ class HttpIo(iobase.IoAdapterBase):
     def __init__(self, player_connection):
         super(HttpIo, self).__init__(player_connection)
         self.port = 8080
-        self.server = make_server("localhost", self.port, app=self.wsgi_app)
+        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler)
         self.server.timeout = 0.5
         self.completer = None
         self.text_to_browser = []
@@ -124,9 +132,25 @@ class HttpIo(iobase.IoAdapterBase):
         return []
 
     def wsgi_process_request(self, environ, path, parameters, start_response):
-        if not path:
-            headers = [('Content-Type', 'text/html; charset=utf-8')]
+        if not path or path == "start":
+            # start page / titlepage
+            start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
             resource = vfs.internal_resources["web/index.html"]
+            txt = resource.data.format(story_version=mud_context.driver.config.version,
+                                       story_name=mud_context.driver.config.name,
+                                       story_author=mud_context.driver.config.author,
+                                       story_author_email=mud_context.driver.config.author_address)
+            return [txt.encode("utf-8")]
+        elif path == "about":
+            # about page
+            start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
+            resource = vfs.internal_resources["web/about.html"]
+            txt = resource.data.format(tale_version=tale_version_str,
+                                       tale_server=self.server.server_name)
+            return [txt.encode("utf-8")]
+        elif path == "story":
+            headers = [('Content-Type', 'text/html; charset=utf-8')]
+            resource = vfs.internal_resources["web/story.html"]
             etag = str(id(self.player_connection))
             if resource.mtime:
                 etag += "-" + str(resource.mtime)
@@ -153,6 +177,7 @@ class HttpIo(iobase.IoAdapterBase):
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                       ('Pragma', 'no-cache'),
                                       ('Expires', '0')])
+            text.insert(0, "<!-- @tale-turns:@ {{%s}} -->" % self.player_connection.player.turns)
             text.insert(0, "<!-- @tale-location:@ {{%s}} -->" % self.player_connection.player.location.title)
             if "fullpage" not in parameters:
                 return (t.encode("utf-8") for t in text)
@@ -169,12 +194,16 @@ class HttpIo(iobase.IoAdapterBase):
         elif path == "input":
             cmd = parameters.get("cmd", "")
             if cmd and "autocomplete" in parameters:
-                self.text_to_browser.append("Suggestions: " + str(self.completer.complete(cmd)))
+                suggestions = self.completer.complete(cmd)
+                if suggestions:
+                    self.text_to_browser.append("Suggestions: " + ", ".join(suggestions))
+                else:
+                    self.text_to_browser.append("No matching commands.")
             else:
                 cmd = html_escape(cmd, False)
                 self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
                 self.player_connection.player.store_input_line(cmd)
-            return self.wsgi_redirect_other(start_response, "../tale/")
+            return self.wsgi_redirect_other(start_response, "/tale/story")
         elif path.startswith("static/"):
             path = path[len("static/"):]
             if not self.wsgi_is_asset_allowed(path):
@@ -228,7 +257,7 @@ style_tags_html = {
     "<item>": ("<span class='txt-item'>", "</span>"),
     "<exit>": ("<span class='txt-exit'>", "</span>"),
     "<location>": ("<span class='txt-location'>", "</span>"),
-    "<monospaced>": ("\n<pre>", "</pre>\n")
+    "<monospaced>": ("<span class='txt-monospaced'>", "</span>")
 }
 
 
@@ -260,9 +289,8 @@ def convert_to_html(line, smartquotes=lambda x: x):
                         close_tags_stack.pop()
             else:
                 # normal text (not a tag)
-                # smartypants replaces '\\' by '\' so ideally shouldn't be used on monospaced output...
-                if style_tags_html["<monospaced>"][1] not in close_tags_stack:
-                    chunk = smartquotes(chunk)
+                # XXX smartypants replaces '\\' by '\' so ideally shouldn't be used on monospaced output...
+                chunk = smartquotes(chunk)
                 chunk = html_escape(chunk, False)
         result.append(chunk)
     return "".join(result)

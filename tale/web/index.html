@@ -6,17 +6,26 @@
     <link rel="stylesheet" type="text/css" href="static/style.css" />
 </head>
 <body>
-    <h2 title="version: {story_version} -- author: {story_author} -- {story_author_email}"><img src="static/logo.gif" align="top"> {story_name}</h2>
-    <iframe src="text?fullpage=1"></iframe>
-    <form action="input" method="post">
-        &gt;&gt; <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
-        <input type="submit" accesskey="m" />
-        <input type="submit" name="autocomplete" value="Autocomplete" accesskey="C" id="button-autocomplete" />
-    </form>
-
-<script>
-    var but=document.getElementById("button-autocomplete");
-    if(but.accessKeyLabel) {{ but.value += ' ('+but.accessKeyLabel+')'; }}
-</script>
+    <h2><img src="static/logo.gif" align="top"> Tale interactive fiction</h2>
+    <hr>
+    <br>
+    <br>
+    <div style="text-align: center;">
+    <h1>{story_name}</h1>
+    <h3>written by {story_author}</h3>
+    <h3>{story_author_email}</h3>
+    <h5>version {story_version}</h5>
+    <br>
+    <br>
+    <hr>
+    <br>
+    <br>
+    <a href="story" style="font-size: 200%">Start the story.</a>
+    <br>
+    <br>
+    <br>
+    <br>
+    <a href="about">about Tale</a>
+    </div>
 </body>
 </html>

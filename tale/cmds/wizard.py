@@ -451,7 +451,7 @@ def do_events(player, parsed, ctx):
     """Dump pending events."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["<bright>Pending events overview.</> Server tick is %.1f sec." % config.server_tick_time,
+    txt = ["<bright>Pending events overview.</>",
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))

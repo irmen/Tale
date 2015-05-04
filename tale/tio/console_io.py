@@ -32,7 +32,6 @@ style_words = {
     "it": colorama.Style.ITALIC,
     "rev": colorama.Style.REVERSEVID,
     "/": colorama.Style.RESET_ALL,
-    "blink": colorama.Style.BLINK,
     "living": colorama.Style.BRIGHT,
     "player": colorama.Style.BRIGHT,
     "item": colorama.Style.BRIGHT,

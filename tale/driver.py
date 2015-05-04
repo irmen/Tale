@@ -336,7 +336,8 @@ class Driver(object):
             # print game banner as supplied by the game
             banner = self.resources["messages/banner.txt"].data
             if player_connection:
-                player_connection.output("\n<monospaced><bright>" + banner + "</></monospaced>\n")
+                player_connection.player.tell("<bright>" + banner + "</>", format=False)
+                player_connection.player.tell("\n")
             else:
                 print(banner)
         except IOError:
@@ -356,6 +357,7 @@ class Driver(object):
                     player_connection.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
                 player_connection.output("</></monospaced>")
                 player_connection.output("")
+                player_connection.output("")
         if not player_connection:
             print("\n")
             print("Tale library: %s" % tale_version_str)
@@ -372,7 +374,7 @@ class Driver(object):
             load_saved_game = False
         else:
             player.tell("\n")
-            load_saved_game = util.input_confirm("Do you want to load a saved game ('<bright>n</>' will start a new game)?", conn)
+            load_saved_game = util.input_confirm("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?", conn)
         player.tell("\n")
         if load_saved_game:
             loaded_player = self.__load_saved_game()

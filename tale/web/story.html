@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{story_name} - Tale interactive fiction</title>
+    <link rel="icon" type="image/x-ico" href="static/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="static/style.css" />
+</head>
+<body>
+    <h2 title="version: {story_version} -- author: {story_author} -- {story_author_email}"><img src="static/logo.gif" align="top"> {story_name}</h2>
+    <iframe src="text?fullpage=1"></iframe>
+    <form action="input" method="post">
+        &gt;&gt; <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
+        <input type="submit" accesskey="m" value="Command" />
+        <input type="submit" name="autocomplete" value="Autocomplete" accesskey="C" id="button-autocomplete" />
+    </form>
+
+<script>
+    var but=document.getElementById("button-autocomplete");
+    if(but.accessKeyLabel) {{ but.value += ' ('+but.accessKeyLabel+')'; }}
+</script>
+</body>
+</html>
