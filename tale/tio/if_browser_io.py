@@ -5,13 +5,19 @@ Webbrowser based I/O for a single player ('if') story.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
+from __future__ import absolute_import, print_function, division
 from wsgiref.simple_server import make_server
 import cgi
 import json
+from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
 from .. import mud_context
+try:
+    from html import escape as html_escape
+except ImportError:
+    from cgi import escape as html_escape
+
 
 __all__ = ["HttpIo"]
 
@@ -30,9 +36,14 @@ style_words = {
     "item": "",
     "exit": "",
     "location": "",
-    "monospaced": "<pre>",
-    "/monospaced": "</pre>"
+    "monospaced": "{{pre}}",
+    "/monospaced": "{{/pre}}"
 }
+escaped_styles_to_html = {
+    "{{pre}}": "<pre>",
+    "{{/pre}}": "</pre>"
+}
+
 assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
 
@@ -63,6 +74,8 @@ class HttpIo(iobase.IoAdapterBase):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
 
     def mainloop(self, player_connection):
+        import webbrowser
+        webbrowser.open("http://%s:%d/tale/" % self.server.server_address)
         while not self.stop_main_loop:
             self.server.handle_request()
 
@@ -74,9 +87,9 @@ class HttpIo(iobase.IoAdapterBase):
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
-            text = self._apply_style(text).strip()
-            if not text:
-                continue
+            text = self._convert_to_html(text)
+            if text == "\n":
+                text = "<br>"
             if formatted:
                 self.text_to_browser.append("<p>" + text + "</p>\n")
             else:
@@ -87,20 +100,24 @@ class HttpIo(iobase.IoAdapterBase):
             self.output_no_newline(line)
 
     def output_no_newline(self, text):
-        text = self._apply_style(text).strip()
-        if text:
-            self.text_to_browser.append("<p>" + text + "</p>\n")
+        text = self._convert_to_html(text)
+        if text == "\n":
+            text = "<br>"
+        self.text_to_browser.append("<p>" + text + "</p>\n")
 
-    def _apply_style(self, line):
+    def _convert_to_html(self, line):
         """Convert style tags to html"""
         if "<" not in line:
             return line
         elif style_words:
-            for tag in style_words:
-                line = line.replace("<%s>" % tag, style_words[tag])
+            for tag, replacement in style_words.items():
+                line = line.replace("<%s>" % tag, replacement)
+            line = html_escape(line)
+            for tag, replacement in escaped_styles_to_html.items():
+                line = line.replace(tag, replacement)
             return line
         else:
-            return iobase.strip_text_styles(line)
+            return html_escape(iobase.strip_text_styles(line))
 
     def wsgi_app(self, environ, start_response):
         method = environ.get("REQUEST_METHOD")
@@ -130,11 +147,34 @@ class HttpIo(iobase.IoAdapterBase):
         start_response('302 Found', [('Location', target)])
         return []
 
+    def wsgi_redirect_other(self, start_response, target):
+        """Called to do a redirect see-other"""
+        start_response('303 See Other', [('Location', target)])
+        return []
+
+    def wsgi_not_modified(self, start_response):
+        """Called to signal that a resource wasn't modified"""
+        start_response('304 Not Modified', [])
+        return []
+
     def wsgi_process_request(self, environ, path, parameters, start_response):
-        print("REQ", path, parameters)  # XXX
         if not path:
+            headers = [('Content-Type', 'text/html; charset=utf-8')]
             resource = vfs.internal_resources["web/index.html"]
-            start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+            etag = str(id(self.player_connection))
+            if resource.mtime:
+                etag += "-" + str(resource.mtime)
+                headers.append(("Last-Modified", formatdate(resource.mtime)))
+                if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
+                if if_modified:
+                    if parsedate(if_modified) >= parsedate(formatdate(resource.mtime)):
+                        # the resource wasn't modified since last requested
+                        return self.wsgi_not_modified(start_response)
+            if_none = environ.get('HTTP_IF_NONE_MATCH')
+            if if_none and (if_none == '*' or etag in if_none):
+                return self.wsgi_not_modified(start_response)
+            headers.append(("ETag", etag))
+            start_response('200 OK', headers)
             txt = resource.data.format(story_version=mud_context.driver.config.version,
                                        story_name=mud_context.driver.config.name,
                                        story_author=mud_context.driver.config.author,
@@ -143,10 +183,21 @@ class HttpIo(iobase.IoAdapterBase):
         if path == "text":
             text = self.text_to_browser
             self.text_to_browser = []
-            start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
-            return (t.encode("utf-8") for t in text)
+            start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8'),
+                                      ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                      ('Pragma', 'no-cache'),
+                                      ('Expires', '0')])
+            if "fullpage" not in parameters:
+                return (t.encode("utf-8") for t in text)
+            else:
+                resource = vfs.internal_resources["web/textpage.html"]
+                txt = resource.data.format(contents="\n".join(text))
+                return [txt.encode("utf-8")]
         elif path == "tabcomplete":
-            start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8')])
+            start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
+                                      ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                      ('Pragma', 'no-cache'),
+                                      ('Expires', '0')])
             return [json.dumps(self.completer.complete(parameters["prefix"])).encode("utf-8")]
         elif path == "input":
             cmd = parameters.get("cmd", "")
@@ -154,13 +205,13 @@ class HttpIo(iobase.IoAdapterBase):
                 self.text_to_browser.append("Suggestions: " + str(self.completer.complete(cmd)))
             else:
                 self.player_connection.player.store_input_line(cmd)
-            return self.wsgi_redirect(start_response, ".")
+            return self.wsgi_redirect_other(start_response, "../tale/")
         elif path.startswith("static/"):
             path = path[len("static/"):]
             if not self.wsgi_is_asset_allowed(path):
                 return self.wsgi_not_found(start_response)
             try:
-                return self.wsgi_serve_static("web/" + path, start_response)
+                return self.wsgi_serve_static("web/" + path, environ, start_response)
             except IOError:
                 return self.wsgi_not_found(start_response)
         return self.wsgi_not_found(start_response)
@@ -169,10 +220,27 @@ class HttpIo(iobase.IoAdapterBase):
         return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
                or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
 
-    def wsgi_serve_static(self, path, start_response):
+    def wsgi_serve_static(self, path, environ, start_response):
+        headers = []
         resource = vfs.internal_resources[path]
+        if resource.mtime:
+            mtime_formatted = formatdate(resource.mtime)
+            etag = str(resource.mtime)
+            if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
+            if if_modified:
+                if parsedate(if_modified) >= parsedate(mtime_formatted):
+                    # the resource wasn't modified since last requested
+                    return self.wsgi_not_modified(start_response)
+            if_none = environ.get('HTTP_IF_NONE_MATCH')
+            if if_none and (if_none == '*' or etag in if_none):
+                return self.wsgi_not_modified(start_response)
+            headers.append(("ETag", etag))
+            headers.append(("Last-Modified", formatdate(resource.mtime)))
         if type(resource.data) is bytes:
-            start_response('200 OK', [('Content-Type', resource.mimetype)])
-            return [resource.data]
-        start_response('200 OK', [('Content-Type', resource.mimetype + "; charset=utf-8")])
-        return [resource.data.encode("utf-8")]
+            headers.append(('Content-Type', resource.mimetype))
+            data = resource.data
+        else:
+            headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
+            data = resource.data.encode("utf-8")
+        start_response('200 OK', headers)
+        return [data]

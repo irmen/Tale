@@ -9,6 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import os
 import io
+import sys
 import errno
 import mimetypes
 import pkgutil
@@ -22,13 +23,14 @@ class VfsError(IOError):
 
 class Resource(object):
     """Simple container of a resource name, its data (string or binary) and the mime type"""
-    def __init__(self, name, data, mimetype):
+    def __init__(self, name, data, mimetype, mtime):
         self.name = name
         self.data = data
         self.mimetype = mimetype
+        self.mtime = mtime      # not always set
 
     def __repr__(self):
-        return "<Resource %s from %s, size=%d>" % (self.mimetype, self.name, len(self.data))
+        return "<Resource %s from %s, size=%d, mtime=%s>" % (self.mimetype, self.name, len(self.data), self.mtime)
 
     def __len__(self):
         return len(self.data)
@@ -87,17 +89,29 @@ class VirtualFileSystem(object):
             encoding = None
         if self.use_pkgutil:
             # package resource access
-            data = pkgutil.get_data(self.root, name)
+            # we can't use pkgutil.get_data directly, because we also need the mtime
+            # so we do some of the work that get_data does ourselves...
+            loader = pkgutil.get_loader(self.root)
+            rootmodule = sys.modules[self.root]
+            parts = name.split('/')
+            parts.insert(0, os.path.dirname(rootmodule.__file__))
+            name = os.path.join(*parts)
+            mtime = None
+            if hasattr(loader, "path_stats"):
+                # this method only exists in Python 3.3 or newer...
+                mtime = loader.path_stats(name)["mtime"]
+            data = loader.get_data(name)
             if encoding:
                 with io.StringIO(data.decode(encoding), newline=None) as f:
-                    return Resource(name, f.read(), mimetype)
+                    return Resource(name, f.read(), mimetype, mtime)
             else:
-                return Resource(name, data, mimetype)
+                return Resource(name, data, mimetype, mtime)
         else:
             # direct filesystem access
             phys_path = os.path.normpath(os.path.join(self.root, name))
             with io.open(phys_path, mode=mode, encoding=encoding) as f:
-                return Resource(name, f.read(), mimetype)
+                mtime = os.fstat(f.fileno()).st_mtime
+                return Resource(name, f.read(), mimetype, mtime)
 
     def __setitem__(self, name, data):
         """

@@ -186,8 +186,8 @@ class ConsoleIo(iobase.IoAdapterBase):
         if "<" not in line:
             return line
         elif style_words and do_styles:
-            for tag in style_words:
-                line = line.replace("<%s>" % tag, style_words[tag])
+            for tag, replacement in style_words.items():
+                line = line.replace("<%s>" % tag, replacement)
             return line
         else:
             return iobase.strip_text_styles(line)

@@ -1,4 +1,4 @@
-html {
+body {
     font-family:  Georgia, 'DejaVu Serif', 'Droid Serif', 'Times New Roman', serif;
     color: black;
     background: #f8f8f0;
@@ -11,10 +11,20 @@ iframe {
     height: 40em;
 }
 pre, #input-cmd {
-    font-family: Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+    font-family: Consolas, Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
     font-size: 11pt;
 }
 #input-cmd {
     padding: 3pt;
-    width: 40em;
+    width: 30em;
+}
+
+.textframe {
+    margin: 10pt;
+    padding: 0pt;
+}
+
+p, pre {
+    padding: 0pt;
+    margin: 0 0 0.5ex 0;
 }
