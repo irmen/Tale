@@ -176,10 +176,10 @@ def do_clean(player, parsed, ctx):
 def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session. (Only available in IF mode)"""
     ctx.conn.io.pause()
-    print("------------Entering PDB debugger session-------------")
+    print("----------Entering PDB debugger session----------")
     import pdb
     pdb.set_trace()
-    print("------------Leaving PDB debugger session--------------")
+    print("----------Leaving PDB debugger session----------")
     ctx.conn.io.pause(unpause=True)
 
 

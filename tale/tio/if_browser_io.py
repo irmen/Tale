@@ -66,9 +66,10 @@ class HttpIo(iobase.IoAdapterBase):
         t.start()
         while not self.stop_main_loop:
             self.server.handle_request()
+        print("Game shutting down.")
 
     def pause(self, unpause=False):
-        pass   # @todo
+        pass
 
     def install_tab_completion(self, completer):
         self.completer = completer
@@ -289,8 +290,6 @@ def convert_to_html(line, smartquotes=lambda x: x):
                         close_tags_stack.pop()
             else:
                 # normal text (not a tag)
-                # XXX smartypants replaces '\\' by '\' so ideally shouldn't be used on monospaced output...
-                chunk = smartquotes(chunk)
-                chunk = html_escape(chunk, False)
+                chunk = html_escape(smartquotes(chunk), False)
         result.append(chunk)
     return "".join(result)

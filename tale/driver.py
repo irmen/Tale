@@ -296,10 +296,10 @@ class Driver(object):
                     self.__main_loop_singleplayer(mud_context.conn)
             else:
                 # multi player MUD
-                #@todo build this
-                #self.show_motd(mud_context.player)
-                #mud_context.player.look(short=False)   # force a 'look' command to get our bearings
-                #mud_context.conn.write_output()
+                # @todo build this
+                # self.show_motd(mud_context.player)
+                # mud_context.player.look(short=False)   # force a 'look' command to get our bearings
+                # mud_context.conn.write_output()
                 while not self.__stop_mainloop:
                     self.__main_loop_multiplayer()
         except:
@@ -316,7 +316,8 @@ class Driver(object):
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.config, connection)
         elif use_web_interface:
-            assert self.config.server_mode == "if"  # XXX
+            if self.config.server_mode != "if":
+                raise ValueError("At this time, the web browser interface only works in singleplayer 'if' game mode.")   # XXX make it work for mud too
             from .tio.if_browser_io import HttpIo
             io = HttpIo(connection)
         else:
@@ -525,7 +526,7 @@ class Driver(object):
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
         """
-        #@todo build mud game loop
+        # @todo build mud game loop, the stuff below is just carried over from the past for now
         has_input = True
         last_loop_time = last_server_tick = time.time()
         loop_duration = 1.0

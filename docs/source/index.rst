@@ -52,7 +52,7 @@ After all that, you'll need a story to run it on (tale by itself doesn't do anyt
 it's only a framework to build games with).
 There's a tiny demo embedded in the library itself, you can start that with::
 
-    python -m tale.demo.story   # add --gui to get a GUI interface
+    python -m tale.demo.story   # add --gui to get a GUI interface, --web to use a browser
 
 Fool around with your pet and try to get out of the house. There's a larger demo story included in the source distribution,
 in the ``stories`` directory. But you will have to download and extract the source distribution manually to get it.
@@ -111,11 +111,11 @@ A random list of the features of the current codebase:
 
 - Runs on most Python implementations, but requires 2.7 or 3.2+
 - game engine and framework code is separated from the actual game code;
-  it can run different games from different directories
+  it can run different games from different directories (just one at a time though)
 - single-player I.F. mode and multi-player MUD mode (but no multiplayer server yet,
   it's just a difference in active features for now)
-- text console interface or GUI (Tkinter), switchable by command line argument.
-- I/O abstraction layer should make it not too hard to make another interface (I'm planning a html/javascript driven one).
+- text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
+- I/O abstraction layer should make it not too hard to make another interface.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
 - the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'
@@ -133,7 +133,7 @@ A random list of the features of the current codebase:
   someone is yelling something, and if possible, where the sound is coming from.
 - text is nicely formatted when outputted (wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
-- uses smartypants to automatically render quotes, dashes, ellipsis etc. in a nicer way. This requires chcp 1252+unicode console font on windows.
+- uses smartypants to automatically render quotes, dashes, ellipsis in a nicer way.
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib
@@ -142,14 +142,12 @@ A random list of the features of the current codebase:
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.
 - it's trivial to give objects a 'heartbeat' (=they will get a call every server tick to do stuff)
 - you can also quite easily schedule calls to be executed at a defined later moment in time
-- easy definition of commands in separate functions
-- uses docstrings to define command help texts
+- easy definition of commands in separate functions, uses docstrings to define command help texts
 - command function code is quite compact due to convenient parameters and available methods on the game objects
 - command code gets parse information from the soul parser as parameter; very little parsing needs to be done in the command code itself
 - there's a set of configurable parameters on a per-story basis
 - stories can define their own introduction text and completion texts
 - stories can define their own commands or override existing commands
-- version checks are done on the story files and the save game files to avoid loading incompatible data
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
@@ -159,8 +157,7 @@ A random list of the features of the current codebase:
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways
   of writing a game story, in a DSL or whatever).
-- many unit tests to validate the code
-
+- a set of unit tests to validate a large part of the code
 
 
 MUD mode versus Interactive Fiction mode
@@ -168,16 +165,12 @@ MUD mode versus Interactive Fiction mode
 The Tale game driver launches in Interactive Fiction mode by default.
 This is because my development efforts are focused on IF at the moment.
 
-However, there's already a bit of multi-user goodness available.
+However, there's already a little bit of multi-user goodness available.
 You can enable it by using the :kbd:`--mode mud` command line switch.
 A couple of new commands and features are enabled when you do this
 (amongst others: message-of-the-day support and the 'stats' command).
 Running a IF story in MUD mode may cause some problems. It's only
-possible to do this for testing purposes right now.
-
-Currently, there is no actual multi-user support. The Tale game driver
-doesn't yet have any multi-user server capabilities, so even in MUD mode,
-you're still limited to a single player for now.
+possible to do this for testing purposes right now, and may be broken.
 
 
 Copyright

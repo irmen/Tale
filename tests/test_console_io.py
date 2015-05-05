@@ -57,6 +57,12 @@ class TestConsoleIo(unittest.TestCase):
         formatted = io.render_output(output.get_paragraphs(), indent=2, width=45)
         self.assertEqual(expected, formatted)
 
+    def testSmartypants(self):
+        self.assertEqual("derp&#8230;", iobase.smartypants("derp..."))
+        self.assertEqual("&#8216;txt&#8217;", iobase.smartypants("'txt'"))
+        self.assertEqual("&#8220;txt&#8221;", iobase.smartypants('"txt"'))
+        self.assertEqual(r"slashes\\slashes", iobase.smartypants(r"slashes\\slashes"))
+
 
 class TextWrapper(unittest.TestCase):
     def test_wrap(self):

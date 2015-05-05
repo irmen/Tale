@@ -10,7 +10,6 @@ import sys
 import traceback
 from ..util import basestring_type
 from .. import soul
-from smartypants import smartypants
 try:
     import HTMLParser
     unescape_entity = HTMLParser.HTMLParser().unescape
@@ -20,7 +19,9 @@ except ImportError:
         unescape_entity = html.parser.unescape  # 3.4+
     else:
         unescape_entity = html.parser.HTMLParser().unescape
-
+import smartypants
+smartypants.process_escapes = lambda txt: txt  # disable the escape processing
+smartypants = smartypants.smartypants
 
 ALL_STYLE_TAGS = {
     "dim", "normal", "bright", "ul", "it", "rev", "/",
