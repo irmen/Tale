@@ -135,9 +135,12 @@ class TaleWindow(Toplevel):
         self.textView.insert(0.0, text)
         self.textView.config(state=DISABLED)
 
-        img = PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
-        self.tk.call('wm', 'iconphoto', self, img)
-        # self.iconbitmap(name)
+        try:
+            img = PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
+        except TclError:
+            pass  # older versions of Tkinter can't create an image from data bytes, don't bother then
+        else:
+            self.tk.call('wm', 'iconphoto', self, img)
 
         self.history = collections.deque(maxlen=100)
         self.history.append("")
@@ -182,7 +185,7 @@ class TaleWindow(Toplevel):
         self.textView.tag_configure('item', font=self.boldFont)
         self.textView.tag_configure('exit', font=self.boldFont)
         self.textView.tag_configure('location', foreground='navy', font=self.boldFont)
-        self.textView.tag_configure('monospaced', font=fixedFont)
+        self.textView.tag_configure('monospaced', font=fixedFont)       # XXX fix this, for instance, the banner isn't printed as monospaced
 
         # pack
         self.commandPrompt.pack(side=LEFT)
