@@ -5,7 +5,7 @@ function setup()
     var but=document.getElementById("button-autocomplete");
     if(but.accessKeyLabel) { but.value += ' ('+but.accessKeyLabel+')'; }
 
-    document.text_refresher = setInterval(poll_text, 500);
+    document.text_refresher = setInterval(poll_text, 450);
 }
 
 function poll_text() {
@@ -14,18 +14,14 @@ function poll_text() {
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
-            var match = this.responseText.match(/@tale-location:@ {{(.+?)}}/);
-            if(match) {
-                var location = match[1];
-                document.getElementById("player-location").innerHTML = location;
+            var json = JSON.parse(this.responseText);
+            console.log(json);
+            if(json["text"]) {
+                document.getElementById("player-location").innerHTML = json["location"];
+                document.getElementById("player-turns").innerHTML = json["turns"];
+                txtdiv.innerHTML += json["text"];
+                txtdiv.scrollTop = txtdiv.scrollHeight;
             }
-            var match = this.responseText.match(/@tale-turns:@ {{(.+?)}}/);
-            if(match) {
-                var turns = match[1];
-                document.getElementById("player-turns").innerHTML = turns;
-            }
-            txtdiv.innerHTML += this.responseText;
-            txtdiv.scrollTop = txtdiv.scrollHeight;
         }
     }
     ajax.onerror = function(error) {

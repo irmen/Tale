@@ -174,14 +174,15 @@ class HttpIo(iobase.IoAdapterBase):
         if path == "text":
             text = self.text_to_browser
             self.text_to_browser = []
-            start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8'),
+            start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                       ('Pragma', 'no-cache'),
                                       ('Expires', '0')])
+            response = {"text": "\n".join(text)}
             if text:
-                text.insert(0, "<!-- @tale-turns:@ {{%s}} -->" % self.player_connection.player.turns)
-                text.insert(0, "<!-- @tale-location:@ {{%s}} -->" % self.player_connection.player.location.title)
-            return (t.encode("utf-8") for t in text)
+                response["turns"] = self.player_connection.player.turns
+                response["location"] = self.player_connection.player.location.title
+            return [json.dumps(response).encode("utf-8")]
         elif path == "tabcomplete":
             start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
