@@ -178,14 +178,10 @@ class HttpIo(iobase.IoAdapterBase):
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                       ('Pragma', 'no-cache'),
                                       ('Expires', '0')])
-            text.insert(0, "<!-- @tale-turns:@ {{%s}} -->" % self.player_connection.player.turns)
-            text.insert(0, "<!-- @tale-location:@ {{%s}} -->" % self.player_connection.player.location.title)
-            if "fullpage" not in parameters:
-                return (t.encode("utf-8") for t in text)
-            else:
-                resource = vfs.internal_resources["web/textpage.html"]
-                txt = resource.data.format(contents="\n".join(text))
-                return [txt.encode("utf-8")]
+            if text:
+                text.insert(0, "<!-- @tale-turns:@ {{%s}} -->" % self.player_connection.player.turns)
+                text.insert(0, "<!-- @tale-location:@ {{%s}} -->" % self.player_connection.player.location.title)
+            return (t.encode("utf-8") for t in text)
         elif path == "tabcomplete":
             start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                       ('Cache-Control', 'no-cache, no-store, must-revalidate'),
@@ -197,14 +193,15 @@ class HttpIo(iobase.IoAdapterBase):
             if cmd and "autocomplete" in parameters:
                 suggestions = self.completer.complete(cmd)
                 if suggestions:
-                    self.text_to_browser.append("Suggestions: " + ", ".join(suggestions))
+                    self.text_to_browser.append("<p>Suggestions: " + ", ".join(suggestions)+"</p>")
                 else:
-                    self.text_to_browser.append("No matching commands.")
+                    self.text_to_browser.append("<p>No matching commands.</p>")
             else:
                 cmd = html_escape(cmd, False)
                 self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
                 self.player_connection.player.store_input_line(cmd)
-            return self.wsgi_redirect_other(start_response, "/tale/story")
+            start_response('200 OK', [])
+            return []
         elif path.startswith("static/"):
             path = path[len("static/"):]
             if not self.wsgi_is_asset_allowed(path):

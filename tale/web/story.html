@@ -4,19 +4,21 @@
     <title>{story_name} - Tale interactive fiction</title>
     <link rel="icon" type="image/x-ico" href="static/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="static/style.css" />
+    <script type="application/javascript" src="static/script.js"></script>
 </head>
-<body>
+<body onload="setup()">
     <h2 title="version: {story_version} -- author: {story_author} -- {story_author_email}"><img src="static/logo.gif" align="top"> {story_name}</h2>
-    <iframe src="text?fullpage=1"></iframe>
-    <form action="input" method="post">
-        &gt;&gt; <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
-        <input type="submit" accesskey="m" value="Command" />
-        <input type="submit" name="autocomplete" value="Autocomplete" accesskey="C" id="button-autocomplete" />
-    </form>
-
-<script>
-    var but=document.getElementById("button-autocomplete");
-    if(but.accessKeyLabel) {{ but.value += ' ('+but.accessKeyLabel+')'; }}
-</script>
+    <div class="story">
+        <div class="location">
+            Location: &nbsp;<span id="player-location">...</span> &nbsp;&nbsp; turns: &nbsp;<span id="player-turns">...</span>
+        </div>
+        <div class="textframe" id="textframe">
+        </div>
+        <form method="POST">
+            &gt;&gt; <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
+            <input type="submit" value="Cmd (enter)" onclick="submit_cmd(); return false;" />
+            <input type="submit" value="Suggest" name="autocomplete" id="button-autocomplete" accesskey="s" onclick="autocomplete_cmd(); return false;" />
+        </form>
+    </div>
 </body>
 </html>

@@ -5,10 +5,8 @@ body {
     background: #f8f8f0;
     margin-left: 1em;
 }
-iframe {
-    border: 1px solid cadetblue;
-    width: 90%;
-    height: 40em;
+h2 {
+    margin: 1ex 0 0 0;
 }
 pre, #input-cmd {
     font-family: Consolas, Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
@@ -21,11 +19,25 @@ pre, #input-cmd {
 input {
     font-size: inherit;
 }
+
+.location {
+    text-align: right;
+    margin-bottom: 2pt;
+}
+.location > span {
+    color: green;
+}
+.story {
+    width: 90%;
+}
 .textframe {
     font-family: Cambria, Georgia, 'DejaVu Serif', 'Droid Serif', serif;
     font-size: 14pt;
-    margin: 10pt;
-    padding: 0pt;
+    border: 1px solid cadetblue;
+    overflow: auto;
+    height: 34em;
+    margin-bottom: 1em;
+    padding: 1em;
 }
 
 p, pre {
