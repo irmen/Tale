@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division
 from wsgiref.simple_server import make_server, WSGIRequestHandler
+from wsgiref.validate import validator
 import cgi
 import json
 import logging
@@ -60,12 +61,13 @@ class CustomRequestHandler(WSGIRequestHandler):
 
 class HttpIo(iobase.IoAdapterBase):
     """
-    I/O adapter for a http/browser based interface
+    I/O adapter for a http/browser based interface.
+    This doubles as a wsgi app and runs as a web server using wsgiref
     """
     def __init__(self, player_connection):
         super(HttpIo, self).__init__(player_connection)
         self.port = 8080
-        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler)
+        self.server = make_server("localhost", self.port, app=validator(self.wsgi_app), handler_class=CustomRequestHandler)
         self.server.timeout = 0.5
         self.completer = None
         self.text_to_browser = []
@@ -110,6 +112,8 @@ class HttpIo(iobase.IoAdapterBase):
             text = "<br>"
         self.text_to_browser.append("<p>" + text + "</p>\n")
 
+    # ---- wsgi methods below -----
+
     def wsgi_app(self, environ, start_response):
         method = environ.get("REQUEST_METHOD")
         path = environ.get('PATH_INFO', '').lstrip('/')
@@ -118,9 +122,26 @@ class HttpIo(iobase.IoAdapterBase):
         if path.startswith("tale/"):
             if method in ("GET", "POST"):
                 parameters = singlyfy_parameters(cgi.parse(environ['wsgi.input'], environ))
-                return self.wsgi_process_request(environ, path[5:], parameters, start_response)
+                return self.wsgi_route(environ, path[5:], parameters, start_response)
             else:
                 return self.wsgi_invalid_request(start_response)
+        return self.wsgi_not_found(start_response)
+
+    def wsgi_route(self, environ, path, parameters, start_response):
+        if not path or path == "start":
+            return self.wsgi_handle_start(environ, parameters, start_response)
+        elif path == "about":
+            return self.wsgi_handle_about(environ, parameters, start_response)
+        elif path == "story":
+            return self.wsgi_handle_story(environ, parameters, start_response)
+        elif path == "text":
+            return self.wsgi_handle_text(environ, parameters, start_response)
+        elif path == "tabcomplete":
+            return self.wsgi_handle_tabcomplete(environ, parameters, start_response)
+        elif path == "input":
+            return self.wsgi_handle_input(environ, parameters, start_response)
+        elif path.startswith("static/"):
+            return self.wsgi_handle_static(environ, path, start_response)
         return self.wsgi_not_found(start_response)
 
     def wsgi_invalid_request(self, start_response):
@@ -148,89 +169,93 @@ class HttpIo(iobase.IoAdapterBase):
         start_response('304 Not Modified', [])
         return []
 
-    def wsgi_process_request(self, environ, path, parameters, start_response):
-        if not path or path == "start":
-            # start page / titlepage
-            headers = [('Content-Type', 'text/html; charset=utf-8')]
-            etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
-            if_none = environ.get('HTTP_IF_NONE_MATCH')
-            if if_none and (if_none == '*' or etag in if_none):
-                return self.wsgi_not_modified(start_response)
-            headers.append(("ETag", etag))
-            start_response("200 OK", headers)
-            resource = vfs.internal_resources["web/index.html"]
-            txt = resource.data.format(story_version=mud_context.driver.config.version,
-                                       story_name=mud_context.driver.config.name,
-                                       story_author=mud_context.driver.config.author,
-                                       story_author_email=mud_context.driver.config.author_address)
-            return [txt.encode("utf-8")]
-        elif path == "about":
-            # about page
-            start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
-            resource = vfs.internal_resources["web/about.html"]
-            txt = resource.data.format(tale_version=tale_version_str,
-                                       story_version=mud_context.driver.config.version,
-                                       story_name=mud_context.driver.config.name,
-                                       uptime="%d:%02d:%02d" % mud_context.driver.uptime,
-                                       starttime=mud_context.driver.server_started,
-                                       num_players=len(mud_context.driver.all_players))
-            return [txt.encode("utf-8")]
-        elif path == "story":
-            headers = [('Content-Type', 'text/html; charset=utf-8')]
-            resource = vfs.internal_resources["web/story.html"]
-            etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
-            if_none = environ.get('HTTP_IF_NONE_MATCH')
-            if if_none and (if_none == '*' or etag in if_none):
-                return self.wsgi_not_modified(start_response)
-            headers.append(("ETag", etag))
-            start_response('200 OK', headers)
-            txt = resource.data.format(story_version=mud_context.driver.config.version,
-                                       story_name=mud_context.driver.config.name,
-                                       story_author=mud_context.driver.config.author,
-                                       story_author_email=mud_context.driver.config.author_address)
-            return [txt.encode("utf-8")]
-        if path == "text":
-            text = self.text_to_browser
-            self.text_to_browser = []
-            start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
-                                      ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                                      ('Pragma', 'no-cache'),
-                                      ('Expires', '0')])
-            response = {"text": "\n".join(text)}
-            if text:
-                response["turns"] = self.player_connection.player.turns
-                response["location"] = self.player_connection.player.location.title
-            return [json.dumps(response).encode("utf-8")]
-        elif path == "tabcomplete":
-            start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
-                                      ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                                      ('Pragma', 'no-cache'),
-                                      ('Expires', '0')])
-            return [json.dumps(self.completer.complete(parameters["prefix"])).encode("utf-8")]
-        elif path == "input":
-            cmd = parameters.get("cmd", "")
-            if cmd and "autocomplete" in parameters:
-                suggestions = self.completer.complete(cmd)
-                if suggestions:
-                    self.text_to_browser.append("<p>Suggestions: " + ", ".join(suggestions)+"</p>")
-                else:
-                    self.text_to_browser.append("<p>No matching commands.</p>")
+    def wsgi_handle_start(self, environ, parameters, start_response):
+        # start page / titlepage
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response("200 OK", headers)
+        resource = vfs.internal_resources["web/index.html"]
+        txt = resource.data.format(story_version=mud_context.driver.config.version,
+                                   story_name=mud_context.driver.config.name,
+                                   story_author=mud_context.driver.config.author,
+                                   story_author_email=mud_context.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
+    def wsgi_handle_about(self, environ, parameters, start_response):
+        # about page
+        start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
+        resource = vfs.internal_resources["web/about.html"]
+        txt = resource.data.format(tale_version=tale_version_str,
+                                   story_version=mud_context.driver.config.version,
+                                   story_name=mud_context.driver.config.name,
+                                   uptime="%d:%02d:%02d" % mud_context.driver.uptime,
+                                   starttime=mud_context.driver.server_started,
+                                   num_players=len(mud_context.driver.all_players))
+        return [txt.encode("utf-8")]
+
+    def wsgi_handle_story(self, environ, parameters, start_response):
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        resource = vfs.internal_resources["web/story.html"]
+        etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response('200 OK', headers)
+        txt = resource.data.format(story_version=mud_context.driver.config.version,
+                                   story_name=mud_context.driver.config.name,
+                                   story_author=mud_context.driver.config.author,
+                                   story_author_email=mud_context.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
+    def wsgi_handle_text(self, environ, parameters, start_response):
+        text = self.text_to_browser
+        self.text_to_browser = []
+        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
+                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                  ('Pragma', 'no-cache'),
+                                  ('Expires', '0')])
+        response = {"text": "\n".join(text)}
+        if text:
+            response["turns"] = self.player_connection.player.turns
+            response["location"] = self.player_connection.player.location.title
+        return [json.dumps(response).encode("utf-8")]
+
+    def wsgi_handle_tabcomplete(self, environ, parameters, start_response):
+        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
+                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                  ('Pragma', 'no-cache'),
+                                  ('Expires', '0')])
+        return [json.dumps(self.completer.complete(parameters["prefix"])).encode("utf-8")]
+
+    def wsgi_handle_input(self, environ, parameters, start_response):
+        cmd = parameters.get("cmd", "")
+        if cmd and "autocomplete" in parameters:
+            suggestions = self.completer.complete(cmd)
+            if suggestions:
+                self.text_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
             else:
-                cmd = html_escape(cmd, False)
-                if cmd:
-                    self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
-                self.player_connection.player.store_input_line(cmd)
-            start_response('200 OK', [])
-            return []
-        elif path.startswith("static/"):
-            path = path[len("static/"):]
-            if not self.wsgi_is_asset_allowed(path):
-                return self.wsgi_not_found(start_response)
-            try:
-                return self.wsgi_serve_static("web/" + path, environ, start_response)
-            except IOError:
-                return self.wsgi_not_found(start_response)
-        return self.wsgi_not_found(start_response)
+                self.text_to_browser.append("<p>No matching commands.</p>")
+        else:
+            cmd = html_escape(cmd, False)
+            if cmd:
+                self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+            self.player_connection.player.store_input_line(cmd)
+        start_response('200 OK', [('Content-Type', 'text/plain')])
+        return []
+
+    def wsgi_handle_static(self, environ, path, start_response):
+        path = path[len("static/"):]
+        if not self.wsgi_is_asset_allowed(path):
+            return self.wsgi_not_found(start_response)
+        try:
+            return self.wsgi_serve_static("web/" + path, environ, start_response)
+        except IOError:
+            return self.wsgi_not_found(start_response)
 
     def wsgi_is_asset_allowed(self, path):
         return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
