@@ -385,38 +385,6 @@ class GameDateTime(object):
         self.clock -= timedelta * self.times_realtime
 
 
-def input_confirm(question, conn):
-    """
-    Simple wrapper around player.input to ask the player for a yes/no confirmation. Returns True or False.
-    """
-    if not question.endswith(" "):
-        question += " "
-    while True:
-        reply = conn.input(question)
-        if reply in ("y", "yes", "sure", "yep", "yeah"):
-            return True
-        if reply in ("n", "no", "nope"):
-            return False
-        if reply:
-            conn.output("That is not a valid answer.")
-
-
-def input_choice(question, choices, conn):
-    """
-    Simple wrapper around player.input to ask the player for a choice from a set of options.
-    You can optionally use the format string '{choices}' to get the list of choices in the question text.
-    """
-    question = question.format(choices="/".join(choices))
-    if not question.endswith(" "):
-        question += " "
-    while True:
-        reply = conn.input(question)
-        if reply in choices:
-            return reply
-        if reply:
-            conn.output("That is not a valid answer.")
-
-
 class Context(object):
     """
     A new instance of this context is passed to every command function and obj.destroy.

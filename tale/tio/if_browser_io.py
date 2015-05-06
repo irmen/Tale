@@ -21,8 +21,24 @@ try:
 except ImportError:
     from cgi import escape as html_escape
 
-
 __all__ = ["HttpIo"]
+
+
+style_tags_html = {
+    "<dim>": ("<span class='txt-dim'>", "</span>"),
+    "<normal>": ("<span class='txt-normal'>", "</span>"),
+    "<bright>": ("<span class='txt-bright'>", "</span>"),
+    "<ul>": ("<span class='txt-ul'>", "</span>"),
+    "<it>": ("<span class='txt-it'>", "</span>"),
+    "<rev>": ("<span class='txt-rev'>", "</span>"),
+    "</>": None,
+    "<living>": ("<span class='txt-living'>", "</span>"),
+    "<player>": ("<span class='txt-player'>", "</span>"),
+    "<item>": ("<span class='txt-item'>", "</span>"),
+    "<exit>": ("<span class='txt-exit'>", "</span>"),
+    "<location>": ("<span class='txt-location'>", "</span>"),
+    "<monospaced>": ("<span class='txt-monospaced'>", "</span>")
+}
 
 
 def singlyfy_parameters(parameters):
@@ -76,7 +92,7 @@ class HttpIo(iobase.IoAdapterBase):
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
-            text = convert_to_html(text, self.smartquotes)
+            text = self.convert_to_html(text)
             if text == "\n":
                 text = "<br>"
             if formatted:
@@ -89,7 +105,7 @@ class HttpIo(iobase.IoAdapterBase):
             self.output_no_newline(line)
 
     def output_no_newline(self, text):
-        text = convert_to_html(text, self.smartquotes)
+        text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
         self.text_to_browser.append("<p>" + text + "</p>\n")
@@ -242,52 +258,34 @@ class HttpIo(iobase.IoAdapterBase):
         start_response('200 OK', headers)
         return [data]
 
-
-style_tags_html = {
-    "<dim>": ("<span class='txt-dim'>", "</span>"),
-    "<normal>": ("<span class='txt-normal'>", "</span>"),
-    "<bright>": ("<span class='txt-bright'>", "</span>"),
-    "<ul>": ("<span class='txt-ul'>", "</span>"),
-    "<it>": ("<span class='txt-it'>", "</span>"),
-    "<rev>": ("<span class='txt-rev'>", "</span>"),
-    "</>": None,
-    "<living>": ("<span class='txt-living'>", "</span>"),
-    "<player>": ("<span class='txt-player'>", "</span>"),
-    "<item>": ("<span class='txt-item'>", "</span>"),
-    "<exit>": ("<span class='txt-exit'>", "</span>"),
-    "<location>": ("<span class='txt-location'>", "</span>"),
-    "<monospaced>": ("<span class='txt-monospaced'>", "</span>")
-}
-
-
-def convert_to_html(line, smartquotes=lambda x: x):
-    """Convert style tags to html"""
-    chunks = tag_split_re.split(line)
-    if len(chunks) == 1:
-        # optimization in case there are no markup tags in the text at all
-        return html_escape(smartquotes(line), False)
-    result = []
-    close_tags_stack = []
-    chunks.append("</>")   # add a reset-all-styles sentinel
-    for chunk in chunks:
-        html_tags = style_tags_html.get(chunk)
-        if html_tags:
-            chunk = html_tags[0]
-            close_tags_stack.append(html_tags[1])
-        elif chunk == "</>":
-            while close_tags_stack:
-                result.append(close_tags_stack.pop())
-            continue
-        elif chunk:
-            if chunk.startswith("</"):
-                chunk = "<" + chunk[2:]
-                html_tags = style_tags_html.get(chunk)
-                if html_tags:
-                    chunk = html_tags[1]
-                    if close_tags_stack:
-                        close_tags_stack.pop()
-            else:
-                # normal text (not a tag)
-                chunk = html_escape(smartquotes(chunk), False)
-        result.append(chunk)
-    return "".join(result)
+    def convert_to_html(self, line):
+        """Convert style tags to html"""
+        chunks = tag_split_re.split(line)
+        if len(chunks) == 1:
+            # optimization in case there are no markup tags in the text at all
+            return html_escape(self.smartquotes(line), False)
+        result = []
+        close_tags_stack = []
+        chunks.append("</>")   # add a reset-all-styles sentinel
+        for chunk in chunks:
+            html_tags = style_tags_html.get(chunk)
+            if html_tags:
+                chunk = html_tags[0]
+                close_tags_stack.append(html_tags[1])
+            elif chunk == "</>":
+                while close_tags_stack:
+                    result.append(close_tags_stack.pop())
+                continue
+            elif chunk:
+                if chunk.startswith("</"):
+                    chunk = "<" + chunk[2:]
+                    html_tags = style_tags_html.get(chunk)
+                    if html_tags:
+                        chunk = html_tags[1]
+                        if close_tags_stack:
+                            close_tags_stack.pop()
+                else:
+                    # normal text (not a tag)
+                    chunk = html_escape(self.smartquotes(chunk), False)
+            result.append(chunk)
+        return "".join(result)

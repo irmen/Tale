@@ -9,7 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from . import races
 from . import lang
-from . import util
+import re
 
 
 class PlayerNaming(object):
@@ -32,7 +32,7 @@ class CharacterBuilder(object):
         self.conn = conn
 
     def build(self):
-        choice = util.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"], self.conn)
+        choice = self.conn.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"])
         if choice == "w":
             return self.create_default_wizard()
         elif choice == "p":
@@ -43,13 +43,15 @@ class CharacterBuilder(object):
     def create_player_from_info(self):
         naming = PlayerNaming()
         while True:
-            naming.name = self.conn.input("Name? ")
-            if naming.name:
+            naming.name = self.conn.input_direct("Name? ")
+            if re.match("[a-zA-Z]{3,}$", naming.name):
                 break
-        naming.gender = util.input_choice("Gender {choices}? ", ["m", "f", "n"], self.conn)
-        self.conn.output("Player races: " + ", ".join(races.player_races))
-        naming.race = util.input_choice("Race? ", races.player_races, self.conn)
-        naming.wizard = util.input_confirm("Wizard y/n? ", self.conn)
+            else:
+                self.conn.output("Name needs to be 3 or more letters (a-z, A-Z, no spaces).")
+        naming.gender = self.conn.input_choice("Gender {choices}? ", ["m", "f", "n"])
+        self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+        naming.race = self.conn.input_choice("Player race? ", races.player_races)
+        naming.wizard = self.conn.input_confirm("Wizard y/n? ")
         naming.description = "A regular person."
         if naming.wizard:
             naming.title = "arch wizard " + lang.capital(naming.name)

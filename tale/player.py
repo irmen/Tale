@@ -98,8 +98,6 @@ class Player(base.Living, pubsub.Listener):
                 short = self.location in self.known_locations
         if self.location:
             self.known_locations.add(self.location)
-            # if "wizard" in self.privileges:
-            #    self.tell(repr(self.location), end=True)
             look_paragraphs = self.location.look(exclude_living=self, short=short)
             for paragraph in look_paragraphs:
                 self.tell(paragraph, end=True)
@@ -280,12 +278,13 @@ class PlayerConnection(object):
                 self.io.output(output.rstrip())
 
     def output(self, *lines):
-        """directly writes the given text to the player's screen, without buffering"""
+        """directly writes the given text to the player's screen, without buffering and formatting/wrapping"""
         self.io.output(*lines)
 
-    def input(self, prompt=None):
+    def input_direct(self, prompt=None):
         """
-        Writes any pending output and prompts for input. Returns stripped result.
+        Writes any pending output and prompts for input directly. Returns stripped result.
+        The driver does NOT use this for the regular game loop!
         Note that input processing takes place asynchronously so this method just prints
         the input prompt, and sits around waiting for a result to appear in the input buffer.
         """
@@ -293,7 +292,37 @@ class PlayerConnection(object):
         self.io.output_no_newline(prompt)
         self.player.input_is_available.wait()
         self.need_new_input_prompt = True
-        return self.player.get_pending_input()[0].strip()   # use just the first line
+        return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
+
+    def input_confirm(self, question):
+        """
+        Simple wrapper around input_direct() to ask the player for a yes/no confirmation. Returns True or False.
+        """
+        if not question.endswith(" "):
+            question += " "
+        while True:
+            reply = self.input_direct(question)
+            if reply in ("y", "yes", "sure", "yep", "yeah"):
+                return True
+            if reply in ("n", "no", "nope"):
+                return False
+            if reply:
+                self.output("That is not a valid answer.")
+
+    def input_choice(self, question, choices):
+        """
+        Simple wrapper around input_direct() to ask the player for a choice from a set of options.
+        You can optionally use the format string '{choices}' to get the list of choices in the question text.
+        """
+        question = question.format(choices="/".join(choices))
+        if not question.endswith(" "):
+            question += " "
+        while True:
+            reply = self.input_direct(question)
+            if reply in choices:
+                return reply
+            if reply:
+                self.output("That is not a valid answer.")
 
     def write_input_prompt(self):
         if self.need_new_input_prompt:
@@ -314,6 +343,9 @@ class PlayerConnection(object):
 
     def mainloop(self):
         return self.io.mainloop(self)
+
+    def pause(self, unpause=False):
+        self.io.pause(unpause)
 
     def destroy(self, ctx):
         if self.io:

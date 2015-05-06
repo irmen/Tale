@@ -130,7 +130,7 @@ def do_destroy(player, parsed, ctx):
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not util.input_confirm("Are you sure you want to destroy %s?" % victim.title, ctx.conn):
+        if not ctx.conn.input_confirm("Are you sure you want to destroy %s?" % victim.title):
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
@@ -159,7 +159,7 @@ def do_clean(player, parsed, ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if util.input_confirm("Are you sure you want to clean out %s?" % victim.title, ctx.conn):
+        if ctx.conn.input_confirm("Are you sure you want to clean out %s?" % victim.title):
             p("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
@@ -175,12 +175,12 @@ def do_clean(player, parsed, ctx):
 @disabled_in_gamemode("mud")
 def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session. (Only available in IF mode)"""
-    ctx.conn.io.pause()
+    ctx.conn.pause()
     print("----------Entering PDB debugger session----------")
     import pdb
     pdb.set_trace()
     print("----------Leaving PDB debugger session----------")
-    ctx.conn.io.pause(unpause=True)
+    ctx.conn.pause(unpause=True)
 
 
 @wizcmd("wiretap")

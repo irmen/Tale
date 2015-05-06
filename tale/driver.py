@@ -304,7 +304,7 @@ class Driver(object):
                     self.__main_loop_multiplayer()
         except:
             for conn in self.all_players.values():
-                conn.io.critical_error()
+                conn.critical_error()
             self.__stop_mainloop = True
             raise
 
@@ -344,28 +344,26 @@ class Driver(object):
         except IOError:
             # no banner provided by the game, print default game header
             if player_connection:
-                player_connection.output("")
-                player_connection.output("")
-                player_connection.output("<monospaced><bright>")
-                msg = "'%s'" % self.config.name
-                player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
-                msg = "v%s" % self.config.version
-                player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
-                player_connection.output("")
-                msg = "written by %s" % self.config.author
-                player_connection.output(msg.center(DEFAULT_SCREEN_WIDTH))
+                o = player_connection.output
+                o("")
+                o("")
+                o("<monospaced><bright>")
+                o(("'%s'" % self.config.name).center(DEFAULT_SCREEN_WIDTH))
+                o(("v" + self.config.version).center(DEFAULT_SCREEN_WIDTH))
+                o("")
+                o(("written by " + self.config.author).center(DEFAULT_SCREEN_WIDTH))
                 if self.config.author_address:
-                    player_connection.output(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
-                player_connection.output("</></monospaced>")
-                player_connection.output("")
-                player_connection.output("")
+                    o(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
+                o("</></monospaced>")
+                o("")
+                o("")
         if not player_connection:
             print("\n")
-            print("Tale library: %s" % tale_version_str)
-            print("MudLib:       '%s' v%s" % (self.config.name, self.config.version))
+            print("Tale library:", tale_version_str)
+            print("MudLib:       %s, v%s" % (self.config.name, self.config.version))
             if self.config.author:
                 print("Written by:   %s - %s" % (self.config.author, self.config.author_address or ""))
-            print("Driver start: %s" % time.ctime())
+            print("Driver start:", time.ctime())
             print("\n")
 
     def __create_player(self, conn):
@@ -375,7 +373,7 @@ class Driver(object):
             load_saved_game = False
         else:
             player.tell("\n")
-            load_saved_game = util.input_confirm("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?", conn)
+            load_saved_game = conn.input_confirm("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?")
         player.tell("\n")
         if load_saved_game:
             loaded_player = self.__load_saved_game()
@@ -553,7 +551,6 @@ class Driver(object):
             # handle player input
             for conn in self.all_players.values():
                 conn.write_input_prompt()
-
                 if self.config.server_tick_method == "timer":
                     has_input = conn.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
                 elif self.config.server_tick_method == "command":
@@ -562,7 +559,6 @@ class Driver(object):
                     before = time.time()
                     self.__server_tick()   # do the server tick after player input (when method=command)
                     self.server_loop_durations.append(time.time() - before)
-
                 if has_input:
                     try:
                         self.__server_loop_process_player_input(conn)
@@ -620,7 +616,7 @@ class Driver(object):
         player.tell("\n")
         self.story.completion(player)
         player.tell("\n")
-        conn.input("\nPress enter to continue. ")
+        conn.input_direct("\nPress enter to continue. ")
         player.tell("\n")
 
     def __process_player_command(self, cmd, player, conn):
@@ -916,3 +912,8 @@ class StoryConfig(object):
     def copy_from(config):
         assert isinstance(config, StoryConfig)
         return StoryConfig(**vars(config))
+
+
+if __name__ == "__main__":
+    print("Use module tale.main instead.")
+    raise SystemExit(1)

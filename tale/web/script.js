@@ -15,7 +15,6 @@ function poll_text() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             var json = JSON.parse(this.responseText);
-            console.log(json);
             if(json["text"]) {
                 document.getElementById("player-location").innerHTML = json["location"];
                 document.getElementById("player-turns").innerHTML = json["turns"];
