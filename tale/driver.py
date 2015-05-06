@@ -869,6 +869,16 @@ class Driver(object):
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
 
+    @property
+    def uptime(self):
+        """gives the server uptime in a (hours, minutes, seconds) tuple"""
+        realtime = datetime.datetime.now()
+        realtime = realtime.replace(microsecond=0)
+        uptime = realtime - self.server_started
+        hours, seconds = divmod(uptime.total_seconds(), 3600)
+        minutes, seconds = divmod(seconds, 60)
+        return hours, minutes, seconds
+
 
 class StoryConfig(object):
     """Container for the configuration settings for a Story"""

@@ -35,8 +35,6 @@ function poll_text() {
 
 function submit_cmd() {
     var cmd_input = document.getElementById("input-cmd");
-    if(!cmd_input.value)
-        return false;
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;

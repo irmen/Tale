@@ -151,7 +151,13 @@ class HttpIo(iobase.IoAdapterBase):
     def wsgi_process_request(self, environ, path, parameters, start_response):
         if not path or path == "start":
             # start page / titlepage
-            start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
+            headers = [('Content-Type', 'text/html; charset=utf-8')]
+            etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
+            if_none = environ.get('HTTP_IF_NONE_MATCH')
+            if if_none and (if_none == '*' or etag in if_none):
+                return self.wsgi_not_modified(start_response)
+            headers.append(("ETag", etag))
+            start_response("200 OK", headers)
             resource = vfs.internal_resources["web/index.html"]
             txt = resource.data.format(story_version=mud_context.driver.config.version,
                                        story_name=mud_context.driver.config.name,
@@ -163,20 +169,16 @@ class HttpIo(iobase.IoAdapterBase):
             start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
             resource = vfs.internal_resources["web/about.html"]
             txt = resource.data.format(tale_version=tale_version_str,
-                                       tale_server=self.server.server_name)
+                                       story_version=mud_context.driver.config.version,
+                                       story_name=mud_context.driver.config.name,
+                                       uptime="%d:%02d:%02d" % mud_context.driver.uptime,
+                                       starttime=mud_context.driver.server_started,
+                                       num_players=len(mud_context.driver.all_players))
             return [txt.encode("utf-8")]
         elif path == "story":
             headers = [('Content-Type', 'text/html; charset=utf-8')]
             resource = vfs.internal_resources["web/story.html"]
-            etag = str(id(self.player_connection))
-            if resource.mtime:
-                etag += "-" + str(resource.mtime)
-                headers.append(("Last-Modified", formatdate(resource.mtime)))
-                if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
-                if if_modified:
-                    if parsedate(if_modified) >= parsedate(formatdate(resource.mtime)):
-                        # the resource wasn't modified since last requested
-                        return self.wsgi_not_modified(start_response)
+            etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
             if_none = environ.get('HTTP_IF_NONE_MATCH')
             if if_none and (if_none == '*' or etag in if_none):
                 return self.wsgi_not_modified(start_response)
@@ -215,7 +217,8 @@ class HttpIo(iobase.IoAdapterBase):
                     self.text_to_browser.append("<p>No matching commands.</p>")
             else:
                 cmd = html_escape(cmd, False)
-                self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+                if cmd:
+                    self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
                 self.player_connection.player.store_input_line(cmd)
             start_response('200 OK', [])
             return []

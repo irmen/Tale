@@ -414,18 +414,16 @@ def do_server(player, parsed, ctx):
     driver = ctx.driver
     config = ctx.config
     txt = ["<bright>Server information:</>", "-" * 19]
+    up_hours, up_minutes, up_seconds = driver.uptime
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
-    uptime = realtime - driver.server_started
-    hours, seconds = divmod(uptime.total_seconds(), 3600)
-    minutes, seconds = divmod(seconds, 60)
     pyversion = "%d.%d.%d" % sys.version_info[:3]
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     implementation = platform.python_implementation()
     txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))
     txt.append("Tale library:   %s" % __version__)
     txt.append("Game version:   %s %s" % (config.name, config.version))
-    txt.append("Uptime:         %d:%02d:%02d  (since %s)" % (hours, minutes, seconds, driver.server_started))
+    txt.append("Uptime:         %d:%02d:%02d  (since %s)" % (up_hours, up_minutes, up_seconds, driver.server_started))
     txt.append("Server mode:    %s" % config.server_mode)
     txt.append("Real time:      %s" % realtime)
     if config.server_tick_method == "timer":
