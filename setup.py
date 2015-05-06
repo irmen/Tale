@@ -18,10 +18,11 @@ print("version=" + tale.__version__)
 setup_args = dict(
     name='tale',
     version=tale.__version__,
-    packages=['tale', 'tale.cmds', 'tale.items', 'tale.tio', 'tale.demo', 'tale.demo.zones'],
+    packages=['tale', 'tale.cmds', 'tale.items', 'tale.tio', 'tale.demo', 'tale.demo.zones', 'tale.web'],
     package_data={
         'tale': ['soul_adverbs.txt'],
-        'tale.tio': ['quill_pen_paper.ico', 'quill_pen_paper.gif']
+        'tale.tio': ['quill_pen_paper.ico', 'quill_pen_paper.gif'],
+        'tale.web': ['*']
     },
     url='http://packages.python.org/tale',
     license='GPL v3',
@@ -68,7 +69,8 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
-    install_requires=["appdirs", "colorama>=0.3.3", "smartypants>=1.8.6"]
+    install_requires=["appdirs", "colorama>=0.3.3", "smartypants>=1.8.6"],
+    options={"install": {"optimize": 0}}
 )
 
 if using_setuptools:
