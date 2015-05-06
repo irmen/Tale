@@ -424,7 +424,9 @@ class Driver(object):
             conn.write_output()
             conn.destroy(ctx)
         self.all_players.clear()
+        time.sleep(0.1)
         mud_context.player = None
+        mud_context.conn = None
 
     def __main_loop_singleplayer(self, conn):
         """

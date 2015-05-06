@@ -7,10 +7,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division
 from wsgiref.simple_server import make_server, WSGIRequestHandler
-from wsgiref.validate import validator
 import cgi
 import json
 import logging
+import time
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
@@ -22,7 +22,7 @@ try:
 except ImportError:
     from cgi import escape as html_escape
 
-__all__ = ["HttpIo"]
+__all__ = ["HttpIo", "TaleWsgiServer"]
 
 
 style_tags_html = {
@@ -53,24 +53,19 @@ def singlyfy_parameters(parameters):
     return parameters
 
 
-class CustomRequestHandler(WSGIRequestHandler):
-    def log_message(self, format, *args):
-        msg = format % args
-        logging.getLogger("tale.wsgi").debug(msg)
-
-
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface.
-    This doubles as a wsgi app and runs as a web server using wsgiref
+    This doubles as a wsgi app and runs as a web server using wsgiref.
+    This way it is a simple call for the driver, it starts everything that is needed.
     """
     def __init__(self, player_connection):
         super(HttpIo, self).__init__(player_connection)
         self.port = 8080
-        self.server = make_server("localhost", self.port, app=validator(self.wsgi_app), handler_class=CustomRequestHandler)
+        self.wsgi_app = TaleWsgiServer(mud_context.driver)
+        self.wsgi_app.connect_player(player_connection)  # connect the (single) player
+        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler)
         self.server.timeout = 0.5
-        self.completer = None
-        self.text_to_browser = []
 
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
@@ -81,6 +76,7 @@ class HttpIo(iobase.IoAdapterBase):
         url = "http://%s:%d/tale/" % self.server.server_address
         print("\nPoint your browser to the following url: ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))
+        t.daemon = True
         t.start()
         while not self.stop_main_loop:
             self.server.handle_request()
@@ -90,7 +86,7 @@ class HttpIo(iobase.IoAdapterBase):
         pass
 
     def install_tab_completion(self, completer):
-        self.completer = completer
+        self.server.completer = completer
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
@@ -98,9 +94,9 @@ class HttpIo(iobase.IoAdapterBase):
             if text == "\n":
                 text = "<br>"
             if formatted:
-                self.text_to_browser.append("<p>" + text + "</p>\n")
+                self.wsgi_app.send_html(self.player_connection, "<p>" + text + "</p>\n")
             else:
-                self.text_to_browser.append("<pre>" + text + "</pre>\n")
+                self.wsgi_app.send_html(self.player_connection, "<pre>" + text + "</pre>\n")
 
     def output(self, *lines):
         for line in lines:
@@ -110,11 +106,60 @@ class HttpIo(iobase.IoAdapterBase):
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
-        self.text_to_browser.append("<p>" + text + "</p>\n")
+        self.wsgi_app.send_html(self.player_connection, "<p>" + text + "</p>\n")
 
-    # ---- wsgi methods below -----
+    def convert_to_html(self, line):
+        """Convert style tags to html"""
+        chunks = tag_split_re.split(line)
+        if len(chunks) == 1:
+            # optimization in case there are no markup tags in the text at all
+            return html_escape(self.smartquotes(line), False)
+        result = []
+        close_tags_stack = []
+        chunks.append("</>")   # add a reset-all-styles sentinel
+        for chunk in chunks:
+            html_tags = style_tags_html.get(chunk)
+            if html_tags:
+                chunk = html_tags[0]
+                close_tags_stack.append(html_tags[1])
+            elif chunk == "</>":
+                while close_tags_stack:
+                    result.append(close_tags_stack.pop())
+                continue
+            elif chunk:
+                if chunk.startswith("</"):
+                    chunk = "<" + chunk[2:]
+                    html_tags = style_tags_html.get(chunk)
+                    if html_tags:
+                        chunk = html_tags[1]
+                        if close_tags_stack:
+                            close_tags_stack.pop()
+                else:
+                    # normal text (not a tag)
+                    chunk = html_escape(self.smartquotes(chunk), False)
+            result.append(chunk)
+        return "".join(result)
 
-    def wsgi_app(self, environ, start_response):
+
+class TaleWsgiServer(object):
+    """The actual wsgi web server that the browser(s) connect to."""
+    # @todo make this thing usable as a base class at least for multi-user server too
+    def __init__(self, driver):
+        self.driver = driver
+        self.completer = None
+        self.player_connection = None   # just a single player here
+        self.__html_to_browser = []     # the lines that need to be displayed in the player's browser
+
+    def connect_player(self, player_connection):
+        """Register a new player connection."""
+        self.player_connection = player_connection
+
+    def send_html(self, player_connection, html):
+        """Schedule the html to be served to the given player connection."""
+        assert player_connection is self.player_connection
+        self.__html_to_browser.append(html)
+
+    def __call__(self, environ, start_response):
         method = environ.get("REQUEST_METHOD")
         path = environ.get('PATH_INFO', '').lstrip('/')
         if not path:
@@ -172,17 +217,17 @@ class HttpIo(iobase.IoAdapterBase):
     def wsgi_handle_start(self, environ, parameters, start_response):
         # start page / titlepage
         headers = [('Content-Type', 'text/html; charset=utf-8')]
-        etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
+        etag = str(id(self.player_connection)) + "-" + str(time.mktime(self.driver.server_started.timetuple()))
         if_none = environ.get('HTTP_IF_NONE_MATCH')
         if if_none and (if_none == '*' or etag in if_none):
             return self.wsgi_not_modified(start_response)
         headers.append(("ETag", etag))
         start_response("200 OK", headers)
         resource = vfs.internal_resources["web/index.html"]
-        txt = resource.data.format(story_version=mud_context.driver.config.version,
-                                   story_name=mud_context.driver.config.name,
-                                   story_author=mud_context.driver.config.author,
-                                   story_author_email=mud_context.driver.config.author_address)
+        txt = resource.data.format(story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
         return [txt.encode("utf-8")]
 
     def wsgi_handle_about(self, environ, parameters, start_response):
@@ -190,37 +235,36 @@ class HttpIo(iobase.IoAdapterBase):
         start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
         resource = vfs.internal_resources["web/about.html"]
         txt = resource.data.format(tale_version=tale_version_str,
-                                   story_version=mud_context.driver.config.version,
-                                   story_name=mud_context.driver.config.name,
-                                   uptime="%d:%02d:%02d" % mud_context.driver.uptime,
-                                   starttime=mud_context.driver.server_started,
-                                   num_players=len(mud_context.driver.all_players))
+                                   story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   uptime="%d:%02d:%02d" % self.driver.uptime,
+                                   starttime=self.driver.server_started,
+                                   num_players=len(self.driver.all_players))
         return [txt.encode("utf-8")]
 
     def wsgi_handle_story(self, environ, parameters, start_response):
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         resource = vfs.internal_resources["web/story.html"]
-        etag = str(id(self.player_connection)) + "-" + str(mud_context.driver.server_started.timestamp())
+        etag = str(id(self.player_connection)) + "-" + str(time.mktime(self.driver.server_started.timetuple()))
         if_none = environ.get('HTTP_IF_NONE_MATCH')
         if if_none and (if_none == '*' or etag in if_none):
             return self.wsgi_not_modified(start_response)
         headers.append(("ETag", etag))
         start_response('200 OK', headers)
-        txt = resource.data.format(story_version=mud_context.driver.config.version,
-                                   story_name=mud_context.driver.config.name,
-                                   story_author=mud_context.driver.config.author,
-                                   story_author_email=mud_context.driver.config.author_address)
+        txt = resource.data.format(story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
         return [txt.encode("utf-8")]
 
     def wsgi_handle_text(self, environ, parameters, start_response):
-        text = self.text_to_browser
-        self.text_to_browser = []
+        html, self.__html_to_browser = self.__html_to_browser, []
         start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
                                   ('Expires', '0')])
-        response = {"text": "\n".join(text)}
-        if text:
+        response = {"text": "\n".join(html)}
+        if html and self.player_connection and self.player_connection.player:
             response["turns"] = self.player_connection.player.turns
             response["location"] = self.player_connection.player.location.title
         return [json.dumps(response).encode("utf-8")]
@@ -237,13 +281,13 @@ class HttpIo(iobase.IoAdapterBase):
         if cmd and "autocomplete" in parameters:
             suggestions = self.completer.complete(cmd)
             if suggestions:
-                self.text_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
+                self.__html_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
             else:
-                self.text_to_browser.append("<p>No matching commands.</p>")
+                self.__html_to_browser.append("<p>No matching commands.</p>")
         else:
             cmd = html_escape(cmd, False)
             if cmd:
-                self.text_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+                self.__html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
             self.player_connection.player.store_input_line(cmd)
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
@@ -265,6 +309,7 @@ class HttpIo(iobase.IoAdapterBase):
         headers = []
         resource = vfs.internal_resources[path]
         if resource.mtime:
+            # unfortunately, this is usually only present when running under python 3.x...
             mtime_formatted = formatdate(resource.mtime)
             etag = str(resource.mtime)
             if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
@@ -286,34 +331,8 @@ class HttpIo(iobase.IoAdapterBase):
         start_response('200 OK', headers)
         return [data]
 
-    def convert_to_html(self, line):
-        """Convert style tags to html"""
-        chunks = tag_split_re.split(line)
-        if len(chunks) == 1:
-            # optimization in case there are no markup tags in the text at all
-            return html_escape(self.smartquotes(line), False)
-        result = []
-        close_tags_stack = []
-        chunks.append("</>")   # add a reset-all-styles sentinel
-        for chunk in chunks:
-            html_tags = style_tags_html.get(chunk)
-            if html_tags:
-                chunk = html_tags[0]
-                close_tags_stack.append(html_tags[1])
-            elif chunk == "</>":
-                while close_tags_stack:
-                    result.append(close_tags_stack.pop())
-                continue
-            elif chunk:
-                if chunk.startswith("</"):
-                    chunk = "<" + chunk[2:]
-                    html_tags = style_tags_html.get(chunk)
-                    if html_tags:
-                        chunk = html_tags[1]
-                        if close_tags_stack:
-                            close_tags_stack.pop()
-                else:
-                    # normal text (not a tag)
-                    chunk = html_escape(self.smartquotes(chunk), False)
-            result.append(chunk)
-        return "".join(result)
+
+class CustomRequestHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        msg = format % args
+        logging.getLogger("tale.wsgi").debug(msg)

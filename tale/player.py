@@ -356,4 +356,5 @@ class PlayerConnection(object):
             self.io = None
         if self.player:
             self.player.destroy(ctx)
+            # self.player = Player("<destroyed-%d>" % id(self.player), "n")
             self.player = None
