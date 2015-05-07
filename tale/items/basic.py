@@ -91,6 +91,9 @@ class Boxlike(Container):
 
 
 class GameClock(Item):
+    """
+    A clock that is able to tell you the in-game time.
+    """
     def init(self):
         super(GameClock, self).init()
         self.use_locale = True
@@ -120,6 +123,9 @@ class GameClock(Item):
 
 
 class Newspaper(Item):
+    """
+    A newspaper with a headline article in it.
+    """
     def init(self):
         super(Newspaper, self).init()
         self.article = '''

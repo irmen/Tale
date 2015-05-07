@@ -97,6 +97,11 @@ Tale API
 .. automodule:: tale.tio.tkinter_io
     :members:
 
+:mod:`tale.tio.if_browser_io` --- Web browser GUI I/O (single-player)
+---------------------------------------------------------------------
+.. automodule:: tale.tio.if_browser_io
+    :members:
+
 :mod:`tale.tio.styleaware_wrapper` --- Text wrapping
 ----------------------------------------------------
 .. automodule:: tale.tio.styleaware_wrapper

@@ -27,9 +27,6 @@ console window. But you can also run Tale in a simple GUI application (built wit
 Tale can be found on Pypi as `tale <http://pypi.python.org/pypi/tale/>`_.
 The source is on Github: https://github.com/irmen/Tale
 
-If you're interested, follow `my blog about developing Tale <http://www.razorvine.net/blog/user/irmen/category/17>`_
-(some of the articles are in Dutch but I'll stick to English for the newer ones)
-
 
 Getting started
 ---------------
@@ -109,18 +106,19 @@ Features
 
 A random list of the features of the current codebase:
 
-- Runs on most Python implementations, but requires 2.7 or 3.2+
+- Runs on most reasonably modern Python implementations (2.7 and 3.2+)
 - game engine and framework code is separated from the actual game code;
   it can run different games from different directories (just one at a time though)
 - single-player I.F. mode and multi-player MUD mode (but no multiplayer server yet,
   it's just a difference in active features for now)
 - text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
-- I/O abstraction layer should make it not too hard to make another interface.
+- can load and run games/stories from a zipfile or from extracted folders.
+- I/O abstraction layer to be able to create alternative interfaces.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
 - the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'
 - the soul has 250+ 'emotes' such as bounce and shrug.
-- the command line input and the gui version both support tab-completion of commands. (command line requires readline/pyreadline for this)
+- tab-completion of commands (command line requires readline/pyreadline for this)
 - it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
   it out in full (gives a list of suggestions if multiple words match).
 - it knows about bodyparts that you can target certain actions (such as kick or pat) at.
@@ -151,7 +149,7 @@ A random list of the features of the current codebase:
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
-- contains a simple virtual file system to provide a resource loading / datafile storage facility.
+- contains a simple virtual file system to provide easy resource loading / datafile storage.
 - provides a simple synchronous pubsub/event signaling mechanism
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is

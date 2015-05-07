@@ -18,6 +18,7 @@ __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
 
 class VfsError(IOError):
+    """Something went wrong while using the virtual file system"""
     pass
 
 
