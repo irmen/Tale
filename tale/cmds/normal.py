@@ -170,8 +170,10 @@ def do_drop(player, parsed, ctx):
 @cmd("empty")
 def do_empty(player, parsed, ctx):
     """Remove the contents from an object."""
-    if len(parsed.args) != 1:
-        raise ParseError("Empty what?")
+    if len(parsed.args) != 1 or not parsed.who_order:
+        if parsed.args[0] in ("bags", "pockets"):
+            raise RetryParse("drop all")
+        raise ParseError("Empty what or who?")
     if len(parsed.who_order) > 1:
         raise ParseError("Please be more specific, only empty one thing at a time.")
     container = parsed.who_order[0]
@@ -280,10 +282,13 @@ def do_combine(player, parsed, ctx):
 @cmd("loot", "pilfer", "sack")
 def do_loot(player, parsed, ctx):
     """Take all things from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
-    if len(parsed.args) != 1:
-        raise ParseError("Loot what?")
+    if len(parsed.args) != 1 or not parsed.who_order:
+        raise ParseError("Loot what or who?")
     if len(parsed.who_order) > 1:
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
+    container = parsed.who_order[0]
+    if not isinstance(container, base.Container):
+        raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
     raise RetryParse("take all from " + parsed.who_order[0].name)
 
 

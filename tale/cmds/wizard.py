@@ -466,9 +466,11 @@ def do_events(player, parsed, ctx):
 @wizcmd("force")
 def do_force(player, parsed, ctx):
     """Force another living being into performing a given command."""
-    if len(parsed.args) < 2:
+    if len(parsed.args) < 2 or not parsed.who_order:
         raise ParseError("Force whom to do what?")
     target = parsed.who_order[0]
+    if not isinstance(target, base.Living):
+        raise ActionRefused("You cannot force <item>%s</> to do anything." % target.title)
     verb = parsed.args[1]
     # simple check for verb validness
     if verb not in ctx.driver.get_current_verbs(target) and not player.soul.is_verb(verb):
