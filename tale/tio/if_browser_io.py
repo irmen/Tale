@@ -62,8 +62,7 @@ class HttpIo(iobase.IoAdapterBase):
     def __init__(self, player_connection):
         super(HttpIo, self).__init__(player_connection)
         self.port = 8080
-        self.wsgi_app = TaleWsgiServer(mud_context.driver)
-        self.wsgi_app.connect_player(player_connection)  # connect the (single) player
+        self.wsgi_app = TaleWsgiServer(mud_context.driver, player_connection)
         self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler)
         self.server.timeout = 0.5
 
@@ -94,9 +93,9 @@ class HttpIo(iobase.IoAdapterBase):
             if text == "\n":
                 text = "<br>"
             if formatted:
-                self.wsgi_app.send_html(self.player_connection, "<p>" + text + "</p>\n")
+                self.wsgi_app.html_to_browser.append("<p>" + text + "</p>\n")
             else:
-                self.wsgi_app.send_html(self.player_connection, "<pre>" + text + "</pre>\n")
+                self.wsgi_app.html_to_browser.append("<pre>" + text + "</pre>\n")
 
     def output(self, *lines):
         for line in lines:
@@ -106,7 +105,7 @@ class HttpIo(iobase.IoAdapterBase):
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
-        self.wsgi_app.send_html(self.player_connection, "<p>" + text + "</p>\n")
+        self.wsgi_app.html_to_browser.append("<p>" + text + "</p>\n")
 
     def convert_to_html(self, line):
         """Convert style tags to html"""
@@ -142,22 +141,16 @@ class HttpIo(iobase.IoAdapterBase):
 
 
 class TaleWsgiServer(object):
-    """The actual wsgi web server that the browser(s) connect to."""
-    # @todo make this thing usable as a base class at least for multi-user server too
-    def __init__(self, driver):
+    """
+    The actual wsgi web server that the player's browser connects to.
+    Note that it is deliberatly simplistic and ony able to handle a single
+    player connection; it only works for 'if' single-player game mode.
+    """
+    def __init__(self, driver, player_connection):
         self.driver = driver
         self.completer = None
-        self.player_connection = None   # just a single player here
-        self.__html_to_browser = []     # the lines that need to be displayed in the player's browser
-
-    def connect_player(self, player_connection):
-        """Register a new player connection."""
-        self.player_connection = player_connection
-
-    def send_html(self, player_connection, html):
-        """Schedule the html to be served to the given player connection."""
-        assert player_connection is self.player_connection
-        self.__html_to_browser.append(html)
+        self.player_connection = player_connection   # just a single player here
+        self.html_to_browser = []     # the lines that need to be displayed in the player's browser
 
     def __call__(self, environ, start_response):
         method = environ.get("REQUEST_METHOD")
@@ -258,7 +251,7 @@ class TaleWsgiServer(object):
         return [txt.encode("utf-8")]
 
     def wsgi_handle_text(self, environ, parameters, start_response):
-        html, self.__html_to_browser = self.__html_to_browser, []
+        html, self.html_to_browser = self.html_to_browser, []
         start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
@@ -281,13 +274,13 @@ class TaleWsgiServer(object):
         if cmd and "autocomplete" in parameters:
             suggestions = self.completer.complete(cmd)
             if suggestions:
-                self.__html_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
+                self.html_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
             else:
-                self.__html_to_browser.append("<p>No matching commands.</p>")
+                self.html_to_browser.append("<p>No matching commands.</p>")
         else:
             cmd = html_escape(cmd, False)
             if cmd:
-                self.__html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+                self.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
             self.player_connection.player.store_input_line(cmd)
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
