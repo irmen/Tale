@@ -278,6 +278,7 @@ class Driver(object):
             connection.singleplayer_mainloop()
         else:
             # mud mode, driver runs as main thread
+            mud_context.player = mud_context.conn = None
             self.__print_game_intro(None)
             self.__startup_main_loop()
 
@@ -300,8 +301,13 @@ class Driver(object):
                 # self.show_motd(mud_context.player)
                 # mud_context.player.look(short=False)   # force a 'look' command to get our bearings
                 # mud_context.conn.write_output()
+                # spin up a multiuser web server
+                from .tio.mud_browser_io import TaleMudWsgiApp
+                wsgi_app, wsgi_server = TaleMudWsgiApp.create_app_server(self)
+                url = "http://%s:%d/tale/" % wsgi_server.server_address
+                print("\nPoint your browser to the following url: ", url, end="\n\n")
                 while not self.__stop_mainloop:
-                    self.__main_loop_multiplayer()
+                    self.__main_loop_multiplayer(wsgi_app, wsgi_server)
         except:
             for conn in self.all_players.values():
                 conn.critical_error()
@@ -318,8 +324,9 @@ class Driver(object):
         elif use_web_interface:
             if self.config.server_mode != "if":
                 raise ValueError("At this time, the web browser interface only works in singleplayer 'if' game mode.")   # XXX make it work for mud too
-            from .tio.if_browser_io import HttpIo
-            io = HttpIo(connection)
+            from .tio.if_browser_io import HttpIo, TaleWsgiApp
+            wsgi_app, wsgi_server = TaleWsgiApp.create_app_server(self, connection)
+            io = HttpIo(connection, wsgi_app, wsgi_server)
         else:
             from .tio.console_io import ConsoleIo
             io = ConsoleIo(connection)
@@ -521,62 +528,23 @@ class Driver(object):
                 except Exception:
                     self.__report_deferred_exception(action)
 
-    def __main_loop_multiplayer(self):
+    def __main_loop_multiplayer(self, wsgi_app, wsgi_server):
         """
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
         """
-        # @todo build mud game loop, the stuff below is just carried over from the past for now
-        has_input = True
-        last_loop_time = last_server_tick = time.time()
-        loop_duration = 1.0
+        # @todo make event loop
+        last_server_tick_time = 0
         while not self.__stop_mainloop:
-            # flush buffered output and check if some player reached the end of the game ('if' mode)
-            for conn in self.all_players.values():
-                conn.write_output()
-                if conn.player.story_complete and self.config.server_mode == "if":
-                    self.__story_complete_output(conn.player, conn)    # congratulations ;-)
-                    if self.config.server_mode == "if":
-                        self._stop_driver()
-                        break
-
-            # do the server tick before processing player input (if method=timer) and keep track of the tick time
-            if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
-                # NOTE: if the sleep time ever gets down to zero or below zero, the server load is too high
-                last_server_tick = time.time()
+            now = time.time()
+            if now - last_server_tick_time >= self.config.server_tick_time:
+                last_server_tick_time = now
                 self.__server_tick()
-                loop_duration_with_server_tick = time.time() - last_loop_time
-                self.server_loop_durations.append(loop_duration_with_server_tick)
-            else:
-                loop_duration = time.time() - last_loop_time
-
-            # handle player input
-            for conn in self.all_players.values():
-                conn.write_input_prompt()
-                if self.config.server_tick_method == "timer":
-                    has_input = conn.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
-                elif self.config.server_tick_method == "command":
-                    conn.player.input_is_available.wait()   # blocking wait until playered entered something
-                    has_input = True
-                    before = time.time()
-                    self.__server_tick()   # do the server tick after player input (when method=command)
-                    self.server_loop_durations.append(time.time() - before)
-                if has_input:
-                    try:
-                        self.__server_loop_process_player_input(conn)
-                    except (KeyboardInterrupt, EOFError):
-                        pass
-                    except errors.StoryCompleted:
-                        pass   # in mud mode, the game can't be 'completed' in this way
-                    except errors.SessionExit:
-                        conn.player.tell("Goodbye, %s. Please come back again soon." % conn.player.title, end=True)
-                    except Exception:
-                        txt = "* internal error:\n" + traceback.format_exc()
-                        conn.player.tell(txt, format=False)
-
+            timeout = self.config.server_tick_time
+            wsgi_server.timeout = timeout
+            wsgi_server.handle_request()
             # process pending actions
             self.__server_loop_process_action_queue()
-            last_loop_time = time.time()
 
     def __server_tick(self):
         """

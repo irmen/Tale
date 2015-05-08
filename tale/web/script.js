@@ -6,6 +6,7 @@ function setup()
     if(but.accessKeyLabel) { but.value += ' ('+but.accessKeyLabel+')'; }
 
     document.text_refresher = setInterval(poll_text, 450);
+    window.onbeforeunload = function(e) { return "Are you sure you want to abort the session and close the window?"; }
 }
 
 function poll_text() {

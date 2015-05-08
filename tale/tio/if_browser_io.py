@@ -9,21 +9,19 @@ from __future__ import absolute_import, print_function, division
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 import cgi
 import json
-import logging
 import time
 from hashlib import md5
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
 from .styleaware_wrapper import tag_split_re
-from .. import mud_context
 from .. import __version__ as tale_version_str
 try:
     from html import escape as html_escape
 except ImportError:
     from cgi import escape as html_escape
 
-__all__ = ["HttpIo", "TaleWsgiServer", "TaleWsgiServerBase"]
+__all__ = ["HttpIo", "TaleWsgiApp", "TaleWsgiAppBase"]
 
 
 style_tags_html = {
@@ -60,12 +58,10 @@ class HttpIo(iobase.IoAdapterBase):
     This doubles as a wsgi app and runs as a web server using wsgiref.
     This way it is a simple call for the driver, it starts everything that is needed.
     """
-    def __init__(self, player_connection):
+    def __init__(self, player_connection, wsgi_app, wsgi_server):
         super(HttpIo, self).__init__(player_connection)
-        self.port = 8080
-        self.wsgi_app = TaleWsgiServer(mud_context.driver, player_connection)
-        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
-        self.server.timeout = 0.5
+        self.wsgi_app = wsgi_app
+        self.server = wsgi_server
 
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
@@ -142,13 +138,26 @@ class HttpIo(iobase.IoAdapterBase):
         return "".join(result)
 
 
-class TaleWsgiServerBase(object):
+class TaleWsgiAppBase(object):
     """
     Generic wsgi functionality that is not tied to a particular
     single or multiplayer web server.
     """
     def __init__(self, driver):
         self.driver = driver
+
+    def __call__(self, environ, start_response):
+        method = environ.get("REQUEST_METHOD")
+        path = environ.get('PATH_INFO', '').lstrip('/')
+        if not path:
+            return self.wsgi_redirect(start_response, "/tale/")
+        if path.startswith("tale/"):
+            if method in ("GET", "POST"):
+                parameters = singlyfy_parameters(cgi.parse(environ['wsgi.input'], environ))
+                return self.wsgi_route(environ, path[5:], parameters, start_response)
+            else:
+                return self.wsgi_invalid_request(start_response)
+        return self.wsgi_not_found(start_response)
 
     def wsgi_route(self, environ, path, parameters, start_response):
         if not path or path == "start":
@@ -247,30 +256,24 @@ class TaleWsgiServerBase(object):
         return [data]
 
 
-class TaleWsgiServer(TaleWsgiServerBase):
+class TaleWsgiApp(TaleWsgiAppBase):
     """
-    The actual wsgi web server that the player's browser connects to.
+    The actual wsgi app that the player's browser connects to.
     Note that it is deliberatly simplistic and ony able to handle a single
     player connection; it only works for 'if' single-player game mode.
     """
     def __init__(self, driver, player_connection):
-        super(TaleWsgiServer, self).__init__(driver)
+        super(TaleWsgiApp, self).__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
         self.html_to_browser = []     # the lines that need to be displayed in the player's browser
 
-    def __call__(self, environ, start_response):
-        method = environ.get("REQUEST_METHOD")
-        path = environ.get('PATH_INFO', '').lstrip('/')
-        if not path:
-            return self.wsgi_redirect(start_response, "/tale/")
-        if path.startswith("tale/"):
-            if method in ("GET", "POST"):
-                parameters = singlyfy_parameters(cgi.parse(environ['wsgi.input'], environ))
-                return self.wsgi_route(environ, path[5:], parameters, start_response)
-            else:
-                return self.wsgi_invalid_request(start_response)
-        return self.wsgi_not_found(start_response)
+    @classmethod
+    def create_app_server(cls, driver, player_connection):
+        wsgi_app = cls(driver, player_connection)
+        wsgi_server = make_server("localhost", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
+        wsgi_server.timeout = 0.5
+        return wsgi_app, wsgi_server
 
     def wsgi_handle_start(self, environ, parameters, start_response):
         # start page / titlepage
@@ -341,9 +344,8 @@ class TaleWsgiServer(TaleWsgiServerBase):
 
 class CustomRequestHandler(WSGIRequestHandler):
     def log_message(self, format, *args):
-        msg = format % args
-        logging.getLogger("tale.wsgi").debug(msg)
+        pass
 
 
 class CustomWsgiServer(WSGIServer):
-    request_queue_size = 200
+    request_queue_size = 10
