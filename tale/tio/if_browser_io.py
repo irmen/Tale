@@ -6,11 +6,12 @@ Webbrowser based I/O for a single player ('if') story.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division
-from wsgiref.simple_server import make_server, WSGIRequestHandler
+from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 import cgi
 import json
 import logging
 import time
+from hashlib import md5
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
@@ -22,7 +23,7 @@ try:
 except ImportError:
     from cgi import escape as html_escape
 
-__all__ = ["HttpIo", "TaleWsgiServer"]
+__all__ = ["HttpIo", "TaleWsgiServer", "TaleWsgiServerBase"]
 
 
 style_tags_html = {
@@ -63,13 +64,14 @@ class HttpIo(iobase.IoAdapterBase):
         super(HttpIo, self).__init__(player_connection)
         self.port = 8080
         self.wsgi_app = TaleWsgiServer(mud_context.driver, player_connection)
-        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler)
+        self.server = make_server("localhost", self.port, app=self.wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         self.server.timeout = 0.5
 
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
 
-    def mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection):
+        """mainloop for the web browser interface for single player mode"""
         import webbrowser
         from threading import Thread
         url = "http://%s:%d/tale/" % self.server.server_address
@@ -140,30 +142,13 @@ class HttpIo(iobase.IoAdapterBase):
         return "".join(result)
 
 
-class TaleWsgiServer(object):
+class TaleWsgiServerBase(object):
     """
-    The actual wsgi web server that the player's browser connects to.
-    Note that it is deliberatly simplistic and ony able to handle a single
-    player connection; it only works for 'if' single-player game mode.
+    Generic wsgi functionality that is not tied to a particular
+    single or multiplayer web server.
     """
-    def __init__(self, driver, player_connection):
+    def __init__(self, driver):
         self.driver = driver
-        self.completer = None
-        self.player_connection = player_connection   # just a single player here
-        self.html_to_browser = []     # the lines that need to be displayed in the player's browser
-
-    def __call__(self, environ, start_response):
-        method = environ.get("REQUEST_METHOD")
-        path = environ.get('PATH_INFO', '').lstrip('/')
-        if not path:
-            return self.wsgi_redirect(start_response, "/tale/")
-        if path.startswith("tale/"):
-            if method in ("GET", "POST"):
-                parameters = singlyfy_parameters(cgi.parse(environ['wsgi.input'], environ))
-                return self.wsgi_route(environ, path[5:], parameters, start_response)
-            else:
-                return self.wsgi_invalid_request(start_response)
-        return self.wsgi_not_found(start_response)
 
     def wsgi_route(self, environ, path, parameters, start_response):
         if not path or path == "start":
@@ -207,22 +192,6 @@ class TaleWsgiServer(object):
         start_response('304 Not Modified', [])
         return []
 
-    def wsgi_handle_start(self, environ, parameters, start_response):
-        # start page / titlepage
-        headers = [('Content-Type', 'text/html; charset=utf-8')]
-        etag = str(id(self.player_connection)) + "-" + str(time.mktime(self.driver.server_started.timetuple()))
-        if_none = environ.get('HTTP_IF_NONE_MATCH')
-        if if_none and (if_none == '*' or etag in if_none):
-            return self.wsgi_not_modified(start_response)
-        headers.append(("ETag", etag))
-        start_response("200 OK", headers)
-        resource = vfs.internal_resources["web/index.html"]
-        txt = resource.data.format(story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
-        return [txt.encode("utf-8")]
-
     def wsgi_handle_about(self, environ, parameters, start_response):
         # about page
         start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
@@ -235,10 +204,94 @@ class TaleWsgiServer(object):
                                    num_players=len(self.driver.all_players))
         return [txt.encode("utf-8")]
 
+    def wsgi_handle_static(self, environ, path, start_response):
+        path = path[len("static/"):]
+        if not self.wsgi_is_asset_allowed(path):
+            return self.wsgi_not_found(start_response)
+        try:
+            return self.wsgi_serve_static("web/" + path, environ, start_response)
+        except IOError:
+            return self.wsgi_not_found(start_response)
+
+    def wsgi_is_asset_allowed(self, path):
+        return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
+            or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
+
+    def etag(self, *components):
+        return '"' + md5("-".join(str(c) for c in components).encode("ascii")).hexdigest() + '"'
+
+    def wsgi_serve_static(self, path, environ, start_response):
+        headers = []
+        resource = vfs.internal_resources[path]
+        if resource.mtime:
+            # unfortunately, this is usually only present when running under python 3.x...
+            mtime_formatted = formatdate(resource.mtime)
+            etag = self.etag(id(vfs.internal_resources), resource.mtime, path)
+            if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
+            if if_modified:
+                if parsedate(if_modified) >= parsedate(mtime_formatted):
+                    # the resource wasn't modified since last requested
+                    return self.wsgi_not_modified(start_response)
+            if_none = environ.get('HTTP_IF_NONE_MATCH')
+            if if_none and (if_none == '*' or etag in if_none):
+                return self.wsgi_not_modified(start_response)
+            headers.append(("ETag", etag))
+            headers.append(("Last-Modified", formatdate(resource.mtime)))
+        if type(resource.data) is bytes:
+            headers.append(('Content-Type', resource.mimetype))
+            data = resource.data
+        else:
+            headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
+            data = resource.data.encode("utf-8")
+        start_response('200 OK', headers)
+        return [data]
+
+
+class TaleWsgiServer(TaleWsgiServerBase):
+    """
+    The actual wsgi web server that the player's browser connects to.
+    Note that it is deliberatly simplistic and ony able to handle a single
+    player connection; it only works for 'if' single-player game mode.
+    """
+    def __init__(self, driver, player_connection):
+        super(TaleWsgiServer, self).__init__(driver)
+        self.completer = None
+        self.player_connection = player_connection   # just a single player here
+        self.html_to_browser = []     # the lines that need to be displayed in the player's browser
+
+    def __call__(self, environ, start_response):
+        method = environ.get("REQUEST_METHOD")
+        path = environ.get('PATH_INFO', '').lstrip('/')
+        if not path:
+            return self.wsgi_redirect(start_response, "/tale/")
+        if path.startswith("tale/"):
+            if method in ("GET", "POST"):
+                parameters = singlyfy_parameters(cgi.parse(environ['wsgi.input'], environ))
+                return self.wsgi_route(environ, path[5:], parameters, start_response)
+            else:
+                return self.wsgi_invalid_request(start_response)
+        return self.wsgi_not_found(start_response)
+
+    def wsgi_handle_start(self, environ, parameters, start_response):
+        # start page / titlepage
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        etag = self.etag(id(self.player_connection), time.mktime(self.driver.server_started.timetuple()), "start")
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response("200 OK", headers)
+        resource = vfs.internal_resources["web/index.html"]
+        txt = resource.data.format(story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
     def wsgi_handle_story(self, environ, parameters, start_response):
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         resource = vfs.internal_resources["web/story.html"]
-        etag = str(id(self.player_connection)) + "-" + str(time.mktime(self.driver.server_started.timetuple()))
+        etag = self.etag(id(self.player_connection), time.mktime(self.driver.server_started.timetuple()), "story")
         if_none = environ.get('HTTP_IF_NONE_MATCH')
         if if_none and (if_none == '*' or etag in if_none):
             return self.wsgi_not_modified(start_response)
@@ -285,47 +338,12 @@ class TaleWsgiServer(object):
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
 
-    def wsgi_handle_static(self, environ, path, start_response):
-        path = path[len("static/"):]
-        if not self.wsgi_is_asset_allowed(path):
-            return self.wsgi_not_found(start_response)
-        try:
-            return self.wsgi_serve_static("web/" + path, environ, start_response)
-        except IOError:
-            return self.wsgi_not_found(start_response)
-
-    def wsgi_is_asset_allowed(self, path):
-        return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
-            or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
-
-    def wsgi_serve_static(self, path, environ, start_response):
-        headers = []
-        resource = vfs.internal_resources[path]
-        if resource.mtime:
-            # unfortunately, this is usually only present when running under python 3.x...
-            mtime_formatted = formatdate(resource.mtime)
-            etag = str(resource.mtime)
-            if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
-            if if_modified:
-                if parsedate(if_modified) >= parsedate(mtime_formatted):
-                    # the resource wasn't modified since last requested
-                    return self.wsgi_not_modified(start_response)
-            if_none = environ.get('HTTP_IF_NONE_MATCH')
-            if if_none and (if_none == '*' or etag in if_none):
-                return self.wsgi_not_modified(start_response)
-            headers.append(("ETag", etag))
-            headers.append(("Last-Modified", formatdate(resource.mtime)))
-        if type(resource.data) is bytes:
-            headers.append(('Content-Type', resource.mimetype))
-            data = resource.data
-        else:
-            headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
-            data = resource.data.encode("utf-8")
-        start_response('200 OK', headers)
-        return [data]
-
 
 class CustomRequestHandler(WSGIRequestHandler):
     def log_message(self, format, *args):
         msg = format % args
         logging.getLogger("tale.wsgi").debug(msg)
+
+
+class CustomWsgiServer(WSGIServer):
+    request_queue_size = 200

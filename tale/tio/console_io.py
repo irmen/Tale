@@ -75,8 +75,8 @@ class ConsoleIo(iobase.IoAdapterBase):
     def __repr__(self):
         return "<ConsoleIo @ 0x%x, local console, pid %d>" % (id(self), os.getpid())
 
-    def mainloop(self, player_connection):
-        """Main event loop for the console I/O adapter"""
+    def singleplayer_mainloop(self, player_connection):
+        """Main event loop for the console I/O adapter for single player mode"""
         while not self.stop_main_loop:
             # Input a single line of text by the player. It is stored in the internal
             # command buffer of the player. The driver's main loop can look into that

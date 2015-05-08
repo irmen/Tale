@@ -40,8 +40,8 @@ class TkinterIo(iobase.IoAdapterBase):
     def __repr__(self):
         return "<TkinterIo @ 0x%x>" % id(self)
 
-    def mainloop(self, player_connection):
-        """Main event loop for this I/O adapter"""
+    def singleplayer_mainloop(self, player_connection):
+        """Main event loop for this I/O adapter for single player mode"""
         self.gui.mainloop(player_connection)
 
     def pause(self, unpause=False):

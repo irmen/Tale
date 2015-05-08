@@ -24,6 +24,7 @@ setup_args = dict(
         'tale.tio': ['quill_pen_paper.ico', 'quill_pen_paper.gif'],
         'tale.web': ['*']
     },
+    include_package_data=True,
     url='http://packages.python.org/tale',
     license='GPL v3',
     author='Irmen de Jong',

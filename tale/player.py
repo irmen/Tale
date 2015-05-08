@@ -341,8 +341,8 @@ class PlayerConnection(object):
     def install_tab_completion(self, completer):
         self.io.install_tab_completion(completer)
 
-    def mainloop(self):
-        return self.io.mainloop(self)
+    def singleplayer_mainloop(self):
+        return self.io.singleplayer_mainloop(self)
 
     def pause(self, unpause=False):
         self.io.pause(unpause)

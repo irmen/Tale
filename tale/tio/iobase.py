@@ -57,8 +57,8 @@ class IoAdapterBase(object):
         """Called when the I/O adapter is shut down"""
         pass
 
-    def mainloop(self, player_connection):
-        """Main event loop for this I/O adapter"""
+    def singleplayer_mainloop(self, player_connection):
+        """Main event loop for this I/O adapter for single player mode"""
         raise NotImplementedError("implement this in subclass")
 
     def clear_screen(self):

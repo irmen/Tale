@@ -275,7 +275,7 @@ class Driver(object):
             driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
             driver_thread.daemon = True
             driver_thread.start()
-            connection.mainloop()   # single player input loop
+            connection.singleplayer_mainloop()
         else:
             # mud mode, driver runs as main thread
             self.__print_game_intro(None)
