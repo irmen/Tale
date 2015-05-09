@@ -28,6 +28,13 @@ function poll_text() {
                 txtdiv.innerHTML += json["text"];
                 txtdiv.scrollTop = txtdiv.scrollHeight;
             }
+            var special = json["special"];
+            if(special) {
+                if(special.indexOf("clear")>=0) {
+                    txtdiv.innerHTML = "";
+                    txtdiv.scrollTop = 0;
+                }
+            }
         }
     }
     ajax.onerror = function(error) {

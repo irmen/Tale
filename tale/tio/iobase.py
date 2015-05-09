@@ -24,7 +24,7 @@ smartypants.process_escapes = lambda txt: txt  # disable the escape processing
 smartypants = smartypants.smartypants
 
 ALL_STYLE_TAGS = {
-    "dim", "normal", "bright", "ul", "it", "rev", "/",
+    "dim", "normal", "bright", "ul", "it", "rev", "clear", "/",
     "living", "player", "item", "exit", "location", "monospaced", "/monospaced"
 }
 

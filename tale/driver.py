@@ -500,14 +500,15 @@ class Driver(object):
                 previous_server_tick = now
             self.__server_loop_process_action_queue()
             # check if player reached the end of the story
+            loop_duration = time.time() - loop_start
+            self.server_loop_durations.append(loop_duration)
             if conn.player.story_complete:
                 self.__story_complete_output(conn)
                 self._stop_driver()
-            loop_duration = time.time() - loop_start
-            self.server_loop_durations.append(loop_duration)
+            else:
+                conn.write_output()
 
     def __server_loop_process_player_input(self, conn):
-        print("PROCESS PLAYER INPUT", conn.player)  # XXX
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -557,7 +558,7 @@ class Driver(object):
             # server tick goes on a timer, use the web server timeout to wait for a limited time
             # wait_time = max(0.01, self.config.server_tick_time - loop_duration)
             self.mud_wsgi_server.timeout = 0.1      # keep things responsive
-            self.mud_wsgi_server.handle_request()       # @todo should the wsgi server perhaps run in its own thread instead just as in IF mode?
+            self.mud_wsgi_server.handle_request()   # @todo should the wsgi server perhaps run in its own thread instead just as in IF mode?
 
             loop_start = time.time()
             for conn in self.all_players.values():

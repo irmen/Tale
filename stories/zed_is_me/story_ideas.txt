@@ -1,4 +1,4 @@
-Turn-based (command-driven).
+Single-Player IF turn-based (command-driven).
 Maak het niet te moeilijk dus je bent zelf NIET infected.
 Waar moet je dan naar op zoek? Uiteindelijk een manier om het dorp te verlaten!
 

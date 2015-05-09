@@ -251,6 +251,8 @@ class TaleWindow(Toplevel):
                             tag = None
                         elif tag == "/":
                             tag = None
+                        elif tag == "clear":
+                            self.gui.clear_screen()
                         continue
                     self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
                 self.textView.insert(END, "\n")

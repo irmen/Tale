@@ -37,6 +37,7 @@ style_words = {
     "item": colorama.Style.BRIGHT,
     "exit": colorama.Style.BRIGHT,
     "location": colorama.Style.BRIGHT,
+    "clear": "\033[1;1H\033[2J",  # ansi sequence to clear the console screen
     "monospaced": "",  # we assume the console is already monospaced font
     "/monospaced": ""
 }

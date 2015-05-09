@@ -35,9 +35,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[cosmetic] Extra text style tags?
-    <center> text style which centers the line(s) on the screen.
-    <clear>  clears the screen  (would allow to clear the screen in the web interface in the @cls command)
+[cosmetic] Add <center> text style which centers the line(s) on the screen.
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
 [code, API] async pubsub bus

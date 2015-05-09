@@ -32,6 +32,7 @@ style_tags_html = {
     "<it>": ("<span class='txt-it'>", "</span>"),
     "<rev>": ("<span class='txt-rev'>", "</span>"),
     "</>": None,
+    "<clear>": None,
     "<living>": ("<span class='txt-living'>", "</span>"),
     "<player>": ("<span class='txt-player'>", "</span>"),
     "<item>": ("<span class='txt-item'>", "</span>"),
@@ -62,6 +63,7 @@ class HttpIo(iobase.IoAdapterBase):
         super(HttpIo, self).__init__(player_connection)
         self.wsgi_server = wsgi_server
         self.html_to_browser = []     # the lines that need to be displayed in the player's browser
+        self.html_special = []      # special out of band commands (such as 'clear')
 
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
@@ -81,6 +83,9 @@ class HttpIo(iobase.IoAdapterBase):
 
     def pause(self, unpause=False):
         pass
+
+    def clear_screen(self):
+        self.html_special.append("clear")
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
@@ -120,6 +125,8 @@ class HttpIo(iobase.IoAdapterBase):
                 while close_tags_stack:
                     result.append(close_tags_stack.pop())
                 continue
+            elif chunk == "<clear>":
+                self.html_special.append("clear")
             elif chunk:
                 if chunk.startswith("</"):
                     chunk = "<" + chunk[2:]
@@ -242,6 +249,7 @@ class TaleWsgiAppBase(object):
         if not conn:
             return self.wsgi_internal_server_error(start_response, "not logged in")
         html, conn.io.html_to_browser = conn.io.html_to_browser, []
+        special, conn.io.html_special = conn.io.html_special, []
         start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
@@ -250,6 +258,7 @@ class TaleWsgiAppBase(object):
         if html and conn.player:
             response["turns"] = conn.player.turns
             response["location"] = conn.player.location.title
+            response["special"] = special
         return [json.dumps(response).encode("utf-8")]
 
     def wsgi_handle_tabcomplete(self, environ, parameters, start_response):
