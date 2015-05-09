@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>about Tale</title>
+    <link rel="icon" type="image/x-ico" href="static/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="static/style.css" />
+</head>
+<body>
+    <h2><img src="static/logo.gif" align="top"> Tale interactive fiction</h2>
+    <hr>
+    <br>
+    <h1>About this server.</h1>
+    <p>
+        <em>Tale</em> is a mud, mudlib & interactive fiction framework for Python.
+    </p>
+    <p>
+        <a href="http://pythonhosted.org/tale/">Developer documentation.</a>
+        <a href="https://github.com/irmen/Tale.git">Source code repository.</a>
+    </p>
+    <p>
+        This software is copyright (c) by Irmen de Jong (<code>irmen@razorvine.net</code>).
+        It is released under the GPL v3 software license.
+    </p>
+    <br>
+    <br>
+    <pre>
+        Server version     :   {tale_version}
+        Game version       :   {story_name}  v{story_version}
+        Uptime             :   {uptime}
+        Up since           :   {starttime}
+        Number of players  :   {num_players}
+    </pre>
+    <br>
+    <h3>Connected players:</h3>
+    {player_table}
+    <br>
+    <br>
+    <a href="../tale/">&larr; Back to the title page.</a>
+</body>
+</html>

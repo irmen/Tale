@@ -762,12 +762,6 @@ class Driver(object):
         elif notify_no_motd:
             player.tell("There's currently no message-of-the-day.")
 
-    def show_story_license(self, player):
-        """Prints optional additional license information supplied by the story"""
-        if self.config.license_file:
-            player.tell(self.resources[self.config.license_file].data, end=True)
-            player.tell("\n")
-
     def search_player(self, name):
         """
         Look through all the logged in players for one with the given name.

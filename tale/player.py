@@ -291,7 +291,7 @@ class PlayerConnection(object):
         """
         self.write_output()
         self.io.output_no_newline(prompt)
-        self.player.input_is_available.wait()
+        self.player.input_is_available.wait()   # blocking wait  @todo fix blocking input for multiplayer
         self.need_new_input_prompt = True
         return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
 

@@ -1,6 +1,6 @@
 
     'Tale' mud driver, mudlib and interactive fiction framework.
-    Copyright (C) 2012  Irmen de Jong (irmen@razorvine.net)
+    Copyright (C) by Irmen de Jong (irmen@razorvine.net)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

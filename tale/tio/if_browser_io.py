@@ -205,18 +205,6 @@ class TaleWsgiAppBase(object):
         start_response('500 Internal server error', [])
         return [message.encode("utf-8")]
 
-    def wsgi_handle_about(self, environ, parameters, start_response):
-        # about page
-        start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
-        resource = vfs.internal_resources["web/about.html"]
-        txt = resource.data.format(tale_version=tale_version_str,
-                                   story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   uptime="%d:%02d:%02d" % self.driver.uptime,
-                                   starttime=self.driver.server_started,
-                                   num_players=len(self.driver.all_players))
-        return [txt.encode("utf-8")]
-
     def wsgi_handle_start(self, environ, parameters, start_response):
         # start page / titlepage
         headers = [('Content-Type', 'text/html; charset=utf-8')]
@@ -296,6 +284,25 @@ class TaleWsgiAppBase(object):
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
 
+    def wsgi_handle_license(self, environ, parameters, start_response):
+        license = "The author hasn't provided any license information."
+        if self.driver.config.license_file:
+            license = self.driver.resources[self.driver.config.license_file].data
+        resource = vfs.internal_resources["web/about_license.html"]
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        etag = self.etag(id(self), time.mktime(self.driver.server_started.timetuple()), resource.mtime, "license")
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response("200 OK", headers)
+        txt = resource.data.format(license=license,
+                                   story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
     def wsgi_handle_static(self, environ, path, start_response):
         path = path[len("static/"):]
         if not self.wsgi_is_asset_allowed(path):
@@ -362,6 +369,19 @@ class TaleWsgiApp(TaleWsgiAppBase):
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.driver._stop_driver()
         return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]
+
+    def wsgi_handle_about(self, environ, parameters, start_response):
+        # about page
+        if "license" in parameters:
+            return self.wsgi_handle_license(environ, parameters, start_response)
+        start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
+        resource = vfs.internal_resources["web/about.html"]
+        txt = resource.data.format(tale_version=tale_version_str,
+                                   story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   uptime="%d:%02d:%02d" % self.driver.uptime,
+                                   starttime=self.driver.server_started)
+        return [txt.encode("utf-8")]
 
 
 class CustomRequestHandler(WSGIRequestHandler):

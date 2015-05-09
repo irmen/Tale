@@ -16,7 +16,6 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from .. import __version__ as tale_version_string
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
@@ -1403,22 +1402,22 @@ def do_read(player, parsed, ctx):
 def do_license(player, parsed, ctx):
     """Show information about the game and about Tale, and show the software license."""
     t = player.tell
-    # version info
     config = ctx.config
     author_addr = " (%s)" % config.author_address if config.author_address else ""
     t("This game, '<bright>%s</>' v%s," % (config.name, config.version))
-    t("is written by <bright>%s%s</>," % (config.author, author_addr))
-    t("and is using Tale framework v%s." % tale_version_string, end=True)
+    t("is written by <bright>%s%s</>" % (config.author, author_addr))
     t("\n")
     # print optional game specific license info
-    ctx.driver.show_story_license(player)
+    if ctx.config.license_file:
+        t(ctx.driver.resources[ctx.config.license_file].data, end=True)
+        t("\n")
     # print GPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)
-    t("Copyright (C) 2012  Irmen de Jong.</>", end=True)
+    t("Copyright (c) by Irmen de Jong.</>", end=True)
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
-
+    t("-- -- -- --", end=True)
 
 @cmd("config")
 def do_config(player, parsed, ctx):
