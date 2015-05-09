@@ -82,9 +82,6 @@ class HttpIo(iobase.IoAdapterBase):
     def pause(self, unpause=False):
         pass
 
-    def install_tab_completion(self, completer):
-        self.wsgi_app.completer = completer
-
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
             text = self.convert_to_html(text)
@@ -323,14 +320,15 @@ class TaleWsgiApp(TaleWsgiAppBase):
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
                                   ('Expires', '0')])
-        return [json.dumps(self.completer.complete(parameters["prefix"])).encode("utf-8")]
+        return [json.dumps(self.player_connection.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]
 
     def wsgi_handle_input(self, environ, parameters, start_response):
         cmd = parameters.get("cmd", "")
         if cmd and "autocomplete" in parameters:
-            suggestions = self.completer.complete(cmd)
+            suggestions = self.player_connection.io.tab_complete(cmd, self.driver)
             if suggestions:
-                self.html_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
+                self.html_to_browser.append("<br><p><em>Suggestions:</em></p>")
+                self.html_to_browser.append("<p><code>" + " &nbsp; ".join(suggestions) + "</code></p>")
             else:
                 self.html_to_browser.append("<p>No matching commands.</p>")
         else:

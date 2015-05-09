@@ -106,12 +106,13 @@ class ConsoleIo(iobase.IoAdapterBase):
         else:
             print("\n" * 5)
 
-    def install_tab_completion(self, completer):
+    def install_tab_completion(self, driver):
         """Install tab completion using readline, if available, and if not running on windows (it behaves weird)"""
         if sys.platform == "win32":
             return
         try:
             import readline
+            completer = ReadlineTabCompleter(driver, self)
             readline.set_completer(completer.complete)
             if readline.__doc__ and "libedit" in readline.__doc__:
                 # this is for osx pythons with libedit instead of gnu readline
@@ -192,3 +193,27 @@ class ConsoleIo(iobase.IoAdapterBase):
             return line
         else:
             return iobase.strip_text_styles(line)
+
+
+class ReadlineTabCompleter(object):
+    """
+    Class used to provide tab-completion on the command line using readline.
+    """
+    def __init__(self, driver, io):
+        self.driver = driver
+        self.io = io
+        self.candidates = []
+        self.prefix = None
+
+    def complete(self, prefix, index=None):
+        if not prefix:
+            return
+        if prefix != self.prefix:
+            # new prefix, recalculate candidates
+            self.candidates = self.io.tab_complete(prefix, self.driver)
+        try:
+            if index is None:
+                return self.candidates
+            return self.candidates[index]
+        except IndexError:
+            return None

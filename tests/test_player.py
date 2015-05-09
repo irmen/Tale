@@ -16,7 +16,7 @@ from tale.npc import NPC
 from tale.player import Player, TextBuffer, PlayerConnection
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
-from tale.tio.iobase import TabCompleter
+from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder
 from tale.driver import StoryConfig
 if sys.version_info < (3, 0):
@@ -556,20 +556,24 @@ class TestTabCompletion(unittest.TestCase):
     def test_complete_c(self):
         player = Player("fritz", "m")
         driver = TestDriver()
-        completer = TabCompleter(driver, player)
-        result = completer.complete("c")
+        conn = PlayerConnection(player)
+        io = IoAdapterBase(conn)
+        conn.io = io
+        result = io.tab_complete("c", driver)
         self.assertGreater(len(result), 20)
         self.assertTrue("cackle" in result)
         self.assertTrue("criticize" in result)
-        result = completer.complete("h")
+        result = io.tab_complete("h", driver)
         self.assertGreater(len(result), 10)
         self.assertTrue("hiss" in result)
 
     def test_complete_one(self):
         player = Player("fritz", "m")
         driver = TestDriver()
-        completer = TabCompleter(driver, player)
-        self.assertEqual(["criticize"], completer.complete("critic"))
+        conn = PlayerConnection(player)
+        io = IoAdapterBase(conn)
+        conn.io = io
+        self.assertEqual(["criticize"], io.tab_complete("critic", driver))
 
 
 if __name__ == '__main__':

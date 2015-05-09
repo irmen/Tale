@@ -338,9 +338,6 @@ class PlayerConnection(object):
     def critical_error(self):
         self.io.critical_error()
 
-    def install_tab_completion(self, completer):
-        self.io.install_tab_completion(completer)
-
     def singleplayer_mainloop(self):
         return self.io.singleplayer_mainloop(self)
 

@@ -29,7 +29,6 @@ from . import cmds
 from . import player
 from . import __version__ as tale_version_str
 from .tio import vfs
-from .tio.iobase import TabCompleter
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 
@@ -177,6 +176,8 @@ class Driver(object):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
+        self.mud_wsgi_app = None
+        self.mud_wsgi_server = None
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -309,11 +310,11 @@ class Driver(object):
                 # mud_context.conn.write_output()
                 # spin up a multiuser web server
                 from .tio.mud_browser_io import TaleMudWsgiApp
-                wsgi_app, wsgi_server = TaleMudWsgiApp.create_app_server(self)
-                url = "http://%s:%d/tale/" % wsgi_server.server_address
+                self.mud_wsgi_app, self.mud_wsgi_server = TaleMudWsgiApp.create_app_server(self)
+                url = "http://%s:%d/tale/" % self.mud_wsgi_server.server_address
                 print("\nPoint your browser to the following url: ", url, end="\n\n")
                 while not self.__stop_mainloop:
-                    self.__main_loop_multiplayer(wsgi_app, wsgi_server)
+                    self.__main_loop_multiplayer()
         except:
             for conn in self.all_players.values():
                 conn.critical_error()
@@ -334,13 +335,25 @@ class Driver(object):
         elif player_io == "console":
             from .tio.console_io import ConsoleIo
             io = ConsoleIo(connection)
+            io.install_tab_completion(self)
         else:
             raise ValueError("invalid io type")
         connection.player = new_player
         connection.io = io
         self.all_players[new_player.name] = connection
         new_player.output_line_delay = line_delay
-        connection.install_tab_completion(TabCompleter(self, new_player))
+        connection.clear_screen()
+        self.__print_game_intro(connection)
+        return connection
+
+    def _connect_mud_player(self):
+        connection = player.PlayerConnection()
+        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
+        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        connection.player = new_player
+        from .tio.mud_browser_io import MudHttpIo
+        connection.io = MudHttpIo(connection, self.mud_wsgi_app, self.mud_wsgi_server)
+        self.all_players[new_player.name] = connection
         connection.clear_screen()
         self.__print_game_intro(connection)
         return connection
@@ -534,7 +547,7 @@ class Driver(object):
                 except Exception:
                     self.__report_deferred_exception(action)
 
-    def __main_loop_multiplayer(self, wsgi_app, wsgi_server):
+    def __main_loop_multiplayer(self):
         """
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
@@ -547,8 +560,8 @@ class Driver(object):
                 last_server_tick_time = now
                 self.__server_tick()
             timeout = self.config.server_tick_time
-            wsgi_server.timeout = timeout
-            wsgi_server.handle_request()
+            self.mud_wsgi_server.timeout = timeout
+            self.mud_wsgi_server.handle_request()
             # process pending actions
             self.__server_loop_process_action_queue()
 

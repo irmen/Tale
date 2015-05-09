@@ -65,10 +65,6 @@ class IoAdapterBase(object):
         """Clear the screen"""
         pass
 
-    def install_tab_completion(self, completer):
-        """Install and enable tab-command-completion if possible"""
-        pass
-
     def critical_error(self, message="Critical Error. Shutting down."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         tb = traceback.format_exc()
@@ -117,35 +113,18 @@ class IoAdapterBase(object):
         """pause/ unpause the input loop"""
         raise NotImplementedError("implement this in subclass")
 
-
-class TabCompleter(object):
-    """
-    Class used to provide tab-completion on the command line.
-    """
-    def __init__(self, driver, player):
-        self.driver = driver
-        self.player = player
-        self.candidates = []
-        self.prefix = None
-
-    def complete(self, prefix, index=None):
+    def tab_complete(self, prefix, driver):
         if not prefix:
             return
-        if prefix != self.prefix:
-            # new prefix, recalculate candidates
-            verbs = [verb for verb in self.driver.get_current_verbs(self.player) if verb.startswith(prefix)]
-            livings = [living.name for living in self.player.location.livings if living.name.startswith(prefix)]
-            livings_aliases = [alias for living in self.player.location.livings for alias in living.aliases if alias.startswith(prefix)]
-            items = [item.name for item in self.player.location.items if item.name.startswith(prefix)]
-            items_aliases = [alias for item in self.player.location.items for alias in item.aliases if alias.startswith(prefix)]
-            exits = [exit for exit in self.player.location.exits if exit.startswith(prefix)]
-            inventory = [item.name for item in self.player.inventory if item.name.startswith(prefix)]
-            inventory_aliases = [alias for item in self.player.inventory for alias in item.aliases if alias.startswith(prefix)]
-            emotes = [verb for verb in soul.VERBS if verb.startswith(prefix)]
-            self.candidates = sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases)
-        try:
-            if index is None:
-                return self.candidates
-            return self.candidates[index]
-        except IndexError:
-            return None
+        player = self.player_connection.player
+        verbs = [verb for verb in driver.get_current_verbs(player) if verb.startswith(prefix)]
+        livings = [living.name for living in player.location.livings if living.name.startswith(prefix)]
+        livings_aliases = [alias for living in player.location.livings for alias in living.aliases if alias.startswith(prefix)]
+        items = [item.name for item in player.location.items if item.name.startswith(prefix)]
+        items_aliases = [alias for item in player.location.items for alias in item.aliases if alias.startswith(prefix)]
+        exits = [xt for xt in player.location.exits if xt.startswith(prefix)]
+        inventory = [item.name for item in player.inventory if item.name.startswith(prefix)]
+        inventory_aliases = [alias for item in player.inventory for alias in item.aliases if alias.startswith(prefix)]
+        emotes = [verb for verb in soul.VERBS if verb.startswith(prefix)]
+        self.candidates = sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases)
+        return self.candidates

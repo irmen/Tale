@@ -26,8 +26,8 @@ class MudHttpIo(HttpIo):
     """
     I/O adapter for a http/browser based interface.
     """
-    def __init__(self, player_connection):
-        super(MudHttpIo, self).__init__(player_connection)
+    def __init__(self, player_connection, wsgi_app, wsgi_server):
+        super(MudHttpIo, self).__init__(player_connection, wsgi_app, wsgi_server)
 
     def __repr__(self):
         return "<MudHttpIo @ 0x%x>" % id(self)
@@ -38,6 +38,24 @@ class MudHttpIo(HttpIo):
     def pause(self, unpause=False):
         # we'll never pause a mud server.
         pass
+
+    def render_output(self, paragraphs, **params):
+        for text, formatted in paragraphs:
+            text = self.convert_to_html(text)
+            if text == "\n":
+                text = "<br>"
+            if formatted:
+                text = "<p>" + text + "</p>\n"
+            else:
+                text = "<pre>" + text + "</pre>\n"
+            print("@@@@TEXT:", text.encode("ascii", errors="ignore"))  # XXX
+
+    def output_no_newline(self, text):
+        text = self.convert_to_html(text)
+        if text == "\n":
+            text = "<br>"
+        text = "<p>" + text + "</p>\n"
+        print("@@@@TEXT2:", text.encode("ascii", errors="ignore"))  # XXX
 
 
 class TaleMudWsgiApp(TaleWsgiAppBase):
@@ -57,6 +75,12 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
     def wsgi_handle_story(self, environ, parameters, start_response):
         session = environ["wsgi.session"]
+        if "player_connection" not in session:
+            # create a new connection
+            conn = self.driver._connect_mud_player()
+            session["player_connection"] = conn
+        conn = session["player_connection"]
+        print("PLAYER CONNECTION", conn)   # XXX
         return super(TaleMudWsgiApp, self).wsgi_handle_story(environ, parameters, start_response)
 
     def wsgi_handle_text(self, environ, parameters, start_response):
@@ -78,20 +102,26 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
     def wsgi_handle_input(self, environ, parameters, start_response):
         session = environ["wsgi.session"]
+        conn = session["player_connection"]
         cmd = parameters.get("cmd", "")
+        text = None
         if cmd and "autocomplete" in parameters:
-            suggestions = self.completer.complete(cmd)
+            suggestions = conn.io.tab_complete(cmd, self.driver)
             if suggestions:
-                self.html_to_browser.append("<p>Suggestions: " + ", ".join(suggestions) + "</p>")
+                text = "<br><p><em>Suggestions:</em></p>"
+                text += "<p><code>" + " &nbsp; ".join(suggestions) + "</code></p>"
             else:
-                self.html_to_browser.append("<p>No matching commands.</p>")
+                text = "<p>No matching commands.</p>"
         else:
             cmd = html_escape(cmd, False)
             if cmd:
-                self.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
-            self.player_connection.player.store_input_line(cmd)
+                text = "<span class='txt-userinput'>%s</span>" % cmd
+            conn.player.store_input_line(cmd)
+        if text:
+            print("@@@@TEXT3:", text.encode("ascii", errors="ignore"))  # XXX
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
+
 
 class CustomRequestHandler(WSGIRequestHandler):
     def log_message(self, format, *args):

@@ -60,9 +60,6 @@ class TkinterIo(iobase.IoAdapterBase):
         self.output("<rev>" + tb + "</>")
         self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
 
-    def install_tab_completion(self, completer):
-        self.gui.install_tab_completion(completer)
-
     def destroy(self):
         self.gui.destroy()
 
@@ -290,11 +287,12 @@ class TaleGUI(object):
         self.window = TaleWindow(self, self.root, window_title, "")
         self.root.withdraw()
         self.root.update()
+        self.install_tab_completion()
 
-    def install_tab_completion(self, completer):
+    def install_tab_completion(self):
         def tab_pressed(event):
             begin, _, prefix = event.widget.get().rpartition(" ")
-            candidates = completer.complete(prefix=prefix)
+            candidates = self.io.tab_complete(prefix, mud_context.driver)
             if candidates:
                 if len(candidates) == 1:
                     # replace text by the only possible candidate
