@@ -268,7 +268,13 @@ class Driver(object):
             raise ValueError("invalid delay, valid range is 0-100")
         if self.config.server_mode == "if":
             # create the single player mode player automatically
-            connection = self.__connect_player(args.gui, args.web, args.delay)
+            if args.gui:
+                player_io = "gui"
+            elif args.web:
+                player_io = "web"
+            else:
+                player_io = "console"
+            connection = self.__connect_if_player(player_io, args.delay)
             mud_context.player = connection.player
             mud_context.conn = connection
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
@@ -314,22 +320,22 @@ class Driver(object):
             self.__stop_mainloop = True
             raise
 
-    def __connect_player(self, use_gui_interface, use_web_interface, line_delay):
+    def __connect_if_player(self, player_io, line_delay):
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        if use_gui_interface:
+        if player_io == "gui":
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.config, connection)
-        elif use_web_interface:
-            if self.config.server_mode != "if":
-                raise ValueError("At this time, the web browser interface only works in singleplayer 'if' game mode.")   # XXX make it work for mud too
+        elif player_io == "web":
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
             wsgi_app, wsgi_server = TaleWsgiApp.create_app_server(self, connection)
             io = HttpIo(connection, wsgi_app, wsgi_server)
-        else:
+        elif player_io == "console":
             from .tio.console_io import ConsoleIo
             io = ConsoleIo(connection)
+        else:
+            raise ValueError("invalid io type")
         connection.player = new_player
         connection.io = io
         self.all_players[new_player.name] = connection

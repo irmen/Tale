@@ -83,7 +83,7 @@ class HttpIo(iobase.IoAdapterBase):
         pass
 
     def install_tab_completion(self, completer):
-        self.server.completer = completer
+        self.wsgi_app.completer = completer
 
     def render_output(self, paragraphs, **params):
         for text, formatted in paragraphs:
@@ -213,6 +213,37 @@ class TaleWsgiAppBase(object):
                                    num_players=len(self.driver.all_players))
         return [txt.encode("utf-8")]
 
+    def wsgi_handle_start(self, environ, parameters, start_response):
+        # start page / titlepage
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        resource = vfs.internal_resources["web/index.html"]
+        etag = self.etag(id(self), time.mktime(self.driver.server_started.timetuple()), resource.mtime, "start")
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response("200 OK", headers)
+        txt = resource.data.format(story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
+    def wsgi_handle_story(self, environ, parameters, start_response):
+        headers = [('Content-Type', 'text/html; charset=utf-8')]
+        resource = vfs.internal_resources["web/story.html"]
+        etag = self.etag(id(self), time.mktime(self.driver.server_started.timetuple()), resource.mtime, "story")
+        if_none = environ.get('HTTP_IF_NONE_MATCH')
+        if if_none and (if_none == '*' or etag in if_none):
+            return self.wsgi_not_modified(start_response)
+        headers.append(("ETag", etag))
+        start_response('200 OK', headers)
+        txt = resource.data.format(story_version=self.driver.config.version,
+                                   story_name=self.driver.config.name,
+                                   story_author=self.driver.config.author,
+                                   story_author_email=self.driver.config.author_address)
+        return [txt.encode("utf-8")]
+
     def wsgi_handle_static(self, environ, path, start_response):
         path = path[len("static/"):]
         if not self.wsgi_is_asset_allowed(path):
@@ -274,37 +305,6 @@ class TaleWsgiApp(TaleWsgiAppBase):
         wsgi_server = make_server("localhost", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
         return wsgi_app, wsgi_server
-
-    def wsgi_handle_start(self, environ, parameters, start_response):
-        # start page / titlepage
-        headers = [('Content-Type', 'text/html; charset=utf-8')]
-        etag = self.etag(id(self.player_connection), time.mktime(self.driver.server_started.timetuple()), "start")
-        if_none = environ.get('HTTP_IF_NONE_MATCH')
-        if if_none and (if_none == '*' or etag in if_none):
-            return self.wsgi_not_modified(start_response)
-        headers.append(("ETag", etag))
-        start_response("200 OK", headers)
-        resource = vfs.internal_resources["web/index.html"]
-        txt = resource.data.format(story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
-        return [txt.encode("utf-8")]
-
-    def wsgi_handle_story(self, environ, parameters, start_response):
-        headers = [('Content-Type', 'text/html; charset=utf-8')]
-        resource = vfs.internal_resources["web/story.html"]
-        etag = self.etag(id(self.player_connection), time.mktime(self.driver.server_started.timetuple()), "story")
-        if_none = environ.get('HTTP_IF_NONE_MATCH')
-        if if_none and (if_none == '*' or etag in if_none):
-            return self.wsgi_not_modified(start_response)
-        headers.append(("ETag", etag))
-        start_response('200 OK', headers)
-        txt = resource.data.format(story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
-        return [txt.encode("utf-8")]
 
     def wsgi_handle_text(self, environ, parameters, start_response):
         html, self.html_to_browser = self.html_to_browser, []
