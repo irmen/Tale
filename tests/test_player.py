@@ -476,7 +476,7 @@ class TestPlayerConnection(unittest.TestCase):
 
     def test_destroy(self):
         pc = PlayerConnection(None, ConsoleIo(None))
-        pc.destroy(tale.util.Context(tale.mud_context.driver, None, None, None))
+        pc.destroy()
         self.assertIsNone(pc.player)
         self.assertIsNone(pc.io)
 

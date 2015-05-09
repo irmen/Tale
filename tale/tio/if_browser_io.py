@@ -58,10 +58,10 @@ class HttpIo(iobase.IoAdapterBase):
     This doubles as a wsgi app and runs as a web server using wsgiref.
     This way it is a simple call for the driver, it starts everything that is needed.
     """
-    def __init__(self, player_connection, wsgi_app, wsgi_server):
+    def __init__(self, player_connection, wsgi_server):
         super(HttpIo, self).__init__(player_connection)
-        self.wsgi_app = wsgi_app
-        self.server = wsgi_server
+        self.wsgi_server = wsgi_server
+        self.html_to_browser = []     # the lines that need to be displayed in the player's browser
 
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
@@ -70,13 +70,13 @@ class HttpIo(iobase.IoAdapterBase):
         """mainloop for the web browser interface for single player mode"""
         import webbrowser
         from threading import Thread
-        url = "http://%s:%d/tale/" % self.server.server_address
+        url = "http://%s:%d/tale/" % self.wsgi_server.server_address
         print("\nPoint your browser to the following url: ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))
         t.daemon = True
         t.start()
         while not self.stop_main_loop:
-            self.server.handle_request()
+            self.wsgi_server.handle_request()
         print("Game shutting down.")
 
     def pause(self, unpause=False):
@@ -88,9 +88,9 @@ class HttpIo(iobase.IoAdapterBase):
             if text == "\n":
                 text = "<br>"
             if formatted:
-                self.wsgi_app.html_to_browser.append("<p>" + text + "</p>\n")
+                self.html_to_browser.append("<p>" + text + "</p>\n")
             else:
-                self.wsgi_app.html_to_browser.append("<pre>" + text + "</pre>\n")
+                self.html_to_browser.append("<pre>" + text + "</pre>\n")
 
     def output(self, *lines):
         for line in lines:
@@ -100,7 +100,7 @@ class HttpIo(iobase.IoAdapterBase):
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
-        self.wsgi_app.html_to_browser.append("<p>" + text + "</p>\n")
+        self.html_to_browser.append("<p>" + text + "</p>\n")
 
     def convert_to_html(self, line):
         """Convert style tags to html"""
@@ -171,6 +171,8 @@ class TaleWsgiAppBase(object):
             return self.wsgi_handle_input(environ, parameters, start_response)
         elif path.startswith("static/"):
             return self.wsgi_handle_static(environ, path, start_response)
+        elif path == "quit":
+            return self.wsgi_handle_quit(environ, parameters, start_response)
         return self.wsgi_not_found(start_response)
 
     def wsgi_invalid_request(self, start_response):
@@ -197,6 +199,11 @@ class TaleWsgiAppBase(object):
         """Called to signal that a resource wasn't modified"""
         start_response('304 Not Modified', [])
         return []
+
+    def wsgi_internal_server_error(self, start_response, message=""):
+        """Called when an internal server error occurred"""
+        start_response('500 Internal server error', [])
+        return [message.encode("utf-8")]
 
     def wsgi_handle_about(self, environ, parameters, start_response):
         # about page
@@ -240,6 +247,54 @@ class TaleWsgiAppBase(object):
                                    story_author=self.driver.config.author,
                                    story_author_email=self.driver.config.author_address)
         return [txt.encode("utf-8")]
+
+    def wsgi_handle_text(self, environ, parameters, start_response):
+        session = environ["wsgi.session"]
+        conn = session.get("player_connection")
+        if not conn:
+            return self.wsgi_internal_server_error(start_response, "not logged in")
+        html, conn.io.html_to_browser = conn.io.html_to_browser, []
+        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
+                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                  ('Pragma', 'no-cache'),
+                                  ('Expires', '0')])
+        response = {"text": "\n".join(html)}
+        if html and conn.player:
+            response["turns"] = conn.player.turns
+            response["location"] = conn.player.location.title
+        return [json.dumps(response).encode("utf-8")]
+
+    def wsgi_handle_tabcomplete(self, environ, parameters, start_response):
+        session = environ["wsgi.session"]
+        conn = session.get("player_connection")
+        if not conn:
+            return self.wsgi_internal_server_error(start_response, "not logged in")
+        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
+                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                                  ('Pragma', 'no-cache'),
+                                  ('Expires', '0')])
+        return [json.dumps(conn.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]
+
+    def wsgi_handle_input(self, environ, parameters, start_response):
+        session = environ["wsgi.session"]
+        conn = session.get("player_connection")
+        if not conn:
+            return self.wsgi_internal_server_error(start_response, "not logged in")
+        cmd = parameters.get("cmd", "")
+        if cmd and "autocomplete" in parameters:
+            suggestions = conn.io.tab_complete(cmd, self.driver)
+            if suggestions:
+                conn.io.html_to_browser.append("<br><p><em>Suggestions:</em></p>")
+                conn.io.html_to_browser.append("<p><code>" + " &nbsp; ".join(suggestions) + "</code></p>")
+            else:
+                conn.io.html_to_browser.append("<p>No matching commands.</p>")
+        else:
+            cmd = html_escape(cmd, False)
+            if cmd:
+                conn.io.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+            conn.player.store_input_line(cmd)
+        start_response('200 OK', [('Content-Type', 'text/plain')])
+        return []
 
     def wsgi_handle_static(self, environ, path, start_response):
         path = path[len("static/"):]
@@ -294,50 +349,19 @@ class TaleWsgiApp(TaleWsgiAppBase):
         super(TaleWsgiApp, self).__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
-        self.html_to_browser = []     # the lines that need to be displayed in the player's browser
 
     @classmethod
     def create_app_server(cls, driver, player_connection):
-        wsgi_app = cls(driver, player_connection)
+        wsgi_app = SessionMiddleware(cls(driver, player_connection))
         wsgi_server = make_server("localhost", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
-        return wsgi_app, wsgi_server
+        return wsgi_server
 
-    def wsgi_handle_text(self, environ, parameters, start_response):
-        html, self.html_to_browser = self.html_to_browser, []
-        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
-                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                                  ('Pragma', 'no-cache'),
-                                  ('Expires', '0')])
-        response = {"text": "\n".join(html)}
-        if html and self.player_connection and self.player_connection.player:
-            response["turns"] = self.player_connection.player.turns
-            response["location"] = self.player_connection.player.location.title
-        return [json.dumps(response).encode("utf-8")]
-
-    def wsgi_handle_tabcomplete(self, environ, parameters, start_response):
-        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
-                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                                  ('Pragma', 'no-cache'),
-                                  ('Expires', '0')])
-        return [json.dumps(self.player_connection.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]
-
-    def wsgi_handle_input(self, environ, parameters, start_response):
-        cmd = parameters.get("cmd", "")
-        if cmd and "autocomplete" in parameters:
-            suggestions = self.player_connection.io.tab_complete(cmd, self.driver)
-            if suggestions:
-                self.html_to_browser.append("<br><p><em>Suggestions:</em></p>")
-                self.html_to_browser.append("<p><code>" + " &nbsp; ".join(suggestions) + "</code></p>")
-            else:
-                self.html_to_browser.append("<p>No matching commands.</p>")
-        else:
-            cmd = html_escape(cmd, False)
-            if cmd:
-                self.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
-            self.player_connection.player.store_input_line(cmd)
-        start_response('200 OK', [('Content-Type', 'text/plain')])
-        return []
+    def wsgi_handle_quit(self, environ, parameters, start_response):
+        # Quit/logged out page. For single player, simply close down the whole driver.
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        self.driver._stop_driver()
+        return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]
 
 
 class CustomRequestHandler(WSGIRequestHandler):
@@ -347,3 +371,15 @@ class CustomRequestHandler(WSGIRequestHandler):
 
 class CustomWsgiServer(WSGIServer):
     request_queue_size = 10
+
+
+class SessionMiddleware(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        environ["wsgi.session"] = {
+            "id": None,
+            "player_connection": self.app.player_connection
+        }
+        return self.app(environ, start_response)

@@ -15,6 +15,12 @@ function poll_text() {
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
+            if(this.status>=300) {
+                txtdiv.innerHTML += "<p><em>Server error: "+this.responseText+"</em><br><em>Perhaps refreshing the page might help.</em></p>"
+                txtdiv.scrollTop = txtdiv.scrollHeight;
+                clearInterval(document.text_refresher);
+                return;
+            }
             var json = JSON.parse(this.responseText);
             if(json["text"]) {
                 document.getElementById("player-location").innerHTML = json["location"];
@@ -53,18 +59,27 @@ function submit_cmd() {
 
 function autocomplete_cmd() {
     var cmd_input = document.getElementById("input-cmd");
-    if(!cmd_input.value)
-        return false;
-    var ajax = new XMLHttpRequest();
-    ajax.onreadystatechange = function() {
-        var DONE = this.DONE || 4;
-        if(this.readyState==DONE) {
-            setTimeout(poll_text, 100);
+    if(cmd_input.value) {
+        var ajax = new XMLHttpRequest();
+        ajax.onreadystatechange = function() {
+            var DONE = this.DONE || 4;
+            if(this.readyState==DONE) {
+                setTimeout(poll_text, 100);
+            }
         }
+        ajax.open("POST", "input", true);
+        ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        ajax.send("cmd=" + encodeURIComponent(cmd_input.value)+"&autocomplete=1");
     }
-    ajax.open("POST", "input", true);
-    ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    ajax.send("cmd=" + encodeURIComponent(cmd_input.value)+"&autocomplete=1");
     cmd_input.focus();
+    return false;
+}
+
+function quit_clicked() {
+    if(confirm("Quitting like this will abort your game.\nYou will lose your progress. Are you sure?")) {
+        window.onbeforeunload = null;
+        document.location="quit";
+        return true;
+    }
     return false;
 }

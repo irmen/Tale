@@ -176,7 +176,6 @@ class Driver(object):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
-        self.mud_wsgi_app = None
         self.mud_wsgi_server = None
 
     def start(self, command_line_args):
@@ -310,7 +309,7 @@ class Driver(object):
                 # mud_context.conn.write_output()
                 # spin up a multiuser web server
                 from .tio.mud_browser_io import TaleMudWsgiApp
-                self.mud_wsgi_app, self.mud_wsgi_server = TaleMudWsgiApp.create_app_server(self)
+                self.mud_wsgi_server = TaleMudWsgiApp.create_app_server(self)
                 url = "http://%s:%d/tale/" % self.mud_wsgi_server.server_address
                 print("\nPoint your browser to the following url: ", url, end="\n\n")
                 while not self.__stop_mainloop:
@@ -330,8 +329,8 @@ class Driver(object):
             io = TkinterIo(self.config, connection)
         elif player_io == "web":
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
-            wsgi_app, wsgi_server = TaleWsgiApp.create_app_server(self, connection)
-            io = HttpIo(connection, wsgi_app, wsgi_server)
+            wsgi_server = TaleWsgiApp.create_app_server(self, connection)
+            io = HttpIo(connection, wsgi_server)
         elif player_io == "console":
             from .tio.console_io import ConsoleIo
             io = ConsoleIo(connection)
@@ -352,11 +351,18 @@ class Driver(object):
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
         connection.player = new_player
         from .tio.mud_browser_io import MudHttpIo
-        connection.io = MudHttpIo(connection, self.mud_wsgi_app, self.mud_wsgi_server)
+        connection.io = MudHttpIo(connection, self.mud_wsgi_server)
         self.all_players[new_player.name] = connection
         connection.clear_screen()
         self.__print_game_intro(connection)
         return connection
+
+    def _disconnect_mud_player(self, conn):
+        name = conn.player.name
+        assert self.all_players[name] is conn
+        conn.write_output()
+        conn.destroy()
+        del self.all_players[name]
 
     def __print_game_intro(self, player_connection):
         try:
@@ -445,10 +451,9 @@ class Driver(object):
         Flushes any pending output to the players, then closes down.
         """
         self.__stop_mainloop = True
-        ctx = util.Context(driver=self, clock=None, config=self.config, player_connection=mud_context.conn)
         for conn in self.all_players.values():
             conn.write_output()
-            conn.destroy(ctx)
+            conn.destroy()
         self.all_players.clear()
         time.sleep(0.1)
         mud_context.player = None

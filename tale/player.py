@@ -13,6 +13,7 @@ from . import lang
 from . import hints
 from . import pubsub
 from . import mud_context
+from . import util
 from .errors import SecurityViolation, ActionRefused
 from .util import queue
 from .tio.iobase import strip_text_styles
@@ -344,7 +345,7 @@ class PlayerConnection(object):
     def pause(self, unpause=False):
         self.io.pause(unpause)
 
-    def destroy(self, ctx):
+    def destroy(self):
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
@@ -352,6 +353,7 @@ class PlayerConnection(object):
                 self.io.abort_all_input(self.player)
             self.io = None
         if self.player:
+            ctx = util.Context(driver=mud_context.driver, clock=None, config=mud_context.config, player_connection=self)
             self.player.destroy(ctx)
             # self.player = Player("<destroyed-%d>" % id(self.player), "n")
             self.player = None
