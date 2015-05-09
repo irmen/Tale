@@ -92,7 +92,7 @@ class Deferred(object):
                     # the owner refers to a module
                     self.owner = sys.modules[self.owner[7:]]
                 else:
-                    raise RuntimeError("invalid owner specifier: "+self.owner)
+                    raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
             func(*self.vargs, **self.kwargs)
         else:
@@ -302,11 +302,6 @@ class Driver(object):
                 while not self.__stop_mainloop:
                     self.__main_loop_singleplayer(mud_context.conn)
             else:
-                # multi player MUD
-                # @todo build this
-                # self.show_motd(mud_context.player)
-                # mud_context.player.look(short=False)   # force a 'look' command to get our bearings
-                # mud_context.conn.write_output()
                 # spin up a multiuser web server
                 from .tio.mud_browser_io import TaleMudWsgiApp
                 self.mud_wsgi_server = TaleMudWsgiApp.create_app_server(self)
@@ -355,6 +350,10 @@ class Driver(object):
         self.all_players[new_player.name] = connection
         connection.clear_screen()
         self.__print_game_intro(connection)
+        new_player.tell("Creating a mud player or logging in is not yet possible!", end=True)  # @todo __create_player
+        # @todo the following commands only after properly logging in:
+        self.show_motd(new_player, True)
+        new_player.look(short=False)  # force a 'look' command to get our bearings
         return connection
 
     def _disconnect_mud_player(self, conn):
@@ -464,39 +463,21 @@ class Driver(object):
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
         """
-        last_loop_time = last_server_tick = time.time()
-        loop_duration = 0.01
+        conn.write_output()
+        loop_duration = 0
+        previous_server_tick = 0
         while not self.__stop_mainloop:
-            conn.write_output()
-            if conn.player.story_complete:
-                # congratulations, player has completed the game
-                self.__story_complete_output(conn.player, conn)
-                self._stop_driver()
-
-            # server TICK (timer tick mode)
-            if self.config.server_tick_method == "timer" and time.time() - last_server_tick >= self.config.server_tick_time:
-                # do the server tick before processing player input
-                # NOTE: if the sleep time ever gets <= 0, the server load is too high
-                last_server_tick = time.time()
-                self.__server_tick()
-                loop_duration_with_server_tick = time.time() - last_loop_time
-                self.server_loop_durations.append(loop_duration_with_server_tick)
-            else:
-                loop_duration = time.time() - last_loop_time
-
-            # check for player input
             conn.write_input_prompt()
-            if self.config.server_tick_method == "timer":
-                has_input = conn.player.input_is_available.wait(max(0.01, self.config.server_tick_time - loop_duration))
-            elif self.config.server_tick_method == "command":
+            if self.config.server_tick_method == "command":
+                # wait indefinitely for next player input
                 conn.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
-                before = time.time()
-                # server TICK (command tick mode)
-                self.__server_tick()
-                self.server_loop_durations.append(time.time() - before)
+            elif self.config.server_tick_method == "timer":
+                # server tick goes on a timer, wait a limited time for player input before going on
+                input_wait_time = max(0.01, self.config.server_tick_time - loop_duration)
+                has_input = conn.player.input_is_available.wait(input_wait_time)
 
-            # process input, if any
+            loop_start = time.time()
             if has_input:
                 conn.need_new_input_prompt = True
                 try:
@@ -512,12 +493,21 @@ class Driver(object):
                 except Exception:
                     txt = "* internal error:\n" + traceback.format_exc()
                     conn.player.tell(txt, format=False)
-
-            # process pending actions
+            # server TICK and pending Actions
+            now = time.time()
+            if now - previous_server_tick >= self.config.server_tick_time:
+                self.__server_tick()
+                previous_server_tick = now
             self.__server_loop_process_action_queue()
-            last_loop_time = time.time()
+            # check if player reached the end of the story
+            if conn.player.story_complete:
+                self.__story_complete_output(conn)
+                self._stop_driver()
+            loop_duration = time.time() - loop_start
+            self.server_loop_durations.append(loop_duration)
 
     def __server_loop_process_player_input(self, conn):
+        print("PROCESS PLAYER INPUT", conn.player)  # XXX
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -525,7 +515,7 @@ class Driver(object):
                 continue
             try:
                 p.tell("\n")
-                self.__process_player_command(cmd, p, conn)
+                self.__process_player_command(cmd, conn)
                 p.remember_parsed()
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
@@ -557,22 +547,45 @@ class Driver(object):
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
         """
-        # @todo make event loop
-        last_server_tick_time = 0
+        loop_duration = 0
+        previous_server_tick = 0
         while not self.__stop_mainloop:
+            for conn in self.all_players.values():
+                conn.write_output()
+                conn.write_input_prompt()
+
+            # server tick goes on a timer, use the web server timeout to wait for a limited time
+            # wait_time = max(0.01, self.config.server_tick_time - loop_duration)
+            self.mud_wsgi_server.timeout = 0.1      # keep things responsive
+            self.mud_wsgi_server.handle_request()       # @todo should the wsgi server perhaps run in its own thread instead just as in IF mode?
+
+            loop_start = time.time()
+            for conn in self.all_players.values():
+                if conn.player.input_is_available.is_set():
+                    conn.need_new_input_prompt = True
+                    try:
+                        self.__server_loop_process_player_input(conn)
+                    except (KeyboardInterrupt, EOFError):
+                        continue
+                    except errors.StoryCompleted:
+                        continue   # can't complete 'story' in mud mode
+                    except errors.SessionExit:
+                        self.story.goodbye(conn.player)
+                    except Exception:
+                        txt = "* internal error:\n" + traceback.format_exc()
+                        conn.player.tell(txt, format=False)
+            # server TICK and pending Actions
             now = time.time()
-            if now - last_server_tick_time >= self.config.server_tick_time:
-                last_server_tick_time = now
+            if now - previous_server_tick >= self.config.server_tick_time:
                 self.__server_tick()
-            timeout = self.config.server_tick_time
-            self.mud_wsgi_server.timeout = timeout
-            self.mud_wsgi_server.handle_request()
-            # process pending actions
+                previous_server_tick = now
             self.__server_loop_process_action_queue()
+            loop_duration = time.time() - loop_start
+            self.server_loop_durations.append(loop_duration)
 
     def __server_tick(self):
         """
-        Do everything that the server needs to do every tick.
+        Do everything that the server needs to do every tick (timer configurable in story)
         1) game clock
         2) heartbeats
         3) deferreds
@@ -606,14 +619,14 @@ class Driver(object):
         print(traceback.format_exc(), file=sys.stderr)
         print("(continuing...)", file=sys.stderr)
 
-    def __story_complete_output(self, player, conn):
-        player.tell("\n")
-        self.story.completion(player)
-        player.tell("\n")
+    def __story_complete_output(self, conn):
+        conn.player.tell("\n")
+        self.story.completion(conn.player)
+        conn.player.tell("\n")
         conn.input_direct("\nPress enter to continue. ")
-        player.tell("\n")
+        conn.player.tell("\n")
 
-    def __process_player_command(self, cmd, player, conn):
+    def __process_player_command(self, cmd, conn):
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
@@ -625,6 +638,7 @@ class Driver(object):
             _verb = cmds.abbreviations[_verb]
             cmd = "".join([_verb, _sep, _rest])
 
+        player = conn.player
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
         # parsing for us even if it's a verb the soul doesn't recognise by itself.
         command_verbs = self.commands.get(player.privileges)
@@ -676,7 +690,7 @@ class Driver(object):
                 player.validate_socialize_targets(parsed)
                 player.do_socialize_cmd(parsed)
             except errors.RetryParse as x:
-                return self.__process_player_command(x.command, player, conn)   # try again but with new command string
+                return self.__process_player_command(x.command, conn)   # try again but with new command string
 
     def __go_through_exit(self, player, direction):
         exit = player.location.exits[direction]
@@ -781,6 +795,7 @@ class Driver(object):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times.
         # @todo be able to detect if something happened during the wait
+        assert self.config.server_mode == "if"
         if self.config.gametime_to_realtime == 0:
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick

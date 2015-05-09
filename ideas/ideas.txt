@@ -3,11 +3,11 @@ Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
 [feature,tkinter,html] Add optional picture to every MudObject description. (with fabulous.image even displayable on linux/osx xterm)
 [feature] Add optional sound clip to locations
+[code]  use websockets or comet long polling instead of 0.5 sec polling to update the text in the browser
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
-[feature] Pyro interface with standalone remote client (console or GUI).
 [feature] SSH interface via Paramiko?
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state. (already have this for IF-mode)
@@ -24,6 +24,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Vendors and shops: stock, sell stuff, buy stuff, haggle?
 [feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
 
+
 [info,feature] Do something with the circlemud xml data:
     data files from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 
@@ -34,6 +35,12 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[cosmetic] Extra text style tags?
+    <center> text style which centers the line(s) on the screen.
+    <clear>  clears the screen  (would allow to clear the screen in the web interface in the @cls command)
+[code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
+    commands, adverbs, names - all should be lowercased and compared by lowercase.
+[code, API] async pubsub bus
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
@@ -53,12 +60,6 @@ General ideas/TODO:
 [code] use yield (generators) for player command processing? should make it a lot easier to build conversational state,
        and yes/no question dialogs, and multiplayer multiplexing. Although, aren't regular threads enough really?
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
-[cosmetic,gui] Add a box / area to the GUI where additional status messages can be displayed (game score? turns? time? etc.. + api call for story), and/or menu buttons.
-[cosmetic] Extra text style tags?
-    <center> text style which centers the line(s) on the screen.
-    <clear>  clears the screen
-[code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
-    commands, adverbs, names - all should be lowercased and compared by lowercase.
 [test] double names.
     What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
     What happens with multiple items of same name in room, in inventory, in bag

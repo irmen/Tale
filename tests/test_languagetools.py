@@ -103,8 +103,7 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("minus one", lang.spell_number(-1))
         self.assertEqual("minus twenty", lang.spell_number(-20))
         self.assertEqual("two and a half", lang.spell_number(2.5))
-        with self.assertRaises(ValueError):
-            lang.spell_number(1.234)
+        self.assertEqual("1.234", lang.spell_number(1.234))
 
     def test_pluralize(self):
         self.assertEqual("cars", lang.pluralize("car"))

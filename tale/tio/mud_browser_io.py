@@ -56,7 +56,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     def create_app_server(cls, driver):
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
         wsgi_server = make_server("127.0.0.1", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
-        wsgi_server.timeout = 0.5
+        wsgi_server.timeout = 0.1
         return wsgi_server
 
     def wsgi_handle_story(self, environ, parameters, start_response):

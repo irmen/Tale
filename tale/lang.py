@@ -152,7 +152,7 @@ def spell_number(number):
     elif fraction == 0.5:
         fraction_txt = " and a half"
     else:
-        raise ValueError("can't spell fractions other than 0.5")
+        return str(number)  # can't spell fractions other than 0.5
     return result + __number_words[int_number] + fraction_txt
 
 
