@@ -12,7 +12,10 @@ import time
 import random
 import sys
 import hashlib
-from http.cookies import SimpleCookie
+try:
+    from http.cookies import SimpleCookie
+except ImportError:
+    from Cookie import SimpleCookie
 try:
     from html import escape as html_escape
 except ImportError:
