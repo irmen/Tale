@@ -27,127 +27,11 @@ from . import util
 from . import soul
 from . import cmds
 from . import player
+from . import base
+from . import npc
 from . import __version__ as tale_version_str
 from .tio import vfs
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
-
-
-@total_ordering
-class Deferred(object):
-    """
-    Represents a callable action that will be invoked (with the given arguments) sometime in the future.
-    This object captures the action that must be invoked in a way that is serializable.
-    That means that you can't pass all types of callables, there are a few that are not
-    serializable (lambda's and scoped functions). They will trigger an error if you use those.
-    """
-    def __init__(self, due, action, vargs, kwargs):
-        assert due is None or isinstance(due, datetime.datetime)
-        assert callable(action)
-        self.due = due   # in game time
-        self.owner = getattr(action, "__self__", None)
-        if isinstance(self.owner, types.ModuleType):
-            # encode a module simply by its name
-            self.owner = "module:" + self.owner.__name__
-        if self.owner is None:
-            action_module = getattr(action, "__module__", None)
-            if action_module:
-                if hasattr(sys.modules[action_module], action.__name__):
-                    self.owner = "module:" + action_module
-                else:
-                    # a callable was passed that we cannot serialize.
-                    raise ValueError("cannot use scoped functions or lambdas as deferred: " + str(action))
-            else:
-                raise ValueError("cannot determine action's owner object: " + str(action))
-        self.action = action.__name__    # store name instead of object, to make this serializable
-        self.vargs = vargs
-        self.kwargs = kwargs
-
-    def __eq__(self, other):
-        return self.due == other.due and type(self.owner) == type(other.owner)\
-            and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
-
-    def __lt__(self, other):
-        return self.due < other.due   # deferreds must be sortable
-
-    def when_due(self, game_clock, realtime=False):
-        """
-        In what time is this deferred due to occur? (timedelta)
-        Normally it is in terms of game-time, but if you pass realtime=True,
-        you will get the real-time timedelta.
-        """
-        secs = (self.due - game_clock.clock).total_seconds()
-        if realtime:
-            secs = int(secs / game_clock.times_realtime)
-        return datetime.timedelta(seconds=secs)
-
-    def __call__(self, *args, **kwargs):
-        self.kwargs = self.kwargs or {}
-        if "ctx" in kwargs:
-            self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
-        if isinstance(self.action, util.basestring_type):
-            # deferred action is stored as the name of the function to call,
-            # so we need to obtain the actual function from the owner object.
-            if isinstance(self.owner, util.basestring_type):
-                if self.owner.startswith("module:"):
-                    # the owner refers to a module
-                    self.owner = sys.modules[self.owner[7:]]
-                else:
-                    raise RuntimeError("invalid owner specifier: " + self.owner)
-            func = getattr(self.owner, self.action)
-            func(*self.vargs, **self.kwargs)
-        else:
-            self.action(*self.vargs, **self.kwargs)
-        # our lifetime has ended, remove references:
-        del self.owner
-        del self.action
-        del self.kwargs
-        del self.vargs
-
-
-class Commands(object):
-    def __init__(self):
-        self.commands_per_priv = {None: {}}
-        self.no_soul_parsing = set()
-
-    def add(self, verb, func, privilege=None):
-        self.validateFunc(func)
-        for commands in self.commands_per_priv.values():
-            if verb in commands:
-                raise ValueError("command defined more than once: " + verb)
-        self.commands_per_priv.setdefault(privilege, {})[verb] = func
-
-    def override(self, verb, func, privilege=None):
-        self.validateFunc(func)
-        if verb in self.commands_per_priv[privilege]:
-            existing = self.commands_per_priv[privilege][verb]
-            self.commands_per_priv[privilege][verb] = func
-            return existing
-        raise KeyError("command not defined: " + verb)
-
-    def validateFunc(self, func):
-        if not hasattr(func, "is_tale_command_func"):
-            raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
-
-    def get(self, privileges):
-        result = self.commands_per_priv[None]  # always include the cmds for None
-        for priv in privileges:
-            if priv in self.commands_per_priv:
-                result.update(self.commands_per_priv[priv])
-        return result
-
-    def adjust_available_commands(self, story_config):
-        # disable commands flagged with the given game_mode
-        # disable soul verbs flagged with override
-        # mark non-soul commands
-        for commands in self.commands_per_priv.values():
-            for cmd, func in list(commands.items()):
-                disabled_mode = getattr(func, "disabled_in_mode", None)
-                if story_config.server_mode == disabled_mode:
-                    del commands[cmd]
-                elif getattr(func, "overrides_soul", False):
-                    del soul.VERBS[cmd]
-                if getattr(func, "no_soul_parse", False):
-                    self.no_soul_parsing.add(cmd)
 
 
 class Driver(object):
@@ -176,7 +60,6 @@ class Driver(object):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
-        self.mud_wsgi_server = None
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -266,6 +149,8 @@ class Driver(object):
             return
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
+        # add the grim reaper to Limbo
+        self.__limbo_grim_reaper()
         if self.config.server_mode == "if":
             # create the single player mode player automatically
             if args.gui:
@@ -283,10 +168,66 @@ class Driver(object):
             driver_thread.start()
             connection.singleplayer_mainloop()
         else:
-            # mud mode, driver runs as main thread
+            # mud mode: driver runs as main thread, wsgi webserver runs in background thread
             mud_context.player = mud_context.conn = None
+            from .tio.mud_browser_io import TaleMudWsgiApp
+            wsgi_server = TaleMudWsgiApp.create_app_server(self)
+            url = "http://%s:%d/tale/" % wsgi_server.server_address
+            print("\nPoint your browser to the following url: ", url, end="\n\n")
+            wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
+            wsgi_thread.daemon = True
+            wsgi_thread.start()
             self.__print_game_intro(None)
             self.__startup_main_loop()
+
+    def __limbo_grim_reaper(self):
+        class LimboReaper(npc.Monster):
+            """
+            The Grim Reaper hanging about in Limbo, to make sure no one stays there for too long.
+            """
+            def __init__(self):
+                super(LimboReaper, self).__init__(
+                    "reaper", "m", "elemental", "Grim Reaper",
+                    description="He wears black robes with a hood. Where a face should be, there is only nothingness. He is carrying a large omnious scythe that looks very, very sharp.",
+                    short_description="A figure clad in black, carrying a scythe, is also present.")
+                self.aliases = {"figure", "death"}
+                self.register_heartbeat()
+                self.candidates = {}    # player --> (first_seen, texts shown)
+
+            def heartbeat(self, ctx):
+                # consider all livings currently in Limbo or having their location set to Limbo
+                in_limbo = {living for living in self.location.livings if living is not self}
+                in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._Limbo})
+                now = time.time()
+                for candidate in in_limbo:
+                    if candidate not in self.candidates:
+                        self.candidates[candidate] = (now, 0)   # a new player first seen
+                for candidate in list(self.candidates):
+                    if candidate not in in_limbo:
+                        del self.candidates[candidate]   # player no longer present in limbo
+                        continue
+                    first_seen, shown = self.candidates[candidate]
+                    duration = now - first_seen
+                    # Depending on how long the candidate is being observed, show increasingly threateningly warnings,
+                    # and eventually killing the candidate (and closing their connection).
+                    if duration >= 10 and shown < 1:
+                        candidate.tell(self.title + " whispers: \"Greetings. Be aware that you must not linger here... Decide swiftly...\"")
+                        shown = 1
+                    elif duration >= 20 and shown < 2:
+                        candidate.tell(self.title + " looms over you and warns: \"You really cannot stay here much longer!\"")
+                        shown = 2
+                    elif duration >= 30 and shown < 3:
+                        candidate.tell(self.title + " menacingly raises his scythe!")
+                        shown = 3
+                    elif duration >= 31 and shown < 4:
+                        candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
+                        shown = 4
+                    elif duration >= 32:
+                        conn = ctx.driver.all_players[candidate.name]
+                        ctx.driver._disconnect_mud_player(conn)
+                    self.candidates[candidate] = (first_seen, shown)
+        base._Limbo.init_inventory([LimboReaper()])
+
 
     def __startup_main_loop(self):
         # continues the startup process and kick off the driver's main loop
@@ -302,11 +243,6 @@ class Driver(object):
                 while not self.__stop_mainloop:
                     self.__main_loop_singleplayer(mud_context.conn)
             else:
-                # spin up a multiuser web server
-                from .tio.mud_browser_io import TaleMudWsgiApp
-                self.mud_wsgi_server = TaleMudWsgiApp.create_app_server(self)
-                url = "http://%s:%d/tale/" % self.mud_wsgi_server.server_address
-                print("\nPoint your browser to the following url: ", url, end="\n\n")
                 while not self.__stop_mainloop:
                     self.__main_loop_multiplayer()
         except:
@@ -346,7 +282,7 @@ class Driver(object):
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
         connection.player = new_player
         from .tio.mud_browser_io import MudHttpIo
-        connection.io = MudHttpIo(connection, self.mud_wsgi_server)
+        connection.io = MudHttpIo(connection, None)
         self.all_players[new_player.name] = connection
         connection.clear_screen()
         self.__print_game_intro(connection)
@@ -502,13 +438,15 @@ class Driver(object):
             # check if player reached the end of the story
             loop_duration = time.time() - loop_start
             self.server_loop_durations.append(loop_duration)
-            if conn.player.story_complete:
-                self.__story_complete_output(conn)
-                self._stop_driver()
-            else:
-                conn.write_output()
+            if conn.player:
+                if conn.player.story_complete:
+                    self.__story_complete_output(conn)
+                    self._stop_driver()
+                else:
+                    conn.write_output()
 
     def __server_loop_process_player_input(self, conn):
+        print("PROCESS PLAYER INPUT", conn.player)  # XXX
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -555,10 +493,15 @@ class Driver(object):
                 conn.write_output()
                 conn.write_input_prompt()
 
-            # server tick goes on a timer, use the web server timeout to wait for a limited time
-            # wait_time = max(0.01, self.config.server_tick_time - loop_duration)
-            self.mud_wsgi_server.timeout = 0.1      # keep things responsive
-            self.mud_wsgi_server.handle_request()   # @todo should the wsgi server perhaps run in its own thread instead just as in IF mode?
+            # server tick goes on a timer
+            wait_time = max(0.01, self.config.server_tick_time - loop_duration)
+            while wait_time > 0:
+                if any(conn.player.input_is_available.is_set() for conn in self.all_players.values()):
+                    # there was player input, abort the wait loop and deal with it
+                    break
+                sub_wait = min(0.1, wait_time)  # keep things responsive
+                time.sleep(sub_wait)
+                wait_time -= sub_wait
 
             loop_start = time.time()
             for conn in self.all_players.values():
@@ -926,6 +869,127 @@ class StoryConfig(object):
     def copy_from(config):
         assert isinstance(config, StoryConfig)
         return StoryConfig(**vars(config))
+
+
+@total_ordering
+class Deferred(object):
+    """
+    Represents a callable action that will be invoked (with the given arguments) sometime in the future.
+    This object captures the action that must be invoked in a way that is serializable.
+    That means that you can't pass all types of callables, there are a few that are not
+    serializable (lambda's and scoped functions). They will trigger an error if you use those.
+    """
+    def __init__(self, due, action, vargs, kwargs):
+        assert due is None or isinstance(due, datetime.datetime)
+        assert callable(action)
+        self.due = due   # in game time
+        self.owner = getattr(action, "__self__", None)
+        if isinstance(self.owner, types.ModuleType):
+            # encode a module simply by its name
+            self.owner = "module:" + self.owner.__name__
+        if self.owner is None:
+            action_module = getattr(action, "__module__", None)
+            if action_module:
+                if hasattr(sys.modules[action_module], action.__name__):
+                    self.owner = "module:" + action_module
+                else:
+                    # a callable was passed that we cannot serialize.
+                    raise ValueError("cannot use scoped functions or lambdas as deferred: " + str(action))
+            else:
+                raise ValueError("cannot determine action's owner object: " + str(action))
+        self.action = action.__name__    # store name instead of object, to make this serializable
+        self.vargs = vargs
+        self.kwargs = kwargs
+
+    def __eq__(self, other):
+        return self.due == other.due and type(self.owner) == type(other.owner)\
+            and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
+
+    def __lt__(self, other):
+        return self.due < other.due   # deferreds must be sortable
+
+    def when_due(self, game_clock, realtime=False):
+        """
+        In what time is this deferred due to occur? (timedelta)
+        Normally it is in terms of game-time, but if you pass realtime=True,
+        you will get the real-time timedelta.
+        """
+        secs = (self.due - game_clock.clock).total_seconds()
+        if realtime:
+            secs = int(secs / game_clock.times_realtime)
+        return datetime.timedelta(seconds=secs)
+
+    def __call__(self, *args, **kwargs):
+        self.kwargs = self.kwargs or {}
+        if "ctx" in kwargs:
+            self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
+        if isinstance(self.action, util.basestring_type):
+            # deferred action is stored as the name of the function to call,
+            # so we need to obtain the actual function from the owner object.
+            if isinstance(self.owner, util.basestring_type):
+                if self.owner.startswith("module:"):
+                    # the owner refers to a module
+                    self.owner = sys.modules[self.owner[7:]]
+                else:
+                    raise RuntimeError("invalid owner specifier: " + self.owner)
+            func = getattr(self.owner, self.action)
+            func(*self.vargs, **self.kwargs)
+        else:
+            self.action(*self.vargs, **self.kwargs)
+        # our lifetime has ended, remove references:
+        del self.owner
+        del self.action
+        del self.kwargs
+        del self.vargs
+
+
+class Commands(object):
+    """
+    Some utility functions to manage the registered commands.
+    """
+    def __init__(self):
+        self.commands_per_priv = {None: {}}
+        self.no_soul_parsing = set()
+
+    def add(self, verb, func, privilege=None):
+        self.validateFunc(func)
+        for commands in self.commands_per_priv.values():
+            if verb in commands:
+                raise ValueError("command defined more than once: " + verb)
+        self.commands_per_priv.setdefault(privilege, {})[verb] = func
+
+    def override(self, verb, func, privilege=None):
+        self.validateFunc(func)
+        if verb in self.commands_per_priv[privilege]:
+            existing = self.commands_per_priv[privilege][verb]
+            self.commands_per_priv[privilege][verb] = func
+            return existing
+        raise KeyError("command not defined: " + verb)
+
+    def validateFunc(self, func):
+        if not hasattr(func, "is_tale_command_func"):
+            raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
+
+    def get(self, privileges):
+        result = self.commands_per_priv[None]  # always include the cmds for None
+        for priv in privileges:
+            if priv in self.commands_per_priv:
+                result.update(self.commands_per_priv[priv])
+        return result
+
+    def adjust_available_commands(self, story_config):
+        # disable commands flagged with the given game_mode
+        # disable soul verbs flagged with override
+        # mark non-soul commands
+        for commands in self.commands_per_priv.values():
+            for cmd, func in list(commands.items()):
+                disabled_mode = getattr(func, "disabled_in_mode", None)
+                if story_config.server_mode == disabled_mode:
+                    del commands[cmd]
+                elif getattr(func, "overrides_soul", False):
+                    del soul.VERBS[cmd]
+                if getattr(func, "no_soul_parse", False):
+                    self.no_soul_parsing.add(cmd)
 
 
 if __name__ == "__main__":

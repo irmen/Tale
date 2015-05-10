@@ -16,18 +16,12 @@ function poll_text() {
         var DONE = this.DONE || 4;
         if (this.readyState === DONE) {
             if(this.status>=300) {
-                txtdiv.innerHTML += "<p><em>Server error: "+this.responseText+"</em><br><em>Perhaps refreshing the page might help.</em></p>"
+                txtdiv.innerHTML += "<p class='server-error'>Server error: "+this.responseText+"<br>Perhaps refreshing the page might help. If it doesn't, quit or close your browser and try with a new window.</p>";
                 txtdiv.scrollTop = txtdiv.scrollHeight;
                 clearInterval(document.text_refresher);
                 return;
             }
             var json = JSON.parse(this.responseText);
-            if(json["text"]) {
-                document.getElementById("player-location").innerHTML = json["location"];
-                document.getElementById("player-turns").innerHTML = json["turns"];
-                txtdiv.innerHTML += json["text"];
-                txtdiv.scrollTop = txtdiv.scrollHeight;
-            }
             var special = json["special"];
             if(special) {
                 if(special.indexOf("clear")>=0) {
@@ -35,10 +29,16 @@ function poll_text() {
                     txtdiv.scrollTop = 0;
                 }
             }
+            if(json["text"]) {
+                document.getElementById("player-location").innerHTML = json["location"];
+                document.getElementById("player-turns").innerHTML = json["turns"];
+                txtdiv.innerHTML += json["text"];
+                txtdiv.scrollTop = txtdiv.scrollHeight;
+            }
         }
     }
     ajax.onerror = function(error) {
-        txtdiv.innerHTML="<strong>Connection error.</strong><br><br><p>Close the browser or refresh the page.</p>";
+        txtdiv.innerHTML="<p class='server-error'>Connection error.<br><br>Close the browser or refresh the page.</p>";
         clearInterval(document.text_refresher);
         var cmd_input = document.getElementById("input-cmd");
         cmd_input.disabled=true;

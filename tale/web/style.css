@@ -88,3 +88,8 @@ p, pre {
     display: block;
 }
 
+.server-error {
+    color: white;
+    background-color: maroon;
+    font-style: italic;
+}

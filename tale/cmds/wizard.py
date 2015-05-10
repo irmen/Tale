@@ -218,7 +218,7 @@ def do_teleport(player, parsed, ctx):
     if not parsed.args:
         raise ActionRefused("Teleport what to where?")
     args = parsed.args
-    teleport_self = parsed.verb == "teleport_to"
+    teleport_self = parsed.verb == "!teleport_to"
     if args[0].startswith("."):
         # teleport the wizard to a location somewhere in a module path
         path, objectname = args[0].rsplit(".", 1)

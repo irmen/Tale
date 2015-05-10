@@ -266,6 +266,8 @@ class PlayerConnection(object):
 
     def write_output(self):
         """print any buffered output to the player's screen"""
+        if not self.io:
+            return
         output = self.get_output()
         if output:
             # (re)set a few io parameters because they can be changed dynamically

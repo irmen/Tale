@@ -56,7 +56,6 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     def create_app_server(cls, driver):
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
         wsgi_server = make_server("127.0.0.1", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
-        wsgi_server.timeout = 0.1
         return wsgi_server
 
     def wsgi_handle_story(self, environ, parameters, start_response):
@@ -67,6 +66,15 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             session["player_connection"] = conn
         return super(TaleMudWsgiApp, self).wsgi_handle_story(environ, parameters, start_response)
 
+    def wsgi_handle_text(self, environ, parameters, start_response):
+        session = environ["wsgi.session"]
+        conn = session.get("player_connection")
+        if not conn:
+            return self.wsgi_internal_server_error(start_response, "not logged in")
+        if not conn or not conn.player or not conn.io:
+            raise SessionMiddleware.CloseSession("no longer a valid connection")
+        return super(TaleMudWsgiApp, self).wsgi_handle_text(environ, parameters, start_response)
+
     def wsgi_handle_quit(self, environ, parameters, start_response):
         # Quit/logged out page. For multi player, get rid of the player connection.
         # @todo auto clean up session and connection when player disconnected (= hasn't done a request in X time)
@@ -74,7 +82,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         conn = session.get("player_connection")
         if not conn:
             return self.wsgi_internal_server_error(start_response, "not logged in")
-        self.driver._disconnect_mud_player(conn)
+        if conn.player:
+            self.driver._disconnect_mud_player(conn)
         raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>")
 
     def wsgi_handle_about(self, environ, parameters, start_response):
