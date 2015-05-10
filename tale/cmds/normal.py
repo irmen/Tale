@@ -1419,6 +1419,7 @@ def do_license(player, parsed, ctx):
     t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
     t("-- -- -- --", end=True)
 
+
 @cmd("config")
 def do_config(player, parsed, ctx):
     """Show or change player configuration parameters."""
@@ -1512,7 +1513,7 @@ def do_teststyles(player, parsed, ctx):
 
 def input_confirm(conn, prompt):
     while True:
-        answer = conn.input_direct(prompt)
+        answer = conn.input_direct(prompt)   # blocks
         try:
             return lang.yesno(answer)
         except ValueError:

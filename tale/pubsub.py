@@ -8,7 +8,7 @@ Uses weakrefs to not needlessly lock subscribers/topics in memory.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 
 
-Currently defined pubsub topics used by the base library:
+Currently defined pubsub topics used by the Tale driver:
 
   "driver-pending-actions"
       Events are callables to be executed in the server tick loop.
@@ -18,6 +18,10 @@ Currently defined pubsub topics used by the base library:
   "driver-pending-tells"
       Tells (messages) that have to be delivered to actors, after any
       other messages have been processed.
+      You can subscribe but only the driver may execute the events.
+
+  "driver-async-dialogs"
+      actions that kick off new async dialogs (generators).
       You can subscribe but only the driver may execute the events.
 
   ("wiretap-location", <location name>)

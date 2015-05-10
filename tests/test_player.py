@@ -539,6 +539,11 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertFalse(pn.wizard)
         pn = b.create_default_wizard()
         self.assertTrue(pn.wizard)
+        conn = PlayerConnection()
+        b = CharacterBuilder(conn)
+        builder = b.build_async()
+        why, what = next(builder)
+        self.assertEqual("input", why)
 
     def test_apply_to(self):
         b = CharacterBuilder(None)

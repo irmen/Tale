@@ -36,58 +36,64 @@ class PlayerNaming(object):
 
 
 class CharacterBuilder(object):
-    def __init__(self, conn):
+    def __init__(self, conn, continue_dialog=None):
         self.conn = conn
+        self.continue_dialog = continue_dialog
 
-    def build(self):
+    def build_async(self):
         while True:
-            choice = self.conn.input_direct("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?")
+            choice = yield "input", "Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?"
             if choice == "w":
-                return self.create_default_wizard()
+                naming = self.create_default_wizard()
+                if self.continue_dialog:
+                    return self.continue_dialog(naming)
+                return naming
             elif choice == "p":
-                return self.create_default_player()
+                naming = self.create_default_player()
+                if self.continue_dialog:
+                    return self.continue_dialog(naming)
+                return naming
             elif choice == "c":
-                return self.create_player_from_info()
+                naming = PlayerNaming()
+                while True:
+                    name = yield "input", "Name?"
+                    message = CharacterBuilder.validate_name(name)
+                    if not message:
+                        naming.name = name
+                        break
+                    self.conn.output(message)
+                while True:
+                    naming.gender = yield "input", "Gender (m)ale/(f)emale/(n)euter ?"
+                    if naming.gender in ('m', 'f', 'n'):
+                        break
+                    self.conn.output("That is not a valid answer.")
+                self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+                while True:
+                    naming.race = yield "input", "Player race?"
+                    if naming.race in races.player_races:
+                        break
+                    self.conn.output("That is not a valid answer.")
+                while True:
+                    answer = yield "input", "Wizard y/n?"
+                    try:
+                        naming.wizard = lang.yesno(answer)
+                        break
+                    except ValueError:
+                        self.conn.output("That is not a valid answer.")
+                naming.description = "A regular person."
+                if naming.wizard:
+                    naming.title = "arch wizard " + lang.capital(naming.name)
+                if self.continue_dialog:
+                    return self.continue_dialog(naming)
+                return naming
             else:
                 self.conn.output("That is not a valid answer.")
-
-    def create_player_from_info(self):
-        naming = PlayerNaming()
-        while True:
-            name = self.conn.input_direct("Name? ")
-            message = CharacterBuilder.validate_name(name)
-            if not message:
-                naming.name = name
-                break
-            self.conn.output(message)
-        while True:
-            naming.gender = self.conn.input_direct("Gender (m)ale/(f)emale/(n)euter ?")
-            if naming.gender in ('m', 'f', 'n'):
-                break
-            self.conn.output("That is not a valid answer.")
-        self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
-        while True:
-            naming.race = self.conn.input_direct("Player race?")
-            if naming.race in races.player_races:
-                break
-            self.conn.output("That is not a valid answer.")
-        while True:
-            answer = self.conn.input_direct("Wizard y/n?")
-            try:
-                naming.wizard = lang.yesno(answer)
-                break
-            except ValueError:
-                self.conn.output("That is not a valid answer.")
-        naming.description = "A regular person."
-        if naming.wizard:
-            naming.title = "arch wizard " + lang.capital(naming.name)
-        return naming
 
     @staticmethod
     def validate_name(name):
         if re.match("[a-zA-Z]{3,}$", name):
             return None
-        return "Name needs to be 3 or more letters (a-z, A-Z, no spaces). Please enter another name."
+        return "Name needs to be 3 or more letters (a-z, A-Z, no spaces)."
 
     def create_default_wizard(self):
         # @todo these hardcoded player profiles eventually need to go

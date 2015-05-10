@@ -465,7 +465,7 @@ def do_events(player, parsed, ctx):
 
 
 @wizcmd("pubsub")
-def do_events(player, parsed, ctx):
+def do_pubsub(player, parsed, ctx):
     """Dump pending pubsub messages."""
     pending = pubsub.pending()
     player.tell("<bright>Pending pubsub messages overview.</>", "Pubsub topics (%d):" % len(pending))
@@ -508,7 +508,7 @@ def do_force(player, parsed, ctx):
 
 def input_confirm(conn, prompt):
     while True:
-        answer = conn.input_direct(prompt)
+        answer = conn.input_direct(prompt)   # blocks
         try:
             return lang.yesno(answer)
         except ValueError:

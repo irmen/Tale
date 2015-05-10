@@ -16,6 +16,7 @@ import os
 import heapq
 import argparse
 import pickle
+import inspect
 import threading
 import types
 import traceback
@@ -24,6 +25,11 @@ import distutils.version
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
+
+
+topic_pending_actions = pubsub.topic("driver-pending-actions")
+topic_pending_tells = pubsub.topic("driver-pending-tells")
+topic_async_dialogs = pubsub.topic("driver-async-dialogs")
 
 
 class Driver(pubsub.Listener):
@@ -50,8 +56,9 @@ class Driver(pubsub.Listener):
         self.game_clock = None
         self.__stop_mainloop = True
         self.waiting_for_input = {}
-        pubsub.topic("driver-pending-actions").subscribe(self)
-        pubsub.topic("driver-pending-tells").subscribe(self)
+        topic_pending_actions.subscribe(self)
+        topic_pending_tells.subscribe(self)
+        topic_async_dialogs.subscribe(self)
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -153,6 +160,8 @@ class Driver(pubsub.Listener):
             connection = self._connect_if_player(player_io, args.delay)
             mud_context.player = connection.player
             mud_context.conn = connection
+            # create the login dialog
+            topic_async_dialogs.send((connection, self.__login_dialog_if(connection)))
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
             driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
             driver_thread.daemon = True
@@ -179,9 +188,6 @@ class Driver(pubsub.Listener):
                 # single player interactive fiction
                 while not mud_context.conn:
                     time.sleep(0.02)
-                self.__create_if_player(mud_context.conn)
-                mud_context.player.look(short=False)   # force a 'look' command to get our bearings
-                mud_context.conn.write_output()
                 while not self.__stop_mainloop:
                     self.__main_loop_singleplayer(mud_context.conn)
             else:
@@ -229,9 +235,8 @@ class Driver(pubsub.Listener):
         connection.clear_screen()
         self.__print_game_intro(connection)
         connection.output("\n")
-        login_dialog = self.__mud_login_dialog(connection)
-        why, what = next(login_dialog)   # run to the first yield
-        self.__process_dialog(connection, login_dialog, why, what)
+        # create the login dialog
+        topic_async_dialogs.send((connection, self.__login_dialog_mud(connection)))
         return connection
 
     def _disconnect_mud_player(self, conn):
@@ -241,7 +246,8 @@ class Driver(pubsub.Listener):
         conn.destroy()
         del self.all_players[name]
 
-    def __mud_login_dialog(self, conn):
+    def __login_dialog_mud(self, conn):
+        assert self.config.server_mode == "mud"
         conn.write_output()
         conn.output("<bright>Welcome. We have to know your name before you can continue.</>")
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
@@ -294,16 +300,20 @@ class Driver(pubsub.Listener):
         mud_context.player = None
         mud_context.conn = None
 
-    def __process_dialog(self, conn, dialog, why, what):
-        """process async dialog result"""
-        if why == "input":
-            if what:
-                if not what.endswith(" "):
-                    what += " "
-                conn.output_no_newline(what)  # the input prompt
-            self.waiting_for_input[conn] = dialog
+    def __process_dialog(self, conn, dialog, message):
+        try:
+            why, what = dialog.send(message)
+        except StopIteration:
+            pass
         else:
-            raise ValueError("invalid generator wait reason: " + why)
+            if why == "input":
+                if what:
+                    if not what.endswith(" "):
+                        what += " "
+                    conn.output_no_newline(what)  # the input prompt
+                self.waiting_for_input[conn] = dialog
+            else:
+                raise ValueError("invalid generator wait reason: " + why)
 
     def __print_game_intro(self, player_connection):
         try:
@@ -345,8 +355,8 @@ class Driver(pubsub.Listener):
         self.all_players[name_info.name] = conn
         name_info.apply_to(player)
 
-    def __create_if_player(self, conn):
-        # Interactive fiction (singleplayer): create a player.
+    def __login_dialog_if(self, conn):
+        # Interactive fiction (singleplayer): create a player. This is a generator function (async input).
         # Initialize it directly from the story's configuration, load a saved game,
         # or let the user create a new player manually.
         assert self.config.server_mode == "if"
@@ -356,7 +366,7 @@ class Driver(pubsub.Listener):
         else:
             player.tell("\n")
             while True:
-                answer = conn.input_direct("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?")
+                answer = yield "input", "Do you want to load a saved game ('<bright>n</>' will start a new game)?"
                 try:
                     load_saved_game = lang.yesno(answer)
                     break
@@ -372,24 +382,39 @@ class Driver(pubsub.Listener):
                 player.tell("\n")
             else:
                 load_saved_game = False
-        if not load_saved_game:
-            if self.config.player_name:
-                player.init_names(self.config.player_name, None, None, None)
-                player.init_race(self.config.player_race, self.config.player_gender)
-            else:
-                # no player config: create a character with the builder
-                name_info = charbuilder.CharacterBuilder(conn).build()
-                self.__rename_player(player, name_info)
-            player.tell("\n")
-            # move the player to the starting location
-            if "wizard" in player.privileges:
-                player.move(self.config.startlocation_wizard)
-            else:
-                player.move(self.config.startlocation_player)
-            player.tell("\n")
-            self.story.welcome(player)
-            player.tell("\n")
+
+        if load_saved_game:
+            self.story.init_player(player)
+            player.look(short=False)   # force a 'look' command to get our bearings
+            return
+
+        if self.config.player_name:
+            # story config provides a name etc.
+            player.init_names(self.config.player_name, None, None, None)
+            player.init_race(self.config.player_race, self.config.player_gender)
+            self.__login_dialog_if_2(player, None)   # finish the login dialog
+        else:
+            # no player config: create a character with the builder
+            builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(player, name_info))
+            topic_async_dialogs.send((conn, builder.build_async()))
+
+    def __login_dialog_if_2(self, player, name_info=None):
+        # Second part of the if login dialog, this has been split to be able
+        # to put in the character builder dialog that continues with this one.
+        if name_info:
+            # player has been created with the character builder, apply this
+            self.__rename_player(player, name_info)
+        player.tell("\n")
+        # move the player to the starting location:
+        if "wizard" in player.privileges:
+            player.move(self.config.startlocation_wizard)
+        else:
+            player.move(self.config.startlocation_player)
+        player.tell("\n")
+        self.story.welcome(player)
+        player.tell("\n")
         self.story.init_player(player)
+        player.look(short=False)  # force a 'look' command to get our bearings
 
     def __main_loop_singleplayer(self, conn):
         """
@@ -400,7 +425,9 @@ class Driver(pubsub.Listener):
         loop_duration = 0
         previous_server_tick = 0
         while not self.__stop_mainloop:
-            conn.write_input_prompt()
+            pubsub.sync("driver-async-dialogs")
+            if conn not in self.waiting_for_input:
+                conn.write_input_prompt()
             if self.config.server_tick_method == "command":
                 # wait indefinitely for next player input
                 conn.player.input_is_available.wait()   # blocking wait until playered entered something
@@ -414,7 +441,13 @@ class Driver(pubsub.Listener):
             if has_input:
                 conn.need_new_input_prompt = True
                 try:
-                    self.__server_loop_process_player_input(conn)
+                    if conn in self.waiting_for_input:
+                        # this connection is processing direct input, rather than regular commands
+                        dialog = self.waiting_for_input.pop(conn)
+                        self.__process_dialog(conn, dialog, conn.player.get_pending_input()[0])
+                    else:
+                        # normal command processing
+                        self.__server_loop_process_player_input(conn)
                 except (KeyboardInterrupt, EOFError):
                     continue
                 except errors.SessionExit:
@@ -424,7 +457,7 @@ class Driver(pubsub.Listener):
                 except Exception:
                     txt = "* internal error:\n" + traceback.format_exc()
                     conn.player.tell(txt, format=False)
-            # deliver late messages
+            # sync pubsub events
             pubsub.sync("driver-pending-tells")
             # server TICK
             now = time.time()
@@ -440,7 +473,11 @@ class Driver(pubsub.Listener):
             self.server_loop_durations.append(loop_duration)
             if conn.player:
                 if conn.player.story_complete:
-                    self.__story_complete_output(conn)
+                    conn.player.tell("\n")
+                    self.story.completion(conn.player)
+                    conn.player.tell("\n")
+                    conn.input_direct("\nPress enter to continue. ")  # blocks
+                    conn.player.tell("\n")
                     self._stop_driver()
                 else:
                     conn.write_output()
@@ -476,9 +513,11 @@ class Driver(pubsub.Listener):
         loop_duration = 0
         previous_server_tick = 0
         while not self.__stop_mainloop:
+            pubsub.sync("driver-async-dialogs")
             for conn in self.all_players.values():
                 conn.write_output()
-                conn.write_input_prompt()
+                if conn not in self.waiting_for_input:
+                    conn.write_input_prompt()
 
             # server tick goes on a timer
             wait_time = max(0.01, self.config.server_tick_time - loop_duration)
@@ -497,13 +536,8 @@ class Driver(pubsub.Listener):
                     try:
                         if conn in self.waiting_for_input:
                             # this connection is processing direct input, rather than regular commands
-                            dialog = self.waiting_for_input[conn]
-                            try:
-                                why, what = dialog.send(conn.player.get_pending_input()[0])
-                            except StopIteration:
-                                del self.waiting_for_input[conn]
-                            else:
-                                self.__process_dialog(conn, dialog, why, what)
+                            dialog = self.waiting_for_input.pop(conn)
+                            self.__process_dialog(conn, dialog, conn.player.get_pending_input()[0])
                         else:
                             # normal command processing
                             self.__server_loop_process_player_input(conn)
@@ -514,7 +548,6 @@ class Driver(pubsub.Listener):
                     except Exception:
                         txt = "* internal error:\n" + traceback.format_exc()
                         conn.player.tell(txt, format=False)
-            # deliver late messages
             pubsub.sync("driver-pending-tells")
             # server TICK
             now = time.time()
@@ -562,13 +595,6 @@ class Driver(pubsub.Listener):
         print(traceback.format_exc(), file=sys.stderr)
         print("(continuing...)", file=sys.stderr)
 
-    def __story_complete_output(self, conn):
-        conn.player.tell("\n")
-        self.story.completion(conn.player)
-        conn.player.tell("\n")
-        conn.input_direct("\nPress enter to continue. ")
-        conn.player.tell("\n")
-
     def __process_player_command(self, cmd, conn):
         if not cmd:
             return
@@ -614,7 +640,7 @@ class Driver(pubsub.Listener):
                 if parsed.verb in custom_verbs:
                     handled = player.location.handle_verb(parsed, player)
                     if handled:
-                        pubsub.topic("driver-pending-actions").send(lambda: player.location.notify_action(parsed, player))
+                        topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -625,7 +651,7 @@ class Driver(pubsub.Listener):
                         ctx = util.Context(self, self.game_clock, self.config, conn)
                         func(player, parsed, ctx)
                         if func.enable_notify_action:
-                            pubsub.topic("driver-pending-actions").send(lambda: player.location.notify_action(parsed, player))
+                            topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb:
@@ -813,6 +839,12 @@ class Driver(pubsub.Listener):
         elif topicname == "driver-pending-tells":
             assert callable(event), "the driver-pending-tells events should be callables"
             event()
+        elif topicname == "driver-async-dialogs":
+            assert type(event) is tuple
+            conn, dialog = event
+            assert type(conn) is player.PlayerConnection
+            assert inspect.isgenerator(dialog)
+            self.__process_dialog(conn, dialog, None)
         else:
             raise ValueError("unknown topic: " + topicname)
 

@@ -57,7 +57,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        mud_context.conn.input_direct("\nPress enter to continue. ")
+        mud_context.conn.input_direct("\nPress enter to continue. ")  # blocks
         player.tell("\n")
 
     def welcome_savegame(self, player):
@@ -66,7 +66,7 @@ class Story(object):
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        mud_context.conn.input_direct("\nPress enter to continue where you were before. ")
+        mud_context.conn.input_direct("\nPress enter to continue where you were before. ")    # blocks
         player.tell("\n")
 
     def goodbye(self, player):
