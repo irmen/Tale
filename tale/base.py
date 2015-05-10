@@ -66,14 +66,6 @@ class MudObject(object):
     gender = "n"
 
     @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-
-    @property
     def title(self):
         return self._title
 
@@ -98,7 +90,7 @@ class MudObject(object):
         self._short_description = value
 
     def __init__(self, name, title=None, description=None, short_description=None):
-        self._name = self._description = self._title = self._short_description = None
+        self.name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
         self.aliases = set()
         self.verbs = {}   # any custom verbs that need to be recognised (verb->docstring mapping. Verb handling is done via handle_verb() callbacks)
@@ -116,7 +108,7 @@ class MudObject(object):
 
     def init_names(self, name, title, description, short_description):
         """(re)set the name and description attributes"""
-        self._name = name.lower()
+        self.name = name.lower()
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
         self._title = title or name
