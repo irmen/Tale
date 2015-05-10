@@ -40,7 +40,7 @@ def pending(topic=None):
     """Return a dictionary from topic name to list of pending events"""
     with __topic_lock:
         names = [topic] if topic else all_topics.keys()
-        return {name: all_topics[name].events.copy() for name in names}
+        return {name: list(all_topics[name].events) for name in names}
 
 
 def unsubscribe_all(subscriber):
