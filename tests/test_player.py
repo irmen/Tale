@@ -449,7 +449,7 @@ class TestPlayerConnection(unittest.TestCase):
             player.store_input_line("input text\n")
             x = pc.input_direct("inputprompt")
             self.assertEqual("input text", x)
-            self.assertEqual("  first this text\ninputprompt", sys.stdout.getvalue())  # should have outputted the buffered text
+            self.assertEqual("  first this text\ninputprompt ", sys.stdout.getvalue())  # should have outputted the buffered text
         finally:
             sys.stdout = old_stdout
 

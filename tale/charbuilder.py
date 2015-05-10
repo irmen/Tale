@@ -40,13 +40,16 @@ class CharacterBuilder(object):
         self.conn = conn
 
     def build(self):
-        choice = self.conn.input_choice("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?", ["w", "p", "c"])
-        if choice == "w":
-            return self.create_default_wizard()
-        elif choice == "p":
-            return self.create_default_player()
-        elif choice == "c":
-            return self.create_player_from_info()
+        while True:
+            choice = self.conn.input_direct("Create default (<bright>w</>)izard, default (<bright>p</>)layer, (<bright>c</>)ustom player?")
+            if choice == "w":
+                return self.create_default_wizard()
+            elif choice == "p":
+                return self.create_default_player()
+            elif choice == "c":
+                return self.create_player_from_info()
+            else:
+                self.conn.output("That is not a valid answer.")
 
     def create_player_from_info(self):
         naming = PlayerNaming()
@@ -57,10 +60,24 @@ class CharacterBuilder(object):
                 naming.name = name
                 break
             self.conn.output(message)
-        naming.gender = self.conn.input_choice("Gender {choices}? ", ["m", "f", "n"])
+        while True:
+            naming.gender = self.conn.input_direct("Gender (m)ale/(f)emale/(n)euter ?")
+            if naming.gender in ('m', 'f', 'n'):
+                break
+            self.conn.output("That is not a valid answer.")
         self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
-        naming.race = self.conn.input_choice("Player race? ", races.player_races)
-        naming.wizard = self.conn.input_confirm("Wizard y/n? ")
+        while True:
+            naming.race = self.conn.input_direct("Player race?")
+            if naming.race in races.player_races:
+                break
+            self.conn.output("That is not a valid answer.")
+        while True:
+            answer = self.conn.input_direct("Wizard y/n?")
+            try:
+                naming.wizard = lang.yesno(answer)
+                break
+            except ValueError:
+                self.conn.output("That is not a valid answer.")
         naming.description = "A regular person."
         if naming.wizard:
             naming.title = "arch wizard " + lang.capital(naming.name)

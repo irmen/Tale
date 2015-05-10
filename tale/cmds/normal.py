@@ -146,7 +146,7 @@ def do_drop(player, parsed, ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            if ctx.conn.input_confirm("Are you sure you want to drop all you are carrying?"):
+            if input_confirm(ctx.conn, "Are you sure you want to drop all you are carrying?"):
                 drop_stuff(player.inventory, player)
     else:
         # drop a single item from the inventory (or a container in the inventory)
@@ -217,7 +217,7 @@ def do_put(player, parsed, ctx):
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
         if what:
-            if not ctx.conn.input_confirm("Are you sure you want to put everything away?"):
+            if not input_confirm(ctx.conn, "Are you sure you want to put everything away?"):
                 return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -469,7 +469,7 @@ def do_give(player, parsed, ctx):
             raise ParseError("Give all to who?")
         what = player.inventory
         if what:
-            if not ctx.conn.input_confirm("Are you sure you want to give it all away?"):
+            if not input_confirm(ctx.conn, "Are you sure you want to give it all away?"):
                 return
         if parsed.args[0] == "all":
             # give all [to] living
@@ -536,7 +536,7 @@ def give_money(player, amount, recipient, driver):
         player.tell("You don't have that amount of wealth.")
     else:
         recipient.allow_give_money(player, amount)
-        if ctx.conn.input_confirm("Are you sure you want to give %s away?" % driver.moneyfmt.display(amount)):
+        if input_confirm(ctx.conn, "Are you sure you want to give %s away?" % driver.moneyfmt.display(amount)):
             player.money -= amount
             recipient.money += amount
             player.tell("You gave <living>%s</> %s." % (recipient.title, driver.moneyfmt.display(amount)))
@@ -830,9 +830,9 @@ def do_wait(player, parsed, ctx):
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""
-    if ctx.conn.input_confirm("Are you sure you want to quit?"):
+    if input_confirm(ctx.conn, "Are you sure you want to quit?"):
         if ctx.config.server_mode != "mud" and ctx.config.savegames_enabled:
-            if ctx.conn.input_confirm("Would you like to save your progress?"):
+            if input_confirm(ctx.conn, "Would you like to save your progress?"):
                 do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()
@@ -1508,3 +1508,12 @@ def do_teststyles(player, parsed, ctx):
     for style, example in style_tests:
         player.tell("  %s -- %s" % (style, example), end=True)
     player.tell("\n")
+
+
+def input_confirm(conn, prompt):
+    while True:
+        answer = conn.input_direct(prompt)
+        try:
+            return lang.yesno(answer)
+        except ValueError:
+            conn.output("That is not a valid answer.")

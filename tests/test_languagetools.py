@@ -123,6 +123,20 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("wolves", lang.pluralize("wolf"))
         self.assertEqual("ladies", lang.pluralize("lady"))
 
+    def test_yesno(self):
+        self.assertTrue(lang.yesno("y"))
+        self.assertTrue(lang.yesno("Yes"))
+        self.assertTrue(lang.yesno("SURE"))
+        self.assertFalse(lang.yesno("n"))
+        self.assertFalse(lang.yesno("NO"))
+        self.assertFalse(lang.yesno("Hell No"))
+        with self.assertRaises(ValueError):
+            self.assertTrue(lang.yesno(None))
+        with self.assertRaises(ValueError):
+            self.assertTrue(lang.yesno(""))
+        with self.assertRaises(ValueError):
+            self.assertTrue(lang.yesno("i dunno"))
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

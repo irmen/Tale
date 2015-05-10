@@ -130,7 +130,7 @@ def do_destroy(player, parsed, ctx):
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not ctx.conn.input_confirm("Are you sure you want to destroy %s?" % victim.title):
+        if not input_confirm(ctx.conn, "Are you sure you want to destroy %s?" % victim.title):
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
@@ -159,7 +159,7 @@ def do_clean(player, parsed, ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if ctx.conn.input_confirm("Are you sure you want to clean out %s?" % victim.title):
+        if input_confirm(ctx.conn, "Are you sure you want to clean out %s?" % victim.title):
             p("Cleaning inventory of", victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
@@ -504,3 +504,12 @@ def do_force(player, parsed, ctx):
         # re-parse and execute the actual command for the target, from the viewpoint of the current player!
         target_parsed = player.parse(cmd)
         pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))
+
+
+def input_confirm(conn, prompt):
+    while True:
+        answer = conn.input_direct(prompt)
+        try:
+            return lang.yesno(answer)
+        except ValueError:
+            conn.output("That is not a valid answer.")

@@ -284,6 +284,10 @@ class PlayerConnection(object):
         """directly writes the given text to the player's screen, without buffering and formatting/wrapping"""
         self.io.output(*lines)
 
+    def output_no_newline(self, line):
+        """similar to output() but writes a single line, without newline at the end"""
+        self.io.output_no_newline(line)
+
     def input_direct(self, prompt=None):
         """
         Writes any pending output and prompts for input directly. Returns stripped result.
@@ -292,42 +296,12 @@ class PlayerConnection(object):
         """
         assert self.io.supports_blocking_input
         self.write_output()
-        self.io.output_no_newline(prompt)
+        if not prompt.endswith(" "):
+            prompt += " "
+        self.output_no_newline(prompt)
         self.player.input_is_available.wait()   # blocking wait
         self.need_new_input_prompt = True
         return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
-
-    def input_confirm(self, question):
-        """
-        Simple wrapper around input_direct() to ask the player for a yes/no confirmation. Returns True or False.
-        This call is *blocking* and will not work in a multi user situation.
-        """
-        if not question.endswith(" "):
-            question += " "
-        while True:
-            reply = self.input_direct(question)
-            if reply in ("y", "yes", "sure", "yep", "yeah"):
-                return True
-            if reply in ("n", "no", "nope"):
-                return False
-            if reply:
-                self.output("That is not a valid answer.")
-
-    def input_choice(self, question, choices):
-        """
-        Simple wrapper around input_direct() to ask the player for a choice from a set of options.
-        You can optionally use the format string '{choices}' to get the list of choices in the question text.
-        This call is *blocking* and will not work in a multi user situation.
-        """
-        question = question.format(choices="/".join(choices))
-        if not question.endswith(" "):
-            question += " "
-        while True:
-            reply = self.input_direct(question)
-            if reply in choices:
-                return reply
-            if reply:
-                self.output("That is not a valid answer.")
 
     def write_input_prompt(self):
         if self.need_new_input_prompt:

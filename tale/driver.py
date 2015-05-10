@@ -21,7 +21,7 @@ import types
 import traceback
 import appdirs
 import distutils.version
-from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder
+from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
@@ -256,7 +256,7 @@ class Driver(pubsub.Listener):
                 conn.output(message)
         while True:
             gender = yield "input", "What is your gender (m/f/n)?"
-            if gender in "mfn":
+            if gender in ('m', 'f', 'n'):
                 break
             else:
                 conn.output("Please type (m)ale, (f)emale or (n)euter.")
@@ -274,9 +274,11 @@ class Driver(pubsub.Listener):
             conn.player.move(self.config.startlocation_player)
         self.__print_game_intro(conn)
         self.story.welcome(conn.player)
+        self.story.init_player(conn.player)
         conn.output("\n")
         self.show_motd(conn.player, True)
         conn.player.look(short=False)  # force a 'look' command to get our bearings
+        # after this, the generator (dialog) ends and we drop down into the regular command loop
 
     def _stop_driver(self):
         """
@@ -296,7 +298,9 @@ class Driver(pubsub.Listener):
         """process async dialog result"""
         if why == "input":
             if what:
-                conn.output(what)  # the input prompt
+                if not what.endswith(" "):
+                    what += " "
+                conn.output_no_newline(what)  # the input prompt
             self.waiting_for_input[conn] = dialog
         else:
             raise ValueError("invalid generator wait reason: " + why)
@@ -351,7 +355,13 @@ class Driver(pubsub.Listener):
             load_saved_game = False
         else:
             player.tell("\n")
-            load_saved_game = conn.input_confirm("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?")
+            while True:
+                answer = conn.input_direct("\nDo you want to load a saved game ('<bright>n</>' will start a new game)?")
+                try:
+                    load_saved_game = lang.yesno(answer)
+                    break
+                except ValueError:
+                    conn.output("That is not a valid answer.")
         player.tell("\n")
         if load_saved_game:
             loaded_player = self.__load_saved_game()

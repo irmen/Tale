@@ -203,3 +203,12 @@ def pluralize(word, amount=2):
     if word.endswith("o") and len(word) > 1 and word[-2] not in "aeiouy":
         return word + "es"
     return word + "s"
+
+
+def yesno(value):
+    value = value.lower() if value else ""
+    if value in {"y", "yes", "sure", "yep", "yeah", "yessir", "sure thing"}:
+        return True
+    if value in {"n", "no", "nope", "no way", "hell no"}:
+        return False
+    raise ValueError("Not a valid yes or no")
