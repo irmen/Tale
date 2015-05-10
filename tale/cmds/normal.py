@@ -1499,10 +1499,12 @@ def do_teststyles(player, parsed, ctx):
         ("player", "<player>This is PLAYER.</>"),
         ("item", "<item>This is ITEM.</>"),
         ("exit", "<exit>This is EXIT.</>"),
+        ("location", "<location>This is LOCATION.</>"),
         ("(combined)", "<ul><bright>Bright underlined. <rev>(and reverse video even)</>")
     ]
     player.tell("Text style tests. Depending on the capabilities of the output device,")
     player.tell("you should see various text formatting styles being used.")
     player.tell("Note that some styles are not widely supported (italic, underlined).", end=True)
     for style, example in style_tests:
-        player.tell("  %-15s %s" % (style, example), format=False)
+        player.tell("  %s -- %s" % (style, example), end=True)
+    player.tell("\n")

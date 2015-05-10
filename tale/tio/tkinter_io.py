@@ -86,7 +86,7 @@ class TkinterIo(iobase.IoAdapterBase):
                 txt = self.textwrapper._munge_whitespace(txt) + "\n"
             else:
                 # unformatted paragraph, just leave the text as-is (don't textwrap it)
-                pass
+                txt = "<monospaced>" + txt + "</monospaced>\n"
             assert txt.endswith("\n")
             output.append(txt)
         return self.smartquotes("".join(output))
@@ -253,6 +253,8 @@ class TaleWindow(Toplevel):
                             tag = None
                         elif tag == "clear":
                             self.gui.clear_screen()
+                        elif tag not in iobase.ALL_STYLE_TAGS and tag != "userinput":
+                            self.textView.insert(END, word, None)
                         continue
                     self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
                 self.textView.insert(END, "\n")

@@ -413,7 +413,8 @@ def do_server(player, parsed, ctx):
     """Dump some server information."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["<bright>Server information:</>", "-" * 19]
+    player.tell("<bright>Server information:</>", end=True)
+    txt = []
     up_hours, up_minutes, up_seconds = driver.uptime
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
@@ -449,17 +450,17 @@ def do_events(player, parsed, ctx):
     """Dump pending actions."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["<bright>Pending actions overview.</>",
-           "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
+    player.tell("<bright>Pending actions overview.</>", end=True)
+    player.tell("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
+    txt = []
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    txt.append("")
-    txt.append("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time))
-    txt.append("<monospaced>")
-    txt.append("<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                  </>")
+    player.tell(*txt, format=False)
+    player.tell("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time), end=True)
+    txt = ["<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
     for d in sorted(driver.deferreds):
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
-    txt.append("</monospaced>")
+    txt.append("")
     player.tell(*txt, format=False)
 
 
@@ -467,17 +468,15 @@ def do_events(player, parsed, ctx):
 def do_events(player, parsed, ctx):
     """Dump pending pubsub messages."""
     pending = pubsub.pending()
+    player.tell("<bright>Pending pubsub messages overview.</>", "Pubsub topics (%d):" % len(pending))
     total_pending = 0
-    txt = ["<bright>Pending pubsub messages overview.</>",
-           "Pubsub topics (%d):" % len(pending),
-           "<monospaced>",
-           "<ul>  topic                                            <dim>|</><ul> #pending</>"]
+    txt = ["<ul>  topic                                            <dim>|</><ul> #pending</>"]
     for topic in sorted(pending):
         num_pending = len(pending[topic])
         total_pending += num_pending
         txt.append("%-50.50s <dim>|</>   %d" % (topic, num_pending))
     txt.append(("total pending:  " + str(total_pending)).rjust(56))
-    txt.append("</monospaced>")
+    txt.append("")
     player.tell(*txt, format=False)
 
 
