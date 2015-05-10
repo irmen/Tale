@@ -182,7 +182,7 @@ class TaleWindow(Toplevel):
         self.textView.tag_configure('item', font=self.boldFont)
         self.textView.tag_configure('exit', font=self.boldFont)
         self.textView.tag_configure('location', foreground='navy', font=self.boldFont)
-        self.textView.tag_configure('monospaced', font=fixedFont)       # XXX fix this, for instance, the banner isn't printed as monospaced
+        self.textView.tag_configure('monospaced', font=fixedFont)
 
         # pack
         self.commandPrompt.pack(side=LEFT)

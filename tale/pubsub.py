@@ -12,11 +12,13 @@ Currently defined pubsub topics used by the base library:
 
   "driver-pending-actions"
       Events are callables to be executed in the server tick loop.
-      (don't confuse this with object heartbeats)
+      (don't confuse this with object heartbeats).
+      You can subscribe but only the driver may execute the events.
 
   "driver-pending-tells"
       Tells (messages) that have to be delivered to actors, after any
       other messages have been processed.
+      You can subscribe but only the driver may execute the events.
 
   ("wiretap-location", <location name>)
       Used by the wiretapper on a location

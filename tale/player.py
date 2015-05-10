@@ -293,13 +293,14 @@ class PlayerConnection(object):
         assert self.io.supports_blocking_input
         self.write_output()
         self.io.output_no_newline(prompt)
-        self.player.input_is_available.wait()   # blocking wait  @todo fix blocking input for multiplayer
+        self.player.input_is_available.wait()   # blocking wait
         self.need_new_input_prompt = True
         return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
 
     def input_confirm(self, question):
         """
         Simple wrapper around input_direct() to ask the player for a yes/no confirmation. Returns True or False.
+        This call is *blocking* and will not work in a multi user situation.
         """
         if not question.endswith(" "):
             question += " "
@@ -316,6 +317,7 @@ class PlayerConnection(object):
         """
         Simple wrapper around input_direct() to ask the player for a choice from a set of options.
         You can optionally use the format string '{choices}' to get the list of choices in the question text.
+        This call is *blocking* and will not work in a multi user situation.
         """
         question = question.format(choices="/".join(choices))
         if not question.endswith(" "):
@@ -355,7 +357,7 @@ class PlayerConnection(object):
                 self.io.abort_all_input(self.player)
             self.io = None
         if self.player:
-            ctx = util.Context(driver=mud_context.driver, clock=None, config=mud_context.config, player_connection=self)
+            ctx = util.Context(mud_context.driver, None, mud_context.config, self)
             self.player.destroy(ctx)
             # self.player = Player("<destroyed-%d>" % id(self.player), "n")
             self.player = None

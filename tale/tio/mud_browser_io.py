@@ -30,8 +30,8 @@ class MudHttpIo(HttpIo):
     """
     I/O adapter for a http/browser based interface.
     """
-    def __init__(self, player_connection, wsgi_server):
-        super(MudHttpIo, self).__init__(player_connection, wsgi_server)
+    def __init__(self, player_connection):
+        super(MudHttpIo, self).__init__(player_connection, None)
         self.supports_blocking_input = False
 
     def __repr__(self):

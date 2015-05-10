@@ -15,16 +15,24 @@ import re
 class PlayerNaming(object):
     def __init__(self):
         self.wizard = False
-        self.name = self.title = self.gender = self.race = self.description = None
+        self._name = self.title = self.gender = self.race = self.description = None
         self.money = 0.0
 
     def apply_to(self, player):
         player.init_race(self.race, self.gender)
-        player.init_names(self.name, self.title, self.description, None)
+        player.init_names(self._name, self.title, self.description, None)
         player.money = self.money
         player.privileges.discard("wizard")
         if self.wizard:
             player.privileges.add("wizard")
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value.lower()
 
 
 class CharacterBuilder(object):
@@ -43,11 +51,12 @@ class CharacterBuilder(object):
     def create_player_from_info(self):
         naming = PlayerNaming()
         while True:
-            naming.name = self.conn.input_direct("Name? ")
-            if re.match("[a-zA-Z]{3,}$", naming.name):
+            name = self.conn.input_direct("Name? ")
+            message = CharacterBuilder.validate_name(name)
+            if not message:
+                naming.name = name
                 break
-            else:
-                self.conn.output("Name needs to be 3 or more letters (a-z, A-Z, no spaces).")
+            self.conn.output(message)
         naming.gender = self.conn.input_choice("Gender {choices}? ", ["m", "f", "n"])
         self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
         naming.race = self.conn.input_choice("Player race? ", races.player_races)
@@ -56,6 +65,12 @@ class CharacterBuilder(object):
         if naming.wizard:
             naming.title = "arch wizard " + lang.capital(naming.name)
         return naming
+
+    @staticmethod
+    def validate_name(name):
+        if re.match("[a-zA-Z]{3,}$", name):
+            return None
+        return "Name needs to be 3 or more letters (a-z, A-Z, no spaces). Please enter another name."
 
     def create_default_wizard(self):
         # @todo these hardcoded player profiles eventually need to go

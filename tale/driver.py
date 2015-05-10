@@ -21,7 +21,7 @@ import types
 import traceback
 import appdirs
 import distutils.version
-from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub
+from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
@@ -49,6 +49,7 @@ class Driver(pubsub.Listener):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
+        self.waiting_for_input = {}
         pubsub.topic("driver-pending-actions").subscribe(self)
         pubsub.topic("driver-pending-tells").subscribe(self)
 
@@ -223,14 +224,14 @@ class Driver(pubsub.Listener):
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
         connection.player = new_player
         from .tio.mud_browser_io import MudHttpIo
-        connection.io = MudHttpIo(connection, None)
+        connection.io = MudHttpIo(connection)
         self.all_players[new_player.name] = connection
         connection.clear_screen()
         self.__print_game_intro(connection)
-        new_player.tell("Creating a mud player or logging in is not yet possible!", end=True)  # @todo __create_player
-        # @todo the following commands only after properly logging in:
-        self.show_motd(new_player, True)
-        new_player.look(short=False)  # force a 'look' command to get our bearings
+        connection.output("\n")
+        login_dialog = self.__mud_login_dialog(connection)
+        why, what = next(login_dialog)   # run to the first yield
+        self.__process_dialog(connection, login_dialog, why, what)
         return connection
 
     def _disconnect_mud_player(self, conn):
@@ -239,6 +240,43 @@ class Driver(pubsub.Listener):
         conn.write_output()
         conn.destroy()
         del self.all_players[name]
+
+    def __mud_login_dialog(self, conn):
+        conn.write_output()
+        conn.output("<bright>Welcome. We have to know your name before you can continue.</>")
+        conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
+        while True:
+            name = yield "input", "Please type in your name."
+            message = charbuilder.CharacterBuilder.validate_name(name)
+            if not message:
+                if name.startswith("wizard") or name.startswith("player"):
+                    break
+                conn.output("Start with wizard- or player- to select player type")  # XXX
+            else:
+                conn.output(message)
+        while True:
+            gender = yield "input", "What is your gender (m/f/n)?"
+            if gender in "mfn":
+                break
+            else:
+                conn.output("Please type (m)ale, (f)emale or (n)euter.")
+        name_info = charbuilder.PlayerNaming()
+        name_info.name = name
+        name_info.gender = gender
+        name_info.wizard = name.startswith("wizard")
+        if name_info.wizard:
+            name_info.title = "El Magician Grande "+name
+        self.__rename_player(conn.player, name_info)
+        conn.output("\n")
+        if name_info.wizard:
+            conn.player.move(self.config.startlocation_wizard)
+        else:
+            conn.player.move(self.config.startlocation_player)
+        self.__print_game_intro(conn)
+        self.story.welcome(conn.player)
+        conn.output("\n")
+        self.show_motd(conn.player, True)
+        conn.player.look(short=False)  # force a 'look' command to get our bearings
 
     def _stop_driver(self):
         """
@@ -253,6 +291,15 @@ class Driver(pubsub.Listener):
         time.sleep(0.1)
         mud_context.player = None
         mud_context.conn = None
+
+    def __process_dialog(self, conn, dialog, why, what):
+        """process async dialog result"""
+        if why == "input":
+            if what:
+                conn.output(what)  # the input prompt
+            self.waiting_for_input[conn] = dialog
+        else:
+            raise ValueError("invalid generator wait reason: " + why)
 
     def __print_game_intro(self, player_connection):
         try:
@@ -288,6 +335,12 @@ class Driver(pubsub.Listener):
             print("Driver start:", time.ctime())
             print("\n")
 
+    def __rename_player(self, player, name_info):
+        conn = self.all_players[player.name]
+        del self.all_players[player.name]
+        self.all_players[name_info.name] = conn
+        name_info.apply_to(player)
+
     def __create_if_player(self, conn):
         # Interactive fiction (singleplayer): create a player.
         # Initialize it directly from the story's configuration, load a saved game,
@@ -315,11 +368,8 @@ class Driver(pubsub.Listener):
                 player.init_race(self.config.player_race, self.config.player_gender)
             else:
                 # no player config: create a character with the builder
-                from .charbuilder import CharacterBuilder
-                name_info = CharacterBuilder(conn).build()
-                del self.all_players[player.name]
-                self.all_players[name_info.name] = conn
-                name_info.apply_to(player)
+                name_info = charbuilder.CharacterBuilder(conn).build()
+                self.__rename_player(player, name_info)
             player.tell("\n")
             # move the player to the starting location
             if "wizard" in player.privileges:
@@ -435,7 +485,18 @@ class Driver(pubsub.Listener):
                 if conn.player.input_is_available.is_set():
                     conn.need_new_input_prompt = True
                     try:
-                        self.__server_loop_process_player_input(conn)
+                        if conn in self.waiting_for_input:
+                            # this connection is processing direct input, rather than regular commands
+                            dialog = self.waiting_for_input[conn]
+                            try:
+                                why, what = dialog.send(conn.player.get_pending_input()[0])
+                            except StopIteration:
+                                del self.waiting_for_input[conn]
+                            else:
+                                self.__process_dialog(conn, dialog, why, what)
+                        else:
+                            # normal command processing
+                            self.__server_loop_process_player_input(conn)
                     except (KeyboardInterrupt, EOFError):
                         continue
                     except errors.SessionExit:
@@ -463,7 +524,7 @@ class Driver(pubsub.Listener):
         5) write buffered output
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
-        ctx = util.Context(driver=self, clock=self.game_clock, config=self.config, player_connection=mud_context.conn)
+        ctx = util.Context(self, self.game_clock, self.config, None)
         for object in self.heartbeat_objects:
             object.heartbeat(ctx)
         while self.deferreds:
@@ -551,7 +612,7 @@ class Driver(pubsub.Listener):
                         self.__go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         func = command_verbs[parsed.verb]
-                        ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, player_connection=conn)
+                        ctx = util.Context(self, self.game_clock, self.config, conn)
                         func(player, parsed, ctx)
                         if func.enable_notify_action:
                             pubsub.topic("driver-pending-actions").send(lambda: player.location.notify_action(parsed, player))
@@ -578,8 +639,11 @@ class Driver(pubsub.Listener):
                 location = getattr(location, name)
             else:
                 modulename = modulename + "." + name
-                __import__(modulename)
-                location = getattr(location, name)
+                try:
+                    __import__(modulename)
+                    location = getattr(location, name)
+                except (ImportError, AttributeError):
+                    raise ValueError("location not found: " + location_name)
         return location
 
     def __load_saved_game(self):
@@ -740,7 +804,7 @@ class Driver(pubsub.Listener):
             assert callable(event), "the driver-pending-tells events should be callables"
             event()
         else:
-            raise ValueError("unknown topic: "+topicname)
+            raise ValueError("unknown topic: " + topicname)
 
     def remove_deferreds(self, owner):
         with self.deferreds_lock:
@@ -965,8 +1029,12 @@ class LimboReaper(npc.Monster):
                 candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
                 shown = 4
             elif duration >= 32:
-                conn = ctx.driver.all_players[candidate.name]
-                ctx.driver._disconnect_mud_player(conn)
+                try:
+                    conn = ctx.driver.all_players[candidate.name]
+                except KeyError:
+                    pass   # already gone
+                else:
+                    ctx.driver._disconnect_mud_player(conn)
             self.candidates[candidate] = (first_seen, shown)
 
 
