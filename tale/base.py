@@ -728,9 +728,9 @@ class Living(MudObject):
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
         """
+        msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
-        for msg in messages:
-            tap.send((self.name, msg))
+        tap.send((self.name, msg))
 
     def tell_others(self, *messages):
         """

@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import unittest
 import gc
-from tale.pubsub import topic, unsubscribe_all, Listener
+from tale.pubsub import topic, unsubscribe_all, Listener, sync, pending
 
 
 class Subber(Listener):
@@ -21,6 +21,11 @@ class Subber(Listener):
 
     def clear(self):
         self.messages = []
+
+
+class RefusingSubber(Subber):
+    def pubsub_event(self, topicname, event):
+        raise Listener.NotYet
 
 
 class TestPubsub(unittest.TestCase):
@@ -38,7 +43,7 @@ class TestPubsub(unittest.TestCase):
         self.assertTrue(s1 is s3)
         self.assertFalse(s1 is s2)
 
-    def test_pubsub(self):
+    def test_pubsub_sync(self):
         s = topic("test1")
         subber = Subber("sub1")
         subber2 = Subber("sub2")
@@ -47,7 +52,9 @@ class TestPubsub(unittest.TestCase):
         s.subscribe(subber2)
         s.subscribe(subber2)
         s2 = topic("test1")
-        result = s2.send([1, 2, 3])
+        result = s2.send([1, 2, 3], True)
+        self.assertEqual([("test1", [1, 2, 3])], subber.messages)
+        self.assertEqual([("test1", [1, 2, 3])], subber2.messages)
         self.assertEqual(2, len(result))
         self.assertTrue("sub1" in result)
         self.assertTrue("sub2" in result)
@@ -55,8 +62,43 @@ class TestPubsub(unittest.TestCase):
         s2.unsubscribe(subber)
         s2.unsubscribe(subber)
         s2.unsubscribe(subber2)
-        result = s2.send("after unsubscribing")
+        result = s2.send("after unsubscribing", True)
         self.assertEqual(0, len(result))
+
+    def test_pubsub_async(self):
+        sync()
+        s = topic("test1")
+        subber = Subber("sub1")
+        subber2 = Subber("sub2")
+        s.subscribe(subber)
+        s.subscribe(subber2)
+        s2 = topic("test1")
+        result = s2.send("event1")
+        self.assertIsNone(result)
+        self.assertEqual([], subber.messages)
+        self.assertEqual([], subber2.messages)
+        self.assertEqual(["event1"], pending()["test1"])
+        result = sync()
+        self.assertEqual([], pending()["test1"])
+        self.assertIsNone(result)
+        self.assertEqual([("test1", "event1")], subber.messages)
+        self.assertEqual([("test1", "event1")], subber2.messages)
+        subber.clear()
+        subber2.clear()
+        s2.send("event2")
+        result = sync("test1")
+        self.assertEqual(2, len(result))
+        self.assertTrue("sub1" in result)
+        self.assertTrue("sub2" in result)
+        self.assertEqual([("test1", "event2")], subber.messages)
+        self.assertEqual([("test1", "event2")], subber2.messages)
+
+    def test_notyet(self):
+        s = topic("notyet")
+        subber = RefusingSubber("refuser")
+        s.subscribe(subber)
+        s.send("event", True)
+        self.assertEqual([], subber.messages)
 
     def test_weakrefs(self):
         s = topic("test222")
@@ -64,7 +106,7 @@ class TestPubsub(unittest.TestCase):
         s.subscribe(subber)
         del subber
         gc.collect()
-        result = s.send("after gc")
+        result = s.send("after gc", True)
         self.assertEqual(0, len(result))
 
     def test_weakrefs2(self):
@@ -83,12 +125,12 @@ class TestPubsub(unittest.TestCase):
         wiretap = Wiretap()
         wiretap.create_tap()
         t = topic("wiretaptest")
-        result = t.send("hi")
+        result = t.send("hi", True)
         self.assertEqual(1, len(result))
         self.assertEqual([('wiretaptest', 'hi')], wiretap.messages)
         del wiretap
         gc.collect()
-        result = t.send("after gc")
+        result = t.send("after gc", True)
         self.assertEqual(0, len(result))
 
     def test_unsubscribe_all(self):
@@ -102,13 +144,15 @@ class TestPubsub(unittest.TestCase):
         s1.send("one")
         s2.send("two")
         s3.send("three")
-        self.assertEqual([('testA', 'one'), ('testB', 'two'), ('testC', 'three')], subber.messages)
+        sync()
+        self.assertEqual(set([('testA', 'one'), ('testB', 'two'), ('testC', 'three')]), set(subber.messages))
         subber.clear()
         unsubscribe_all(subber)
         unsubscribe_all(subber)
         s1.send("one")
         s2.send("two")
         s3.send("three")
+        sync()
         self.assertEqual([], subber.messages)
 
 

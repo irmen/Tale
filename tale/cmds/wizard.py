@@ -15,7 +15,7 @@ import gc
 import platform
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util
+from .. import base, lang, util, pubsub
 from ..player import Player
 from .. import __version__
 
@@ -446,10 +446,10 @@ def do_server(player, parsed, ctx):
 
 @wizcmd("events")
 def do_events(player, parsed, ctx):
-    """Dump pending events."""
+    """Dump pending actions."""
     driver = ctx.driver
     config = ctx.config
-    txt = ["<bright>Pending events overview.</>",
+    txt = ["<bright>Pending actions overview.</>",
            "Heartbeat objects (%d):" % len(driver.heartbeat_objects)]
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
@@ -459,6 +459,24 @@ def do_events(player, parsed, ctx):
     txt.append("<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                  </>")
     for d in sorted(driver.deferreds):
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
+    txt.append("</monospaced>")
+    player.tell(*txt, format=False)
+
+
+@wizcmd("pubsub")
+def do_events(player, parsed, ctx):
+    """Dump pending pubsub messages."""
+    pending = pubsub.pending()
+    total_pending = 0
+    txt = ["<bright>Pending pubsub messages overview.</>",
+           "Pubsub topics (%d):" % len(pending),
+           "<monospaced>",
+           "<ul>  topic                                            <dim>|</><ul> #pending</>"]
+    for topic in sorted(pending):
+        num_pending = len(pending[topic])
+        total_pending += num_pending
+        txt.append("%-50.50s <dim>|</>   %d" % (topic, num_pending))
+    txt.append(("total pending:  " + str(total_pending)).rjust(56))
     txt.append("</monospaced>")
     player.tell(*txt, format=False)
 

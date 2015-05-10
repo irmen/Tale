@@ -29,6 +29,7 @@ from . import cmds
 from . import player
 from . import base
 from . import npc
+from . import pubsub
 from . import __version__ as tale_version_str
 from .tio import vfs
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
@@ -414,6 +415,7 @@ class Driver(object):
                 p.tell(str(x))
 
     def __server_loop_process_action_queue(self):
+        pubsub.sync()  # also sync the pubsub queue
         while True:
             try:
                 action = self.action_queue.get_nowait()

@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import print_function, division, unicode_literals, absolute_import
 import datetime
 import unittest
-from tale import util, mud_context
+from tale import util, mud_context, pubsub
 from tale.errors import ParseError
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
@@ -167,6 +167,7 @@ class TestUtil(unittest.TestCase):
         wiretap_house = Wiretap(house)
         wiretap_attic = Wiretap(attic)
         util.message_nearby_locations(plaza, "boing")
+        pubsub.sync()
         self.assertEqual([], wiretap_plaza.msgs, "the plaza doesnt receive tells")
         self.assertEqual([], wiretap_attic.msgs, "the attic is too far away to receive msgs")
         self.assertTrue(("road", "boing") in wiretap_road.msgs)

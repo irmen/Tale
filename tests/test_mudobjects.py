@@ -426,12 +426,14 @@ class TestLiving(unittest.TestCase):
         self.assertTrue(rat in attic.livings)
         self.assertFalse(rat in hall.livings)
         self.assertEqual(attic, rat.location)
+        pubsub.sync()
         self.assertEqual([("hall", "Rat leaves.")], wiretap_hall.msgs)
         self.assertEqual([("attic", "Rat arrives.")], wiretap_attic.msgs)
         # now try silent
         wiretap_hall.clear()
         wiretap_attic.clear()
         rat.move(hall, silent=True)
+        pubsub.sync()
         self.assertTrue(rat in hall.livings)
         self.assertFalse(rat in attic.livings)
         self.assertEqual(hall, rat.location)
@@ -462,7 +464,8 @@ class TestLiving(unittest.TestCase):
         tap.subscribe(collector)
         julie.tell("msg1", "msg2")
         julie.tell("msg3", "msg4", ignored_arg=42)
-        self.assertEqual(["msg1", "msg2", "msg3", "msg4"], collector.messages)
+        pubsub.sync()
+        self.assertEqual(["msg1 msg2", "msg3 msg4"], collector.messages)
 
     def test_show_inventory(self):
         class Ctx(object):
@@ -485,12 +488,14 @@ class TestLiving(unittest.TestCase):
         julie.init_inventory([item1])
         julie.money = 9.23
         julie.show_inventory(julie, ctx)
+        pubsub.sync()
         text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key Money in possession: 9 dollar and 23 cent.", text)
         ctx.config.money_type = None
         ctx.driver.moneyfmt = None
         collector.clear()
         julie.show_inventory(julie, ctx)
+        pubsub.sync()
         text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key", text)
 

@@ -19,6 +19,7 @@ from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder
 from tale.driver import StoryConfig
+from tale import pubsub
 if sys.version_info < (3, 0):
     from StringIO import StringIO
 else:
@@ -45,8 +46,8 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell(self):
         player = Player("fritz", "m")
-        player.tell(None)
-        self.assertEqual(["None\n"], player.test_get_output_paragraphs())
+        player.tell(5)
+        self.assertEqual(["5\n"], player.test_get_output_paragraphs())
         player.tell("")
         self.assertEqual([], player.test_get_output_paragraphs())
         player.tell("")
@@ -245,6 +246,7 @@ class TestPlayer(unittest.TestCase):
         player.create_wiretap(attic)
         julie.tell("message for julie")
         attic.tell("message for room")
+        pubsub.sync()
         output = pc.get_output()
         self.assertTrue("[wiretapped from 'Attic': message for room]" in output)
         self.assertTrue("[wiretapped from 'julie': message for julie]" in output)
