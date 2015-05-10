@@ -288,9 +288,9 @@ class PlayerConnection(object):
         """
         Writes any pending output and prompts for input directly. Returns stripped result.
         The driver does NOT use this for the regular game loop!
-        Note that input processing takes place asynchronously so this method just prints
-        the input prompt, and sits around waiting for a result to appear in the input buffer.
+        This call is *blocking* and will not work in a multi user situation.
         """
+        assert self.io.supports_blocking_input
         self.write_output()
         self.io.output_no_newline(prompt)
         self.player.input_is_available.wait()   # blocking wait  @todo fix blocking input for multiplayer

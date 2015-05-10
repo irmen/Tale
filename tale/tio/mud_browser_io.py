@@ -32,6 +32,7 @@ class MudHttpIo(HttpIo):
     """
     def __init__(self, player_connection, wsgi_server):
         super(MudHttpIo, self).__init__(player_connection, wsgi_server)
+        self.supports_blocking_input = False
 
     def __repr__(self):
         return "<MudHttpIo @ 0x%x>" % id(self)

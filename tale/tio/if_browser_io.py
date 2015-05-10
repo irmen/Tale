@@ -73,7 +73,7 @@ class HttpIo(iobase.IoAdapterBase):
         import webbrowser
         from threading import Thread
         url = "http://%s:%d/tale/" % self.wsgi_server.server_address
-        print("\nPoint your browser to the following url: ", url, end="\n\n")
+        print("\nWeb server url:  ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))
         t.daemon = True
         t.start()

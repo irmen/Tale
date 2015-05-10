@@ -40,8 +40,6 @@ class Driver(object):
     Reads story file and config, initializes game state.
     Handles main game loop, player connections, and loading/saving of game state.
     """
-    directions = {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}
-
     def __init__(self):
         self.heartbeat_objects = set()
         self.unbound_exits = []
@@ -149,8 +147,7 @@ class Driver(object):
             return
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
-        # add the grim reaper to Limbo
-        self.__limbo_grim_reaper()
+        base._Limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
         if self.config.server_mode == "if":
             # create the single player mode player automatically
             if args.gui:
@@ -159,7 +156,7 @@ class Driver(object):
                 player_io = "web"
             else:
                 player_io = "console"
-            connection = self.__connect_if_player(player_io, args.delay)
+            connection = self._connect_if_player(player_io, args.delay)
             mud_context.player = connection.player
             mud_context.conn = connection
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
@@ -172,72 +169,23 @@ class Driver(object):
             mud_context.player = mud_context.conn = None
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
-            url = "http://%s:%d/tale/" % wsgi_server.server_address
-            print("\nPoint your browser to the following url: ", url, end="\n\n")
             wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
             wsgi_thread.daemon = True
             wsgi_thread.start()
             self.__print_game_intro(None)
+            print("Web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
             self.__startup_main_loop()
 
-    def __limbo_grim_reaper(self):
-        class LimboReaper(npc.Monster):
-            """
-            The Grim Reaper hanging about in Limbo, to make sure no one stays there for too long.
-            """
-            def __init__(self):
-                super(LimboReaper, self).__init__(
-                    "reaper", "m", "elemental", "Grim Reaper",
-                    description="He wears black robes with a hood. Where a face should be, there is only nothingness. He is carrying a large omnious scythe that looks very, very sharp.",
-                    short_description="A figure clad in black, carrying a scythe, is also present.")
-                self.aliases = {"figure", "death"}
-                self.register_heartbeat()
-                self.candidates = {}    # player --> (first_seen, texts shown)
-
-            def heartbeat(self, ctx):
-                # consider all livings currently in Limbo or having their location set to Limbo
-                in_limbo = {living for living in self.location.livings if living is not self}
-                in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._Limbo})
-                now = time.time()
-                for candidate in in_limbo:
-                    if candidate not in self.candidates:
-                        self.candidates[candidate] = (now, 0)   # a new player first seen
-                for candidate in list(self.candidates):
-                    if candidate not in in_limbo:
-                        del self.candidates[candidate]   # player no longer present in limbo
-                        continue
-                    first_seen, shown = self.candidates[candidate]
-                    duration = now - first_seen
-                    # Depending on how long the candidate is being observed, show increasingly threateningly warnings,
-                    # and eventually killing the candidate (and closing their connection).
-                    if duration >= 10 and shown < 1:
-                        candidate.tell(self.title + " whispers: \"Greetings. Be aware that you must not linger here... Decide swiftly...\"")
-                        shown = 1
-                    elif duration >= 20 and shown < 2:
-                        candidate.tell(self.title + " looms over you and warns: \"You really cannot stay here much longer!\"")
-                        shown = 2
-                    elif duration >= 30 and shown < 3:
-                        candidate.tell(self.title + " menacingly raises his scythe!")
-                        shown = 3
-                    elif duration >= 31 and shown < 4:
-                        candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
-                        shown = 4
-                    elif duration >= 32:
-                        conn = ctx.driver.all_players[candidate.name]
-                        ctx.driver._disconnect_mud_player(conn)
-                    self.candidates[candidate] = (first_seen, shown)
-        base._Limbo.init_inventory([LimboReaper()])
-
-
     def __startup_main_loop(self):
-        # continues the startup process and kick off the driver's main loop
+        # Continues the startup process and kick off the driver's main loop.
+        # This may run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
         try:
             if self.config.server_mode == "if":
                 # single player interactive fiction
                 while not mud_context.conn:
                     time.sleep(0.02)
-                self.__create_player(mud_context.conn)
+                self.__create_if_player(mud_context.conn)
                 mud_context.player.look(short=False)   # force a 'look' command to get our bearings
                 mud_context.conn.write_output()
                 while not self.__stop_mainloop:
@@ -251,7 +199,7 @@ class Driver(object):
             self.__stop_mainloop = True
             raise
 
-    def __connect_if_player(self, player_io, line_delay):
+    def _connect_if_player(self, player_io, line_delay):
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
@@ -299,6 +247,20 @@ class Driver(object):
         conn.destroy()
         del self.all_players[name]
 
+    def _stop_driver(self):
+        """
+        Stop the driver mainloop in an orderly fashion.
+        Flushes any pending output to the players, then closes down.
+        """
+        self.__stop_mainloop = True
+        for conn in self.all_players.values():
+            conn.write_output()
+            conn.destroy()
+        self.all_players.clear()
+        time.sleep(0.1)
+        mud_context.player = None
+        mud_context.conn = None
+
     def __print_game_intro(self, player_connection):
         try:
             # print game banner as supplied by the game
@@ -333,10 +295,13 @@ class Driver(object):
             print("Driver start:", time.ctime())
             print("\n")
 
-    def __create_player(self, conn):
-        # Lets the user create a new player, load a saved game, or initialize it directly from the story's configuration
+    def __create_if_player(self, conn):
+        # Interactive fiction (singleplayer): create a player.
+        # Initialize it directly from the story's configuration, load a saved game,
+        # or let the user create a new player manually.
+        assert self.config.server_mode == "if"
         player = conn.player
-        if self.config.server_mode == "mud" or not self.config.savegames_enabled:
+        if not self.config.savegames_enabled:
             load_saved_game = False
         else:
             player.tell("\n")
@@ -347,20 +312,16 @@ class Driver(object):
             if loaded_player:
                 conn.player = player = loaded_player
                 player.tell("\n")
-                if self.config.server_mode == "if":
-                    self.story.welcome_savegame(player)
-                else:
-                    player.tell("Welcome back to %s, %s." % (self.config.name, player.title))
+                self.story.welcome_savegame(player)
                 player.tell("\n")
             else:
                 load_saved_game = False
         if not load_saved_game:
-            if self.config.server_mode == "if" and self.config.player_name:
-                # interactive fiction mode, create the player from the game's config
+            if self.config.player_name:
                 player.init_names(self.config.player_name, None, None, None)
                 player.init_race(self.config.player_race, self.config.player_gender)
-            elif self.config.server_mode == "mud" or not self.config.player_name:
-                # mud mode, or if mode without player config: create a character with the builder
+            else:
+                # no player config: create a character with the builder
                 from .charbuilder import CharacterBuilder
                 name_info = CharacterBuilder(conn).build()
                 del self.all_players[player.name]
@@ -373,26 +334,9 @@ class Driver(object):
             else:
                 player.move(self.config.startlocation_player)
             player.tell("\n")
-            if self.config.server_mode == "if":
-                self.story.welcome(player)
-            else:
-                player.tell("Welcome to %s, %s." % (self.config.name, player.title), end=True)
+            self.story.welcome(player)
             player.tell("\n")
         self.story.init_player(player)
-
-    def _stop_driver(self):
-        """
-        Stop the driver mainloop in an orderly fashion.
-        Flushes any pending output to the players, then closes down.
-        """
-        self.__stop_mainloop = True
-        for conn in self.all_players.values():
-            conn.write_output()
-            conn.destroy()
-        self.all_players.clear()
-        time.sleep(0.1)
-        mud_context.player = None
-        mud_context.conn = None
 
     def __main_loop_singleplayer(self, conn):
         """
@@ -459,7 +403,7 @@ class Driver(object):
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
             except soul.UnknownVerbException as x:
-                if x.verb in self.directions:
+                if x.verb in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}:
                     p.tell("You can't go in that direction.")
                 else:
                     p.tell("The verb '%s' is unrecognized." % x.verb)
@@ -990,6 +934,53 @@ class Commands(object):
                     del soul.VERBS[cmd]
                 if getattr(func, "no_soul_parse", False):
                     self.no_soul_parsing.add(cmd)
+
+
+class LimboReaper(npc.Monster):
+    """
+    The Grim Reaper hanging about in Limbo, to make sure no one stays there for too long.
+    """
+    def __init__(self):
+        super(LimboReaper, self).__init__(
+            "reaper", "m", "elemental", "Grim Reaper",
+            description="He wears black robes with a hood. Where a face should be, there is only nothingness. He is carrying a large omnious scythe that looks very, very sharp.",
+            short_description="A figure clad in black, carrying a scythe, is also present.")
+        self.aliases = {"figure", "death"}
+        self.register_heartbeat()
+        self.candidates = {}    # player --> (first_seen, texts shown)
+
+    def heartbeat(self, ctx):
+        # consider all livings currently in Limbo or having their location set to Limbo
+        in_limbo = {living for living in self.location.livings if living is not self}
+        in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._Limbo})
+        now = time.time()
+        for candidate in in_limbo:
+            if candidate not in self.candidates:
+                self.candidates[candidate] = (now, 0)   # a new player first seen
+        for candidate in list(self.candidates):
+            if candidate not in in_limbo:
+                del self.candidates[candidate]   # player no longer present in limbo
+                continue
+            first_seen, shown = self.candidates[candidate]
+            duration = now - first_seen
+            # Depending on how long the candidate is being observed, show increasingly threateningly warnings,
+            # and eventually killing the candidate (and closing their connection).
+            if duration >= 10 and shown < 1:
+                candidate.tell(self.title + " whispers: \"Greetings. Be aware that you must not linger here... Decide swiftly...\"")
+                shown = 1
+            elif duration >= 20 and shown < 2:
+                candidate.tell(self.title + " looms over you and warns: \"You really cannot stay here much longer!\"")
+                shown = 2
+            elif duration >= 30 and shown < 3:
+                candidate.tell(self.title + " menacingly raises his scythe!")
+                shown = 3
+            elif duration >= 31 and shown < 4:
+                candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
+                shown = 4
+            elif duration >= 32:
+                conn = ctx.driver.all_players[candidate.name]
+                ctx.driver._disconnect_mud_player(conn)
+            self.candidates[candidate] = (first_seen, shown)
 
 
 if __name__ == "__main__":

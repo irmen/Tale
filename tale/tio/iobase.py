@@ -50,6 +50,7 @@ class IoAdapterBase(object):
         self.do_styles = True
         self.do_smartquotes = True
         self.supports_smartquotes = True
+        self.supports_blocking_input = True
         self.player_connection = player_connection
         self.stop_main_loop = False
 
