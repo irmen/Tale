@@ -471,7 +471,7 @@ def do_events(player, parsed, ctx):
     player.tell("<bright>Pending pubsub messages overview.</>", "Pubsub topics (%d):" % len(pending))
     total_pending = 0
     txt = ["<ul>  topic                                            <dim>|</><ul> #pending</>"]
-    for topic in sorted(pending):
+    for topic in sorted(pending, key=lambda t: str(t)):
         num_pending = len(pending[topic])
         total_pending += num_pending
         txt.append("%-50.50s <dim>|</>   %d" % (topic, num_pending))
@@ -503,4 +503,4 @@ def do_force(player, parsed, ctx):
     else:
         # re-parse and execute the actual command for the target, from the viewpoint of the current player!
         target_parsed = player.parse(cmd)
-        ctx.driver.after_player_action(lambda: target.do_socialize_cmd(target_parsed))
+        pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))

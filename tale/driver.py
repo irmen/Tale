@@ -21,21 +21,12 @@ import types
 import traceback
 import appdirs
 import distutils.version
-from . import mud_context
-from . import errors
-from . import util
-from . import soul
-from . import cmds
-from . import player
-from . import base
-from . import npc
-from . import pubsub
+from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub
 from . import __version__ as tale_version_str
-from .tio import vfs
-from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
+from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
 
-class Driver(object):
+class Driver(pubsub.Listener):
     """
     The Mud 'driver'.
     Reads story file and config, initializes game state.
@@ -46,7 +37,6 @@ class Driver(object):
         self.unbound_exits = []
         self.deferreds = []  # heapq
         self.deferreds_lock = threading.Lock()
-        self.action_queue = util.queue.Queue()
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.config = None
         self.server_loop_durations = collections.deque(maxlen=10)
@@ -59,6 +49,8 @@ class Driver(object):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
+        pubsub.topic("driver-pending-actions").subscribe(self)
+        pubsub.topic("driver-pending-tells").subscribe(self)
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -365,8 +357,6 @@ class Driver(object):
                     self.__server_loop_process_player_input(conn)
                 except (KeyboardInterrupt, EOFError):
                     continue
-                except errors.StoryCompleted:
-                    conn.player.story_completed()
                 except errors.SessionExit:
                     self.story.goodbye(conn.player)
                     self._stop_driver()
@@ -374,12 +364,17 @@ class Driver(object):
                 except Exception:
                     txt = "* internal error:\n" + traceback.format_exc()
                     conn.player.tell(txt, format=False)
-            # server TICK and pending Actions
+            # deliver late messages
+            pubsub.sync("driver-pending-tells")
+            # server TICK
             now = time.time()
             if now - previous_server_tick >= self.config.server_tick_time:
                 self.__server_tick()
                 previous_server_tick = now
-            self.__server_loop_process_action_queue()
+            if self.config.server_tick_method == "command":
+                # Even though the server tick may be skipped, the pubsub events
+                # should be processed every player command no matter what.
+                pubsub.sync()
             # check if player reached the end of the story
             loop_duration = time.time() - loop_start
             self.server_loop_durations.append(loop_duration)
@@ -391,7 +386,6 @@ class Driver(object):
                     conn.write_output()
 
     def __server_loop_process_player_input(self, conn):
-        print("PROCESS PLAYER INPUT", conn.player)  # XXX
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -413,19 +407,6 @@ class Driver(object):
                 p.tell(str(x))
             except errors.ParseError as x:
                 p.tell(str(x))
-
-    def __server_loop_process_action_queue(self):
-        pubsub.sync()  # also sync the pubsub queue
-        while True:
-            try:
-                action = self.action_queue.get_nowait()
-            except util.queue.Empty:
-                break
-            else:
-                try:
-                    action()
-                except Exception:
-                    self.__report_deferred_exception(action)
 
     def __main_loop_multiplayer(self):
         """
@@ -457,19 +438,18 @@ class Driver(object):
                         self.__server_loop_process_player_input(conn)
                     except (KeyboardInterrupt, EOFError):
                         continue
-                    except errors.StoryCompleted:
-                        continue   # can't complete 'story' in mud mode
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
                     except Exception:
                         txt = "* internal error:\n" + traceback.format_exc()
                         conn.player.tell(txt, format=False)
-            # server TICK and pending Actions
+            # deliver late messages
+            pubsub.sync("driver-pending-tells")
+            # server TICK
             now = time.time()
             if now - previous_server_tick >= self.config.server_tick_time:
                 self.__server_tick()
                 previous_server_tick = now
-            self.__server_loop_process_action_queue()
             loop_duration = time.time() - loop_start
             self.server_loop_durations.append(loop_duration)
 
@@ -479,7 +459,8 @@ class Driver(object):
         1) game clock
         2) heartbeats
         3) deferreds
-        4) write buffered output
+        4) pending pubsub events
+        5) write buffered output
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = util.Context(driver=self, clock=self.game_clock, config=self.config, player_connection=mud_context.conn)
@@ -501,6 +482,7 @@ class Driver(object):
                     deferred(ctx=ctx)  # call the deferred and provide a context object
                 except Exception:
                     self.__report_deferred_exception(deferred)
+        pubsub.sync()
         for conn in self.all_players.values():
             conn.write_output()
 
@@ -561,7 +543,7 @@ class Driver(object):
                 if parsed.verb in custom_verbs:
                     handled = player.location.handle_verb(parsed, player)
                     if handled:
-                        self.after_player_action(lambda: player.location.notify_action(parsed, player))
+                        pubsub.topic("driver-pending-actions").send(lambda: player.location.notify_action(parsed, player))
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -572,7 +554,7 @@ class Driver(object):
                         ctx = util.Context(driver=self, config=self.config, clock=self.game_clock, player_connection=conn)
                         func(player, parsed, ctx)
                         if func.enable_notify_action:
-                            self.after_player_action(lambda: player.location.notify_action(parsed, player))
+                            pubsub.topic("driver-pending-actions").send(lambda: player.location.notify_action(parsed, player))
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb:
@@ -750,12 +732,15 @@ class Driver(object):
         with self.deferreds_lock:
             heapq.heappush(self.deferreds, deferred)
 
-    def after_player_action(self, action):
-        """
-        Register a callable action in the queue to be called later,
-        but directly *after* the player's own actions have been completed.
-        """
-        self.action_queue.put(action)
+    def pubsub_event(self, topicname, event):
+        if topicname == "driver-pending-actions":
+            assert callable(event), "the driver-pending-actions events should be callables"
+            event()
+        elif topicname == "driver-pending-tells":
+            assert callable(event), "the driver-pending-tells events should be callables"
+            event()
+        else:
+            raise ValueError("unknown topic: "+topicname)
 
     def remove_deferreds(self, owner):
         with self.deferreds_lock:

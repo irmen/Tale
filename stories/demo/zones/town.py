@@ -117,15 +117,15 @@ class GameEnd(Location):
     def init(self):
         pass
 
-    def notify_player_arrived(self, player, previous_location):
-        # player arrived!
-        # The StoryCompleted exception is an immediate game end trigger.
-        # This means the player never actually enters this location
-        # (because the insert call aborts with an exception)
-        # raise StoryCompleted(self.completion)
-        player.story_completed()
-        # setting the status on the player is usually better,
-        # it allows the driver to complete the last player action normally.
+    def insert(self, obj, actor):
+        # Normally you would use notify_player_arrived() to trigger an action.
+        # but for the game ending, we require an immediate response.
+        # So instead we hook into the direct arrival of something in this location.
+        super(GameEnd, self).insert(obj, actor)
+        try:
+            obj.story_completed()   # player arrived! Great Success!
+        except AttributeError:
+            pass
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")
@@ -136,7 +136,7 @@ class EndDoor(Door):
         super(EndDoor, self).unlock(actor, item)
         if not self.locked:
             if "unlocked_enddoor" not in actor.hints.checkpoints:
-                mud_context.driver.after_player_action(lambda: actor.tell("<dim>(You will remember this event.)</>"))
+                actor.tell_later("<dim>(You will remember this event.)</>")
             actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
 
@@ -251,10 +251,23 @@ class DoorKey(Item):
         player = mud_context.player
         if target_container is player or target_container in player:
             if "got_doorkey" not in actor.hints.checkpoints:
-                mud_context.driver.after_player_action(lambda: actor.tell("<dim>(You will remember this event.)</>"))
+                actor.tell_later("<dim>(You will remember this event.)</>")
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
 
 
 doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
 doorkey.door_code = end_door.door_code
 alley.insert(doorkey, None)
+
+
+class MagicGameEnd(Item):
+    def __init__(self):
+        super(MagicGameEnd, self).__init__("magic orb", description="A magic orb of some sort.")
+        self.aliases = "orb"
+
+    def notify_moved(self, source_container, target_container, actor):
+        actor.tell_later("By touching it you immediately end the game!")
+        actor.story_completed()
+
+
+alley.insert(MagicGameEnd(), None)

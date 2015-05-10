@@ -28,14 +28,6 @@ class TestDriver(driver.Driver):
         # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
 
-    def execute_after_player_actions(self):
-        while True:
-            try:
-                action = self.action_queue.get_nowait()
-                action()
-            except util.queue.Empty:
-                break
-
 
 class Wiretap(pubsub.Listener):
     def __init__(self, target):

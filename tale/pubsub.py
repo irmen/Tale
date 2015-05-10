@@ -6,6 +6,24 @@ Uses weakrefs to not needlessly lock subscribers/topics in memory.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
+
+
+Currently defined pubsub topics used by the base library:
+
+  "driver-pending-actions"
+      Events are callables to be executed in the server tick loop.
+      (don't confuse this with object heartbeats)
+
+  "driver-pending-tells"
+      Tells (messages) that have to be delivered to actors, after any
+      other messages have been processed.
+
+  ("wiretap-location", <location name>)
+      Used by the wiretapper on a location
+
+  ("wiretap-living", <living name>)
+      Used by the wiretapper on a living
+
 """
 
 import weakref
@@ -32,7 +50,7 @@ def sync(topic=None):
     if topic:
         return all_topics[topic].sync()
     else:
-        for t in all_topics.values():
+        for t in list(all_topics.values()):
             t.sync()
 
 
@@ -45,7 +63,7 @@ def pending(topic=None):
 
 def unsubscribe_all(subscriber):
     """unsubscribe the given subscriber object from all topics that it may have been subscribed to."""
-    for topic in all_topics.values():
+    for topic in list(all_topics.values()):
         topic.unsubscribe(subscriber)
 
 

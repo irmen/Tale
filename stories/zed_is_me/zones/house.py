@@ -13,9 +13,16 @@ class GameEnd(Location):
     def init(self):
         pass
 
-    def notify_player_arrived(self, player, previous_location):
-        # player has entered!
-        player.story_completed()
+    def insert(self, obj, actor):
+        # Normally you would use notify_player_arrived() to trigger an action.
+        # but for the game ending, we require an immediate response.
+        # So instead we hook into the direct arrival of something in this location.
+        super(GameEnd, self).insert(obj, actor)
+        try:
+            obj.story_completed()   # player arrived! Great Success!
+        except AttributeError:
+            pass
+
 
 livingroom = Location("Living room", "The living room in your home in the outskirts of the city.")
 room1 = Location("Small room", "A small room.")

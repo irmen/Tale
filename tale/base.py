@@ -46,6 +46,10 @@ from .errors import ActionRefused, ParseError
 from .races import races
 
 
+pending_actions = pubsub.topic("driver-pending-actions")
+pending_tells = pubsub.topic("driver-pending-tells")
+
+
 class MudObject(object):
     """
     Root class of all objects in the mud world
@@ -732,6 +736,10 @@ class Living(MudObject):
         tap = self.get_wiretap()
         tap.send((self.name, msg))
 
+    def tell_later(self, *messages, **kwargs):
+        """Tell something to this actor, but do it after other messages."""
+        pending_tells.send(lambda: self.tell(*messages, **kwargs))
+
     def tell_others(self, *messages):
         """
         Message(s) sent to the other livings in the location, but not to self.
@@ -787,7 +795,7 @@ class Living(MudObject):
         who, actor_message, room_message, target_message = self.soul.process_verb_parsed(self, parsed)
         self.tell(actor_message)
         self.location.tell(room_message, self, who, target_message)
-        mud_context.driver.after_player_action(lambda: self.location.notify_action(parsed, self))
+        pending_actions.send(lambda: self.location.notify_action(parsed, self))
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
@@ -795,7 +803,7 @@ class Living(MudObject):
             if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
-                        mud_context.driver.after_player_action(lambda: living.start_attack(self))
+                        pending_actions.send(lambda: living.start_attack(self))
 
     def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """
@@ -817,18 +825,18 @@ class Living(MudObject):
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
             # queue event
             if is_player:
-                mud_context.driver.after_player_action(lambda: original_location.notify_player_left(self, target))
+                pending_actions.send(lambda: original_location.notify_player_left(self, target))
             else:
-                mud_context.driver.after_player_action(lambda: original_location.notify_npc_left(self, target))
+                pending_actions.send(lambda: original_location.notify_npc_left(self, target))
         else:
             target.insert(self, actor)
         if not silent:
             target.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
         # queue event
         if is_player:
-            mud_context.driver.after_player_action(lambda: target.notify_player_arrived(self, original_location))
+            pending_actions.send(lambda: target.notify_player_arrived(self, original_location))
         else:
-            mud_context.driver.after_player_action(lambda: target.notify_npc_arrived(self, original_location))
+            pending_actions.send(lambda: target.notify_npc_arrived(self, original_location))
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """The same as locate_item except it only returns the item, or None."""

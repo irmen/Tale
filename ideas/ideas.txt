@@ -35,6 +35,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[feature] More commands should recognise object aliases (touch, take) like examine already does.
 [cosmetic] Add <center> text style which centers the line(s) on the screen.
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
