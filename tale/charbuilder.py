@@ -56,7 +56,7 @@ class CharacterBuilder(object):
                 naming.name = yield "input", ("Name?", validate_name)
                 naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
                 naming.gender = naming.gender[0]
-                self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+                self.conn.output("You can choose one of the following races: ", lang.join(races.player_races))
                 naming.race = yield "input", ("Player race?", validate_race)
                 naming.wizard = yield "input", ("Wizard y/n?", lang.yesno)
                 naming.description = "A regular person."

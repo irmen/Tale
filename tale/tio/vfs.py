@@ -40,7 +40,6 @@ class Resource(object):
         return self.data[item]
 
 
-# XXX fix: don't allow to read files above the filesystem root (using ../..)
 class VirtualFileSystem(object):
     """
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
@@ -72,16 +71,21 @@ class VirtualFileSystem(object):
             self.root = root_package
             self.use_pkgutil = True
 
-    @staticmethod
-    def __validate_path(path):
+    def _validate_path(self, path):
         if "\\" in path:
             raise VfsError("path must use forward slash '/' as separator, not backward slash '\\'")
         if os.path.isabs(path):
             raise VfsError("path must be relative to the story root folder")
+        if self.use_pkgutil:
+            pass
+        else:
+            path = os.path.abspath(path)
+            if not path.startswith(self.root):
+                raise VfsError("path must not escape root folder")
 
     def __getitem__(self, name):
         """Reads the resource data (text or binary) for the given name and returns it as a Resource object"""
-        self.__validate_path(name)
+        self._validate_path(name)
         mimetype = mimetypes.guess_type(name)[0] or ""
         if mimetype.startswith("text/"):
             mode = "rt"
@@ -123,7 +127,7 @@ class VirtualFileSystem(object):
         """
         if self.readonly:
             raise VfsError("attempt to write a read-only vfs")
-        self.__validate_path(name)
+        self._validate_path(name)
         if isinstance(data, Resource):
             data = data.data
         with self.open_write(name) as f:
@@ -133,7 +137,7 @@ class VirtualFileSystem(object):
         """Deletes the given resource"""
         if self.readonly:
             raise VfsError("attempt to write a read-only vfs")
-        self.__validate_path(name)
+        self._validate_path(name)
         try:
             os.remove(os.path.join(self.root, name))
         except IOError:
@@ -143,7 +147,7 @@ class VirtualFileSystem(object):
         """returns a writable file io stream"""
         if self.readonly:
             raise VfsError("attempt to write to a read-only vfs")
-        self.__validate_path(name)
+        self._validate_path(name)
         phys_path = os.path.normpath(os.path.join(self.root, name))
         dirname = os.path.dirname(phys_path)
         try:
