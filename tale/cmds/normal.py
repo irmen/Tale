@@ -147,8 +147,10 @@ def do_drop(player, parsed, ctx):
         if player.inventory_size == 0:
             raise ActionRefused("You're not carrying anything.")
         else:
-            if input_confirm(ctx.conn, "Are you sure you want to drop all you are carrying?"):
+            if (yield "input", ("Are you sure you want to drop all you are carrying?", lang.yesno)):
                 drop_stuff(player.inventory, player)
+            else:
+                player.tell("You hold onto your stuff.")
     else:
         # drop a single item from the inventory (or a container in the inventory)
         if parsed.who_order:
@@ -218,7 +220,8 @@ def do_put(player, parsed, ctx):
         what = list(player.inventory)
         where = parsed.who_order[-1]   # last object is where to put the stuff
         if what:
-            if not input_confirm(ctx.conn, "Are you sure you want to put everything away?"):
+            if not (yield "input", ("Are you sure you want to put everything away?", lang.yesno)):
+                p("You leave everything where it is.")
                 return
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
@@ -456,10 +459,32 @@ def do_give(player, parsed, ctx):
         # first try if the first one or two words can be interpreted as an amount of money
         if ctx.config.money_type:
             try:
-                money = ctx.driver.moneyfmt.parse(parsed.unrecognized)
-                return give_money(player, money, parsed.who_order[0], ctx.driver)
+                amount = ctx.driver.moneyfmt.parse(parsed.unrecognized)
             except (ValueError, ParseError):
-                pass
+                pass   # go on below
+            else:
+                # we're giving some money away
+                recipient = parsed.who_order[0]
+                if not recipient:
+                    raise ActionRefused("Give it to whom?")
+                if not isinstance(recipient, base.Living):
+                    raise ActionRefused("You can't do that.")
+                if recipient is player:
+                    raise ActionRefused("There's no reason to give it to yourself.")
+                if amount <= 0:
+                    raise ActionRefused("You don't give away anything.")
+                elif player.money < amount:
+                    raise ActionRefused("You don't have that amount of wealth.")
+                else:
+                    recipient.allow_give_money(player, amount)
+                    if (yield "input", ("Are you sure you want to give %s away?" % ctx.driver.moneyfmt.display(amount), lang.yesno)):
+                        player.money -= amount
+                        recipient.money += amount
+                        player.tell("You gave <living>%s</> %s." % (recipient.title, ctx.driver.moneyfmt.display(amount)))
+                        player.tell_others("{Title} gave %s some money." % recipient.title)
+                        return
+                    else:
+                        raise ActionRefused("You keep your money.")
     if parsed.unrecognized:
         raise ParseError("You don't have %s." % lang.join(parsed.unrecognized))
     if player.inventory_size == 0:
@@ -470,14 +495,17 @@ def do_give(player, parsed, ctx):
             raise ParseError("Give all to who?")
         what = player.inventory
         if what:
-            if not input_confirm(ctx.conn, "Are you sure you want to give it all away?"):
+            if not (yield "input", ("Are you sure you want to give it all away?", lang.yesno)):
+                player.tell("You leave everything where it is.")
                 return
         if parsed.args[0] == "all":
             # give all [to] living
-            return give_stuff(player, what, parsed.args[1])
+            give_stuff(player, what, parsed.args[1])
+            return
         else:
             # give living all
-            return give_stuff(player, what, parsed.args[0])
+            give_stuff(player, what, parsed.args[0])
+            return
 
     # give one or more specific items.
     if len([who for who in parsed.who_order if isinstance(who, base.Living)]) > 1:
@@ -486,11 +514,13 @@ def do_give(player, parsed, ctx):
     if isinstance(parsed.who_order[0], base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
         what = parsed.who_order[1:]
-        return give_stuff(player, what, None, target=parsed.who_order[0])
+        give_stuff(player, what, None, target=parsed.who_order[0])
+        return
     elif isinstance(parsed.who_order[-1], base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
         what = parsed.who_order[:-1]
-        return give_stuff(player, what, None, target=parsed.who_order[-1])
+        give_stuff(player, what, None, target=parsed.who_order[-1])
+        return
     else:
         raise ActionRefused("It's not clear who you want to give things to.")
 
@@ -522,26 +552,6 @@ def give_stuff(player, items, target_name, target=None):
         p("You give <living>%s</> <item>%s</>." % (target.title, items_str))
     else:
         p("You didn't give <living>%s</> anything." % target.title)
-
-
-def give_money(player, amount, recipient, driver):
-    if not recipient:
-        raise ActionRefused("Give it to whom?")
-    if not isinstance(recipient, base.Living):
-        raise ActionRefused("You can't do that.")
-    if recipient is player:
-        raise ActionRefused("There's no reason to give it to yourself.")
-    if amount <= 0:
-        player.tell("You don't give away anything.")
-    elif player.money < amount:
-        player.tell("You don't have that amount of wealth.")
-    else:
-        recipient.allow_give_money(player, amount)
-        if input_confirm(ctx.conn, "Are you sure you want to give %s away?" % driver.moneyfmt.display(amount)):
-            player.money -= amount
-            recipient.money += amount
-            player.tell("You gave <living>%s</> %s." % (recipient.title, driver.moneyfmt.display(amount)))
-            player.tell_others("{Title} gave %s some money." % recipient.title)
 
 
 @cmd("help")
@@ -1510,12 +1520,3 @@ def do_teststyles(player, parsed, ctx):
     for style, example in style_tests:
         player.tell("  %s -- %s" % (style, example), end=True)
     player.tell("\n")
-
-
-def input_confirm(conn, prompt):
-    while True:
-        answer = conn.input_direct(prompt)   # blocks
-        try:
-            return lang.yesno(answer)
-        except ValueError:
-            conn.output("That is not a valid answer.")
