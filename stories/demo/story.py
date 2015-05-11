@@ -59,7 +59,6 @@ class Story(object):
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
-        player.tell("\n")
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
@@ -67,12 +66,10 @@ class Story(object):
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
-        player.tell("\n")
 
     def goodbye(self, player):
         """goodbye text when player quits the game"""
         player.tell("Goodbye, %s. Please come back again soon." % player.title)
-        player.tell("\n")
         player.tell("\n")
 
     def completion(self, player):

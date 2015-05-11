@@ -162,17 +162,16 @@ class Driver(pubsub.Listener):
                 player_io = "console"
             connection = self._connect_if_player(player_io, args.delay)
             mud_context.player = connection.player
-            mud_context.conn = connection
             # create the login dialog
             topic_async_dialogs.send((connection, self.__login_dialog_if(connection)))
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
-            driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop)
+            driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop, args=(connection,))
             driver_thread.daemon = True
             driver_thread.start()
             connection.singleplayer_mainloop()
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
-            mud_context.player = mud_context.conn = None
+            mud_context.player = None
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
             wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
@@ -180,9 +179,9 @@ class Driver(pubsub.Listener):
             wsgi_thread.start()
             self.__print_game_intro(None)
             print("Web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
-            self.__startup_main_loop()
+            self.__startup_main_loop(None)
 
-    def __startup_main_loop(self):
+    def __startup_main_loop(self, conn):
         # Kick off the appropriate driver main event loop.
         # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
@@ -190,7 +189,7 @@ class Driver(pubsub.Listener):
             if self.config.server_mode == "if":
                 # single player interactive fiction event loop
                 while not self.__stop_mainloop:
-                    self.__main_loop_singleplayer(mud_context.conn)
+                    self.__main_loop_singleplayer(conn)
             else:
                 # multi player mud event loop
                 while not self.__stop_mainloop:
@@ -273,7 +272,9 @@ class Driver(pubsub.Listener):
         else:
             conn.player.move(self.config.startlocation_player)
         self.__print_game_intro(conn)
-        self.story.welcome(conn.player)
+        prompt = self.story.welcome(conn.player)
+        if prompt:
+            yield "input", "\n" + prompt
         self.story.init_player(conn.player)
         conn.output("\n")
         self.show_motd(conn.player, True)
@@ -292,7 +293,6 @@ class Driver(pubsub.Listener):
         self.all_players.clear()
         time.sleep(0.1)
         mud_context.player = None
-        mud_context.conn = None
 
     def __continue_dialog(self, conn, dialog, message):
         # Notice that the try...except structure is very similar to
@@ -384,7 +384,9 @@ class Driver(pubsub.Listener):
             if loaded_player:
                 conn.player = player = loaded_player
                 player.tell("\n")
-                self.story.welcome_savegame(player)
+                prompt = self.story.welcome_savegame(player)
+                if prompt:
+                    yield "input", "\n" + prompt
                 player.tell("\n")
             else:
                 load_saved_game = False
@@ -398,13 +400,14 @@ class Driver(pubsub.Listener):
             # story config provides a name etc.
             player.init_names(self.config.player_name, None, None, None)
             player.init_race(self.config.player_race, self.config.player_gender)
-            self.__login_dialog_if_2(player, None)   # finish the login dialog
+            self.__login_dialog_if_2(conn, None)   # finish the login dialog
         else:
             # no player config: create a character with the builder
-            builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(player, name_info))
+            builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(conn, name_info))
             topic_async_dialogs.send((conn, builder.build_async()))
 
-    def __login_dialog_if_2(self, player, name_info=None):
+    def __login_dialog_if_2(self, conn, name_info=None):
+        player = conn.player
         # Second part of the if login dialog, this has been split to be able
         # to put in the character builder dialog that continues with this one.
         if name_info:
@@ -417,7 +420,9 @@ class Driver(pubsub.Listener):
         else:
             player.move(self.config.startlocation_player)
         player.tell("\n")
-        self.story.welcome(player)
+        prompt = self.story.welcome(player)
+        if prompt:
+            conn.input_direct("\n" + prompt)   # blocks  (note: cannot use yield here)
         player.tell("\n")
         self.story.init_player(player)
         player.look(short=False)  # force a 'look' command to get our bearings
@@ -716,6 +721,8 @@ class Driver(pubsub.Listener):
 
     def __load_saved_game(self):
         assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"
+        assert len(self.all_players) == 1
+        conn = list(self.all_players.values())[0]
         try:
             savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
             state = pickle.loads(savegame)
@@ -738,7 +745,7 @@ class Driver(pubsub.Listener):
             # we load a new player and simply replace all players with this one.
             player = state["player"]
             mud_context.player = player
-            self.all_players = {player.name: mud_context.conn}
+            self.all_players = {player.name: conn}
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]

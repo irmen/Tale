@@ -11,7 +11,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import sys
 from tale.driver import StoryConfig
 from tale.main import run_story
-from tale import mud_context
 
 
 class Story(object):
@@ -52,27 +51,30 @@ class Story(object):
         pass
 
     def welcome(self, player):
-        """welcome text when player enters a new game"""
+        """
+        Welcome text when player enters a new game
+        If you return a string, it is used as an input prompt before continuing (a pause).
+        """
         player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        mud_context.conn.input_direct("\nPress enter to continue. ")  # blocks
-        player.tell("\n")
+        return "Press enter to continue."
 
     def welcome_savegame(self, player):
-        """welcome text when player enters the game after loading a saved game"""
+        """
+        Welcome text when player enters the game after loading a saved game
+        If you return a string, it is used as an input prompt before continuing (a pause).
+        """
         player.tell("<bright>Welcome back to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
-        mud_context.conn.input_direct("\nPress enter to continue where you were before. ")    # blocks
-        player.tell("\n")
+        return "Press enter to continue where you were before."
 
     def goodbye(self, player):
         """goodbye text when player quits the game"""
         player.tell("Goodbye. Please come back again soon to finish the story.")
-        player.tell("\n")
         player.tell("\n")
 
     def completion(self, player):

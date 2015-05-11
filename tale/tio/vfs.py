@@ -79,7 +79,7 @@ class VirtualFileSystem(object):
         if self.use_pkgutil:
             pass
         else:
-            path = os.path.abspath(path)
+            path = os.path.abspath(os.path.join(self.root, path))
             if not path.startswith(self.root):
                 raise VfsError("path must not escape root folder")
 

@@ -51,7 +51,6 @@ class Story(object):
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to fool around with your pet, and exit the house to win the game.")
         player.tell("\n")
-        player.tell("\n")
 
     def welcome_savegame(self, player):
         pass  # not supported in demo
