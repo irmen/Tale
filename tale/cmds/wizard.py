@@ -161,8 +161,8 @@ def do_clean(player, parsed, ctx):
         if len(parsed.who_order) != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
-        if input_confirm(ctx.conn, "Are you sure you want to clean out %s?" % victim.title):
-            p("Cleaning inventory of", victim)
+        if (yield "input", ("Are you sure you want to clean out %s?" % victim.title, lang.yesno)):
+            p("Cleaning inventory of %s." % victim)
             player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
             for item in items:
@@ -171,6 +171,8 @@ def do_clean(player, parsed, ctx):
                 p("destroyed", item)
             if victim.inventory_size:
                 p("Some items refused to be destroyed!")
+        else:
+            p("You leave %s be." % victim.subjective)
 
 
 @wizcmd("pdb")
@@ -506,12 +508,3 @@ def do_force(player, parsed, ctx):
         # re-parse and execute the actual command for the target, from the viewpoint of the current player!
         target_parsed = player.parse(cmd)
         pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))
-
-
-def input_confirm(conn, prompt):
-    while True:
-        answer = conn.input_direct(prompt)   # blocks
-        try:
-            return lang.yesno(answer)
-        except ValueError:
-            conn.output("That is not a valid answer.")
