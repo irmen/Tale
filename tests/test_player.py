@@ -17,7 +17,7 @@ from tale.player import Player, TextBuffer, PlayerConnection
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
-from tale.charbuilder import CharacterBuilder
+from tale.charbuilder import CharacterBuilder, validate_name, validate_race, PlayerNaming
 from tale.driver import StoryConfig
 from tale import pubsub
 if sys.version_info < (3, 0):
@@ -472,6 +472,7 @@ class TestPlayerConnection(unittest.TestCase):
             player.tell("hello 1", end=True)
             player.tell("hello 2", end=True)
             pc.write_output()
+            self.assertEqual("  hello 2", pc.last_output_line)
             self.assertEqual("  hello 1\n  hello 2\n", sys.stdout.getvalue())
         finally:
             sys.stdout = old_stdout
@@ -534,19 +535,19 @@ class TestTextbuffer(unittest.TestCase):
 
 class TestCharacterBuilder(unittest.TestCase):
     def test_build(self):
-        b = CharacterBuilder(None)
+        b = CharacterBuilder(None, None)
         pn = b.create_default_player()
         self.assertFalse(pn.wizard)
         pn = b.create_default_wizard()
         self.assertTrue(pn.wizard)
         conn = PlayerConnection()
-        b = CharacterBuilder(conn)
+        b = CharacterBuilder(conn, None)
         builder = b.build_async()
         why, what = next(builder)
         self.assertEqual("input", why)
 
     def test_apply_to(self):
-        b = CharacterBuilder(None)
+        b = CharacterBuilder(None, None)
         p = Player("test", "n")
         pn = b.create_default_wizard()
         self.assertFalse("wizard" in p.privileges)
@@ -557,6 +558,42 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual("human", p.race)
         self.assertEqual("m", p.gender)
         self.assertEqual("arch wizard Rinzwind", p.title)
+
+    def test_validators(self):
+        self.assertEqual("Rinzwind", validate_name("Rinzwind"))
+        self.assertEqual("Bob", validate_name("Bob"))
+        self.assertEqual("human", validate_race("human"))
+        self.assertEqual("human", validate_race("HUMAN"))
+        with self.assertRaises(ValueError):
+            validate_name("aa")
+        with self.assertRaises(ValueError):
+            validate_name("aabcde444")
+        with self.assertRaises(ValueError):
+            validate_name("aabc def")
+        with self.assertRaises(ValueError):
+            validate_race("elemental")
+        with self.assertRaises(ValueError):
+            validate_race("xyz12343")
+
+    def test_playernaming(self):
+        n = PlayerNaming()
+        n.wizard = True
+        n.gender = "m"
+        n.name = "RINZWIND"
+        n.description = "a wizard"
+        n.money = 999
+        n.race = "elemental"
+        n.title = "grand master"
+        self.assertEqual("rinzwind", n.name)
+        p = Player("dummy", "f")
+        n.apply_to(p)
+        self.assertEqual("rinzwind", p.name)
+        self.assertEqual("m", p.gender)
+        self.assertIn("wizard", p.privileges)
+        self.assertEqual("a wizard", p.description)
+        self.assertEqual(999, p.money)
+        self.assertEqual("elemental", p.race)
+        self.assertEqual("grand master", p.title)
 
 
 class TestTabCompletion(unittest.TestCase):

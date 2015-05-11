@@ -253,6 +253,7 @@ class PlayerConnection(object):
         self.player = player
         self.io = io
         self.need_new_input_prompt = True
+        self.last_output_line = None
 
     def get_output(self):
         """
@@ -276,17 +277,21 @@ class PlayerConnection(object):
             if mud_context.config.server_mode == "if" and self.player.output_line_delay > 0:
                 for line in output.rstrip().splitlines():
                     self.io.output(line)
+                    self.last_output_line = line
                     time.sleep(self.player.output_line_delay / 1000.0)  # delay the output for a short period
             else:
-                self.io.output(output.rstrip())
+                line = self.last_output_line = output.rstrip()
+                self.io.output(line)
 
     def output(self, *lines):
         """directly writes the given text to the player's screen, without buffering and formatting/wrapping"""
         self.io.output(*lines)
+        self.last_output_line = lines[-1]
 
     def output_no_newline(self, line):
         """similar to output() but writes a single line, without newline at the end"""
         self.io.output_no_newline(line)
+        self.last_output_line = line
 
     def input_direct(self, prompt=None):
         """

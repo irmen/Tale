@@ -211,4 +211,14 @@ def yesno(value):
         return True
     if value in {"n", "no", "nope", "no way", "hell no"}:
         return False
-    raise ValueError("Not a valid yes or no")
+    raise ValueError("That is not an understood yes or no.")
+
+
+def validate_gender(value):
+    value = value.lower() if value else ""
+    if value in GENDERS:
+        return value
+    if len(value) > 1:
+        if value[0] in GENDERS and GENDERS[value[0]] == value:
+            return value
+    raise ValueError("That is not a valid gender.")

@@ -131,11 +131,25 @@ class TestLanguagetools(unittest.TestCase):
         self.assertFalse(lang.yesno("NO"))
         self.assertFalse(lang.yesno("Hell No"))
         with self.assertRaises(ValueError):
-            self.assertTrue(lang.yesno(None))
+            lang.yesno(None)
         with self.assertRaises(ValueError):
-            self.assertTrue(lang.yesno(""))
+            lang.yesno("")
         with self.assertRaises(ValueError):
-            self.assertTrue(lang.yesno("i dunno"))
+            lang.yesno("i dunno")
+
+    def test_gender(self):
+        self.assertEqual("f", lang.validate_gender("f"))
+        self.assertEqual("m", lang.validate_gender("m"))
+        self.assertEqual("n", lang.validate_gender("n"))
+        self.assertEqual("f", lang.validate_gender("F"))
+        self.assertEqual("female", lang.validate_gender("Female"))
+        self.assertEqual("male", lang.validate_gender("MALE"))
+        with self.assertRaises(ValueError):
+            lang.validate_gender(None)
+        with self.assertRaises(ValueError):
+            lang.validate_gender("")
+        with self.assertRaises(ValueError):
+            lang.validate_gender("nope")
 
 
 if __name__ == "__main__":

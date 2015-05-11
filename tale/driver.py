@@ -55,7 +55,7 @@ class Driver(pubsub.Listener):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
-        self.waiting_for_input = {}
+        self.waiting_for_input = {}   # maps playerconnection to tuple (dialog, validator)
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
@@ -252,23 +252,14 @@ class Driver(pubsub.Listener):
         conn.output("<bright>Welcome. We have to know your name before you can continue.</>")
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
         while True:
-            name = yield "input", "Please type in your name."
-            message = charbuilder.CharacterBuilder.validate_name(name)
-            if not message:
-                if name.startswith("wizard") or name.startswith("player"):
-                    break
-                conn.output("Start with wizard- or player- to select player type")  # XXX
-            else:
-                conn.output(message)
-        while True:
-            gender = yield "input", "What is your gender (m/f/n)?"
-            if gender in ('m', 'f', 'n'):
+            name = yield "input", ("Please type in your name.", charbuilder.validate_name)
+            if name.startswith("wizard") or name.startswith("player"):
                 break
-            else:
-                conn.output("Please type (m)ale, (f)emale or (n)euter.")
+            conn.output("Start with wizard- or player- to select player type")  # XXX
+        gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
         name_info = charbuilder.PlayerNaming()
         name_info.name = name
-        name_info.gender = gender
+        name_info.gender = gender[0]
         name_info.wizard = name.startswith("wizard")
         if name_info.wizard:
             name_info.title = "El Magician Grande "+name
@@ -300,18 +291,22 @@ class Driver(pubsub.Listener):
         mud_context.player = None
         mud_context.conn = None
 
-    def __process_dialog(self, conn, dialog, message):
+    def __continue_dialog(self, conn, dialog, message):
         try:
             why, what = dialog.send(message)
         except StopIteration:
             pass
         else:
             if why == "input":
-                if what:
-                    if not what.endswith(" "):
-                        what += " "
-                    conn.output_no_newline(what)  # the input prompt
-                self.waiting_for_input[conn] = dialog
+                if type(what) is tuple:
+                    prompt, validator = what
+                else:
+                    prompt, validator = what, None
+                if prompt:
+                    if not prompt.endswith(" "):
+                        prompt += " "
+                    conn.output_no_newline(prompt)  # the input prompt
+                self.waiting_for_input[conn] = (dialog, validator)
             else:
                 raise ValueError("invalid generator wait reason: " + why)
 
@@ -365,13 +360,7 @@ class Driver(pubsub.Listener):
             load_saved_game = False
         else:
             player.tell("\n")
-            while True:
-                answer = yield "input", "Do you want to load a saved game ('<bright>n</>' will start a new game)?"
-                try:
-                    load_saved_game = lang.yesno(answer)
-                    break
-                except ValueError:
-                    conn.output("That is not a valid answer.")
+            load_saved_game = yield "input", ("Do you want to load a saved game ('<bright>n</>' will start a new game)?", lang.yesno)
         player.tell("\n")
         if load_saved_game:
             loaded_player = self.__load_saved_game()
@@ -443,8 +432,18 @@ class Driver(pubsub.Listener):
                 try:
                     if conn in self.waiting_for_input:
                         # this connection is processing direct input, rather than regular commands
-                        dialog = self.waiting_for_input.pop(conn)
-                        self.__process_dialog(conn, dialog, conn.player.get_pending_input()[0])
+                        dialog, validator = self.waiting_for_input.pop(conn)
+                        response = conn.player.get_pending_input()[0]
+                        if validator:
+                            try:
+                                response = validator(response)
+                            except ValueError as x:
+                                prompt = conn.last_output_line
+                                conn.output(str(x) or "That is not a valid answer.")
+                                conn.output_no_newline(prompt)   # print the input prompt again
+                                self.waiting_for_input[conn] = (dialog, validator)   # reschedule
+                                continue
+                        self.__continue_dialog(conn, dialog, response)
                     else:
                         # normal command processing
                         self.__server_loop_process_player_input(conn)
@@ -536,8 +535,18 @@ class Driver(pubsub.Listener):
                     try:
                         if conn in self.waiting_for_input:
                             # this connection is processing direct input, rather than regular commands
-                            dialog = self.waiting_for_input.pop(conn)
-                            self.__process_dialog(conn, dialog, conn.player.get_pending_input()[0])
+                            dialog, validator = self.waiting_for_input.pop(conn)
+                            response = conn.player.get_pending_input()[0]
+                            if validator:
+                                try:
+                                    response = validator(response)
+                                except ValueError as x:
+                                    prompt = conn.last_output_line
+                                    conn.output(str(x) or "That is not a valid answer.")
+                                    conn.output_no_newline(prompt)   # print the input prompt again
+                                    self.waiting_for_input[conn] = (dialog, validator)   # reschedule
+                                    continue
+                            self.__continue_dialog(conn, dialog, response)
                         else:
                             # normal command processing
                             self.__server_loop_process_player_input(conn)
@@ -844,7 +853,7 @@ class Driver(pubsub.Listener):
             conn, dialog = event
             assert type(conn) is player.PlayerConnection
             assert inspect.isgenerator(dialog)
-            self.__process_dialog(conn, dialog, None)
+            self.__continue_dialog(conn, dialog, None)
         else:
             raise ValueError("unknown topic: " + topicname)
 
