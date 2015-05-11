@@ -20,6 +20,8 @@ def cmd(func):
     """
     # NOTE: this code is VERY similar to the internal @cmd decorator in cmds/normal.py
     # If changes are made, make sure to update both occurrences
+    if inspect.isgeneratorfunction(func):
+        func.is_generator = True   # contains async yields
     argspec = inspect.getargspec(func)
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)
@@ -48,6 +50,8 @@ def wizcmd(func):
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)
 
+    if inspect.isgeneratorfunction(func):
+        func.is_generator = True   # contains async yields
     argspec = inspect.getargspec(func)
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)

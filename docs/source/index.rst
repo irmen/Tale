@@ -15,11 +15,12 @@ Tale is 100% pure Python and runs on Python 2.7 and 3.4+.
 (maybe it runs on 3.2 and 3.3 as well, but that is not tested).
 
 You can run Tale in console mode, where it is a pure text interface running in your
-console window. But you can also run Tale in a simple GUI application (built with Tkinter).
+console window. But you can also run Tale in a simple GUI application (built with Tkinter)
+or in your web browser.
 
 .. note::
-    The multi-user aspects are on the back burner, I'm mainly focusing on the (single player)
-    interactive fiction things right now.
+    The multi-user aspects are fairly new and still incomplete.
+    Until recently, the focus has been on the (single player) interactive fiction things.
 
 .. note::
     This documentation is still a stub. I hope to write some real documentation soon,
@@ -69,7 +70,7 @@ Anyway, the command to do so is::
     $ tale-run --game <path-to-the-story/demo-directory>`
 
 You can use the ``--help`` argument to see some help about this command.
-You can use ``--gui`` to start the GUI version of the interface rather than the text console version.
+You can use ``--gui`` or ``--web`` to start the GUI or browser version of the interface rather than the text console version.
 
 The story might prompt you with a couple of questions:
 Choose not to load a saved game (you will have none at first start anyway).
@@ -110,14 +111,14 @@ A random list of the features of the current codebase:
 - Runs on Python 2.7 and 3.4+ (maybe on 3.2 and 3.3 too but that is not tested)
 - game engine and framework code is separated from the actual game code;
   it can run different games from different directories (just one at a time though)
-- single-player I.F. mode and multi-player MUD mode (but no multiplayer server yet,
-  it's just a difference in active features for now)
+- single-player I.F. mode and multi-player MUD mode
+- MUD mode runs as a web server only for now (no old-skool console access like telnet)
 - text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
 - can load and run games/stories from a zipfile or from extracted folders.
 - I/O abstraction layer to be able to create alternative interfaces.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
-- the parser is partly based on a heavily modified adaptation of LPC-MUD's 'soul'
+- the parser uses a soul based on LPC-MUD's 'soul.c', it has been converted to Python and adapted
 - the soul has 250+ 'emotes' such as bounce and shrug.
 - tab-completion of commands (command line requires readline/pyreadline for this)
 - it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
@@ -141,8 +142,10 @@ A random list of the features of the current codebase:
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.
 - it's trivial to give objects a 'heartbeat' (=they will get a call every server tick to do stuff)
 - you can also quite easily schedule calls to be executed at a defined later moment in time
+- using generators (yield statements) instead of regular input() calls,
+  it is easy to create sequential dialogs (question-response) that will be handled without blocking the driver
 - easy definition of commands in separate functions, uses docstrings to define command help texts
-- command function code is quite compact due to convenient parameters and available methods on the game objects
+- command function code is quite compact due to convenient parameters, and available methods on the game objects
 - command code gets parse information from the soul parser as parameter; very little parsing needs to be done in the command code itself
 - there's a set of configurable parameters on a per-story basis
 - stories can define their own introduction text and completion texts
@@ -151,7 +154,7 @@ A random list of the features of the current codebase:
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
 - hint and story-recap system that can adapt dynamically to the progress of the story.
 - contains a simple virtual file system to provide easy resource loading / datafile storage.
-- provides a simple synchronous pubsub/event signaling mechanism
+- provides a simple pubsub/event signaling mechanism
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways
@@ -162,14 +165,12 @@ A random list of the features of the current codebase:
 MUD mode versus Interactive Fiction mode
 ----------------------------------------
 The Tale game driver launches in Interactive Fiction mode by default.
-This is because my development efforts are focused on IF at the moment.
 
-However, there's already a little bit of multi-user goodness available.
-You can enable it by using the :kbd:`--mode mud` command line switch.
-A couple of new commands and features are enabled when you do this
+To run a story (or world, rather) in multi-user MUD mode, use the :kbd:`--mode mud` command line switch.
+A whole lot of new commands and features are enabled when you do this
 (amongst others: message-of-the-day support and the 'stats' command).
-Running a IF story in MUD mode may cause some problems. It's only
-possible to do this for testing purposes right now, and may be broken.
+Running a IF story in MUD mode may cause some problems. Therefore you can
+specify in the story config what game modes your story supports.
 
 
 Copyright

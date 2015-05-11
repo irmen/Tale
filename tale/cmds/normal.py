@@ -34,6 +34,8 @@ def cmd(command, *aliases):
     def cmd2(func):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
+        if inspect.isgeneratorfunction(func):
+            func.is_generator = True   # contains async yields
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
@@ -830,9 +832,9 @@ def do_wait(player, parsed, ctx):
 @disable_notify_action
 def do_quit(player, parsed, ctx):
     """Quit the game."""
-    if input_confirm(ctx.conn, "Are you sure you want to quit?"):
+    if (yield "input", ("Are you sure you want to quit?", lang.yesno)):
         if ctx.config.server_mode != "mud" and ctx.config.savegames_enabled:
-            if input_confirm(ctx.conn, "Would you like to save your progress?"):
+            if (yield "input", ("Would you like to save your progress?", lang.yesno)):
                 do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()

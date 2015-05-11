@@ -96,8 +96,11 @@ class Driver(pubsub.Listener):
             raise IOError("Cannot find specified game")
         story = __import__("story", level=0)
         self.story = story.Story()
+        if len(self.story.config.supported_modes) == 1 and args.mode != "mud":
+            # There's only one mode this story runs in. Just select that one.
+            args.mode = list(self.story.config.supported_modes)[0]
         if args.mode not in self.story.config.supported_modes:
-            raise ValueError("driver mode '%s' not supported by this story" % args.mode)
+            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
         self.config = StoryConfig.copy_from(self.story.config)
         self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         if self.config.server_mode != "if" and self.config.server_tick_method == "command":
@@ -656,9 +659,14 @@ class Driver(pubsub.Listener):
                     if parsed.verb in player.location.exits:
                         self.__go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
+                        # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                         func = command_verbs[parsed.verb]
                         ctx = util.Context(self, self.game_clock, self.config, conn)
-                        func(player, parsed, ctx)
+                        if getattr(func, "is_generator", False):
+                            dialog = func(player, parsed, ctx)
+                            topic_async_dialogs.send((conn, dialog))    # enqueue as async, and continue
+                        else:
+                            func(player, parsed, ctx)
                         if func.enable_notify_action:
                             topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
                     else:

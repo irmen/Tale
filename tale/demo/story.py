@@ -14,6 +14,7 @@ from tale.driver import StoryConfig
 from tale.main import run_story
 
 
+# XXX fix: the story intro appears slow and an input prompt is printed above it >>>
 class Story(object):
     config = StoryConfig(
         name="Tale demo story",
@@ -68,4 +69,5 @@ if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
     gamedir = os.path.dirname(__file__)
     gui = len(sys.argv) > 1 and sys.argv[1] == "--gui"
-    run_story(gamedir, gui)
+    web = len(sys.argv) > 1 and sys.argv[1] == "--web"
+    run_story(gamedir, gui, web)

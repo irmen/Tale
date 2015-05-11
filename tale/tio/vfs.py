@@ -40,6 +40,7 @@ class Resource(object):
         return self.data[item]
 
 
+# XXX fix: don't allow to read files above the filesystem root (using ../..)
 class VirtualFileSystem(object):
     """
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
