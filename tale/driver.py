@@ -183,17 +183,16 @@ class Driver(pubsub.Listener):
             self.__startup_main_loop()
 
     def __startup_main_loop(self):
-        # Continues the startup process and kick off the driver's main loop.
-        # This may run in a background thread depending on the driver mode.
+        # Kick off the appropriate driver main event loop.
+        # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
         try:
             if self.config.server_mode == "if":
-                # single player interactive fiction
-                while not mud_context.conn:
-                    time.sleep(0.02)
+                # single player interactive fiction event loop
                 while not self.__stop_mainloop:
                     self.__main_loop_singleplayer(mud_context.conn)
             else:
+                # multi player mud event loop
                 while not self.__stop_mainloop:
                     self.__main_loop_multiplayer()
         except:
@@ -421,13 +420,14 @@ class Driver(pubsub.Listener):
             if conn not in self.waiting_for_input:
                 conn.write_input_prompt()
             if self.config.server_tick_method == "command":
-                # wait indefinitely for next player input
                 conn.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
             elif self.config.server_tick_method == "timer":
                 # server tick goes on a timer, wait a limited time for player input before going on
                 input_wait_time = max(0.01, self.config.server_tick_time - loop_duration)
                 has_input = conn.player.input_is_available.wait(input_wait_time)
+            else:
+                raise ValueError("invalid tick method")
 
             loop_start = time.time()
             if has_input:

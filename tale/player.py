@@ -309,6 +309,8 @@ class PlayerConnection(object):
         return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
 
     def write_input_prompt(self):
+        # only actually write a prompt when the flag is set.
+        # this avoids writing a prompt on every server tick even when nothing is entered.
         if self.need_new_input_prompt:
             self.io.write_input_prompt()
             self.need_new_input_prompt = False

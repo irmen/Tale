@@ -14,7 +14,6 @@ from tale.driver import StoryConfig
 from tale.main import run_story
 
 
-# XXX fix: the story intro appears slow and an input prompt is printed above it >>>
 class Story(object):
     config = StoryConfig(
         name="Tale demo story",
