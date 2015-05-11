@@ -19,6 +19,9 @@ class PlayerNaming(object):
         self.money = 0.0
 
     def apply_to(self, player):
+        assert self._name
+        assert self.gender
+        assert self.race
         player.init_race(self.race, self.gender)
         player.init_names(self._name, self.title, self.description, None)
         player.money = self.money

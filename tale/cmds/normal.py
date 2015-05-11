@@ -480,8 +480,12 @@ def do_give(player, parsed, ctx):
                     if (yield "input", ("Are you sure you want to give %s away?" % ctx.driver.moneyfmt.display(amount), lang.yesno)):
                         player.money -= amount
                         recipient.money += amount
-                        player.tell("You gave <living>%s</> %s." % (recipient.title, ctx.driver.moneyfmt.display(amount)))
-                        player.tell_others("{Title} gave %s some money." % recipient.title)
+                        amount_formatted = ctx.driver.moneyfmt.display(amount)
+                        player_title = lang.capital(player.title)
+                        room_msg = "<player>%s</> gave <living>%s</> some money." % (player_title, recipient.title)
+                        recipient_msg = "<player>%s</> gave you <item>%s</>." % (player_title, amount_formatted)
+                        player.location.tell(room_msg, player, [recipient], recipient_msg)
+                        player.tell("You gave <living>%s</> <item>%s</>." % (recipient.title, amount_formatted))
                         return
                     else:
                         raise ActionRefused("You keep your money.")
@@ -846,7 +850,7 @@ def do_quit(player, parsed, ctx):
             if (yield "input", ("Would you like to save your progress?", lang.yesno)):
                 do_save(player, parsed, ctx)
         player.tell("\n")
-        raise SessionExit()
+        raise SessionExit()         # XXX make quit work in MUD mode
     player.tell("Good, thank you for staying.")
 
 

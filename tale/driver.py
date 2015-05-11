@@ -263,6 +263,7 @@ class Driver(pubsub.Listener):
         name_info.name = name
         name_info.gender = gender[0]
         name_info.wizard = name.startswith("wizard")
+        name_info.race = "human"
         if name_info.wizard:
             name_info.title = "El Magician Grande "+name
         self.__rename_player(conn.player, name_info)

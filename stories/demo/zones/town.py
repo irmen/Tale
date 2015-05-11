@@ -248,7 +248,7 @@ alley.insert(computer, None)
 
 class DoorKey(Item):
     def notify_moved(self, source_container, target_container, actor):
-        player = mud_context.player
+        player = mud_context.player         # XXX fix, is None
         if target_container is player or target_container in player:
             if "got_doorkey" not in actor.hints.checkpoints:
                 actor.tell_later("<dim>(You will remember this event.)</>")
