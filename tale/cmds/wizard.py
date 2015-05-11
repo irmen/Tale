@@ -36,6 +36,7 @@ def wizcmd(command, *aliases):
     def wizcmd2(func):
         func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
         func.is_tale_command_func = True
+        func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
 
         @functools.wraps(func)
         def executewizcommand(player, parsed, ctx):
@@ -45,8 +46,6 @@ def wizcmd(command, *aliases):
 
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
-        if inspect.isgeneratorfunction(func):
-            func.is_generator = True   # contains async yields
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
@@ -132,7 +131,8 @@ def do_destroy(player, parsed, ctx):
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not input_confirm(ctx.conn, "Are you sure you want to destroy %s?" % victim.title):
+        if not (yield "input", ("Are you sure you want to destroy %s?" % victim.title, lang.yesno)):
+            player.tell("You leave %s be." % victim.subjective)
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)

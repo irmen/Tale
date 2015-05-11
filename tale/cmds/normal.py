@@ -34,8 +34,7 @@ def cmd(command, *aliases):
     def cmd2(func):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
-        if inspect.isgeneratorfunction(func):
-            func.is_generator = True   # contains async yields
+        func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
         argspec = inspect.getargspec(func)
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)

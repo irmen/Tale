@@ -294,10 +294,23 @@ class Driver(pubsub.Listener):
         mud_context.conn = None
 
     def __continue_dialog(self, conn, dialog, message):
+        # Notice that the try...except structure is very similar to
+        # the one in __server_loop_process_player_input
+        # That's no surprise because also in this async case, we need
+        # to handle any parse errors and such that may be thrown from the
+        # generator. The reguar player input function has to deal with
+        # them as well, caused by normal player commands.
         try:
             why, what = dialog.send(message)
         except StopIteration:
             pass
+        except errors.ActionRefused as x:
+            conn.player.remember_parsed()
+            conn.player.tell(str(x))
+            conn.write_output()
+        except errors.ParseError as x:
+            conn.player.tell(str(x))
+            conn.write_output()
         else:
             if why == "input":
                 if type(what) is tuple:
@@ -307,6 +320,7 @@ class Driver(pubsub.Listener):
                 if prompt:
                     if not prompt.endswith(" "):
                         prompt += " "
+                    conn.write_output()
                     conn.output_no_newline(prompt)  # the input prompt
                 self.waiting_for_input[conn] = (dialog, validator)
             else:
