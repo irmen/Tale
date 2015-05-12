@@ -21,7 +21,11 @@ import tale.demo
 from tests.supportstuff import Thing
 
 
-def module_level_func(ctx=None):
+def module_level_func(ctx):
+    assert ctx is not None
+
+
+def module_level_func_without_ctx():
     pass
 
 
@@ -83,8 +87,8 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def testCallable(self):
-        def plain_function(ctx=None):
-            return ctx
+        def scoped_function():
+            pass
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
         ctx = tale.util.Context(driver="driver", clock=None, config=None, player_connection=None)
@@ -92,12 +96,10 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual([42], t.x)
         d = the_driver.Deferred(None, module_level_func, [], None)
         d(ctx=ctx)
-        d = the_driver.Deferred(None, os.getcwd, [], None)
-        with self.assertRaises(TypeError) as x:
-            d(ctx=ctx)
-        self.assertTrue(str(x.exception).startswith("getcwd() takes no"))
+        d = the_driver.Deferred(None, module_level_func_without_ctx, [], None)
+        d(ctx=ctx)
         with self.assertRaises(ValueError):
-            the_driver.Deferred(None, plain_function, [], None)
+            the_driver.Deferred(None, scoped_function, [], None)
         with self.assertRaises(ValueError):
             d = the_driver.Deferred(None, lambda a, ctx=None: 1, [42], None)
 

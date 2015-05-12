@@ -850,7 +850,7 @@ def do_quit(player, parsed, ctx):
             if (yield "input", ("Would you like to save your progress?", lang.yesno)):
                 do_save(player, parsed, ctx)
         player.tell("\n")
-        raise SessionExit()         # XXX make quit work in MUD mode
+        raise SessionExit()
     player.tell("Good, thank you for staying.")
 
 

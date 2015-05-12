@@ -214,16 +214,16 @@ class TestUtil(unittest.TestCase):
     def test_vfs_validate_path(self):
         vfs = VirtualFileSystem(root_path=".")
         print("ROOT", vfs.root)
-        vfs._validate_path(".")
-        vfs._validate_path("./foo")
-        vfs._validate_path("./foo/bar")
-        vfs._validate_path(".")
+        vfs.validate_path(".")
+        vfs.validate_path("./foo")
+        vfs.validate_path("./foo/bar")
+        vfs.validate_path(".")
         with self.assertRaises(VfsError):
-            vfs._validate_path(r".\wrong\slash")
+            vfs.validate_path(r".\wrong\slash")
         with self.assertRaises(VfsError):
-            vfs._validate_path(r"/absolute/not/allowed")
+            vfs.validate_path(r"/absolute/not/allowed")
         with self.assertRaises(VfsError):
-            vfs._validate_path(r"./foo/../../../../../rootescape/notallowed")
+            vfs.validate_path(r"./foo/../../../../../rootescape/notallowed")
 
     def test_vfs_storage(self):
         with self.assertRaises(ValueError):

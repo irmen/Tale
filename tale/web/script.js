@@ -31,7 +31,7 @@ function poll_text() {
             }
             if(json["text"]) {
                 document.getElementById("player-location").innerHTML = json["location"];
-                document.getElementById("player-turns").innerHTML = json["turns"];
+                // document.getElementById("player-turns").innerHTML = json["turns"];
                 txtdiv.innerHTML += json["text"];
                 txtdiv.scrollTop = txtdiv.scrollHeight;
             }

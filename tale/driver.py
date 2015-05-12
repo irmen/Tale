@@ -241,9 +241,9 @@ class Driver(pubsub.Listener):
     def _disconnect_mud_player(self, conn):
         name = conn.player.name
         assert self.all_players[name] is conn
-        conn.write_output()
-        conn.destroy()
         del self.all_players[name]
+        conn.write_output()
+        self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
 
     def __login_dialog_mud(self, conn):
         assert self.config.server_mode == "mud"
@@ -574,6 +574,8 @@ class Driver(pubsub.Listener):
                         continue
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
+
+                        topic_pending_tells.send(lambda: self._disconnect_mud_player(conn))
                     except Exception:
                         txt = "* internal error:\n" + traceback.format_exc()
                         conn.player.tell(txt, format=False)
@@ -852,9 +854,10 @@ class Driver(pubsub.Listener):
         Note that the due time is datetime.datetime *in game time* (not real time!)
         when the deferred should trigger. It can also be a number, meaning the number
         of real-time seconds after the current time.
-        Also note that the deferred *always* gets a kwarg 'ctx' set to a Context object.
-        This is often useful, for instance you can register a new deferred on the
-        ctx.driver without having to access a global driver object.
+        Also note that the deferred gets a kwarg 'ctx' set to a Context object, if it has
+        a 'ctx' argument in its signature. (If not, that's okay too)
+        Receiving the context is often useful, for instance you can register a new
+        deferred on the ctx.driver without having to access a global driver object.
         """
         assert callable(action)
         if isinstance(due, datetime.datetime):
@@ -993,9 +996,9 @@ class Deferred(object):
 
     def __call__(self, *args, **kwargs):
         self.kwargs = self.kwargs or {}
-        if "ctx" in kwargs:
-            self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
-        if isinstance(self.action, util.basestring_type):
+        if callable(self.action):
+            func = self.action
+        else:
             # deferred action is stored as the name of the function to call,
             # so we need to obtain the actual function from the owner object.
             if isinstance(self.owner, util.basestring_type):
@@ -1005,9 +1008,9 @@ class Deferred(object):
                 else:
                     raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
-            func(*self.vargs, **self.kwargs)
-        else:
-            self.action(*self.vargs, **self.kwargs)
+        if "ctx" in inspect.getargspec(func).args:
+            self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
+        func(*self.vargs, **self.kwargs)
         # our lifetime has ended, remove references:
         del self.owner
         del self.action
