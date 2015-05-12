@@ -161,7 +161,6 @@ class Driver(pubsub.Listener):
             else:
                 player_io = "console"
             connection = self._connect_if_player(player_io, args.delay)
-            mud_context.player = connection.player
             # create the login dialog
             topic_async_dialogs.send((connection, self.__login_dialog_if(connection)))
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
@@ -171,7 +170,6 @@ class Driver(pubsub.Listener):
             connection.singleplayer_mainloop()
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
-            mud_context.player = None
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
             wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
@@ -292,7 +290,6 @@ class Driver(pubsub.Listener):
             conn.destroy()
         self.all_players.clear()
         time.sleep(0.1)
-        mud_context.player = None
 
     def __continue_dialog(self, conn, dialog, message):
         # Notice that the try...except structure is very similar to
@@ -744,7 +741,6 @@ class Driver(pubsub.Listener):
             # Because loading a complete saved game is strictly for single player 'if' mode,
             # we load a new player and simply replace all players with this one.
             player = state["player"]
-            mud_context.player = player
             self.all_players = {player.name: conn}
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]

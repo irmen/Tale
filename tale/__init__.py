@@ -17,8 +17,7 @@ class _MudContext(object):
 
 
 # The mud_context is a global container for the following attributes,
-# that will be set (by the driver) to the correct current instances:
+# that will be set (by the driver) to the correct initialized instances:
 #  - driver   (driver)
-#  - player   (player itself)
 #  - config   (story config)
 mud_context = _MudContext()

@@ -9,6 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door, Item, Container
 from tale.npc import NPC
+from tale.player import Player
 from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.util import clone
@@ -248,8 +249,13 @@ alley.insert(computer, None)
 
 class DoorKey(Item):
     def notify_moved(self, source_container, target_container, actor):
-        player = mud_context.player         # XXX fix, is None
-        if target_container is player or target_container in player:
+        # check if a player picked up this key
+        player = None
+        if type(target_container) is Player:
+            player = target_container
+        elif type(self.contained_in) is Player:
+            player = self.contained_in
+        if player:
             if "got_doorkey" not in actor.hints.checkpoints:
                 actor.tell_later("<dim>(You will remember this event.)</>")
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")

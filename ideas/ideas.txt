@@ -55,13 +55,12 @@ General ideas/TODO:
     Interaction with the part is done by owner object's handle_part_verb? (which by default only prints a description?)
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[code] use yield (generators) for player command processing (not only for direct inputs)?
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [test] double names.
     What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
     What happens with multiple items of same name in room, in inventory, in bag
     make a little menu that gives an enumerated choice of the stuff with the same name?
-[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs? Use answer/say/tell?
+[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [code] prototypes to extend items/npc instead of inheritance?
 [code] Use a DSL to define the basic world stuff, and convert it to python source
 [feature] Change living location logic so that livings can sit inside a container item too.
