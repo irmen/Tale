@@ -155,6 +155,24 @@ class TestPubsub(unittest.TestCase):
         sync()
         self.assertEqual([], subber.messages)
 
+    def test_destroy(self):
+        sync()
+        s1 = topic("testA")
+        s2 = topic("testB")
+        s1.send("123")
+        p = pending()
+        self.assertIn("testA", p)
+        self.assertIn("testB", p)
+        s1.destroy()
+        self.assertEqual("<defunct>", s1.name)
+        p = pending()
+        self.assertNotIn("testA", p)
+        self.assertIn("testB", p)
+        s2.destroy()
+        p = pending()
+        self.assertNotIn("testA", p)
+        self.assertNotIn("testB", p)
+
 
 if __name__ == '__main__':
     unittest.main()

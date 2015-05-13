@@ -73,6 +73,7 @@ class Driver(pubsub.Listener):
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
+        parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
         args = parser.parse_args(command_line_args)
         try:
             self.__start(args)
@@ -160,7 +161,7 @@ class Driver(pubsub.Listener):
                 player_io = "web"
             else:
                 player_io = "console"
-            connection = self._connect_if_player(player_io, args.delay)
+            connection = self._connect_if_player(player_io, args.delay, args.wizard)
             # create the login dialog
             topic_async_dialogs.send((connection, self.__login_dialog_if(connection)))
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
@@ -199,7 +200,7 @@ class Driver(pubsub.Listener):
             self.__stop_mainloop = True
             raise
 
-    def _connect_if_player(self, player_io, line_delay):
+    def _connect_if_player(self, player_io, line_delay, wizard_override):
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
@@ -216,6 +217,8 @@ class Driver(pubsub.Listener):
             io.install_tab_completion(self)
         else:
             raise ValueError("invalid io type")
+        if wizard_override:
+            new_player.privileges.add("wizard")
         connection.player = new_player
         connection.io = io
         self.all_players[new_player.name] = connection
@@ -288,13 +291,11 @@ class Driver(pubsub.Listener):
         name_info = charbuilder.PlayerNaming()
         name_info.name = account["name"]
         name_info.gender = account["gender"]
-        name_info.wizard = "wizard" in account["privileges"]
         name_info.race = account["race"]
-        if name_info.wizard:
-            name_info.title = "El Magician Grande " + name
         self.__rename_player(conn.player, name_info)
+        conn.player.privileges = set(account["privileges"])
         conn.output("\n")
-        if name_info.wizard:
+        if "wizard" in conn.player.privileges:
             conn.player.move(self.config.startlocation_wizard)
         else:
             conn.player.move(self.config.startlocation_player)
@@ -391,6 +392,8 @@ class Driver(pubsub.Listener):
     def __rename_player(self, player, name_info):
         conn = self.all_players[player.name]
         del self.all_players[player.name]
+        old_wiretap = player.get_wiretap()
+        old_wiretap.destroy()
         self.all_players[name_info.name] = conn
         name_info.apply_to(player)
 
@@ -425,21 +428,23 @@ class Driver(pubsub.Listener):
 
         if self.config.player_name:
             # story config provides a name etc.
-            player.init_names(self.config.player_name, None, None, None)
-            player.init_race(self.config.player_race, self.config.player_gender)
-            self.__login_dialog_if_2(conn, None)   # finish the login dialog
+            name_info = charbuilder.PlayerNaming()
+            name_info.name = self.config.player_name
+            name_info.race = self.config.player_race
+            name_info.gender = self.config.player_gender
+            name_info.money = self.config.player_money or 0.0
+            name_info.wizard = "wizard" in player.privileges
+            self.__login_dialog_if_2(conn, name_info)   # finish the login dialog
         else:
             # no player config: create a character with the builder
             builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(conn, name_info))
             topic_async_dialogs.send((conn, builder.build_async()))
 
-    def __login_dialog_if_2(self, conn, name_info=None):
-        player = conn.player
+    def __login_dialog_if_2(self, conn, name_info):
         # Second part of the if login dialog, this has been split to be able
         # to put in the character builder dialog that continues with this one.
-        if name_info:
-            # player has been created with the character builder, apply this
-            self.__rename_player(player, name_info)
+        player = conn.player
+        self.__rename_player(player, name_info)
         player.tell("\n")
         # move the player to the starting location:
         if "wizard" in player.privileges:
@@ -944,6 +949,7 @@ class StoryConfig(object):
         "player_name",
         "player_gender",
         "player_race",
+        "player_money",
         "money_type",
         "server_tick_method",
         "server_tick_time",

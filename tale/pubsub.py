@@ -90,6 +90,13 @@ class Topic(object):
         self.subscribers = set()
         self.events = []
 
+    def destroy(self):
+        self.sync()
+        del all_topics[self.name]
+        self.name = "<defunct>"
+        del self.subscribers
+        del self.events
+
     def subscribe(self, subscriber):
         if not isinstance(subscriber, Listener):
             raise TypeError("subscriber needs to be a Listener")

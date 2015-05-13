@@ -351,6 +351,7 @@ class PlayerConnection(object):
 
 
 class MudAccounts(object):          # @todo unit tests
+    """Handles the accounts (login, creation, etc) of mud users"""
     def __init__(self, database_opener=None):
         if not database_opener:
             database_opener = self.__shelve_db_opener

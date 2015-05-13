@@ -528,4 +528,4 @@ def do_useradd(player, parsed, ctx):
     player.tell("You can choose one of the following races: ", lang.join(races.player_races))
     race = yield "input", ("Player race?", charbuilder.validate_race)
     account = ctx.driver.mud_accounts.create(name, password, email, gender[0], race)
-    player.tell("Account created! ", account)   # XXX
+    player.tell("Account created!")

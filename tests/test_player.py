@@ -441,17 +441,13 @@ class TestPlayerConnection(unittest.TestCase):
 
     def test_input(self):
         player = Player("julie", "f")
-        pc = PlayerConnection(player, ConsoleIo(None))
-        old_stdout = sys.stdout
-        sys.stdout = StringIO()
-        try:
+        with WrappedConsoleIO(None) as io:
+            pc = PlayerConnection(player, io)
             player.tell("first this text")
             player.store_input_line("input text\n")
             x = pc.input_direct("inputprompt")
             self.assertEqual("input text", x)
             self.assertEqual("  first this text\ninputprompt ", sys.stdout.getvalue())  # should have outputted the buffered text
-        finally:
-            sys.stdout = old_stdout
 
     def test_peek_output(self):
         player = Player("fritz", "m")
@@ -465,17 +461,13 @@ class TestPlayerConnection(unittest.TestCase):
 
     def test_write_output(self):
         player = Player("julie", "f")
-        pc = PlayerConnection(player, ConsoleIo(None))
-        old_stdout = sys.stdout
-        sys.stdout = StringIO()
-        try:
+        with WrappedConsoleIO(None) as io:
+            pc = PlayerConnection(player, io)
             player.tell("hello 1", end=True)
             player.tell("hello 2", end=True)
             pc.write_output()
             self.assertEqual("  hello 2", pc.last_output_line)
             self.assertEqual("  hello 1\n  hello 2\n", sys.stdout.getvalue())
-        finally:
-            sys.stdout = old_stdout
 
     def test_destroy(self):
         pc = PlayerConnection(None, ConsoleIo(None))
@@ -535,29 +527,13 @@ class TestTextbuffer(unittest.TestCase):
 
 class TestCharacterBuilder(unittest.TestCase):
     def test_build(self):
-        b = CharacterBuilder(None, None)
-        pn = b.create_default_player()
-        self.assertFalse(pn.wizard)
-        pn = b.create_default_wizard()
-        self.assertTrue(pn.wizard)
         conn = PlayerConnection()
-        b = CharacterBuilder(conn, None)
-        builder = b.build_async()
-        why, what = next(builder)
-        self.assertEqual("input", why)
-
-    def test_apply_to(self):
-        b = CharacterBuilder(None, None)
-        p = Player("test", "n")
-        pn = b.create_default_wizard()
-        self.assertFalse("wizard" in p.privileges)
-        self.assertEqual("Test", p.title)
-        pn.apply_to(p)
-        self.assertTrue("wizard" in p.privileges)
-        self.assertEqual("rinzwind", p.name)
-        self.assertEqual("human", p.race)
-        self.assertEqual("m", p.gender)
-        self.assertEqual("arch wizard Rinzwind", p.title)
+        with WrappedConsoleIO(conn) as io:
+            conn.io = io
+            b = CharacterBuilder(conn, None)
+            builder = b.build_async()
+            why, what = next(builder)
+            self.assertEqual("input", why)
 
     def test_validators(self):
         self.assertEqual("Rinzwind", validate_name("Rinzwind"))
@@ -577,7 +553,6 @@ class TestCharacterBuilder(unittest.TestCase):
 
     def test_playernaming(self):
         n = PlayerNaming()
-        n.wizard = True
         n.gender = "m"
         n.name = "RINZWIND"
         n.description = "a wizard"
@@ -586,10 +561,11 @@ class TestCharacterBuilder(unittest.TestCase):
         n.title = "grand master"
         self.assertEqual("rinzwind", n.name)
         p = Player("dummy", "f")
+        p.privileges.add("wiz")
         n.apply_to(p)
         self.assertEqual("rinzwind", p.name)
         self.assertEqual("m", p.gender)
-        self.assertIn("wizard", p.privileges)
+        self.assertEqual({"wiz"}, p.privileges)
         self.assertEqual("a wizard", p.description)
         self.assertEqual(999, p.money)
         self.assertEqual("elemental", p.race)
@@ -618,6 +594,19 @@ class TestTabCompletion(unittest.TestCase):
         io = IoAdapterBase(conn)
         conn.io = io
         self.assertEqual(["criticize"], io.tab_complete("critic", driver))
+
+
+class WrappedConsoleIO(ConsoleIo):
+    def __init__(self, connection):
+        super(WrappedConsoleIO, self).__init__(connection)
+
+    def __enter__(self):
+        self._old_stdout = sys.stdout
+        sys.stdout = StringIO()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout = self._old_stdout
 
 
 if __name__ == '__main__':
