@@ -18,6 +18,7 @@ import tale.cmds.wizard
 import tale.base
 import tale.util
 import tale.demo
+from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
 from tests.supportstuff import Thing
 
 
@@ -162,6 +163,51 @@ class TestVarious(unittest.TestCase):
         gamedir = os.path.dirname(inspect.getabsfile(tale.demo))
         d = the_driver.Driver()
         d.start(["--game", gamedir, "--verify"])
+
+
+@cmd
+@disabled_in_gamemode("if")
+def func1(player, parsed, ctx):
+    pass
+
+@cmd
+def func2(player, parsed, ctx):
+    pass
+
+@cmd
+def func3(player, parsed, ctx):
+    pass
+
+@wizcmd
+def func4(player, parsed, ctx):
+    pass
+
+
+class TestCommands(unittest.TestCase):
+    def setUp(self):
+        self.cmds = the_driver.Commands()
+        self.cmds.add("verb1", func1)
+        self.cmds.add("verb2", func2)
+        self.cmds.add("verb3", func2, "wizard")
+        self.cmds.add("verb4", func3, "noob")
+
+    @unittest.expectedFailure
+    def testCommandsOverrideFail(self):
+        self.cmds.override("verbXXX", func2)
+
+    def testCommandsOverride(self):
+        self.cmds.override("verb4", func2, "noob")
+
+    def testCommandsAdjust(self):
+        wiz = self.cmds.get(["wizard"])
+        self.assertEqual({"verb1", "verb2", "verb3"}, wiz.keys())
+        wiz = self.cmds.get([None])
+        self.assertEqual({"verb1", "verb2"}, wiz.keys())
+        self.cmds.adjust_available_commands("if")
+        wiz = self.cmds.get(["wizard"])
+        self.assertEqual({"verb2", "verb3"}, wiz.keys())
+        wiz = self.cmds.get([None])
+        self.assertEqual({"verb2"}, wiz.keys())
 
 
 if __name__ == "__main__":

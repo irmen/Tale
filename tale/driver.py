@@ -46,7 +46,7 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.config = None
         self.server_loop_durations = collections.deque(maxlen=10)
-        self.commands = Commands()          # @todo this cannot be global because the available commands vary per logged in user
+        self.commands = Commands()
         cmds.register_all(self.commands)
         self.all_players = {}   # maps playername to player connection object
         self.zones = None
@@ -115,7 +115,7 @@ class Driver(pubsub.Listener):
             pass
         else:
             story_cmds.register_all(self.commands)
-        self.commands.adjust_available_commands(self.config)
+        self.commands.adjust_available_commands(self.config.server_mode)
         tale_version = distutils.version.LooseVersion(tale_version_str)
         tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
         if tale_version < tale_version_required:
@@ -1089,20 +1089,20 @@ class Commands(object):
             raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 
     def get(self, privileges):
-        result = self.commands_per_priv[None]  # always include the cmds for None
+        result = dict(self.commands_per_priv[None])  # always include the cmds for None
         for priv in privileges:
             if priv in self.commands_per_priv:
                 result.update(self.commands_per_priv[priv])
         return result
 
-    def adjust_available_commands(self, story_config):
+    def adjust_available_commands(self, server_mode):
         # disable commands flagged with the given game_mode
         # disable soul verbs flagged with override
         # mark non-soul commands
         for commands in self.commands_per_priv.values():
             for cmd, func in list(commands.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
-                if story_config.server_mode == disabled_mode:
+                if server_mode == disabled_mode:
                     del commands[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]
