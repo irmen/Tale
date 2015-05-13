@@ -15,8 +15,8 @@ import gc
 import platform
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util, pubsub
-from ..player import Player
+from .. import base, lang, util, pubsub, charbuilder, races
+from ..player import Player, MudAccounts
 from .. import __version__
 
 all_commands = {}
@@ -508,3 +508,24 @@ def do_force(player, parsed, ctx):
         # re-parse and execute the actual command for the target, from the viewpoint of the current player!
         target_parsed = player.parse(cmd)
         pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))
+
+
+@wizcmd("useradd")    # @todo replace this by a 'self-service' account creation
+@disabled_in_gamemode("if")
+def do_useradd(player, parsed, ctx):
+    """Temporary solution to add users to the system"""
+    player.tell("<bright>Creating a new user account.</>")
+    name = yield "input", ("Please type in the player name.", MudAccounts.accept_name)
+    try:
+        ctx.driver.mud_accounts.get(name)
+    except KeyError:
+        pass
+    else:
+        raise ActionRefused("Name is already taken.")
+    password = yield "input", ("Please type in the password.", MudAccounts.accept_password)    # XXX cloak the password input on the screen
+    email = yield "input", ("Please type in the player's email address.", MudAccounts.accept_email)
+    gender = yield "input", ("What is their gender (m/f/n)?", lang.validate_gender)
+    player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+    race = yield "input", ("Player race?", charbuilder.validate_race)
+    account = ctx.driver.mud_accounts.create(name, password, email, gender[0], race)
+    player.tell("Account created! ", account)   # XXX

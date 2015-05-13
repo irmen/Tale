@@ -46,7 +46,7 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.config = None
         self.server_loop_durations = collections.deque(maxlen=10)
-        self.commands = Commands()
+        self.commands = Commands()          # @todo this cannot be global because the available commands vary per logged in user
         cmds.register_all(self.commands)
         self.all_players = {}   # maps playername to player connection object
         self.zones = None
@@ -170,6 +170,7 @@ class Driver(pubsub.Listener):
             connection.singleplayer_mainloop()
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
+            self.mud_accounts = player.MudAccounts()
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
             wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
@@ -234,6 +235,12 @@ class Driver(pubsub.Listener):
         connection.clear_screen()
         self.__print_game_intro(connection)
         connection.output("\n")
+        # check if we have at least 1 admin user
+        all_accounts = self.mud_accounts.all_accounts()
+        if not any("wizard" in acc["privileges"] for acc in all_accounts.values()):
+            # there is no wizard, create a dialog to construct the initial admin user
+            topic_async_dialogs.send((connection, self.__login_dialog_mud_create_admin(connection)))
+            return connection
         # create the login dialog
         topic_async_dialogs.send((connection, self.__login_dialog_mud(connection)))
         return connection
@@ -245,6 +252,20 @@ class Driver(pubsub.Listener):
         conn.write_output()
         self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
 
+    def __login_dialog_mud_create_admin(self, conn):
+        assert self.config.server_mode == "mud"
+        conn.write_output()
+        conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
+        conn.output("Creating new admin user.")
+        name = yield "input", ("Please type in the admin's player name.", player.MudAccounts.accept_name)
+        password = yield "input", ("Please type in the admin password.", player.MudAccounts.accept_password)    # XXX cloak the password input on the screen
+        email = yield "input", ("Please type in the admin's email address.", player.MudAccounts.accept_email)
+        gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
+        self.mud_accounts.create(name, password, email, gender[0], "human", privileges={"wizard"})
+        conn.output("\n")
+        conn.output("\n")
+        topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
+
     def __login_dialog_mud(self, conn):
         assert self.config.server_mode == "mud"
         conn.write_output()
@@ -252,17 +273,25 @@ class Driver(pubsub.Listener):
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
         while True:
             name = yield "input", ("Please type in your name.", charbuilder.validate_name)
-            if name.startswith("wizard") or name.startswith("player"):
+            password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
+            try:
+                self.mud_accounts.valid_password(name, password)
+            except ValueError as x:
+                conn.output(str(x))
+                continue
+            else:
+                account = self.mud_accounts.get(name)
+                self.mud_accounts.logged_in(name)
+                if account["logged_in"]:
+                    conn.output("Last login: " + account["logged_in"])
                 break
-            conn.output("Start with wizard- or player- to select player type")  # XXX
-        gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
         name_info = charbuilder.PlayerNaming()
-        name_info.name = name
-        name_info.gender = gender[0]
-        name_info.wizard = name.startswith("wizard")
-        name_info.race = "human"
+        name_info.name = account["name"]
+        name_info.gender = account["gender"]
+        name_info.wizard = "wizard" in account["privileges"]
+        name_info.race = account["race"]
         if name_info.wizard:
-            name_info.title = "El Magician Grande "+name
+            name_info.title = "El Magician Grande " + name
         self.__rename_player(conn.player, name_info)
         conn.output("\n")
         if name_info.wizard:
@@ -320,6 +349,7 @@ class Driver(pubsub.Listener):
                         prompt += " "
                     conn.write_output()
                     conn.output_no_newline(prompt)  # the input prompt
+                assert conn not in self.waiting_for_input, "can only run one async dialog at the same time"
                 self.waiting_for_input[conn] = (dialog, validator)
             else:
                 raise ValueError("invalid generator wait reason: " + why)

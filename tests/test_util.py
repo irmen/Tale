@@ -213,7 +213,6 @@ class TestUtil(unittest.TestCase):
 
     def test_vfs_validate_path(self):
         vfs = VirtualFileSystem(root_path=".")
-        print("ROOT", vfs.root)
         vfs.validate_path(".")
         vfs.validate_path("./foo")
         vfs.validate_path("./foo/bar")

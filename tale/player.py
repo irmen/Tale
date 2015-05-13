@@ -8,6 +8,12 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import time
+import random
+from hashlib import sha1
+import shelve
+import dbm
+import threading
+import datetime
 from . import base
 from . import lang
 from . import hints
@@ -342,3 +348,106 @@ class PlayerConnection(object):
             self.player.destroy(ctx)
             # self.player = Player("<destroyed-%d>" % id(self.player), "n")
             self.player = None
+
+
+class MudAccounts(object):          # @todo unit tests
+    def __init__(self, database_opener=None):
+        if not database_opener:
+            database_opener = self.__shelve_db_opener
+        self.open_db = database_opener
+        self.db_lock = threading.Lock()
+        try:
+            self.get("trigger")
+        except KeyError:
+            pass
+
+    def __shelve_db_opener(self):
+        """If not specified, a simple shelve database is used in the user's data directry"""
+        dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
+        try:
+            return shelve.open(dbpath, flag='w')
+        except dbm.error:
+            print("%s: Can't open the user accounts database." % mud_context.config.name)
+            print("Location:", dbpath)
+            if input("\nDo you want to create a new one (y/n)? ").lower() == "y":
+                return shelve.open(dbpath, flag='c')
+            else:
+                raise SystemExit("Cannot launch mud mode without a user accounts database.")
+
+    def get(self, name):
+        with self.db_lock, self.open_db() as db:
+            return db[name]
+
+    def all_accounts(self):
+        with self.db_lock, self.open_db() as db:
+            return dict(db)
+
+    def logged_in(self, name):
+        with self.db_lock, self.open_db() as db:
+            account = db[name]
+            account["logged_in"] = datetime.datetime.now().isoformat()
+            db[name] = account
+
+    def valid_password(self, name, password):
+        with self.db_lock, self.open_db() as db:
+            if name in db:
+                account = db[name]
+                pwhash, _ = self.__pwhash(password, account["pw_salt"])
+                if pwhash == account["pw_hash"]:
+                    return
+            raise ValueError("Invalid name or password.")
+
+    def __pwhash(self, password, salt=None):
+        if not salt:
+            salt = str(random.random() * time.time() + id(password)).replace('.', '')
+        pwhash = sha1((salt + password).encode("utf-8")).hexdigest()
+        return pwhash, salt
+
+    @staticmethod
+    def accept_password(password):
+        if len(password) >= 8:
+            return password
+        raise ValueError("Password should be minimum length 8.")
+
+    @staticmethod
+    def accept_name(name):
+        if name.strip() == name and len(name) >= 3:
+            return name
+        raise ValueError("Name should be minimum length 3.")
+
+    @staticmethod
+    def accept_email(email):
+        user, _, domain = email.partition("@")
+        if user and domain:
+            return email
+        raise ValueError("Invalid email address.")
+
+    def create(self, name, password, email, gender, race, privileges=[]):
+        name = name.strip()
+        self.accept_name(name)
+        with self.db_lock, self.open_db() as db:
+            if name in db:
+                raise ValueError("Name is already taken.")
+            self.accept_password(password)
+            self.accept_email(email)
+            pwhash, salt = self.__pwhash(password)
+            db[name] = {"name": name, "email": email, "pw_hash": pwhash, "pw_salt": salt,
+                        "privileges": privileges, "gender": gender, "race": race,
+                        "created": datetime.datetime.now().isoformat(), "logged_in": None}
+            return db[name]
+
+    def change_password_email(self, name, old_password, new_password, new_email):
+        with self.db_lock, self.open_db() as db:
+            if name not in db:
+                raise KeyError("Unknown name.")
+            self.valid_password(name, old_password)
+            account = db[name]
+            if new_password:
+                self.accept_password(new_password)
+                pwhash, salt = self.__pwhash(new_password)
+                account["pw_hash"] = pwhash
+                account["pw_salt"] = salt
+            if new_email:
+                self.accept_email(new_email)
+                account["email"] = new_email
+            db[name] = account

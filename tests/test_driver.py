@@ -150,12 +150,12 @@ class TestVarious(unittest.TestCase):
         self.assertGreater(len(tale.cmds.normal.all_commands), 1)
         self.assertGreater(len(tale.cmds.wizard.all_commands), 1)
 
-    def testEnableNotifyActionSet(self):
+    def testEnableNotifyActionSetAndDocstring(self):
         for cmd in tale.cmds.normal.all_commands.values():
-            self.assertIsNotNone(cmd.__doc__)
+            self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
             self.assertTrue(cmd.enable_notify_action in (True, False))
         for cmd in tale.cmds.wizard.all_commands.values():
-            self.assertIsNotNone(cmd.__doc__)
+            self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
 
     def testStoryVerify(self):
