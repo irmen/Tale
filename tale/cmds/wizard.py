@@ -529,3 +529,68 @@ def do_useradd(player, parsed, ctx):
     race = yield "input", ("Player race?", charbuilder.validate_race)
     account = ctx.driver.mud_accounts.create(name, password, email, gender[0], race)
     player.tell("Account created!")
+
+
+@wizcmd("accounts")
+@disabled_in_gamemode("if")
+def do_accounts(player, parsed, ctx):
+    """Show all registered player accounts"""
+    accounts = ctx.driver.mud_accounts.all_accounts()
+    wizards = set()
+    txt = ["<ul> account      <dim>|</><ul> logged in           <dim>|</><ul> email                <dim>|</><ul> privileges </>"]
+    for name, account in accounts.items():
+        if "wizard" in account["privileges"]:
+            wizards.add(name)
+        txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
+                   (account["name"], account["logged_in"], account["email"], account["privileges"]))
+    txt.append("\nWizards: " + lang.join(wizards))
+    player.tell(*txt, format=False)
+
+
+@wizcmd("add_priv")
+@disabled_in_gamemode("if")
+def do_add_priv(player, parsed, ctx):
+    """
+    Usage: add_priv <account> <privilege>. Adds a privilege to a user account. It will become active on next login.
+    """
+    if len(parsed.args) != 2:
+        raise ParseError("For what account add what privilege?")
+    name, priv = parsed.args
+    try:
+        account = ctx.driver.mud_accounts.get(name)
+    except KeyError:
+        raise ActionRefused("No such account.")
+    privileges = set(account["privileges"])
+    privileges.add(priv)
+    ctx.driver.mud_accounts.update_privileges(name, privileges, player)
+    player.tell("Privileges of account <player>%s</> updated to: %s." % (name, privileges))
+    player.tell("It will become active on their next login.")
+
+
+@wizcmd("remove_priv")
+@disabled_in_gamemode("if")
+def do_remove_priv(player, parsed, ctx):
+    """
+    Usage: remove_priv <account> <privilege>.
+    Remove a privilege from a user account.
+    If the account is currently logged in, it will be forced to log off.
+    """
+    if len(parsed.args) != 2:
+        raise ParseError("For what account remove what privilege?")
+    name, priv = parsed.args
+    try:
+        account = ctx.driver.mud_accounts.get(name)
+    except KeyError:
+        raise ActionRefused("No such account.")
+    if priv in account["privileges"]:
+        privileges = set(account["privileges"])
+        privileges.remove(priv)
+        ctx.driver.mud_accounts.update_privileges(name, privileges, player)
+        player.tell("Privileges of account <player>%s</> updated to: %s." % (name, privileges))
+        other = ctx.driver.search_player(name)
+        if other:
+            other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. Sorry for the inconvenience." % lang.capital(player.title))
+            ctx.driver.defer(1, ctx.driver._disconnect_mud_player, other)
+            player.tell("Player has been notified and forced to log off.")
+    else:
+        player.tell("No changes.")

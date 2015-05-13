@@ -386,7 +386,7 @@ class MudAccounts(object):          # @todo unit tests
     def logged_in(self, name):
         with self.db_lock, self.open_db() as db:
             account = db[name]
-            account["logged_in"] = datetime.datetime.now().isoformat()
+            account["logged_in"] = str(datetime.datetime.now().replace(microsecond=0))
             db[name] = account
 
     def valid_password(self, name, password):
@@ -432,12 +432,18 @@ class MudAccounts(object):          # @todo unit tests
             self.accept_password(password)
             self.accept_email(email)
             pwhash, salt = self.__pwhash(password)
-            db[name] = {"name": name, "email": email, "pw_hash": pwhash, "pw_salt": salt,
-                        "privileges": privileges, "gender": gender, "race": race,
-                        "created": datetime.datetime.now().isoformat(), "logged_in": None}
+            db[name] = {"name": name,
+                        "email": email,
+                        "pw_hash": pwhash,
+                        "pw_salt": salt,
+                        "privileges": privileges,
+                        "gender": gender,
+                        "race": race,
+                        "created": str(datetime.datetime.now().replace(microsecond=0)),
+                        "logged_in": None}
             return db[name]
 
-    def change_password_email(self, name, old_password, new_password, new_email):
+    def change_password_email(self, name, old_password, new_password, new_email):       # @todo make changing pw/email available to the player
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
@@ -451,4 +457,13 @@ class MudAccounts(object):          # @todo unit tests
             if new_email:
                 self.accept_email(new_email)
                 account["email"] = new_email
+            db[name] = account
+
+    def update_privileges(self, name, privileges, actor):
+        assert "wizard" in actor.privileges
+        with self.db_lock, self.open_db() as db:
+            if name not in db:
+                raise KeyError("Unknown name.")
+            account = db[name]
+            account["privileges"] = set(privileges)
             db[name] = account

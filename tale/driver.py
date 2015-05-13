@@ -248,8 +248,15 @@ class Driver(pubsub.Listener):
         topic_async_dialogs.send((connection, self.__login_dialog_mud(connection)))
         return connection
 
-    def _disconnect_mud_player(self, conn):
-        name = conn.player.name
+    def _disconnect_mud_player(self, conn_or_player):
+        if type(conn_or_player) is player.PlayerConnection:
+            name = conn_or_player.player.name
+            conn = conn_or_player
+        elif type(conn_or_player) is player.Player:
+            name = conn_or_player.name
+            conn = self.all_players[name]
+        else:
+            raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
         del self.all_players[name]
         conn.write_output()
@@ -436,7 +443,8 @@ class Driver(pubsub.Listener):
             name_info.wizard = "wizard" in player.privileges
             self.__login_dialog_if_2(conn, name_info)   # finish the login dialog
         else:
-            # no player config: create a character with the builder
+            # No story player config: create a character with the builder
+            # This is unusual though, normally any 'if' story should provide a player config
             builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(conn, name_info))
             topic_async_dialogs.send((conn, builder.build_async()))
 
@@ -609,7 +617,6 @@ class Driver(pubsub.Listener):
                         continue
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
-
                         topic_pending_tells.send(lambda: self._disconnect_mud_player(conn))
                     except Exception:
                         txt = "* internal error:\n" + traceback.format_exc()

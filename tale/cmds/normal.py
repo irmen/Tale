@@ -901,18 +901,9 @@ def do_who(player, parsed, ctx):
         # print all players
         player.tell("All players currently in the game:", end=True)
         player.tell("\n")
-        if "wizard" in player.privileges:
-            # wizard also sees the connection information
-            for conn in ctx.driver.all_players.values():
-                other = conn.player
-                player.tell("<player>%s</> (%s)" % (lang.capital(other.name), other.title), end=True)
-                player.tell("| location: <location>%s</>" % other.location.name, end=True)
-                player.tell("| connection: %r" % conn.io, end=True)
-        else:
-            # normal players only see player names and location.
-            for conn in ctx.driver.all_players.values():
-                other = conn.player
-                player.tell("<player>%s</> (%s): currently in '<location>%s</>'." % (lang.capital(other.name), other.title, other.location.name), end=True)
+        for conn in ctx.driver.all_players.values():
+            other = conn.player
+            player.tell("<player>%s</> (%s): currently in <location>%s</>." % (lang.capital(other.name), other.title, other.location.name), end=True)
 
 
 @cmd("open", "close", "lock", "unlock")
