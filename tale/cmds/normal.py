@@ -16,6 +16,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from ..player import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
@@ -1514,4 +1515,49 @@ def do_teststyles(player, parsed, ctx):
     player.tell("Note that some styles are not widely supported (italic, underlined).", end=True)
     for style, example in style_tests:
         player.tell("  %s -- %s" % (style, example), end=True)
+    player.tell("\n")
+
+
+@cmd("@change_password")
+@disabled_in_gamemode("if")
+def do_change_pw(player, parsed, ctx):
+    """Lets you change your account password."""
+    player.tell("Changing your password.")
+    current_pw = yield "input", "Type your current password."
+    new_pw = yield "input", ("Type your new password.", MudAccounts.accept_password)
+    try:
+        ctx.driver.mud_accounts.change_password_email(player.name, current_pw, new_password=new_pw)
+        player.tell("Password updated.")
+    except ValueError as x:
+        raise ActionRefused("<it>%s</it>" % x)
+
+
+@cmd("@change_email")
+@disabled_in_gamemode("if")
+def do_change_email(player, parsed, ctx):
+    """Lets you change the email address on file for your account."""
+    account = ctx.driver.mud_accounts.get(player.name)
+    player.tell("Changing your email. It is currently set to: %s" % account["email"])
+    current_pw = yield "input", "Type your current password."
+    new_email = yield "input", ("Type your new email address.", MudAccounts.accept_email)
+    try:
+        ctx.driver.mud_accounts.change_password_email(player.name, current_pw, new_email=new_email)
+        player.tell("Email address updated.")
+    except ValueError as x:
+        raise ActionRefused("<it>%s</it>" % x)
+
+
+@cmd("@account")
+@disabled_in_gamemode("if")
+def do_account(player, parsed, ctx):
+    """Displays your player account data."""
+    account = ctx.driver.mud_accounts.get(player.name)
+    player.tell("<ul>Your account data.</ul>", end=True)
+    player.tell("name: %s" % account["name"], end=True)
+    player.tell("email: %s" % account["email"], end=True)
+    player.tell("privileges: %s" % (lang.join(account["privileges"], None) or "-"), end=True)
+    player.tell("gender: %s" % lang.GENDERS[account["gender"]], end=True)
+    player.tell("race: %s" % account["race"], end=True)
+    player.tell("created: %s" % account["created"], end=True)
+    player.tell("last login: %s" % account["logged_in"], end=True)
     player.tell("\n")

@@ -22,7 +22,7 @@ import types
 import traceback
 import appdirs
 import distutils.version
-from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang
+from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 
@@ -283,11 +283,28 @@ class Driver(pubsub.Listener):
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
         while True:
             name = yield "input", ("Please type in your name.", charbuilder.validate_name)
-            password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
+            try:
+                self.mud_accounts.get(name)
+                password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
+            except KeyError:
+                conn.player.tell("'<player>%s</>' is the name of a new character." % name)
+                if not (yield "input", ("Do you want to create this character (y/n)?", lang.yesno)):
+                    continue
+                # self-service account creation
+                conn.player.tell("\n")
+                conn.player.tell("<ul><bright>New character creation: '%s'.</>" % name, end=True)
+                password = yield "input", ("Please type in the desired password.", player.MudAccounts.accept_password)    # XXX cloak the password input on the screen
+                email = yield "input", ("Please type in your email address.", player.MudAccounts.accept_email)
+                gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
+                conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+                race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
+                account = self.mud_accounts.create(name, password, email, gender[0], race)
+                conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
+                conn.output("")
             try:
                 self.mud_accounts.valid_password(name, password)
             except ValueError as x:
-                conn.output(str(x))
+                conn.output("<it>%s</it>" % x)
                 continue
             else:
                 account = self.mud_accounts.get(name)
@@ -592,7 +609,7 @@ class Driver(pubsub.Listener):
                 wait_time -= sub_wait
 
             loop_start = time.time()
-            for conn in self.all_players.values():
+            for conn in list(self.all_players.values()):
                 if conn.player.input_is_available.is_set():
                     conn.need_new_input_prompt = True
                     try:
@@ -638,6 +655,7 @@ class Driver(pubsub.Listener):
         3) deferreds
         4) pending pubsub events
         5) write buffered output
+        6) verify validity of connected players
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.config, None)
@@ -660,8 +678,12 @@ class Driver(pubsub.Listener):
                 except Exception:
                     self.__report_deferred_exception(deferred)
         pubsub.sync()
-        for conn in self.all_players.values():
-            conn.write_output()
+        for name, conn in list(self.all_players.items()):
+            if conn.player and conn.io and conn.player.location:
+                conn.write_output()
+            else:
+                # disconnect corrupt player connection
+                self._disconnect_mud_player(conn)
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)

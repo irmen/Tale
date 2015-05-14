@@ -392,6 +392,18 @@ class PubsubCollector(pubsub.Listener):
 
 
 class TestLiving(unittest.TestCase):
+    def test_lifecycle(self):
+        orc = Living("orc", "m", race="orc")
+        axe = Weapon("axe")
+        orc.insert(axe, orc)
+        self.assertIsNotNone(orc.soul)
+        self.assertIsNotNone(orc.location)
+        self.assertGreater(orc.inventory_size, 0)
+        orc.destroy(Context(TestDriver(), None, None, None))
+        self.assertIsNone(orc.soul)
+        self.assertIsNone(orc.location)
+        self.assertEqual(orc.inventory_size, 0)
+
     def test_contains(self):
         orc = Living("orc", "m", race="orc")
         axe = Weapon("axe")

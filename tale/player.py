@@ -14,6 +14,7 @@ import shelve
 import dbm
 import threading
 import datetime
+import re
 from . import base
 from . import lang
 from . import hints
@@ -132,7 +133,6 @@ class Player(base.Living, pubsub.Listener):
     def destroy(self, ctx):
         self.activate_transcript(None, None)
         super(Player, self).destroy(ctx)
-        del self.soul   # truly die ;-)
 
     def allow_give_money(self, actor, amount):
         """Do we accept money? Raise ActionRefused if not."""
@@ -406,9 +406,10 @@ class MudAccounts(object):          # @todo unit tests
 
     @staticmethod
     def accept_password(password):
-        if len(password) >= 8:
-            return password
-        raise ValueError("Password should be minimum length 8.")
+        if len(password) >= 6:
+            if re.search("[a-zA-z]", password) and re.search("[0-9]", password):
+                return password
+        raise ValueError("Password should be minimum length 6. It should contain letters, at least one number, and optionally other characters.")
 
     @staticmethod
     def accept_name(name):
@@ -443,11 +444,11 @@ class MudAccounts(object):          # @todo unit tests
                         "logged_in": None}
             return db[name]
 
-    def change_password_email(self, name, old_password, new_password, new_email):       # @todo make changing pw/email available to the player
+    def change_password_email(self, name, old_password, new_password=None, new_email=None):
+        self.valid_password(name, old_password)
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
-            self.valid_password(name, old_password)
             account = db[name]
             if new_password:
                 self.accept_password(new_password)

@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division
 from .if_browser_io import HttpIo, TaleWsgiAppBase
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
+from socketserver import ThreadingMixIn
 import time
 import random
 import sys
@@ -107,15 +108,18 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
 
 class CustomRequestHandler(WSGIRequestHandler):
+    """A wsgi request handler that doesn't spam the log."""
     def log_message(self, format, *args):
         pass
 
 
-class CustomWsgiServer(WSGIServer):
+class CustomWsgiServer(ThreadingMixIn, WSGIServer):
+    """A multi-threaded wsgi server with a larger request queue size than the default."""
     request_queue_size = 200
 
 
 class SessionMiddleware(object):
+    """Wsgi middleware that injects session cookie logic."""
 
     class CloseSession(Exception):
         """

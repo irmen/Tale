@@ -46,6 +46,8 @@ from .errors import ActionRefused, ParseError
 from .races import races
 
 
+__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Location", "Weapon", "heartbeat"]
+
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
 
@@ -681,6 +683,7 @@ class Living(MudObject):
             item.destroy(ctx)
         self.__inventory.clear()
         # @todo: remove attack status, etc.
+        self.soul = None   # truly die ;-)
 
     def wiz_clone(self, actor):
         if "wizard" not in actor.privileges:

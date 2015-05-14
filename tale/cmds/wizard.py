@@ -15,8 +15,8 @@ import gc
 import platform
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util, pubsub, charbuilder, races
-from ..player import Player, MudAccounts
+from .. import base, lang, util, pubsub
+from ..player import Player
 from .. import __version__
 
 all_commands = {}
@@ -280,10 +280,11 @@ def teleport_someone_to_player(who, player):
     """helper function for teleport command, to teleport someone to the player"""
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
+    player.location.tell("%s makes some gestures and a portal suddenly opens." % lang.capital(player.title), exclude_living=who)
     who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
     who.teleported_from = who.location  # used for the 'return' command
     who.move(player.location, silent=True)
-    player.location.tell("%s makes some gestures and a portal suddenly opens." % lang.capital(player.title), exclude_living=who)
+    who.tell("You tumble out of the other end of the portal, and find yourself in <location>%s</>." % player.location.name)
     player.location.tell("%s tumbles out of it, and the portal quickly closes again." % lang.capital(who.title), exclude_living=who)
 
 
@@ -510,27 +511,6 @@ def do_force(player, parsed, ctx):
         pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))
 
 
-@wizcmd("useradd")    # @todo replace this by a 'self-service' account creation
-@disabled_in_gamemode("if")
-def do_useradd(player, parsed, ctx):
-    """Temporary solution to add users to the system"""
-    player.tell("<bright>Creating a new user account.</>")
-    name = yield "input", ("Please type in the player name.", MudAccounts.accept_name)
-    try:
-        ctx.driver.mud_accounts.get(name)
-    except KeyError:
-        pass
-    else:
-        raise ActionRefused("Name is already taken.")
-    password = yield "input", ("Please type in the password.", MudAccounts.accept_password)    # XXX cloak the password input on the screen
-    email = yield "input", ("Please type in the player's email address.", MudAccounts.accept_email)
-    gender = yield "input", ("What is their gender (m/f/n)?", lang.validate_gender)
-    player.tell("You can choose one of the following races: ", lang.join(races.player_races))
-    race = yield "input", ("Player race?", charbuilder.validate_race)
-    account = ctx.driver.mud_accounts.create(name, password, email, gender[0], race)
-    player.tell("Account created!")
-
-
 @wizcmd("accounts")
 @disabled_in_gamemode("if")
 def do_accounts(player, parsed, ctx):
@@ -542,7 +522,7 @@ def do_accounts(player, parsed, ctx):
         if "wizard" in account["privileges"]:
             wizards.add(name)
         txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
-                   (account["name"], account["logged_in"], account["email"], account["privileges"]))
+                   (account["name"], account["logged_in"], account["email"], lang.join(account["privileges"], None)))
     txt.append("\nWizards: " + lang.join(wizards))
     player.tell(*txt, format=False)
 
