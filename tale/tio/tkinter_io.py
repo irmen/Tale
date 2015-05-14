@@ -93,11 +93,13 @@ class TkinterIo(iobase.IoAdapterBase):
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
+        super(TkinterIo, self).output(*lines)
         for line in lines:
             self.gui.write_line(line)
 
     def output_no_newline(self, text):
         """Like output, but just writes a single line, without end-of-line."""
+        super(TkinterIo, self).output_no_newline(text)
         self.gui.write_line(text)
 
 

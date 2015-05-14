@@ -17,3 +17,6 @@ and the appdirs library (to load and save games in the correct folder).
 
 Read the documentation for more details on how to get started.
 It is online at http://pythonhosted.org/tale/
+
+
+If my server is up, you can find a running MUD instance there: http://www.razorvine.net/tale/

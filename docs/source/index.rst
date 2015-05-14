@@ -19,8 +19,9 @@ console window. But you can also run Tale in a simple GUI application (built wit
 or in your web browser.
 
 .. note::
-    The multi-user aspects are fairly new and still incomplete.
+    The multi-user aspects are fairly new and still somewhat incomplete.
     Until recently, the focus has been on the (single player) interactive fiction things.
+    However if my server is up, you can find a running MUD instance here: http://www.razorvine.net/tale/
 
 .. note::
     This documentation is still a stub. I hope to write some real documentation soon,
@@ -51,7 +52,12 @@ After all that, you'll need a story to run it on (tale by itself doesn't do anyt
 it's only a framework to build games with).
 There's a tiny demo embedded in the library itself, you can start that with::
 
-    python -m tale.demo.story   # add --gui to get a GUI interface, --web to use a browser
+    python -m tale.demo.story
+
+You can add several command line options:
+ * ``--gui`` add this to get a GUI interface
+ * ``--web`` add this to get a web browser interface
+ * ``--mud`` add this to launch the demo game as mud (multi-user) server
 
 Fool around with your pet and try to get out of the house. There's a larger demo story included in the source distribution,
 in the ``stories`` directory. But you will have to download and extract the source distribution manually to get it.
@@ -71,6 +77,8 @@ Anyway, the command to do so is::
 
 You can use the ``--help`` argument to see some help about this command.
 You can use ``--gui`` or ``--web`` to start the GUI or browser version of the interface rather than the text console version.
+There are some other command line arguments such as ``--mode`` that allow you to select other things, look at the help
+output to learn more.
 
 The story might prompt you with a couple of questions:
 Choose not to load a saved game (you will have none at first start anyway).
@@ -109,13 +117,11 @@ Features
 A random list of the features of the current codebase:
 
 - Runs on Python 2.7 and 3.4+ (maybe on 3.2 and 3.3 too but that is not tested)
-- game engine and framework code is separated from the actual game code;
-  it can run different games from different directories (just one at a time though)
-- single-player I.F. mode and multi-player MUD mode
-- MUD mode runs as a web server only for now (no old-skool console access like telnet)
+- game engine and framework code is separated from the actual game code
+- single-player Interactive Fiction mode and multi-player MUD mode
 - text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
+- MUD mode runs as a web server (no old-skool console access like telnet for now)
 - can load and run games/stories from a zipfile or from extracted folders.
-- I/O abstraction layer to be able to create alternative interfaces.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
 - the parser uses a soul based on LPC-MUD's 'soul.c', it has been converted to Python and adapted
@@ -155,6 +161,7 @@ A random list of the features of the current codebase:
 - hint and story-recap system that can adapt dynamically to the progress of the story.
 - contains a simple virtual file system to provide easy resource loading / datafile storage.
 - provides a simple pubsub/event signaling mechanism
+- I/O abstraction layer to be able to create alternative interfaces to the engine
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
   very much a programming job. This may or may not improve in the future (to allow for more natural ways

@@ -11,7 +11,6 @@ import time
 import random
 from hashlib import sha1
 import shelve
-import dbm
 import threading
 import datetime
 import re
@@ -26,6 +25,16 @@ from .util import queue
 from .tio.iobase import strip_text_styles
 from threading import Event
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
+try:
+    import anydbm as dbm   # python 2
+except ImportError:
+    try:
+        import dbm   # python 3
+    except ImportError:
+        dbm = None
+except Exception as x:
+    # pypy can generate a distutils error somehow if dbm is not available
+    dbm = None
 
 
 class Player(base.Living, pubsub.Listener):
@@ -47,6 +56,7 @@ class Player(base.Living, pubsub.Listener):
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()
         self.story_complete = False
+        self.last_input_time = time.time()
         self.init_nonserializables()
 
     def init_nonserializables(self):
@@ -154,6 +164,11 @@ class Player(base.Living, pubsub.Listener):
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)
         self.input_is_available.set()
+        self.last_input_time = time.time()
+
+    @property
+    def idle_time(self):
+        return time.time() - self.last_input_time
 
     def activate_transcript(self, file, vfs):
         if file:
@@ -259,7 +274,6 @@ class PlayerConnection(object):
         self.player = player
         self.io = io
         self.need_new_input_prompt = True
-        self.last_output_line = None
 
     def get_output(self):
         """
@@ -270,6 +284,14 @@ class PlayerConnection(object):
         if formatted and self.player.transcript:
             self.player.transcript.write(formatted)
         return formatted or None
+
+    @property
+    def last_output_line(self):
+        return self.io.last_output_line
+
+    @property
+    def idle_time(self):
+        return self.player.idle_time
 
     def write_output(self):
         """print any buffered output to the player's screen"""
@@ -283,21 +305,17 @@ class PlayerConnection(object):
             if mud_context.config.server_mode == "if" and self.player.output_line_delay > 0:
                 for line in output.rstrip().splitlines():
                     self.io.output(line)
-                    self.last_output_line = line
                     time.sleep(self.player.output_line_delay / 1000.0)  # delay the output for a short period
             else:
-                line = self.last_output_line = output.rstrip()
-                self.io.output(line)
+                self.io.output(output.rstrip())
 
     def output(self, *lines):
         """directly writes the given text to the player's screen, without buffering and formatting/wrapping"""
         self.io.output(*lines)
-        self.last_output_line = lines[-1]
 
     def output_no_newline(self, line):
         """similar to output() but writes a single line, without newline at the end"""
         self.io.output_no_newline(line)
-        self.last_output_line = line
 
     def input_direct(self, prompt=None):
         """
@@ -370,7 +388,7 @@ class MudAccounts(object):          # @todo unit tests
         except dbm.error:
             print("%s: Can't open the user accounts database." % mud_context.config.name)
             print("Location:", dbpath)
-            if input("\nDo you want to create a new one (y/n)? ").lower() == "y":
+            if input("\nDo you want to create a new one? ").lower() == "y":
                 return shelve.open(dbpath, flag='c')
             else:
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")

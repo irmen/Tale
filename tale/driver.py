@@ -258,6 +258,7 @@ class Driver(pubsub.Listener):
         else:
             raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
+        conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
         del self.all_players[name]
         conn.write_output()
         self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
@@ -283,12 +284,15 @@ class Driver(pubsub.Listener):
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
         while True:
             name = yield "input", ("Please type in your name.", charbuilder.validate_name)
+            if self.search_player(name):
+                conn.player.tell("That player is already logged in elsewhere.")
+                continue
             try:
                 self.mud_accounts.get(name)
                 password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
             except KeyError:
                 conn.player.tell("'<player>%s</>' is the name of a new character." % name)
-                if not (yield "input", ("Do you want to create this character (y/n)?", lang.yesno)):
+                if not (yield "input", ("Do you want to create this character?", lang.yesno)):
                     continue
                 # self-service account creation
                 conn.player.tell("\n")
@@ -483,6 +487,7 @@ class Driver(pubsub.Listener):
         player.tell("\n")
         self.story.init_player(player)
         player.look(short=False)  # force a 'look' command to get our bearings
+        conn.write_output()
 
     def __main_loop_singleplayer(self, conn):
         """
@@ -634,7 +639,7 @@ class Driver(pubsub.Listener):
                         continue
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
-                        topic_pending_tells.send(lambda: self._disconnect_mud_player(conn))
+                        topic_pending_tells.send(lambda conn=conn: self._disconnect_mud_player(conn))
                     except Exception:
                         txt = "* internal error:\n" + traceback.format_exc()
                         conn.player.tell(txt, format=False)
@@ -655,7 +660,7 @@ class Driver(pubsub.Listener):
         3) deferreds
         4) pending pubsub events
         5) write buffered output
-        6) verify validity of connected players
+        6) verify validity and idle state of connected players
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.config, None)
@@ -680,6 +685,14 @@ class Driver(pubsub.Listener):
         pubsub.sync()
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
+                idle_limit = 3 * 60 * 60 if "wizard" in conn.player.privileges else 30 * 60
+                if self.config.server_mode == "mud" and conn.idle_time > idle_limit:
+                    idle_limit_minutes = int(idle_limit / 60)
+                    conn.player.tell("\n")
+                    conn.player.tell("<it><rev>Automatic logout:  You have been logged out because you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
+                    conn.player.tell("\n")
+                    conn.player.tell_others("{Title} has been idling around for too long.")
+                    self._disconnect_mud_player(conn)   # remove players who stay idle too long
                 conn.write_output()
             else:
                 # disconnect corrupt player connection
@@ -1161,19 +1174,19 @@ class LimboReaper(npc.Monster):
             duration = now - first_seen
             # Depending on how long the candidate is being observed, show increasingly threateningly warnings,
             # and eventually killing the candidate (and closing their connection).
-            if duration >= 10 and shown < 1:
+            if duration >= 30 and shown < 1:
                 candidate.tell(self.title + " whispers: \"Greetings. Be aware that you must not linger here... Decide swiftly...\"")
                 shown = 1
-            elif duration >= 20 and shown < 2:
+            elif duration >= 50 and shown < 2:
                 candidate.tell(self.title + " looms over you and warns: \"You really cannot stay here much longer!\"")
                 shown = 2
-            elif duration >= 30 and shown < 3:
+            elif duration >= 60 and shown < 3:
                 candidate.tell(self.title + " menacingly raises his scythe!")
                 shown = 3
-            elif duration >= 31 and shown < 4:
+            elif duration >= 61 and shown < 4:
                 candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
                 shown = 4
-            elif duration >= 32:
+            elif duration >= 62:
                 try:
                     conn = ctx.driver.all_players[candidate.name]
                 except KeyError:

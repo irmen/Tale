@@ -191,23 +191,23 @@ class TestCommands(unittest.TestCase):
         self.cmds.add("verb3", func2, "wizard")
         self.cmds.add("verb4", func3, "noob")
 
-    @unittest.expectedFailure
     def testCommandsOverrideFail(self):
-        self.cmds.override("verbXXX", func2)
+        with self.assertRaises(KeyError):
+            self.cmds.override("verbXXX", func2)
 
     def testCommandsOverride(self):
         self.cmds.override("verb4", func2, "noob")
 
     def testCommandsAdjust(self):
         wiz = self.cmds.get(["wizard"])
-        self.assertEqual({"verb1", "verb2", "verb3"}, wiz.keys())
+        self.assertEqual({"verb1", "verb2", "verb3"}, set(wiz.keys()))
         wiz = self.cmds.get([None])
-        self.assertEqual({"verb1", "verb2"}, wiz.keys())
+        self.assertEqual({"verb1", "verb2"}, set(wiz.keys()))
         self.cmds.adjust_available_commands("if")
         wiz = self.cmds.get(["wizard"])
-        self.assertEqual({"verb2", "verb3"}, wiz.keys())
+        self.assertEqual({"verb2", "verb3"}, set(wiz.keys()))
         wiz = self.cmds.get([None])
-        self.assertEqual({"verb2"}, wiz.keys())
+        self.assertEqual({"verb2"}, set(wiz.keys()))
 
 
 if __name__ == "__main__":

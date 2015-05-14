@@ -74,12 +74,11 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         if not conn:
             return self.wsgi_internal_server_error(start_response, "not logged in")
         if not conn or not conn.player or not conn.io:
-            raise SessionMiddleware.CloseSession("no longer a valid connection")
+            raise SessionMiddleware.CloseSession("{\"error\": \"no longer a valid connection\"}", "application/json")
         return super(TaleMudWsgiApp, self).wsgi_handle_text(environ, parameters, start_response)
 
     def wsgi_handle_quit(self, environ, parameters, start_response):
         # Quit/logged out page. For multi player, get rid of the player connection.
-        # @todo auto clean up session and connection when player disconnected (= hasn't done a request in X time)
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
@@ -128,7 +127,9 @@ class SessionMiddleware(object):
         Raise this from your wsgi function to remove the current session.
         The exception message is returned as last goodbye text to the browser.
         """
-        pass
+        def __init__(self, message, content_type="text/html"):
+            super(SessionMiddleware.CloseSession, self).__init__(message)
+            self.content_type = content_type
 
     def __init__(self, app, factory):
         self.app = app
@@ -169,7 +170,7 @@ class SessionMiddleware(object):
             cookie["path"] = "/tale"
             cookie["httponly"] = 1
             cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
-            response_headers = [('Content-Type', 'text/html')]
+            response_headers = [('Content-Type', x.content_type)]
             response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
             start_response("200 OK", response_headers)
             return [str(x).encode("utf-8")]

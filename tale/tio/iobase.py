@@ -53,6 +53,7 @@ class IoAdapterBase(object):
         self.supports_blocking_input = True
         self.player_connection = player_connection
         self.stop_main_loop = False
+        self.last_output_line = None
 
     def destroy(self):
         """Called when the I/O adapter is shut down"""
@@ -95,12 +96,18 @@ class IoAdapterBase(object):
         return text
 
     def output(self, *lines):
-        """Write some text to the screen. Needs to take care of style tags that are embedded."""
-        raise NotImplementedError("implement this in subclass")
+        """
+        Write some text to the screen. Needs to take care of style tags that are embedded.
+        Implement specific behavior in subclass (but don't forget to call base method)
+        """
+        self.last_output_line = lines[-1]
 
     def output_no_newline(self, text):
-        """Like output, but just writes a single line, without end-of-line."""
-        raise NotImplementedError("implement this in subclass")
+        """
+        Like output, but just writes a single line, without end-of-line.
+        Implement specific behavior in subclass (but don't forget to call base method)
+        """
+        self.last_output_line = text
 
     def write_input_prompt(self):
         """write the input prompt '>>'"""

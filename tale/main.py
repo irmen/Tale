@@ -9,13 +9,16 @@ import sys
 from .driver import Driver
 
 
-def run_story(story_path, gui=False, web=False):
+def run_story(story_path, gui=False, web=False, mud=False):
     """convenience helper function to launch the game from story script files"""
     args = ["--game", story_path]
     if gui:
         args.append("--gui")
     elif web:
         args.append("--web")
+    elif mud:
+        args.append("--mode")
+        args.append("mud")
     Driver().start(args)
     raise SystemExit(0)
 

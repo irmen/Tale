@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import print_function, division, unicode_literals, absolute_import
 import sys
+import time
 import unittest
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
@@ -570,6 +571,18 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual(999, p.money)
         self.assertEqual("elemental", p.race)
         self.assertEqual("grand master", p.title)
+
+    def test_idle(self):
+        p = Player("dummy", "f")
+        c = PlayerConnection(p, WrappedConsoleIO(None))
+        self.assertLess(p.idle_time, 0.1)
+        self.assertLess(c.idle_time, 0.1)
+        time.sleep(0.2)
+        self.assertGreater(p.idle_time, 0.1)
+        self.assertGreater(c.idle_time, 0.1)
+        p.store_input_line("input")
+        self.assertLess(p.idle_time, 0.1)
+        self.assertLess(c.idle_time, 0.1)
 
 
 class TestTabCompletion(unittest.TestCase):

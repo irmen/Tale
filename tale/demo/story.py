@@ -69,4 +69,5 @@ if __name__ == "__main__":
     gamedir = os.path.dirname(__file__)
     gui = len(sys.argv) > 1 and sys.argv[1] == "--gui"
     web = len(sys.argv) > 1 and sys.argv[1] == "--web"
-    run_story(gamedir, gui, web)
+    mud = len(sys.argv) > 1 and sys.argv[1] == "--mud"
+    run_story(gamedir, gui, web, mud)

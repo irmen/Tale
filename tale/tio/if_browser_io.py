@@ -53,6 +53,7 @@ def singlyfy_parameters(parameters):
     return parameters
 
 
+#@todo: protect the display and transmission of account/password input text
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface.
@@ -98,10 +99,12 @@ class HttpIo(iobase.IoAdapterBase):
                 self.html_to_browser.append("<pre>" + text + "</pre>\n")
 
     def output(self, *lines):
+        super(HttpIo, self).output(*lines)
         for line in lines:
             self.output_no_newline(line)
 
     def output_no_newline(self, text):
+        super(HttpIo, self).output_no_newline(text)
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"

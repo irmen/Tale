@@ -157,12 +157,14 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def output(self, *lines):
         """Write some text to the screen. Takes care of style tags that are embedded."""
+        super(ConsoleIo, self).output(*lines)
         for line in lines:
             print(self._apply_style(line, self.do_styles))
         sys.stdout.flush()
 
     def output_no_newline(self, text):
         """Like output, but just writes a single line, without end-of-line."""
+        super(ConsoleIo, self).output_no_newline(text)
         print(self._apply_style(text, self.do_styles), end="")
         sys.stdout.flush()
 
