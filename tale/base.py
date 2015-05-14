@@ -42,7 +42,7 @@ from . import util
 from . import pubsub
 from . import mud_context
 from . import soul
-from .errors import ActionRefused, ParseError
+from .errors import ActionRefused, ParseError, LocationIntegrityError
 from .races import races
 
 
@@ -335,8 +335,8 @@ class Location(MudObject):
 
     def init_inventory(self, objects):
         """Set the location's initial item and livings 'inventory'"""
-        assert len(self.items) == 0
-        assert len(self.livings) == 0
+        if len(self.items) > 0 or len(self.livings) > 0:
+            raise LocationIntegrityError("clobbering existing inventory", None, None, self)
         for obj in objects:
             self.insert(obj, self)
 
@@ -554,7 +554,8 @@ class Exit(MudObject):
         assert isinstance(location, Location)
         directions = self.aliases | {self.name}
         for direction in directions:
-            assert direction not in location.exits
+            if direction in location.exits:
+                raise LocationIntegrityError("exit already exists: '%s' in %s" % (direction, location), direction, self, location)
             location.exits[direction] = self
 
     def _bind_target(self, game_zones_module):
@@ -580,7 +581,8 @@ class Exit(MudObject):
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
-        assert self.bound
+        if not self.bound:
+            raise LocationIntegrityError("exit not bound", None, self, None)
 
     def open(self, actor, item=None):
         raise ActionRefused("You can't open that.")
@@ -993,7 +995,8 @@ class Door(Exit):
 
     def allow_passage(self, actor):
         """Is the actor allowed to move through this door?"""
-        assert self.bound
+        if not self.bound:
+            raise LocationIntegrityError("door not bound", None, self, None)
         if not self.opened:
             raise ActionRefused("You can't go there; it's closed.")
 

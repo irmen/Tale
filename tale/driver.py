@@ -860,7 +860,8 @@ class Driver(pubsub.Listener):
             player.tell("\n")
             player.tell("\n")
         elif notify_no_motd:
-            player.tell("There's currently no message-of-the-day.")
+            player.tell("There's currently no message-of-the-day.", end=True)
+            player.tell("\n")
 
     def search_player(self, name):
         """

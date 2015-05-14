@@ -13,7 +13,6 @@ from tale.player import Player
 from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.util import clone
-from tale import mud_context
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 

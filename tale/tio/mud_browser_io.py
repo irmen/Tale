@@ -8,7 +8,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division
 from .if_browser_io import HttpIo, TaleWsgiAppBase
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
-from socketserver import ThreadingMixIn
+try:
+    from socketserver import ThreadingMixIn  # py 3.x
+except ImportError:
+    from SocketServer import ThreadingMixIn  # py 2.x
 import time
 import random
 import sys

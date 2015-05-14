@@ -14,6 +14,7 @@ import shelve
 import threading
 import datetime
 import re
+from contextlib import closing
 from . import base
 from . import lang
 from . import hints
@@ -371,9 +372,7 @@ class PlayerConnection(object):
 class MudAccounts(object):          # @todo unit tests
     """Handles the accounts (login, creation, etc) of mud users"""
     def __init__(self, database_opener=None):
-        if not database_opener:
-            database_opener = self.__shelve_db_opener
-        self.open_db = database_opener
+        self.open_db = database_opener or self.__shelve_db_opener
         self.db_lock = threading.Lock()
         try:
             self.get("trigger")
@@ -384,12 +383,12 @@ class MudAccounts(object):          # @todo unit tests
         """If not specified, a simple shelve database is used in the user's data directry"""
         dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
         try:
-            return shelve.open(dbpath, flag='w')
+            return closing(shelve.open(dbpath, flag='w'))
         except dbm.error:
             print("%s: Can't open the user accounts database." % mud_context.config.name)
             print("Location:", dbpath)
             if input("\nDo you want to create a new one? ").lower() == "y":
-                return shelve.open(dbpath, flag='c')
+                return closing(shelve.open(dbpath, flag='c'))
             else:
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
