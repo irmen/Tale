@@ -90,6 +90,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
     def wsgi_handle_about(self, environ, parameters, start_response):
         # about page
+        if "license" in parameters:
+            return self.wsgi_handle_license(environ, parameters, start_response)
         start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
         resource = vfs.internal_resources["web/about_mud.html"]
         player_table = ["<br><p><em>Connected players:</em></p><pre>"]
