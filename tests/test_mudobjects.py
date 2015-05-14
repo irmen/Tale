@@ -535,6 +535,22 @@ class TestNPC(unittest.TestCase):
         dragon = Monster("dragon", "f", race="dragon")
         self.assertTrue(dragon.aggressive)
 
+    def test_init_inventory(self):
+        rat = NPC("rat", "n", race="rodent")
+        with self.assertRaises(ActionRefused):
+            rat.insert(Item("thing"), None)
+        rat.insert(Item("thing"), rat)
+        wizz = Player("wizard", "f")
+        wizz.privileges.add("wizard")
+        rat.insert(Item("thing2"), wizz)
+        self.assertEqual(2, rat.inventory_size)
+        stuff = [Item("thing")]
+        with self.assertRaises(AssertionError):
+            rat.init_inventory(stuff)
+        rat = NPC("rat", "n", race="rodent")
+        rat.init_inventory(stuff)
+        self.assertEqual(1, rat.inventory_size)
+
     def test_move_notify(self):
         class LocationNotify(Location):
             def notify_npc_left(self, npc, target_location):
@@ -564,6 +580,24 @@ class TestNPC(unittest.TestCase):
         self.assertEqual(room2, room1.npc_left_target)
         self.assertEqual(npc, room2.npc_arrived)
         self.assertEqual(room1, room2.npc_arrived_from)
+
+
+class TestMonster(unittest.TestCase):
+    def test_init_inventory(self):
+        rat = Monster("rat", "n", race="rodent")
+        with self.assertRaises(ActionRefused):
+            rat.insert(Item("thing"), None)
+        rat.insert(Item("thing"), rat)
+        wizz = Player("wizard", "f")
+        wizz.privileges.add("wizard")
+        rat.insert(Item("thing2"), wizz)
+        self.assertEqual(2, rat.inventory_size)
+        stuff = [Item("thing")]
+        with self.assertRaises(AssertionError):
+            rat.init_inventory(stuff)
+        rat = Monster("rat", "n", race="rodent")
+        rat.init_inventory(stuff)
+        self.assertEqual(1, rat.inventory_size)
 
 
 class TestDescriptions(unittest.TestCase):
