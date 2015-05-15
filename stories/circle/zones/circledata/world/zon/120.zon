@@ -1,0 +1,279 @@
+#120
+Rome~
+12000 12099 45 2
+*
+* Created by Onivel of Jedi
+*
+* Mobiles
+M 0 12000 3 12001       Adjudicator
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+M 0 12000 3 12001       Adjudicator
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+M 0 12000 3 12001       Adjudicator
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+M 0 12001 1 12001       Scorekeeper
+E 1 3021 100 16                 Small Sword
+E 1 3042 100 11                 Shield
+M 0 12003 10 12003      Spectator
+M 0 12003 10 12004      Spectator
+M 0 12003 10 12008      Spectator
+M 0 12003 10 12022      Spectator
+M 0 12003 10 12023      Spectator
+M 0 12003 10 12003      Spectator
+M 0 12003 10 12004      Spectator
+M 0 12003 10 12008      Spectator
+M 0 12003 10 12022      Spectator
+M 0 12003 10 12023      Spectator
+M 0 12004 3 12002       Nobleman
+E 1 3042 100 11                 Shield
+E 1 3022 100 16                 Long Sword
+G 1 12033 1                     Key To Judge's Booth
+M 0 12004 3 12028       Nobleman
+E 1 3022 100 16                 Long Sword
+E 1 12001 3 13                  Bronze Belt
+M 0 12004 3 12043       Nobleman
+E 1 3022 100 16                 Long Sword
+E 1 12000 5 1                   Pewter Ring
+M 0 12005 5 12021       Slave
+E 1 3023 100 16                 Club
+M 0 12005 5 12021       Slave
+E 1 3023 100 16                 Club  
+M 0 12005 5 12021       Slave
+E 1 3023 100 16                 Club
+M 0 12005 5 12006       Slave
+E 1 3023 100 16                 Club
+M 0 12005 5 12049       Slave
+E 1 3023 100 16                 Club
+M 0 12006 5 12010       Gladiator
+E 1 3022 100 16                 Long Sword
+M 0 12006 5 12010       Gladiator
+E 1 3022 100 16                 Long Sword
+M 0 12006 5 12010       Gladiator
+E 1 3022 100 16                 Long Sword
+M 0 12006 5 12009       Gladiator
+E 1 3022 100 16                 Long Sword
+M 0 12006 5 12009       Gladiator
+E 1 3022 100 16                 Long Sword
+E 1 12002 2 6                   Roman Helmet
+M 0 12007 4 12016       Chariot Driver
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+M 0 12007 4 12009       Chariot Driver
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+M 0 12007 4 12016       Chariot Driver
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+M 0 12007 4 12016       Chariot Driver
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+M 0 12008 1 12009       Coach
+E 1 3021 100 16                 Small Sword
+E 1 3043 100 5                  Leather Jacket
+G 1 12003 100                   Coach's Whistle
+M 0 12009 1 12011       Roman Doctor
+E 1 3022 100 16                 Long Sword
+E 1 3043 100 5                  Leather Jacket
+E 1 3042 100 11                 Shield
+E 1 12004 6 3                   Stethoscope
+G 1 12028 3                     Staff Of Kodarta
+M 0 12010 1 12011       Nurse
+E 1 3021 100 16                 Small Sword
+E 1 3043 100 5                  Leather Jacket
+E 1 12005 3 6                   Hairpin
+G 1 12027 5                     Staff Of Latumfus
+M 0 12011 1 12006       Titus' Shopkeeper
+G 1 3020 100                    Dagger
+G 1 3021 100                    Small Sword
+G 1 3022 100                    Long Sword
+G 1 3023 100                    Wooden Club
+G 1 3024 100                    Warhammer
+G 1 3025 100                    Flail
+G 1 12008 100                   Leather Sandals
+E 1 3022 100 16                 Long Sword
+E 1 12008 100 8                 Leather Sandals
+G 1 12034 1                     Key To The Back Room
+M 0 12012 1 12032       Peddler
+E 1 12008 100 8                 Leather Sandals
+G 1 12006 100                   Apple
+G 1 12007 100                   Orange
+M 0 12013 2 12043       Page
+E 1 3020 100 16                 Dagger
+E 1 12008 100 8                 Leather Sandals
+M 0 12013 2 12037       Page
+E 1 3020 100 16                 Dagger
+E 1 12008 100 8                 Leather Sandals
+M 0 12014 1 12050       Plaintiff
+E 1 3022 100 16                 Long Sword
+E 1 12011 2 15                  Silver And Gold Bracelet
+M 0 12015 3 12025       Ticket Master
+E 1 3022 100 16                 Long Sword
+M 0 12015 3 12025       Ticket Master
+E 1 3022 100 16                 Long Sword
+M 0 12015 3 12025       Ticket Master
+E 1 12015 1 16                  Tempered Sword
+M 0 12016 3 12004       Stadium Vendor
+G 1 12010 25                    Hotdog
+M 0 12016 3 12008       Stadium Vendor
+G 1 12010 25                    Hotdog
+M 0 12016 3 12023       Stadium Vendor
+G 1 12010 25                    Hotdog
+M 0 12017 15 12012      Common Citizen
+M 0 12017 15 12032      Common Citizen
+M 0 12017 15 12021      Common Citizen
+M 0 12017 15 12031      Common Citizen
+M 0 12017 15 12018      Common Citizen
+M 0 12017 15 12032      Common Citizen
+M 0 12017 15 12045      Common Citizen
+M 0 12017 15 12034      Common Citizen
+M 0 12017 15 12039      Common Citizen
+M 0 12017 15 12040      Common Citizen
+M 0 12017 15 12046      Common Citizen
+M 0 12017 15 12033      Common Citizen
+M 0 12017 15 12019      Common Citizen
+M 0 12017 15 12024      Common Citizen
+M 0 12017 15 12013      Common Citizen
+M 0 12018 5 12051       Gate Guard
+E 1 3022 100 16                 Long Sword
+M 0 12018 5 12029       Gate Guard
+E 1 3022 100 16                 Long Sword
+M 0 12018 5 12035       Gate Guard
+E 1 3022 100 16                 Long Sword
+M 0 12018 5 12051       Gate Guard
+E 1 3022 100 16                 Long Sword
+M 0 12018 5 12005       Gate Guard
+E 1 3022 100 16                 Long Sword
+M 0 12019 3 12006       Soldier
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+M 0 12019 3 12042       Soldier
+E 1 3021 100 16                 Small Sword
+E 1 12019 2 8                   Combat Boots
+M 0 12019 3 12045       Soldier
+E 1 3021 100 16                 Small Sword
+E 1 12008 100 8                 Leather Sandals
+E 1 12018 2 5                   Combat Plate
+M 0 12020 1 12036       Julius Caesar
+E 1 3022 100 16                 Long Sword
+E 1 12017 1 10                  Moorish Bracers
+G 1 12024 7                     Musty Scroll
+M 0 12021 2 12036       Royal Bodyguard
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+E 1 3046 100 5                  Breast Plate
+M 0 12021 2 12036       Royal Bodyguard
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+E 1 3046 100 5                  Breast Plate
+M 0 12022 1 12055       Judge
+E 1 3022 100 16                 Long Sword
+E 1 12012 1 2                   Sapphire Ring
+M 0 12023 1 12043       Master Scheduler
+E 1 3022 100 16                 Long Sword
+E 1 12008 100 8                 Leather Sandals
+E 1 12013 1 4                   Jade Necklace
+G 1 12035 1                     Key To Caesar's Office
+G 1 12036 1                     Key To The Senate Chambers
+M 0 12024 6 12041       Slimeball
+M 0 12024 6 12048       Slimeball
+M 0 12024 6 12054       Slimeball
+M 0 12024 6 12057       Slimeball
+M 0 12024 6 12054       Slimeball
+M 0 12024 6 12057       Slimeball
+G 1 12030 500                   Blaze Orange Potion
+M 0 12025 1 12049       Froboz
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+E 1 12014 10 12                 Froboz' Cloak
+G 1 12025 10                    Ornate Scroll
+G 1 12026 10                    Plain Scroll
+G 1 12029 10                    Prototype Wand
+M 0 12026 1 12007       Titus Andronicus
+E 1 12016 3 17                  Quenched Sword
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+E 1 3046 100 5                  Breast Plate
+E 1 12008 100 8                 Leather Sandals
+M 0 12027 2 12037       Senator
+E 1 3021 100 16                 Small Sword
+E 1 3044 100 5                  Studded Leather Jacket
+G 1 12037 1                     Key To The Common Room
+M 0 12027 2 12037       Senator           
+E 1 3021 100 16                 Small Sword   
+E 1 3044 100 5                  Studded Leather Jacket
+G 1 3050 500                    Scroll Of Identify
+M 0 12028 1 12050       Bailiff
+E 1 3022 100 16                 Long Sword
+E 1 3042 100 11                 Shield
+G 1 12039 1                     Key To The Judge's Chambers
+M 0 12029 1 12050       Defendant 
+E 1 3024 100 16                 Warhammer
+E 1 3043 100 5                  Leather Jacket
+* Gods
+M 0 12030 1 12047       Jupiter
+E 1 12020 1 16                  Thunderbolt
+M 0 12031 1 12052       Venus
+E 1 12022 1 3                   Crystal Necklace
+M 0 12032 1 12056       Mars
+E 1 12016 3 17                  Quenched Sword
+E 1 12021 1 13                  Loincloth
+M 0 12033 1 12059       Mercury
+E 1 12023 1 8                   Winged Sandals
+M 0 12034 1 12042       Froboz' Shopkeeper
+G 1 3050 500                    Scroll Of Identify
+G 1 3051 500                    Yellow Potion
+G 1 3052 500                    Scroll Of Recall
+G 1 3053 500                    Grey Wand
+G 1 3054 500                    Gnarled Staff
+G 1 12030 10                    Blaze Orange Potion
+E 1 3022 100 16                 Long Sword
+E 1 12008 100 8                 Leather Sandals
+G 1 12038 1                     Key To Froboz' Workshop
+M 0 12035 1 12061       Executioner
+G 1 12031 10                    Executioner's Mace
+M 0 12036 1 12062       Baker
+G 1 3000 100                    Beer Barrel
+G 1 3001 100                    Beer Bottle
+G 1 3009 100                    Waybread
+G 1 3010 100                    Bread Loaf
+G 1 3011 100                    Danish Pastry
+G 1 12006 100                   Apple
+G 1 12007 100                   Apple
+E 1 3022 100 16                 Long Sword
+M 0 12037 1 12063       Grocer
+G 1 3030 100                    Torch
+G 1 3031 100                    Lantern
+G 1 3032 100                    Bag
+G 1 3033 100                    Box
+G 1 3036 100                    Cashcard
+G 1 12003 100                   Coach's Whistle
+E 1 3022 100 16                 Long Sword
+* Gates
+D 0 12005 3 2           West Gate Of City
+D 0 12029 0 2           North Gate Of City
+D 0 12035 2 2           South Gate Of City
+D 0 12051 1 1           East Gate Of City
+D 0 12064 3 1           Outside Of East Gate
+* Doors
+D 0 12001 5 2           Caesar's Private Box
+D 0 12002 4 2
+D 0 12006 2 2           Back Room Of Titus Andronicus' Store
+D 0 12007 0 2
+D 0 12037 0 2           Emperor's Private Office
+D 0 12036 2 2           
+D 0 12037 2 2           House Of Commons
+D 0 12038 0 2
+D 0 12042 1 2           Froboz' Workshop
+D 0 12049 3 2
+D 0 12043 3 2           Emperor's Private Office
+D 0 12036 1 2
+D 0 12044 3 2           Senate Chambers
+D 0 12037 1 2           
+D 0 12050 1 2           Judge's Chambers
+D 0 12055 3 2
+*
+S
+$

@@ -1,0 +1,119 @@
+#1200
+The Meeting Room Of The Gods~
+   The meeting room is plain and very simple.  A circular table sits
+in the middle of the room, lit by some unseen light source.  There
+are many chairs around the table, all empty.  The Immortal Board Room
+is to the north.
+~
+12 d 0
+D0
+The Immortal Board Room can be seen to the north.
+~
+~
+0 -1 1204
+S
+#1201
+The Inn Of The Gods~
+   The Inn of the Gods is a small room, holding only a shelf with many
+small precious stones on it.  When a God comes to rent his belongings,
+his essence is stored in the stones.  The Immortal Board Room is to
+the south.
+~
+12 dj 0
+D2
+The Immortal Board Room can be seen to the south.
+~
+~
+0 -1 1204
+S
+#1202
+The Ice Box Of The Gods~
+   The Ice Box is for little boys and girls that cannot play nice. Be good
+and maybe someone will come and get you.
+~
+12 defh 0
+S
+#1203
+The Gods' Mortal Board Room~
+   Here the Gods have magically created an exact copy of the mortal board
+room.  Any God can easily post and read messages from the mortal board room
+without being seen by any mortals.  The Immortal Board Room is to the west.
+~
+12 d 0 
+D3
+The Immortal Board Room can be seen to the west.
+~
+~
+0 -1 1204
+S
+#1204
+The Immortal Board Room~
+   The main hang out of the Gods, the Immortal Board Room is the place to
+be.  Gods exchange messages here most every day.  The mortal board room is
+to the east and the meeting room for the gods is to the south.  To the north
+is the Gods' Inn and to the west is a post office for Gods.  There is a large
+staircase leading down to the main temple in the city of Midgaard.  In the
+northeast corner you spot a small staircase leading upwards.
+~
+12 d 0
+D0
+The Gods' Inn can be seen just to the north.
+~
+~
+0 -1 1201
+D1
+The Mortal Board Room can be seen just to the east.
+~
+~
+0 -1 1203
+D2
+The Gods' Meeting Room is located to the south.
+~
+~
+0 -1 1200
+D3
+The Gods' Post Office is just to the west.
+~
+~
+0 -1 1205
+D4
+There is a small stair in the corner leading up to the social room of
+the Gods.
+~
+~
+0 -1 1206
+D5
+You see the hustle and bustle of the Temple of Midgaard at the bottom of
+the stairs.
+~
+~
+0 -1 3001
+S
+#1205
+The Post Office Of The Gods~
+   The Post Office Of The Gods is the same as most Post Offices except that
+it is not as slow.  Even the Postal service knows not to anger the Gods.
+Piles of junk mail line the walls.  I guess even Gods get on mailing lists.
+The Immortal Board Room is to the east.
+~
+12 d 0
+D1
+The Immortal Board Room is just to the east.
+~
+~
+0 -1 1204
+S
+#1206
+The Social Gathering Room~
+   This elegantly decorated room has one simple purpose.  To socialize with
+everyone else around in one central location.
+~
+12 d 0
+D5
+The Immortal Board Room is just down through the floor.  Funny how you
+didn't notice that exit before isn't it?
+~
+~
+0 -1 1204
+S
+$

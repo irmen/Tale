@@ -1,0 +1,80 @@
+CircleMUD v3.0 Shop File~
+#3301~
+3300
+3301
+3308
+3309
+3310
+-1
+1.1
+0.9
+-1
+%s We didn't grow any of those this year.~
+%s You don't have that!~
+%s I won't buy that!~
+%s I can't buy that!~
+%s You can't buy that!~
+%s Ok, %d coins please!~
+%s Ok, %d coins please!~
+2
+2
+3304
+0
+3350
+-1
+8
+22
+0
+0
+#3302~
+3032
+3037
+3038
+3039
+-1
+1.1
+0.9
+-1
+%s Could you repeat that please?~
+%s I don't buy!~
+%s I don't buy!~
+%s I don't buy!~
+%s But you haven't the money!~
+%s Ok, %d gold please.~
+%s Ok, %d gold please.~
+2
+0
+3301
+0
+3345
+-1
+8
+22
+0
+0
+#3303~
+3319
+3320
+3321
+-1
+1.2
+1.0
+-1
+%s I don't know how to make one of those!~
+%s We don't *buy* drinks... we sell 'em!~
+%s We don't *buy* drinks... we sell 'em!~
+%s We don't *buy* drinks... we sell 'em!~
+%s I don't give 'em away free, you know!~
+%s That's %d gold.~
+%s We don't *buy* drinks... we sell 'em!~
+2
+0
+3314
+0
+3357
+-1
+20
+2
+11
+18
+$~

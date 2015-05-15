@@ -1,0 +1,132 @@
+#65
+The Dwarven Kingdom~
+6500 6599 40 2
+*
+* Mobiles
+M 0 6500 11 6505        Dwarf Guard
+E 1 6504 100 16                 Dwarven Hammer
+E 1 6505 100 5                  Dwarven Plate
+E 1 6515 3 17                   Key To Entrance Of Mountain
+M 0 6500 11 6540        Dwarf Guard
+E 1 6504 100 16                 Dwarven Hammer
+E 1 6505 100 5                  Dwarven Plate
+E 1 6502 100 17                 Key To The Mines
+M 0 6500 11 6505        Dwarf Guard
+E 1 6504 100 16                 Dwarven Hammer
+E 1 6505 100 5                  Dwarven Plate
+M 0 6500 11 6540        Dwarf Guard
+E 1 6504 100 16                 Dwarven Hammer
+E 1 6505 100 5                  Dwarven Plate
+M 0 6500 11 6509        Dwarf Guard
+E 1 6512 100 9                  Dwarven Gloves
+E 1 6509 100 16                 Two-Handed Dwarven Axe
+M 0 6500 11 6521        Dwarf Guard
+M 1 6500 11 6521        Dwarf Guard
+M 1 6500 11 6521        Dwarf Guard
+M 0 6500 11 6512        Dwarf Guard
+E 1 6508 100 16                 Dwarven Club
+M 0 6500 11 6512        Dwarf Guard
+E 1 6508 100 16                 Dwarven Club
+M 0 6500 11 6509        Dwarf Guard
+E 1 6509 100 16                 Two-Handed Dwarven Axe
+E 1 6510 100 6                  Dwarven Helmet
+E 1 6511 100 1                  Golden Dwarf Ring
+M 0 6501 9 6503         Dwarven Worker
+M 0 6501 9 6502         Dwarven Worker
+M 0 6501 9 6501         Dwarven Worker
+M 0 6502 1 6527         Wraith
+E 1 6503 100 17                 Key To The Castle
+* Shopkeepers
+M 0 6503 1 6516         Hide & Tooth Storekeeper
+G 1 3022 100                    Long Sword
+G 1 6504 100                    Dwarven Hammer
+G 1 6505 100                    Dwarven Plate
+G 1 6510 100                    Dwarven Helmet
+G 1 6512 100                    Dwarven Gloves
+E 1 6504 100 16                 Dwarven Hammer
+M 0 6504 1 6535         Granite Head The Baker
+G 1 3000 100                    Beer Barrel
+G 1 3003 100                    Firebreather
+G 1 3010 100                    Loaf Of Bread
+G 1 3011 100                    Danish Pastry
+G 1 3031 100                    Lantern
+G 1 6013 100                    Water Barrel
+E 1 6504 100 16                 Dwarven Hammer
+* Mobiles
+M 0 6505 2 6515         Lizard
+M 0 6505 2 6520         Lizard
+M 0 6506 2 6508         Giant
+E 1 6505 100 5                  Dwarven Plate
+M 0 6507 4 6543         Dwarven Mineworker
+E 1 6508 100 16                 Dwarven Club
+M 0 6507 4 6543         Dwarven Mineworker
+E 1 6508 100 16                 Dwarven Club
+M 0 6507 4 6542         Dwarven Mineworker
+E 1 6508 100 16                 Dwarven Club
+M 0 6507 4 6542         Dwarven Mineworker
+E 1 6508 100 16                 Dwarven Club
+M 0 6508 1 6543         Dwarven Mineleader
+E 1 6512 100 9                  Dwarven Gloves
+E 1 6508 100 16                 Dwarven Club
+M 0 6509 1 6534         Dwarf Doctor
+E 1 6506 100 17                 Long Black Heal Stick
+M 0 6510 4 6534         Dwarf Peon
+E 1 7211 100 16                 Short Sword
+M 0 6510 4 6534         Dwarf Peon
+E 1 7211 100 16                 Short Sword
+M 0 6511 8 6523         Barrack Dwarf
+E 1 7211 100 16                 Short Sword
+M 0 6511 8 6523         Barrack Dwarf
+E 1 7211 100 16                 Short Sword
+M 0 6511 8 6523         Barrack Dwarf
+E 1 7211 100 16                 Short Sword
+M 0 6511 8 6524         Barrack Dwarf
+E 1 6504 100 16                 Dwarven Hammer
+M 0 6511 8 6524         Barrack Dwarf
+E 1 7211 100 16                 Short Sword
+M 0 6511 8 6524         Barrack Dwarf
+E 1 7211 100 16                 Short Sword
+M 0 6514 4 6521         Barrack Guard
+E 1 6509 100 16                 Two-Handed Dwarven Axe
+M 0 6514 4 6521         Barrack Guard
+E 1 6509 100 16                 Two-Handed Dwarven Axe
+M 0 6516 1 6553         Mazekeeper
+E 1 6500 1 17                   Key To The Treasury
+O 1 6501 1 6554         Treasure
+M 0 6517 2 6548         Giant Snake
+M 0 6517 2 6549         Giant Snake
+* Objects
+R 0 6513 6507
+O 0 6507 4 6513         Long Black Light Stick
+R 0 6505 6507
+O 0 6507 4 6505         Long Black Light Stick
+R 0 6503 6507
+O 0 6507 4 6503         Long Black Light Stick
+R 0 6540 6507
+O 0 6507 4 6540         Long Black Light Stick
+O 0 6513 6 6545         Chunk Of Coal
+R 0 6551 6514
+O 0 6514 3 6551         Mining Pick
+O 0 6516 1 6532         Key To The Mine Maze
+* Doors
+D 0 6505 3 2            Mountain Entrance
+D 0 6513 1 2
+D 0 6509 0 2            Kingdom Door
+D 0 6510 2 2
+D 0 6512 1 2            Castle Door
+D 0 6525 3 2
+D 0 6521 2 1            Barracks Entrance
+D 0 6523 0 1
+D 0 6526 5 1            Wine Cellar
+D 0 6527 4 1
+D 0 6531 0 1            Queen's Bedroom
+D 0 6532 2 1
+D 0 6532 3 2            Treasury Door
+D 0 6554 1 2
+D 0 6540 1 2            Mine Entrance
+D 0 6541 3 2
+D 0 6544 0 2            Maze Entrance
+D 0 6546 2 2
+*
+S
+$

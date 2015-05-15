@@ -1,0 +1,5167 @@
+#5400
+The Entrance To The Dancing Daemon Inn~
+   You find yourself in an entrance foyer to the Dancing Daemon Inn.
+Chrome plated stairs spiral up to the reception area.  To the south
+you hear the sounds of merriment and drinking and from the west you
+hear the bustling activity of New Thalos.
+~
+54 d 0
+D2
+You see people dancing and drinking.
+~
+~
+0 -1 5402
+D3
+You see people walking by on Sultan's Walk.
+~
+~
+0 -1 5420
+D4
+The spiral stairs lead up to the reception area.
+~
+~
+0 -1 5401
+S
+#5401
+The Reception Area~
+   You are now standing in the reception of New Thalos.  A huge mahogany
+desk is here along with two sofas and a coffee table covered in magazines.
+The plush carpeting under your feet is a nice change from the rugged paths
+you are used to travelling.  A chrome stairway spirals downstairs to the
+tavern of the Dancing Daemon Inn, and your future adventures in New Thalos.
+~
+54 deh 0
+D5
+The stairs lead down to the Daemon.
+~
+~
+0 -1 5400
+S
+#5402
+The Dancing Daemon Inn~
+   A huge circling wet-bar takes up most of the east end of the Daemon.  An
+old mage reclines against the mirror behind the bar absentmindedly pouring
+several drinks at once with his refined telekinesis.  The Lokettes, a local
+band, are playing their usual gig on the stage.  The large booths along the
+all are filled with people drinking and having a grand time.  You feel like
+partying here.
+The only obvious exit is to the north.
+~
+54 d 0
+D0
+You see the entrance to the Daemon.
+~
+~
+0 -1 5400
+E
+bar~
+The bar looks slightly out of place and you can only assume the powerful
+magic of the bartender allows it to revolve.
+~
+S
+#5403
+The Medina~
+   You stand on the Medina, on the larger open areas in New Thalos.
+People walk to and fro carrying on their day to day business.  The
+Common Square of the people opens up to the south and the Medina
+continues north.
+~
+54 0 1
+D0
+You see Medina.
+~
+~
+0 -1 5404
+D2
+You see the Common Square.
+~
+~
+0 -1 5410
+S
+#5404
+The Medina~
+   You are walking along a wide open expanse of road connecting
+Market Square to the Common Square.  Panhandlers, beggars, and
+other such riff-raff wander about hoping to catch those few who
+with open hearts.  The Medina continues to the south and the
+Market Square spreads out to the north.
+~
+54 0 1
+D0
+You see Market Square.
+~
+~
+0 -1 5405
+D2
+You see the Medina.
+~
+~
+0 -1 5403
+S
+#5405
+Southern Market Square~
+   The large square of markets fills your vision.  Strange sights and
+sounds, those known only to the New Thalos market, barrage your senses.
+The only hope of making any sense of what is going on here is to wander
+around.  Market Square continues north, west, and east, with the Medina
+trailing off th the south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5406
+D1
+~
+~
+0 -1 5407
+D2
+~
+~
+0 -1 5404
+D3
+~
+~
+0 -1 5408
+S
+#5406
+The Center Of Market Square~
+   You are standing in the center of Market Square, the famous square
+of New Thalos.  A large, peculiar looking statue is standing in the
+middle of the square.  The square extends in every direction.
+~
+54 0 1
+D0
+~
+~
+0 -1 5415
+D1
+~
+~
+0 -1 5417
+D2
+~
+~
+0 -1 5405
+D3
+~
+~
+0 -1 5409
+E
+statue~
+Before you is a statue of the mighty beholder!
+A great beast with multiple eyes and wicked... wicked... um.... eyes...
+The mighty beholder is in Excellent condition.
+~
+S
+#5407
+Southeastern Market Square~
+   In this corner of the market some of the largest warriors in the land
+tower over you.  It is easy to understand why they hang out here once you
+notice the weapon shop and the armoury close by.  Perhaps you might stop
+in and take a look at the wares these shops have to offer.
+~
+54 0 1
+D0
+~
+~
+0 -1 5417
+D1
+~
+~
+0 -1 5529
+D2
+~
+~
+0 -1 5536
+D3
+~
+~
+0 -1 5405
+S
+#5408
+Southwestern Market Square~
+   This area of the market seems relatively quiet, save the high pitch
+banter of the shopkeepers attempting to lure you into their stores.
+South you see the bread stand and west is the entrance to the general
+store.
+   The market's sprawl continues east and north of here.
+~
+54 0 1
+D0
+~
+~
+0 -1 5409
+D1
+~
+~
+0 -1 5405
+D2
+You see the grocer's.
+~
+~
+0 -1 5535
+D3
+You see the general store.
+~
+~
+0 -1 5528
+S
+#5409
+Western Market Square~
+   This area of the square seems a bit more subdued than the rest.
+You notice that most of the outland adventurers mill around the
+southern end of the market, while the townfolk seem to keep their
+business in the northern end.
+   West Main street begins here and heads for the gate, the market's 
+expanse fills the other directions.
+~
+54 0 1
+D0
+~
+~
+0 -1 5414
+D1
+~
+~
+0 -1 5406
+D2
+~
+~
+0 -1 5408
+D3
+~
+~
+0 -1 5426
+S
+#5410
+The Common Square~
+   People pass by talking to each other, or rest their weary bones on this
+grassy field.  You can hear faint sounds of the river to the south of you
+as it passes through the city.  Ishtar drive heads east and west from here
+and the Medina is to the north.  South lies the River Ishtar Bridge and the
+southern gate.
+~
+54 0 1
+D0
+You see the medina.
+~
+~
+0 -1 5403
+D1
+~
+~
+0 -1 5437
+D2
+You see the bridge over the river.
+~
+~
+0 -1 5412
+D3
+~
+~
+0 -1 5436
+S
+#5411
+Outside The Southern Gate Of New Thalos~
+   You see before you the expanse of the Great Eastern Desert.
+You have heard many tales of the Great Pyramid, the lost city
+of Old Thalos and the friendly brass dragon that lies under the
+desert.
+   To the south lies the desert and the city of New Thalos is
+to the north.
+~
+54 c 1
+D0
+~
+gate~
+1 5401 5413
+D2
+~
+~
+0 -1 5039
+S
+#5412
+The Southern Bridge~
+   Walking over the bridge you see the rushing waters of the River
+Ishtar.  To the south you see the Southern Gate of New Thalos and
+the Common Square stretches out to the north
+~
+54 c 1
+D0
+~
+~
+0 -1 5410
+D2
+~
+~
+0 -1 5413
+D5
+~
+~
+0 -1 5485
+S
+#5413
+Inside The South Gate Of New Thalos~
+   Two large stone towers rise up to greet you with the massive iron
+gate swinging on ornately crafted hinges and emblazoned with the crest
+of New Thalos.  The makers of the city spared no expense in rebuilding
+the defenses or their home.  The River Ishtar bridge lies to the north
+and the desert to the south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5412
+D2
+~
+gate~
+1 5401 5411
+S
+#5414
+Northwestern Market Square~
+   This corner of the market contains some of the most civilized folk
+in New Thalos.  To the north lies the humble store of the merchant
+Ahkeem, his weavings known to be the best in the city.  West of here
+is the entrance to the First Royal Bank of New Thalos.
+~
+54 0 1
+D0
+~
+~
+0 -1 5514
+D1
+~
+~
+0 -1 5415
+D2
+~
+~
+0 -1 5409
+D3
+~
+~
+0 -1 5521
+S
+#5415
+Northern Market Square~
+   You stand in one of the most heavily used parts of town.  To the north
+lies the Palace of New Thalos and the Casbah, east west and south of here
+the busy market thrives with life.
+~
+54 0 1
+D0
+~
+~
+0 -1 5418
+D1
+~
+~
+0 -1 5416
+D2
+~
+~
+0 -1 5406
+D3
+~
+~
+0 -1 5414
+S
+#5416
+Northeastern Market Square~
+   Pandemonium.  Chaos.  Madness.  A few other choice words come to mind
+as you gaze into this corner of the market.  The vegetable stand seems
+quiet enough so you have to assume the noise comes from the Butchery.
+You have to think for a while before you muster the will to enter this
+shop.  The market continues to the south and west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5515
+D1
+~
+~
+0 -1 5522
+D2
+~
+~
+0 -1 5417
+D3
+~
+~
+0 -1 5415
+S
+#5417
+Eastern Market Square~
+   You stand in the market of New Thalos, the gem of the desert.  The
+market is the hub of the city, all trade and commerce of any significance
+is carried on here.  The market spreads out in all directions save east,
+here Main Street heads for the easter gate.
+~
+54 0 1
+D0
+~
+~
+0 -1 5416
+D1
+~
+~
+0 -1 5427
+D2
+~
+~
+0 -1 5407
+D3
+~
+~
+0 -1 5406
+S
+#5418
+Sultan's Walk~
+   This cobblestone road aides your journey through town.  Traveling north
+will take you by the Palace and the Dancing Daemon Inn, and south will put
+you on Market Square.
+~
+54 0 1
+D0
+~
+~
+0 -1 5419
+D2
+~
+~
+0 -1 5415
+S
+#5419
+Sultan's Walk~
+   This part of the road travels between one of the sturdy walls of
+the Palace and the Dancing Daemon.  To the east you peer through a
+small window into the Daemon, seeing many people dancing and drinking.
+After you tend to your other chores you plan on visiting the Daemon.
+   The walk continues north and south from here.
+~
+54 0 1
+D0
+~
+~
+0 -1 5420
+D2
+~
+~
+0 -1 5418
+S
+#5420
+Sultan's Walk~
+   The road here between the Palace and the Dancing Daemon Inn seems well
+worn by the travel of horses, carts, and leather boots.  From the west you
+hear the faint sound of trumpets announcing the arrival of some duke or
+duchess to the Palace.  Safe haven awaits you to the east in the halls
+of the Daemon, and Sultan's Walk continues north and south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5421
+D1
+~
+~
+0 -1 5400
+D2
+~
+~
+0 -1 5419
+D3
+~
+~
+0 -1 5558
+S
+#5421
+Sultan's Walk~
+   The main road north from the square continues here, surrounded
+by the walls of the Palace and the Daemon.  To the north you see
+the heavily guarded gate and can make out faint sounds of trade
+to the south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5422
+D2
+~
+~
+0 -1 5420
+S
+#5422
+Inside The Northern Gate Of New Thalos~
+   Two large stone towers rise up to greet you with a massive iron
+gate swinging between on ornately crafted hinges and emblazend with
+the crest of New Thalos.  The makers of this city spared no costs
+in rebuilding the defenses of their home.
+   Sultan's Walk runs to the south and the Casbah stretches out east
+and west.  To the north is wilderness.
+~
+54 0 1
+D0
+~
+gate~
+1 5401 5567
+D1
+~
+~
+0 -1 5449
+D2
+~
+~
+0 -1 5421
+D3
+~
+~
+0 -1 5448
+S
+#5423
+Inside The West Gate Of New Thalos~
+   Two large stone towers embedded in the wall loom over you.  The
+massive iron gate, emblazoned with the crest of New Thalos, swings
+easily on four ornately crafted hinges.  It is obvious the makers
+of this city spared no expense in protecting their home.
+   Main street heads towards the market eastward and the wilderness
+beckons from the west.  To the south lies the entrance the Warriors'
+Guild.
+~
+54 c 1
+D1
+~
+~
+0 -1 5424
+D2
+~
+~
+0 -1 5526
+D3
+~
+gate~
+1 5401 5569
+S
+#5424
+West Main Street~
+   This is the main road traveling though the city.  To the south you
+hear the hammering of the repair shop and to the north is the grassy
+field known as Temple Square.  Main street continues east and west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5520
+D1
+~
+~
+0 -1 5425
+D2
+~
+~
+0 -1 5527
+D3
+~
+~
+0 -1 5423
+S
+#5425
+West Main Street~
+   A foreman stands stand here watching over two construction workers
+fixing a pothole.  The road here branches off north and south into
+two alleys behind the stores of the market.  The main street continues
+east and west from here.
+~
+54 0 1
+D0
+~
+~
+0 -1 5471
+D1
+~
+~
+0 -1 5426
+D2
+~
+~
+0 -1 5472
+D3
+~
+~
+0 -1 5424
+S
+#5426
+West Main Street~
+   You are strolling on the street between the bank and general store.
+To the west you hear a roadcrew at work and to the east, the sounds of 
+commerce taking place.  The air is filled with the smell of gold and
+riches.
+On the wall of the store is a poster.
+~
+54 0 1
+D1
+~
+~
+0 -1 5409
+D3
+~
+~
+0 -1 5425
+E
+poster~
+The poster is of a wealthy looking man in red robes smiling at you.
+The caption reads:
+
+       THE SULTAN REMINDS YOU TO PAY YOUR TAXES!
+
+~
+S
+#5427
+East Main Street~
+   Here on East Main, you smell the odor of freshly slaughtered meat
+and, hear the pounding of new metal from the armory.  The Square is
+to the west and a junction is to the East.  
+~
+54 0 1
+D1
+~
+~
+0 -1 5428
+D3
+~
+~
+0 -1 5417
+S
+#5428
+East Main Street~
+   You are on East Main Street.  To the North is the beginning
+of Guildsman Row.  To the South is a dark alley.  The road also
+continues to the East.
+There is a small sign on a wire hanging across the junction.
+~
+54 0 1
+D0
+~
+~
+0 -1 5464
+D1
+~
+~
+0 -1 5429
+D2
+~
+~
+0 -1 5465
+D3
+~
+~
+0 -1 5427
+E
+sign~
+The sign reads:
+
+                        NO LOITERING!
+
+            (by order of the Sultan of New Thalos)
+
+~
+S
+#5429
+East Main Street~
+   As you walk by the mercenary guild a cold chill causes you to shiver
+uncontrollably.  You see some shady looking characters lurking about the
+entrance to this house of 'helpful' people.  Perhaps curiosity gets the
+best of you, but you wonder what could be going on inside.  To the north
+you see the open doors of the apothecary shop where one may buy many
+magical livations.
+   Main Street continues east and west from here.
+~
+54 0 1
+D0
+~
+~
+0 -1 5523
+D1
+~
+~
+0 -1 5430
+D2
+~
+~
+0 -1 5530
+D3
+~
+~
+0 -1 5428
+S
+#5430
+East Main Street~
+   The Main street through eastern New Thalos begins here and heads
+westward towards the marketplace.  One of the main gates can be seen
+to the east and Braheem's Magic Shop awaits your business to the north.
+~
+54 0 1
+D0
+~
+~
+0 -1 5524
+D1
+~
+~
+0 -1 5431
+D3
+~
+~
+0 -1 5429
+S
+#5431
+Inside the Eastern Gate of New Thalos~
+   Two large stone towers imbedded in the wall loom over you.  The
+massive iron gate, emblazened with the crest of New Thalos, swings
+easily on four ornately crafted hinges.  It is obvious the makers
+of this city spared no expense in protecting their home.
+   Main street heads towards the market westward and the wilderness
+beckons from the east.  To the north lies the entrance to the Mages'
+Guild.
+~
+54 c 1
+D0
+~
+~
+0 -1 5525
+D1
+~
+gate~
+1 5401 5568
+D3
+~
+~
+0 -1 5430
+S
+#5432
+Cassandra's Catch Of The Day~
+   Nothing in your life has prepared you for the odor which fills your
+lungs.  Not wanting to offend the beautiful shopkeeper you hold your
+tongue and quietly look over her selection.
+~
+54 cd 0
+D2
+~
+~
+0 -1 5441
+S
+#5433
+West Ishtar Drive~
+   This is the warehouse district of New Thalos.  Strong men walk back
+and forth from the docks to the warehouse carrying large crates loading
+and unloading the boats as they sail down the river.  To the north is
+one of the entrances of the warehouse and West Ishtar leads east.
+~
+54 0 1
+D0
+~
+~
+0 -1 5540
+D1
+~
+~
+0 -1 5434
+S
+#5434
+West Ishtar Drive~
+   A few men walk by almost pushing you out of the way as they go about
+their business of loading and unloading the boats.  An entrance to one
+of the huge warehouses of New Thalos is to the north and the River Ishtar 
+quietly flows by to the south.  Ishtar Drive continues east and west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5541
+D1
+~
+~
+0 -1 5435
+D3
+~
+~
+0 -1 5433
+S
+#5435
+West Ishtar Drive~
+   The cobblestone road is moist here, the trail of water heading down to
+the boat ramp.  Catching your balance as you start to slide on the slick
+pavement you grab on to the handrail someone has conveniently placed here.
+   To the north is the Shipwright and Ishtar Drive continues east and west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5542
+D1
+~
+~
+0 -1 5436
+D2
+~
+~
+0 -1 5443
+D3
+~
+~
+0 -1 5434
+S
+#5436
+West Ishtar Drive~
+   A cool breeze blows up off the river chilling the sweat otherwise
+present on your skin.  Orders and sometimes curses can be heard from
+the west in the direction of the warehouses.  The common square opens
+up to the east and Ishtar Drive continues west.
+~
+54 0 1
+D1
+~
+~
+0 -1 5410
+D3
+~
+~
+0 -1 5435
+S
+#5437
+East Ishtar Drive~
+   Loud hammering and the sound of red hot iron cooling in water reaches 
+your ears as you stand in front of the blacksmith.  A small boy runs up
+to you with big eyes and, as you return his gaze, runs off down the road.
+   The common square can be seen to the west and Ishtar Drive continues
+to the east.
+~
+54 0 1
+D0
+~
+~
+0 -1 5544
+D1
+~
+~
+0 -1 5439
+D3
+~
+~
+0 -1 5410
+S
+#5438
+East Ishtar Drive~
+   The wide road bordering the south of town continues to the east west
+here, bordered only by the hay-loft to the north and the River Ishtar to
+the south.
+~
+54 0 1
+D1
+~
+~
+0 -1 5440
+D3
+~
+~
+0 -1 5439
+S
+#5439
+East Ishtar Drive~
+   Small clumps of hay strewn about the ground alerts you to the fact
+that you have reached the stables.  Arabian stallions as well as many
+other  fine breeds of horses can be purchased for a price.  Ishtar Drive
+continues east and west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5545
+D1
+~
+~
+0 -1 5438
+D3
+~
+~
+0 -1 5437
+S
+#5440
+East Ishtar Drive~
+   Even in broad daylight, you can hardly see into the back alley
+that begins here and heads north.  Sounds of loud drunken folk and
+the occasional screaming cat emenate from the direction.  Luckily
+you have the choice of going east or west down the drive as well.
+~
+54 0 1
+D0
+You see murky darkness.
+~
+~
+0 -1 5468
+D1
+~
+~
+0 -1 5441
+D3
+~
+~
+0 -1 5438
+S
+#5441
+East Ishtar Drive~
+   Your highly acute sense of smell reports you have reached the
+entrance to the fish market.  Although renowned for it fresh catches
+and wide selection of aquarian delicacies you wonder how much longer
+you can endure the smell!  The River Ishtar flows alongside to the
+south with the drive running along side it east to west.
+~
+54 0 1
+D0
+~
+~
+0 -1 5432
+D1
+~
+~
+0 -1 5442
+D3
+~
+~
+0 -1 5440
+S
+#5442
+East Ishtar Drive~
+   The sound of squawking gulls and the smell of rotting fish gives you
+a hint of your location.  The River Ishtar flows south of you, but looks
+crystal clear, so it cannot be the source of this putrid smell.
+Looking north you notice a small sign hanging over the dump.
+~
+54 0 1
+D0
+~
+~
+0 -1 5547
+D3
+~
+~
+0 -1 5441
+E
+sign~
+#====================================================#
+|                                                    |
+|              THE DUMP OF NEW THALOS                |
+|                                                    |
+|                                                    |
+|                      -----                         |
+|                                                    |
+|             Enter at your own risk.                |
+|                            -the management         |
+|                                                    |
+#====================================================#
+~
+S
+#5443
+The Boat Ramp~
+   This sloped slab of stone allows easy passage to and from the River
+Ishtar.  Boats are moored to the docks here awaiting their masters to
+return from the warehouses and the pubs.  The waters of the River Ishtar
+lap at your feet to the south and Ishtar Drive is to the north.
+~
+54 c 1
+D0
+~
+~
+0 -1 5435
+D2
+~
+~
+0 -1 5486
+S
+#5444
+West Casbah~
+   The air takes on a somber note as you stand before the entrance to the
+jailhouse of New Thalos.  Hopefully you won't ever see this structure from
+the inside.  The northwest tower stands here with a spiral staircase 
+leading up.  The Avenue ends here, only exiting to the east.
+~
+54 0 1
+D1
+~
+~
+0 -1 5445
+D2
+~
+gate~
+2 5493 5553
+D4
+~
+~
+0 -1 5559
+S
+#5445
+West Casbah~
+   You have almost reached the end of the Avenue in this direction, the 
+number of guards in this part of town is nearly doubled.  To the north
+the familiar city wall protects you from the wilderness.  Looking south
+marble stairs rise towards the entrance of city hall surrounded by 
+massive white pillars.
+   The Avenue continues east and west from here.
+~
+54 0 1
+D1
+~
+~
+0 -1 5446
+D2
+~
+~
+0 -1 5554
+D3
+~
+~
+0 -1 5444
+S
+#5446
+The Casbah~
+   The wall of the Palace curves south from here, a darkened alley runs
+along it in that direction.  West of here you see the steps of the City
+Hall and notice the increase in the number of guards.
+   To the east the Avenue continues.
+~
+54 0 1
+D1
+~
+~
+0 -1 5447
+D2
+~
+~
+0 -1 5458
+D3
+~
+~
+0 -1 5445
+S
+#5447
+The Casbah~
+   As you travel down the road towards towards the City Hall you look up
+at the guards walking along the wall keeping watch.  South of you stands
+the great walls of the Palace and the Avenue goes east and west.
+~
+54 0 1
+D1
+~
+~
+0 -1 5448
+D3
+~
+~
+0 -1 5446
+S
+#5448
+The Casbah~
+   The cobblestone pavement runs along the north wall here.  South of you
+stand the great walls of the Palace and the Avenue goes east and west.
+~
+54 0 1
+D1
+~
+~
+0 -1 5422
+D3
+~
+~
+0 -1 5447
+S
+#5449
+The Casbah~
+   The activity here is only slightly less than chaotic.  Young boys run
+to and fro with stern intent, and older gentleman swagger down the street
+towards the Library.  To the west you can see the tall towers of the
+northern gate, and the Avenue continues east.
+~
+54 0 1
+D1
+~
+~
+0 -1 5450
+D3
+~
+~
+0 -1 5422
+S
+#5450
+The Casbah~
+   Walking along the cobblestone path you feel secure with the walls of
+the city towering over you.  You hear the scraping sounds of metal on
+stone and look up to see a large, strong guard looking out to the north.
+   To the east lies the intersection on Guildsman's Row and the northern
+gate is a short walk to the west.
+~
+54 0 1
+D1
+~
+~
+0 -1 5451
+D3
+~
+~
+0 -1 5449
+S
+#5451
+The Casbah~
+   The din of the guilds assaults your senses as you reach this
+intersection, the sound of hammering, the smell of tanned leather,
+and the smoke rising from the smithy all rush up to greet you.
+  The Avenue continues east and west from here and the Row leads
+south.
+~
+54 0 1
+D1
+~
+~
+0 -1 5452
+D2
+~
+~
+0 -1 5460
+D3
+~
+~
+0 -1 5450
+S
+#5452
+The Casbah~
+   You walk between the solid stone wall of the city and that of the
+Masons' Guild.  Young children with their nannies walk around enjoying
+the saftey of the city.
+   The Avenue runs east and west from here.
+~
+54 0 1
+D1
+~
+~
+0 -1 5453
+D3
+~
+~
+0 -1 5451
+S
+#5453
+The Casbah~
+   You have almost reached the end of the Avenue in this direction.
+Walking towards the north-east corner of the city you notice the
+population density here is much less then the rest of the town.  A
+few old men hobbling on canes and young men intent on studies are
+the only travelers of the path to the library on a regular basis.
+   The Avenue continues east and west from here.
+~
+54 0 1
+D1
+~
+~
+0 -1 5454
+D3
+~
+~
+0 -1 5452
+S
+#5454
+The Casbah~
+   The Avenue ends here, turning south to become Kali Row.  Traveling in
+that direction will take you to the Library and the grand dance hall of
+the city.
+   The northeast tower of the wall is accessible here up a spiral staircase.
+~
+54 0 1
+D2
+~
+~
+0 -1 5455
+D3
+~
+~
+0 -1 5453
+D4
+~
+~
+0 -1 5562
+S
+#5455
+Kali Row~
+   This is a small, newly added section of the town.  The city's Library
+can be entered through the door to the west and the Casbah begins its
+journey a little ways north of here.  The Row and the entrance to the
+dancehall is to the south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5454
+D2
+~
+~
+0 -1 5456
+D3
+~
+~
+0 -1 5551
+S
+#5456
+Kali Row~
+   The short Row ends abruptly here at the entrance to the dance
+hall of New Thalos.
+   The entrance to the hall is to the west and the Row continues
+northward.
+~
+54 0 1
+D0
+~
+~
+0 -1 5455
+D3
+~
+~
+0 -1 5552
+S
+#5457
+Underground~
+   The small passage continues north and south.
+~
+54 ad 1
+D0
+~
+~
+0 -1 5478
+D2
+~
+~
+0 -1 5480
+S
+#5458
+Alley~
+   This is a dark alley running between the Palace and City Hall.  Not a
+lot here, unless you're partial to spiders and rats.
+~
+54 0 1
+D0
+~
+~
+0 -1 5446
+D2
+~
+~
+0 -1 5459
+S
+#5459
+Alley~
+   The alley ends here.
+~
+54 a 1
+D0
+~
+~
+0 -1 5458
+D5
+You see a manhole covering an opening in the road.
+~
+manhole hole man~
+1 -1 5475
+S
+#5460
+Guildsman's Row~
+   This Row is a hive of activity second only to the actual Market 
+Square itself.  Along this row stands all the guilds of the working
+class citizens of New Thalos, here all the items sold in the Square
+are made.  Along this particular stretch of the row lie the Boyer/
+Fletcher to the west and the Masons' to the east.
+   The Row leads off to the south and East Casbah is to the north.
+~
+54 0 1
+D0
+~
+~
+0 -1 5451
+D1
+~
+~
+0 -1 5556
+D2
+~
+~
+0 -1 5461
+D3
+~
+~
+0 -1 5555
+S
+#5461
+Guildsman's Row~
+   The guilds continue here, to the west is the Weavers' Guild, and
+to the east stands the Craftsmans' Guild.  The row of guilds continues
+north and south from here.
+~
+54 0 1
+D0
+~
+~
+0 -1 5460
+D1
+~
+~
+0 -1 5507
+D2
+~
+~
+0 -1 5462
+D3
+~
+~
+0 -1 5506
+S
+#5462
+Guildsman's Row~
+   Only one guild offers its door to this stretch of the Row, the Tanners'
+Guild, to the west.  To the east is a beautifully sculpted marble door
+allowing entrance to the Museum of the Greater Gods.
+   The Row of Guilds leads north and south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5461
+D1
+~
+~
+0 -1 5511
+D2
+~
+~
+0 -1 5463
+D3
+~
+~
+0 -1 5564
+S
+#5463
+Guildsman's Row~
+   After the guilds were built the people of the city used some of the
+extra space to erect a shrine to their patron saints.  The result of
+this labor became the Museum of the Greater Gods.
+   You may enter the sacred hall to the east.
+~
+54 0 1
+D0
+~
+~
+0 -1 5462
+D1
+~
+~
+0 -1 5516
+D2
+~
+~
+0 -1 5464
+S
+#5464
+Guildsman's Row~
+   This small cramped road is worn with travel as apprentices to the
+guilds run merchandise from the guildhouses to the shops on Market
+Square.
+   The guildhouses lie to the north and Main street is to the south.
+~
+54 0 1
+D0
+~
+~
+0 -1 5463
+D2
+~
+~
+0 -1 5428
+S
+#5465
+Alley~
+   Even with your light you cannot seem to penetrate the magical cloak of
+darkness covering this alley.
+~
+54 ac 1
+D0
+~
+~
+0 -1 5428
+D2
+~
+~
+0 -1 5466
+S
+#5466
+Alley~
+   Even with your light you cannot seem to penetrate the magical cloak of
+darkness covering this alley.
+~
+54 a 1
+D0
+~
+~
+0 -1 5465
+D1
+~
+~
+0 -1 5467
+D3
+~
+~
+0 -1 5537
+S
+#5467
+Alley~
+   Even with your light you cannot seem to penetrate the magical cloak of
+darkness covering this alley.
+~
+54 a 1
+D1
+~
+~
+0 -1 5538
+D2
+~
+~
+0 -1 5468
+D3
+~
+~
+0 -1 5466
+S
+#5468
+Alley~
+   Even with your light you cannot seem to penetrate the magical cloak of
+darkness covering this alley.
+~
+54 ac 1
+D0
+~
+~
+0 -1 5467
+D2
+~
+~
+0 -1 5440
+S
+#5469
+Alley~
+   This is a tiny corner in the alley.  The temple walls are north and
+west.  You notice a fair amount of footprints to the east.
+~
+54 a 1
+D1
+~
+~
+0 -1 5470
+D2
+~
+~
+0 -1 5471
+E
+footprint~
+Kind of looks like a yeti has been here... Hmmmm.
+~
+S
+#5470
+Alley~
+   This is a dead end to the tiny alley.  There is an unusual amount of
+wear apparent on the ground.
+~
+54 a 1
+D3
+~
+~
+0 -1 5469
+D5
+You see a small iron circle imbedded in the ground.
+~
+manhole man hole~
+1 -1 5478
+S
+#5471
+Alley~
+   You are in a tiny ally between the temple and the bank.  You hear
+some shouting and general roadwork to the south.  The ground is rough
+and in need of repair.  In the road is a small pothole.
+~
+54 ac 1
+D0
+~
+~
+0 -1 5469
+D2
+~
+~
+0 -1 5425
+E
+pothole~
+Why are you looking in a pothole?  Are you poor or something?
+~
+S
+#5472
+Alley~
+   You are on a small alley between the repair shop and the general
+store.  Nothing much here but small rodents and dust.
+~
+54 ac 1
+D0
+~
+~
+0 -1 5425
+D2
+~
+~
+0 -1 5473
+S
+#5473
+Alley~
+   This is a small corner in the alley behind the warehouses and the guild
+of warriors.  You notice some small scrapings to the west.
+~
+54 a 1
+D0
+~
+~
+0 -1 5472
+D1
+~
+~
+0 -1 5474
+S
+#5474
+Alley~
+   The alley ends here as do the footprints you had noticed earlier.
+~
+54 a 1
+D3
+~
+~
+0 -1 5473
+D5
+You see a small round iron plate set in the ground.
+~
+manhole man hole~
+1 -1 5481
+S
+#5475
+Underground~
+   You are in a small underground passage beneath the city.  You see a
+small glint of light from above and the passage continues south.
+~
+54 ad 1
+D2
+~
+~
+0 -1 5476
+D4
+~
+man hole manhole~
+1 -1 5459
+S
+#5476
+Underground~
+   The passage continues north and south.
+~
+54 ad 1
+D0
+~
+~
+0 -1 5475
+D2
+~
+~
+0 -1 5477
+S
+#5477
+Underground~
+   The tunnel branches here going north, east, and west.
+~
+54 ad 1
+D0
+~
+~
+0 -1 5476
+D1
+~
+~
+0 -1 5478
+D3
+~
+~
+0 -1 5479
+S
+#5478
+Underground~
+   The alley turns again here and heads south and west.  You notice a
+small glint of light from above.
+~
+54 ad 1
+D2
+~
+~
+0 -1 5457
+D3
+~
+~
+0 -1 5477
+D4
+~
+manhole man hole~
+1 -1 5470
+S
+#5479
+Underground~
+   The passage ends here and you hear some low chanting from the west.
+You also notice the clearing of dust on the ground but can't seem to
+find any door in that direction.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5477
+S
+#5480
+Underground~
+   The small passage continues north and south from here.
+~
+54 ad 1
+D0
+~
+~
+0 -1 5457
+D2
+~
+~
+0 -1 5481
+S
+#5481
+Underground~
+   The small passage heads north and east from here.  You here the sounds
+of the city above you.
+~
+54 ad 1
+D0
+~
+~
+0 -1 5480
+D1
+~
+~
+0 -1 5482
+D4
+~
+manhole man hole~
+1 -1 5474
+S
+#5482
+Underground~
+   The tunnel continues you west and east.  Hopefully you have a good sense
+of direction.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5492
+D3
+~
+~
+0 -1 5481
+S
+#5483
+River Ishtar~
+   High above you on the top of the city wall guards look down to see if
+you wish to exit the city via water.  To do so they must open the iron
+grating in front  of you from above.  The horrid smell of the dump wafts
+down from the shore.
+~
+54 0 7
+D1
+~
+~
+0 -1 5624
+D3
+~
+grating~
+1 -1 5484
+S
+#5484
+River Ishtar~
+   The gentle flow of the river carries you eastward, looking up you
+see couples strolling along the road.  To the west you see the southern
+bridge and to the east you see the iron grating protecting the city from
+unwanted guests.
+~
+54 0 7
+D1
+~
+grating~
+1 -1 5483
+D3
+~
+~
+0 -1 5485
+S
+#5485
+River Ishtar~
+   You hear your voice echo as you float under the bridge above.  The
+city construction crews have just recently finished the small ladder
+giving common-folk easy access to the river.  To the west and east you
+see the river flowing by the city.
+~
+54 0 7
+D1
+~
+~
+0 -1 5484
+D3
+~
+~
+0 -1 5486
+D4
+~
+~
+0 -1 5412
+S
+#5486
+River Ishtar~
+   This part of the river seems alive with activity.  Boats moored to
+the docks near the ramp north of here make navigation a bit more trying.
+As the river flows eastward you can see the southern bridge in that
+direction.
+~
+54 0 7
+D0
+~
+~
+0 -1 5443
+D1
+~
+~
+0 -1 5485
+D3
+~
+~
+0 -1 5487
+S
+#5487
+River Ishtar~
+   The river flows through a huge iron grating from the wilderness
+through the city.  Strong guards above await word to open the portal
+should any citizen require exit or entry.
+~
+54 0 7
+D1
+~
+~
+0 -1 5486
+D3
+~
+grating~
+1 -1 5623
+S
+#5488
+A Dark Passage~
+   You seem to have stumbled into a small hand made passage.  The wall
+to the west doesn't look quite right but searching it reveals no secret
+doors.  The only exit it seems is east.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5489
+S
+#5489
+A Dark Passage~
+   The small passage continues east and west from here.  Again you
+notice something peculiar about the wall, this time to the north,
+but you fail to find any secret doors.  Voices can be faintly heard
+from the north.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5490
+D3
+~
+~
+0 -1 5488
+S
+#5490
+A Dark Passage~
+   The small passage continues west and east from here.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5491
+D3
+~
+~
+0 -1 5489
+E
+boulder~
+A huge boulder stands here.  In its center someone has carved out a
+perfect round hole.
+~
+S
+#5491
+A Dark Passage~
+   The small passage ends here for no apparent reason.  Looking around
+you find a small ladder half buried in the dirt.  setting it up you find
+a trap door in the ceiling.  The passage continues west from here.
+~
+54 ad 1
+D3
+~
+~
+0 -1 5490
+D4
+~
+secret~
+1 -1 5570
+E
+fire~
+Moving closer you see this fire is actually FROZEN in place.  The
+flames still radiate heat, but are not actually burning.  Looking
+around you notice a small hole about the size of a piece of charcoal
+at the base of the flames.
+~
+S
+#5492
+Underground~
+   The small passage continues west and east.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5493
+D3
+~
+~
+0 -1 5482
+S
+#5493
+Underground~
+   The small passage continues west and east.
+~
+54 ad 1
+D1
+~
+~
+0 -1 5500
+D3
+~
+~
+0 -1 5492
+S
+#5500
+Underground~
+   The small passage continues west and east.
+~
+54 ad 0
+D1
+~
+~
+0 -1 5501
+D3
+~
+~
+0 -1 5493
+S
+#5501
+Underground~
+   The small passage continues west and east.
+~
+54 ad 0
+D1
+~
+~
+0 -1 5502
+D3
+~
+~
+0 -1 5500
+S
+#5502
+Underground~
+   The small passage continues west and east.
+~
+54 ad 0
+D1
+~
+~
+0 -1 5488
+D3
+~
+~
+0 -1 5501
+S
+#5503
+Clerics' Sanctum~
+   You walk down the staircase into the silent inner sanctum.  Here sits
+your guildmaster ready to assist you when the time is right.  The room
+is completely silent.  The only obvious exit is back up the staircase
+into the the Nectar.
+~
+54 deh 0
+D1
+You notice the floor at the base of the eastern wall has some faint
+scratches in it.
+~
+secret door~
+1 -1 5479
+D4
+~
+~
+0 -1 5519
+S
+#5504
+The Chamber Of The High Priest~
+   You have entered the chamber of the most holy man in New Thalos.  The
+High Priest advises the Sultan on all matters in the world of the sacred.
+From what you have heard however, this holy man has a bit of a temper,
+and he doesn't look very happy that you've disturbed his prayers.
+   The only obvious exit is south.
+~
+54 d 0
+D2
+~
+~
+0 -1 5508
+S
+#5505
+By The Altar~
+   You are by the temple altar in the northern end of Temple of New
+Thalos.  A huge altar made of highly polished black onyx is standing
+in front of you.  Behind this altar sits a twelve foot tall statue of
+Akbal, the highest god in all the lands.
+~
+54 deg 0
+D2
+~
+~
+0 -1 5509
+E
+statue~
+Looking up the huge statue you see Akbal calmly gazing out across his
+lands, he seems pleased.
+~
+S
+#5506
+The Weavers' Guild~
+   Rows and rows of uncut cloth lie about waiting to be hemed up
+into tailored clothes.  Cotten is brought in from the country side
+and spun up into cloth and dyed different colors.  A young boy walks
+in, grabs a pile of clothing and leaves.
+~
+54 d 0
+D1
+~
+~
+0 -1 5461
+S
+#5507
+The Craftsmans' Guild~
+   You have entered a busy workshop filled with people running amok
+with various tools and materials.  The air is tense with the rush to
+complete various projects and creations.
+~
+54 d 0
+D3
+~
+~
+0 -1 5461
+S
+#5508
+Inside The Temple~
+   The temple continues here, but not on such a grand scale.  The place
+still looks immaculate.  To the north you see the chamber of the High
+Priest and a sign on the door in BIG letters thats reads 'DO NOT DISTURB'
+To the south is the entrance to the Clerics' Guild.
+~
+54 dg 0
+D0
+~
+~
+0 -1 5504
+D1
+~
+~
+0 -1 5509
+D2
+~
+~
+0 -1 5512
+S
+#5509
+Inside The Temple~
+   Huge marble pillars rise on either side of you and grab hold of
+the ceiling.  Between each of these, fine softstone frescoes have
+been carved depicting scenes from the religous history of New Thalos.
+Rows of pews face forward giving their full attention to the pulpit
+rising high above the ground.  The deep red carpeting underfoot shows
+not a speck of wear or dirt.  It is obvious that New Thalonians take
+religion seriously.
+~
+54 dgh 0
+D0
+~
+~
+0 -1 5505
+D1
+~
+~
+0 -1 5510
+D2
+~
+~
+0 -1 5513
+D3
+~
+~
+0 -1 5508
+S
+#5510
+The Donation Room~
+   This room is new to the temple, it was created during the hard times
+that had struck the city in recent decades.  Luckily for them the Sultan
+had been hoarding some of the basic neccesities for just such an occasion.
+These days the donation room depends on the generosity of wealthy 
+adventurers, and a curse on any that walk in to take everything.
+~
+54 cd 0
+D3
+~
+~
+0 -1 5509
+S
+#5511
+The Museum Of The Greater Gods~
+   Four large stone statues reside in the museum.  They were constructed
+by the people of New Thalos to pay homage to the saints they believe to 
+have saved all their lives.
+   The museum continues to the south.
+~
+54 cd 0
+D2
+~
+~
+0 -1 5516
+D3
+~
+~
+0 -1 5462
+S
+#5512
+The Entrance To The Guild of Clerics~
+   This hall pales in comparison to that of the main hall, but is
+beautiful in its own right.  Shaven heads and brown robes can be
+seen milling about quitely talking to each other.  North is back
+inside the temple proper, and south is the entrance to the clerics'
+bar.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5508
+D2
+~
+~
+0 -1 5519
+S
+#5513
+The Temple Gates~
+   You stand before the entrance way to the Temple of New Thalos.  Two
+large wrought iron gates lie open before you.  Although they might not
+ever be used the priests in the temple are ready to defend themselves,
+should their city ever come under seige again.
+~
+54 0 1
+D0
+~
+~
+0 -1 5509
+D2
+~
+~
+0 -1 5520
+D5
+~
+~
+0 -1 5520
+S
+#5514
+Ahkeem's Stuff~
+   You step into a shop swirling with smoke.  Ahkeem seems to have a
+liking for things not of this world... very strange stuff indeed.
+~
+54 d 0
+D2
+~
+~
+0 -1 5414
+S
+#5515
+Vera's Veggies~
+   This is a busy place.  Customers shuffle around, bartering for lower
+prices on the wide selection of vegetables.  You can still hear your
+mother telling you 'Eat your Veggies'.  That is probably why you are
+spending time in the city of New Thalos and not with her.  But wait...
+Vera looks just like your mother!
+~
+54 d 0
+D2
+~
+~
+0 -1 5416
+S
+#5516
+The Museum Of The Greater Gods~
+   Four large stone statues reside in the museum.  They were constructed
+by the people of New Thalos to pay homage to the saints they believe to 
+have saved all their lives.
+   The museum continues to the north.
+~
+54 cd 0
+D0
+~
+~
+0 -1 5511
+D3
+~
+~
+0 -1 5463
+S
+#5517
+The Base Of The Tower~
+   You walk into a cold room whose only feature is an old wooden
+staircase spirling up along the wall to a higher level.  Up these
+stairs you are told awaits the old mage who may be able to help
+you advance in your studies.
+~
+54 de 0
+D1
+~
+~
+0 -1 5518
+D2
+You see some small scratches on the floor near the base of the wall.
+~
+door secret~
+1 -1 5524
+D4
+~
+~
+0 -1 5548
+S
+#5518
+The Mages' Courtyard~
+   You enter a small tiled courtyard with a small fountain in the middle.
+Around the sides are four wrought iron benches with cushions where the
+mages of the land sit and exchange ideas.  To the west stands a two-story
+tower where the leader of the mages' guild performs his experiments.
+~
+54 e 1
+D2
+~
+~
+0 -1 5525
+D3
+~
+~
+0 -1 5517
+S
+#5519
+Nectar Of The Gods~
+   You are startled by the lavishness of this place.  From what you
+know of clerics they are supposed to be humble people, giving all their
+material goods to their cause.  Perhaps because only clerics are 
+allowed to enter this bar they have condoned making it as comfortable
+as possible.  In the corner stands a staircase leading down to the
+meditaion chambers.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5512
+D5
+~
+~
+0 -1 5503
+S
+#5520
+Temple Square~
+   You are standing on the meeting grounds of those with holy
+intentions.  Monks, bards, paladins and clerics mill around
+either preaching or listening to their fellows preach.  Huge
+marble steps lead up to the gates of the temple and Main Street
+lies to the south.
+~
+54 cg 1
+D0
+~
+~
+0 -1 5513
+D2
+~
+~
+0 -1 5424
+D4
+~
+~
+0 -1 5513
+S
+#5521
+The Bank~
+   You stand in a large building decorated with black marble and red
+satin.  Huge pillars support an arched ceiling far above your head.
+You wonder at the skill the dwarves have for detail as you examine
+the trim.  Fine silver seperates the polished blocks that make up the
+floor.
+~
+54 de 0
+D1
+~
+~
+0 -1 5414
+S
+#5522
+The Butchery~
+   This shop has the aroma of freshly slaughterd beasts.  You feel right
+at home.  You see a fairly simple set up.  The corpses... er... selections
+hang on hooks, still bleeding into catch pans that drain into a single
+underground vat.  You wonder where that leads...
+~
+54 d 0
+D3
+~
+~
+0 -1 5416
+E
+vat~
+You think you hear noises from the vat... naaah.
+~
+S
+#5523
+The Witch's Brew~
+   The first thing you notice as you walk into this spacious shop is
+the hundreds of candles that line the shelves.  The swirling mist that
+surrounds your feet makes it seem that you have stepped into a gateway
+to another plane.  A cluttered table stands near the far wall, opposite
+the doorway.
+~
+54 d 0
+D2
+~
+~
+0 -1 5429
+S
+#5524
+Braheem's Magic Shop~
+   You enter a shop crowded with bookshelves and clutterd with scrolls.
+The owner seems to be hard at work on his latest magical creation.
+You see a small sign on the wall.
+~
+54 d 0
+D2
+~
+~
+0 -1 5430
+E
+sign~
+The sign reads:
+
+Welcome to Braheem's...
+
+LIST   - Shows you all of my wonderful creations.
+VALUE  - Shows what an item might be worth to me.
+SELL   - Allows you to rid yourself of excessive magic items.
+BUY    - Allows you to rid youself of excessive cash.
+
+~
+S
+#5525
+The Entrance To The Mages' Tower~
+   The entrance hall is a small poor lighted room.  It would seem its
+only purpose is to house the powerful sorcerer standing here guarding 
+the entrance.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5518
+D2
+~
+~
+0 -1 5431
+S
+#5526
+The Entrance To The Guild of Warriors~
+   This small hall is merely a check point to keep the unwanted out.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5423
+D2
+~
+~
+0 -1 5533
+S
+#5527
+The Repair Shop~
+   One of the most popular shops in New Thalos, this shop is always a
+hive of activity.  It is almost inhuman the way one man can fix all
+types of armour singlehandedly.  If you have an item in need of repair
+simply give it to the man behind the counter.
+There is a small sign on the counter.
+~
+54 cd 0
+D0
+~
+~
+0 -1 5424
+E
+sign~
+The sign reads:
+
+Closed for renovations
+
+~
+S
+#5528
+The General Store~
+   The new found wealth of this beautiful city is apearant in the exotic
+items for sale here.  You wonder what would happen if you typed... LIST...
+~
+54 d 0
+D1
+~
+~
+0 -1 5408
+S
+#5529
+Abdul's Armour~
+   The sound of hammering metal grows louder as you enter the armoury.
+Young boys run to and fro carrying buckets of water and coal.  A few
+dwarves work on sections of armour in the back of the shop, their
+hammers working too fast to follow.  The walls are adorned in all of
+Abdul's prize creations.  Here you can purchase suits of armour meant
+to keep monsters from hacking you into little pieces.
+A note on the wall beckons your attention.
+~
+54 d 0
+D3
+~
+~
+0 -1 5407
+E
+note~
+The note reads:
+
+LIST  : gives you a list of items for sale.
+VALUE : tells you how much an item is worth to Abdul
+SELL  : sells an item to Abdul for a generous sum
+BUY   : Abdul's FAVORITE command lets you have an item for his low,
+                low price.
+
+~
+S
+#5530
+The Mercenaries' Guild~
+   This guild is frowned upon by most of the population of New Thalos,
+but the laws of supply and demand are irresistable.  People come here
+when they feel unable or are unwilling to fight their own battles.  For
+a small fee you may hire a henchman.
+~
+54 d 0
+D0
+~
+~
+0 -1 5429
+D1
+You notice some small scratches in the floor next to the eastern wall.
+~
+door secret~
+1 -1 5532
+S
+#5531
+The Mercenaries Guild~
+   This is the storage room for the mercenaries to be hired.
+~
+54 dj 0
+S
+#5532
+Entrance To The Thieves' Guild~
+   This small, dark room has a single torch mounted in the wall for
+light. There is a small wooden bench and a book lying on it.  The
+assassin guarding the entrance from 'outsiders' stands as you walk
+in.
+~
+54 adeh 0
+D2
+~
+~
+0 -1 5539
+D3
+~
+door secret~
+1 -1 5530
+S
+#5533
+The Whet Stone~
+   Very large men with very large swords drink beer from very large mugs.
+Everything in this room is BIG.  The large round tables are scuffed and
+nicked from the numerous bar brawls that have sprung up.  It might be a
+good idea to hold your tounge for a while as you soak up the atmosphere.
+   There is an exit to the east where the master swordsman awaits pupils
+to train with.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5526
+D1
+~
+~
+0 -1 5534
+S
+#5534
+The Tournament And Practice Yard~
+   This is a wide expanse of grass filled with dummies, punching bags
+and swordpupils.  To the north you see a man dressed in black robes,
+unlike his iron clad comrades, who you assume to be your master.
+~
+54 deh 0
+D1
+You see the grass near the base of the wall here is slightly torn.
+~
+secret door~
+1 -1 5473
+D3
+~
+~
+0 -1 5533
+S
+#5535
+The Bread Stand~
+   A small stand has been set up here, showing the shopkeep's humble
+selection.  You notice he has added a few things to his list.
+~
+54 d 0
+D0
+~
+~
+0 -1 5408
+S
+#5536
+Igor's Implements Of Destruction~
+   You can't help but shiver as you look at the selection of vicious
+weapons.  Huge swords and wicked looking axes hang on pegs around the
+room.  A dwarf sits at a bench in the back hammering away on his latest
+creation.  It is here you can buy rare and exotic items not found in
+other parts of the world.
+A note catches your eye.
+~
+54 d 0
+D0
+~
+~
+0 -1 5407
+E
+note~
+The note simply reads:
+
+READ THE NOTE IN THE ARMOURY
+
+                          Igor.
+
+~
+S
+#5537
+Ye Old Leather Shoppe~
+   You are standing on a thick oriental rug surrounded on all sides by
+racks of numerous leather goods.  A few women sit on leather cushions
+sewing in some detail work on custom ordered jackets.
+~
+54 d 0
+D1
+~
+~
+0 -1 5466
+S
+#5538
+Smuggler's Inn~
+   You are inside a filthy inn, that seemingly has been cleaned in
+decades.  Poker tables line the walls and everyone stares at you as
+you walk in, you don't feel very welcome.  The bar has numerous
+knife holes in it and the bartender leans over waiting for your
+order.
+~
+54 d 0
+D3
+~
+~
+0 -1 5467
+S
+#5539
+The Filthy Unicorn~
+   A draft chills your bones as you enter, though you see no open
+window or door.  Hooded figures lurk around in the shadows and speak
+in low voices.  A flash of steel lets you know that weapons are in
+great abundance in this crowd.  As you quickly check your beltpouch
+you notice a small staircase leading down.
+~
+54 deh 0
+D0
+~
+~
+0 -1 5532
+D5
+~
+~
+0 -1 5546
+S
+#5540
+The Warehouse~
+   You are standing in a large room used to store merchandise made in the
+city before it is shipped off.  All the items here are made in New Thalos
+and shipped to other parts of the land.
+~
+54 d 0
+D1
+~
+~
+0 -1 5541
+D2
+~
+~
+0 -1 5433
+S
+#5541
+The Warehouse~
+   Men walk to and fro counting crates and writing down their findings.
+This area of the warehouse is used for storing the raw materials brought
+in from areas outside the city.  These goods are then delivered to the
+various guilds.  The export area of the warehouses is to the south.
+~
+54 d 0
+D2
+~
+~
+0 -1 5434
+D3
+~
+~
+0 -1 5540
+S
+#5542
+The Shipwright~
+   The wood under you feet creaks from years of being soaked in saltwater.
+An old man with a curly, grey beard stand behind a small counter waiting
+to take your order.  Behind him are mounted various model sailboats and
+large fish.
+~
+54 d 0
+D1
+~
+~
+0 -1 5543
+D2
+~
+~
+0 -1 5435
+S
+#5543
+The Drafting Room~
+   The walls are covered with paper sketchings of hull designs.  This room
+is used by the shipwright to build his creations on paper before making a
+single cut in wood.
+~
+54 d 0
+D3
+~
+~
+0 -1 5542
+S
+#5544
+The Forge~
+   Very much like the weaponsmith this man deals in the molding of metal.
+It seems that most of his creations deal with horses.  On the walls you
+see several horseshoes made of iron.  The room is hot, hotter than the
+desert just south of here, and one wonders how the smithy can stand it.
+~
+54 d 0
+D2
+~
+~
+0 -1 5437
+S
+#5545
+The Royal Stables~
+   Nothing you wouldn't expect is here.  Several stalls hold the
+Sultan's choice Arabian Stallions, and each has their own trough
+for drinking.  A small boy wanders in sometimes with a shovel to
+remove the offensive by-product of such beasts.
+~
+54 d 1
+D1
+~
+~
+0 -1 5549
+D2
+~
+~
+0 -1 5439
+S
+#5546
+The Secret Yard~
+   This is a hidden yard known to only a few people in New Thalos.  Here
+you may train in the arts of stealing, picking locks, and becoming almost
+invisible.
+   A small staircase leads back up to the Unicorn.
+~
+54 deh 0
+D2
+You see some small scratches in the wall to the south.
+~
+secret door~
+1 -1 5489
+D4
+~
+~
+0 -1 5539
+S
+#5547
+The Dump~
+   This is the place where the people of the city dump their trash.  Due
+to the constant winds blowing down the moutains the smell is usually blown
+outside the walls and over the desert.
+~
+54 0 1
+D2
+~
+~
+0 -1 5442
+S
+#5548
+The Mage's Laboratory~
+   You stand in the top of an old stone tower.  Along the walls hundreds
+of potions, scroll, and wands lie in disaray.  The man you see before you
+sits hunched over a small wooden table with two beakers of bubbling liquid
+in front of him.  He looks up as you enter and smiles broadly.
+~
+54 deh 0
+D5
+~
+~
+0 -1 5517
+S
+#5549
+The Hay Loft~
+   Not as big as the ones you see on farms in the country, this hay loft
+serves as a storage area for the horses in the stables.  The young boy
+you saw with the shovel seems to have takes up residence on the second
+story.
+~
+54 d 0
+D3
+~
+~
+0 -1 5545
+S
+#5550
+The Grand Entrance~
+   Nowhere have you seen such an obscene display of wealth then in this 
+corridor.  The shaggy carpeting under your feet makes it seem as if you
+are walking on a cloud.  Platinum candelabras hang delicately from the
+ceiling casting light on the ancient tapestries adorning the walls.  The
+crick in your neck tells you that it is time to stop staring.  To the west
+the numerous halls of the palace being and the gate lies to the east.
+~
+54 d 0
+D0
+~
+~
+0 -1 5560
+D1
+~
+gate~
+2 5400 5558
+D2
+~
+~
+0 -1 5557
+D3
+~
+~
+0 -1 5605
+S
+#5551
+The Library~
+   This building holds the vast collection of books and documents
+that have been brought here by the commitee apointed to recover the
+lost knowledge of Thalos.  Rows of shelves filled with book in every
+condition line the walls.  The air has the aroma of old parchment
+and glue.
+~
+54 df 0
+D1
+~
+~
+0 -1 5455
+S
+#5552
+The Dance Hall~
+   You seem to have missed a huge party.  The janitors are here cleaning
+up the confetti and pieces of food.  Hundreds of empty beer mugs on the 
+tables surrounding the dance floor suggest that the citizens love their
+drink.  There is still a banner on the wall.
+~
+54 d 0
+D1
+~
+~
+0 -1 5456
+E
+banner~
+========================================================================
+                     
+             H A P P Y   B I R T H D A Y   T O   U S
+
+========================================================================
+~
+S
+#5553
+The Jail~
+   You are in jail.  For some reason, someone feels that you've screwed
+up pretty bad and should be put away safely for a while.  
+~
+54 defhj 0
+D0
+~
+gate~
+2 5493 5444
+S
+#5554
+City Hall~
+   You stand inside the administrative head of the city.  Here the
+decisions regarding city policy are made.  Although the Sultan's
+word is law, he usually spends his time on affairs outside the city
+wall.
+~
+54 d 0
+D0
+~
+~
+0 -1 5445
+S
+#5555
+The Boyer/Fletchers' Guild~
+   The walls in this room are covered with pegs that hold various types
+of bows.  There are few people working here, lending to the fact that
+the skills are rare to come by in the general populas.  A few boys are
+busy in the corner preparing feathers for the fine shafts used in making
+arrows.  Some Elven craftsmen are carefuly inspecting each bow as it is
+finnished.
+~
+54 d 0
+D1
+~
+~
+0 -1 5460
+S
+#5556
+The Masons' Guild~
+   There is no doubt that the Dwarves here know what they're doing.  They
+have been invaluable in the building of this beautiful city.  Here they
+are hard at work doing what they do best.  The hammers fly in a blur as
+these talented craftsmen work the stone into ornate bricks, pillars, trim,
+and many other forms.
+~
+54 d 0
+D3
+~
+~
+0 -1 5460
+S
+#5557
+The Guard House~
+   You stand inside the southern of the two main guard houses.  The
+stone interior has a spartan look to it, only the bare neccesities.
+A few weapons are mounted on the walls in case they might be needed.
+~
+54 d 0
+D0
+~
+~
+0 -1 5550
+S
+#5558
+The Palace Gate~
+   You stand before a magnificantly crafted gate wrought in solid gold.
+You gape in awe at the splendor of the spirilng towers beyond the portal.
+The ruler of all the eastern lands resides in this fine palace, and he is
+not a poor man.  The grand entrance lies byond the gate, and Sultan's Walk
+is to the east.
+~
+54 0 1
+D1
+~
+~
+0 -1 5420
+D3
+~
+gate~
+2 5400 5550
+S
+#5559
+The Northwest Tower~
+   You stand on one of the four towers guarding the city.  The view from
+here is great!  To the west you see the tall mountains that make up the
+divide between here and Midgaard.  The River Ishtar slowly flows from that
+direction.  South you can see the entire city of New Thalos and the Great
+Eastern Desert to the south.
+~
+54 d 0
+D5
+~
+~
+0 -1 5444
+S
+#5560
+The Guard House~
+   You stand inside the northern of the two main guard houses.  Strong
+guards are seated here, playing cards.  The stone interior is clean but
+bare walled save the weapons and armor mounted in the walls.
+   The only exit is south.
+~
+54 d 0
+D2
+~
+~
+0 -1 5550
+S
+#5561
+The Kitchen~
+   Your footsteps echo off the stone tiles of the kitchen.  On the south
+wall you see the large fire place and a huge copper pot bubbling merrily.
+The chef is busy chopping up greens and other vegetables at the wooden
+table for tonight's meal.  Servants scurry about grabbing utensils and
+preparing fresh hares.
+   A small door leads out into the hall northward and the doorway to the
+dining hall is west.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5563
+D3
+~
+~
+0 -1 5571
+S
+#5562
+The Northeast Tower~
+   You stand on one of the four towers guarding the city.  To the north
+you see the wide plains and then the forset.  South of here you see the
+city and the Great Eastern Desert beyond.
+~
+54 d 0
+D5
+~
+~
+0 -1 5454
+S
+#5563
+A Hall~
+   You are at the eastern end of the southern hallway.  A small servants'
+entrance gives access to the kitchen and the hall continues west.
+~
+54 d 0
+D2
+~
+door small~
+1 -1 5561
+D3
+~
+~
+0 -1 5572
+S
+#5564
+The Tanners' Guild~
+   You first notice the pungent smell of freshly tanned leather goods as
+you enter this strange place.  The next thing that grabs your attention
+is the many colors that these people have transformed the beautiful
+skins into.  The people are streaching the leather and cutting it into
+the shapes they need.
+You notice a small message on a wall.
+~
+54 d 0
+D1
+~
+~
+0 -1 5462
+E
+message~
+The message appears to read:
+
+                       I hate being a Tanner
+
+~
+S
+#5565
+A Hall~
+   You have come to the eastern end of the northern hallway.  The only
+exit is west except for the simple wooden door to the north.
+There is a golden plaque above the door.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5566
+D3
+~
+~
+0 -1 5574
+E
+plaque~
+Engraved on the plaque are the following words:
+
+                     The Holy Shrine of Allah
+
+~
+S
+#5566
+The Shrine Of Allah~
+   As you step into this room you seem to leave the material plane.
+The walls here are decorated with beautiful, multi-colored tiles.
+There is a strange stillness about the air.  You sense the presence
+of an all-mighty being.
+~
+54 d 0
+D2
+~
+door~
+1 -1 5565
+S
+#5567
+Outside The Northern Gate Of New Thalos~
+   You stand outside the gate of New Thalos.  The city lies to the south,
+and wilderness to the north.
+~
+54 c 1
+D0
+~
+~
+0 -1 5681
+D2
+~
+gate~
+1 5401 5422
+S
+#5568
+Outside The Eastern Gate Of New Thalos~
+   You stand outside the protective walls of the city.  The massive iron
+gate sits to the west and the unknown awaits you eastward.
+~
+54 0 1
+D1
+~
+~
+0 -1 5690
+D2
+~
+~
+0 -1 5570
+D3
+~
+gate~
+1 5401 5431
+S
+#5569
+Outside The West Gate Of New Thalos~
+   You stand outside the city walls, the iron gate to the east.  The city
+lies in that direction and the road to Midgaard lies west.
+~
+54 0 1
+D1
+~
+gate~
+1 5401 5423
+D3
+~
+~
+0 -1 5618
+S
+#5570
+Outside The Wall~
+   You are in a small clearing outside the east wall of the city.  The
+ground seems well trodden but you can see no apparent exit save that
+to the north.
+~
+54 0 2
+D0
+~
+~
+0 -1 5568
+S
+#5571
+The Grand Dining Hall~
+   A long oaken table, coverd with silverware, plates, and a table cloth
+with gold trim, dominates the room.  Although no diners occupy the room
+as of yet, servants sprint about setting the table and placing condiments.
+   The kitchen entrance is to the east, and two huge double doors open
+into the hallway north.
+~
+54 d 0
+D0
+~
+doors double~
+1 -1 5572
+D1
+~
+~
+0 -1 5561
+S
+#5572
+A Hall~
+   You stand at a T-crossing in the long hallways.  There are two large
+double doors to the south.
+~
+54 d 0
+D0
+~
+~
+0 -1 5573
+D1
+~
+~
+0 -1 5563
+D2
+~
+doors double~
+1 -1 5571
+D3
+~
+~
+0 -1 5577
+S
+#5573
+A Hall~
+   You stand at an intersection of the hallways.  Wooden corridors
+lead off in all directions except west, the garden of the palace
+can be entered there.
+~
+54 d 0
+D0
+~
+~
+0 -1 5574
+D1
+~
+~
+0 -1 5605
+D2
+~
+~
+0 -1 5572
+D3
+~
+~
+0 -1 5578
+S
+#5574
+A Hall~
+   You have come to a T-crossing on the hallways.  The wooden corridors
+continue east, west and south.  There is a large iron door to the north.
+~
+54 d 0
+D0
+~
+door iron heavy~
+1 -1 5575
+D1
+~
+~
+0 -1 5565
+D2
+~
+~
+0 -1 5573
+D3
+~
+~
+0 -1 5579
+S
+#5575
+The Entrance To The Dungeon~
+   You enter a cold damp room with bare roughly hewn stone walls.
+This room seems very out of place compared to the splendor of the
+rest of the Palace.
+   A large steel grating leads down into darkness, and an iron door
+returns you to the hallway.
+~
+54 d 0
+D2
+~
+door iron~
+1 -1 5574
+D5
+~
+grating steel~
+1 -1 5591
+S
+#5576
+A Guest Room~
+   This is a simple room used for visiting nobles.  A small dresser stands
+on the east wall with a mirror hung right above it.  A queen sized bed made
+up in satin sheets stands in the middle of the room against the south
+wall under a window.  The only obvious exit is north back out into the 
+hallway.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5577
+E
+window~
+Looking out this window you can see the grounds of the palace that 
+seperate the walls of the palace from the building itself.
+~
+E
+mirror~
+You see a the fighting image of some armor clad humanoid wielding a weapon.
+~
+S
+#5577
+A Hall~
+   The long hall continues here with a wooden door in the south wall.  On
+the north wall hangs the picture of some forgotten nobleman who once ruled 
+the land.
+~
+54 d 0
+D1
+~
+~
+0 -1 5572
+D2
+~
+door~
+1 -1 5576
+D3
+~
+~
+0 -1 5582
+S
+#5578
+The Sultan's Garden~
+   You have entered the Sultan's private gardens.  A light sweat breaks
+out on your skin from the humidity here.  All around you are thousands of
+exotic plants and flowers.  The sweet smell of jasmine and honeysuckle
+reminds you of happier days at home.  Off to the north, through the palm
+trees, you see a delicate white gazebo.
+   A path leads out into the hallway and west towards the gazebo.
+To your right stands a gold sign.
+~
+54 0 2
+D1
+~
+~
+0 -1 5573
+D3
+~
+~
+0 -1 5583
+E
+sign~
+=========================================================================
+=========================================================================
+||                                                                     ||
+||                                                                     ||
+||                                                                     ||
+||                                                                     ||
+||        Welcome to my humble garden.  I have created this            ||
+||        tiny bit of paradise for the pleasure of my people.          ||
+||        Take only memories... Leave only footprints...               ||
+||                                                                     ||
+||                                                                     ||
+||                                                                     ||
+||                                 The Sultan                          ||
+||                                                                     ||
+||                                                                     ||
+||                                                                     ||
+=========================================================================
+=========================================================================
+~
+S
+#5579
+A Hall~
+   The long stretch of hallway continues east and west from here.  The
+small red carpet covering the centerline is always underfoot and an
+occasional bench or potted plant lines the wall.
+There is a door here to the north with a plaque mounted over it.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5580
+D1
+~
+~
+0 -1 5574
+D3
+~
+~
+0 -1 5584
+E
+plaque door~
+The plaque on the door reads:
+
+                   THE ART EXHIBIT
+                         of
+                     NEW THALOS
+
+                          - the management is not responsible for lost items.
+
+~
+S
+#5580
+The Art Exhibit~
+   You are standing in the Sultan's tribute to the finer virtues.
+Large paintings hang from the walls displaying nature scenes, nudes,
+and glorious victories in battle.  Strange scupltures rest on pedestals 
+at each corner of the room and mirrors are placed in strategic locations
+so the viewer may see an entire sculpture at a glance.
+   Your eyes, however, are pulled towards a painting that dominates the
+far wall.
+~
+54 d 0
+D2
+~
+door~
+1 -1 5579
+E
+painting~
+The large painting on the west wall appears to be of the temple of New
+Thalos, and occupies the entire western wall of this room.
+~
+S
+#5581
+A Guest Room~
+   This is another room made up for visiting nobles.  There is a dresser
+up against the eastern wall with a mirror above it and a queen sized bed,
+made up in satin sheets, against the south wall.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5582
+S
+#5582
+A Hall~
+   You have reached the western end of the southern hallway.  The only
+exit is east except for the doors in the southern and western walls.
+~
+54 d 0
+D1
+~
+~
+0 -1 5577
+D2
+~
+door~
+1 -1 5581
+D3
+~
+door~
+2 5401 5587
+S
+#5583
+The Garden Gazebo~
+   Walking through the gardens you come across a small white wooden
+structure.  The sounds of birds, the smell of flowers, ahhh, paradise.
+You believe that you have never been in a more peaceful setting.
+~
+54 d 0
+D1
+~
+~
+0 -1 5578
+S
+#5584
+A Hall~
+   This is the western end of the northern hallway.  Two doors are set
+in the walls here, one to the north, another to the west.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5585
+D1
+~
+~
+0 -1 5579
+D3
+~
+door~
+1 -1 5589
+S
+#5585
+The Guard Room~
+   You stand in a barren chamber lined with nothing but cots and
+footlockers.  The guards come here when off duty to sleep, for
+they may only leave the Palace grounds with special permission.
+   The only exit is to the south.
+~
+54 d 0
+D2
+~
+door~
+1 -1 5584
+S
+#5586
+The Guard Room~
+   This is living quarters for the guards of the palace.  Barren compared
+to the rest of the Palace, you see only cots and footlockers here.  On the
+walls you see pictures of well known knights who have give a proud name to
+the Sultan's Guard.
+~
+54 d 0
+D0
+~
+~
+0 -1 5587
+S
+#5587
+The Harem~
+   This is the room where the Sultan keeps the beautiful women of his
+Palace.  There are ten girls here lying about the room dressed in silks
+you can almost see through.  In the western end of the room stands a
+large mound of pillows and a beautiful young maiden sits perched atop.
+It is unfortunate for you that only the Sultan is allowed in here.
+~
+54 d 0
+D0
+~
+door secret~
+1 -1 5588
+D1
+~
+door~
+2 5401 5582
+D2
+~
+~
+0 -1 5586
+S
+#5588
+A Small room~
+   This is secret chamber allowing the Sultan direct access to his harem
+at any time he chooses.
+~
+54 d 0
+D0
+~
+door~
+1 -1 5589
+D2
+~
+door secret~
+1 -1 5587
+S
+#5589
+The Throne Room~
+   You stand in the throne room of the mighty Sultan of New Thalos.  Guards
+stand at attention near his side ready to make the ultimate sacrifice for
+their beloved leader.  The gold inlaid throne studded with jewels stands
+upon a mable dias.  The Sultan is not a man to be trifled with.
+~
+54 d 0
+D0
+~
+throne~
+2 5400 5590
+D1
+~
+door~
+1 -1 5584
+D2
+~
+door~
+1 -1 5588
+S
+#5590
+The Treasure Room~
+   You have somhow managed to gain access to the treaure vault of the
+Sultan.  The alarm sounding in the background tells you that you must
+have tripped off some kind of alarm system.  It might be adviseable to
+grab as much stuff as you possibly can and run for the door.
+~
+54 d 0
+D2
+~
+door~
+2 5400 5589
+S
+#5591
+The Jailer's Room~
+   Climbing down the old wooden ladder you enter a small cave like
+room.  There is a small bench with some old magazines and a low
+burning candle sitting off to one side.  A door is set into the
+stone on the north wall, and the steel grating opens up above.
+~
+54 ad 0
+D1
+~
+door~
+1 -1 5592
+D4
+~
+steel~
+1 -1 5575
+S
+#5592
+A Tunnel In The Dungeon~
+   You stand in a roughly hewn stone tunnel with cells to the north and
+south.  The tunnel continues east.
+~
+54 ad 0
+D0
+~
+cell~
+2 5493 5597
+D1
+~
+~
+0 -1 5593
+D2
+~
+cell~
+2 5493 5601
+D3
+~
+door~
+1 -1 5491
+S
+#5593
+A Tunnel In The Dungeon~
+   You stand in a roughly hewn stone tunnel with cells to the north and
+south.  The tunnel continues east and west.
+~
+54 ad 0
+D0
+~
+cell~
+2 5493 5598
+D1
+~
+~
+0 -1 5594
+D2
+~
+cell~
+2 5493 5602
+D3
+~
+~
+0 -1 5592
+S
+#5594
+A Tunnel In The Dungeon~
+   You stand in a roughly hewn stone tunnel with cells to the north and
+south.  The tunnel continues east and west.
+~
+54 ad 0
+D0
+~
+cell~
+2 5493 5599
+D1
+~
+~
+0 -1 5595
+D2
+~
+cell~
+2 5493 5603
+D3
+~
+~
+0 -1 5593
+S
+#5595
+A Tunnel In The Dungeon~
+   You stand in a roughly hewn stone tunnel with cells to the north and
+south.  The tunnel continues west and you notice a small crack in the
+stone to the east.
+~
+54 ad 0
+D0
+~
+cell~
+2 5493 5600
+D1
+~
+crack~
+2 5400 5596
+D2
+~
+cell~
+2 5493 5604
+D3
+~
+~
+0 -1 5594
+S
+#5596
+The Secret Cell~
+   This room seems more like a lair than a cell.  Small bits of hay lie
+strewn about the floor covering bones of unkown origin.  Spatterd blood
+and tufts of grey hair lie matted in one corner.  As you turn to leave
+you notice a pair of small red eyes peering at you from the darkness.
+~
+54 adfj 0
+D3
+~
+crack~
+2 5400 5595
+S
+#5597
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D2
+~
+cell~
+2 5493 5592
+S
+#5598
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D2
+~
+cell~
+2 5493 5593
+S
+#5599
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D2
+~
+cell~
+2 5493 5594
+S
+#5600
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D2
+~
+cell~
+2 5493 5595
+S
+#5601
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D0
+~
+cell~
+2 5493 5592
+S
+#5602
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D0
+~
+cell~
+2 5493 5593
+S
+#5603
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D0
+~
+cell~
+2 5493 5594
+S
+#5604
+The Cell~
+   You are in a cold, cramped chamber with only one exit.
+~
+54 adfj 0
+D0
+~
+cell~
+2 5493 5595
+S
+#5605
+A Hall~
+   You stand in a large cedar wood hall leading east and west.  On the
+floor lies a thin and narrow purple rug.  The hall leads west inside the
+Palace and east to the Grand Entrance.
+~
+54 d 0
+D1
+~
+~
+0 -1 5550
+D3
+~
+~
+0 -1 5573
+S
+#5606
+A Path Through The Mountains~
+   The narrow path turns here heading south and west.
+~
+54 0 5
+D2
+~
+~
+0 -1 5607
+D3
+~
+~
+0 -1 5611
+S
+#5607
+A Path Through The Mountains~
+   Travel is hard and slow as you almost have to climb around large
+boulders strewn about the path.
+~
+54 0 5
+D0
+~
+~
+0 -1 5606
+D1
+~
+~
+0 -1 5608
+S
+#5608
+The Edge Of The Ravine~
+   The ground drops off below down to a rushing river.  A small rope
+bridge sways to and fro in the wind giving you access to the other
+side.
+~
+54 0 5
+D1
+~
+~
+0 -1 5609
+D3
+~
+~
+0 -1 5607
+S
+#5609
+On A Rope Bridge~
+   The small rope bridge shudders under your weight as you make your
+way across the valley.
+~
+54 0 2
+D1
+~
+~
+0 -1 5627
+D3
+~
+~
+0 -1 5608
+S
+#5610
+The Ledge Around The Valley~
+   You are walking around a small ledge overlooking a large valley
+deep within the eastern mountains.  The ledge turns north following
+the shape of the valley and a steep trail continues to the east.
+~
+54 0 5
+D0
+This can be used to add something onto... such as the valley that is 
+supposed to exist here. (=
+~
+~
+0 -1 -1
+D1
+~
+~
+0 -1 5611
+S
+#5611
+A Path Through The Mountains~
+   You are walking through a rock strewn path deep within the mountains
+east of Midgaard.  The going is rough and you constantly twist your
+ankle on the small stones lying about.
+~
+54 0 5
+D1
+~
+~
+0 -1 5606
+D3
+~
+~
+0 -1 5610
+S
+#5612
+On The Eastern Edge Of The Mountains~
+   You stand on the eastern edge of the eastern mountains.  The high
+peaks lie to the west and rolling hills and plains open up to your
+east.
+~
+54 0 5
+D2
+~
+~
+0 -1 5613
+D3
+~
+~
+0 -1 5629
+S
+#5613
+In The Foothills~
+   The path curves down the face of the mountain allowing you to
+move up or down the face of this missive hunk of stone.
+~
+54 0 5
+D0
+~
+~
+0 -1 5612
+D1
+~
+~
+0 -1 5614
+S
+#5614
+In The Foothills~
+   The path curves down the face of the mountain allowing you to
+move up or down as you please.
+~
+54 0 5
+D2
+~
+~
+0 -1 5615
+D3
+~
+~
+0 -1 5613
+S
+#5615
+A Rocky Trail~
+   The faint sound of a flowing river reaches your ears from the south and 
+through the trees you can see water.  The path you are on continues north
+and east from here.
+~
+54 0 5
+D0
+~
+~
+0 -1 5614
+D1
+~
+~
+0 -1 5630
+D2
+~
+~
+0 -1 5645
+S
+#5616
+On A Road~
+   This long road continues to the east and south.
+~
+54 0 2
+D1
+~
+~
+0 -1 5617
+D2
+~
+~
+0 -1 5633
+S
+#5617
+On A Road~
+   The well kept road continues east and west from here.
+~
+54 0 2
+D1
+~
+~
+0 -1 5618
+D3
+~
+~
+0 -1 5616
+S
+#5618
+On A Road~
+   You stand on a well maintained road leading east towards New Thalos
+and west towards the Eastern Mountains.  To the north you can see wide
+plains stretching out as far as the eye can see.  South of you begins
+a dark green forest.
+~
+54 0 2
+D1
+~
+~
+0 -1 5569
+D3
+~
+~
+0 -1 5617
+S
+#5619
+The Headwaters Of The River Of Lost Souls~
+   You are at the headwaters of what is oft called the darkest river
+in the land.  Looking at the swampy water pooling in this rocky valley,
+you can see why the water downstream is so dark.  The rock walls reach
+up around you blocking all exits except that to the north up onto the
+banks, and to the south where the river flows.
+~
+54 0 7
+D0
+There is a small path leading away from the bank just to the north.
+~
+~
+0 -1 1500
+D2
+The waters of this swampy pool are flowing slowly towards the south.
+~
+~
+0 -1 5634
+S
+#5620
+River Ishtar~
+   The river calms a bit after being thrashed in the interior of
+the mountain.  Although still deep within the rocks you can see
+faint traces of green to the east.
+~
+54 0 7
+D1
+~
+~
+0 -1 5621
+D3
+~
+~
+0 -1 5639
+S
+#5621
+River Ishtar~
+   The river flows east and west through the hills.  
+~
+54 0 7
+D1
+~
+~
+0 -1 5622
+D3
+~
+~
+0 -1 5620
+S
+#5622
+River Ishtar~
+   The river begins its decent out of the mountains now and continues
+its flow to the east.
+~
+54 0 7
+D1
+~
+~
+0 -1 5644
+D3
+~
+~
+0 -1 5621
+S
+#5623
+River Ishtar~
+   The river flows under the wall of the city to the east and stretches
+off towards high snow capped mountains far far to the west.
+~
+54 0 7
+D1
+~
+grating~
+1 -1 5487
+D3
+~
+~
+0 -1 5649
+S
+#5624
+River Ishtar~
+   The river flows out from the city down a long winding gully towards
+the Sea of Dragons.  To the south of you lies the Great Eastern Desert
+and north a wide open expanse of grass.  You can just barely make out
+a road that seems to be traveling along side the river but the
+banks are to steep for you to see very far.
+~
+54 0 7
+D1
+~
+~
+0 -1 5625
+D3
+~
+~
+0 -1 5483
+S
+#5625
+River Ishtar~
+   The river continues its descent down the lowlands flowing ever so
+gently south.  It is hard to believe this is the same river that came
+cascading down the mountainside.
+~
+54 0 7
+D1
+~
+~
+0 -1 5626
+D3
+~
+~
+0 -1 5624
+S
+#5626
+River Ishtar~
+   Small animals and herd animals can be heard in the distance, though 
+you don't actually see any near the river.  Perhaps the steep slopes
+pervent them from using the river.
+~
+54 0 7
+D1
+~
+~
+0 -1 5684
+D3
+~
+~
+0 -1 5625
+S
+#5627
+The Edge Of The Ravine~
+  You stand at the edge of a really long drop down.  A small rope
+bridge has conviently been placed here to allow you access to the
+other side of the bridge.  Unfortunately the wind seems to be kicking
+up making the bridge sway slightly.  The path leads off through the
+mountains to the east.
+~
+54 0 5
+D1
+~
+~
+0 -1 5628
+D3
+~
+~
+0 -1 5609
+S
+#5628
+A Path Through The Mountains~
+   The narrow path makes its way through the mountains east
+and west.  You hear the squawking of a large bird over head
+most likely a buzzard waiting for you to drop.
+~
+54 0 5
+D1
+~
+~
+0 -1 5629
+D2
+~
+~
+0 -1 4049
+D3
+~
+~
+0 -1 5627
+S
+#5629
+A Path Through The Mountains~
+   A large boulder suddenly decides it wants to occupy the same space
+you are currently standing in.
+~
+54 0 5
+D1
+~
+~
+0 -1 5612
+D3
+~
+~
+0 -1 5628
+S
+#5630
+On A Road~
+   The road you are on continues east and west.
+~
+54 0 4
+D1
+~
+~
+0 -1 5631
+D3
+~
+~
+0 -1 5615
+S
+#5631
+On A Road~
+   The road you are on continues east and west.
+~
+54 0 2
+D1
+~
+~
+0 -1 5632
+D3
+~
+~
+0 -1 5630
+S
+#5632
+On A Road~
+   The road you are on continues east and west.
+~
+54 0 2
+D1
+~
+~
+0 -1 5633
+D3
+~
+~
+0 -1 5631
+S
+#5633
+On A Road~
+   The road bends here toward the riverbank giving access to
+the River Ishtar.  The road continues north and west from the
+river bank.
+~
+54 0 2
+D0
+~
+~
+0 -1 5616
+D2
+~
+~
+0 -1 5649
+D3
+~
+~
+0 -1 5632
+S
+#5634
+The River Of Lost Souls~
+   The river flows south through a valley in the mountains.  You can see
+a small village to the west.
+~
+54 0 7
+D0
+~
+~
+0 -1 5619
+D2
+~
+~
+0 -1 5635
+S
+#5635
+The River Of Lost Souls~
+   The river flows south in the southern end of this wide valley.  The
+walls of the valley close in to the south.
+~
+54 0 7
+D0
+~
+~
+0 -1 5634
+D2
+~
+~
+0 -1 5636
+S
+#5636
+The River Of Lost Souls~
+   The river begins to speed up as it cascades down this mountain
+crevice.  High above you a small rope bridge sways in the wind.
+~
+54 0 7
+D0
+~
+~
+0 -1 5635
+D2
+~
+~
+0 -1 5637
+S
+#5637
+The River Of Lost Souls~
+   The river rapidly flows down this crack in the side of the mountain
+to the south.  Hopefully you will hear any aproaching rapids.
+~
+54 0 7
+D0
+~
+~
+0 -1 5636
+D2
+~
+~
+0 -1 5638
+S
+#5638
+The River Of Lost Souls~
+   The river seems to calm a bit as the crevase widens lessens
+its stranglehold on the waters.  The river continues to the north 
+through a crack and flows to the south.
+~
+54 0 7
+D0
+~
+~
+0 -1 5637
+D2
+~
+~
+0 -1 5639
+S
+#5639
+A Split In The River~
+   The waters of the river crash down upon a rock and split into
+two bodies of water.  The river you are on continues its southern
+course and the new river heads off to the east.  To your west you
+notice that the rocks have split and crumbled as if torn asunder
+by some massive force.  It looks impossible to traverse.  The River
+of Lost Souls also continues to the north.
+~
+54 0 7
+D0
+~
+~
+0 -1 5638
+D1
+~
+~
+0 -1 5620
+D2
+~
+~
+0 -1 5640
+S
+#5640
+The River Of Lost Souls~
+   The river continues north and south from here through a water
+eroded valley.
+~
+54 0 7
+D0
+~
+~
+0 -1 5639
+D2
+~
+~
+0 -1 5641
+S
+#5641
+The River Of Lost Souls~
+   The river continues north and south from here through a water
+eroded valley.
+~
+54 0 7
+D0
+~
+~
+0 -1 5640
+D2
+~
+~
+0 -1 5642
+S
+#5642
+The River Of Lost Souls~
+   The river continues north and south from here through a water
+eroded valley.
+~
+54 0 7
+D0
+~
+~
+0 -1 5641
+D2
+~
+~
+0 -1 5643
+S
+#5643
+The River Of Lost Souls~
+   The river makes a sharp bend here and heads south into a large
+mountain and north through a valley.  On a ledge above you, and to
+the west, you can see movement.
+~
+54 0 7
+D0
+~
+~
+0 -1 5642
+D2
+~
+~
+0 -1 5004
+S
+#5644
+River Ishtar~
+   The river widens here, no longer bounded by rock, and flows east
+towards a plain.
+~
+54 0 7
+D1
+~
+~
+0 -1 5645
+D3
+~
+~
+0 -1 5622
+S
+#5645
+River Ishtar~
+   The river continues here east to east.  There is a landing area to
+the north where you can gain access to the shore.
+~
+54 0 7
+D0
+~
+~
+0 -1 5615
+D1
+~
+~
+0 -1 5646
+D3
+~
+~
+0 -1 5644
+S
+#5646
+River Ishtar~
+   The river meanders through the foothills of the eastern mountains.
+The air is dryer on this side of the continental divide and it seems
+a bit warmer.
+~
+54 0 7
+D1
+~
+~
+0 -1 5647
+D3
+~
+~
+0 -1 5645
+S
+#5647
+River Ishtar~
+   The river continues its journey eastward flowing through the
+plains.  To the west you see the peaks of large snow capped
+mountains and to the east you see the outline of a large city.
+~
+54 0 7
+D1
+~
+~
+0 -1 5648
+D3
+~
+~
+0 -1 5646
+S
+#5648
+River Ishtar~
+   The river flows east and west from here.
+~
+54 0 7
+D1
+~
+~
+0 -1 5649
+D3
+~
+~
+0 -1 5647
+S
+#5649
+River Ishtar~
+   The river slows as it widens and meanders through the lowlands.  A
+small dock give access to the north shore.
+~
+54 0 7
+D0
+~
+~
+0 -1 5633
+D1
+~
+~
+0 -1 5623
+D3
+~
+~
+0 -1 5648
+S
+#5651
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5652
+D1
+~
+~
+0 -1 5656
+D2
+~
+~
+0 -1 5654
+D3
+~
+~
+0 -1 5657
+S
+#5652
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5652
+D1
+~
+~
+0 -1 5655
+D2
+~
+~
+0 -1 5652
+D3
+~
+~
+0 -1 5651
+S
+#5653
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5654
+D1
+You see a large boulder blocking your path.
+~
+boulder rock crack~
+1 -1 5639
+D2
+~
+~
+0 -1 5656
+D3
+~
+~
+0 -1 5657
+S
+#5654
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5654
+D1
+~
+~
+0 -1 5658
+D2
+~
+~
+0 -1 5657
+D3
+~
+~
+0 -1 5660
+S
+#5655
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5655
+D1
+~
+~
+0 -1 5659
+D2
+~
+~
+0 -1 5658
+D3
+~
+~
+0 -1 5654
+S
+#5656
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 0
+D0
+~
+~
+0 -1 5653
+D1
+~
+~
+0 -1 5658
+D2
+~
+~
+0 -1 5655
+D3
+~
+~
+0 -1 5651
+S
+#5657
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5654
+D1
+~
+~
+0 -1 5658
+D2
+~
+~
+0 -1 5654
+D3
+~
+~
+0 -1 5654
+S
+#5658
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5655
+D1
+~
+~
+0 -1 5657
+D2
+~
+~
+0 -1 5659
+D3
+~
+~
+0 -1 5654
+S
+#5659
+In The Mountains~
+   You are walking over rocks and stones through the mountains between 
+the Ishtar and Dark rivers.
+   It is funny how all the rocks look alike.
+~
+54 0 5
+D0
+~
+~
+0 -1 5652
+D1
+~
+~
+0 -1 5659
+D2
+~
+~
+0 -1 5654
+D3
+~
+~
+0 -1 5658
+S
+#5660
+The Headwaters Of The Dark River~
+   A large natural spring issues forth from the heart of the mountain
+and flows west down the mountain.  It looks like there was a terrible
+earthquake here not too long ago, and a path that leads eastwards
+through the mountains is covered with rocks, making passage difficult.
+~
+54 a 7
+D1
+~
+~
+0 -1 5654
+D3
+~
+~
+0 -1 5661
+S
+#5661
+On The Dark River~
+   The river flows down the mountain through a large crevasse to the west
+and up into the mountains east.
+~
+54 a 7
+D1
+~
+~
+0 -1 5660
+D3
+~
+~
+0 -1 5662
+S
+#5662
+On The Dark River~
+   The walls of this canyon tower overhead as the river continues east
+and west from here.
+~
+54 a 7
+D1
+~
+~
+0 -1 5661
+D3
+~
+~
+0 -1 5663
+S
+#5663
+On The Dark River~
+   The walls of rock around you slowly shrink to ground level as the river 
+flows out of the mountains and onto the plains.
+~
+54 a 7
+D1
+~
+~
+0 -1 5662
+D3
+~
+~
+0 -1 5664
+S
+#5664
+On The Dark River~
+   The river continues east and west from here out of the foothills
+to the east down into the mountains south of here.
+~
+54 a 7
+D1
+~
+~
+0 -1 5663
+D2
+~
+~
+0 -1 5665
+S
+#5665
+On The Dark River~
+   The river, following a low spot in the foothills, bends and twists.
+Tall mountains can be seen off to the south and east.
+~
+54 a 7
+D0
+~
+~
+0 -1 5664
+D2
+~
+~
+0 -1 5666
+S
+#5666
+On The Dark River~
+   The river makes a wide sweeping turn here into the mountain.
+~
+54 a 7
+D0
+~
+~
+0 -1 5665
+D3
+~
+~
+0 -1 5667
+S
+#5667
+On The Dark River~
+   The river flows west from here into the heart of the mountain and
+east towards the foothills once more.
+~
+54 ad 7
+D1
+~
+~
+0 -1 5666
+D3
+~
+~
+0 -1 5668
+S
+#5668
+On The Dark River~
+   You can barely make out what is ahead of you as the river flows
+quietly through the passageway.
+~
+54 ad 7
+D1
+~
+~
+0 -1 5667
+D2
+~
+~
+0 -1 5669
+S
+#5669
+On The Dark River~
+   The river slowly flows west towards the heart of the mountain.  There
+are small cracks in the passage wall to the north where you might be able
+to get up out of the water.
+~
+54 ad 7
+D0
+~
+~
+0 -1 5672
+D1
+~
+~
+0 -1 5668
+D3
+~
+~
+0 -1 5670
+S
+#5670
+On The Dark River~
+   The river continues east and west from here flowing south of a dark
+ledge high above the water level.
+~
+54 ad 7
+D1
+~
+~
+0 -1 5669
+D3
+~
+~
+0 -1 5671
+S
+#5671
+On The Dark River~
+   The river flows south through a narrowing part of the passage as it
+progresses deeper into the mountain.
+~
+54 ad 7
+D1
+~
+~
+0 -1 5670
+D2
+~
+~
+0 -1 5005
+S
+#5672
+On A Small Ledge~
+   You clamber out of the water up onto this narrow ledge to see if
+it leads deeper into the mountain.  Unfortunately, the ledge is only
+wide enough to rest upon for a while and there does not appear to be
+any other exits other than rejoining the underground river.
+~
+54 ad 2
+D2
+~
+~
+0 -1 5669
+S
+#5681
+On The Plains~
+   You stand on an open expanse of grass extending in all directions.
+To the south of you stand the might northern gates of New Thalos.  East
+and west of you the grassy fields continue and north, in the distance,
+you see a line of trees.
+~
+54 0 2
+D0
+~
+~
+0 -1 5682
+D1
+~
+~
+0 -1 5681
+D2
+~
+~
+0 -1 5567
+D3
+~
+~
+0 -1 5681
+S
+#5682
+On The Plains~
+   You stand on an open field of grass.  The forest to the north is
+closer but still a good distance away.  To the south a small dirt
+path has been trodden into the ground heading towards New Thalos.
+~
+54 0 2
+D0
+~
+~
+0 -1 5683
+D1
+~
+~
+0 -1 5682
+D2
+~
+~
+0 -1 5681
+D3
+~
+~
+0 -1 5682
+S
+#5683
+The Edge Of The Forest~
+   You stand at the edge of a huge forest.  The line of trees
+continues as far as the eye can see to the east and west.  A
+large expanse of grass spreads out to the south.
+~
+54 0 2
+D1
+~
+~
+0 -1 5683
+D2
+~
+~
+0 -1 5682
+D3
+~
+~
+0 -1 5683
+S
+#5684
+River Ishtar~
+   The river broadens even more here and the waters become murky.
+The smell of saltwater has reached you from the east.  The Dragon
+Sea cannot be far away.  To the east you can see the faint outline
+of a city and to the north you see a large expanse of grass.
+~
+54 0 7
+D1
+~
+~
+0 -1 5685
+D3
+~
+~
+0 -1 5626
+S
+#5685
+The River Delta~
+   This is where the river empties out into the Dragon Sea.  The backrush
+of water has kicked up a lot of sand and the blue sea is stained where
+the river empties.  Looking west all you can see is water... all the way
+to the horizon.  North of here is a small dock you think you should be
+able to reach with out too much trouble.  The river stretches off to the
+west back towards New Thalos.
+~
+54 0 7
+D1
+~
+~
+0 -1 5686
+D3
+~
+~
+0 -1 5684
+S
+#5686
+The Dragon Sea~
+   You are on the clear blue seas of the Dragon Sea.  Water extends
+in all directions as far as the eye can see.  Off in the distance
+you think you might see a small dock to the north.
+~
+54 0 7
+D0
+~
+~
+0 -1 5687
+D1
+~
+~
+0 -1 5686
+D2
+~
+~
+0 -1 5686
+D3
+~
+~
+0 -1 5685
+S
+#5687
+The Dragon Sea~
+   The Dragon Sea comes up along the shore here.  The deep blue waters
+rolling in and crashing against the beach.  To the north you see a 
+small dock jutting out into the surf.
+~
+54 0 7
+D0
+~
+~
+0 -1 5695
+D1
+~
+~
+0 -1 5696
+D2
+~
+~
+0 -1 5686
+S
+#5688
+The Dragon Sea~
+   You are on the clear blue seas of the Dragon Sea.  Water extends
+in all directions as far as the eye can see.  Off in the distance
+you think you might see a small dock to the west.
+~
+54 0 7
+D0
+~
+~
+0 -1 5688
+D1
+~
+~
+0 -1 5697
+D2
+~
+~
+0 -1 5695
+S
+#5689
+The Dragon Sea~
+   You are on the clear blue seas of the Dragon Sea.  Water extends
+in all directions as far as the eye can see.  Off in the distance
+you think you might see a small dock to the west.
+~
+54 0 7
+D0
+~
+~
+0 -1 5697
+D1
+~
+~
+0 -1 5689
+D2
+~
+~
+0 -1 5696
+D3
+~
+~
+0 -1 5695
+D5
+~
+~
+0 -1 5698
+S
+#5690
+On A Road~
+   The people of New Thalos take great pride in the services their
+city may provide.  One of these services is the construction crews
+the go to great lengths to keep all the roads in order.  Although
+the taxes in New Thalos are higher then other cities in the realm
+most of the money is used for the good of the people.
+~
+54 0 2
+D1
+~
+~
+0 -1 5691
+D3
+~
+~
+0 -1 5568
+S
+#5691
+On A Road~
+   You walk along a well used road with beautiful scenery.  To the north
+tall pine trees form a wall that goes on for miles.  Between the road
+and the trees lies a great expanse of grassy plains.  South of here, 
+beyond the river, lies the Great Eastern Desert.  The road continues
+east and west.
+~
+54 0 2
+D1
+~
+~
+0 -1 5692
+D3
+~
+~
+0 -1 5690
+S
+#5692
+On A Road~
+   The Dragon Sea can be seen to the east now spreading out to unknown
+lands.  The road continues east and west.  To the south you hear the
+sounds of boats traveling the River Ishtar delivering goods.
+~
+54 0 2
+D1
+~
+~
+0 -1 5693
+D3
+~
+~
+0 -1 5691
+S
+#5693
+On A Road~
+   This is the man land route through the land.  Merchants can bring
+their goods to the coastline and have them ferried onto ships for
+export.  Travel by foot west will take you through New Thalos up and
+over the Eastern Mountains and down into Midgaard.
+~
+54 0 2
+D1
+~
+~
+0 -1 5694
+D3
+~
+~
+0 -1 5692
+S
+#5694
+Near The Shore~
+   The road ends here turning into a small dirt path leading down the
+beach and onto a dock.  To the north and south you see the coastline
+stretching out before you.  West of here the lowlands roll up into
+huge snow capped mountains.
+~
+54 0 2
+D1
+~
+~
+0 -1 5695
+D3
+~
+~
+0 -1 5693
+S
+#5695
+On A Dock~
+   You stand on a simple wooden dock that acts as an extension of the
+road to the west.  The dock seems to have been here for quite a long
+time but is still sturdy.  A small ladder has been built on the eastern
+end to allow easy access to and from ships.
+~
+54 0 1
+D0
+~
+~
+0 -1 5688
+D1
+~
+~
+0 -1 5689
+D2
+~
+~
+0 -1 5687
+D3
+~
+~
+0 -1 5694
+S
+#5696
+The Dragon Sea~
+   You are on the clear blue seas of the Dragon Sea.  Water extends in
+all directions as far as the eye can see.  Off in the distance you think
+you might see a small dock to the west.
+~
+54 0 7
+D0
+~
+~
+0 -1 5689
+D1
+~
+~
+0 -1 5696
+D3
+~
+~
+0 -1 5687
+S
+#5697
+The Dragon Sea~
+   The ocean spreads out in all directions rolling gently.  In the
+distance you can see an island on the horizon.  To the west you see
+the mainland.
+~
+54 0 7
+D0
+~
+~
+0 -1 5697
+D1
+~
+~
+0 -1 5697
+D2
+~
+~
+0 -1 5689
+D3
+~
+~
+0 -1 5688
+S
+#5698
+Under The dock~
+   You are swiming underneath the dock.  You can see the four wooden
+pylons that support the structure.  The murky water clouds you vision
+as you gaze westward, but you think you can make out an iron grating
+in that direction.
+~
+54 1 7
+D3
+~
+grate~
+1 -1 5699
+D4
+~
+~
+0 -1 5697
+S
+#5699
+The Lair Of The Ixitxachitl~
+   Blood swirls around in the water as the Ixitxachitl devours the 
+last of its meal.  Swirling around quickly as you intrude upon his
+meal the large sting ray attacks!
+~
+54 1 7
+D1
+~
+grate~
+1 -1 5698
+S
+$

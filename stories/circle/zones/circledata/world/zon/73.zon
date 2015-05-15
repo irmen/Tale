@@ -1,0 +1,30 @@
+#73
+The Tunnels In The Sewer~
+7300 7399 25 2
+*
+* Mobiles
+M 0 7040 1 7328         The Red Dragon
+M 0 7041 2 7344         The Sea Hag
+M 0 7042 2 7335         The Good Guardian Naga
+M 0 7043 3 7339         The Basilisk
+M 0 7044 6 7306         The Lemure Blob
+M 0 7045 1 7319         Jones The Ettin
+M 0 7046 1 7324         Herald The Ettin
+M 0 7010 2 7329         Chr-eff'n
+* Doors
+D 0 7304 2 1            The Secret Room Door
+D 0 7305 0 1
+D 0 7305 2 1            The Mudhole Entrance
+D 0 7306 0 1
+D 0 7315 0 1            The Treasure Room Door
+D 0 7316 2 1
+D 0 7321 3 1            The Square Lair
+D 0 7318 1 1
+D 0 7324 0 2            False Door
+D 0 7324 2 2            False Door
+D 0 7324 1 1            Secret Tunnel Entrance
+D 0 7325 3 1
+D 0 7333 3 1            Stair-Room Entrance
+*
+S
+$

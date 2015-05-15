@@ -1,0 +1,50 @@
+#9
+River Island Of Minos~
+900 999 39 1
+*
+* Created by Mahatma of HexOynx
+*
+* Mobiles
+* First Test
+M 0 900 3 915           Homba
+M 0 900 3 915           Homba
+M 0 900 3 915           Homba
+* Second Test
+M 0 901 2 916           Swordsman
+E 1 901 15 17                   Speckled Potion
+M 0 901 2 916           Swordsman
+* Third Test
+M 0 902 1 917           Mummy
+* Fourth Test
+M 0 903 1 918           Giant Lizard
+* Fifth Test
+M 0 904 1 919           General Woundwart
+E 1 903 10 9                    Troll Gauntlets
+E 1 902 25 17                   Speckled Potion
+* Sixth Test
+M 0 905 1 920           Franz
+E 1 905 10 16                   Flail
+M 0 906 1 920           Hanz
+E 1 907 5 16                    Heavy Spear
+* Final Test And Treasure
+M 0 907 1 921           Minos
+E 1 901 8 11                    Minotaur Shield
+E 1 900 1 17                    Golden Key
+O 1 904 10 922          Platinum Ring
+O 1 906 1 922           Gold
+M 0 909 2 908           Sea Hag
+M 0 909 2 908           Sea Hag
+M 0 910 2 909           Merman
+E 1 908 30 16                   Trident
+M 0 910 2 909           Merman
+E 1 908 30 16                   Trident
+M 0 911 3 910           Crab
+M 0 911 3 910           Crab
+* Objects
+R 0 910 909
+O 0 909 12 910          Boots Of Water Walking
+* Doors
+D 0 921 1 2             Treasure Room Door
+*
+S
+$

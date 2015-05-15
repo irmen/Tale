@@ -372,7 +372,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver, player_connection):
         wsgi_app = SessionMiddleware(cls(driver, player_connection))
-        wsgi_server = make_server("localhost", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
+        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
         return wsgi_server
 

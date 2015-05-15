@@ -1,0 +1,25 @@
+#71
+The Second Sewer~
+7100 7199 20 2
+*
+* Mobiles
+M 0 7004 3 7102         The Earth Beetle
+M 0 7005 7 7112         The Giant Maggot
+M 0 7005 7 7112         The Giant Maggot
+M 0 7005 7 7122         The Giant Maggot
+M 0 7002 7 7104         The Sewer Rat
+M 0 7000 3 7103         The Horrifying Mudmonster
+M 0 7000 3 7103         The Horrifying Mudmonster
+M 0 7006 7 7113         The Slithering Snake
+M 0 7006 7 7122         The Slithering Snake
+M 0 7006 7 7122         The Slithering Snake
+* Doors
+D 0 7106 5 1            The Abyss
+D 0 7111 5 1            The Abyss
+D 0 7121 5 1            The Abyss
+D 0 7279 4 1
+D 0 7116 5 1            Secret Way Down
+D 0 7280 4 1
+*
+S
+$

@@ -1,0 +1,285 @@
+#7900
+key steel~
+a large key~
+A large steel key has been left here.~
+~
+18 c 16385
+7900 0 0 0
+2 0 0
+E
+steel key~
+This huge key is made from solid steel.
+~
+#7901
+key copper~
+a copper key~
+A copper key has been left on the floor.~
+~
+18 c 16385
+7901 0 0 0
+2 0 0
+E
+copper key~
+This little key is made from copper.
+~
+#7902
+key brass~
+a small brass key~
+A small brass key lies here.~
+~
+18 c 16385
+7902 0 0 0
+1 10 4
+E
+key brass~
+It is a small, simple brass key with no inscriptions or marks of any kind.
+~
+#7903
+treasure coins~
+a huge treasure~
+There is a huge treasure here, looking moderately valuable.~
+~
+20 0 1
+7734 0 0 0
+5 7734 0
+E
+treasure~
+This looks like a whole lot of coins, though not as many as you expected.
+~
+#7904
+chest wooden~
+a wooden chest~
+A wooden chest stands in the corner.~
+~
+15 0 0
+100 15 7902 0
+0 0 0
+E
+chest wooden~
+It is a robust chest made from short, heavy planks that have been fastened
+together with tenons.  It is equipped with a simple brass lock.
+~
+#7905
+chest~
+a chest~
+A heavy iron chest sits in one corner of the room.~
+~
+15 f 0
+15 15 7902 0
+0 0 0
+#7906
+dagger plain black~
+a plain dagger~
+A long black, but very plain, dagger rests here.~
+~
+5 dfhn 8193
+0 5 3 11
+3 6500 15000
+A
+18 -3
+A
+19 -1
+#7907
+bracelet spiked~
+a large spiked bracelet~
+A large spiked bracelet has been left here.~
+~
+11 g 4097
+0 0 0 0
+1 1200 2000
+A
+17 -4
+#7908
+waybread bread~
+a waybread~
+Some waybread has been put here.~
+~
+19 0 1
+24 0 0 0
+1 50 50
+E
+waybread bread~
+The waybread is the traditional feed of elves when travelling, they
+call it lembas.  It is said to refresh the weary traveler greatly.
+~
+#7909
+ring gold goldring~
+a golden ring~
+A shiny goldring has been abandoned here.~
+~
+11 dfmpq 3
+0 0 0 0
+20 3500 2000
+A
+3 2
+#7910
+sword bastard~
+a huge bastard sword~
+There is a huge bastard sword here.~
+~
+5 gklmn 8193
+0 2 8 3
+18 1700 800
+E
+bastard sword~
+Quite a heavy weapon, with a pure white hilt.
+~
+A
+19 3
+#7911
+helmet large~
+a large helmet~
+There is a large helmet on the floor.~
+~
+9 g 17
+7 0 0 0
+5 4500 1500
+E
+large helmet~
+This looks like some heavy protection, for the head of course.
+~
+#7912
+helmet chaos~
+a chaos helmet~
+On the floor is a grand evil-looking chaos helmet.~
+~
+9 fgj 17
+8 0 0 0
+8 2300 1000
+E
+chaos helmet~
+This helmet has mounted some mean looking spikes on the front,
+moreover it looks like good protection.
+~
+A
+19 2
+A
+24 -2
+#7913
+sword two-handed~
+a two-handed sword~
+On the floor rests a enormous two-handed sword.~
+~
+5 gjkm 8193
+0 3 6 3
+22 3500 3500
+E
+two-handed sword~
+You notice that there has been inscribed some runes and a sort of
+pattern, which resembles flames running along the edge.
+~
+E
+runes~
+On the blade you can read 'Flame And Strength United Are My Soul Power'.
+~
+A
+17 10
+A
+19 3
+#7914
+plate breast silvery silver~
+a silvery breast plate~
+There is a silvery breast plate on the floor.~
+~
+9 gkl 9
+10 7000 0 0
+70 20000 5000
+E
+plate breast silvery silver~
+On the breast plate you notice a relief of large rose.  The metal seems
+to be some kind of silver or platinum.
+~
+#7915
+plates leg silvery~
+some silvery leg plates~
+On the floor you see some leg plates.~
+~
+9 gkl 33
+7 7000 0 0
+40 12500 5000
+E
+leg plates silvery silver~
+They seem to be made from silver or platinum. You see the outline of a
+rose.
+~
+#7916
+gloves silvery silver~
+a pair of silvery gloves~
+You can see a pair of gloves on the floor.~
+~
+9 gkl 129
+5 7000 0 0
+14 2500 2000
+E
+gloves silvery silver~
+The gloves are made of silver threads.
+~
+A
+18 1
+#7917
+helmet silvery silver~
+a silvery helmet~
+The silvery helmet lies here.~
+~
+9 gkl 17
+8 7000 0 0
+35 9000 5000
+E
+helmet silvery silver~
+The helmet is made from platinum or silver and has a white fur brush
+attached on the top.
+~
+#7918
+shield rose~
+the shield of the rose~
+The shield of the rose rests on the floor.~
+~
+9 gkl 513
+12 7000 0 0
+60 15000 7500
+E
+shield rose~
+On the shield you see a clear and perfect painting of a dark red rose
+on a white background. You also notice an inscription.
+~
+E
+inscription~
+The inscription reads:
+
+Pax Est Sanctuum
+
+~
+#7919
+boots heavy plated~
+a pair of heavy plated boots~
+A pair of heavy plated boots stand on the floor.~
+~
+9 gkl 65
+5 7000 0 0
+40 3500 3500
+E
+boots heavy plated~
+The boots are made from a silvery metal.
+~
+#7920
+plates arm silvery silver~
+some silvery arm plates~
+On the floor you see some arm plates.~
+~
+9 gkl 257
+7 7000 0 0
+40 12500 5000
+E
+plates arm silvery silver~
+They seem to be made from silver or platinum.  You see the outline of a
+rose.
+~
+#7921
+barrel water~
+a barrel~
+A water barrel has been left here.~
+~
+17 0 1
+40 40 15 0
+45 60 20
+$

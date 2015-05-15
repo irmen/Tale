@@ -1,0 +1,309 @@
+#1500
+allah god yahweh~
+Allah~
+You resist the urge to avert your eyes from the sight of the one true God.
+~
+The sight is for each man a different, a mirror into the true nature of
+each person's body and soul.  At first a proud, bitter old man, but just
+as easily a gentle extended hand, a smile, and gardens... gardens.
+~
+beilnopqr h 1000 S
+30 -10 -10 1d1+2999 8d8+9
+0 400000
+8 8 1
+#1501
+michael angel archangel~
+Michael~
+The archangel Michael turns and begins to look you over.
+~
+At first you see nothing but a bright and comforting glow; then the
+image sharpens suddenly, and you see a face, eyes, hands, but then
+that too fades, and you see nothing.
+~
+bl h 1000 S
+29 -6 -7 1d100+1900 6d7+7
+0 280000
+8 8 1
+#1502
+gabriel angel archangel~
+Gabriel~
+The archangel Gabriel smiles, and begins to tell you something.
+~
+Known as the Messenger, it is this angel that has brought the Divine Word
+to the chosen prophets, and in turn brought the Seal of the Prophets on a
+miraculous journey to the holy city of Jerusalem.
+~
+bl h 1000 S
+29 -6 -7 1d100+1900 6d7+7
+0 280000
+8 8 1
+#1503
+raphael angel archangel~
+Raphael~
+The archangel Raphael looks up and frowns at you in disapproval.
+~
+It is impossible to get a solid glance at the archangel.  He is nothing
+that is human, and with a mere whisper, he dispels every image that you
+attempt to create in your mind.
+~
+bl h 1000 S
+29 -6 -7 1d100+1900 6d7+7
+0 280000
+8 8 1
+#1504
+uriel angel archangel~
+Uriel~
+Uriel, the angel of darkness, stands here guarding the way forward.
+~
+After the Fall of the bringer of light, the Lord had need for the
+service of a fourth, and it was this angel, Uriel, that rose to the
+highest ranks.
+~
+bl h 1000 S
+29 -6 -7 1d100+1900 6d7+7
+0 280000
+8 8 1
+#1505
+cherub cherubin cherubim~
+the cherubin~
+The cherubin of the blazing sword looks at you and begins to chuckle.
+~
+The monster before you seems to be nothing more than a baby or young
+child, wrapped in a glowing white cloth, but as you try to walk past,
+the beast grins and cackles, drawing its sword and blocking the way.
+~
+bf h 0 S
+17 1 0 10d5+260 3d6+4
+0 40000
+8 8 0
+#1506
+jester~
+the jester~
+A mad, drunken jester is sitting here, lost in his deepening stupor.
+~
+He is dimly aware of your gaze.  Chuckling softly, you hear him mutter
+something obscure: dragons, the temple, the falling of great empires.
+He laughs at you and takes another drink.
+~
+b 0 -300 S
+13 6 1 10d2+180 2d8+2
+3450 21000
+6 6 1
+#1507
+jinn sprite~
+the jinn~
+One of the jinn dances in and out of the air before your eyes, taunting you.
+~
+You have heard legends of these creatures, the mischievous little demons
+said to be trapped in lamps and bottles, capable of granting all kinds of
+powerful wishes.  To you, it looks like nothing more than an annoying little
+sprite.
+~
+cg b 0 S
+23 0 -2 25d2+400 3d9+3
+0 70000
+8 8 0
+#1508
+man old~
+the slumped old man~
+A slumped, shaking old man stands up and begins to yell at the world.
+~
+He wears a faded uniform, decorated with honors of his own creation,
+slackened jaws and pasty white bags sagging under his ugly, hating eyes.
+A tuft of reckless dark hair scatters across his forehead, and his right
+hand shakes and shakes.
+~
+bf dk -1000 S
+26 -4 -5 4d10+840 4d9+6
+34000 180000
+8 8 1
+#1509
+caliph hakim al-hakim~
+al-Hakim~
+The mad Caliph al-Hakim is here, dissecting a young boy.
+~
+The darkest skin, and eyes so white.  Covered only in a shoddy woolen
+tunic, he has not bathed in months nor eaten in days, and yet his smile,
+so charming.
+~
+bf dk -1000 S
+26 -4 -5 4d10+840 4d9+6
+34000 180000
+8 8 1
+#1510
+judas escariot apostle~
+Judas Escariot~
+The wayward apostle approaches slowly, extending his arms in a hug.
+~
+You see nothing but the sadness of a man who would sell his own God.
+~
+bc dk -1000 S
+25 -3 -4 5d10+650 4d6+5
+1 145000
+8 8 1
+#1511
+pharoah~
+Pharoah~
+Pharoah has been sent here in retribution for a lifetime of evils.
+~
+Richly clothed and postured in arrogance and love of power, he looks at
+you with nothing more than a smirk of contempt.
+~
+b dk -1000 S
+25 -3 -4 5d10+650 4d6+5
+25000 145000
+8 8 1
+#1512
+abu bakr first caliph~
+Abu Bakr~
+Abu Bakr, first of the Rashidun, mourns over the death of the Prophet.
+~
+You see a simple man, dressed in dark and unadorned robes, bent over and
+pensive, reliving the memories of a man he never thought would die.
+~
+b dk 1000 S
+25 -3 -4 5d10+650 4d6+5
+25000 145000
+8 8 1
+#1513
+umar second caliph~
+Umar~
+You see Umar, second of the Rashidun, the successors of the Prophet.
+~
+You are amazed at the piety of the man.  He looks at you in sadness,
+saying: "I do not wish to fight you, but if you refuse the truth of
+the Word, then I must."
+~
+b dk 1000 S
+25 -3 -4 5d10+650 4d6+5
+25000 145000
+8 8 1
+#1514
+uthman third caliph~
+Uthman~
+The third of the rightly-guided Caliphs, Uthman, stands before you.
+~
+He was chosen as leader by a clique of jealous rivals who could agree
+upon no other.  The memory of the Prophet fading quickly from the minds
+of the faithful, he could do little, and was in the end killed by his
+enemies.
+~
+bf dk 1000 S
+26 -4 -5 4d10+840 4d9+6
+34000 180000
+8 8 1
+#1515
+ali fourth last caliph~
+Ali~
+You have come before Ali, fourth and last of the Rashidun.
+~
+Some view him as the closest to God among all of the Caliphs, the one
+most deserving of our respect and reverence.  Still others saw him as
+a schismatic, a heretic, one to be killed and forgotten.  To look at
+him now is for you to decide for yourself.
+~
+bf dk 1000 S
+26 -4 -5 4d10+840 4d9+6
+34000 180000
+8 8 1
+#1516
+angel beautiful iblis~
+Iblis~
+You gaze in awe at the most beautiful of all angels, Iblis, the Fallen.
+~
+He smiles calmly, and begins to tell you of the time when he would not
+kneel, would not prostrate himself before the first human beings.  And
+then he gestures at you, smiling, and conjures an image of all the 
+temptations that will be yours if you in turn but follow him.
+~
+bcf dk -1000 S
+25 -3 -4 10d5+650 4d6+5
+25000 145000
+8 8 1
+#1517
+iblis satan devil voice~
+the Temptation~
+You pause nervously as a voice whispers at you from over your shoulder.
+~
+There is no physical figure attached to the presence that dominates this
+place, just tormented laughter, moaning, screaming, and begging.
+~
+bcf dk -1000 S
+25 -3 -4 10d5+650 4d6+5
+25000 145000
+8 8 1
+#1518
+serpent dragon devil iblis~
+the raging dragon~
+A raging dragon turns to you in violent lust for your soul.
+~
+The serpent of babylon, the aged and violet hued monster that has 
+watched all of mankind succumb before its power, turns to you as
+its last victim.
+~
+bcf dk -1000 S
+27 -4 -5 75d2+825 4d8+5
+40000 180000
+8 8 1
+#1519
+demon fire~
+the demon~
+The hell-fire around you is dominated by a massive, burning demon.
+~
+You see nothing but the inexorably red and burning anger of the 
+lord of the underworld that you fear to be your fate.
+~
+bcf dk -1000 S
+27 -4 -5 75d2+825 4d8+5
+40000 180000
+8 8 1
+#1520
+baby innocent~
+the innocent baby~
+Lying on the ground wrapped in blankets is the most innocent of babies.
+~
+The baby is barely aware of your presence, lost in a sleepy and
+contented yawn.
+~
+b dk 1000 S
+22 -3 -4 5d10+150 4d6+4
+20000 145000
+4 4 1
+#1521
+boy teenage~
+the teenage boy~
+You stop in surprise at the sight of a teenage boy staring off to the distance.
+~
+He is young, and has not yet seen the bloodiness of this world.  You follow
+his gaze and notice that he is gazing in wonderment at the fullness of the
+moon.
+~
+b dk 1000 S
+24 -3 -4 5d10+680 4d6+5
+22000 145000
+8 8 1
+#1522
+man~
+the man~
+A middle-aged man is here, kneeling in prayer.
+~
+He is tired, the lines of age marking his face, but in his robe, 
+kneeling, he is the image of perfect contentment.
+~
+bl dk 1000 S
+26 -4 -5 75d2+820 4d8+5
+40000 180000
+5 5 1
+#1523
+soul~
+the bodyless soul~
+You are overwhelmed by the presence of a soul that has transcended its body.
+~
+You sense certain tastes and smells, the winds through the gardens.
+Nothing can explain or describe this perfection, this utter bliss.
+~
+bf dk 1000 S
+28 -4 -5 100d2+820 4d8+5
+0 190000
+8 8 1
+$

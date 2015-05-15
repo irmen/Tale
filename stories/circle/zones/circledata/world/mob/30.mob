@@ -1,0 +1,528 @@
+#3000
+wizard~
+the wizard~
+A wizard walks around behind the counter, talking to himself.
+~
+The wizard looks old and senile, and yet he looks like a very powerful
+wizard.  He is equipped with fine clothing, and is wearing many fine
+rings and bracelets.
+~
+ablno d 900 S
+33 2 2 1d1+30000 2d8+18
+30000 160000
+8 8 1
+#3001
+baker~
+the baker~
+The baker looks at you calmly, wiping flour from his face with one hand.
+~
+A fat, nice looking baker.  But you can see that he has many scars on his
+body.
+~
+ablno d 900 S
+33 0 -10 1d1+30000 2d8+18
+100 160000
+8 8 1
+#3002
+grocer~
+the grocer~
+A grocer stands at the counter, with a slightly impatient look on his face.
+~
+A tall grocer, who moves two 200 pounds bag of flour around on his shoulders.
+~
+ablno d 900 S
+33 0 -10 1d1+30000 2d8+18
+30000 160000
+8 8 1
+#3003
+weaponsmith~
+the weaponsmith~
+A weaponsmith is standing here.
+~
+He is a young weaponsmith, who still has lots to learn but he is still
+eager to sell you his latest implements of carnage and destruction.
+~
+ablno d 900 S
+33 0 -10 1d1+30000 2d8+18
+30000 160000
+8 8 1
+#3004
+armourer~
+the armourer~
+An armourer stands here displaying his new (and previously owned) armours.
+~
+An old but very strong armourer.  He has made more suits of armour in his
+life than you have ever seen.
+~
+ablno d 900 S
+33 0 -10 1d1+30000 2d8+18
+28500 160000
+8 8 1
+#3005
+receptionist~
+the receptionist~
+A receptionist is standing behind the counter here, smiling at you.
+~
+You notice a tired look in her face.  She looks like she isn't paid well
+enough to put up with any crap from mud players with attitudes.
+~
+abelnop dfp 900 S
+33 0 -10 1d1+30000 2d8+32
+0 0
+8 8 2
+#3006
+captain stolar~
+Captain Stolar~
+A retired captain stands here, selling boats.
+~
+This captain has eaten more sharks than you have killed peas.
+~
+ablno d 900 S
+33 2 2 1d1+30000 2d8+12
+2000 160000
+8 8 1
+#3007
+sailor~
+the sailor~
+A sailor stands here, waiting to help you.
+~
+He looks like a strong, fit sailor.
+~
+blno 0 900 S
+33 0 -10 1d1+30000 2d8+12
+2000 160000
+8 8 1
+#3008
+uncle juan~
+Uncle Juan~
+Uncle Juan is here ready to take your order.
+~
+He looks like he may or may not have a green card.
+~
+ablno 0 900 S
+33 0 -10 1d1+30000 2d8+18
+2000 160000
+8 8 1
+#3009
+wally watermaster~
+Wally the Watermaster~
+Wally the Watermaster is standing behind the counter.
+~
+Wally is a bit pudgy but looks very strong.  He has a glass of Midgaard
+Natural Spring Water in his hand.  When he notices you, he proudly
+displays his fine collection of contemporary waters.
+~
+ablno d 800 S
+33 0 -10 1d1+30000 1d8+18
+1000 160000
+8 8 1
+#3010
+postmaster post master~
+the postmaster~
+The head postmaster is standing here, waiting to help you with your mail.
+~
+The Postmaster seems like a happy old man, though a bit sluggish.  He
+worries about the reputation of the MMS (Midgaard Mail Service), as many
+people seem to think that it is slow.  Perhaps if he were to brush the
+cobwebs from his uniform it would help to make a better impression.
+~
+ablnopr dp 1000 S
+33 0 -10 1d1+30000 1d8+18
+2000 0
+8 8 1
+#3020
+guildmaster master mage~
+the mages' guildmaster~
+Your guildmaster is studying a spellbook while preparing to cast a spell.
+~
+Even though your guildmaster looks old and tired, you can clearly see the
+vast amount of knowledge she possesses.  She is wearing fine magic clothing,
+and you notice that she is surrounded by a blue shimmering aura.
+~
+abelnop dh 1000 S
+34 0 -10 6d10+640 1d8+24
+18794 100000
+8 8 2
+#3021
+guildmaster master priest~
+the priests' guildmaster~
+Your guildmaster is prayer to your God here.
+~
+You are in no doubt that this guildmaster is truly close to your God; he
+has a peaceful, loving look.  You notice that he is surrounded by a white
+aura.
+~
+abelnop dh 1000 S
+34 0 -10 6d10+640 1d8+24
+18794 100000
+8 8 1
+#3022
+guildmaster master beggar thief~
+the thieves' guildmaster~
+A beggar is sitting here, could she be a guildmaster?
+~
+You realize that whenever your guildmaster moves, you fail to notice it -
+the way of the true thief.  She is to be dressed in poor clothing, having
+the appearance of a beggar.
+~
+abelnop dh 1000 S
+34 0 -10 6d10+640 1d8+34
+18794 100000
+8 8 2
+#3023
+guildmaster master~
+the fighters' guildmaster~
+Your guildmaster is standing here sharpening an axe.
+~
+This is your master. Big and strong with bulging muscles. Several scars
+across his body proves that he was using arms before you were born. He
+has a calm look on his face.
+~
+abelnop 0 1000 S
+34 0 -10 6d10+740 1d8+34
+18794 100000
+8 8 1
+#3024
+sorcerer~
+the sorcerer~
+A sorcerer is guarding the entrance.
+~
+He is an experienced mage who has specialized in the field of Combat Magic.
+He is here to guard the Mage's Guild and his superior knowledge of offensive
+as well as defensive spells make him a deadly opponent.
+~
+ablnop dh 900 S
+33 0 -5 6d10+990 1d8+22
+2000 60000
+8 8 1
+#3025
+knight templar~
+the knight templar~
+A knight templar is guarding the entrance.
+~
+He is a specially trained warrior belonging to the military order of the
+Faith.  His duty is to protect the faithful from persecution and infidel
+attacks and his religious devotion combined with his superior skill makes
+him a deadly opponent.
+~
+ablnop dh 1000 S
+33 0 -5 6d10+990 1d8+22
+2000 160000
+8 8 1
+#3026
+assassin~
+the assassin~
+An assassin is guarding the entrance.
+~
+He is a thief who has specialized in killing others as effectively as
+possible, using all sorts of weapons.  His superior knowledge of how
+and where to use them combined with his extraordinary stealth makes
+him a deadly opponent.
+~
+ablnop dfhst 400 S
+33 0 -10 6d10+990 1d8+25
+2000 160000
+8 8 1
+#3027
+knight~
+the knight~
+A knight is guarding the entrance.
+~
+He is an expert warrior who has attained knighthood through countless
+chivalrous deeds.  His duty is to protect the Guild of Swordsmen and his
+extreme skill combined with his experience in warfare makes him a deadly
+opponent.
+~
+ablnop dh 800 S
+33 0 -8 6d10+990 1d8+40
+2000 160000
+8 8 1
+#3040
+bartender~
+the bartender~
+A bartender watches you calmly, while he skillfully mixes a drink.
+~
+A tired looking Bartender who hates trouble in his bar.
+~
+bno 0 900 S
+24 2 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3041
+waiter~
+the waiter~
+A waiter is going around from one place to another.
+~
+A tired looking waiter.
+~
+bno 0 900 S
+23 2 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3042
+waiter~
+the waiter~
+A man now leads a quiet, peaceful life as a waiter is standing here.
+~
+This man was obviously a famous sorcerer in his younger days as you
+instantly recognize his face.
+~
+bno 0 600 S
+23 1 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3043
+waiter~
+the waiter~
+A waiter who seems to have reached contact with his God is standing here.
+~
+This waiter almost makes you feel like you should drop to your knees
+and begin to worship your God.  Naaah.
+~
+bno 0 600 S
+23 1 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3044
+waiter~
+the waiter~
+A waiter who knows where all his customers keep their money is standing here.
+~
+Hmmm... wonder where he got that coin he is playing with.
+~
+bno 0 600 S
+23 1 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3045
+waiter~
+the waiter~
+A waiter is here.
+~
+This guy looks like he could easily kill you while still carrying
+quite a few firebreathers.
+~
+bno 0 600 S
+23 1 2 6d10+390 1d8+12
+2000 80000
+8 8 1
+#3046
+filthy~
+Filthy~
+Filthy is standing here, eager to serve you a special drink.
+~
+Filthy looks real, ehm, dirty.  He likes to keep his customers happy,
+but do not mess with him or else he'll get upset.
+~
+belno d 600 S
+33 1 -10 1d1+30000 1d8+22
+2000 80000
+8 8 1
+#3059
+keeper peacekeeper~
+the Peacekeeper~
+A Peacekeeper is standing here, ready to jump in at the first sign of trouble.
+~
+He looks very strong and wise.  Looks like he doesn't answer to ANYONE.
+~
+aeglm d 1000 E
+17 3 0 5d6+225 3d3+13
+2500 30000
+8 8 1
+BareHandAttack: 10
+E
+#3060
+cityguard guard~
+the cityguard~
+A cityguard stands here.
+~
+A big, strong, helpful, trustworthy guard.
+~
+aglm d 1000 S
+10 10 1 1d12+123 1d8+5
+500 9000
+8 8 1
+#3061
+janitor~
+the janitor~
+A janitor is walking around, cleaning up.
+~
+What a tough job he has.
+~
+agl 0 800 S
+1 20 9 2d6+10 1d5+0
+34 100
+8 8 1
+#3062
+fido dog~
+the beastly fido~
+A beastly fido is mucking through the garbage looking for food here.
+~
+The fido is a small dog that has a foul smell and pieces of rotted meat
+hanging around his teeth.
+~
+afghq p -200 E
+0 20 10 1d6+4 1d4+0
+0 25
+8 8 1
+BareHandAttack: 4
+E
+#3063
+mercenary~
+the mercenary~
+A mercenary is waiting for a job here.
+~
+He looks pretty mean, and you imagine he'd do anything for money.
+~
+bl 0 -330 S
+5 15 5 2d6+60 1d6+1
+87 900
+8 8 1
+#3064
+drunk~
+the drunk~
+A singing, happy Drunk.
+~
+A drunk who seems to be too happy, and to carry too much money.
+~
+b 0 400 S
+2 19 8 2d6+22 1d6+0
+53 200
+8 8 1
+#3065
+beggar~
+the beggar~
+A beggar is here, asking for a few coins.
+~
+The beggar looks like she is fed up with life.
+~
+b 0 400 S
+1 20 9 2d6+10 1d5+0
+0 100
+8 8 2
+#3066
+odif yltsaeb~
+the odif yltsaeb~
+An odif yltsaeb is here, walking backwards.
+~
+The odif is a small god that has been reversed by some dog.
+~
+afghq p -200 E
+0 20 10 1d6+4 1d4+0
+0 25
+8 8 1
+BareHandAttack: 4
+E
+#3067
+cityguard guard~
+the cityguard~
+A cityguard is here, guarding the gate.
+~
+A big, strong, helpful, trustworthy guard.
+~
+abglm 0 1000 S
+10 10 1 1d12+123 1d8+5
+500 9000
+8 8 1
+#3068
+green gelatinous blob~
+the green gelatinous blob~
+An oozing green gelatinous blob is here, sucking in bits of debris.
+~
+A horrid looking thing; it is huge, greenish, and looks like the blob.
+~
+aeghlnopqr d 0 E
+20 0 0 1d11+325 3d6+5
+1000 40000
+8 8 0
+BareHandAttack: 6
+E
+#3089
+pet shop boy~
+the Pet Shop Boy~
+There is a Pet Shop Boy standing here cuddleing something furry in his hands.
+~
+As you look at him, he opens his hands to reveal a rat!
+~
+blno 0 1000 S
+10 10 1 1d1+30000 20d4+10
+500 9000
+8 8 1
+#3090
+kitten~
+the kitten~
+A small loyal kitten is here.
+~
+The kitten looks like a cute, little, fierce fighter.
+~
+bco 0 0 E
+1 20 9 1d6+11 1d4+0
+0 100
+8 8 0
+BareHandAttack: 8
+E
+#3091
+puppy~
+the puppy~
+A small loyal puppy is here.
+~
+The puppy looks like a cute, little, fierce fighter.
+~
+bco 0 0 E
+1 20 9 1d6+13 1d4+0
+0 125
+8 8 0
+BareHandAttack: 8
+E
+#3092
+beagle~
+the beagle~
+A small, quick, loyal beagle is here.
+~
+The beagle looks like a fierce fighter.
+~
+bco 0 0 E
+2 19 8 1d12+22 1d6+0
+0 200
+8 8 0
+BareHandAttack: 4
+E
+#3093
+rottweiler~
+the rottweiler~
+A large, loyal rottweiler is here.
+~
+The rottweiler looks like a strong, fierce fighter.
+~
+bco 0 0 E
+3 18 7 1d12+35 1d7+0
+0 800
+8 8 0
+BareHandAttack: 4
+E
+#3094
+wolf~
+the wolf~
+A large, trained wolf is here.
+~
+The wolf looks like a strong, fearless fighter.
+~
+bco 0 0 E
+4 17 6 1d12+47 1d8+0
+0 1600
+8 8 0
+BareHandAttack: 4
+E
+#3095
+cryogenicist cryo~
+the cryogenicist~
+The cryogenicist is here, playing with a canister of liquid nitrogen.
+~
+You notice a tired look in her face.  She looks like she isn't paid well
+enough to put up with any crap from mud players with attitudes.
+~
+ablno dfp 900 S
+33 0 -10 1d1+30000 2d8+32
+0 0
+8 8 2
+$

@@ -1,0 +1,154 @@
+#4000
+ring yellow green~
+a yellow and green ring~
+A ring is here, with yellow and green ornamentation.  It looks very old.~
+~
+9 dhq 3
+0 0 0 0
+1 50 20
+E
+ring yellow green~
+It feels heavy.
+~
+A
+1 -2
+#4001
+corpse goblin~
+a goblin's corpse~
+A halfway decayed corpse of a goblin is here, giving off a foul odor.~
+~
+15 0 1
+1 0 -1 0
+20 0 500
+#4002
+coins~
+some coins~
+A small pile of coins is on the ground.~
+~
+20 0 1
+500 0 0 0
+0 0 0
+#4050
+potion purple~
+a purple potion~
+A purple potion is here.~
+~
+10 0 16385
+17 14 36 33
+1 35500 2000
+E
+potion purple~
+It looks rather strange!
+~
+#4051
+helmet metal~
+a metal helmet~
+A metal helmet in here.~
+~
+9 g 17
+-5 0 0 0
+4 3000 100
+E
+helmet metal~
+It looks somehow magical!.
+~
+A
+24 -2
+A
+23 -2
+#4052
+mushroom~
+a mushroom~
+A small mushroom is here.~
+~
+19 0 16385
+2 0 0 1
+1 9 3
+E
+mushroom~
+Let's put it this way - I wouldn't eat it!!
+~
+#4053
+dirk~
+a thieves' dirk~
+A beautifully crafted dirk is lying here.~
+~
+5 np 8193
+0 2 4 11
+2 850 500
+E
+dirk~
+It is a medium sized, beautifully crafted dirk made from some greyish alloy.
+Its blade is double-edged and very thin... this looks like a good thieves'
+weapon.
+~
+A
+18 1
+A
+19 1
+#4100
+blade black demon~
+a black demon blade~
+A black demon blade is here.~
+~
+5 mjl 8193 
+0 3 4 11
+8 10000 800
+E
+blade black demon~
+You'll become as evil as the weapon, if you use it as you sense the forces
+of evil controlling the weapon...
+~
+#4101
+gloves swordmans~
+a pair of swordsmans' gloves~
+A pair of finely crafted gloves are lying on the ground here.~
+~
+9 j 129
+0 0 0 0
+1 3500 800
+E
+gloves swordsmans~
+They look like the right kind of equipment to use when fighting.
+~
+A
+18 2
+A
+19 1
+#4102
+scroll ysafg~
+a scroll which reads 'ysafg'~
+A scroll which reads 'ysafg', it looks very fragile and quite old.~
+~
+2 0 1
+1 44 -1 -1
+1 1500 10
+E
+scroll ysafg~
+It looks informative.
+~
+#4103
+slime mould green~
+a green slime mould~
+A green slime mould is here.  Stinks like you wouldn't believe!~
+~
+19 0 1
+24 0 0 0
+1 20 8
+E
+smile mould~
+It wasn't meant to be food -- at least, certainly not for humans.
+~
+#4104
+slime mould green~
+a green slime mould~
+A green slime mould is here.  Stinks like you wouldn't believe!~
+~
+19 0 1
+24 0 0 1
+1 20 8
+E
+smile mould~
+It wasn't meant to be food -- at least, certainly not for humans.
+~
+$

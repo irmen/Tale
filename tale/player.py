@@ -161,6 +161,7 @@ class Player(base.Living, pubsub.Listener):
 
     def store_input_line(self, cmd):
         """store a line of entered text in the input command buffer"""
+        cmd = cmd.strip()
         self._input.put(cmd)
         if self.transcript:
             self.transcript.write("\n\n>> %s\n" % cmd)
@@ -381,7 +382,7 @@ class MudAccounts(object):          # @todo unit tests
 
     def __shelve_db_opener(self):
         """If not specified, a simple shelve database is used in the user's data directry"""
-        dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
+        dbpath = mud_context.driver.user_resources.validate_path(util.storyname_to_filename(mud_context.config.name) + ".useraccounts.shelve")
         try:
             return closing(shelve.open(dbpath, flag='w'))
         except dbm.error:
@@ -430,23 +431,28 @@ class MudAccounts(object):          # @todo unit tests
 
     @staticmethod
     def accept_name(name):
-        if name.strip() == name and len(name) >= 3:
+        if re.match("[a-z]{3,16}$", name):
+            if name in MudAccounts.blocked_names:
+                raise ValueError("That name is not available.")
             return name
-        raise ValueError("Name should be minimum length 3.")
+        raise ValueError("Name should be all lowercase letters [a-z] and length 3 to 16.")
 
     @staticmethod
     def accept_email(email):
         user, _, domain = email.partition("@")
-        if user and domain:
+        if user and domain and user.strip() == user and domain.strip() == domain:
             return email
         raise ValueError("Invalid email address.")
 
     def create(self, name, password, email, gender, race, privileges=[]):
         name = name.strip()
+        email = email.strip()
+        gender = gender.strip()
+        race = race.strip()
         self.accept_name(name)
         with self.db_lock, self.open_db() as db:
             if name in db:
-                raise ValueError("Name is already taken.")
+                raise ValueError("That name is not available.")
             self.accept_password(password)
             self.accept_email(email)
             pwhash, salt = self.__pwhash(password)
@@ -472,6 +478,7 @@ class MudAccounts(object):          # @todo unit tests
                 pwhash, salt = self.__pwhash(new_password)
                 account["pw_hash"] = pwhash
                 account["pw_salt"] = salt
+            new_email = new_email.strip()
             if new_email:
                 self.accept_email(new_email)
                 account["email"] = new_email
@@ -485,3 +492,56 @@ class MudAccounts(object):          # @todo unit tests
             account = db[name]
             account["privileges"] = set(privileges)
             db[name] = account
+
+    blocked_names = """irmen
+me
+you
+us
+them
+they
+their
+theirs
+he
+him
+his
+she
+her
+hers
+it
+its
+yes
+no
+god
+allah
+jesus
+jezus
+neuk
+fuck
+cunt
+cock
+prick
+pik
+lul
+kut
+dick
+pussy
+twat
+cum
+milf
+anal
+sex
+ass
+neger
+nigger
+nigga
+jew
+muslim
+moslim
+chink
+cancer
+kanker
+aids
+bitch
+motherfucker
+fucker
+""".split()

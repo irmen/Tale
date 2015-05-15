@@ -1,0 +1,63 @@
+#31
+Southern part of Midgaard~
+3100 3299 40 2
+*
+* Cityguards from zone 30
+M 0 3060 20 3111        Cityguard
+E 1 3022 100 16                 Long Sword
+G 1 3105 2                      Key To HQ
+M 0 3060 20 3111        Cityguard
+E 1 3022 100 16                 Long Sword
+M 0 3060 20 3111        Cityguard
+E 1 3022 100 16                 Long Sword
+M 0 3060 20 3111        Cityguard
+E 1 3022 100 16                 Long Sword
+M 0 3068 4 3106         Green Blob
+* Mobiles
+M 0 3100 1 3106         Maid
+G 1 3100 500                    Cup Of Tea
+G 1 3101 500                    Cup Of Coffee
+G 1 3102 500                    Cup Of Water
+M 0 3101 1 3106         Sexton
+G 1 3106 2                      Key To Graveyard
+M 0 3102 1 3110         Chief Guard
+G 1 3107 2                      Key To The Desk
+M 0 3103 4 3110         Mad Guard 
+M 1 3103 4 3110         Mad Guard 
+M 1 3103 4 3110         Mad Guard 
+M 1 3103 4 3110         Mad Guard 
+M 0 3104 1 3137         Secretary
+M 0 3105 1 3138         Mayor
+E 1 3112 1 17                   City Key
+M 0 3106 1 3120         Town Crier
+M 0 3120 1 3114         Swan
+M 0 3121 1 3114         Duckling
+M 0 3122 1 3109         Sparrow
+M 0 3123 2 3113         Duck
+M 0 3123 2 3115         Duck
+* Objects
+O 0 3109 1 3110         Desk
+P 1 3108 1 3109                 Key To Safe
+O 0 3110 1 3110         Safe
+P 1 3115 1 3110                 Money
+R 0 3101 3111
+O 0 3111 3 3101         Bench
+R 0 3102 3111
+O 0 3111 3 3102         Bench
+R 0 3103 3111
+O 0 3111 3 3103         Bench
+R 0 3141 3113
+O 0 3113 1 3141         Fountain
+O 0 3114 1 3141         20 Coins
+O 0 3116 1 3155         Candlestick
+O 0 3117 1 3124         Elm Tree
+* Doors
+D 0 3111 3 2            Cityguard HQ
+D 0 3110 1 2
+D 0 3129 2 2            Graveyard
+D 0 3150 0 2
+D 0 3154 2 1            Chapel
+D 0 3155 0 1
+*
+S
+$

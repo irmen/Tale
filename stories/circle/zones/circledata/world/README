@@ -1,0 +1,40 @@
+CircleMUD - World Files
+
+[
+  These files were obtained from CircleMUD web site:
+  http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/lib/world/
+]
+
+   Contained in this lovely archive is the present shape of the world
+for Circle.  Everything should be in the form of ASCII flags for easy
+addition and removal of flags.  All of the shop files are in the
+CircleMUD style (and they make good examples since there is a bit of
+everything, from wandering shops through to shops that dislike certain
+alignments or classes).
+
+   Feedback on the world is more than welcome.  This includes
+listing things that people like and things that people do not
+like.  Why do you like it or dislike it?
+
+   The zone files have been formatted into a consistent format
+with comments and ordering.  This allows readers of the files to
+have a much quicker grasp of what is going on in the file.  All
+of the world files have been indented with three (3) characters
+to begin all paragraphs.  This makes the overall format of the
+world much more similar.
+
+   If you are comparing the world to the CircleMUD 2.x world, you
+will notice that some areas have been removed, others have been
+added, and some have been shifted about a little bit.
+
+   Also, please note the 'zone.lst' file in this directory, which
+shows all of the zone numbers that are currently in use, and what
+is using them.  Finally, full credit should be in all of the zone
+files (please leave it there in case you ever release your mud code
+and world), and can also be found in 'info.hlp' under 'AREAS ZONES'
+which gives a current list of zones used in CircleMUD.  Please ensure
+that all credits in there remain, and if you add new areas, please
+credit them properly.
+
+Furry/Alex Fletcher
+<furry@circlemud.org>

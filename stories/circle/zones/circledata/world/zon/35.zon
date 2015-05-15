@@ -1,0 +1,57 @@
+#35
+Miden'Nir~
+3500 3599 60 2
+*
+* Created by Copper II DikuMUD
+*
+* Rewritten for MercMUD by VampLestat
+*
+* Modified and edited for CircleMUD by Furry
+*
+* Mobiles
+M 0 3500 3 3521         Wyvern
+M 0 3500 3 3521         Wyvern
+M 0 3500 3 3521         Wyvern
+M 0 3501 10 3508        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3509        Goblin 
+E 1 3502 10 16                  Club
+M 0 3501 10 3509        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3512        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3512        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3512        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3514        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3516        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3518        Goblin
+E 1 3502 10 16                  Club
+M 0 3501 10 3556        Goblin
+E 1 3502 10 16                  Club
+M 0 3502 4 3551         Lieutenant
+E 1 3500 10 16                  Small Sword
+M 0 3502 4 3556         Lieutenant
+E 1 3500 10 16                  Small Sword
+M 0 3503 1 3556         Leader
+E 1 3504 10 16                  Small Spear
+M 0 3504 1 3575         Small Boy
+E 1 3508 25 17                  Gyroscope
+M 0 3505 1 3576         Innkeeper
+M 0 3506 1 3577         Bard
+E 1 3502 2 16                   Fine Long Sword
+M 0 3507 4 3584         Horseman
+E 1 3503 8 5                    Leather Jacket
+M 0 3507 4 3584         Horseman
+E 1 3503 8 5                    Leather Jacket
+* Objects
+O 0 3505 2 3521         Mutilated Corpse
+O 0 3506 1 3521         Mutilated Corpse
+P 1 3507 1 3506                 Ornate Dagger
+O 0 3505 2 3521         Mutilated Corpse
+*
+S
+$

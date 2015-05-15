@@ -1,0 +1,108 @@
+#33
+The Three Of Swords~
+3300 3399 30 2
+*
+* Created by Amanda Eterniale & Builder_5 of C.A.W.
+* Official C.A.W. site:  http://qsilver.queensu.ca/~fletchra/Caw/
+* Mail Address: fletchra@qsilver.queensu.ca
+*
+* Mobiles
+M 0 3300 2 3346         Farmer
+M 0 3300 2 3353         Farmer
+M 0 3301 1 3345         Storekeeper
+G 1 3032 1000                   Bag
+G 1 3037 1000                   Candle
+G 1 3038 1000                   Nail
+G 1 3039 1000                   Pot
+M 0 3302 1 3347         Cowgirl
+M 0 3303 4 3347         Horse
+M 0 3303 4 3347         Horse
+M 0 3303 4 3347         Horse
+M 0 3303 4 3347         Horse
+M 0 3304 1 3350         Farmer's Wife
+G 1 3300 1000                   Orange
+G 1 3301 1000                   Bale Of Wheat
+G 1 3308 1000                   Apple
+G 1 3309 1000                   Loaf Of Bread
+G 1 3310 1000                   Melon
+M 0 3305 1 3375         Aglandiir
+G 1 3313 5                      Short Sword
+O 1 3302 5 3375         Zither
+O 1 3303 5 3375         Barrel Of Perfume
+O 1 3304 5 3375         Statue
+O 1 3305 25 3375        Halberd
+O 1 3306 25 3375        Potion Of Protection
+O 1 3307 1 3375         Dragon's Crown
+M 0 3306 3 3368         Cyclops
+M 0 3306 3 3368         Cyclops
+M 0 3306 3 3368         Cyclops
+M 0 3307 1 3357         Salle
+E 1 3318 25 5                   Leather Vest
+E 1 3312 20 16                  Long Sword
+M 0 3308 1 3330         Duwick
+E 1 3311 10 16                  Knife
+M 0 3309 1 3358         Receptionist
+M 0 3310 1 3356         Innkeeper
+M 0 3311 2 3349         Hunter
+E 1 3317 1000 16                Hunting Bow
+M 0 3311 2 3355         Hunter
+E 1 3317 1000 16                Hunting Bow
+M 0 3312 1 3357         Waiter
+M 0 3313 1 3357         Waitress
+M 0 3314 1 3357         Bartender
+G 1 3319 1000                   Glass Of Beer
+G 1 3320 1000                   Glass Of Mead
+G 1 3321 1000                   Shot Of Whiskey
+M 0 3315 9 3319         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3323         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3325         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3327         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3332         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3336         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3339         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3321         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3315 9 3327         Bandit
+E 1 3315 1000 16                Scimitar
+M 0 3316 5 3329         Bandit Guard
+E 1 3315 1000 16                Scimitar
+M 0 3316 5 3329         Bandit Guard
+E 1 3315 1000 16                Scimitar
+M 0 3316 5 3340         Bandit Guard
+E 1 3315 1000 16                Scimitar
+M 0 3316 5 3340         Bandit Guard
+E 1 3315 1000 16                Scimitar
+M 0 3316 5 3317         Bandit Guard
+E 1 3315 1000 16                Scimitar
+M 0 3317 2 3340         Slave
+M 0 3317 2 3340         Slave
+M 0 3318 2 3357         Farmer
+M 0 3318 2 3357         Farmer
+M 0 3319 1 3357         Hunter
+E 1 3317 1000 16                Hunting Bow
+* Objects
+O 0 3314 1 3304         Corpse
+O 0 3315 2 3323         Scimitar
+O 0 3315 2 3323         Scimitar
+O 0 3316 3 3330         Crate
+O 0 3316 3 3330         Crate
+O 0 3316 3 3330         Crate
+* Doors
+D 0 3329 0 1
+D 0 3330 2 1
+D 0 3351 1 1
+D 0 3352 3 1
+D 0 3353 2 1
+D 0 3354 0 1
+D 0 3355 0 1
+D 0 3356 2 1
+S
+$
+

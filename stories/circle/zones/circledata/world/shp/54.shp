@@ -1,0 +1,510 @@
+CircleMUD v3.0 Shop File~
+#5405~
+5467
+5468
+5469
+-1
+1.1
+1.0
+LIQ CONTAINER
+-1
+%s I don't know how to make one of those!~
+%s I don't *buy* drinks... we sell 'em!~
+%s I don't *buy* drinks... we sell 'em!~
+%s I don't *buy* drinks... we sell 'em!~
+%s I don't give 'em away free, you know!~
+%s That's %d gold.~
+%s I don't *buy* drinks... we sell 'em!~
+1
+2
+5405
+0
+5402
+-1
+0
+28
+0
+0
+#5410~
+5440
+5441
+5442
+5443
+5445
+5491
+-1
+1.1
+1.0
+-1
+%s Haven't got that on storage - try list!~
+%s I don't buy!~
+%s I don't buy!~
+%s I don't buy!~
+%s If you have no money, you'll have to go!~
+%s That'll be %d coins.~
+%s Oops - %d a minor bug - please report!~
+0
+2
+5410
+0
+5535
+-1
+0
+28
+0
+0
+#5411~
+5434
+5435
+5436
+5437
+5438
+5439
+-1
+1.5
+0.4
+LIGHT
+CONTAINER
+FOOD
+TRASH
+TREASURE
+-1
+%s Haven't got that on storage - try list!~
+%s You don't seem to have that.~
+%s I don't buy THAT... Try another shop.~
+%s I can't afford such a treasure.~
+%s You can't afford it!~
+%s That'll be %d coins, please.~
+%s You'll get %d coins for it!~
+0
+2
+5411
+0
+5528
+-1
+0
+28
+0
+0
+#5413~
+5446
+5447
+5448
+5449
+5450
+5451
+5452
+5453
+5454
+5455
+-1
+1.05
+0.15
+-1
+%s Sorry, I haven't got exactly that item.~
+%s You don't seem to have that.~
+%s I don't buy such items.~
+%s That is too expensive for me!~
+%s You can't afford it!~
+%s That'll be %d coins, please.~
+%s You'll get %d coins for it!~
+0
+2
+5413
+0
+5514
+-1
+0
+28
+0
+0
+#5414~
+5456
+5457
+5458
+5459
+5460
+-1
+1.3
+1.0
+-1
+%s I've never heard of that... what kind of vegetable is it?~
+%s I don't buy.~
+%s I don't buy.~
+%s I don't buy.~
+%s If you come back with more money, I may consider selling it.~
+%s That's %d coins... can I wrap it up for you?~
+%s I don't buy.~
+0
+2
+5414
+0
+5515
+-1
+0
+28
+0
+0
+#5415~
+5461
+5462
+5463
+-1
+1.1
+1.0
+FOOD
+-1
+%s I didn't kill any of those this season, sorry.~
+%s I don't buy that.~
+%s I don't buy that.~
+%s I don't buy that when I don't have the money.~
+%s That costs money.  Something you don't have... sorry.~
+%s That costs %d coins.~
+%s Here are %d coins, thank you for your business.~
+0
+2
+5415
+0
+5522
+-1
+0
+28
+0
+0
+#5416~
+5415
+5416
+5417
+5418
+5419
+5420
+5421
+-1
+1.3
+0.5
+ARMOR
+-1
+%s Haven't got that on storage - try list!~
+%s You don't seem to have that.~
+%s I only buy armours.. Go away!~
+%s That is too expensive for me - Try a wizard!~
+%s You can't afford it!~
+%s That'll be %d coins, please.~
+%s You'll get %d coins for it!~
+2
+2
+5416
+40
+5529
+-1
+0
+28
+0
+0
+#5417~
+5403
+5404
+5405
+5406
+5407
+5408
+5409
+5410
+5411
+5412
+5413
+5414
+-1
+1.3
+0.4
+WEAPON
+-1
+%s I haven't got that kind of a weapon~
+%s You don't carry that weapon~
+%s I only buy weapons.~
+%s I can't afford such a great weapon~
+%s Sorry, but NO CREDIT~
+%s That just costs %d coins.~
+%s Here is %d coins for that.~
+0
+2
+5417
+0
+5536
+-1
+0
+28
+0
+0
+#5418~
+-1
+2.0
+0.5
+FOOD
+-1
+%s Sorry buddy, I don't sell that.~
+%s Why don't you sell something you own?~
+%s I don't buy such items!~
+%s That is much to valuable for you to let go!~
+%s No money.  Off with ya then!~
+%s That will be %d gold.~
+%s Here is %d gold for that.~
+0
+2
+5418
+0
+5432
+-1
+6
+12
+13
+20
+#5433~
+-1
+1.1
+1.0
+SCROLL
+WAND
+STAFF
+TREASURE
+-1
+%s Don't have one, but I think I might be able to find one...~
+%s You have one?  Really?  Let me see!~
+%s I'm not interested.  Anything else?~
+%s Too rich for my blood!~
+%s Perhaps you should go visit the bank first...~
+%s That's just %d coins, cash in advance.~
+%s I'll take that for %d coins, thank you!~
+2
+2
+5433
+8
+5403
+5404
+5405
+5406
+5407
+5408
+5409
+5410
+5414
+5415
+5416
+5417
+5418
+5419
+5420
+5421
+5422
+5424
+5425
+5426
+5427
+5428
+5429
+5430
+5434
+5435
+5436
+5437
+5438
+5439
+5440
+5441
+5442
+5444
+5445
+5446
+5447
+5448
+5449
+5450
+5451
+5452
+5453
+5454
+5455
+5456
+5460
+5461
+5462
+5463
+5464
+-1
+0
+28
+0
+0
+#5465~
+3060
+3061
+-1
+1.2
+0.9
+BOAT
+-1
+%s Sorry pal, I have not got that kind of ship.~
+%s Ok, but let me see it first.~
+%s I only trade ships.~
+%s I can't afford such a nice ship.~
+%s This ship is too expensive for you.~
+%s Here is your ship, I'll take %d gold coins.~
+%s What a fine deal, you get %d gold coins.~
+0
+2
+5465
+0
+5542
+-1
+6
+22
+0
+0
+#5466~
+5487
+5488
+5489
+-1
+1.2
+0.5
+ARMOR
+WEAPON
+-1
+%s Havn't got that in storage, try LIST!~
+%s You can't sell what you dont HAVE!~
+%s Sorry, I'm not a fence.~
+%s I'd love to buy it, I just can't spare the coinage~
+%s Bah, come back when you can pay!~
+%s That'll be %d coins -- thank you.~
+%s I'll give ya %d coins for that!~
+0
+2
+5466
+0
+5544
+-1
+0
+28
+0
+0
+#5479~
+5470
+5471
+5472
+5473
+5474
+-1
+1.2
+1.0
+POTION
+-1
+%s We don't have any of those, Sugar.~
+%s Are you sure you have one, handsome?~
+%s I don't buy those, darling.~
+%s I'm a little strapped -- how about a gift?~
+%s Perhaps later, when you've more cash, honey.~
+%s That's %d coins, love.~
+%s Here's %d coins, friend.~
+0
+2
+5479
+0
+5523
+-1
+7
+17
+0
+0
+#5480~
+5478
+5479
+5480
+5481
+5482
+-1
+1.8
+0.5
+WORN
+OTHER
+WAND
+STAFF
+-1
+%s Sorry buddy, I don't sell that.~
+%s Why don't you sell something you own?~
+%s I don't buy that kind of crap!~
+%s That is much to valuable for you to let go!~
+%s No money.  I killed my mother for less.~
+%s That will be %d gold.~
+%s Here is %d gold for that.~
+0
+2
+5480
+0
+5524
+-1
+0
+12
+13
+20
+#5483~
+5475
+5476
+5477
+-1
+1.3
+1.0
+-1
+%s It's very noisy in here, what did you say you wanted to buy?~
+%s I don't buy!~
+%s I don't buy!~
+%s I don't buy!~
+%s Are you drunk or what ?? - NO CREDIT!~
+%s That'll be - say %d coins.~
+%s Oops - %d a minor bug - please report!~
+0
+2
+5483
+0
+5538
+-1
+0
+28
+0
+0
+#5484~
+5422
+5423
+5524
+5525
+5526
+5527
+5528
+5529
+5530
+5531
+5532
+5533
+-1
+1.1
+0.5
+ARMOR
+-1
+%s Havn't got that in storage, try LIST!~
+%s You can't sell what you dont HAVE!~
+%s Sorry, I'm not a fence.~
+%s I'd love to buy it, I just can't spare the coinage~
+%s Bah, come back when you can pay!~
+%s That'll be %d coins -- thank you.~
+%s I'll give ya %d coins for that!~
+0
+2
+5484
+0
+5537
+-1
+0
+28
+0
+0
+$~
+

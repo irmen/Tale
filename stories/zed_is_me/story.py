@@ -18,8 +18,8 @@ class Story(object):
         name="Zed is me",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
-        version="0.6",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="2.0",            # tale library required to run the game
+        version="1.0",                  # arbitrary but is used to check savegames for compatibility
+        requires_tale="2.1",            # tale library required to run the game
         supported_modes={"if"},         # what driver modes (if/mud) are supported by this story
         player_name="julie",            # set a name to create a prebuilt player, None to use the character builder
         player_gender="f",              # m/f/n
@@ -36,7 +36,9 @@ class Story(object):
         startlocation_wizard="house.livingroom",
         savegames_enabled=True,
         show_exits_in_look=True,
-        license_file=None
+        license_file=None,
+        mud_host=None,
+        mud_port=None
     )
 
     driver = None     # will be set by driver init()

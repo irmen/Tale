@@ -1,0 +1,100 @@
+#36
+The Chessboard of Midgaard~
+3600 3699 10 1
+*
+* Created for SillyMud by Exxon
+*
+* Mobiles
+M 0 3600 8 3609         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3610         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3611         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3612         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3613         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3614         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3615         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3600 8 3616         Black Pawn
+E 1 3600 8 5                    Black Pawn Armour
+E 1 3602 8 16                   Black Pawn Sword
+M 0 3601 8 3649         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3650         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3651         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3652         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3653         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3654         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3655         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3601 8 3656         White Pawn
+E 1 3601 8 5                    White Pawn Armour
+E 1 3603 8 16                   White Pawn Sword
+M 0 3602 2 3601         Black Rook
+E 1 3604 2 5                    Black Rook Armour
+M 0 3602 2 3608         Black Rook
+E 1 3604 2 5                    Black Rook Armour
+M 0 3603 2 3657         White Rook
+E 1 3605 2 5                    White Rook Armour
+M 0 3603 2 3664         White Rook
+E 1 3605 2 5                    White Rook Armour
+M 0 3604 2 3602         Black Knight
+E 1 3606 2 16                   Black Knight Lance
+M 0 3604 2 3607         Black Knight
+E 1 3606 2 16                   Black Knight Lance
+M 0 3605 2 3658         White Knight
+E 1 3607 2 16                   White Knight Lance
+M 0 3605 2 3663         White Knight
+E 1 3607 2 16                   White Knight Lance
+M 0 3606 2 3603         Black Bishop
+E 1 3608 2 17                   Black Bishop Staff
+M 0 3606 2 3606         Black Bishop
+E 1 3608 2 17                   Black Bishop Staff
+M 0 3607 2 3659         White Bishop
+E 1 3609 2 17                   White Bishop Staff
+M 0 3607 2 3662         White Bishop
+E 1 3609 2 17                   White Bishop Staff
+M 0 3608 1 3604         Black Queen
+E 1 3610 1 6                    Black Queen Crown
+M 0 3609 1 3660         White Queen
+E 1 3611 1 6                    White Queen Crown
+M 0 3610 1 3605         Black King
+E 1 3612 1 17                   Black King Sceptre
+G 1 3614 1                      Black Treasury Key
+M 0 3611 1 3661         White King
+E 1 3613 1 17                   White King Sceptre
+G 1 3615 1                      White Treasury Key
+* Objects
+O 0 3616 1 3665         Black Treasury Gold
+O 0 3617 1 3666         White Treasury Gold
+* Doors
+D 0 3604 5 2            Black Treasury Door
+D 0 3665 4 2
+D 0 3660 5 2            White Treasury Door
+D 0 3666 4 2
+*
+S
+$

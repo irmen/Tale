@@ -1,0 +1,177 @@
+#3600
+armour black pawn~
+some Black Pawn Armour~
+A pile of black armour is here.~
+~
+9 j 9
+1 0 0 0
+13 300 1
+#3601
+armour white pawn~
+some White Pawn Armour~
+A pile of white armour is here.~
+~
+9 k 9
+1 0 0 0
+13 300 1
+#3602
+sword black pawn~
+a Black Pawn's Sword~
+The sword of a Black Pawn lies here.~
+~
+5 j 8193
+0 3 4 3
+10 100 1
+#3603
+sword white pawn~
+a White Pawn's Sword~
+The sword of a White Pawn lies here.~
+~
+5 k 8193
+0 3 4 3
+10 100 1
+#3604
+armour black rook~
+some Black Rook Armour~
+Some armour made from the remains of a black rook lies heaped on the floor.~
+~
+9 ahj 9
+2 0 0 0
+60 17000 5
+A
+17  2
+A
+5  1
+#3605
+armour white rook~
+some White Rook Armour~
+Some armour made from the remains of a white rook lies heaped on the floor.~
+~
+9 agk 9
+2 0 0 0
+60 17000 5
+A
+17  2
+A
+5  1
+#3606
+lance black knight~
+the Lance of the Black Knight~
+The Lance of the Black Knight lies here, waiting to rust.~
+~
+5 bgj 8193
+0 3 6 6
+18 10000 3
+A
+19  2
+A
+23  5
+#3607
+lance white knight~
+the Lance of the White Knight~
+The Lance of the White Knight lies here, waiting to rust.~
+~
+5 bgk 8193
+0 3 6 6
+18 10000 3
+A
+19  2
+A
+23  5
+#3608
+staff black bishop~
+the Staff of the Black Bishop~
+The Black Bishop's Staff is lying here.~
+~
+4 agj 16385
+20 5 5 36
+3 20000 6
+#3609
+staff white bishop~
+the Staff of the White Bishop~
+The White Bishop's Staff is lying here.~
+~
+4 agk 16385
+20 5 5 36
+3 20000 6
+#3610
+crown black queen~
+the Crown of the Black Queen~
+The Crown of the Black Queen lies here, looking neglected.~
+~
+9 bgj 17
+2 0 0 0
+4 3000 5
+A
+3  1
+A
+4  1
+#3611
+crown white queen~
+the Crown of the White Queen~
+The Crown of the White Queen lies here, looking neglected.~
+~
+9 bgk 17
+2 0 0 0
+4 3000 5
+A
+3  1
+A
+4  1
+#3612
+sceptre black king~
+the Black King's Sceptre~
+The Sceptre of the Black King lies here, collecting dust.~
+~
+8 bfgj 16385
+0 0 0 0
+200 85000 1
+A
+1  1
+A
+18 1
+#3613
+sceptre white king~
+the White King's Sceptre~
+The Sceptre of the White King lies here, collecting dust.~
+~
+8 bfgk 16385
+0 0 0 0
+300 85000 10
+A
+1  1
+A
+18 1
+#3614
+key black treasury~
+The Key to the Black Treasury~
+There is a sinister black key lying here.~
+~
+18 cdfq 16385
+3614 0 0 0
+1 1000 300
+#3615
+key white treasury~
+the Key to the White Treasury~
+There is a bright white key lying here.~
+~
+18 cdfq 16385
+3615 0 0 0
+1 1000 300
+#3616
+coins gold black royal treasure~
+the Black Royal Treasure~
+There are a LOT of coins here.~
+~
+20 0 1
+10000 0 0 0
+10 10000 0
+#3617
+coins gold white royal treasure~
+the White Royal Treasure~
+There are a LOT of coins here.~
+~
+20 0 1
+10000 0 0 0
+10 10000 0
+$

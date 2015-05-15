@@ -1,0 +1,238 @@
+#6000
+john lumberjack~
+John the Lumberjack~
+John the Lumberjack is here, looking for some trees to chop down.
+~
+He is six feet tall and looks quite strong, muscles bulging under his heavy,
+chequered shirt.  His features are worn with hard work and his expression is
+one of a peaceful man leading a simple life.
+~
+cglm f 370 S
+5 15 6 1d12+60 1d4+3
+100 1050
+8 8 1
+#6001
+rabbit small~
+the rabbit~
+A small rabbit is foraging in the bushes here.
+~
+It is a small, furry creature with long ears and big feet.
+~
+g 0 0 S
+0 20 6 1d4+1 1d4+0
+0 60
+8 8 0
+#6002
+bear brown~
+the brown bear~
+A big, brown, angry-looking bear is here.
+~
+The bear is a big, brown, furry animal with very large claws and very sharp
+teeth.  It doesn't resemble those cute little dolls from toy shops at all.
+~
+fg 0 -50 S
+8 13 3 1d12+98 2d6+2
+0 4000
+4 8 0
+#6003
+rabbit ferocious~
+the ferocious rabbit~
+A ferocious rabbit is here, glaring hungrily at you.
+~
+This small, furry creature with long ears and big feet has been attacked
+by the dreaded rabbit rabies, a horrible disease that turns helpless and
+innocent rabbits into ferocious and bloodthirsty monsters.
+~
+fg 0 -150 S
+3 17 6 1d4+26 1d8+0
+0 350
+4 8 0
+#6004
+deer fallow~
+the fallow deer~
+A fallow deer is grazing peacefully here.
+~
+She is a graceful creature on long, slender legs, and with large, brown eyes
+looking back at you with an air of watchful interest.
+~
+gh d 350 S
+2 19 5 2d8+8 1d6+0
+0 230
+8 8 2
+#6005
+fox brown~
+the brown fox~
+A brown fox is stalking rabbits through the underbrush here.
+~
+It is a large fox with beautiful, red-brown fur and a long, thick bushy tail.
+~
+g 0 -50 S
+2 18 6 1d4+18 1d6+0
+0 225
+8 8 0
+#6006
+bird large~
+the bird~
+A large bird with a broken wing has been cornered here.
+~
+The bird isn't going to live much longer, by the looks of it.
+~
+b 0 0 S
+0 17 10 2d3+1 1d2+1
+0 25
+8 8 0
+#6007
+bobcat cat~
+the bobcat~
+A medium sized bobcat is stalking a bird here.
+~
+The bobcat has sharp claws and teeth, and will probably eat you instead of
+the bird if you give it the chance.
+~
+bf dk -150 S
+5 15 5 1d12+60 2d4+3
+0 1100
+8 8 0
+#6008
+sparrow~
+the sparrow~
+A sparrow is flapping around by the ground.
+~
+The sparrow looks like it is enjoying life.
+~
+g 0 200 S
+0 20 9 3d3+1 1d4+0
+0 25
+8 8 0
+#6009
+robin~
+the robin~
+A robin is hopping around looking for bugs to eat.
+~
+The robin looks quite intent on finding a bug or worm to eat.
+~
+g 0 200 S
+0 20 9 3d3+1 1d4+0
+0 25
+8 8 0
+#6010
+squirrel~
+the squirrel~
+A squirrel is here seeking refuge in its nest.
+~
+It peers out of its nest at you anxiously, seeming to plead silently with
+you to leave it alone.
+~
+b st 200 S
+1 20 8 1d7+9 1d5+0
+0 120
+8 8 0
+#6011
+badger~
+the sleepy badger~
+A furry brown badger is curled up under a log here.
+~
+The badger is slowly awakening and peering up at you from its burrow. You
+know that it won't be moving this slow for long.  Its sharp claws and teeth
+catch your attention when you consider killing it.
+~
+b t 50 S
+4 17 5 1d5+48 2d3+2
+0 650
+8 8 0
+#6012
+grey squirrel~
+the grey squirrel~
+A grey squirrel with a bushy tail is foraging for nuts here.
+~
+This happy creature seems to pay you no heed as it goes about its search for
+nuts among the leaves and twigs on the ground here.
+~
+g s 150 S
+2 19 8 1d12+22 1d6+0
+0 200
+8 8 0
+#6013
+chipmunk~
+the small chipmunk~
+A small brown-red chipmunk dashes from tree to tree here.
+~
+The absolute zenith of hyperactivity, this small rodent seems to never tire
+of running up, down, and around the trees in this area.  If you could ever
+catch it, you imagine it would make an easy meal.
+~
+g s 170 S
+0 20 5 2d5+3 1d4+0
+0 40
+8 8 0
+#6014
+crow black bird~
+the large black crow~
+A large black bird flits about here, picking at bits of carrion.
+~
+The bird eyes you warily, but continues with its meal.
+~
+bch 0 -20 S
+2 19 8 1d12+22 1d5+1
+3 200
+8 8 0
+#6015
+grotesque vulture~
+the grotesque vulture~
+A grotesque vulture covered in blood and gore is here feeding madly.
+~
+It sickens you to even look at this foul bird.  Bits of dried gore stick to
+its beak, and unidentifiable organs hang from its talons and feathers.  
+It sees you and attacks, protecting its horrible feast!
+~
+bcf dhk -700 S
+6 15 4 1d12+68 2d3+2
+14 1750
+8 8 0
+#6016
+buck deer~
+the young buck~
+A young 5-point buck is drinking from the lake here.
+~
+This young male deer is drinking from the edge of the lake and watching you
+warily.  His antlers are not full size yet, and will no doubt be quite 
+impressive in a few years.
+~
+bg d 350 S
+4 17 4 1d12+48 1d5+3
+0 750
+8 8 1
+#6017
+fish~
+the fish~
+A fish is swimming about here.
+~
+The fish looks about the right size for a meal.
+~
+b g 100 S
+0 20 10 2d5+0 1d3+0
+0 30
+8 8 0
+#6018
+duckling~
+the duckling~
+A duckling is swimming around in the pond.
+~
+The duckling is adorable, it looks most of all like a tiny furball.
+~
+b 0 1000 S
+0 20 10 1d1+0 1d1+0
+0 1
+8 8 0
+#6019 
+duck~
+the duck~
+A duck is here, quacking happily.
+~
+The duck is quite fat.  It looks like it is enjoying life.
+~
+g 0 1000 S
+1 20 10 2d6+5 1d4+0
+0 75
+8 8 0
+$

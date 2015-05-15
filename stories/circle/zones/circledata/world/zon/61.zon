@@ -1,0 +1,62 @@
+#61
+Haon-Dor, Dark Forest~
+6100 6199 30 2
+* Mobiles
+M 0 6100 2 6116         Vicious Warg
+M 0 6100 2 6116         Vicious Warg
+M 0 6101 2 6127         Ferocious Warg
+M 0 6101 2 6127         Ferocious Warg
+M 0 6102 4 6108         Grey Wolf
+M 0 6102 4 6108         Grey Wolf
+M 0 6102 4 6104         Grey Wolf
+M 0 6102 4 6104         Grey Wolf
+M 0 6103 4 6112         Black Wolf
+M 0 6103 4 6112         Black Wolf
+M 0 6103 4 6118         Black Wolf
+M 0 6103 4 6118         Black Wolf
+M 0 6110 4 6120         Tree
+M 0 6110 4 6123         Tree
+M 0 6111 4 6109         Tree
+M 0 6111 4 6105         Tree
+M 0 6112 1 6143         Green Dragon
+G 1 6108 10                     10,000 Gold
+G 1 6110 10                     Strength Potion
+G 1 6112 1                      Iron Crown
+O 1 6111 10 6143        Shield
+M 0 6113 3 6133         Poisonous Spider
+M 0 6113 3 6133         Poisonous Spider
+M 0 6113 3 6133         Poisonous Spider
+M 0 6114 1 6134         Queen Spider
+G 1 6108 10                     10,000 Gold
+G 1 6109 3                      Healing Potion
+G 1 6113 2                      Iron Sceptre
+M 0 6115 1 6100         Shargugh The Forest Brownie
+E 1 6114 1 1                    Iron Ring
+M 0 6116 1 6155         Druid
+E 1 6115 1 16                   Morning Star
+G 1 3055 3 17                   Metal Staff
+M 0 6117 1 6134         Isha The Dark Elf
+E 1 6116 1 5                    Dragon Scale Shirt
+E 1 6117 1 7                    Dragon Scale Skirt
+E 1 6118 1 12                   Black Cloak
+E 1 6119 1 13                   Silver Belt
+E 1 6120 1 16                   Long, Slender Sword
+* Objects
+O 0 6102 1 6103         Hollow Tree
+O 0 6103 1 6113         Branch, Light
+O 0 6104 1 6125         Branch, Weapon
+O 0 6105 1 6105         Branch, Unusable
+R 0 6104 6106
+O 0 6106 4 6104         Toadstool
+R 0 6111 6106
+O 0 6106 4 6111         Toadstool
+R 0 6122 6106
+O 0 6106 4 6122         Toadstool
+R 0 6119 6107
+O 0 6107 4 6119         Poisonous Toadstool
+* Doors
+D 1 6152 1 1            Tree
+D 1 6153 3 1
+*
+S
+$

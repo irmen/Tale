@@ -1,0 +1,303 @@
+#3300
+orange~
+an orange~
+An orange lies on the ground here.~
+~
+19 0 1
+8 0 0 0
+1 8 8
+E
+orange~
+You wonder how it got here, seeing how 
+oranges are non-migratory.
+~
+#3301
+bale wheat~
+a bale of wheat~
+There is a bale of wheat here.~
+~
+19 0 1
+24 0 0 0
+100 1000 1000
+E
+bale wheat~
+It doesn't look appetizing to you, but
+a horse might enjoy this...
+~
+#3302
+zither~
+a big zither~
+A HUGE zither made of gold rests in the corner~
+~
+8 0 1
+0 0 0 0
+40 200000 20000
+E
+zither~
+Someone truly huge with big fingers might be
+able to play this.  You can't.
+~
+#3303
+barrel perfume~
+a barrel of perfume~
+You can smell a barrel on the other side of the room from here.~
+~
+8 0 1
+0 0 0 0
+20 100000 10000
+E
+barrel perfume~
+Smells good...the label reads:
+
+   "Somewhere between GPA and MUD there lies...
+		OBSESSION"
+~
+#3304
+statue~
+a statue~
+There is a statue of Aglandiir here, made of solid gold.~
+~
+8 0 1 
+0 0 0 0
+30 150000 15000
+E
+statue~
+He's a pretty striking chap, for a dragon.
+~
+#3305
+halberd~
+a halberd~
+A runed halberd lies on the ground here.~
+~
+5 g 8193
+0 1 12 3
+16 10000 3000
+A 
+18 5
+E
+halberd~
+The runes glow with a bright light, making you
+think that this might be a pretty decent weapon.
+~
+#3306
+potion protection dun vial~
+a potion of protection~
+A vial of a dun fluid is here.~
+~
+10 a 1
+20 36 1 3
+1 10000 2000
+E
+potion protection dun vial~
+Looks thick, and brownish-grey (dun).  Ick!
+~
+#3307
+crown~
+a dragon's crown~
+Aglandiir's crown sits here, radiating a shield.~
+~
+8 a 0
+0 0 0 0
+400 0 0
+E
+crown~
+The shield repulses you, making you wonder how
+you're going to get your hands on this huge, valuble
+chunk of gold...
+~
+#3308
+apple~
+an apple~
+A scrawny red apple sits here.~
+~
+19 0 1
+4 0 0 0
+1 5 2
+E
+apple~
+It is not wormy... yet.
+~
+#3309
+bread loaf~
+a loaf of bread~
+A fresh loaf of bread lies here.~
+~
+19 0 1
+12 0 0 0
+1 10 5
+E
+bread loaf~
+Mmmm... Rye!
+~
+#3310
+melon~
+a melon~
+A melon sits here, discarded evidently.~
+~
+19 0 1
+8 0 0 0
+3 8 3
+E
+melon~
+Wow!  Look at the size of that melon!
+~
+#3311
+knife~
+a knife~
+An exquisitely crafted knife rests here.~
+~
+5 dn 24577
+0 3 5 11
+8 1000000 20000
+E
+knife~
+The craftsmanship... it takes your breath away!
+This knife... it had to have been forged by the 
+legendary smith Gabadiel.  It must be worth a
+fortune!
+~
+A
+18 3
+A
+2 2
+#3312
+sword long~
+a long sword~
+A superb long sword sticks in the earth.~
+~
+5 dmn 24577
+0 2 7 3
+15 750000 15000
+E
+sword long~
+This sword is light, but the heft is perfectly
+balanced.  Such an incredible weapon can only have
+be crafted by the legendary smith Gabadiel, and
+as such be worth a fortune!
+~
+A
+18 2
+A
+1 1
+#3313
+sword short~
+a short sword~
+A short sword lies here... a work of art!~
+~
+5 adimn 24577
+0 4 6 3
+10 10000000 30000
+E
+sword short~
+It brings tears to your eyes.  This must have
+been Gabadiel the smith's masterpiece; his final
+work.  Simply invaluble.
+~
+A
+18 4
+A
+2 3
+#3314
+corpse~
+a dismembered and burnt corpse~
+A dismembered and burnt corpse lies on the ground here.~
+~
+13 0 0
+0 0 0 0
+1 1 1
+E
+corpse~
+It is still smouldering a little; the culprits can't
+be far off!
+~
+#3315
+scimitar~
+a scimitar~
+A scimitar as long as your arm lies here.~
+~
+5 0 8193
+0 1 7 3
+10 500 50
+E
+scimitar~
+This weapon really isn't of too high a quality.
+~
+#3316
+crate~
+a crate~
+A crate is stacked here.~
+~
+15 0 1
+200 5 0 0
+50 100 20
+E
+crate~
+It's a standard wooden crate.
+~
+#3317
+bow hunting~
+a hunting bow~
+A hunting bow lies here, unwanted~
+~
+5 0 8193
+0 1 5 11
+6 400 40
+E
+bow hunting~
+This is the type of weapon you would use to bag
+some deer or rabbits, but not the type you'd take
+into battle...
+~
+A
+19 1
+#3318
+vest leather~
+a leather vest~
+A nice leather vest lies here.~
+~
+9 g 9
+6 0 0 0
+6 5000 500
+E
+vest leather~
+The seams are delicately sewn with a enruned thread...
+~
+#3319
+glass beer~
+a glass~
+A glass of beer sits forgotten here.~
+~
+17 0 16385
+1 1 1 0
+2 5 1
+E
+glass~
+This is a nice glass filled with homebrew.  There doesn't seem to
+be too much stuff floating in it.
+~
+#3320
+glass mead ale~
+a glass~
+A big glass of mead sits here, cool and frosty.~
+~
+17 0 16385
+1 1 3 0
+2 8 3
+E
+glass mead~
+Looks good.  Looks warm.  Doesn't matter; it still looks good.
+~
+#3321
+shot whisky~
+a shot~
+A shot of whisky is sitting here.~
+~
+17 0 16385
+1 1 5 0
+1 10 5
+E
+shot~
+Whew!  Looks like potent stuff!
+~
+$
+

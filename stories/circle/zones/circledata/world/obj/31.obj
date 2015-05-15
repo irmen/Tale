@@ -1,0 +1,225 @@
+#3100
+cup tea~
+a cup~
+A cup has been set here.~
+~
+17 0 1
+8 8 11 0
+1 5 1
+E
+cup~
+It is a small simple cup.
+~
+#3101
+cup coffee~
+a cup~
+A cup has been set here.~
+~
+17 0 1
+8 8 12 0
+1 7 1
+E
+cup~
+It is a small simple cup.
+~
+#3102
+cup water~
+a cup~
+A cup has been set here.~
+~
+17 0 1
+12 12 15 0
+1 2 1
+E
+cup~
+It is a large simple cup.
+~
+#3103
+bottle water~
+a bottle~
+A bottle of Evian natural spring water is here.~
+~
+17 0 1
+24 24 15 0
+1 10 6
+E
+label~
+You've been ripped off!  It says here at the bottom of the label, in really
+really small letters, 'Bottled in the Midgaard branch of Evian Inc.  This
+water is from the natural, mostly clean River of Midgaard.'
+~
+E
+bottle~
+It is a large, clean bottle.  There is a large label pasted on the side.
+~
+#3104
+canteen water~
+a canteen~
+A canteen has been set on the ground here.~
+~
+17 0 1
+80 80 15 0
+20 45 15
+E
+canteen~
+It is a fairly big canteen.  Looks like it can hold a lot of liquid.
+~
+#3105
+key iron~
+an iron key~
+An iron key has been left here.~
+~
+18 c 1
+0 0 0 0
+1 0 10
+E
+key iron~
+The iron key is not special.  In fact, it is quite boring.
+~
+#3106
+key rusty~
+a rusty key~
+A rusty key has been left here.~
+~
+18 c 1
+0 0 0 0
+1 0 10
+E
+key rusty~
+The key is a fairly large rusty key.  You notice a lot of dirt it.
+~
+#3107
+key wooden~
+a wooden key~
+A wooden key has been left here.~
+~
+18 c 1
+0 0 0 0
+1 0 10
+E
+key wooden~
+The wooden key is not special.  In fact it is just about the most boring
+key you've ever seen in your life.
+~
+#3108
+key brass~
+a brass key~
+A brass key has been left here.~
+~
+18 c 1
+0 0 0 0
+1 0 10
+E
+key brass~
+The brass key is small and looks like it fits a very complicated lock.
+~
+#3109
+desk drawer~
+the desk~
+A desk is set against the western wall.~
+~
+15 0 0
+34 15 3107 0
+100 0 0
+E
+desk~
+The desk looks very sparse, there is a drawer in the left side.
+~
+E
+drawer~
+You notice a keyhole in the drawer.
+~
+#3110
+safe~
+the safe~
+A safe is placed in a dark corner of the room.~
+~
+15 0 0
+34 15 3108 0
+999 0 0
+E
+safe~
+The safe is very heavy and has a keyhole.
+~
+#3111
+bench~
+the Bench~
+A white-painted wooden bench is standing here.~
+~
+12 0 0
+0 0 0 0
+100 600 200
+E
+bench~
+It is a quite heavy but very comfortable bench.  It is placed with its front
+towards the river so you can sit and watch the river and the houses on the
+other side.
+~
+#3112
+key city~
+the City Key~
+The very big City Key is lying here.~
+~
+18 c 1
+0 0 0 0
+30 10000 500
+E
+key city~
+It is probably the biggest key you have seen in your life.  It is made from
+polished gold and has various patterns on it along with the Midgaard Coat of
+Arms.
+~
+#3113
+fountain water~
+a fountain~
+A small white fountain is standing here, gurgling happily.~
+~
+23 0 0
+999 999 15 0
+999 0 0
+E
+fountain water~
+It is very nice.  Made from fine white marble.
+~
+#3114
+coins gold~
+a small pile of gold coins~
+A small pile of gold coins lies here.~
+~
+20 0 1
+37 0 0 0
+0 0 0
+#3115
+gold coins~
+the gold~
+A lot of gold is here.~
+~
+20 0 1
+32385 0 0 0
+0 32385 0
+#3116
+candlestick candle stick pewter~
+a candlestick~
+A pewter candlestick is standing here.~
+~
+1 0 16385
+0 0 24 0
+5 150 10
+E
+candlestick~
+It is a rather old-looking three-armed candlestick made from pewter.  Its
+candles are a yellowish white color.
+~
+#3117
+tree elm~
+an elm tree~
+An old elm tree grows here.~
+~
+13 0 0
+0 0 0 0
+0 0 0
+E
+elm tree~
+The fresh young leaves of the elm tree wave gently in the wind.
+~
+$

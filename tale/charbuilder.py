@@ -10,7 +10,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from . import races
 from . import lang
 from . import mud_context
-import re
+from .player import MudAccounts
 
 
 class PlayerNaming(object):
@@ -43,7 +43,7 @@ class CharacterBuilder(object):
     def build_async(self):
         self.conn.output("Creating a player character.\n")
         naming = PlayerNaming()
-        naming.name = yield "input", ("Name?", validate_name)
+        naming.name = yield "input", ("Name?", MudAccounts.accept_name)
         naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
         naming.gender = naming.gender[0]
         self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
@@ -57,9 +57,3 @@ def validate_race(value):
     if value in races.player_races:
         return value
     raise ValueError("That is not a valid race.")
-
-
-def validate_name(name):
-    if re.match("[a-zA-Z]{3,}$", name):
-        return name
-    raise ValueError("Name needs to be 3 or more letters (a-z, A-Z, no spaces).")

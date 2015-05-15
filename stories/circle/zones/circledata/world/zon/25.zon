@@ -1,0 +1,345 @@
+#25
+The High Tower Of Magic~
+2500 2699 20 2
+*
+* Created for SillyMUD by Skylar 
+*
+* Edited and modified for CircleMUD by Furry
+*
+* Mobiles
+M 0 2500 6 2502         Shadow Guardian
+M 0 2500 6 2504         Shadow Guardian
+M 0 2500 6 2506         Shadow Guardian
+M 0 2500 6 2508         Shadow Guardian
+M 0 2500 6 2511         Shadow Guardian
+M 0 2501 1 2511         Adventurer
+M 0 2502 1 2507         Edgar
+M 0 2503 1 2512         Diamond Golem
+E 1 2500 1 17                   Diamond Key
+M 0 2504 7 2513         Wandering Mage
+M 0 2504 7 2514         Wandering Mage
+M 0 2504 7 2514         Wandering Mage
+M 0 2504 7 2515         Wandering Mage
+M 0 2504 7 2516         Wandering Mage
+M 0 2504 7 2518         Wandering Mage
+M 0 2504 7 2519         Wandering Mage
+M 0 2505 1 2518         Strick The Bartender
+G 1 2504 100                    Silce Of Traveller's Bread
+G 1 2545 100                    Herbal Brew
+G 1 2546 100                    Waybread
+G 1 3010 100                    Loaf Of Bread
+G 1 3100 100                    Tea Cup
+G 1 3101 100                    Coffee Cup
+M 0 2506 1 2519         Tatorious The Wizard
+G 1 3050 100                    Scroll Of Identify
+G 1 3051 100                    Yellow Potion
+G 1 3053 100                    Grey Wand Of Invisibility
+M 0 2507 1 2520         The Cook
+E 1 2547 2 16                   Meat Cleaver
+M 0 2508 1 2520         Assistant Cook
+M 0 2509 1 2527         Prisoner
+E 1 2548 1 13                   Chain Shackles
+M 0 2510 1 2528         Jailor
+E 1 2522 1 17                   Old Key
+M 0 2511 2 2533         Broom
+M 0 2511 2 2533         Broom
+M 0 2512 10 2535        Lesser Guardian
+M 0 2512 10 2540        Lesser Guardian
+M 0 2512 10 2630        Lesser Guardian
+M 0 2512 10 2535        Lesser Guardian
+M 0 2512 10 2535        Lesser Guardian
+M 0 2512 10 2535        Lesser Guardian
+M 0 2513 5 2535         Greater Guardian
+M 0 2513 5 2575         Greater Guardian
+M 0 2513 5 2600         Greater Guardian
+M 0 2513 5 2633         Greater Guardian
+M 0 2513 5 2649         Greater Guardian
+M 0 2514 1 2537         Visiting Mage
+M 0 2515 3 2542         Apprentice
+M 0 2515 3 2544         Apprentice
+M 0 2516 3 2544         Apprentice
+M 0 2516 3 2542         Apprentice
+M 0 2517 3 2542         Apprentice
+M 0 2517 3 2544         Apprentice
+M 0 2518 3 2545         Apprentice
+M 0 2518 3 2545         Apprentice
+M 0 2518 3 2545         Apprentice
+M 0 2519 1 2545         Kitten
+M 0 2520 4 2549         Student
+M 0 2520 4 2549         Student
+M 0 2520 4 2549         Student
+M 0 2520 4 2549         Student
+M 0 2521 1 2549         Teacher
+M 0 2522 4 2554         Student
+M 0 2522 4 2554         Student
+M 0 2522 4 2554         Student
+M 0 2522 4 2554         Student
+M 0 2523 1 2554         Teacher
+M 0 2524 3 2557         Listener
+M 0 2524 3 2557         Listener
+M 0 2524 3 2557         Listener
+M 0 2525 1 2557         Speaker
+M 0 2526 3 2559         Student
+E 1 2549 6 16                   Silvery Dagger
+M 0 2526 3 2559         Student
+E 1 2549 6 16                   Silvery Dagger
+M 0 2526 3 2559         Student
+E 1 2549 6 16                   Silvery Dagger
+M 0 2527 1 2559         Battle Master
+E 1 2549 6 17                   Silvery Dagger
+M 0 2528 2 2564         Teacher
+M 0 2529 1 2565         Sleeping Mage
+M 0 2530 1 2567         Scribe
+M 0 2512 10 2568        Lesser Guardian
+M 0 2531 2 2571         Scribe
+M 0 2531 2 2571         Scribe
+M 0 2532 1 2573         Master Scribe
+G 1 2552 1                      Cylindrical Tube
+P 1 2550 2 2552                         Scroll
+P 1 2551 2 2552                         Bound Scroll
+M 0 2533 1 2573         Assistant Scribe
+G 1 2553 3                      Old Scroll
+M 0 2534 1 2582         Enchanter
+E 1 2515 1 17                   Small Key
+G 1 2554 1                      Scroll Of Enchantment
+M 0 2535 1 2582         Dancing Sword
+M 0 2536 1 2588         The Mad Alchemist
+E 1 2555 5 17                   Leather Pouch
+P 1 2556 2 2555                         Silver Spoon
+P 1 2558 2 2555                         Red Potion
+P 1 2559 2 2555                         Green Potion
+P 1 2560 2 2555                         Effervescent Potion
+P 1 2561 2 2555                         Milky White Potion
+M 0 2537 1 2590         The Summoner
+E 1 2562 2 17                   Teleport Staff
+M 0 2538 1 2595         Master Of Charm
+E 1 2563 1 17                   Golden Flute
+G 1 2564 1                      Figurine
+M 0 2539 5 2568         Golem Sentry
+M 0 2539 5 2598         Golem Sentry
+M 0 2539 5 2598         Golem Sentry
+M 0 2539 5 2628         Golem Sentry
+M 0 2539 5 2628         Golem Sentry
+M 0 2540 1 2602         SpellBinder
+E 1 2524 1 17                   Silvery Key
+G 1 2523 1                      Silvery Key
+E 1 2565 2 13                   Holstered Belt
+P 1 2566 2 2565                         Blackened Wand
+M 0 2541 1 2609         Golem Maker
+E 1 2567 2 17                   Runed Chisel
+M 0 2542 1 2609         Granite Golem
+M 0 2543 1 2611         Bronze Golem
+M 0 2544 1 2611         Flesh Golem
+M 0 2545 1 2609         Cloth Golem
+M 0 2546 1 2611         Adamantite Golem
+M 0 2547 1 2611         Clay Golem
+M 0 2548 1 2617         Master Of Illusion
+E 1 2568 3 13                   Beltpouch
+P 1 2569 3 2568                         Sparkling Dust
+M 0 2549 1 2625         The Necromancer
+E 1 2570 2 3                    Dark Cowl
+E 1 2571 2 17                   Ashen Wand
+M 0 2550 4 2625         Skeleton
+M 0 2550 4 2625         Skeleton
+M 0 2551 1 2625         Undead Giant
+E 1 2572 1 16                   Spiked Club
+M 0 2552 3 2635         Witch
+M 0 2552 3 2635         Witch
+M 0 2552 3 2635         Witch
+M 0 2553 1 2637         Librarian
+M 0 2554 1 2653         Neutral Apprentice
+E 1 2573 1 12                   Grey Robe
+E 1 2574 1 14                   Silver Bracelet
+M 0 2555 1 2654         Grey Familiar
+M 0 2556 1 2654         Neutral Guildmaster
+G 1 2593 1                      Grey Key
+E 1 2575 1 3                    Grey Cloak
+E 1 2576 1 16                   Iron Shod Staff
+E 1 2577 3 17                   Ward Minor
+M 0 2557 1 2661         Evil Apprentice
+E 1 2578 1 12                   Black Robe
+E 1 2579 1 14                   Onyx Bracelet
+M 0 2558 1 2664         Black Familiar
+M 0 2559 1 2664         Evil Guildmaster
+G 1 2594 1                      Black Key
+E 1 2580 1 3                    Dark Black Cloak
+E 1 2581 1 16                   Shard Of Obsidian
+E 1 2577 3 17                   Ward Minor
+M 0 2560 1 2667         Good Apprentice
+E 1 2582 1 12                   White Robe
+E 1 2583 1 14                   White Gold Bracelet
+M 0 2561 1 2669         White Familiar
+M 0 2562 1 2669         Good Guildmaster
+G 1 2595 1                      White Key
+E 1 2584 1 3                    White Cloak
+E 1 2585 1 16                   Ivory Hilted Dagger
+E 1 2577 3 17                   Ward Minor
+M 0 2563 1 2677         Calico Cat
+E 1 2586 1 3                    Spiked Collar
+M 0 2564 1 2677         Grand Master Of Magic
+G 1 2538 1                      Intricate Key
+E 1 2587 1 3                    Shimmering Cloak
+E 1 2592 2 5                    Green Dragon Scale Shirt
+E 1 2588 1 1                    Emerald Ring
+E 1 2589 1 14                   Emerald Bracelet
+E 1 2590 1 17                   Ward Major
+E 1 2591 1 16                   Ebony Kris
+* Objects
+O 0 2501 1 2520         Oven
+P 1 2504 200 2501               Traveller's Bread
+O 0 2502 1 2520         Meat Locker
+P 1 2505 1 2502                 Chunk Of Meat
+P 1 2506 1 2502                 Finger Sandwich
+R 0 2520 2503
+O 0 2503 3 2520         Spice Rack
+O 0 2507 2 2533         Broom
+O 0 2507 2 2533         Broom
+O 0 2508 1 2579         Cabinet
+P 1 3020 100 2508               Dagger
+P 1 3021 100 2508               Small Sword
+P 1 3022 100 2508               Long Sword
+O 0 2509 1 2579         Bar Of Silver
+O 0 2510 1 2579         Bar Of Gold
+O 0 2511 1 2579         Bar Of Mithral
+O 0 2512 1 2579         Bar Of Adamantite
+O 0 2513 1 2581         Mithral Hammer
+O 0 2514 1 2582         Chest
+P 1 2516 1 2514                 Long Sword
+P 1 2517 1 2514                 Silver Dagger
+P 1 2518 1 2514                 Scimitar
+O 0 2519 1 2601         Staff
+O 0 2520 1 2603         Cabinet
+P 1 2525 1 2520                 Red And White Staff
+P 1 2526 1 2520                 Burnt Staff
+O 0 2521 1 2603         Cabinet
+P 1 2527 1 2521                 Black Rod
+P 1 2528 1 2521                 Wooden Stick
+P 1 2529 1 2521                 Metal Wand
+O 0 2530 1 2635         Cauldron
+P 1 2531 1 2530                 Bat Wings
+P 1 2532 1 2530                 Eyeball
+O 0 2533 1 2645         The Book Of Magic
+P 1 2534 1 2533                 Spectacles Of True Seeing
+O 0 2535 1 2680         Golden Altar
+P 1 2536 1 2535                 Heart Shaped Medallion
+O 0 2537 1 2681         Chest
+P 1 2539 1 2537                 Coins
+O 0 2540 1 2682         Brown Cloak
+O 0 2541 1 2682         Chameleon Poncho
+O 0 2542 1 2682         Old Boots
+O 0 2544 1 2682         Leather Backpack
+P 1 2543 1 2544                 Seashell Ring
+* Doors
+D 0 2512 0 2            Tower Entrance
+D 0 2513 2 2
+D 0 2516 3 1            Kitchen
+D 0 2520 1 1
+D 0 2517 5 1            Trapdoor
+D 0 2521 4 1
+D 0 2523 0 2            Dark Cell
+D 0 2527 2 2
+D 0 2524 1 1            Jailor's Office
+D 0 2528 3 1
+D 0 2530 0 1            Store Room
+D 0 2532 2 1
+D 0 2530 2 1            Broom Closet
+D 0 2533 0 1
+D 0 2531 0 1            A Hallway
+D 0 2534 2 1
+D 0 2531 1 1            Guest Bedroom 
+D 0 2536 3 1
+D 0 2531 2 1            Guardian's Chamber
+D 0 2535 0 1
+D 0 2534 1 1            Guest Bedroom
+D 0 2537 3 1
+D 0 2538 1 1            Burnt Room
+D 0 2539 3 1
+D 0 2540 0 1            Apprentices' Barracks
+D 0 2542 2 1
+D 0 2543 0 1            Apprentices' Barracks
+D 0 2544 2 1
+D 0 2545 0 1            Apprentices' Workshop
+D 0 2546 2 1
+D 0 2548 3 1            Classroom
+D 0 2549 1 1
+D 0 2550 3 1            Empty Classroom
+D 0 2552 1 1
+D 0 2551 3 1            Empty Classroom
+D 0 2554 1 1
+D 0 2555 2 1            Amphitheater
+D 0 2557 0 1
+D 0 2556 2 1            Training Room
+D 0 2559 0 1
+D 0 2558 2 1            Dueling Room
+D 0 2561 0 1
+D 0 2562 1 1            Spellmasters' Lounge
+D 0 2564 3 1
+D 0 2563 1 1            Bedroom
+D 0 2565 3 1
+D 0 2566 1 1            Study
+D 0 2567 3 1
+D 0 2570 0 1            Small Office
+D 0 2571 2 1
+D 0 2571 3 1            Master Scribe's Workshop
+D 0 2573 1 1
+D 0 2574 0 1            Store Room
+D 0 2575 2 1
+D 0 2577 3 1            Store Room
+D 0 2579 1 1
+D 0 2578 3 1            Very Hot Room
+D 0 2581 1 1
+D 0 2581 2 1            Master Enchanter's Chamber
+D 0 2582 0 1
+D 0 2581 4 1            Dark Room
+D 0 2612 5 1
+D 0 2584 2 1            Laboratory
+D 0 2586 0 1
+D 0 2587 2 1            Pentagram Chamber
+D 0 2590 0 1
+D 0 2591 1 1            Empty Room
+D 0 2594 3 1
+D 0 2593 1 1            Charm Master's Chamber
+D 0 2595 3 1
+D 0 2595 0 1            Animal Pens
+D 0 2597 2 1
+D 0 2600 0 1            Store Room
+D 0 2601 2 1
+D 0 2601 3 1            Master Spellbinder's Chamber
+D 0 2602 1 1
+D 0 2602 3 1            Master Spellbinder's Cache
+D 0 2603 1 1
+D 0 2605 0 1            Master Spellbinder's Cache
+D 0 2603 2 1
+D 0 2608 3 1            Golem Master's Workshop
+D 0 2609 1 1
+D 0 2609 5 1            Dark Room
+D 0 2612 4 1
+D 0 2616 2 1            Illusion Master's Chamber
+D 0 2617 0 1
+D 0 2619 2 1            Meditation Chamber
+D 0 2620 0 1
+D 0 2622 1 1            Necromancer's Room
+D 0 2623 3 1
+D 0 2634 1 1            Scrying Chamber
+D 0 2635 3 1
+D 0 2536 3 1            Library
+D 0 2637 1 1
+D 0 2652 2 1            Grey Antechamber
+D 0 2653 0 1
+D 0 2660 1 1            Black Antechamber
+D 0 2661 3 1
+D 0 2666 3 1            White Antechamber
+D 0 2667 1 1
+D 0 2673 0 2            Grey Door
+D 0 2674 2 2
+D 0 2674 0 2            Black Door
+D 0 2675 2 2
+D 0 2675 0 2            White Door
+D 0 2676 2 2
+D 0 2680 1 1            Treasury
+D 0 2681 3 1
+D 0 2680 3 1            Secret Excape Passage
+D 0 2682 1 1
+*
+S
+$

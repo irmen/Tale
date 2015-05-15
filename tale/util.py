@@ -340,6 +340,19 @@ def clone(obj):
     return copy.deepcopy(obj)
 
 
+def storyname_to_filename(name):
+    """converts the story name to a suitable name for a file on disk"""
+    filename = name.lower()
+    filename = filename.replace(" ", "_")
+    filename = filename.replace(".", "_")
+    filename = filename.replace("'", "")
+    filename = filename.replace('"', "")
+    filename = filename.replace("\\", "")
+    filename = filename.replace("/", "")
+    filename = filename.replace("*", "")
+    return filename
+
+
 class GameDateTime(object):
     """
     The datetime class that tracks game time.

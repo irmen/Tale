@@ -1,0 +1,78 @@
+#62
+The Orc Enclave~
+6200 6299 20 2
+*
+* Created by Builder_5 & Serene of C.A.W.
+* Official C.A.W. site:  http://qsilver.queensu.ca/~fletchra/Caw/
+* Mail Address: fletchra@qsilver.queensu.ca
+*
+* Mobiles
+M 0 6200 3 6219         Deer
+M 0 6200 3 6224         Deer
+M 0 6200 3 6218         Deer
+M 0 6201 2 6219         Rabbit
+M 0 6201 2 6224         Rabbit
+M 0 6202 3 6227         Squirrel
+M 0 6202 3 6224         Squirrel
+M 0 6202 3 6238         Squirrel
+M 0 6203 10 6234        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6240        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6236        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6229        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6212        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6221        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6223        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6225        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6214        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6203 10 6230        Orc Hunter
+E 1 6204 1 16                   Club
+M 0 6204 1 6252         Orc Chief
+E 1 6204 1 16                   Club
+M 0 6205 3 6253         Orc Woman
+M 0 6205 3 6250         Orc Woman
+M 0 6205 3 6249         Orc Woman
+M 0 6206 2 6246         Orc Child
+M 0 6206 2 6251         Orc Child
+M 0 6207 1 6253         Pregnant Orc Woman
+M 0 6208 2 6254         Mutant Orc
+M 0 6208 2 6254         Mutant Orc
+M 0 6209 3 6251         Mutant Orc
+E 1 6204 1 16                   Club
+M 0 6209 3 6250         Mutant Orc
+E 1 6204 1 16                   Club
+M 0 6209 3 6244         Mutant Orc
+E 1 6204 1 16                   Club
+M 0 6210 1 6259         Elstar
+E 1 6205 1 16                   Starkblade
+E 1 6203 1 17                   Runestone
+M 0 6211 1 6216         Elven Child
+G 1 6200 1                      Key
+M 0 6212 4 6267         Mutant Thing
+M 0 6212 4 6264         Mutant Thing
+M 0 6212 4 6261         Mutant Thing
+M 0 6213 1 6265         Mutant Thing
+E 1 6201 1 9                    Manacles
+E 1 6202 1 8                    Shackles
+* Doors
+D 0 6255 3 2
+D 0 6256 1 2
+D 0 6256 3 1
+D 0 6257 1 1
+D 0 6266 1 1
+D 0 6267 3 1
+D 0 6263 1 1
+D 0 6264 3 1
+D 0 6260 1 1
+D 0 6261 3 1
+S
+$
+

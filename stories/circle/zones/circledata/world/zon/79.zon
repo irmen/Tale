@@ -1,0 +1,63 @@
+#79
+Redferne's Residence~
+7900 7999 50 2
+*
+* Created for DikuMud
+*
+* Modified by Cyron of VieMud
+*
+* Mobiles
+M 0 7900 1 7900         Grand Knight of Paladins
+E 1 7901 4 17                   Copper Key
+E 1 7910 2 16                   Bastard Sword 
+E 1 7914 2 5                    Silvery Breast-Plate
+E 1 7915 2 7                    Silvery Leg Plates
+E 1 7916 2 9                    Silvery Gloves
+E 1 7917 2 6                    Silvery Helmet
+E 1 7918 2 11                   Shield of the Rose
+E 1 7919 2 8                    Heavy Boots
+E 1 7920 2 10                   Silvery Arm Plates
+M 0 7901 2 7907         Rat
+G 1 7900 1                      Brass Key
+M 0 7901 2 7907         Rat
+M 0 7902 1 7913         The Cleaver
+E 1 7907 6 14                   Spiked Bracelet
+E 1 7907 6 15                   Spiked Bracelet
+E 1 7911 2 6                    Large Helmet
+G 1 7902 1                      Steel Key
+* Objects
+R 0 7907 7908
+O 0 7908 40 7907        Waybread
+R 0 7908 7921
+O 0 7921 10 7908        Water Barrel
+R 0 7903 7904
+O 0 7904 1 7903         Chest
+P 1 7903 1 7904                 Money
+P 1 7909 4 7904                 Golden Ring
+R 0 7913 7905
+O 1 7905 1 7913         Chest
+P 1 7906 5 7905
+P 1 7912 3 7905                 Chaos Helmet
+P 1 7913 2 7905                 Two-Handed Sword
+* Doors
+D 0 7900 0 2            Residence Door
+D 0 7901 2 2
+D 0 7901 1 1            Treasure Room Door
+D 0 7910 3 1
+D 0 7901 3 1            Library Door
+D 0 7902 1 1            
+D 0 7910 1 2            Safe Entrance
+D 0 7903 3 2
+D 0 7904 1 1            Monster Pen Door
+D 0 7913 3 1
+D 0 7904 3 1            Sitting Room Door
+D 0 7905 1 1
+D 0 7906 0 1            Larder Door
+D 0 7907 2 1
+D 0 7906 1 1            Fridge Door
+D 0 7908 3 1
+D 0 7911 2 1            Balcony Doors
+D 0 7912 0 1
+*
+S
+$

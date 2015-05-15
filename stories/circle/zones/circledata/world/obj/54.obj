@@ -1,0 +1,812 @@
+#5400
+palace key~
+the palace key of New Thalos~
+A large key bearing the crest of New Thalos lies here.~
+~
+18 c ao
+5400 0 0 0
+5 0 0
+#5401
+city key~
+the Key to the City of New Thalos~
+The heavy city key lies here in the dust~
+~
+18 c ao
+5401 0 0 0
+5 0 0
+#5402
+fountain water~
+the large central fountain~
+The large central fountain domintating the central square rests here.~
+~
+23 ce 0
+9999 9999 0 0
+9999 0 0
+#5403
+morningstar morning star~
+a morningstar~
+A small spiked metal ball connected to a rod by links of chain lies here.~
+~
+5 0 8193   
+0 2 5 6
+5 1200 500
+#5404
+awl-pike~
+an awl-pike~
+An awl pike lies here.~
+~
+5 0 8193
+0 1 12 5
+3 2100 100
+#5405
+bardiche~
+a bardiche~
+A bardiche lies here.~
+~
+5 0 8193
+0 2 6 3
+4 1900 110
+#5406
+corbin bec~
+a bec de corbin~
+A bec de corbin lies here.~
+~
+5 0 8193
+0 1 8 3
+3 5400 50
+#5407 
+guisarme bill~
+a bill-guisarme~
+A bill-guisarme lies here.~
+~
+5 0 8193
+0 1 10 3
+3 1300 50
+#5408
+fauchard~
+a fauchard~
+A fauchard lies here.~
+~
+5 0 8193
+0 1 8 1
+3 1250 20
+#5409
+glaive~
+a glaive~
+A glaive lies here.~
+~
+5 0 8193
+0 1 10 5
+3 1870 20
+#5410
+guisarme~
+a guisarme~
+A guisarme lies here.~
+~
+5 0 8193
+0 2 4 4 
+4 1953 20
+#5411
+sickle~
+a sickle~
+A sickle lies here.~
+~
+5 0 8193
+0 2 4 3
+1 500 10
+#5412
+sword bastard two-handed~
+a two-handed bastard sword~
+A two handed bastard sword lies here.~
+~
+5 0 8193
+0 2 8 3
+18 12580 10000
+#5413
+scimitar~
+a scimitar~
+A scimitar lies here.~
+~
+5 0 8193
+0 1 9 3
+10 1200 150
+A
+19 1
+#5414
+rapier~
+a rapier~
+A rapier lies here.~
+~
+5 0 8193
+0 1 8 3
+10 3100 100
+A
+18 1
+#5415
+suit mail banded~
+a suit of banded mail~
+A suit of banded mail lies here.~
+~
+9 agmno 9
+8 0 0 0
+25 3400 800
+#5416 
+suit brigandine~
+a suit of brigandine~
+A suit of brigandine lies here.~
+~
+9 agmo 9
+7 0 0 0
+20 2000 420
+#5417
+suit plate field~
+a suit of field plate~
+A suit of field plate lies here.~
+~
+9 agmno 9
+9 0 0 0
+28 4000 1000
+#5418
+suit ringmail ring mail~
+a suit of ringmail~
+A suit of ringmail lies here.~
+~
+9 n 9
+5 0 0 0
+6 1385 100
+#5419
+suit splintmail splint mail~
+a suit of splintmail~
+A suit of splintmail aromr lies here.~
+~
+9 m 9
+4 0 0 0
+5 2500 100
+#5420
+shield wooden~
+a wooden shield~
+A wooden shield lies here~
+~
+9 0 513  
+1 0 0 0
+1 10 1
+#5421
+shield splinted~
+a splinted shield~
+A splinted shield lies here.~
+~
+9 0 513
+7 0 0 0
+8 175 17
+#5422
+buckler shield~
+a buckler~
+A buckler lies here.~
+~
+9 0 513
+1 0 0 0
+6 30 7
+#5423
+jacket leather~
+a leather jacket~
+A leather jacket lies here.~
+~
+9 0 9
+3 0 0 0
+6 600 200
+#5424
+sleeves leather~
+a pair of leather sleeves~
+A pair of leather sleeves lies here.~
+~
+9 0 257
+2 0 0 0
+2 350 200
+#5425
+cap leather~
+a leather cap~
+A leather cap lies here~
+~
+9 0 17
+1 0 0 0
+2 65 200
+#5426
+pants leather~
+a pair of leather pants~
+A pair of leather pants lies here.~
+~
+9 0 33
+2 0 0 0
+2 850 200
+#5427
+gloves leather~
+a pair of leather gloves~
+A pair of leather gloves lies here.~
+~
+9 0 129
+2 0 0 0
+2 150 200
+#5428
+boots padded leather~
+a pair of padded leather boots~
+A pair of padded leather boots lies here.~
+~
+9 0 65
+2 0 0 0
+2 410 200
+#5429
+jacket studded leather~
+a studded leather jacket~
+A studded leather jacket lies here.~
+~
+9 0 9
+3 0 0 0
+10 650 200
+#5430
+sleeves studded leather~
+a pair of studded leather sleeves~
+A pair of studded leather sleeves lie here.~
+~
+9 0 257
+3 0 0 0
+3 500 200
+#5431
+pants studded leather~
+a pair of studded leather pants~
+A pair of studded leather pants lie here.~
+~
+9 0 33
+3 0 0 0
+3 500 200
+#5432
+gloves studded leather~
+a pair of studded leather gloves~
+A pair of studded leather gloves lie here.~
+~
+9 0 129
+3 0 0 0
+3 500 200
+#5433
+shield leather~
+a leather shield~
+A leather shield lies here.~
+~
+9 0 513
+5 0 0 0
+3 50 200
+#5434
+sack~
+a sack~
+A sack lies here~
+~
+15 0 16385
+50 0 0 0
+1 20 200
+#5435
+lamp oil oillamp~
+an oil lamp~
+An oil lamp lies here~
+~
+1 0 1
+0 0 48 0
+1 100 200
+#5436
+backpack back pack~
+a backpack~
+A backpack lies here~
+~
+15 0 1025
+75 1 0 0
+8 100 100
+#5437
+basket~
+a basket~
+A basket lies here.~
+~
+15 0 1
+50 0 0 0
+4 250 50
+#5438
+pouch belt~
+a belt pouch~
+A belt pouch lies here~
+~
+15 0 2049 
+25 0 0 0 
+3 100 20
+#5439
+candle~
+a candle~
+A candle lies here~
+~
+1 0 16385
+0 0 50 0
+1 35 10
+#5440
+cheese~
+a hunk of cheese~
+A hunk of cheese lies here.~
+~
+19 0 1
+5 0 0 0
+1 5 10
+#5441
+bread~
+some bread~
+Some bread lies here.~
+~
+19 0 1
+3 0 0 0
+1 3 10
+#5442
+rations dry~
+some dry rations~
+Some dry rations lie here.~
+~
+19 0 1
+20 0 0 0
+2 20 30
+#5443
+rations iron~
+some iron rations~
+A tin of iron rations lies here.~
+~
+19 0 1
+25 0 0 0
+3 25 50
+#5445
+nuts~
+some nuts~
+Some nuts lie scatterd on the ground.~
+~
+19 0 1
+1 0 0 0
+1 1 10
+#5446
+belt~
+a belt~
+A nicely made belt lies here.~
+~
+9 0 2049
+0 0 0 0
+2 2 10
+#5447
+boots hiking~
+a pair of hiking boots~
+A nicely made pair of boots lies here.~
+~
+9 0 65
+0 0 0 0
+3 390 10
+#5448
+cloak fur~
+a fur cloak~
+A nicely made fur cloak lies here.~
+~
+9 0 1025
+0 0 0 0
+2 4550 50
+#5449
+girdle~
+a girdle~
+A nicely made girdle lies here.~
+~
+9 0 2049
+0 0 0 0
+1 375 10
+#5450
+hose~
+a pair of hose~
+A nicely made pair of hose lies here.~
+~
+9 0 33
+0 0 0 0
+1 120 10
+#5451
+robe common~
+a common robe~
+A nicely made robe of common cloth lies here.~
+~
+9 0 5
+0 0 0 0
+2 90 20
+#5452
+robe embroidered~
+an embroidered robe~
+A nicely made robe of embroidered cloth lies here.~
+~
+9 0 5
+0 0 0 0
+2 2500 5
+#5453
+sandals~
+a pair of sandals~
+A nicely made pair of sandals lies here.~
+~
+9 0 65
+0 0 0 0
+1 15 10
+#5454
+sash~
+a sash~
+A nicely made sash lies here.~
+~
+9 0 2049
+0 0 0 0
+1 20 10
+#5455
+jacket silk~
+a silk jacket~
+A nicely made silk jacket lies here.~
+~
+9 0 1025
+0 0 0 0
+1 3800 100
+#5456
+egg~
+an egg~
+An egg lies here.~
+~
+19 0 1
+2 0 0 0
+1 3 10
+#5457
+carrot~
+a carrot~
+A carrot lies here.~
+~
+19 0 1
+3 0 0 0
+1 4 10
+#5458
+tomato~
+a tomato~
+A tomato lies here.~
+~
+19 0 1
+2 0 0 0
+1 8 10
+#5459
+fig~
+a fig~
+A fig lies here.~
+~
+19 0 1
+1 0 0 0
+1 2 10
+#5460
+dates~
+some dates~
+A bunch of dates lies here.~
+~
+19 0 1
+2 0 0 0
+1 4 10
+#5461
+lamb leg~
+a leg of lamb~
+A leg of lamb lies here.~
+~
+19 0 1
+10 0 0 0
+2 10 20
+#5462
+beef side~
+a side of beef~
+A side of beef lies here.~
+~
+19 0 1
+15 0 0 0
+5 20 50
+#5463
+chicken whole~
+a whole chicken~
+A whole skinned chicken lies here.~
+~
+19 0 1
+12 0 0 0
+3 12 30
+#5464
+herring salted~
+a salted herring~
+A salted herring lies here.~
+~
+19 0 1
+8 0 0 0
+1 8 10
+#5465
+muscle~
+a muscle~
+A muscle lies here.~
+~
+19 0 1
+4 0 0 0
+1 4 10
+#5467
+glass liquor blue oasis whisky~
+a glass~
+A glass of blue alcohol rests here.~
+~
+17 0 1
+5 5 5 0
+1 1800 10
+#5468
+glass wine~
+a glass~
+A glass rests here.~
+~
+17 0 1
+1 1 2 0
+1 3800 10
+#5469
+bottle grog ale~
+a bottle of grog~
+A bottle lies here.~
+~
+17 0 1
+2 2 3 0
+1 8000 10
+#5470
+vial glowing blue~
+a glowing blue vial~
+A glowing blue vial lies here.~
+~
+10 ag 16385
+12 1 3 -1
+1 800 15
+E
+vial glowing blue~
+The blueish liquid inside this potion bottle is glowing with
+a strange light.  There is a small label that reads 'Protection'
+~
+#5471
+potion green~
+a deep-green potion~
+A deep-green potion lies here.~
+~
+10 ag 16385
+10 15 35 -1
+1 5000 15
+E
+potion green~
+The potion inside the bottle is a greenish colour and has a
+small label which reads 'Curative'
+~
+#5472
+potion crystal clear~
+a crystal clear potion~
+A crystal clear potion lies here.~
+~
+10 g 16385
+10 50 51 35
+1 3000 15
+E
+potion crystal clear~
+This glass bottle appears to contain a clear liquid.  There is a
+label on the bottle which reads 'Preparation'
+~
+#5473
+potion white~
+an off-white potion~
+An off-white potion lies here.~
+~
+10 0 16385
+15 14 28 36
+1 3000 15
+E
+potion white~
+This potion bottle contains a whitish liquid that looks rather thick.
+A small label reads 'Redemption'
+~
+#5474
+potion dark blue~
+a dark blue potion~
+A dark blue potion lies here.~
+~
+10 0 16385
+10 35 14 -1
+1 4000 15
+E
+potion dark blue~
+This dark blue potion has a small label on it reading 'Restoration'
+~
+#5475
+bottle scorpion flaming beer~
+a flaming scorpion~
+A bottle of strong beer lies here.~
+~
+17 0 1
+5 5 1 0
+1 500 10
+#5476
+barrel beer~
+a barrel~
+A barrel of beer lies here.~
+~
+17 0 1
+10 10 1 0
+15 900 50
+#5477
+shot whisky~
+a shot~
+A shot of strong liquor lies here.~
+~
+17 0 1
+1 1 5 0
+1 350 10
+#5478
+scroll recall~
+a scroll of recall~
+A scroll of recall lies here.~
+~
+2 g 16385
+12 42 -1 -1
+4 2000 25
+#5479
+wand grey silver~
+a grey-silver wand~
+A grey-silver wand lies here.~
+~
+3 gnop 16385
+15 1 1 6
+1 10000 15
+E
+wand grey silver~
+You see a small engraved storm cloud at the base of this wand.
+~
+#5480
+wand yellow~
+a wand of glinting yellow~
+A wand of glinting yellow lies here.~
+~
+3 g 16385
+1 1 1 19
+1 666 15
+E
+wand yellow~
+You see a shape slowly fading into existance at the base of this wand.
+~
+#5481
+wand oak~
+an oak wand~
+A wand of oak lies here.~
+~
+3 g 16385
+5 1 1 32
+1 500 15
+#5482
+wand pink~
+a pink wand~
+A pink wand lies here~
+~
+3 g 16385
+3 1 1 38
+1 5000 15
+#5483
+shears sewing~
+a pair of sewing shears~
+A pair of sewing shears lies here.~
+~
+5 0 8193
+0 1 4 1
+2 100 50
+#5484
+cleaver meat~
+a meat cleaver~
+A meat cleaver lies here~
+~
+5 cd 8193
+0 1 5 0
+5 100 10
+#5485
+pen fountain~
+a fountain pen~
+A fountain pen lies here.~
+~
+5 b 8193
+0 1 3 11
+1 100 5
+#5486
+hammer sledge~
+a sledge hammer~
+A sledge hammer lies here.~
+~
+5 0 8193
+0 2 3 6
+24 200 40
+#5487
+shoe horse~
+a horse shoe~
+A horse shoe lies here.~
+~
+9 bg 16389
+1 0 0 0
+2 1000 200
+A
+18 1
+#5488
+saddle~
+a saddle~
+A saddle lies here.~
+~
+12 0 1
+0 0 0 0
+4 100 50
+#5489
+crop riding~
+a riding crop~
+A riding crop lies here.~
+~
+5 0 8193
+0 1 4 2
+1 50 10
+#5490
+chessboard~
+a chessboard~
+A heavy marble chessboard lies here.~
+~
+5 0 16385
+0 1 30 6
+10 100 20
+#5491
+seed sesame~
+a sesame seed~
+A sesame seed lies here.~
+~
+19 0 16385
+6 0 0 0
+1 10 0
+#5492
+spear gae bolg~
+Gae Bolg~
+A beautiful spear is lying on the ground here.~
+~
+5 agmno 8193
+0 5 3 11
+12 18000 12500
+E
+spear gae bolg~
+The beautiful, glowing spear is close to eight feet long and has
+a bright, polished silver blade that tapers at the end into what
+must be the finest point you have ever seen.
+~
+#5493
+key~
+the jail key~
+The key to the jail lies here.~
+~
+18 c 16385
+5493 0 0 0
+1 100 200
+#5494
+key~
+the dungeon key~
+The dungeon key lies here.~
+~
+18 c 16385
+5494 0 0 0
+1 100 200
+#5495
+claw wolverine~
+the wolverine claw~
+A claw from some animal lies here.~
+~
+5 bl 8193
+0 3 6 8
+2 400 50
+A
+13 -20
+#5496
+wrath allah mace~
+the wrath of Allah~
+A large ornate mace floats above the ground here.~
+~
+5 agmop 8193
+0 4 4 6
+16 25000 12500
+E
+wrath allah mace~
+This enormous weapon looks like it could pound the stuffing out of
+anything or anyone around.
+~
+$

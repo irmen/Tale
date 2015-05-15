@@ -1,0 +1,54 @@
+#63
+Arachnos~
+6300 6399 34 2
+*
+* Created by Mahatma of HexOynx
+*
+* Mobiles
+M 0 6301 10 6301        Young Spider
+M 0 6301 10 6306        Young Spider
+M 0 6301 10 6306        Young Spider
+M 0 6301 10 6304        Young Spider
+M 0 6305 1 6303         Wasp
+M 0 6310 1 6342         Bird Spider
+M 0 6303 1 6313         Wolf Spider
+M 0 6308 5 6308         Slave
+M 0 6308 5 6308         Slave
+M 0 6308 5 6308         Slave
+M 0 6308 5 6308         Slave
+M 0 6308 5 6308         Slave
+M 0 6309 2 6327         Quasit
+M 0 6307 5 6335         Ethereal Spider
+M 0 6307 5 6333         Ethereal Spider
+M 0 6304 1 6332         Stuck Orc
+G 1 6300 1                      Key To Arachnos' Chambers
+M 0 6306 3 6321         Drone Spider
+G 1 6305 10                     Black Potion
+M 0 6306 3 6331         Drone Spider
+G 1 6305 10                     Black Potion
+M 0 6311 1 6373         Hermit
+G 1 6302 2                      Wizard's Hat
+M 0 6315 1 6350         Ki-Rin
+G 1 6109 10                     Blue Potion
+G 1 6109 10                     Blue Potion
+M 0 6314 1 6399         Arachnos
+G 1 6301 5                      Thief's Knife
+G 1 6302 2                      Wizard's Hat
+G 1 6303 2                      Pontiff's Headdress
+G 1 6304 2                      Black Knight's Visor
+M 0 6312 1 6370         Donjonkeeper
+G 1 6301 5                      Thief's Knife
+G 1 6109 10                     Blue Potion
+M 0 6313 1 6367         Guardian
+M 0 6306 3 6330         Drone Spider
+M 0 6302 1 6360         Yevaud
+G 1 6304 2                      Black Knight's Visor
+G 1 7203 1                      Purple Cloak
+M 0 6316 1 6330         Baby Dragon
+M 0 6317 1 6340         Elder Wormkin
+* Doors
+D 0 6392 0 2                    Arachnos' Lair
+D 0 6399 2 2
+*
+S
+$

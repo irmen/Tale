@@ -1,0 +1,72 @@
+#50
+The Great Eastern Desert~
+5000 5099 30 2
+*
+* Created by Rorschach of Alfa
+*
+* Mobiles
+M 0 5015 3 5039         Dustdigger
+M 0 5015 3 5033         Dustdigger
+M 0 5015 3 5049         Dustdigger
+M 0 5017 1 5058         Rabid Camel
+M 0 5000 5 5047         Dervish
+E 1 7211 25 16                  Short Sword
+M 0 5000 5 5033         Dervish
+E 1 7211 25 16                  Short Sword
+M 0 5001 8 5040         Large Dervish
+E 1 3022 25 16                  Long Sword
+M 0 5002 5 5031         Coral Snake
+M 0 5003 5 5050         Small Scorpion
+M 0 5004 1 5036         Purple Worm 
+G 1 5019 10                     Pink Potion 
+G 1 5020 5                      Platinum Wand
+G 1 5021 1                      Energy Bow
+M 0 5005 1 5065         Brass Dragon 
+G 1 5024 1                      Golden Key
+G 1 5022 10                     Encrypted Scroll
+M 0 5006 1 5061         Nomad Leader
+E 1 5016 10 16                  Sabre
+M 0 5007 1 5060         Nomad Commander
+E 1 5017 15 16                  Scimitar
+M 0 5008 5 5059         Nomad Warrior 
+E 1 5018 25 16                  Cutlass
+M 0 5009 10 5057        Slave
+M 0 5010 1 5011         Dracolich 
+E 1 5001 1 5                    Banded Mail
+E 1 5002 1 16                   Halberd
+M 0 5011 3 5009         Drider
+E 1 3022 50 16                  Long Sword
+M 0 5012 3 5014         Duergar
+E 1 5000 15 16                  Mining Pick
+M 0 5013 4 5021         Myconoid
+M 0 5014 1 5021         Myconoid Shaman
+E 1 5003 1 3                    Mushroom Amulet
+* Objects
+O 0 5005 1 5011         Bone
+R 0 5049 5006
+O 0 5006 6 5049         Cactus Cup
+R 0 5031 5006
+O 0 5006 6 5031         Cactus Cup
+R 0 5044 5006
+O 0 5006 6 5044         Cactus Cup
+O 0 5007 1 5060         Basket
+P 0 5012 1 5007                 Stakes
+P 0 5011 1 5007                 Coil Of Rope
+O 0 5008 1 5061         Basket
+P 1 5014 5 5008                 Turban
+O 0 5009 1 5061         Basket
+O 0 5010 1 5061         Basket
+P 1 5013 50 5010                Tattered Map
+O 0 5023 1 5070         Iron Chest
+P 1 5025 3 5023                 Bracelet
+P 1 5026 3 5023                 Ruby
+P 1 5027 3 5023                 Diamond
+P 1 5028 3 5023                 Sapphire
+P 1 5029 3 5023                 Lapis
+P 1 5030 1 5023                 Tiger Jewel
+P 1 5031 1 5023                 Red-Eyed Jewel
+P 1 5032 3 5023                 Emerald
+P 1 5015 1 5023                 Gold
+*
+S
+$

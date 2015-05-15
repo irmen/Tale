@@ -1,0 +1,86 @@
+#6300
+key black~
+a black key~
+A somewhat plain black key has been left here.~
+~
+18 c 16385
+6300 0 0 0
+1 0 0
+#6301
+knife thief~
+a very sharp knife~
+A very sharp knife lies here.~
+~
+5 glmnp 8193
+0 8 1 11
+9 1000 2500
+E
+knife thief~
+A keen knife, very sharp -- you could cut the air in two!
+~
+A
+2 2
+A
+18 3
+#6302
+hat wizard~
+a wizard's hat~
+A blue wizard's hat lies here.~
+~
+9 fgnop 17
+6 0 0 0
+5 20000 10000
+E
+hat wizard~
+A hat made of blue cloth.  It looks very comfortable.
+~
+A
+3 2
+A
+12 17
+#6303
+headress pontiff ornament cone head~
+a pontiff's headress~
+A white cone-shaped head ornament with religious symbols lies here.~
+~
+9 fgmop 17
+6 0 0 0
+5 20000 10000
+E
+headress pontiff ornament cone head~
+A starchy headress worn by powerful secular types.
+~
+A
+4 3
+A
+12 13
+#6304
+visor black knight~
+a black knight's visor~
+A black visor sits here.~
+~
+9 fgmno 17
+8 0 0 0
+5 20000 10000
+E
+visor black knight~
+A visor that protects the head, good for warriors.
+~
+A
+1 1
+A
+5 2
+#6305
+potion thick white~
+a thick white potion~
+A thick white potion has been left here.~
+~
+10 g 1
+25 15 35 19
+9 21000 1000
+E
+potion thick white~
+It is disgusting thick white gunk which looks like liquid web and smells like
+medicine.
+~
+$

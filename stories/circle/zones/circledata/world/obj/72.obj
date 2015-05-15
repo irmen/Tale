@@ -1,0 +1,180 @@
+#7200
+rod devil~
+the devil rod~
+The mysterious devil rod lies on the floor.~
+~
+5 gj 8193
+0 2 5 3
+6 16000 800
+E
+devil rod~
+This is indeed a mysterious rod.  It is dark black at the base but has four
+very sharp purple tentacles at the end.
+~
+A
+18 3
+A
+1 -1
+#7201
+mace large~
+the large mace~
+A large mace lies here.~
+~
+5 g 8193
+0 1 6 7
+10 1000 400
+E
+large mace~
+The mace is pretty large with a weight of 10 lbs.  The head is actually four
+purple tentacles tied together.
+~
+A
+19 2
+#7202
+mace small~
+the small mace~
+a small mace has been left here.~
+~
+5 g 8193
+0 1 6 7
+6 600 200
+E
+small mace~
+This weapon does look like it does a lot of damage, but then you never know.
+It consists of a black handle and a purple head.
+~
+A
+19 1
+#7203
+cloak purple~
+a purple cloak~
+A purple cloak lies on the floor.~
+~
+11 g 5
+0 0 0 0
+20 5000 6000
+E
+cloak purple~
+This is a very fine made cloak from an unknown material, in a nice purple
+color.
+~
+A
+24 2
+A
+17 -10
+#7204
+potion blue neon~
+a neon blue potion~
+A neon blue potion stands on the floor.~
+~
+10 g 1
+14 6 15 16
+4 100 1000
+E
+potion blue~
+In the flask is a transparent electric blue liquid.
+~
+#7205
+key black~
+a black key~
+A black key has been left on the floor.~
+~
+18 c 16385
+0 0 0 0
+2 0 0
+E
+black key~
+This little key is made from a black metal of unknown origin.
+~
+#7206
+skull white~
+a strange white skull~
+A strange white skull lies on the floor looking at you.~
+~
+9 abh 17
+1 0 0 0
+30 0 250
+E
+white skull~
+The skull has two small horns in the forehead. You notice some writing on
+the inside.
+~
+E
+writing text~
+You read the number '666'.
+~
+A
+2 -4
+#7207
+gauntlets muddy~
+a pair of muddy gauntlets~
+A pair of muddy gauntlets have been thrown away here.~
+~
+9 g 129
+6 0 0 0
+10 6000 1500
+E
+muddy gauntlets~
+These gauntlets are muddy indeed, however they look very effective.
+~
+A
+1 1
+#7208
+stick small~
+a small stick~
+A small stick lies here.~
+~
+1 0 16385
+0 0 -1 0
+4 200 200
+E
+small stick~
+The small stick does not look interesting at all.  But just as you are going
+to throw it away you notice some small letters.
+~
+E
+letters letter~
+They read:
+
+Hold me
+
+~
+#7209
+boots muddy~
+a pair of muddy boots~
+A pair of muddy boots has been dropped here.~
+~
+9 g 65
+4 0 0 0
+10 75 500
+E
+boots muddy~
+The boots are muddy and they look well worn, but also very comfortable.
+~
+A
+14 15
+#7210
+treasure coins~
+a huge treasure~
+There is a huge treasure here, looking very valuable.~
+~
+20 0 1
+6522 0 0 0
+5 6522 0
+E
+treasure coins~
+This looks like a whole lot of coins.
+~
+#7211
+sword short~
+a short sword~
+A short sword is lying here.~
+~
+5 0 8193
+0 2 3 3
+4 100 300
+E
+short sword~
+This is a very nice little weapon.
+~
+$

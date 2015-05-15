@@ -1,0 +1,171 @@
+CircleMUD v3.0 Shop File~
+#12011~
+3020
+3021
+3022
+3023
+3024
+3025
+12008
+-1
+2.25
+0.6
+WEAPON
+ARMOR
+-1
+%s We are out of that item right now.~
+%s You don't have that.  Stop wasting my time!~
+%s This is a weapon and armour shop!  Go someplace else!~
+%s A fine weapon indeed, but more than I can afford.~
+%s NO CREDIT!~
+%s Here you go.  That will be %d coins.  Don't get hurt!~
+%s You'll get %d for that.~
+0
+0
+12011
+0
+12006
+-1
+0
+28
+0
+0
+#12012~
+12006
+12007
+-1
+1.2
+0.6
+-1
+%s I don't have anything like that.  Sorry.~
+%s I don't think you have that.~
+%s I don't stock that stuff.  Try another shop.~
+%s I can't afford to buy anything, I'm only a poor peddler.~
+%s No cash, no goods!~
+%s Here you go.  That'll be... %d coins.~
+%s Thank-you very much.  Here are your %d coins as payment.~
+1
+0
+12012
+0
+12032
+-1
+7
+13
+14
+19
+#12016~
+-1
+1.6
+0.3
+-1
+%s We don't sell that.~
+%s I don't think you have that.~
+%s I don't stock that stuff.  Try another shop.~
+%s I can't afford to buy anything, I'm only a poor peddler.~
+%s No cash, no goods!~
+%s Here you go.  That'll be... %d coins.~
+%s Thank-you very much.  Here are your %d coins as payment.~
+1
+0
+12016
+0
+12003
+12004
+12008
+12015
+12022
+12023
+-1
+9
+17
+18
+22
+#12034~
+3050
+3051
+3052
+3053
+3054
+12030
+-1
+1.85
+0.5
+SCROLL
+WAND
+-1
+%s We don't carry that item.~
+%s You don't have that.~
+%s I can't buy that.  See another shop.~
+%s We are low on cash.  Come back later.~
+%s Sorry, but you can't afford that.~
+%s Here you go.  That will cost you %d.~
+%s I will give you %d coins for that.~
+2
+2
+12034
+96
+12042
+-1
+8
+18
+0
+0
+#12036~
+3000
+3001
+3009
+3010
+3011
+12006
+12007
+-1
+1.1
+0.8
+-1
+%s We don't have that item in stock right now.~
+%s I don't think you have that item.~
+%s Hmmmm... if I was in a good mood, I'd consider it.  But I'm not.~
+%s The Emperor's tax collector just came.  I don't have the cash.  Sorry.~
+%s NO CREDIT!  We don't even take the Renaissance Express card!~
+%s That will be %d coins.  Enjoy!~
+%s You'll get %d coins for that.~
+2
+2
+12036
+0
+12062
+-1
+0
+28
+0
+0
+#12037~
+3030
+3031
+3032
+3033
+3036
+12003
+-1
+1.75
+0.6
+-1
+%s We don't have that item on stock.~
+%s I don't think you have that.~
+%s I don't stock that stuff.  Try another shop.~
+%s I can't afford it right now.  Come back tomorrow.~
+%s No cash, no goods!~
+%s Here you go.  That'll be... %d coins.~
+%s Thank-you very much.  Here are your %d coins as payment.~
+2
+2
+12037
+0
+12063
+-1
+6
+20
+0
+0
+$~

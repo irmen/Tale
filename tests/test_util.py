@@ -356,6 +356,12 @@ class TestUtil(unittest.TestCase):
         ctx.x = 99
         self.assertEqual(99, ctx.x)
 
+    def test_storyname(self):
+        self.assertEqual("name", util.storyname_to_filename("NaMe"))
+        self.assertEqual("story_name_dot", util.storyname_to_filename("story name.dot"))
+        self.assertEqual("name", util.storyname_to_filename("name\\/*"))
+        self.assertEqual("name", util.storyname_to_filename("name'\""))
+
 
 if __name__ == '__main__':
     unittest.main()

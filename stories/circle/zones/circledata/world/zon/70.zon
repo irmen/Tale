@@ -1,0 +1,23 @@
+#70
+The Sewer, First Level~
+7000 7099 15 2
+*
+* Mobiles
+M 0 7001 9 7041         The Mean Bat
+M 0 7001 9 7025         The Mean Bat
+M 0 7001 9 7004         The Mean Bat
+M 0 7001 9 7004         The Mean Bat
+M 0 7002 3 7049         The Sewer Rat
+M 0 7002 3 7031         The Sewer Rat
+M 0 7003 8 7039         The Small Hairy Spider
+M 0 7003 8 7039         The Small Hairy Spider
+M 0 7003 8 7039         The Small Hairy Spider
+M 0 7003 8 7037         The Small Hairy Spider
+M 0 7003 8 7037         The Small Hairy Spider
+M 0 7003 8 7050         The Small Hairy Spider
+* Doors
+D 0 7047 1 1            South End Of The Grand Sewer
+D 0 7053 3 1
+* 
+S
+$

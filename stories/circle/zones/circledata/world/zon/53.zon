@@ -1,0 +1,127 @@
+#53
+The Great Pyramid~
+5300 5399 20 2
+*
+* Created by Andersen of HexOynx.
+*
+* Modifed and edited for CircleMUD by Furry
+*
+* Mobiles
+M 0 5300 6 5302         Asp
+M 0 5300 6 5305         Asp
+M 0 5300 6 5313         Asp
+M 0 5300 6 5340         Asp
+M 0 5301 4 5303         Cobra
+M 0 5301 4 5341         Cobra
+M 0 5302 3 5306         Mongoose
+M 0 5302 3 5316         Mongoose
+M 0 5302 3 5326         Mongoose
+M 0 5303 6 5309         Pyramid Watcher
+E 1 5300 6 16                   Egyptian Mace
+M 0 5303 6 5309         Pyramid Watcher
+E 1 5301 10 12                  Sand-Coloured Robes
+M 0 5303 6 5337         Pyramid Watcher
+E 1 5300 6 16                   Egyptian Mace
+M 0 5303 6 5337         Pyramid Watcher
+E 1 5301 10 12                  Sand-Coloured Robes
+M 0 5303 6 5340         Pyramid Watcher
+E 1 5300 6 16                   Egyptian Mace
+M 0 5303 6 5340         Pyramid Watcher
+E 1 5301 10 12                  Sand-Coloured Robes
+M 0 5304 6 5325         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5304 6 5326         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5304 6 5333         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5304 6 5334         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5304 6 5335         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5304 6 5342         Tomb Thief
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5305 1 5343         Ali Baba
+E 1 5303 4 6                    Cloth Turban
+E 1 5302 7 16                   Obsidian Dagger
+M 0 5306 1 5323         Magic Carpet
+M 0 5307 4 5325         Mummy
+E 1 5304 5 5                    Cloth Wrappings
+G 1 5306 3                      Jar Of Formaldehyde
+M 0 5307 4 5325         Mummy
+E 1 5304 5 5                    Cloth Wrappings
+G 1 5305 2                      Bottle Of Embalming Fluid
+M 0 5307 4 5337         Mummy
+E 1 5304 5 5                    Cloth Wrappings
+M 0 5307 4 5341         Mummy
+E 1 5304 5 5                    Cloth Wrappings
+M 0 5308 4 5354         Sandman
+M 0 5308 4 5355         Sandman
+M 0 5308 4 5356         Sandman
+M 0 5308 4 5357         Sandman
+M 0 5309 1 5311         Efreet
+E 1 5307 4 17                    Ball Of Flame
+M 0 5310 2 5345         Caryatid
+E 1 5308 3 16                   Stone Scimitar
+M 0 5310 2 5345         Caryatid
+E 1 5308 3 16                   Stone Scimitar
+G 1 5309 1                      Stone Key
+*
+* Note: The Second One Was Given The Key To Require That BOTH Be Killed
+* At Some Time For The Key To Be Reloaded.  This Way If Players Only Kill
+* The Second One, The First One Will Be Loaded W/O Key On The Next Reset.
+* Of Course, This Won't Really FORCE The Previous Players To Kill Both,
+* But It Is More Balanced Than Always Fighting Only The First Caraytid.
+* And Also The Treasure Of The Pharoahs
+*
+M 0 5311 1 5323         Djinn
+E 1 5313 4 17                   Lamp
+M 0 5312 3 5348         Hieracosphinx
+M 0 5312 3 5349         Hieracosphinx
+M 0 5312 3 5351         Hieracosphinx
+M 0 5313 2 5350         Gynosphinx
+M 0 5313 2 5350         Gynosphinx
+G 1 5314 2                      Ankh
+M 0 5314 2 5352         Criosphinx
+M 0 5314 2 5352         Criosphinx
+G 1 5315 2                      Book Of Riddles
+M 0 5315 1 5347         Androsphinx
+G 1 5316 2                      Lion's Paw
+M 0 5316 1 5358         Great Sphinx
+E 1 5317 1 17                   Answer
+M 0 5317 1 5332         Lord Ramses
+G 1 5319 1                      Pile Of Sand
+G 1 5320 3                      Curse Of The Mummy
+G 1 5321 2                      Small Elixir
+G 1 5321 2                      Small Elixir
+E 1 5322 1 6                    Golden Mask
+* Objects
+O 1 5318 1 5359         The Treasure Of The Sphinx
+O 1 5324 1 5359         A Sun Wand
+O 1 5325 1 5359         A Sandy Ring
+O 1 5326 1 5359         A Small Golden Sphinx
+O 1 5327 1 5359         Sphinxian Leggings
+O 0 5323 1 5319         Key
+O 0 5310 1 5345         The Stone Sarcophagus
+P 1 5311 2 5310                 Dust
+P 1 5312 1 5310                 The Scarab
+* Doors
+D 0 5306 5 1     Stone Atop The Pyramid
+D 0 5308 4 1     
+D 0 5309 3 1     Fire Pool
+D 0 5310 1 1     
+D 0 5322 2 2     Entrance To The Vault Of The Lamp
+D 0 5323 0 2     
+D 0 5326 3 2     Coffin Lid
+D 0 5327 1 2       * Note That This Has No Key Number, Locking You In
+D 0 5329 2 1     Stone Into The Ancient Hall
+D 0 5330 0 1     
+D 0 5331 5 1     The Stone Into The Tomb Of Ramses
+D 0 5332 4 1     
+D 0 5343 5 1     Floor Into The Tomb
+D 0 5344 4 1     
+D 0 5344 0 1     Tomb Of The Pharoahs
+D 0 5345 2 1     
+D 0 5358 2 2     Entrance To The Hole In The Sand
+*
+S
+$

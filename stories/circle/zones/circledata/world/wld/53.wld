@@ -1,0 +1,1465 @@
+#5300
+The Great Eastern Desert~
+   A vast desert stretches for miles, the sands constantly shifting around
+you.  Rising out of the sand to the north you see a mighty pyramid.
+~
+53 0 2
+D0
+The sands of the desert continue onward towards the pyramid.
+~
+~
+0 -1 5301
+D1
+Sand as far as the eye can see.
+~
+~
+0 -1 5040
+D2
+Sand as far as the eye can see.
+~
+~
+0 -1 5050
+D3
+Sand as far as the eye can see.
+~
+~
+0 -1 5035
+E
+pyramid~
+The massive pyramid rises out of the sand, a monument to long-dead pharoahs.
+~
+S
+#5301
+At The Base Of The Pyramid~
+   The mighty pyramid towers above you out of the hot desert sands, made
+from huge blocks of stone that have been coated over with a rough sandy
+plaster-like substance.  The face of the pyramid is steep, but you think
+you might be able to climb it.
+~
+53 0 2
+D2
+Sand as far as the eye can see.
+~
+~
+0 -1 5300
+D4
+The steep slope of the pyramid rises up before you.
+~
+~
+0 -1 5302
+E
+pyramid~
+You wonder how anyone could have built such a massive thing out in this
+heat.
+~
+S
+#5302
+Climbing The Great Pyramid~
+   Hot air rises off the sides of the pyramid, and the wind chokes you with
+a flurry of sand and dust.  So far you have made it halfway up the side.  The
+walls of the pyramid are quite steep.
+~
+53 0 5
+D0
+If you are daring you could try to skirt around to the northern side.
+~
+~
+0 -1 5303
+D2
+If you are daring you could try to skirt around to the southern side.
+~
+~
+0 -1 5304
+D4
+It looks too dangerous to try to climb any higher.
+~
+~
+0 -1 5307
+D5
+Far below you are the burning sands of the desert.
+~
+~
+0 -1 5301
+E
+pyramid~
+You wonder how anyone could have built such a massive thing out in this
+heat.
+~
+S
+#5303
+Climbing The Great Pyramid~
+   Hot air rises off the sides of the pyramid, and the wind chokes you with
+a flurry of sand and dust.  The walls of the pyramid are quite steep, and
+you are having trouble keeping from sliding down into the sands below.
+~
+53 0 5
+D1
+If you are daring you could try to skirt around to the eastern side.
+~
+~
+0 -1 5305
+D3
+If you are daring you could try to skirt around to the western side.
+~
+~
+0 -1 5302
+D4
+It looks too dangerous to try to climb any higher.
+~
+~
+0 -1 5307
+D5
+This side of the pyramid has a dangerous drop before the sandy floor.
+~
+~
+0 -1 5307
+E
+pyramid~
+You wonder how anyone could have built such a massive thing out in this
+heat.
+~
+S
+#5304
+Climbing The Great Pyramid~
+   Hot air rises off the sides of the pyramid, and the wind chokes you with
+a flurry of sand and dust.  The walls of the pyramid are quite steep, and
+you are having trouble keeping from sliding down into the sands below.
+~
+53 0 5
+D1
+If you are daring you could try to skirt around to the eastern side.
+~
+~
+0 -1 5305
+D3
+If you are daring you could try to skirt around to the western side.
+~
+~
+0 -1 5302
+D4
+It looks too dangerous to try to climb any higher.
+~
+~
+0 -1 5307
+D5
+This side of the pyramid has a dangerous drop before the sandy floor.
+~
+~
+0 -1 5307
+E
+pyramid~
+You wonder how anyone could have built such a massive thing out in this
+heat.
+~
+S
+#5305
+Climbing The Great Pyramid~
+   Here on the eastern side of the pyramid there is a little more shelter
+from the heat and wind.  The stone side is not nearly so slippery smooth
+from the ravages of time, and you think you may be able to even reach the
+top from here.
+~
+53 0 5
+D0
+If you are daring you could try to skirt around to the northern side.
+~
+~
+0 -1 5303
+D2
+If you are daring you could try to skirt around to the southern side.
+~
+~
+0 -1 5304
+D4
+You see the apex of the pyramid many yards above you.
+~
+~
+0 -1 5306
+D5
+This side of the pyramid has a dangerous drop before the sandy floor.
+~
+~
+0 -1 5307
+E
+pyramid~
+You wonder how anyone could have built such a massive thing out in this
+heat.
+~
+S
+#5306
+The Apex Of The Great Pyramid~
+   Bathed in sweat, you have managed to reach the summit of the great
+pyramid.  The four sides of the pyramid slope sharply down into the
+hot sands in all four cardinal directions.
+A plaque has been set into the sandy stones beneath your feet.
+~
+53 0 1
+D0
+The north side of the pyramid slopes down into the sands.
+It looks really dangerous.  I wouldn't go that way.
+~
+~
+0 -1 5307
+D1
+The east side of the pyramid slopes down into the sands.
+~
+~
+0 -1 5305
+D2
+The south side of the pyramid slopes down into the sands.
+It looks really dangerous.  I wouldn't go that way.
+~
+~
+0 -1 5307
+D3
+The west side of the pyramid slopes down into the sands.
+It looks really dangerous.  I wouldn't go that way.
+~
+~
+0 -1 5307
+D5
+You see some sandy stones pressed closely together to form a hard surface.
+~
+stones~
+1 -1 5308
+E
+stones~
+As you look closer you can make out a crack in the center of the stones
+beneath your feet.  With some effort you might be able to lift that 
+section up and get inside!
+~
+E
+plaque~
+The plaque reads:
+
+                        The Great Pyramid
+
+                Created by the Andersen work crew.
+
+~
+S
+#5307
+On The Dangerous Stones~
+   Here the elements have carved away at the sides of the pyramid quite a 
+bit.  You aren't so sure of your footing anymore...
+
+Suddenly the wind picks up, and you lose your balance!
+You tumble down the side of the pyramid, and fall to your death!
+
+SPLAT.
+
+Ouch.
+~
+53 bd 0
+S
+#5308
+A Ladder~
+   You are climbing an ancient ladder that leads down into the depths of
+the pyramid.  The air around is thick with layers of dust and a strange
+musty smell.  Above you you see tiny beams of light coming through the
+stones of the ceiling.
+~
+53 cd 0
+D4
+You see the sandy stones of the ceiling.
+~
+stones~
+1 -1 5306
+D5
+You see a small dusty chamber.
+~
+~
+0 -1 5309
+E
+stones~
+As you look closer you can make out a crack in the center of the stones
+above your head.  With some effort you might be able to lift that section
+up and get outside!
+~
+S
+#5309
+A Musty Chamber~
+   You are standing in a dank, musty chamber just inside the pyramid. 
+Footprints and other strange marks are set into the dusty floor here.
+It would seem that some of the tenants of this monument are still alive.
+Exits lead in all directions.   The door to the west is covered with
+inscriptions.
+~
+53 d 0
+D0
+You see a tiny crawlway raised about three feet off the ground.
+~
+~
+0 -1 5312
+D1
+A dust-covered hallway leads off to the east.
+~
+~
+0 -1 5339
+D2
+You see a small crack in the wall through which you might be able to slide.
+~
+~
+0 -1 5324
+D3
+You see a large stone door, covered in sigils and hieroglyphs.
+~
+door stone~
+1 -1 5310
+D4
+A small rickety ladder leads up.
+~
+~
+0 -1 5308
+E
+door stone~
+The stone door is covered in strange inscriptions and hieroglyphs that warn
+you not to proceed any further.
+~
+E
+sigils hieroglyphs inscriptions writing~
+You cannot understand the strange glyphs that cover the door, but most of
+them seem to depict scenes of fire and massive creatures of apparently
+tremendous strength.  You have a feeling that the glyphs are serving as a
+warning.
+~
+S
+#5310
+The Fire Pool~
+   This room is dominated by a massive raised pool that is filled with
+not water but flames of intense heat.  The multicoloured flames lick out
+at you, searching for things to burn.  The pool proceeds to the east into
+a small chamber.
+~
+53 cd 0
+D1
+You see a large stone door.
+~
+door stone~
+1 -1 5309
+D3
+You see a small chamber filled with fire.
+~
+~
+0 -1 5311
+S
+#5311
+The Chamber Of The Efreet~
+   You make your way across the fire pool, and into a small stone chamber.
+Here the flames are nearly as high as your head, singeing your face and 
+evaporating your sweat instantaneously.
+~
+53 d 7
+D1
+The pool of fire ends to the east.
+~
+~
+0 -1 5310
+S
+#5312
+A Tiny Crawlway~
+   You have to go down onto your hands and knees to fit inside this tiny
+space.  The crawlway is thick with sand and dust, and markings of the
+passage of other creatures.
+~
+53 ad 0
+D0
+The crawlway continues to the north.
+~
+~
+0 -1 5313
+D2
+The crawlway ends to the south in a musty chamber.
+~
+~
+0 -1 5309
+D4
+A small hole above your head leads into a dank chamber.
+~
+~
+0 -1 5337
+S
+#5313
+A Tiny Crawlway~
+   You are on your hands and knees, inside a small crawlway that winds
+through the inside of the pyramid.  The crawlway is thick with sand, dust, 
+and markings of the passage of other creatures.
+~
+53 ad 0
+D2
+The crawlway continues to the south.
+~
+~
+0 -1 5312
+D3
+The crawlway continues to the west.
+~
+~
+0 -1 5314
+S
+#5314
+A Tiny Crawlway~
+   You are on your hands and knees, inside a small crawlway that winds
+through the inside of the pyramid.  The crawlway is thick with sand, dust, 
+and markings of the passage of other creatures.
+~
+53 ad 0
+D1
+The crawlway continues to the east.
+~
+~
+0 -1 5313
+D3
+The crawlway gets a little tighter to the west.
+~
+~
+0 -1 5315
+S
+#5315
+A Tightening In The Crawlway~
+   Here you are forced to slide on your belly through a particularly tight
+section of the crawlway, as the stones of the pyramid close together about
+you.  Below you is a small, slippery-looking hole that plummets into
+blackness.
+~
+53 ad 0
+D1
+The crawlway gets a little larger to the east.
+~
+~
+0 -1 5314
+D2
+The crawlway continues to diminish in size to the south.
+~
+~
+0 -1 5316
+D5
+The hole looks very slippery and very dark.
+~
+~
+0 -1 5317
+S
+#5316
+The Crawlway's End~
+   The crawlway shrinks away to nothing as the sandy stones of the pyramid
+close together into a space through which only a snake could fit.   There is
+barely enough space to turn around and make your way back through the tiny
+crawlway to the north.
+~
+53 ad 0
+D0
+The crawlway gets a little larger to the north.
+~
+~
+0 -1 5315
+S
+#5317
+A Slippery Hole~
+   The sides of this hole are slippery-smooth.  You lower yourself in, and 
+proceed to move downward... when suddenly you lose your purchase!
+
+You fall for what seems like an eternity, and smash into the stones below...
+
+
+
+Under The Hole
+   You are in a small chamber underneath the slippery hole, far below
+the pyramid now.   The floor is strewn with bones.  To the south is a
+small rocky crevasse.
+~
+53 acd 0
+D2
+You see a rocky crevasse that proceeds deep under the pyramid.
+~
+~
+0 -1 5319
+D4
+The hole looks far too slippery to climb back up.
+~
+~
+0 -1 -1
+E
+bones~
+The bones have whitened and cracked in the dry air, apparently the remains 
+of adventurers, thieves, and creatures that did not survive the fall.
+~
+S
+#5318
+Under The Hole~
+   You are in a small chamber underneath the slippery hole, far below
+the pyramid now.   The floor is strewn with bones.  To the south is a
+small rocky crevasse.
+~
+53 ad 0
+D2
+You see a rocky crevasse that proceeds deep under the pyramid.
+~
+~
+0 -1 5319
+D4
+The hole looks far too slippery to climb back up.
+~
+~
+0 -1 -1
+E
+bones~
+The bones have whitened and cracked in the dry air, apparently the remains 
+of adventurers, thieves, and creatures that did not survive the fall.
+~
+S
+#5319
+A Rough Crevasse~
+   You are now exploring deep within a strange rocky crevasse that plunges
+down into the rock on which the pyramid was constructed.  To the south you
+see the flickering light of a fire, and the crevasse proceeds downward.
+~
+53 d 0
+D0
+You see a small stone chamber littered with bones.
+~
+~
+0 -1 5318
+D2
+You see the flickering light of a small fire.
+~
+~
+0 -1 5320
+D5
+The crevasse continues downward into total darkness.
+~
+~
+0 -1 5321
+E
+rough~
+As you look through the rough terrain, your eyes catch a small glint of light!
+~
+S
+#5320
+A Small Fire~
+   Here a small fire burns in a nook in the rocks, providing some warmth and
+comforting light in the cold, dark, dry air.
+Standing here is a strange-looking old man, who stares at you balefully.
+~
+53 d 0
+D0
+You see a massive crevasse that plunges into darkness.
+~
+~
+0 -1 5319
+E
+man old~
+The old man looks like he has been trapped down here far too long, and
+has begun to lose his mind.  He moves about slowly, cackling to himself.
+
+He turns to you and shouts, 'nope measse!  nope measse!', then turns 
+back and stares into the fire.
+
+'What a strange person,' you think to yourself.
+
+~
+S
+#5321
+Down The Crevasse~
+   The crevasse proceeds downward into the dark depths of the earth.
+The air about you is now cold and quite dry, and your light source
+gutters in a cool breeze that wafts up from below.
+~
+53 ad 0
+D4
+It is too dark for you to see any further along the crevasse.
+~
+~
+0 -1 5319
+D5
+It is too dark for you to see any further along the crevasse.
+~
+~
+0 -1 5322
+S
+#5322
+At The Crevasse's End~
+   Here the crevasse comes to an abrupt end.  A chilling wind howls
+at your face from a black shape to the south, but the light from your
+source is too dim to see exactly what it is.
+~
+53 ad 0
+D2
+You see a strange-looking black shape.
+~
+sesame~
+2 5323 5323
+D4
+It is too dark for you to see anything along the crevasse.
+~
+~
+0 -1 5321
+E
+black shape~
+Wind howls about your ears like the roar of a tiger.  As your eyes
+adjust to the light the shape to the south almost seems to take the
+form of a massive animal head.
+~
+E
+tiger head animal sesame~
+You are now certain that the wind is the cold breath of some unearthly
+giant animal, whose voice rumbles lowly on the breeze, and whose
+massive jaws could easily swallow you whole.
+
+You move closer for a better look, when suddenly a pair of eyes flashes.
+A cold voice echoes: 'SEEK YE THE DIAMOND... IN THE ROUGH...'
+
+... Then all is silent.
+~
+S
+#5323
+The Vault Of The Lamp~
+   The jaws of the massive stone tiger part wide to reveal a great vault.
+An arched ceiling lies far above your head... and all about you is a low
+guttural rumbling noise and a chill wind.
+Giant heaps of ancient treasure, gold coins, and valuables surround you
+on all sides.
+~
+53 ad 0
+D0
+Through the jaws of the tiger you see the blackness of the crevasse.
+~
+~
+2 5323 5322
+E
+treasure gold coins valuables~
+You reach for some of the tasty goodies, when you hear a loud rumbling
+sound and see a bright flash of light...
+
+Then the words: 'TAKE ONLY THE LAMP... TOUCH NOTHING ELSE.'
+
+... All is silent once again.
+~
+S
+#5324
+A Crack In The Wall~
+   You exhale, and squeeze yourself into the narrow crack in the wall.
+Dust fills your eyes as you disturb it, and chunks of mortar and stone
+mixed with a touch of sand fall on you as you scrape your way through.
+~
+53 ad 0
+D0
+You see a musty chamber.
+~
+~
+0 -1 5309
+D2
+You see a tomb.
+~
+~
+0 -1 5325
+S
+#5325
+A Looted Tomb~
+  The floor of this small tomb is littered with the lids of 
+smashed sarcophagi, bits of treasure dropped by thieves and
+looters, and corpses pulled from their resting places.
+~
+53 d 0
+D0
+You see a small crack in the wall through which you might be able to slide.
+~
+~
+0 -1 5324
+D1
+To the east is another tomb.
+~
+~
+0 -1 5333
+D3
+To the west is another tomb.
+~
+~
+0 -1 5326
+S
+#5326
+A Demolished Tomb~
+  This tomb has been utterly destroyed by thieves and looters in search of
+the treasures of the pharoahs.  Nothing of interest remains in this room,
+except a large stone coffin that leans against the western wall.
+~
+53 d 0
+D1
+To the east is another tomb.
+~
+~
+0 -1 5325
+D3
+You see a large stone coffin.
+~
+coffin lid~
+2 5312 5327
+E
+coffin lid~
+The coffin is sculpted into the form of a man, standing several heads above
+you, and clad in the garments of pharoahs.  It has apparently been untouched
+by the ravages of time and the activities of looters.  Several markings on the 
+side indicate spots where unsuccessful attempts were made to open the coffin.
+
+You can't see any way to open it.
+~
+E
+man garments pharoah~
+As you look closer at the figure sculpted into the stone coffin you notice a
+small marking carved into its chest.  It looks like a scarab or small beetle
+would fit into the small space, if properly sized.
+
+Hmmm.
+~
+S
+#5327
+A Stairway~
+   You stand now at the head of a stairway that goes down into darkness.
+The steps and walls are smooth sandy stone, covered with a thick layer
+of dust.  Some inscriptions are carved into the wall here.
+~
+53 ad 0
+D1
+You see the backside of the coffin lid, featureless stone.
+~
+coffin lid~
+2 -1 5326
+D5
+It is too dark to see down the stairway.
+~
+~
+0 -1 5328
+E
+inscriptions~
+You blow dust away from the inscriptions to read:
+
+Beware the curse of the mummy.
+
+~
+E
+coffin lid~
+On this side the coffin lid is smooth featureless stone.
+~
+S
+#5328
+A Stairway~
+   You are on a stairway that disappears into darkness in both directions.
+The smooth, uneven steps of the stairway have not been travelled in what
+appears to be centuries.
+~
+53 ad 0
+D4
+It is too dark to see up the stairway.
+~
+~
+0 -1 5327
+D5
+It is too dark to see down the stairway.
+~
+~
+0 -1 5329
+S
+#5329
+A Stairway~
+   You stand now at the base of the uneven stairway.  The walls, floor,
+and ceiling of this small landing are covered with strange hieroglyphics.
+~
+53 ad 0
+D2
+You see a seam in the stone wall.
+~
+stone~
+1 -1 5330
+D4
+It is too dark to see up the stairway.
+~
+~
+0 -1 5328
+E
+walls floor ceiling hieroglyphics~
+The hieroglyphics are covered with a thick layer of dust.  You clear the
+dust away with your hand, and find that you cannot comprehend them.
+~
+S
+#5330
+The Ancient Hall~
+   Here the air is deathly still, motes of dust thickly obscuring your
+vision.  Several stone statues line the walls of the hall, depicting the 
+gods of an ancient society.  Strange glyphs and sigils cover the walls, a 
+peculiar pictorial form of written language that you don't understand.
+   Some steps lead to a raised dais to the south.
+~
+53 ad 0
+D0
+You see a seam in the stone wall.
+~
+stone~
+1 -1 5329
+D2
+You see a small raised dais.
+~
+~
+0 -1 5331
+E
+writings glyphs sigils hieroglyphics symbols~
+You don't understand the meaning of these symbols.
+~
+S
+#5331
+A Raised Dais~
+   You are at the southern end of the ancient hall, the dust and darkness
+absorbing your light so that you cannot see past the steps of the dais.
+A low pedestal rests here.  You see something written into the face of it.
+~
+53 ad 0
+D0
+You cannot see past the steps of the dais.
+~
+~
+0 -1 5330
+D5
+You see a seam in the stone floor.
+~
+tomb~
+1 -1 5332
+E
+pedestal writings~
+The writings are covered in sand and worn nearly away by the passage
+of time: 'I am Ramses the Damned, once counselor and aide to the mightiest
+of pharoahs and queens of this land.  Much time has passed since I last
+walked the earth.  Disturb my rest at your peril.'
+~
+S
+#5332
+The Tomb Of Ramses~
+   You stand in an empty tomb, a cubicle no more then ten feet to a side.
+~
+53 ad 0
+D4
+That leads back the way you came.
+~
+tomb~
+1 -1 5331
+S
+#5333
+A Ransacked Tomb~
+  This tomb has been completely ransacked and destroyed by the actions
+of pyramid thieves and looters.  The floor is littered with junk.
+~
+53 d 0
+D1
+To the east is a low-ceilinged tunnel.
+~
+~
+0 -1 5334
+D3
+To the west is another tomb.
+~
+~
+0 -1 5325
+S
+#5334
+A Tunnel~
+   The low-ceilinged tunnel runs east-west.
+~
+53 ad 0
+D1
+You cannot see into the darkness of the low tunnel.
+~
+~
+0 -1 5335
+D3
+You see a tomb.
+~
+~
+0 -1 5333
+S
+#5335
+A Fork In The Tunnel~
+   Here the tunnel forks off through a gaping hole down in the
+southern wall, continuing onward to the east and west as well.
+~
+53 ad 0
+D1
+You cannot see into the darkness of the low tunnel.
+~
+~
+0 -1 5336
+D2
+The hole is low, at the floor of the southern wall.
+~
+~
+0 -1 -1
+D3
+You cannot see into the darkness of the low tunnel.
+~
+~
+0 -1 5334
+D5
+Through the hole you see rubble and sand.
+~
+~
+0 -1 5346
+E
+hole~
+The hole is low, at the floor of the southern wall.
+~
+S
+#5336
+A Tunnel~
+   The low-ceilinged tunnel makes a turn to the west and ends
+to the north as it spills out into a dusty hallway.
+~
+53 ad 0
+D0
+The mouth of the tunnel is stone that has been torn away by looters.
+~
+~
+0 -1 5342
+D3
+You cannot see into the darkness of the low tunnel.
+~
+~
+0 -1 5335
+S
+#5337
+A Dank Chamber~
+   This chamber has a dank, dusty, musty smell to it.  Small footprints
+in the dust betray the recent passage of some sort of creatures.  A hole 
+in the floor lies to the west and a stairway is to the east.
+~
+53 d 0
+D1
+You see a spiral stone stairway.
+~
+~
+0 -1 5338
+D3
+You see only blackness through the hole in the floor.
+~
+~
+0 -1 5312
+S
+#5338
+A Spiral Stairway~
+   Some dusty, broken stone stairs here spiral slowly in a constricted
+space down towards a dusty hallway.
+~
+53 d 0
+D4
+The stairs spiral up into a dank chamber.
+~
+~
+0 -1 5337
+D5
+The stairs spiral down into a dusty hallway.
+~
+~
+0 -1 5341
+S
+#5339
+A Dust-Covered Hallway~
+   This hallway is covered with dust that has accumulated over the
+centuries that the pyramid has stood.  Small markings and footprints
+in the dust betray the recent passage of others -- perhaps thieves?
+~
+53 d 0
+D1
+The hallway proceeds to the east towards a strange smell.
+~
+~
+0 -1 5340
+D3
+The hallway proceeds towards the west towards a musty smell.
+~
+~
+0 -1 5309
+S
+#5340
+A Smelly Chamber~
+   This small chamber has a sickly putrescent smell to it, the
+smell of formaldehyde and other ointments used to preserve the
+corpses of those who died ages ago.
+~
+53 d 0
+D1
+You see a dusty hallway.
+~
+~
+0 -1 5341
+D3
+You a dusty hallway.
+~
+~
+0 -1 5339
+S
+#5341
+A Dust-Covered Hallway~
+   This hallway is covered with a thick, choking dust that rises
+up to obscure your light source and sting your eyes.  Small marks
+and footprints in the dust betray the recent passage of others.
+~
+53 d 0
+D1
+The hallway turns to the north.
+~
+~
+0 -1 5342
+D3
+You smell something peculiar over there.
+~
+~
+0 -1 5340
+D4
+A tightly spiralling stone stairway leads up.
+~
+~
+0 -1 5338
+S
+#5342
+A Turn In The Hallway~
+   You are standing in an elbow turn in a dust-covered stone hallway,
+that dead ends to the north and continues on to the west.  To the south
+the stones of the pyramid have been torn asunder by thieves, making
+a low-ceilinged tunnel.
+~
+53 d 0
+D0
+The hallway ends to the north.
+~
+~
+0 -1 5343
+D2
+The tunnel is dark.
+~
+~
+0 -1 5336
+D3
+The dust-covered hallway continues to the west.
+~
+~
+0 -1 5341
+S
+#5343
+A Dead End~
+   The dust-covered hallway has come to an abrupt end at a stony,
+featureless wall.  Here and there are signs of the recent passage
+of others in the dust.
+~
+53 d 0
+D2
+The dusty hall continues to the south.
+~
+~
+0 -1 5342
+D5
+The floor is quite dusty, and made of stone.  You see some cracks.
+~
+floor~
+1 -1 5344
+E
+cracks~
+The cracks look like you might be able to pull away some pieces of
+the floor, perhaps even fit your body through the space you make.
+~
+S
+#5344
+The Tomb Entrance~
+   You are in a small, dark chamber that has stood undisturbed for
+many years.  To the north stands a massive stone tomb, which is
+covered in hieroglyphics and gold-lined carvings that mark it as the
+final resting place of the mighty pharoahs of this land.
+~
+53 acd 0
+D0
+You see the tomb of the pharoahs.
+~
+tomb~
+1 -1 5345
+D4
+The stone ceiling has some cracks in it, through which a dim light streams.
+~
+ceiling~
+1 -1 5343
+E
+tomb~
+The tomb looks like it has stood for many years, much like the pyramid
+which encloses it.  It is covered in small hieroglyphics.
+~
+E
+hieroglyphics carvings~
+The markings indicate that this tomb is indeed the tomb of the greatest
+pharoahs of the ancient civilization that built this massive pyramid.
+~
+S
+#5345
+The Tomb Of The Pharoahs~
+   Great golden sarcophogai line the walls of this massive tomb.  It has
+withstood the passage of time intact, untouched by the hands of thieves
+and looters.  The treasures taken by the pharoahs to their graves still
+lie before your feet.
+~
+53 ad 0
+D2
+That way leads back out of the tomb.
+~
+tomb~
+1 -1 5344
+E
+treasures~
+The treasures are dusty and fragile, but still seem quite valuable.
+You decide not to take them out of respect for the ancient dead.
+~
+S
+#5346
+A Rubble-Strewn Hallway~
+   This hallway formerly had a beautiful arch to the ceiling, now
+collapsed under the weight of the slowly settling stones of the
+pyramid.  Now, a massive pile of rubble leads up into a hole high 
+in the northern portion of the hallway.  To the south, through the 
+rubble and fallen stones you see a sandstone crypt.
+~
+53 acd 0
+D2
+You see a sandstone crypt.
+~
+~
+0 -1 5347
+D4
+From here you see only darkness.
+~
+~
+0 -1 5335
+S
+#5347
+A Sandstone Crypt~
+   This small crypt is lit by a hole in the wall to the south, through
+which sand pours from the desert outside.  A hot wind blows in from the
+desert, drying your skin instantly.  To the east and north the arched
+hallway continues.
+~
+53 d 0
+D0
+The arched hallway collapses into rubble shortly to the north.
+~
+~
+0 -1 5346
+D1
+You see a beautifully arched hallway.
+~
+~
+0 -1 5348
+D2
+You see a lot of sand.
+~
+~
+0 -1 5353
+S
+#5348
+An Arched Hall~
+   This hallway has a beautiful arch to it, formed painstakingly and
+exquisitely out of the sandy stones of the pyramid.  The dust that
+covers most of the rest of the pyramid interior is not present here,
+scoured away by the blowing of the desert winds that howl about
+your ears.
+~
+53 d 0
+D1
+The arched hall proceeds to the east, making a sharp southward turn.
+~
+~
+0 -1 5349
+D3
+The arched hall proceeds into a sandstone crypt.
+~
+~
+0 -1 5347
+S
+#5349
+An Arched Hall~
+   This hallway has a beautiful arch to it, formed painstakingly and
+exquisitely out of the sandy stones of the pyramid.  To the east is
+a small, golden-coloured crypt, and the hall proceeds to the south
+and north.
+~
+53 d 0
+D0
+The arched hall proceeds to the north, making a sharp westward turn.
+~
+~
+0 -1 5348
+D1
+A small golden crypt lies to the east.
+~
+~
+0 -1 5350
+D2
+The arched hall proceeds to the south.
+~
+~
+0 -1 5351
+S
+#5350
+A Golden Crypt~
+   You stand inside a small crypt with walls and ceiling made of
+golden bricks that obscure the large sandy stones of the pyramid.
+Small rugs and tapestries are scattered about the floor here, and
+they appear to have been used recently.
+~
+53 d 0
+D3
+You see an arched hall.
+~
+~
+0 -1 5349
+E
+rug rugs tapestry tapestries~
+The rugs and tapestries are very fine and worn with age, their colors
+now faded.  They depict scenes of life in an ancient desert city.
+~
+E
+bricks~
+The small golden bricks are very smooth and also quite soft.
+~
+S
+#5351
+An Arched Hall~
+   This hallway has a beautiful arch to it, formed painstakingly and
+exquisitely out of the sandy stones of the pyramid.  The arched
+hall proceeds to the north and ends to the south in a small vault.
+~
+53 d 0
+D0
+The arched hall continues to the north.
+~
+~
+0 -1 5349
+D2
+You see a small vault from which a shining light issues.
+~
+~
+0 -1 5352
+S
+#5352
+A Shining Vault~
+   The stones of the pyramid here take on a strange, twinkling quality,
+almost seeming to shine with an internal light.  As you look closer you
+see tiny glass-like glittery particles within the stones, that reflect
+the light from your light source so perfectly that they seem to shine.
+~
+53 d 0
+D0
+You see a hall with a beautifully arched ceiling.
+~
+~
+0 -1 5351
+E
+particles glass~
+The glassy particles reflect and refract your light source in a myriad
+of dazzling colours that dance across your eyes and make you giggle.
+~
+S
+#5353
+A Massive Sand Dune~
+   You stand now on a massive sand dune on the southern side of
+the pyramid.  At the foot of the sand dune to the north you see a
+small hole where the stones of the pyramid have collapsed.  Not
+far to the south is a massive roiling sandstorm; the wind from the
+storm howls and bites at your face even here.
+~
+53 c 2
+D0
+You see a small hole leading back into the pyramid.
+~
+~
+0 -1 5347
+D2
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5354
+E
+sand dune sandstorm~
+The sand is very white, and very sandy.  There sure is a lot of it.
+~
+S
+#5354
+A Swirling Sandstorm~
+   You are caught in the midst of a massive sandstorm.  Howling winds
+buffet you from all sides, and the sand tears at your skin, blinding
+you and choking you.  You have lost all sense of direction.
+~
+53 0 2
+D0
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5353
+D1
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5354
+D2
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5355
+D3
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5354
+E
+sand~
+Sand is about all you CAN see right now.  Unfortunately, it isn't very
+interesting sand, only white, dry, and blowing all over the place.
+~
+S
+#5355
+A Swirling Sandstorm~
+   You are caught in the midst of a massive sandstorm.  Howling winds
+buffet you from all sides, and the sand tears at your skin, blinding
+you and choking you.  You have lost all sense of direction.
+~
+53 0 2
+D0
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5354
+D1
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5355
+D2
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5356
+D3
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5355
+E
+sand~
+Sand is about all you CAN see right now.  Unfortunately, it isn't very
+interesting sand, only white, dry, and blowing all over the place.
+~
+S
+#5356
+A Swirling Sandstorm~
+   You are caught in the midst of a massive sandstorm.  Howling winds
+buffet you from all sides, and the sand tears at your skin, blinding
+you and choking you.  You have lost all sense of direction.
+~
+53 0 2
+D0
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5355
+D1
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5356
+D2
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5357
+D3
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5356
+E
+sand~
+Sand is about all you CAN see right now.  Unfortunately, it isn't very
+interesting sand, only white, dry, and blowing all over the place.
+~
+S
+#5357
+A Swirling Sandstorm~
+   You are caught in the midst of a massive sandstorm.  Howling winds
+buffet you from all sides, and the sand tears at your skin, blinding
+you and choking you.  You have lost all sense of direction.
+~
+53 0 2
+D0
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5356
+D1
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5357
+D2
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5358
+D3
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5357
+E
+sand~
+Sand is about all you CAN see right now.  Unfortunately, it isn't very
+interesting sand, only white, dry, and blowing all over the place.
+~
+S
+#5358
+A Massive Sand Dune~
+   Somehow you managed to make your way through the howling winds
+of the sandstorm, and clamber up on this sand dune.  You can see the
+storm to the north of you, and presumably the pyramid is somewhere
+beyond it.  Nothing but flat, featureless, open dunes of sand lie in
+every other direction.
+~
+53 0 2
+D0
+You see only a wall of whirling, blowing, dry sand.
+~
+~
+0 -1 5357
+D2
+On the southern side of the sand dune is a small hole in the sand.
+For some reason you seem unable to get to it.
+~
+riddle~
+2 5317 5359
+E
+sand dune~
+The sand is very white, and very sandy.  There sure is a lot of it.
+~
+E
+riddle~
+A vision forms before your eyes, in glowing hieroglyphic symbols.
+~
+E
+hieroglyphics symbols~
+Like most of the ancient hieroglyphics of this land, the symbols are
+totally incomprehensible to you.  Perhaps the Sphinx has the answer
+to this ancient riddle.
+~
+S
+#5359
+Through The Hole In The Sand~
+   You squeeze through the small hole in the sand and land in a small
+white chamber.  Above you is a small hole, reachable by climbing up
+the small sandy slope down which you slid.
+~
+53 acd 0
+D4
+You see a sand dune.
+~
+~
+0 -1 5358
+S
+$

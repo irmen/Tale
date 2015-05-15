@@ -1,0 +1,281 @@
+#5000
+pick mining~
+a small mining pick~
+A small mining pick made of what appears to be silver lies on the ground.~
+~
+5 j 8193
+0 1 9 11
+3 600 500
+#5001 
+suit mail banded~
+a glowing suit of banded mail~
+A glowing suit of banded mail lies on the ground.~
+~
+9 ag 9
+7 0 0 0
+0 75000 20000
+A
+2 2
+A
+17 -4
+#5002
+halberd~
+a halberd~
+A mighty halberd lies against the wall.~
+~
+5 gi 8193
+0 3 5 3
+16 12000 10000
+A
+18 2
+A
+19 2
+#5003
+amulet mushroom~
+a mushroom amulet~
+A mushroom-shaped amulet lies on the ground.~
+~
+9 gp 5
+0 0 0 0
+2 1500 4000
+A
+5 2
+#5005
+bone leg~
+a large leg bone~
+A large leg bone rests on the ground.~
+~
+5 0 8193
+0 1 4 7
+5 300 60
+#5006
+cactus cup water~
+a small cactus cup~
+A small cactus cup lies on the ground.~
+~
+17 0 1
+5 5 0 0
+6 30 5
+#5007
+basket wicker small~
+a small wicker basket~
+A small wicker basket sits on the ground.~
+~
+15 0 1
+100 5 -1 0
+50 5000 50
+#5008 
+basket wicker small~
+a small wicker basket~
+A small wicker basket sits on the ground.~
+~
+15 0 1
+100 5 -1 0
+50 5000 50
+#5009
+basket wicker small~
+a small wicker basket~
+A small wicker basket sits on the ground.~
+~
+15 0 1
+100 5 -1 0
+50 5000 50
+#5010
+basket wicker small~
+a small wicker basket~
+A small wicker basket sits on the ground.~
+~
+15 0 0
+100 5 -1 0
+50 5000 50
+#5011
+rope coil~
+a coil of rope~
+A long coil of rope lies on the ground.~
+~
+12 0 1
+0 0 0 0
+12 450 45
+#5012
+stakes bundle bunch~
+a bunch of stakes~
+A small bundle of stakes lies here.~
+~
+5 0 8193
+0 1 2 11
+6 250 30
+#5013
+map tattered old~
+an old, tattered map~
+An old, tattered, and much faded map lies here.~
+~
+12 0 1
+0 0 0 0
+1 300 20
+#5014
+turban padded~
+a thick padded turban~
+A thick padded turban lies here.~
+~
+9 gh 17
+0 0 0 0
+15 4300 100
+A 
+17 1
+#5015
+coins treasure~
+a great pile of treasure~
+A great, gleaming pile of treasure lies at your feet.~
+~
+20 0 1 
+46270 0 0 0
+0 0 0
+#5016
+sabre curved long~
+a long, curved sabre~
+A long, curved sabre stands upright in the ground.~
+~
+5 l 8193
+0 1 8 3
+7 1050 200
+A
+18 2
+#5017
+scimitar curved~
+a curved scimitar~
+A curved scimitar lies at your feet.~
+~
+5 l 8193
+0 1 7 3
+6 600 150
+A
+18 1
+#5018
+cutlass pointed long~
+a long, pointed cutlass~
+A long, pointed cutlass lies here.~
+~
+5 l 8193
+0 1 7 3
+5 550 10
+#5019
+potion pink~
+a pink potion~
+A pink potion stands here.~
+~
+10 0 1
+25 33 17 -1
+6 600 100
+#5020
+wand platinum~
+a platinum wand~
+A platinum wand lies here.~
+~
+3 b 16385
+30 10 10 32
+8 1900 1000
+#5021
+bow golden~
+a golden bow~
+A powerful golden bow lies here.~
+~
+5 abfgio 8193
+0 4 6 12
+20 150000 20000
+#5022
+scroll encrypted~
+an encrypted scroll~
+An encrypted scroll lies at your feet.~
+~
+2 0 1
+22 14 35 43
+7 1500 500
+#5023
+chest iron bound~
+an iron bound chest~
+An iron bound chest with a shiny lock sits here.~
+~
+15 0 0
+200 13 5024 0
+200 1000 0
+#5024
+key golden~
+a golden key~
+A shiny golden key lies here.~
+~
+18 c 16385
+10 0 0 0
+1 150 0
+#5025
+bracelet copper~
+a copper bracelet~
+A tarnished copper bracelet lies at your feet.~
+~
+9 gh 4097
+-5 0 0 0
+10 23000 2500
+A
+13 10
+A
+19 -4
+#5026
+ruby gem~
+a large ruby~
+A large ruby lies on the ground, collecting dust.~
+~
+8 gh 16385
+20 0 0 0
+9 4000 200
+#5027
+diamond gem~
+a glittering diamond~
+A glittering diamond lies at your feet.~
+~
+8 g 16385
+21 0 0 0
+10 9500 200
+#5028
+sapphire gem~
+a brilliant sapphire~
+A brilliant sapphire lies here, twinkling happily.~
+~
+8 g 16385
+22 0 0 0
+7 3500 200
+#5029
+lapis lazuli blue gem~
+a deep blue lapis lazuli~
+A deep blue lapis lazuli gem lies here.~
+~
+8 g 16385
+24 0 0 0
+11 8500 200
+#5030
+jewel tiger~
+the Tiger Jewel~
+The Tiger Jewel lies here blazing.~
+~
+8 256 16385
+0 0 0 0
+23 43000 1500
+A
+2 1
+#5031
+jewel red-eyed~
+the red-eyed jewel~
+The red-eyed jewel glares at you greedily.~
+~
+8 h 16385
+0 0 0 0
+30 35000 600
+A
+3 -2
+#5032
+emerald gem fiery green~
+a fiery green emerald~
+A fiery green emerald sits here.~
+~
+8 g 16385
+23 0 0 0
+7 5500 200
+$

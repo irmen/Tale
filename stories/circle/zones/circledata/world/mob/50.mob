@@ -1,0 +1,198 @@
+#5000
+dervish raggity~
+the dervish~
+A raggity dervish walks on aimlessly.
+~
+Dressed in loose fitting rags, this man looks like he could use some rest.
+~
+cgh st 900 S
+5 15 5 1d10+60 2d4+0
+70 1000
+8 8 1
+#5001
+dervish large~
+the dervish~
+A large dervish watches for signs of trouble.
+~
+Dressed in loose fitting rags, this man looks like he could use LOTS of
+rest.
+~
+fg st 650 S
+8 12 3 2d6+100 2d6+1
+150 7000
+8 8 1
+#5002
+snake coral~
+the coral snake~
+A brightly colored snake slithers along the sands.
+~
+This relatively harmless snake has bright alternating bands of red, yellow
+and black.
+~
+g 0 -10 S
+4 17 4 1d6+40 1d9+0
+0 600
+8 8 0
+#5003
+scorpion small~
+the small scorpion~
+A small, red scorpion scuttles away at your approach.
+~
+The little tail is mighty dangerous for such a small creature.
+~
+g 0 -50 S
+3 17 1 1d6+40 1d8+0
+0 500
+8 8 0
+#5004
+worm giant purple~
+the sand worm~
+A giant, purple sand worm thrusts up out of the sand and attacks!
+~
+He's big, mean, and purple.  Watch out!
+~
+abeflpr dfk -300 S
+21 0 3 2d10+320 3d7+14
+2540 65000
+8 8 0
+#5005
+dragon brass~
+the brass dragon~
+A very large brass dragon steps out of the darkness and says 'Hello.'
+~
+Then adds to it, 'Prepare to die, have a nice day!'
+~
+abefq dhkp 950 S
+20 1 0 2d6+500 3d6+4
+1500 45000
+8 8 2
+#5006
+nomad leader~
+the nomad leader~
+The nomad leader sits silently in prayer.
+~
+He is clad in silk robes lined with gold thread. At his side is a large,
+engraved cutlass.  He has an especially haughty air about him.
+~
+bhl d 950 S
+14 7 0 2d6+170 2d8+5
+1000 18000
+6 6 1
+#5007
+nomad commander~
+the nomad commander~
+The nomad commander stands here staring at you suspiciously.
+~
+This is the nomad leader's second in command.  His clothes are richly woven
+of silk and gold thread.  A nasty cutlass hangs at his side.
+~
+bhl 0 900 S
+12 8 1 2d6+135 2d5+3
+600 14000
+8 8 1
+#5008
+nomad warrior~
+the nomad warrior~
+A proud nomad warrior stands here.
+~
+This warrior is dressed in typical nomad clothing and looks quite mean.
+~
+b 0 700 S
+10 11 2 1d6+105 2d6+1
+300 7000
+8 8 1
+#5009
+slave young~
+the slave~
+A young slave sits here staring at you with pleading eyes.
+~
+She looks quite thin and weak.
+~
+bh 0 1000 S
+3 18 9 1d4+25 1d5+0
+0 300
+5 5 2
+#5010
+dracolich lich~
+the dracolich~
+A pile of bones rises up to form a skeletal dracolich.
+~
+The dracolich is now only bone with pieces of flesh hanging from it.
+Obviously it no longer fears death.
+~
+abeflnopq bdfhkp -1000 S
+24 0 -6 1d12+520 3d5+35
+75000 125000
+8 8 0
+#5011
+drider~
+the drider~
+The drider looks at you viciously while it draws its sword.
+~
+This half-spider, half-drow creature is a formidable opponent.
+~
+fg dkp -1000 S
+8 12 2 1d6+95 2d6+2
+200 4000
+8 8 0
+#5012
+duergar dark dwarf~
+the dark dwarf~
+A duergar is here mining precious stones with his pick.
+~
+The duergar could probably crush your head as easily as he does those
+rocks.
+~
+fg dkp -850 S
+5 16 3 1d11+60 2d5+1
+170 1250
+8 8 1
+#5013
+myconoid~
+the myconoid~
+A myconoid lumbers along peacefully.
+~
+The myconoid looks something like a giant mushroom (and probably has the
+same effect).
+~
+gh dk 850 S
+6 15 4 1d12+68 2d7+0
+50 600
+8 8 1
+#5014
+myconoid shaman~
+the myconoid shaman~
+A rather large myconoid stands here chanting in a strange tongue.
+~
+The shaman shoots spores into the air.
+~
+acil dhk 950 S
+14 7 1 1d12+173 2d7+2
+2500 18000
+8 8 1
+#5015
+dustdigger oasis~
+the dustdigger~
+A small oasis invites you to dive in.
+~
+Looking a little closer at this oasis, you begin to wonder why
+it seems to be moving about...
+~
+bcfqr 0 -200 S
+7 10 1 1d6+85 3d4+0
+450 2250
+8 8 0
+#5017
+camel~
+the camel~
+A very dangerous creature, a camel, snorts at you.
+~
+It is advisable not to mess with this creature.  After all, you
+have heard many a horror story about experiences with camels.
+Bad experiences.
+~
+bfq 0 -351 S
+5 12 6 1d6+60 2d4+3
+270 900
+8 8 0
+$

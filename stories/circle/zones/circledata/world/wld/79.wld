@@ -1,0 +1,494 @@
+#7900
+Outside Redferne's Residence~
+   A huge cloud forms the plateau on which you are now standing.  The
+wind here is absolutely quiet and the sun is shining warmly upon you.
+From under the cloud you can hear the faint sounds of Midgaard.  Right
+before you to the north lies the grand Mansion of Naris.
+~
+79 cj 0
+D0
+You see an enormous arched gate leading into this magnificent building.
+~
+gate huge arched~
+2 7901 7901
+D5
+You see a Huge Chain that anchors the Mansion of Naris to the ground.
+~
+~
+0 -1 7918
+S
+#7901
+The Southern End Of The Hall~
+   You are standing in a vast hall that is dimly lit, but wherever the
+light comes from, is a mystery.  The walls seem to radiate warmth and
+give the pleasent feeling of being welcome here.  A large portrait is
+hanging on one of the walls.  A large wooden staircase leads up into
+the tower.  To the east there is a high passage away from the hall.
+This ends shortly after by a tall oak door.  The enormous hall extends
+further north from here.  To the south you can see a huge, and VERY 
+heavy-looking iron-wrought door.  It looks like this is the only exit
+from this magnificent old house.
+~
+79 cdj 0
+D0
+The hallway continues that way.  You can see more doorways under the
+wooden staircase in that direction.
+~
+~
+0 -1 7904
+D1
+You see a tall oak door there.  It looks quite tightly closed to you.
+On it little runes are chiselled into the wood.
+~
+door oak tall~
+1 -1 7910
+D2
+Here you see a REAL door.  It would be more proper to call this a
+'GATE', rather than a 'door'.  It is really HUGE!  On it hangs a
+large sign with very large letters spelling:
+
+                EMERGENCY EXIT
+
+~
+gate iron huge~
+2 7901 7900
+D3
+This looks like a 'door' in the meaning of the word.  The ashen wood
+is painted in a peculiar yellow color.  Small letters are written
+with black on it.
+~
+door ashen ash yellow~
+1 -1 7902
+D4
+You see the staircase extending upwards into the very high tower.
+It ends in what seems like a large bedroom up there.
+~
+~
+0 -1 7909
+E
+runes~
+These runes are utterly strange to you, but you are in luck today:
+Under the runes you can just make out a sentence in Common.  It
+reads:
+
+Stay out, if you treasure your life.  That is if you are mortal.
+
+~
+E
+letters~
+They read:
+
+                LIBRARY
+
+~
+S
+#7902
+Redferne's Library~
+   This is truly a magnificent place!  Books and scrolls lie together
+on every shelf.  A large globe, with the map of the world upon it,
+stands in the dimly lit north-western corner of the room.  Two large
+and comfortable looking leather armchairs adorn the center of the
+library together with a huge oak desk.  Dim light radiates from an
+enormous crystal chandelier hanging down from the ceiling approximately
+10 feet off the floor.  To the east there is a great old ashen door.  A
+large glass window is set in the west wall.
+~
+79 cdj 0
+D1
+You can see an old ashen door, painted in a peculiar yellow color.
+~
+door ash ashen~
+1 -1 7901
+E
+globe world map~
+You see a large world map stretch out on the enormous globe.  It has towns
+drawn in every spot available for such.  In the middle of the map you can
+spot a large town with the name 'MIDGAARD' written over it.  The rest is
+mountains, woods, plains and water.
+~
+E
+midgaard town city~
+You see a small speck with woods on the west from it, plains to the east
+from it and mountains to the north from it.  To the east of it you can
+see a thin trail lead to a large castle.  Finally you notice a rather
+large river pour in from the east and go through Midgaard in the middle.
+~
+E
+chairs leather armchairs chair armchair~
+These two chairs are exactly alike one another.  They look incredibly
+comfortable.  They are both made from old leather, and yet they seem
+so worn that they can be nothing but a perfect place for a long needed
+rest.
+~
+E
+window glass~
+These windows are really BIG!  They reach from about 20 inches above the
+floor to approximately 10 inches under the ceiling.  If you try and
+'look out', you might see what might lie beyond these windows.
+~
+E
+out outside beyond~
+The clouds muster and form the ground on which this entire building is set.
+Through the thinnest of the clouds you can just make out Midgaard with all
+of its magnificent activity.
+~
+E
+river~
+You see a large and winding river cut through the landscape, starting at an
+enormous inland lake, it seeps through Midgaard and finally ends up in the
+Grand Sea on the west coast of the land.
+~
+S
+#7903
+The Artifact Room Of Naris~
+   This is gloomy and dark room with only a faint light radiating from the
+walls.  A bunch of funny-looking items fill the center of the room.  There
+is no furniture here what-so-ever.  The only way out seems to be west,
+through the low steel door.
+~
+79 cdj 0
+D3
+You see only the back of a safe's steel door.
+~
+door steel safe~
+2 7900 7910
+S
+#7904
+The Northern End Of The Hall~
+   You are standing in the northern end of the huge hall.  This part is
+under the grand wooden staircase so the light seems to be a little less
+bright here, but this doesn't affect your sight at all.  To the north
+lies the kitchen.  To the south lies the southern end of the hall.  To
+the east there is a huge metal door.  To the west there is a large
+aspenwood door.
+~
+79 cdj 0
+D0
+~
+~
+0 -1 7906
+D1
+You see a huge metal door.  From it a foul stench emanates.  The smell is
+the most awful experience in your entire life.  A thought seeps through this
+terrible stench and into your mind: 'Monsters', you feel BAD about opening
+that door.
+~
+door metal huge~
+2 -1 7913
+D2
+The rest of the hall lies in that direction, and so does the exit.
+~
+~
+0 -1 7901
+D3
+The door has 'SITTING ROOM' written on it.  It is made from Aspenwood and
+is beautifully carved with small elves as main issue of sculpture.
+~
+door aspen wood~
+1 -1 7905
+S
+#7905
+The Sitting Room Of Naris~
+   You are standing in the middle of a really comfortable place.  The
+walls are decorated with paintings of smiling Kings and Queens.  The
+most attractive picture is one of a Prince in shining armour.  By one
+of the walls there is an old armchair.  The only exit is through the
+aspenwood door to the east.
+~
+79 cdj 0
+D1
+The door seems to be a very HEAVY door, carved completely from the trunk of
+an Aspen tree.
+~
+door aspen heavy~
+1 -1 7904
+E
+chair armchair~
+This is truly a wonderful relic of the past.  In it is a large cushion.
+~
+S
+#7906
+The Kitchen Of Naris~
+   This must be the place of food and drink.  You can hear the faint noise
+of rats feasting on meat and bread from somewhere undeterminable.  The sound
+makes you feel the agony of HUNGER.  The only visible exit is south to the
+Northern end of the hall.
+~
+79 cdj 0
+D0
+It is dark in there.  But the sounds from there are unmistakable.  The rats
+are here for your information.
+~
+larder wooden cupboard~
+1 -1 7907
+D1
+You can see the fridge from here.  There are drinks all over the place.
+~
+fridge~
+1 -1 7908
+D2
+You can see the northern end of the hall.
+~
+~
+0 -1 7904
+S
+#7907
+The Larder~
+   You can see food all over.  Among the heaps of food you notice HUGE rats
+scuttling around, nibbling pieces off the heaps here and there.
+~
+79 cdj 0
+D2
+~
+door wooden larder~
+1 -1 7906
+S
+#7908
+The Fridge~
+   This place is LOADED with drink, water and booze.
+~
+79 cdj 0
+D3
+~
+door fridge~
+1 -1 7906
+S
+#7909
+On The Stairs~
+   You can see up and down the stairway.  It seems to take forever, either
+going up OR down.  It is just a seemingly insurmountable climb, either way.
+Up is the bedroom of Redferne, and down leads to the southern end of the
+hall.
+~
+79 cdj 0
+D4
+~
+~
+0 -1 7911
+D5
+~
+~
+0 -1 7901
+S
+#7910
+The Treasure Room~
+   This place is gloomy.  A HUGE safe is cemented into the west wall.  The
+only visible exit is west, through the oak door.
+~
+79 cdj 0
+D1
+~
+safe steel~
+2 7900 7903
+D3
+You see a tall oak door.
+~
+door oak tall~
+1 -1 7901
+S
+#7911
+Redferne's Bedroom~
+   This is a snugly set bedroom with all the necessities for a romantic
+evening.  A large fireplace adorns the east wall, and sizzling away is
+the wood that is ablaze within.  The bed is enormous, covering at least
+HALF of this great room.  The room stretches at least 140 feet, so can
+you imagine the BED?  A large staircase leads down to the hall.  A couple
+of doors open up to a broad balcony to the south.
+~
+79 cdj 0
+D2
+The sun seems to shine out there, warmly and comforting.
+~
+doors~
+1 -1 7912
+D5
+~
+~
+0 -1 7909
+S
+#7912
+Redferne's Balcony~
+   You see a splendid of the most of this world.  The valleys stretch as
+far as the eye reaches to the south from here.  Down below you can see
+the entrance of this magnificent building.  To the north are the doors
+to Redferne's bedroom.
+~
+79 cj 0
+D0
+You see the comfortable bedroom of Naris.
+~
+doors~
+1 -1 7911
+D5
+You see the ground on which this castle is set.  Funnily it seems to you
+that it is no more than clouds.
+~
+~
+0 -1 -1
+S
+#7913
+The Monster Pen~
+   This looks like the cage in which a large carnivore is being kept.
+Judging by the state the walls are in, this could very well be a large
+AGGRESSIVE animal.  This makes you pretty insecure, this stating your
+feeling about the place quite mildly.
+~
+79 dj 0
+D3
+This looks like the only exit from here.
+~
+door cage metal pen~
+1 -1 7904
+S
+#7914
+On The Huge Chain~
+   This place has quite a good view over Midgaard.  Your possibilities of
+movement seem to extend only to the up and down directions.  Unless you
+want to let go of the secure and seemingly unmovable chain, then those are
+the directions you should take from here.
+~
+79 c 5
+D4
+Upwards, you see the chain disappearing into the clouds above.
+~
+~
+0 -1 7915
+D5
+Down below, you see the huge chain anchored to the ground at the Road
+Crossing of southern Midgaard.
+~
+~
+0 -1 3120
+S
+#7915
+The Chain Where It Is Too Windy~
+   Hanging on to the chain you figure out that there is no way of leaving
+down from here.  The wind pulls you from left to right and back.  This
+seems like a totally impossible task.  The ascend is the only way ahead
+for you.  Otherwise you would risk death by falling to the hard ground
+below.  DO NOT DESCEND NOW OR YOU WILL SURELY DIE!!!!
+~
+79 c 5
+D4
+That way seems to be the only way away from here.
+~
+~
+0 -1 7916
+D5
+THAT WAY IS CERTAIN DEATH!!!!  You can see the wind tearing at the chain
+down below you.  It swings like a furious serpent from side to side!  The
+descent is ABSOLUTELY out of the QUESTION.  
+~
+~
+0 -1 7920
+S
+#7916
+On The Great Chain Of Naris~
+   You are approximately on the middle of the treacherous Chain.  One false
+step and death will come and collect you quickly.  The chain leads upwards
+and down.  No way are you going to descend now... You've only just begun
+your climb.  Besides it could cost you your life.  Look down and you'll
+see why.
+~
+79 c 5
+D4
+There seems to be only one way from here and that's up.
+~
+~
+0 -1 7918
+D5
+The chain down there is swinging wildly back and forth.  Going down there
+will be pretty risky!
+~
+~
+0 -1 7915
+S
+#7917
+The Chain~
+   As you descend, the chain seems to absorb all weather around it, making
+it swing less and less in the very powerful wind tearing at it.  The Chain
+seems to chuckle quietly, and as you descend further you hear a soft whisper
+originating from within the Chain *ITSELF*.  It says 'Welcome back some
+other time, stranger.  Your company is always... hmmm... interesting.  God
+Speed.'  The chain extends further down through the now spreading clouds.
+~
+79 c 5
+D4
+It seems to you that the Chain is dissolving again.  Maybe it is just an 
+illusion, but still...
+~
+~
+0 -1 -1
+D5
+That way seems safe enough... now.
+~
+~
+0 -1 7914
+S
+#7918
+The Mighty Chain Of Naris~
+   This place truly a splendid view of the WHOLE COUNTRY SIDE!  A magnificent
+light shines upon you and the way up through the clouds is opened.  Up there
+you can now see the Mansion of Naris, Residence of the Greater God Redferne.
+The chain beneath you seems to evaporate in the mustering clouds that
+surround you by now.
+~
+79 c 5
+D4
+You see the sunny top of the clouds.  Beyond these, the Mansion towers before
+your eyes.  Beautiful!!
+~
+~
+0 -1 7900
+D5
+You see nothing but the thick clouds.  They've closed completely around the
+Chain.
+~
+~
+0 -1 7917
+S
+#7920
+The Free Fall From The Chain~
+   This is probably the third worst place to be in this entire MUD right
+now.  You fall
+.  
+.
+.
+and fall
+.
+.
+.
+and fall
+.
+.
+.
+and HIT THE GROUND WITH SUCH A *SPLUTCH* that you die horribly, but instantly.
+Good-bye cruel world.
+~
+79 bd 0
+D0
+~
+~
+0 -1 7914
+D1
+~
+~
+0 -1 7915
+D2
+~
+~
+0 -1 7916
+D3
+~
+~
+0 -1 7917
+D4
+~
+~
+0 -1 7918
+D5
+~
+~
+0 -1 3120
+S
+$

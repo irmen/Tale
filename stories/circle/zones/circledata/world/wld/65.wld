@@ -1,0 +1,856 @@
+#6500
+The Path To The Dwarven Village~
+   You are walking down a path that leads to the dwarven village.  Above
+you, you can see the Turning Point, and to the north the path continues 
+toward the mountains.
+~
+65 c 2
+D0
+The path continues.
+~
+~
+0 -1 6501
+D4
+You can see the city of Midgaard.
+~
+~
+0 -1 3502
+S
+#6501
+The Path At The Base Of The Mountain~
+   Now you are at the bottom of a rugged mountain.  The forest around you
+is very dense, and it seems very dark to the north.
+~
+65 0 4
+D0
+The path coninues up the mountain.
+~
+~
+0 -1 6502
+D2
+The path heads toward the main city of Midgaard.
+~
+~
+0 -1 6500
+S
+#6502
+The Path At The Middle Of The Mountain~
+   Standing on the middle of the mountain, you can easily see the city to
+the south, and the top of the mountain is very near to the north.
+~
+65 0 5
+D0
+The top of the mountain is easily seen from here.
+~
+~
+0 -1 6503
+D2
+The base of the mountain is near.
+~
+~
+0 -1 6501
+S
+#6503
+The Top Of The Mountain~
+   You are now on the top of the mountain.  To the south you see a path
+leading down the mountain.  To the east and west you see entrances to
+what seems like mines.
+~
+65 0 4
+D1
+An entrance to the mountain which seems to lead underground.
+~
+~
+0 -1 6540
+D2
+The path leads down the mountain to the main city of Midgaard.
+~
+~
+0 -1 6502
+D3
+There is an entrance to the mountain.
+~
+~
+0 -1 6505
+S
+#6504
+The Narrow Path~
+   This is a narrow path leading to the Dwarven Kingdom.  It looks less
+travelled than the others, and it is very creepy.  The path opens up to 
+the south, and continues to the north.
+~
+65 d 0
+D0
+~
+~
+0 -1 6506
+D2
+~
+~
+0 -1 6540
+S
+#6505
+The Entrance To The Mountain~
+   Here is an entrance to the mountain.  The door looks very well built,
+and you can hear noise coming from within.
+~
+65 0 2
+D1
+~
+~
+0 -1 6503
+D3
+~
+door~
+2 6515 6513
+S
+#6506
+A Bend In The Narrow Path~
+  This is a narrow path that bends to the east here.  The trees hang
+over the path, and it is very overgrown.  The narrow path continues to
+the south and to the east.
+~
+65 d 0
+D1
+~
+~
+0 -1 6507
+D2
+~
+~
+0 -1 6504
+E
+tree trees~
+They hang over the road in the most ominous of ways.
+~
+S
+#6507
+The Narrow Path~
+   This path is very narrow, and it continues to the north and west.
+~
+65 d 0
+D0
+~
+~
+0 -1 6508
+D3
+~
+~
+0 -1 6506
+S
+#6508
+The Narrow North-South Path~
+   This path leads to the north and south.  To the north you can see a
+door, and to the south the path continues.
+~
+65 d 0
+D0
+~
+~
+0 -1 6509
+D2
+~
+~
+0 -1 6507
+S
+#6509
+The Door To The Kingdom~
+   Here the path turns to the west.  You can see a door in front of you,
+and the path continues to the west and south.
+~
+65 d 0
+D0
+~
+door~
+2 6503 6510
+D2
+~
+~
+0 -1 6508
+D3
+~
+~
+0 -1 6522
+S
+#6510
+On The Path To The Castle~
+   You are on a path that will eventually lead to the castle.  It
+continues north to the castle, and there is a door in the southern
+wall.
+~
+65 d 0
+D0
+~
+~
+0 -1 6511
+D2
+~
+door~
+2 6503 6509
+S
+#6511
+Still On The Path To The Castle~
+   You are still on the path to the castle, or back to the Dwarven
+village, whichever way you wish to go.  The path continues to the
+north and south.
+~
+65 d 0
+D0
+~
+~
+0 -1 6512
+D2
+~
+~
+0 -1 6510
+S
+#6512
+The Door To The Castle~
+   Here there is a door to the castle to the east.  The castle is 
+elegantly designed, and looks much like a roll of toilet paper
+standing  on its end.  There is a sign which says:
+
+              ******************************************
+              *  WELCOME TO THE CASTLE OF STRANGELOVE  *
+              *      Here, celibacy is uninvited       *
+              ******************************************
+
+~
+65 d 0
+D1
+~
+door~
+2 6503 6525
+D2
+~
+~
+0 -1 6511
+S
+#6513
+Inside The Entrance~
+   Everything here is covered in soot and very grimy.  The path continues
+to the east and north, and there is a door to the west.
+~
+65 d 0
+D0
+The little underground path continues to the north.
+~
+~
+0 -1 6514
+D1
+The path leads outside the entrance.
+~
+door~
+2 6515 6505
+D3
+This looks like an entrance to some type of store room.
+~
+~
+0 -1 6526
+S
+#6514
+The Path~
+   You are on a path in the dwarven village which leads north to the shops
+and south to the corner of the area.
+~
+65 d 0
+D0
+~
+~
+0 -1 6515
+D2
+~
+~
+0 -1 6513
+S
+#6515
+A Turn In The Road~
+   You are on a path that leads to the Hide & Tooth shop to the west, and
+the path continues to the south.
+~
+65 d 0
+D2
+~
+~
+0 -1 6514
+D3
+The Hide & Tooth shop can be seen to the west.
+~
+~
+0 -1 6516
+S
+#6516
+The Hide & Tooth Shop~
+   You are in the Hide & Tooth shop.  Here you may buy the finest in Dwarven
+weapons and armors.  The path continues to the north and east.
+~
+65 df 0
+D0
+~
+~
+0 -1 6517
+D1
+~
+~
+0 -1 6515
+S
+#6517
+The Path To The North Of The Shop~
+   You are on a path to the north of the Hide & Tooth shop.  The path 
+continues to the north, and there is Granite Head's bakery to the west.
+~
+65 d 0
+D0
+~
+~
+0 -1 6518
+D2
+~
+~
+0 -1 6516
+D3
+~
+~
+0 -1 6535
+S
+#6518
+North Of The Shops~
+   Here the path bends to the east towards the barracks. To the south
+you can see the shops.
+~
+65 d 0
+D1
+~
+~
+0 -1 6519
+D2
+~
+~
+0 -1 6517
+S
+#6519
+A Path By The Hospital~
+   Here the path passes by the Hospital to the north.  It continues
+to the east to the barracks, and to the west.
+~
+65 d 0
+D0
+~
+~
+0 -1 6534
+D1
+~
+~
+0 -1 6520
+D3
+~
+~
+0 -1 6518
+S
+#6520
+A Path Next To The Barracks~
+   Here the path continues west, and east to the barracks.
+~
+65 d 0
+D1
+~
+~
+0 -1 6521
+D3
+~
+~
+0 -1 6519
+S
+#6521
+The Entrance To The Barracks~
+   Here there is an entrance to the barracks to the south, and the path 
+continues to the west.
+~
+65 d 0
+D2
+~
+door~
+1 -1 6523
+D3
+~
+~
+0 -1 6520
+S
+#6522
+A Guard House~
+   You are in the guard house to the west of the entrance to the castle.  
+There are nudie posters covering the walls.
+~
+65 d 0
+D1
+~
+~
+0 -1 6509
+E
+poster~
+There is a wall poster of a nude Minne Pearl.
+~
+S
+#6523
+The First Barrack Room~
+   Here is the first of two main rooms of barracks.  The barracks
+continue to the south, and you can leave the room to the north.
+~
+65 d 0
+D0
+~
+door~
+1 -1 6521
+D2
+~
+~
+0 -1 6524
+S
+#6524
+The Back Of The Barracks~
+   Here is the back of the dwarven barracks.  There are rows of beds 
+here, and there is a stench that is unbearable.
+~
+65 d 0
+D0
+~
+~
+0 -1 6523
+S
+#6525
+Inside Of Castle Strangelove~
+   You are just inside the castle.  It is very tubular in shape,
+and it is very featureless.  There is a set of stairs that lead
+up, and the door leads out of the castle to the west.
+~
+65 d 0
+D3
+~
+door~
+2 6514 6512
+D4
+~
+~
+0 -1 6528
+S
+#6526
+A Store Room~
+   There is a layer of dust on the floor at least 3 inches thick!  It is
+probable that not many people have been in here for many months.
+~
+65 ad 0
+D1
+A lighted area that looks like a well worn path.
+~
+~
+0 -1 6513
+D5
+After blowing all the dust off the floor, you notice a trapdoor!
+~
+trapdoor~
+1 -1 6527
+E
+floor dust~
+After blowing all the dust off the floor, you notice a trapdoor!
+~
+S
+#6527
+The Wine Cellar~
+   This room smells like wine, and you can only assume it used to be
+a wine cellar at one time.
+~
+65 ad 0
+D4
+~
+trapdoor~
+1 -1 6526
+S
+#6528
+On The Stairs In Castle Strangelove~
+   The stairs continue to circle up and down here.
+~
+65 d 0
+D4
+~
+~
+0 -1 6529
+D5
+~
+~
+0 -1 6525
+S
+#6529
+On The Stairs~
+   You are still circling around on the stairs.  You are starting to
+get dizzy from going around and around and around and around and
+around.  The stairs continue up and down.
+~
+65 d 0
+D4
+~
+~
+0 -1 6530
+D5
+~
+~
+0 -1 6528
+S
+#6530
+At The Top Of The Stairs~
+   You are at the top of the stairs in the castle.  There is an exit
+to the east, and the stairs lead down.
+~
+65 d 0
+D1
+~
+~
+0 -1 6531
+D5
+~
+~
+0 -1 6529
+S
+#6531
+The Queen's Waiting Room~
+   This is the Queen's waiting room.  Here the men literally
+'wait' for the queen.  You've heard that the queen really
+likes to get to 'know' her people, in the biblical sense.
+   The Queen's bedroom is to the north, and you can see stairs
+to the west.
+~
+65 d 0
+D0
+~
+door~
+1 -1 6532
+D3
+~
+~
+0 -1 6530
+S
+#6532
+The Queen's Bedroom~
+   This is the Queen's bedroom.  The bed is all ruffled, and there
+is a stack of dirty sheets piled in the corner.  There is a ladder
+that leads down, out of the castle, and you can leave the room
+to the south.  There is also a small wooden door to the west.
+There is a sign that says:
+
+      -------------------------
+      |  I'm busy right now,  |
+      |  and don't know when  |
+      |  Ill be back, but if  |
+      |  there is a key here  |
+      |  take it and PLEASE,  |
+      |  try to get my birth  |
+      |  control pills back!  |
+      |  I've heard they can  |
+      |  be found somewhere,  |
+      |  deep in the mines..  |
+      -------------------------
+
+~
+65 d 0
+D2
+~
+door~
+1 -1 6531
+D3
+~
+door wooden~
+2 6500 6554
+D5
+~
+~
+0 -1 6533
+S
+#6533
+The North Side Of Castle Strangelove~
+   You are standing on the north side of Castle Strangelove.  You
+notice that you are no longer inside the mountain anymore either.
+Along the southern horizon you see towering mountains.
+   The only exit, however, is back up the ladder into the Queen's
+Bedroom.
+~
+65 0 0
+D4
+~
+~
+0 -1 6532
+S
+#6534
+The Hospital~
+   You are inside the Dwarven Hospital.  It smells like rubbing
+alcohol, and there is blood all over the walls.
+~
+65 d 0
+D2
+~
+~
+0 -1 6519
+S
+#6535
+Granite Head's Bakery~
+   The aroma coming from this room is astonishing.  You can almost taste
+the pastries dissolving in your mouth.
+~
+65 dh 0
+D1
+~
+~
+0 -1 6517
+S
+#6540
+The Dark Path~
+   This path is very well worn, and there is an entrance to the mines to the
+east, while the path continues to the north and west.
+~
+65 d 0
+D0
+~
+~
+0 -1 6504
+D1
+~
+door~
+1 6502 6541
+D3
+~
+~
+0 -1 6503
+S
+#6541
+The Mine Entrance~
+   The little path here leads down toward the mines, while the worn path
+continues to the west.
+~
+65 d 0
+D3
+~
+door~
+1 6502 6540
+D5
+~
+~
+0 -1 6542
+S
+#6542
+At The Bottom Of The Mineshaft~
+   You are at the bottom of the mineshaft.  The air here is very sooty, and
+it is very hard to breath.  The mineshaft leads up and east.
+~
+65 ad 0
+D1
+~
+~
+0 -1 6543
+D4
+~
+~
+0 -1 6541
+S
+#6543
+On The Path Inside The Mine~
+   You are deep inside the mine, and you feel very uncomfortable.  The
+path continues to the east, and leads to the mineshaft to the west.
+~
+65 ad 0
+D1
+~
+~
+0 -1 6544
+D3
+~
+~
+0 -1 6542
+S
+#6544
+The Mine Crossroad~
+   You are at a crossroad in the mine.  There is a door to the north,
+and the path continues to the south, east, and west.
+~
+65 ad 0
+D0
+~
+door~
+2 6516 6546
+D1
+~
+~
+0 -1 6545
+D2
+~
+~
+0 -1 6551
+D3
+~
+~
+0 -1 6543
+S
+#6545
+The Coal Room~
+   You are inside the storage area for the raw materials that are
+found down here.  The room is very unsturdy as the supports are
+very rickety.
+~
+54 ad 0
+D3
+~
+~
+0 -1 6544
+S
+#6546
+The Mine Maze~
+   You have entered the maze of the mines.  To the east you can see
+some inscriptions, and you can exit to the south.
+~
+65 ad 0
+D1
+~
+~
+0 -1 6547
+D2
+~
+door~
+2 6516 6544
+S
+#6547
+At The Maze Inscription~
+   You are inside the maze, but not far enough in that you could
+get lost.  There is an enscription on the wall which says:
+
+          1    3    2    4
+          N    W    N    S
+
+This isn't too tough, so don't take it so rough.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6548
+D1
+~
+~
+0 -1 6544
+D3
+~
+~
+0 -1 6546
+S
+#6548
+The Maze~
+   You are in a maze.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6549
+D2
+~
+~
+0 -1 6547
+D3
+~
+~
+0 -1 6548
+S
+#6549
+The Maze~
+   You are in a maze.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6548
+D2
+~
+~
+0 -1 6548
+D3
+~
+~
+0 -1 6550
+S
+#6550
+The Maze~
+   You are in a maze.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6549
+D1
+~
+~
+0 -1 6549
+D2
+~
+~
+0 -1 6552
+D3
+~
+~
+0 -1 6548
+S
+#6551
+The Mining Equipment Room~
+   This is the storage room for equipment used by the Dwarven miners.
+It is very small, and you can tell that not many miners actually use 
+equipment.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6544
+S
+#6552
+The End Of The Maze~
+   You have solved the maze.  You can tell by the last few moves
+that there is no way that a dumb worker could have figured that
+out.  It seems pretty desolate here.  To the south is a bleak
+room.  To the north, you see the maze.  There is a sign above
+the south exit:
+
+THOSE WHO ENTER, PLAN ON A TIMELY DEATH.
+(ESPECIALLY IF YOU'RE LOYAL TO THE QUEEN)
+
+~
+65 ad 0
+D0
+~
+~
+0 -1 6550
+D2
+~
+~
+0 -1 6553
+S
+#6553
+The Mazekeeper's Room~
+   You have entered the Mazekeeper's room.  There are pictures of
+the Queen with darts thrown at it.  Spraypainted on the wall are
+things like 'the queen shall suffer' and 'Catholics Rule'.
+~
+65 ad 0
+D0
+~
+~
+0 -1 6552
+S
+#6554
+The Treasury~
+   This room appears to be the Queen's Treasury.  There is one
+exit, back to the east.
+~
+65 dj 1
+D1
+~
+door~
+2 6500 6532
+S
+$

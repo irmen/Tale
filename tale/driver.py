@@ -103,6 +103,8 @@ class Driver(pubsub.Listener):
         if args.mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
         self.config = StoryConfig.copy_from(self.story.config)
+        self.config.mud_host = self.config.mud_host or "localhost"
+        self.config.mud_port = self.config.mud_port or 8180
         self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         if self.config.server_mode != "if" and self.config.server_tick_method == "command":
             raise ValueError("'command' tick method can only be used in 'if' game mode")
@@ -283,7 +285,7 @@ class Driver(pubsub.Listener):
         conn.output("<bright>Welcome. We have to know your name before you can continue.</>")
         conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
         while True:
-            name = yield "input", ("Please type in your name.", charbuilder.validate_name)
+            name = yield "input", ("Please type in your name.", player.MudAccounts.accept_name)
             if self.search_player(name):
                 conn.player.tell("That player is already logged in elsewhere.")
                 continue
@@ -292,7 +294,7 @@ class Driver(pubsub.Listener):
                 password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
             except KeyError:
                 conn.player.tell("'<player>%s</>' is the name of a new character." % name)
-                if not (yield "input", ("Do you want to create this character?", lang.yesno)):
+                if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
                     continue
                 # self-service account creation
                 conn.player.tell("\n")
@@ -302,9 +304,19 @@ class Driver(pubsub.Listener):
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
                 conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
                 race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
+                # review the account
+                conn.player.tell("<bright>Please review your new character.</>", end=True)
+                conn.player.tell("<dim> name:</> " + name, end=True)
+                conn.player.tell("<dim> email:</> " + email, end=True)
+                conn.player.tell("<dim> gender:</> " + gender, end=True)
+                conn.player.tell("<dim> race:</> " + race, end=True)
+                if not (yield "input", ("You cannot change anything later (except your email address). Do you want to create this character?", lang.yesno)):
+                    # abort
+                    conn.player.tell("Ok, let's get back to the beginning then.", end=True)
+                    continue
                 account = self.mud_accounts.create(name, password, email, gender[0], race)
                 conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
-                conn.output("")
+                conn.player.tell("\n")
             try:
                 self.mud_accounts.valid_password(name, password)
             except ValueError as x:
@@ -327,7 +339,6 @@ class Driver(pubsub.Listener):
             conn.player.move(self.config.startlocation_wizard)
         else:
             conn.player.move(self.config.startlocation_player)
-        self.__print_game_intro(conn)
         prompt = self.story.welcome(conn.player)
         if prompt:
             yield "input", "\n" + prompt
@@ -800,7 +811,7 @@ class Driver(pubsub.Listener):
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
         try:
-            savegame = self.user_resources[self.config.name.lower() + ".savegame"].data
+            savegame = self.user_resources[util.storyname_to_filename(self.config.name) + ".savegame"].data
             state = pickle.loads(savegame)
             del savegame
         except (pickle.PickleError, ValueError, TypeError) as x:
@@ -909,7 +920,7 @@ class Driver(pubsub.Listener):
             "config": self.config
         }
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
-        self.user_resources[self.config.name.lower() + ".savegame"] = savedata
+        self.user_resources[util.storyname_to_filename(self.config.name) + ".savegame"] = savedata
         player.tell("Game saved.")
         if self.config.display_gametime:
             player.tell("Game time:", self.game_clock)
@@ -1004,7 +1015,9 @@ class StoryConfig(object):
         "startlocation_wizard",
         "savegames_enabled",
         "show_exits_in_look",
-        "license_file"
+        "license_file",
+        "mud_host",
+        "mud_port"
     }
 
     def __init__(self, **kwargs):

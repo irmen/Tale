@@ -1,0 +1,62 @@
+#72
+The Sewer Maze~
+7200 7299 25 2
+*
+* Mobiles
+M 0 7200 1 7201         Master Mindflayer
+E 1 7200 1 16                   Devil Rod
+E 1 7203 1 3                    Cloak 
+G 1 7205 1                      Key
+O 1 7204 6 7200         Neon Blue Potion
+O 1 7210 1 7200         Treasure
+M 0 7201 1 7203         Senior Mindflayer
+E 1 7201 4 16                   Large Mace
+M 0 7202 2 7205         Junior Mindflayer
+E 1 7202 8 16                   Small Mace
+M 0 7202 2 7207         Junior Mindflayer
+E 1 7202 8 16                   Small Mace
+M 0 7203 10 7214        Wererat
+E 1 7211 16 16                  Short Sword
+M 0 7203 10 7213        Wererat
+E 1 7211 16 16                  Short Sword
+M 0 7203 10 7215        Wererat
+E 1 7211 16 16                  Short Sword
+M 0 7203 10 7217        Wererat
+E 1 7211 16 16                  Short Sword
+M 0 7203 10 7219        Wererat
+M 0 7203 10 7221        Wererat
+M 0 7203 10 7223        Wererat
+M 0 7203 10 7225        Wererat
+M 0 7203 10 7233        Wererat
+M 0 7203 10 7233        Wererat
+M 0 7204 1 7234         Gigantic Rat
+M 0 7002 5 7285         The Sewer Rat
+M 0 7002 5 7285         The Sewer Rat
+E 1 7190 2 2                    Silver Ring
+E 1 7209 4 8                    Muddy Boots
+G 1 7208 20                     Light Stick
+M 0 7002 5 7285         The Sewer Rat
+M 0 7000 8 7286         The Horrifying Mudmonster
+M 0 7000 8 7286         The Horrifying Mudmonster
+M 0 7000 8 7281         The Horrifying Mudmonster
+M 0 7000 8 7281         The Horrifying Mudmonster
+M 0 7000 8 7280         The Horrifying Mudmonster
+* Objects
+R 0 7206 7206
+O 0 7206 4 7206         Skull
+R 0 7211 7208
+O 0 7208 20 7211        Light Stick
+* Doors
+D 0 7201 3 2            Treasury Door
+D 0 7200 1 2
+D 0 7202 0 1            Inner Lair Door
+D 0 7201 2 1            
+D 0 7208 0 1            Lair Door
+D 0 7204 2 1
+D 0 7281 2 1            Entrance Door
+D 0 7280 0 1            
+D 0 7286 0 1            Torture Room Door
+D 0 7285 2 1
+*
+S
+$

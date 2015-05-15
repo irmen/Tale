@@ -1,0 +1,742 @@
+#1500
+A Road Leading From The Bank~
+   You find yourself on a small road leading away from the edge
+of the River of Lost Souls.  The dark waters of the River can
+be seen and heard just south of here.  Looking to the east and
+west, you see only the walls of the rocky cliffs.  Off to the
+north a strange path seems to lead straight into the depths of
+the mountain.
+~
+15 c 4
+D0
+A strange path leads northwards.
+~
+~
+0 -1 1501
+D2
+The River of Lost Souls flows just to the south of here.
+~
+~
+0 -1 5619
+S
+#1501
+A Long Road~
+   You stand here in spiritual emptiness, beginning a long and dangerous
+path.  Your honest submission has already been made, but the truth of your
+heart has yet to be told.  Leave here now, and do not come back until
+you have grown.
+~
+15 d 0
+D0
+~
+~
+0 -1 1502
+D2
+~
+~
+0 -1 1500
+S
+#1502
+A Long Road~
+   You stop for a moment, screaming in frustration.  Surely it was that one
+sin that was avoidable, of all that you regret.  The hitting and the hurting
+flash briefly before you.  Moments later the pain passes, and the straight
+path reveals itself before you.
+~
+15 d 0
+D2
+~
+~
+0 -1 1501
+D0
+~
+~
+0 -1 1503
+S
+#1503
+A Long Road~
+   The road clears, the fog and pain of the first few steps left behind
+you.  Despite the sudden clarity, your mind is still haunted, images of
+an old woman kneeling in prayer, eyes closing, smiling and crying.
+~
+15 d 0
+D0
+~
+~
+0 -1 1504
+D2
+~
+~
+0 -1 1502
+S
+#1504
+A Long Road~
+   Looking ahead, you can see that the path you have been following will
+soon come to an end, but something in the cold and the breeze tells you
+that that will be only the beginning of the journey.
+~
+15 d 0
+D0
+~
+~
+0 -1 1505
+D2
+~
+~
+0 -1 1503
+S
+#1505
+A Test for the Faithful~
+   It is here finally that decisions must be made.  The first one that
+confronts you is simple enough, to walk in the darkness, or to walk in
+the light.  Only the depths of your soul can decide, but remember this
+much: the same truth lies at the end of both paths.
+~
+15 d 0
+D4
+~
+~
+0 -1 1507
+D5
+~
+~
+0 -1 1506
+S
+#1506
+Halls of the Forgotten~
+   Even the darkest have a place on the road to the truth.  It is in this
+place, so empty and forgotten, that God has chosen the worst, and brought
+them close to Him for one last time.
+~
+15 d 0
+D1
+~
+~
+0 -1 1513
+D3
+~
+~
+0 -1 1508
+D4
+~
+~
+0 -1 1505
+S
+#1507
+Shahadah~
+   It was written once, on an ancient parchment in a curious and flowing
+script, that there is in fact no god but Allah, and that Muhammad was
+the last of His Prophets.  With this recognition, all else became empty
+and meaningless.
+~
+15 d 0
+D1
+~
+~
+0 -1 1523
+D3
+~
+~
+0 -1 1518
+D5
+~
+~
+0 -1 1505
+S
+#1508
+Earthly Evil~
+   Whatever it carries, that rage converts into a weapon.  Wrath supplies
+all with arms.  When an angry man thirsts for blood anything will serve
+him for a spear.  Fury turns a stick into a cudgel.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1509
+D1
+~
+~
+0 -1 1506
+S
+#1509
+Misguidance~
+   Some have been brought here not for what they did, but what they
+failed to do.  It is these, the poor souls that were presented the
+fair evidence and rejected it with an honest mind, that deserve our
+pity the most of all.
+~
+15 ad 0
+D2
+~
+~
+0 -1 1508
+D0
+~
+~
+0 -1 1510
+S
+#1510
+Temptation~
+   Old tales tell of a conversation between the devil and the Prophet
+Jesus: the devil offered him a kingdom, vast riches, the temptation of
+a glorious near-death saved by his angels.  Even this Messenger of God
+was forced to stop and think.  Imagine how hard it could be for the rest.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1511
+D2
+~
+~
+0 -1 1509
+S
+#1511
+Hypocrisy~
+   He called the populace to strict religious purity, rigidly enforcing
+the times of prayer and the most correct forms of the words of the Muezzin.
+All of this he strengthened by his most impeccable example, shunning all
+riches and riding in tattered rags through his capital on the back of a
+donkey.  Despite all this, remember.  Behind closed doors, all men are
+hypocrites.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1512
+D2
+~
+~
+0 -1 1510
+S
+#1512
+Hate~
+   There is little in life much easier, and truthfully, little that is a
+quicker ticket to damnation.  You give brief thanks that you have come to
+the end of these trials, but your words are drowned out by something
+much louder, a mechanical preaching that drowns your ears in anger.  You
+hear a steady, repetitive litany of the same phrase, over and over again:
+"I go the way history dictates with the blind assurance of a sleep-walker."
+~
+15 ad 0
+D2
+~
+~
+0 -1 1511
+D0
+~
+~
+0 -1 1528
+S
+#1513
+Spiritual Danger~
+   Some evils are tangible, solid, so evident that they spit you right in
+the face.  Others are more clever, more subtle, and it is these that present
+the greatest danger.  Looking down the hall before you, a great fear fills
+your heart, and a great, heavy longing.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1514
+D3
+~
+~
+0 -1 1506
+S
+#1514
+The Fall~
+   In the beginning, he was the best, the most beautiful of all the angels,
+and God's most loved creation.  Look at your own beauty, human, and do what
+he could not.  Look at your beauty, and learn to kneel!
+~
+15 ad 0
+D2
+~
+~
+0 -1 1513
+D0
+~
+~
+0 -1 1515
+S
+#1515
+Temptation~
+   Temptation is the IF, the wondering, the second-guessing, the "I will
+be a better man... if..."  And that if is usually taken, sitting alone,
+listening to that voice, calling you, offering such an easy way, but such
+a crooked one.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1516
+D2
+~
+~
+0 -1 1514
+S
+#1516
+The Last Day~
+   The din of a great battle shakes these halls, the moans of the earth
+erupting at the shakings of the End Time.  Be ready for that day, be very
+ready, for if you are not, he will claim you for one of his own.
+~
+15 ad 0
+D2
+~
+~
+0 -1 1515
+D0
+~
+~
+0 -1 1517
+S
+#1517
+Flame~
+   Undescribable horror and pain, a blackness drowned out only by the
+burning anguish, the inextinguishable fire coming not from some burning
+wood or molten lava but from the brightness and pain of the horrible,
+tortured souls that surround, everywhere you turn.
+~
+15 ad 0
+D0
+~
+~
+0 -1 1530
+D2
+~
+~
+0 -1 1516
+S
+#1518
+Earthly Light~
+   To slip into evil is easy, but walking this path is the hardest of
+all.  Even the four you will find here today have strayed from the line
+at least once in their lives, and there are still some living who curse
+the very sound of their names.  Despite all this, confront them now, and
+let their actions serve as your example.
+~
+15 d 0
+D0
+~
+~
+0 -1 1519
+D1
+~
+~
+0 -1 1507
+S
+#1519
+The Light of the Rashidun~
+   Many believed that the Prophet would never die, but when the stark
+evidence of his body confronted them, it soon became necessary to provide
+for the future.  The four that came after are called the Rashidun, the
+rightly-guided Caliphs that would spread the word and the light, and with
+it forge one of history's greatest empires.
+~
+15 d 0
+D0
+~
+~
+0 -1 1520
+D2
+~
+~
+0 -1 1518
+S
+#1520
+The Light of the Rashidun~
+   The first Caliphs were chosen by consultation with a noble council
+of elders, each of whom, hoping to lead the world of Islam alone, voted
+to elect the one amongst them they thought was the weakest.  Each time,
+they were wrong.  Each one was more noble, more upright than the one
+before.
+~
+15 d 0
+D0
+~
+~
+0 -1 1521
+D2
+~
+~
+0 -1 1519
+S
+#1521
+The Light of the Rashidun~
+   Every majestic and happy tale must end, usually all too soon, and thus
+it was with the golden age of the Caliphate.  The Rashidun were pure men,
+good men, true to the path, but their followers soon began to bicker, and
+civil war was on the horizon.
+~
+15 d 0
+D2
+~
+~
+0 -1 1520
+D0
+~
+~
+0 -1 1522
+S
+#1522
+The Light of the Rashidun~
+   The end of the Rashidun was the beginning of Schism.  The memories
+of the Prophet and the living example of the Caliphs proved to be
+insufficient example to the faithful.  Ali died, and some say that
+with him the Caliphate died too, a martyr, his blood still flowing in
+the nameless river.
+~
+15 d 0
+D0
+~
+~
+0 -1 1531
+D2
+~
+~
+0 -1 1521
+S
+#1523
+Spritual Reward~
+   Behold, Allah is the Provider, the most Generous.  He would not suffer
+his believers to walk the path of light without guidance.  He provided the
+Prophets, may peace be upon them, and in the examples of their own growth,
+we shall find the truth of our own.
+~
+15 d 0
+D0
+~
+~
+0 -1 1524
+D3
+~
+~
+0 -1 1507
+S
+#1524
+Creation~
+   In the creation of the heavens and the earth, and in the alternation of
+night and day, there are signs for men of sense; those that remember Allah
+say: "Lord, You have not created this in vain!"
+~
+15 d 0
+D0
+~
+~
+0 -1 1525
+D2
+~
+~
+0 -1 1523
+S
+#1525
+Revelation~
+   The Angel Gabriel came to him and said: "Read!"  He replied: "But I
+cannot!"  The order was repeated three times, until the Angel himself
+said: "Read, in the name of your Lord who created man from clots of blood.
+Praise be to God, Lord of the Universe."
+~
+15 d 0
+D2
+~
+~
+0 -1 1524
+D0
+~
+~
+0 -1 1526
+S
+#1526
+Conversion~
+   Unbelievers, I do not worship what you worship, nor do you worship
+what I worship.  I shall never worship what you worship, nor will you
+ever worship what I worship.  You have your own religion, and I have
+mine.
+~
+15 d 0
+D0
+~
+~
+0 -1 1527
+D2
+~
+~
+0 -1 1525
+S
+#1527
+Deliverance~
+   The balance had been made, the soul placed in readiness, and the final
+measurement taken.  For those that have come this far, surely this is the
+day of immortality!
+~
+15 d 0
+D0
+~
+~
+0 -1 1533
+D2
+~
+~
+0 -1 1526
+S
+#1528
+Repentance~
+   God forgives those who commit evil in ignorance, for He is all-knowing
+and wise.  But He will not forgive those who do evil, and when death comes
+to them, say: "Now we repent!"  For those We have prepared a woeful scourge.
+~
+15 ad 0
+D4
+~
+~
+0 -1 1534
+D1
+~
+~
+0 -1 1529
+D2
+~
+~
+0 -1 1512
+S
+#1529
+Pilgrimage~
+   It is incumbent upon all Muslims to make the pilgrimage to Mecca once
+in their lifetime, if they are able, and for those unfortunate enough to
+follow the lives of the lower evils, such a pilgrimage with an open and
+contrite heart shall absolve them of all.
+~
+15 ad 0
+D4
+~
+~
+0 -1 1535
+D1
+~
+~
+0 -1 1530
+D3
+~
+~
+0 -1 1528
+S
+#1530
+Intercession~
+   It is written that no one may intercede with God on behalf of another.
+No prayers from another may save the soul of a doomed man; his only hope
+is prayers of his own.
+~
+15 ad 0
+D4
+~
+~
+0 -1 1536
+D2
+~
+~
+0 -1 1517
+D3
+~
+~
+0 -1 1529
+S
+#1531
+The Upper Reaches~
+   You have traveled the righteous path, and you have faced the examples
+of the true models of the Prophet.  Only the final journey awaits you;
+live like this and you shall live forever.
+~
+15 d 0
+D2
+~
+~
+0 -1 1522
+D1
+~
+~
+0 -1 1532
+D5
+~
+~
+0 -1 1534
+S
+#1532
+The Upper Reaches~
+   When the records of men's deeds are laid open, and heaven is stripped
+bare; when Hell burns fiercely and Paradise is brought near: then each
+soul shall know what it has done.
+~
+15 d 0
+D1
+~
+~
+0 -1 1533
+D3
+~
+~
+0 -1 1531
+D5
+~
+~
+0 -1 1535
+S
+#1533
+The Upper Reaches~
+   You have traveled the righteous path, and your own journey has
+imitated the evolution of the most perfect soul.  Only one final
+path awaits you; die as the one in the room before, and your death
+will mean nothing.
+~
+15 d 0
+D2
+~
+~
+0 -1 1527
+D3
+~
+~
+0 -1 1532
+D5
+~
+~
+0 -1 1536
+S
+#1534
+The Final Facing~
+   The last of the darkness lies behind you; only the straight path
+remains.  Go forth with a clean heart.  Only the penitent shall find
+what they seek.
+~
+15 cd 0
+D1
+~
+~
+0 -1 1535
+D4
+~
+~
+0 -1 1531
+D5
+~
+~
+0 -1 1528
+S
+#1535
+The Final Facing~
+   The last of the darkness lies behind you; only the straight path
+remains.  Go forth with a clean heart.  Only the penitent shall find
+what they seek.
+~
+15 cd 0
+D0
+~
+~
+0 -1 1537
+D3
+~
+~
+0 -1 1534
+D1
+~
+~
+0 -1 1536
+D4
+~
+~
+0 -1 1532
+D5
+~
+~
+0 -1 1529
+S
+#1536
+The Final Facing~
+   The last of the darkness lies behind you; only the straight path
+remains.  Go forth with a clean heart.  Only the penitent shall find
+what they seek.
+~
+15 cd 0
+D3
+~
+~
+0 -1 1535
+D4
+~
+~
+0 -1 1533
+D5
+~
+~
+0 -1 1530
+S
+#1537
+A Straight Path~
+   The Compassionate, the Merciful, Sovereign of the Day of Judgment!
+You alone we worship, and to You alone we turn for help.  Guide us to
+the Straight Path, the path of those whom You have favored, not of
+those who have gone astray.
+~
+15 d 0
+D2
+~
+~
+0 -1 1535
+D0
+~
+~
+0 -1 1538
+S
+#1538
+Progression~
+   Were We worn out by the First Creation?  Yet they are in doubt about
+a new creation.  WE created man.  We know the promptings of his soul,
+and are closer to him than his jugular vein.
+~
+15 d 0
+D0
+~
+~
+0 -1 1539
+D2
+~
+~
+0 -1 1537
+S
+#1539
+Judgment~
+   Undoubtedly the shortest path is the straightest one.  Only one more
+step awaits before a final decision is made and a home given to you for
+all eternity.
+~
+15 d 0
+D0
+~
+~
+0 -1 1540
+D2
+~
+~
+0 -1 1538
+S
+#1540
+The Utmost Throne~
+   You have come at last to the resting place of the most holy.  Startling
+crystal clarity of vision has been granted to you; seven guardians rim
+the periphery of the throne and all is bathed in a warm and clean light.
+It is here that the final choice is to be made, and no defiance of yours
+can change the outcome.
+~
+15 d 0
+D2
+~
+~
+0 -1 1539
+S
+$

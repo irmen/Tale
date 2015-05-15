@@ -1,0 +1,82 @@
+#64
+Rand's Tower~
+6400 6499 20 1
+*
+* Created by Amanda Eterniale of C.A.W.
+* Official C.A.W. site: http://qsilver.queensu.ca/~fletchra/Caw/
+* Mail Address: fletchra@qsilver.queensu.ca
+*
+* Mobiles
+M 0 6400 3 6400         Goats
+M 0 6400 3 6402         Goats
+M 0 6400 3 6404         Goats
+M 0 6401 2 6407         Demons
+M 0 6401 2 6407         Demons
+M 0 6402 1 6412         Book Monster
+G 1 6410 20                     Chaos Book
+G 1 6411 20                     Elder Book
+M 0 6403 1 6411         Bad Feeling
+M 0 6405 1 6437         Door Guardian
+O 0 6416 1 6416         Chest
+M 0 6404 3 6416         Worst Nightmare
+P 1 6401 50 6416                Glowing Platemail
+O 0 6417 1 6416         Chest
+M 0 6404 3 6416         Worst Nightmare
+P 1 6405 100 6417               Dragon's Blood
+P 1 6407 50 6417                Tent Pole
+O 0 6418 1 6416         Chest
+M 0 6404 1 6416         Worst Nightmare
+P 1 6406 100 6418               Amulet
+P 1 6408 1 6418                 Powder Of Wealth
+P 1 6412 10 6418                Occluded Lens
+* Objects
+R 0 6411 6404
+O 0 6404 5 6411         Sculpture
+O 0 6409 1 6411         Desk
+P 0 6402 50 6409                Agate
+P 0 6403 50 6409                Jade
+P 0 6400 50 6409                Glowing Dagger
+R 0 6441 6413
+O 0 6413 100 6441       Mevais
+R 0 6441 6414
+O 0 6414 100 6441       Peska
+R 0 6436 6415
+O 0 6415 10 6436        Rand's Staff
+R 0 6410 6419
+O 0 6419 1 6410         Water Basin
+R 0 6424 6420
+O 0 6420 10 6424        Food
+R 0 6424 6420
+O 0 6420 10 6424        Food
+* Doors
+D 0 6406 5 1
+D 0 6407 4 1
+D 0 6407 2 1
+D 0 6408 0 1
+D 0 6409 0 1
+D 0 6409 2 1
+D 0 6410 0 1
+D 0 6411 2 1
+D 0 6412 1 1
+D 0 6412 3 1
+D 0 6413 3 1
+D 0 6414 1 1
+D 0 6414 5 1
+D 0 6415 3 1
+D 0 6416 4 1
+D 0 6417 0 1
+D 0 6417 1 1
+D 0 6417 2 1
+D 0 6418 0 1
+D 0 6419 2 1
+D 0 6420 0 1
+D 0 6421 2 1
+D 0 6423 0 1
+D 0 6424 2 1
+D 0 6435 3 2
+D 0 6436 1 2
+D 0 6437 3 1
+D 0 6438 1 1
+S
+$
+

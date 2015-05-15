@@ -1,0 +1,37 @@
+#1200
+innkeeper~
+the Immortal Innkeeper~
+The Immortal Innkeeper is organizing her books here.
+~
+She appears to be having no problem tallying things up.
+~
+ab p 0 S
+30 0 -10 1d49+901 4d8+5
+0 0
+8 8 2
+#1201
+postmaster master post~
+the Immortal Postmaster~
+The Immortal Postmaster is hard at work here.
+~
+Scary... a postal worker... working?
+~
+ab p 0 S
+30 0 -10 1d49+901 4d8+5
+0 0
+8 8 2
+#1202
+being amorphous spirit wandering~
+the wandering spirit~
+A strange amorphous being wanders these halls eternally cleaning.
+~
+This spirit, having lived out its days in the mortal world, now
+works off its final sins by doing menial labour in this realm's
+purgatory.  In this case, those chores seem to be cleaning up
+after the immortals of the land.
+~
+acgq dkps 0 S
+30 0 -10 1d49+901 4d8+5
+0 0
+8 8 0
+$

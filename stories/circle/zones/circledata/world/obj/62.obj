@@ -1,0 +1,87 @@
+#6200
+key~
+a key~
+A key sits here.~
+~
+18 cdq 16385
+6200 0 0 0
+1 20 0
+E
+key~
+It is a plain looking key.
+~
+#6201
+manacles~
+a set of manacles~
+A set of iron manacles lie here.~
+~
+9 h 129
+0 0 0 0
+20 100 20
+E
+manacles~
+They're big steel cuffs, meant to be locked around the hands.
+~
+A
+18 -20
+#6202
+shackles~
+a set of shackles~
+A set of shackles sit here, discarded.~
+~
+9 h 65
+0 0 0 0
+20 100 20
+E
+shackles~
+Big iron cuffs, meant to be locked around the ankles.
+~
+A
+14 -80
+#6203
+Runestone rune stone~
+the Runestone~
+A small stone with an inscription sits here.~
+~
+1 a 16385
+0 0 -1 0
+1 10000 2000
+E
+runestone rune stone~
+It is a small, carved stone with a strange symbol
+carved upon it.  Strange...
+~
+A
+12 8
+#6204
+club~
+a club~
+A crude wooden club sits here.~
+~
+5 0 8193
+0 2 2 7
+12 10 2
+E
+club~
+It is a big, wooden club.
+~
+#6205
+Starkblade knife dagger blade~
+Starkblade~
+A knife hums with eternal energy here.~
+~
+5 bp 8193
+0 3 7 3
+1 100000 20000
+E
+starkblade knife dagger blade~
+It is an odd knife, with an inset of sapphire in the
+pommel.  It hums constantly, and your hand stings a 
+bit when you touch it.
+~
+A
+12 10
+A
+13 -20
+$
+

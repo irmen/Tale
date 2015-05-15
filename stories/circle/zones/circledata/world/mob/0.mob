@@ -1,0 +1,65 @@
+#1
+Puff dragon fractal~
+Puff~
+Puff the Fractal Dragon is here, contemplating a higher reality.
+~
+Is that some type of differential curve involving some strange, and
+unknown calculus that she seems to be made out of?
+~
+anopqr dkp 1000 E
+26 1 -1 5d10+550 4d6+3
+10000 155000
+8 8 2
+BareHandAttack: 12
+E
+#10
+clone~
+the clone~
+A boring old clone is standing here.
+~
+This clone is nothing to look at.  No, really, it is quite boring.
+~
+b 0 0 S
+1 0 0 1d1+1 1d1+1
+0 0
+8 8 0
+#11
+zombie undead humanoid~
+the zombie~
+A strange humanoid is here.  How odd, its flesh seems to be falling off!
+~
+This strange humanoid is moving rather slowly, and appears to be
+a corpse, a walking corpse!  It must be a zombie or something of
+the sort.
+~
+b 0 0 E
+1 0 0 1d1+1 1d1+1
+0 0
+8 8 0
+BareHandAttack: 7
+E
+#19
+aerial servant shape~
+the aerial servant~
+An amorphous shape is floating in the air.
+~
+As you stare at this amorphous shape, it begins to appear to take
+the shape of a cloud-like humanoid.
+~
+b 0 0 S
+1 0 0 1d1+1 1d1+1
+0 0
+8 8 0
+#20
+elemental~
+the elemental~
+An elemental is standing patiently here.
+~
+This creature is the essence of the elements, and appears to be
+waiting patiently for something to occur.
+~
+b 0 0 S
+1 0 0 1d1+1 1d1+1
+0 0
+8 8 0
+$

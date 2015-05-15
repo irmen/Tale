@@ -1,0 +1,192 @@
+#18601
+pitbeast pit-beast~
+the pit beast~
+The big, ugly pit-beast is standing here sizing you up.
+~
+Ick... what a disgusting creature!  It is black and green and slimy
+and it is drooling everywhere... looks mean too.
+~
+6 0 -750 S
+5 17 5 4d6+42 1d5+1
+100 1200
+8 8 0
+#18602
+newbie monster~
+the newbie monster~
+The newbie monster stands here looking confused.  Kill him!  Kill him!
+~
+What an odd looking little beast.  He looks harmless, but you never can
+tell.  He is only about 4 feet tall, but he pretty muscular looking...
+maybe you should ask if he needs help?  Nah... kill him.
+~
+68 0 0 S
+2 19 9 2d4+16 1d4+1
+250 400
+8 8 1
+#18603
+dragon baby~
+the baby dragon~
+Someone's little pet dragon has gotten loose, and is sniffing about here.
+~
+Awwww... how cute!  A little baby dragon.  He's about 3 feet long and you
+just want to cuddle him to death... no, you really want to kill him to tell
+the truth.  But, remember, even a little dragon can be a big problem.
+~
+0 0 100 S
+4 17 6 1d4+50 1d6+1
+0 1000
+8 8 1
+#18604
+keeper guard monster~
+the Newbie Guard~
+The Newbie Guard is here wondering where that dragon went.
+~
+The Guard also had the job of taking care of the Alchemist's pet dragon,
+but he doesn't seem to be doing a good job of it.  He looks at you and
+says, 'Have you seen that dragon?  Master will have my head if I don't find
+him.'
+~
+2 0 0 S
+3 18 7 2d6+34 1d7+0
+500 800
+8 8 1
+#18605
+alchemist newbie~
+the Newbie Alchemist~
+The Newbie Alchemist is here trying to make something.
+~
+He is a funny looking, furry little dude.  He looks really busy trying to
+mix up a batch of something or other.
+~
+2 0 0 S
+5 16 5 4d6+38 2d4+0
+1000 1200
+8 8 0
+#18606
+crawler creepy bug thing~
+the creepy crawler~
+A creepy little crawling thing is scuttling along the floor at your feet.
+~
+Yuck!  If they'd ever clean this place maybe it wouldn't attract vermin
+like this disgusting, little, six-legged, brown bug.
+~
+64 0 -250 S
+1 20 10 1d4+8 1d4+0
+0 100
+8 8 0
+#18607
+newbie zombie~
+the zombiefied newbie~
+A VERY gaunt looking newbie... it looks like a zombie!
+~
+This guy has been lost in here too long... it is more zombie than man
+now.  You would feel sorry for it, but it is moving in to attack!
+~
+100 0 -500 S
+4 17 5 1d8+46 2d4+0
+300 600
+8 8 0
+#18608
+quasit imp thing~
+the quasit~
+A funny little imp-like thing (a quasit perhaps?) is sneaking about here.
+~
+Little green, vaguely humoniod shaped creature, with a long pointed tail.
+It is hard to say because before you ever get a good look at it, it darts
+back into the shadows.
+~
+228 0 -800 S
+3 19 7 1d10+30 1d4+1
+0 300
+8 8 1
+#18609
+minotaur~
+the massive Minotaur~
+The Great Minotaur is wondering just what you'll taste like.
+~
+A massive man, with the head of a bull.  He looks as strong as bull too,
+but not nearly as smart.  Actually, now that you consider it... he looks
+a heck of a lot meaner than any bull you have ever seen... and he is
+coming this way!
+~
+1600 0 -1000 S
+7 15 5 3d5+85 2d4+1
+1000 3000
+8 8 1
+#18610
+spectre ghost~
+the dark spectre~
+The dark spectre is lurking in the shadows.
+~
+The soul of a long since passed on adventurer... it lurks here waiting for
+a chance to bring death to any who cross its path.
+~
+2122 524298 -850 S
+6 16 3 3d5+62 2d4+0
+0 1600
+8 8 0
+#18611
+newbie annoying jerk~
+the annoying newbie~
+A newbie is here annoying the hell out of you.
+~
+What a jerk!  He won't shut up, and he keeps making the most irritating
+comments about everything.  Better silence him with cold, tempered steel
+MUHAHAHAHAHAHAHAHAHAHA!
+~
+68 0 -500 S
+2 18 10 2d4+20 1d3+1
+250 500
+8 8 1
+#18612
+newbie clueless moron~
+the clueless newbie~
+A newbie is here looking terribly confused.
+~
+What a moron!  Every question that is answered in the help files, he will
+ask and he will probably ask 2 or 3 times too.  This guy just doesn't get
+it, best put him out of his misery.
+~
+68 0 0 S
+1 20 10 1d1+19 1d3+1
+50 220
+8 8 1
+#18613
+newbie talkative~
+the talkative newbie~
+A newbie is here talking a lot.
+~
+Well, at least this gal seems pretty cool.  Talks a lot, but she's a
+friendly, interesting sort.  Seems to have a clue what she's doing also,
+unlike some others you might see.
+~
+64 0 100 S
+3 18 8 6d5+22 1d7+1
+700 600
+8 8 2
+#18614
+newbie lost~
+the lost newbie~
+A newbie is here wandering about aimlessly.
+~
+Hmmm... looks like he has been around a while, but he wandered a little
+too far from home this time.  Don't think he knows quite where he is,
+maybe you should help him out?
+~
+64 0 300 S
+4 17 6 8d5+20 1d6+1
+250 500
+8 8 1
+#18615
+newbie smart~
+the smart newbie~
+A newbie is here, and he looks quite sure of himself.
+~
+Here is a guy who has it all together.  Nice equipment too, must have read
+the help files, Eh?
+~
+68 0 500 S
+5 15 9 10d5+20 2d3+2
+1100 1000
+8 8 1
+$

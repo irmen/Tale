@@ -1,0 +1,1834 @@
+#7200
+The Treasury~
+   You are in a small but well equipped treasury.  You can see some writing
+on the wall.  The ceiling has a funny glow, which enables you to see.  You
+can get back into the inner lair through the stone door which is east.
+~
+72 cd 0
+D1
+You look back through the opening into the inner lair.
+~
+door stone~
+2 7205 7201
+E
+door stone~
+This is a heavy black stone door it looks very solid.
+~
+E
+writing~
+You read the number '666'.
+~
+S
+#7201
+The Inner Lair~
+   You are in a octagonal room with smooth purple stone walls.  The floor is 
+made from black stone.  In the western wall you see a large black stone door.
+~
+72 ad 0
+D2
+You look back through the door into the lair.
+~
+door wooden~
+1 -1 7202
+D3
+You see the treasury.
+~
+door stone~
+2 7205 7200
+S
+#7202
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.  To
+the north is a wooden door.
+~
+72 d 1
+D0
+You can see the inner lair.
+~
+door wooden~
+1 -1 7201
+D1
+You see another part of the lair.
+~
+~
+0 -1 7205
+D2
+You see another part of the lair.
+~
+~
+0 -1 7203
+E
+skull skulls bones decay~
+On all the skulls you notice that there is a three inch hole in the 
+forehead.  All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7203
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.
+~
+72 d 1
+D0
+You see another part of the lair.
+~
+~
+0 -1 7202
+D1
+You see another part of the lair.
+~
+~
+0 -1 7206
+D2
+You see another part of the lair.
+~
+~
+0 -1 7204
+E
+skull skulls bones decay~
+On all the skulls you notice that there is a three inch hole in the 
+forehead.  All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7204
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.
+~
+72 d 1
+D0
+You see another part of the lair.
+~
+~
+0 -1 7203
+D1
+You see another part of the lair.
+~
+~
+0 -1 7207
+D2
+You see the lair entrance.
+~
+door wooden~
+1 -1 7208
+E
+skull skulls bones decay~
+On all the skulls you notice that there is a three inch hole in the 
+forehead.  All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7205
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.
+~
+72 d 1
+D2
+You see another part of the lair.
+~
+~
+0 -1 7206
+D3
+You see another part of the lair.
+~
+~
+0 -1 7202
+E
+skull skulls bones decay~
+On all the skulls you notice that there is a three inch hole in the 
+forehead.  All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7206
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.
+~
+72 cd 1
+D0
+You see another part of the lair.
+~
+~
+0 -1 7205
+D2
+You see another part of the lair.
+~
+~
+0 -1 7207
+D3
+You see another part of the lair.
+~
+~
+0 -1 7203
+E
+bones decay~
+All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7207
+The Lair~
+   On the floor you see a lot of human decay, like bones and skulls.  You
+also see a lot of slime.  On the wall is a torch sitting in its sconce.
+~
+72 d 1
+D0
+You see another part of the lair.
+~
+~
+0 -1 7206
+D3
+You see another part of the lair.
+~
+~
+1 -1 7204
+E
+skull skulls bones decay~
+On all the skulls you notice that there is a three inch hole in the 
+forehead.  All the bones are broken and old.
+~
+E
+slime~
+The slime is slimy and uninteresting.
+~
+E
+torch sconce~
+The torch is bolted to the sconce and the sconce to the wall.
+~
+S
+#7208
+The Lair Entrance~
+   You are in a dry part of the sewer.  To the north is a wooden door,
+you can see some slime at the lower part of the door.  You also see
+some skulls and some broken bones.
+~
+72 acd 2
+D0
+You can see the lair.
+~
+door wooden~
+1 -1 7204
+D1
+You see a crawlway.
+~
+~
+0 -1 7209
+E
+slime~
+The slime is slimy and uninteresting.
+~
+S
+#7209
+The Crawlway~
+   You are in a narrow crawlway.  It is rather boring here.
+~
+72 ad 3
+D1
+You see a four-way junction.
+~
+~
+0 -1 7210
+D3
+You see the entrance to a lair.
+~
+~
+0 -1 7208
+S
+#7210
+The Four-Way Junction~
+   You are in a sewer junction.  To the north is a small hole, to the west
+is a narrow crawlway and to the east and south the sewer continues.
+~
+72 ad 3
+D0 
+You can see a small cave-like room.
+~
+~
+0 -1 7211
+D1 
+You can see a sewer drain.
+~
+~
+0 -1 7212
+D2
+You can see a sewer drain.
+~
+~
+0 -1 7215
+D3
+You can see a narrow crawlway.
+~
+~
+0 -1 7209
+S
+#7211
+The Small Cave~
+   You are in a collapsed sewer drain, which now is more like a small cave.
+~
+72 ad 3
+D2
+You look back into the four-way junction.
+~
+~
+0 -1 7210
+S
+#7212
+The Sewer Drain~
+   You are in a dry sewer drain which bends to the north.
+~
+72 ad 3
+D0
+You can see the drain continuing north.
+~
+~
+0 -1 7213
+D3
+You can see the four-way junction.
+~
+~
+0 -1 7210
+S
+#7213
+The Sewer Drain~
+   You are in a dry sewer drain which bends to the east.
+~
+72 ad 3
+D1
+You can see the drain continuing east.
+~
+~
+0 -1 7214
+D2
+You can see the drain continuing south.
+~
+~
+0 -1 7212
+S
+#7214
+The End Of The Drain~
+   You are at the end of the drain around you the sewer has collapsed, the
+only exit is west.
+~
+72 ad 3
+D3
+You see the sewer drain.
+~
+~
+0 -1 7213
+S
+#7215
+The Half-Wet Drain~
+   You are in a sewer drain where the floor is covered with water.  To
+the north it looks more dry, south however the drain runs down into
+some water.
+~
+72 ad 4
+D0
+To the north lies a dry four-way junction.
+~
+~
+0 -1 7210
+D2
+To the south you see a sewer drain filled with water.
+~
+~
+0 -1 7216
+E
+water~
+The water is dirty but it looks like you would be able to swim in it.
+~
+S
+#7216
+Under Water In The Sewer~
+   You are swimming in some dirty water and are holding your breath.  You'd
+better continue onwards before you drown.  It is a good thing that you can
+hold your light above the water-level.
+~
+72 ad 6
+D0 
+It is hard to see, but it looks like the drain runs slightly upwards.
+~
+~
+0 -1 7215
+D2
+It is hard to see, but it looks like the drain runs a little bit upwards.
+~
+~
+0 -1 7217
+S
+#7217
+The Half-Dry Drain~
+   You are in a half-dry sewer drain.  To the north the drain runs a little
+bit downwards into some water to the east you can see a small hole.  To the
+west you see another drain.
+~
+72 ad 4
+D0
+You see the drain running down into some water.
+~
+~
+0 -1 7216
+D1
+Through the hole you can just make out a very small room.
+~
+~
+0 -1 7218
+D3
+You see a drain running to the west.
+~
+~
+0 -1 7219
+E
+water~
+The water is dirty but it looks like you would be able to swim in it.
+~
+E
+hole~
+Through the hole you can just make out a very small room.
+~
+S
+#7218
+The Very Small Room~
+   You are in a very small room, it is pretty uninteresting.
+~
+72 ad 3
+D3
+Through the little hole you can see a half-dry drain.
+~
+~
+0 -1 7217
+S
+#7219
+A Dry Sewer Drain~
+   You are in a dry but dirty sewer drain.  The drain continues east and
+south.
+~
+72 ad 3
+D1
+You see a half-dry drain.
+~
+~
+0 -1 7217
+D2
+You see another boring sewer drain.
+~
+~
+0 -1 7220
+S
+#7220
+A Boring Drain~
+   You are in yet another sewer drain.
+~
+72 ad 3
+D0
+You see a sewer drain continuing to the north.
+~
+~
+0 -1 7219
+D1
+You can see another drain to the east.
+~
+~
+0 -1 7221
+S
+#7221
+The Sewer Drain~
+   You are in a sewer drain, there is nothing special in here, except for a 
+loud echo.
+~
+72 ad 3
+D1
+You can see another sewer drain.
+~
+~
+0 -1 7222
+D3
+You can make out a sewer drain to the west.
+~
+~
+0 -1 7220
+D4
+You can see a sewer line.
+~
+~
+0 -1 7129
+S
+#7222
+The Sewer Drain~
+   You are in a drain, with some slimy water on the floor.
+~
+72 ad 3
+D1
+You see a sewer bend.
+~
+~
+0 -1 7223
+D3
+You see a sewer drain.
+~
+~
+0 -1 7221
+E
+slimy water~
+The water floats to the east from here.
+~
+S
+#7223
+The Sewer Bend~
+   You find yourself in an ordinary sewer bend, which bends from west to
+north.
+~
+72 ad 3
+D0
+You see a sewer drain.
+~
+~
+0 -1 7224
+D3
+You see a sewer drain.
+~
+~
+0 -1 7222
+S
+#7224
+The Sewer Junction~
+   You stand in a junction of three sewer drains.  You see some odd
+scratches on the pipe wall, as if from a gigantic rat.  North and
+south the sewer continues as usual, but west it looks a little
+strange.
+~
+72 ad 3
+D0 
+You see nothing but a sewer drain.
+~
+~
+0 -1 7225
+D2
+You see nothing but a sewer drain.
+~
+~
+0 -1 7223
+D3
+You see a strange sewer pipe.
+~
+~
+0 -1 7229
+S
+#7225
+The Sewer~
+   You are in a sewer, where the slimy water runs down through a tiny hole.
+You see some odd scratches on the pipe wall, as from a gigantic rat.  There 
+is a sewer drain south.
+~
+72 ad 3
+D2
+You see a sewer drain.
+~
+~
+0 -1 7224
+S
+#7229
+The Strange Sewer~
+   You are in a very strange sewer indeed, there are some odd scratches on
+the pipe wall, as from a gigantic rat.  And you can see a lot of organic
+decay like bones from animals AND humans.  West the drain runs slightly
+upwards.
+~
+72 ad 3
+D1
+You see a sewer junction.
+~
+~
+0 -1 7224
+D3
+You see a slimy sewer drain.
+~
+~
+0 -1 7230
+S
+#7230
+The Damp Sewer~
+   You are in a sewer drain with a funny damp substance on the floor, in the 
+substance you see a lot of decay.  You see some odd scratches on the wall,
+as if from a gigantic rat.  Both to the east and west the pipe seems to run
+down.
+~
+72 acd 3
+D1
+You see a sewer.
+~
+~
+0 -1 7229
+D3
+You see a sewer.
+~
+~
+0 -1 7231
+S
+#7231
+The Strange Sewer~
+   You are in an ordinary sewer except for a lot of scratches on the sewer
+wall, and a lot of debris on the floor.
+~
+72 ad 3
+D1
+You see a sewer.
+~
+~
+0 -1 7230
+D3
+You see another sewer.
+~
+~
+0 -1 7232
+E
+debris~
+You see a lot of organic decay on the floor.
+~
+S
+#7232
+The Sewer~
+   You are in a sewer with more scratches on the walls.  And of course a whole
+lot of decay.  The drain runs east and north.
+~
+72 ad 3
+D0
+You see yet another sewer line.
+~
+~
+0 -1 7233
+D1
+You see a sewer pipe.
+~
+~
+0 -1 7231
+S
+#7233
+The Sewer Drain~
+   You stand in a sewer drain, you are able to see some kind of cave-like
+room.  You see some odd scratches on the drain wall, as if from a gigantic
+rat.  The sewer leads south.
+~
+72 ad 3
+D1
+You see a cave-like room.
+~
+~
+0 -1 7234
+D2
+You see a sewer.
+~
+~
+0 -1 7232
+S
+#7234
+The Rat's Lair~
+   You are in a little cave.  You are able to see quite a lot of debris on
+the floor.  There is a sewer drain west of here.
+~
+72 ad 3
+D3
+You see the sewer system that way.
+~
+~
+0 -1 7233
+S
+#7279
+The Wall Of The Abyss~
+   You hang onto some steps leading down into utter darkness.  There is an
+exit leading up as well, though you'll have to open the tiny rock again to
+do so.
+~
+72 ad 5
+D4
+~
+rock~
+1 -1 7111
+D5
+~
+~
+0 -1 7299
+S
+#7280
+The Entrance~
+   You are in a very dark room.  You notice that some faces are staring at
+you from inside the walls.  In the middle of the room there is a small altar.
+To the north there is a small round door.
+~
+72 ad 1
+D0
+A beam of red light seeps through a hole in the door.
+~
+door small round~
+1 -1 7281
+D4
+~
+altar secret~
+1 -1 7116
+E
+altar~
+This altar is very special.  Faces appear to be smiling from it.  There
+is a triangle engraved in the top of it.
+~
+E
+triangle~
+The triangle is filled with small symbols.  They seem to be a language
+you have never seen before.
+~
+S
+#7281
+The Corridor~
+   The corridor is glowing oppressively in a red hue.  You can hear wailing
+through an open black hole to the east.  To the south there is a round door.
+~
+72 d 1
+D1
+The hole seems more black than the night.  It is appears to be "eating" the
+red light around it.
+~
+~
+0 -1 7282
+D2
+~
+door small round~
+1 -1 7280
+E
+small round door~
+The door is completely round without a keyhole.
+~
+E
+red light~
+The red light glows from the walls.
+~
+E
+walls~
+The walls look alive.
+~
+S
+#7282
+The Realm Of Lost Souls~
+   You are standing in nothing.  All around you there are stars.
+Sometimes a shadow flies closely by you, wailing very loudly.  To
+the north there is a small bright hole.  To the west there is a
+small red hole.
+~
+72 d 0
+D0
+You look into a very bright hole.
+~
+~
+0 -1 7283
+D3
+You look into a red hole.
+~
+~
+0 -1 7281
+E
+shadow~
+The shadow looks like a man in great pain.
+~
+S
+#7283
+The T-Crossing~
+   You are in a small hallway.  There are doors to the east and to
+the west.  To the south there are a black hole.  There is writing
+in the wall.  Wails can be heard from the south.
+~
+72 acd 1
+D1
+It is too dark to tell.
+~
+~
+0 -1 7286
+D2
+A black hole in the wall.
+~
+~
+0 -1 7282
+D3
+You can see a big fire to the west.  It looks like a unhealthy
+place to enter!
+~
+~
+0 -1 7284
+E
+writing~
+The writing says 'The one to the east, belongs to the beast.
+To the west you will surely END your quest!'.
+~
+S
+#7284
+The Firedeath~
+   This room is very hot.  There are flames surrounding you.  You can
+see no exits at all!  Skeletons are lying all over the floor.
+~
+72 cd 1
+E
+skeletons~
+The skeletons looks like they had suffered the death of hunger.
+One of them looks like he has written something at the wall.
+~
+E
+writing wall~
+The writing says 'A prayer to the GODS will not be heard, though
+the only exit is death... Mother, I love you'.
+~
+S
+#7285
+The Torture Room~
+   You are standing in a middle of a square room.  Along the walls skeletons 
+are hanging in rusty chains.  In the middle of the room there is a big metal 
+box, covered with dust.  To the south you can just make out a small exit.
+~
+72 d 1
+D2
+It is too dark to tell.
+~
+door iron~
+1 -1 7286
+E
+skeletons~
+When you look at the skeletons, you can see that they once had been in great 
+pain.  They are hanging in their arms, and some of them were killed with a
+sharp instrument.
+~
+E
+big metal box~
+The metal box is covered with dust.  You notice that it was once filled with
+coal, as you see some small pieces of it.
+~
+S
+#7286
+The Hell Yard~
+   You are standing in a lot of mud.  A disgusting smell surrounds
+the place, and makes you feel sick.  Small flames sometimes shoot
+up from the hot mud.  To the west there is a small door.  To the 
+north you can see an iron door.
+~
+72 cd 5
+D0
+It is too dark to tell.
+~
+door iron~
+1 -1 7285
+D3
+It is too dark to tell.
+~
+~
+0 -1 7283
+S
+#7299
+On The Walls Of The Abyss~
+   You are clutching the steps on the wall so that you don't fall to the
+ground down below.  You cannot see anymore handholds below you and thus
+this stops your journey down, as the only exit is up.
+~
+72 ad 5
+D4
+~
+~
+0 -1 7279
+S
+#7300
+Cave Entrance~
+   You are standing in the cave entrance.  It is very dark down here.  There
+is writing on the wall.  There is an exit to the north.  A stairway leads up.
+~
+73 ad 1
+D0
+To the north you can see a small tunnel.
+~
+~
+0 -1 7301
+D4
+You can see the stairs going up into darkness.
+~
+~
+2 -1 7102
+E
+writing wall~
+The writing says 'BEWARE adventurer!'
+~
+S
+#7301
+Cave Tunnel~
+   You are walking in a tunnel.  It is very cold.  You can feel the presence
+of a living thing... SOMEWHERE.
+~
+73 ad 1
+D0
+To the north you can see the tunnel continuing.
+~
+~
+0 -1 7302
+D2
+To the south tunnel continuing.
+~
+~
+0 -1 7300
+S
+#7302
+Cave Room~
+   You are standing in a room.  It is much cooler now.  The walls are glowing.
+~
+73 d 1
+D1
+To the east you see the tunnel going downwards.
+~
+~
+0 -1 7303
+D2
+To the south you see a dark cave tunnel.
+~
+~
+0 -1 7301
+D3
+~
+~
+0 -1 7321
+S
+#7303
+The Cave T-Cross~
+   You are standing in a mudlike substance.  The smell here is awful, it is
+rotten.  To the west you can see some light.
+~
+73 ad 2
+D1
+To the east the tunnel still goes downwards.
+~
+~
+0 -1 7304
+D2
+~
+~
+0 -1 7308
+D3
+You can see some light to the west.
+~
+~
+0 -1 7302
+E
+mud~
+When you examine the mud, you notice small worms crawling around.
+~
+E
+worms~
+The worms are purple.  They do not look edible.
+~
+S
+#7304
+The Cave Turning-Point~
+   The mud is getting deeper.  You are wondering, 'Would it be an idea to
+leave, before I disappear?'.  To the south you notice a flat round stone
+is blocking the way.  To the west you can see mud.
+~
+73 ad 2
+D2
+You can see an opening behind the stone.
+~
+stone flat round~
+1 -1 7305
+D3
+~
+~
+0 -1 7303
+E
+flat round stone~
+The stone looks very uninteresting.  BUT as you are about to turn away, you
+see a strip of light coming through a small hole.  Conclusion: The stone is
+moveable.
+~
+S
+#7305
+The Secret Room~
+   There is dust all over the place.  It looks like nobody has been here
+for ages.  In the middle of the room you see a socket with a crystal globe.
+The globe glows with a pulsing light.  To the north you see a stone door.
+To the south you see a grey block.
+~
+73 d 1
+D0
+You see a round stone door.
+~
+door round stone~
+1 -1 7304
+D2
+You see a grey block.
+~
+block grey~
+1 -1 7306
+E
+socket~
+The socket looks like the work of a dwarf.  It is VERY beautiful.
+~
+E
+crystal globe~
+The crystal globe is glowing with a pulsing light.  It looks like there is
+smoke inside it.
+~
+S
+#7306
+The Mudhole~
+   You are standing in a lot of mud.  The mud goes to your chest.  You feel
+the presence of something IN the mud.  The only obvious exit is to the west.
+~
+73 ad 6
+D0
+You can see nothing at all.
+~
+block grey~
+1 -1 7305
+D3
+~
+~
+0 -1 7307
+S
+#7307
+A Tunnel~
+   The mud goes to your knees.  Otherwise the tunnel looks very normal.
+~
+73 ad 5
+D0
+~
+~
+0 -1 7308
+D1
+You can see a mudhole.
+~
+~
+0 -1 7306
+D2
+~
+~
+0 -1 7309
+S
+#7308
+The Long Tunnel~
+   Here there is almost no mud, as you stand at the top of a small rock.  Just
+beside you there are a sign which says 'WARNING!  The worms are dangerous!'
+~
+73 ad 1
+D0
+You can see a lot of mud... Yuck!
+~
+~
+0 -1 7303
+D2
+The tunnel goes a little downwards.
+~
+~
+0 -1 7307
+S
+#7309
+The Hot Room~
+   You are very surprised, as this room for a change are hot instead of
+cold.  To the north it goes downwards into some mud.  There are also an
+exit to the west.
+~
+73 ad 1
+D0
+You see a lot of mud.
+~
+~
+0 -1 7307
+D3
+You see a entrance to a small room.
+~
+~
+0 -1 7310
+S
+#7310
+The Small Room~
+   As you look around you notice a small statue.  There are exits to the west
+and to the east.
+~
+73 ad 1
+D1
+It is pitch dark out there.
+~
+~
+0 -1 7309
+D3
+You see a VERY long hallway.
+~
+~
+0 -1 7311
+E
+small statue~
+This is a statue of a imp, pointing to the west.  The imp looks like a man
+with horns and a tail.
+~
+S
+#7311
+The Stalagmite Cave~
+   You are standing in a stalagmite cave.  Water is dripping from the walls.
+It is very cold in here.
+~
+73 ad 2
+D0
+~
+~
+0 -1 7314
+D1
+You see a long hallway, and some mud.
+~
+~
+0 -1 7310
+D2
+~
+~
+0 -1 7312
+E
+stalagmite~
+The stalagmites are very tall, and looks very beautiful.
+~
+S
+#7312
+The Stalagmite Tunnel~
+   You has entered a small tunnel.  Here it is quite dry.  Maybe it would be a
+good idea to rest here.
+~
+73 ad 1
+D0
+You can see a small cave to the north.
+~
+~
+0 -1 7311
+D3
+~
+~
+0 -1 7313
+S
+#7313
+The Spongy Room~
+   You definitely do NOT like this area.  It is very dank, and most of the
+room is wet.
+~
+73 cd 3
+D1
+~
+~
+0 -1 7312
+D3
+~
+~
+0 -1 7345
+S
+#7314
+The Stalagmite T-Cross~
+   You are standing in a cross.  To the north you can see some light.
+Otherwise it is dark.
+~
+73 cd 1
+D0
+You see some light ahead.
+~
+~
+0 -1 7317
+D1
+~
+~
+0 -1 7315
+D2
+~
+~
+0 -1 7311
+S
+#7315
+The Blind End Room~
+   This room is obviously a blind end.  To the north you see a primitive
+picture.
+~
+73 ad 1
+D0
+You see a primitive picture of some people dancing around a huge sun.  The
+sun is about 7 feet in diameter, which shows the size of the picture.
+~
+sun~
+1 -1 7316
+D3
+~
+~
+0 -1 7314
+E
+primitive picture~
+You see some people dancing around a huge sun.  The sun is about 7 feet in
+diameter, which shows the size of the picture.
+~
+S
+#7316
+The Treasure Room~
+   This room is richly ornamented.  The walls have been carved to show
+people dancing around a moon which is drawn on the floor.  It looks very
+old, and it is very dusty.  To the south you see the back side of a secret
+door.
+~
+73 adj 1
+D2
+You can see a picture with some peeple crawling around a huge moon.
+~
+moon door~
+1 -1 7315
+S
+#7317
+The Square Lair~
+   You are standing in the south-east part of the lair.  You can see a skeleton
+lying in the corner.
+~
+73 d 1
+D0
+Another part of the lair.
+~
+~
+0 -1 7318
+D3
+Another part of the lair.
+~
+~
+0 -1 7320
+D2
+~
+~
+0 -1 7314
+E
+skeleton~
+It looks like a adventurer who wasn't lucky.  You'd better watch out...
+~
+S
+#7318
+The Square Lair~
+   You are standing in the north-east part of the lair.
+You see a sign on the wall.
+~
+73 ad 1
+D1
+You see a wooden door.
+~
+door wooden~
+1 -1 7321
+D2
+Another part of the lair.
+~
+~
+0 -1 7317
+D3
+Another part of the lair.
+~
+~
+0 -1 7319
+E
+sign wall~
+The sign says 'Gods of War I call you, my sword is by my side,
+               I seek a light free from all false pride'
+                       Reyemle Grug...
+~
+S
+#7319
+The Square Lair~
+   You are standing in the north-west part of the lair.  Here there is another
+sign.  There is an exit from the lair to the north.
+~
+73 ad 1
+D0
+You see a small tunnel leading north.
+~
+~
+0 -1 7322
+D1
+Another part of the lair.
+~
+~
+0 -1 7318
+D2
+Another part of the lair.
+~
+~
+0 -1 7320
+E
+sign~
+The sign says 'I'm wandering around in a everlasting tale,
+               seeking the light to regain my pride
+                           Corama...
+~
+S
+#7320
+The Lair End~
+   You can see a table in front of you.  It is very dusty.  Five skeletons are
+sitting around the table.  Exits are north and east.
+~
+73 ad 1
+D0
+The northern part of the lair.
+~
+~
+0 -1 7319
+D1
+The eastern part of the lair.
+~
+~
+0 -1 7317
+E
+table~
+On the table there is dust, in the center there is a small statue of a
+Dragon sleeping.
+~
+E
+skeleton skeletons~
+They've obviously been killed somehow, but it doesn't look like it was by 
+sword or club.
+~
+E
+dragon statue~
+It looks like a silver dragon.  It is nailed onto the table.  The dragon sits
+on a red dragon that looks dead.  But the eyes of the red dragon are glowing,
+pulsating red.  You feel drained.
+~
+S
+#7321
+The East Tunnel~
+   You are standing in dark tunnel, the exits are east and west.  To the west
+you see a wooden door.
+~
+73 cd 1
+D3
+You can see a wooden door.
+~
+door wooden~
+1 -1 7318
+D1
+You can see a muddy tunnel.
+~
+~
+0 -1 7302
+S
+#7322
+The North Tunnel~
+   You are standing in a dark tunnel, it leads upwards.
+~
+73 ad 1
+D0
+The dark tunnel continues.
+~
+~
+0 -1 7323
+D2
+You can see the lair.
+~
+~
+0 -1 7319
+D3
+You can see a cave entrance.
+~
+~
+0 -1 7336
+S
+#7323
+The L-Shaped Room~
+   You are standing in deep darkness.  To the south there is a small exit.
+To the east you can see a gaping hole.
+~
+73 ad 1
+D1
+~
+~
+0 -1 7324
+D2
+~
+~
+0 -1 7322
+S
+#7324
+The Circular Hall~
+   You are standing in round hall.  To the north, east and south you can see
+a stone head hanging on the walls.
+~
+73 ad 1
+D0
+You see a red dragon's head hanging on the wall.
+~
+head red~
+2 0 7324
+D1
+You see a green dragon's head hanging on the wall.
+~
+head green~
+1 -1 7325
+D2
+You see a blue dragon's head hanging on the wall.
+~
+head blue~
+2 0 7324
+D3
+You see a room far away.
+~
+~
+0 -1 7323
+E
+head heads~
+When you study the faces of the heads you see that they are faces of dragons.
+The face to the north is red, the face to the east is green, and the face to
+the south is blue.
+~
+E
+green~
+This looks like an evil dragon.
+~
+E
+red~
+This looks like a neutral dragon.
+~
+E
+blue~
+This looks like a good dragon.
+~
+S
+#7325
+A Dusty Tunnel~
+   You are standing in dust.  This place has not been touched for a long time. 
+Otherwise it is quite boring here, looks like a place to rest!  To the west
+you see the outline of a door.  A tunnel leads to the east.
+~
+73 cd 1
+D1
+You see a tunnel which leads downwards.  It is quite dark.
+~
+~
+0 -1 7326
+D3
+You can see the outline of a door.  Just like in the description!
+~
+door~
+1 -1 7324
+S
+#7326
+The Crossing~
+   You are standing in a crossing of hallways.  You can leave this place
+in every direction, except up and down.  In the dust you notice strange
+footprints.
+~
+73 ad 1
+D0
+~
+~
+0 -1 7331
+D1
+~
+~
+0 -1 7330
+D2
+~
+~
+0 -1 7327
+D3
+~
+~
+0 -1 7325
+E
+footprints foot~
+You have never seen this kind of footprint before!
+~
+S
+#7327
+The L-Shaped Room~
+   You are standing in a L-shaped room.  You can hear noises from the long
+tunnel to the east.  You feel very afraid!
+A sign is hanging on the wall.
+~
+73 ad 2
+D0
+~
+~
+0 -1 7326
+D1
+~
+~
+0 -1 7328
+E
+sign~
+The sign says:
+
+DANGER!!
+
+~
+S
+#7328
+The Dragon's Lair~
+   You can see burned walls, the floorstones are fiery red.  All kinds
+of bones are scattered all over the floor.  On the walls you can see
+some burned shapes.  You smell burnt flesh.  Two creatures are half
+melted into the floor.
+~
+73 d 2
+D0
+You can see a long tunnel.
+~
+~
+0 -1 7329
+D3
+You can see nothing but darkness.
+~
+~
+0 -1 7327
+S
+#7329
+The Burnt Room~
+   You are in a room, which once has at one time been quite burnt.  There
+is writing on the wall.
+~
+73 ad 1
+D2
+You can see a red glow...
+~
+~
+0 -1 7328
+D3
+~
+~
+0 -1 7330
+E
+writing~
+The writing says:
+
+                        DANGER
+
+~
+S
+#7330
+The Windy Tunnel~
+   You are standing in a tunnel.  Above you, you can feel a breeze.
+~
+73 ad 1
+D1
+It is too dark to tell.
+~
+~
+0 -1 7329
+D3
+~
+~
+0 -1 7326
+E
+breeze~
+The breeze comes from a hole above you.  NO way to get up there.
+~
+S
+#7331
+The Glittering Room~
+   This room is very bright.  On the walls you can see some silver.  Exits
+are west, east and south.
+~
+73 d 1
+D1
+~
+~
+0 -1 7332
+D2
+~
+~
+0 -1 7326
+D3
+~
+~
+0 -1 7333
+E
+glitter walls silver~
+The glittering silver looks like it is INSIDE the walls.
+~
+S
+#7332
+The Secret Passageway~
+   You have entered a tiny room.  There is only an exit to the west.
+~
+73 ad 1
+D3
+You can see a light to the west.
+~
+~
+0 -1 7331
+S
+#7333
+The End Of Long Tunnel~
+   You are at a end of a long tunnel.  Right in front of you, you can see a
+grey mass.  To the east you can see a tremendously long tunnel, but you know
+that, you were just there.
+~
+73 ad 5
+D1
+A long tunnel.  JUST like in the description!
+~
+~
+0 -1 7331
+D3
+A grey mass is blocking the way.
+~
+mass grey~
+1 -1 7334
+E
+grey mass~
+The mass is nothing but a mass, but it is quite suspicious!
+~
+S
+#7334
+The Stair-Room~
+   You are standing in a small room.  Drawings of faces in pain are on the
+walls.  You can feel that darkness is ruling the place.  There is one exit:
+south.
+~
+73 ad 1
+D2
+Nothing but darkness...
+~
+~
+0 -1 7335
+S
+#7335
+A Dark Tunnel~
+   You are standing in a dark tunnel.  It continues to the north and to the
+south.  Bones are spread on the floor.
+~
+73 ad 1
+D0
+~
+~
+0 -1 7334
+D2
+~
+~
+0 -1 7336
+E
+bones bone~
+It looks like bones of a human.
+~
+S
+#7336
+The Entrance To The Lair~
+   The smell here is awful.  To the south you can see some smoke.  A tunnel
+leads north and east.
+~
+73 acd 2
+D0
+~
+~
+0 -1 7335
+D2
+The only thing you can see is smoke.
+~
+~
+0 -1 7337
+D1
+A small cave is to the east.
+~
+~
+0 -1 7322
+S
+#7337
+The North-Eastern Part Of The Basilisk's Cave~
+   It is hard to see here because of the smoke.  To the north you can barely
+see a small tunnel.  Other exits are to the south and to the west.
+~
+73 ad 2
+D0
+~
+~
+0 -1 7336
+D2
+~
+~
+0 -1 7338
+D3
+~
+~
+0 -1 7339
+S
+#7338
+The South-Eastern Part Of The Basilisk's Cave~
+   There is a very small hole in wall from which the smoke is coming from. 
+Otherwise it is pitch black.  Exits are north and west.
+~
+73 ad 2
+D0
+You can see nothing but smoke.
+~
+~
+0 -1 7337
+D3
+You can see nothing but smoke.
+~
+~
+0 -1 7340
+E
+hole small~
+It seems to be a small hole, about one foot in diameter.
+~
+S
+#7339
+The North-Western Part Of The Basilisk's Cave~
+   You can see some hay spread on the floor.  The smell is awful here, and it
+makes you feel sick.  This place where the Basilisk sleeps.  Watch out...
+maybe it is not far from here...
+~
+73 ad 2
+D1
+~
+~
+0 -1 7337
+D2
+~
+~
+0 -1 7340
+E
+hay~
+The hay is very dirty.  The smell of it makes you feel sick.
+~
+S
+#7340
+The South-Western Part Of The Basilisk's Cave~
+   You can see nothing but smoke.  
+~
+73 ad 5
+D0 
+~
+~
+0 -1 7339
+D1
+~
+~
+0 -1 7338
+D2
+~
+~
+0 -1 7341
+S
+#7341
+The Small Cave~
+   You are standing in small cave.  You can see some light at the end.  Exits
+are north and south.
+~
+73 acd 2
+D0
+You can see only smoke.
+~
+~
+0 -1 7340
+D2
+You can see a blue glow.  And you feel a fresh breeze... ahhhh...
+~
+~
+0 -1 7342
+S
+#7342
+The Northern End Of The Pool~
+   You have wet feet, you are standing in water.  The water looks calm.  You
+can see that it is a big lake.  Light seeps from the water.
+~
+73 d 4
+D0
+You can see a small cave.
+~
+~
+0 -1 7341
+D1
+You can see more water.
+~
+~
+0 -1 7343
+D2
+You can see water.
+~
+~
+0 -1 7344
+S
+#7343
+The Pool~
+   You are swimming in water.  It is getting deep here.  It is also dark in
+this end.
+~
+73 ad 6
+D2
+You can see some bubbles in the water.
+~
+~
+0 -1 7345
+D3 
+You see calm water.
+~
+~
+0 -1 7342
+S
+#7344
+The South End Of The Pool~
+   You standing in water up to your neck!  You can only see water.
+~
+73 d 5
+D0 
+You can see calm water.
+~
+~
+0 -1 7342
+D1
+To dark to tell, but you can feel something nearby.
+~
+~
+0 -1 7345
+S
+#7345
+The Pool~
+   You are swimming in DARKNESS.  You feel something touching your right leg.
+~
+73 ad 6
+D0 
+To dark to tell.
+~
+~
+0 -1 7343
+D1
+You can feel a warm breeze.
+~
+~
+0 -1 7313
+D3
+~
+~
+0 -1 7344
+S
+$

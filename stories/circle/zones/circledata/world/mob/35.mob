@@ -1,0 +1,98 @@
+#3500
+wyvern~
+the wyvern~
+A monstrous wyvern slowly circles just above your head.
+~
+This huge winged creature looks really menacing as it circles only inches
+above your head, flapping its wings and squawking very loudly.
+~
+bgjq 0 -700 S
+8 13 3 2d10+90 2d6+1
+0 3575
+8 8 0
+#3501
+goblin mountain~
+the goblin~
+A mountain goblin is wandering around mumbling to himself...
+~
+You see before you a small and twisted creature with knotted muscles and
+disgustingly green skin.  Doesn't look like the type you'd invite to dinner.
+~
+fglm k -250 S
+4 17 6 1d1+55 1d8+0
+50 600
+8 8 1
+#3502
+goblin lieutenant~
+the goblin lieutenant~
+A goblin lieutenant stands here, attempting to get his men in order.
+~
+The goblin lieutenant is rather angry, and looking for one of his men to
+beat up upon, but maybe you will do just fine...
+~
+gjlm dk -600 S
+7 15 3 1d12+100 2d5+1
+300 2000
+8 8 1
+#3503
+goblin leader~
+the goblin leader~
+The goblin leader surveys the room.
+~
+The leader doesn't look too happy that you have found him here.  He grabs
+for his shortsword and lunges for your neck.
+~
+bcjlm dk -900 S
+9 10 1 1d12+120 2d5+3
+1000 8000
+8 8 1
+#3504
+boy small~
+the small boy~
+A small boy sits here, licking his wounds.
+~
+The poor boy has numerous cuts and scratches, but appears to be all right.
+He is apparently the only survivor of the ambush.
+~
+bh 0 500 S
+4 17 6 1d12+47 1d8+0
+0 600
+5 5 1
+#3505
+innkeeper~
+the Innkeeper~
+The Innkeeper stands here, cleaning glasses.
+~
+The Innkeeper now spends most of his days waiting for customers, while the
+nights are spent watching out for goblins.  His inn is no longer the happy
+place that is used to be in days past.
+~
+bglm 0 400 S
+10 8 1 1d12+200 2d8+1
+1500 7000
+8 8 1
+#3506
+bard~
+the bard~
+A sullen bard is here, drinking away his problems.
+~
+You can smell the alcohol on his breath from across the room.  This poor
+bard has been sitting here quite a while, drinking himself into oblivion.
+~
+bglm d 600 S
+8 13 3 1d12+110 2d6+0
+1500 3750
+6 6 1
+#3507
+horseman dark~
+the dark horseman~
+A dark horseman is here, mounted on his black steed.
+~
+The man is obviously an outlaw, and has no qualms about slashing you into
+little bits.
+~
+ghm sp -900 S
+8 12 4 1d12+97 1d5+7
+1000 4000
+8 8 1
+$

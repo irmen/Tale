@@ -37,7 +37,9 @@ class Story(object):
         startlocation_wizard="house.livingroom",
         savegames_enabled=False,
         show_exits_in_look=True,
-        license_file=None
+        license_file=None,
+        mud_host=None,
+        mud_port=None
     )
 
     driver = None     # will be set by driver init()

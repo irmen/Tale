@@ -1,0 +1,425 @@
+#5300
+mace egyptian~
+an egyptian mace~
+A hierogylph-engraved mace has been left here.~
+~
+5 0 8193
+0 2 6 7
+10 800 50
+E
+mace egyptian~
+The mace is formed from solid brass, and engraved in strange hieroglyphs.
+~
+#5301
+robe sand~
+some sand-colored robes~
+Sand-colored robes lie here.~
+~
+9 0 1025
+4 0 0 0
+5 500 40
+E
+robes sand~
+The robes are colored a sandy off-white, and are in fact caked and covered
+with sand as well.  You don't seem to be able to remove all of the sand, no
+matter how much you try.
+~
+#5302
+dirk obsidian~
+an obsidian dirk~
+A flat dirk made of chipped obsidian lies here.~
+~
+5 g 8193
+0 3 3 11
+8 1000 100
+A
+2 1
+A
+18 1
+E
+dirk obsidian~
+The blade of the dirk is black, glassy obsidian, chipped razor sharp.
+~
+#5303
+turban cloth~
+a dirty cloth turban~
+A dirty cloth turban has been forgotten here.~
+~
+9 g 17
+5 0 0 0
+10 1500 250
+A
+2 1
+A
+13 5
+E
+turban cloth~
+The turban used to be white cloth, now it is covered with oil and dirt from
+the head and hair of its previous owner, who must not have bathed much.
+~
+#5304
+wrappings cloth~
+some cloth wrappings~
+Long cloth wrappings lie on the ground in a pile.~
+~
+9 0 9
+5 0 0 0
+15 1250 175
+E
+wrappings cloth~
+The cloth wrappings are old, wrinkled, and stink of embalming fluid.
+~
+#5305
+bottle fluid~
+a bottle of embalming fluid~
+A dusty bottle lies here on the ground.~
+~
+10 0 1
+5 33 -1 -1
+5 250 50
+E
+bottle fluid~
+The bottle is dusty and the fluid has a strange sickly-sweet smell to it.
+~
+#5306
+jar formaldehyde~
+a jar of formaldehyde~
+A small jar lies here on the ground.~
+~
+10 0 1
+10 16 -1 -1
+6 300 60
+E
+jar formaldehyde~
+The jar is sticky and smells really bad.
+~
+#5307
+ball fire~
+a small hot ball of fire~
+A little ball of fire hovers in the air before your eyes.~
+~
+1 agp 16385
+0 0 -1 0
+10 3500 500
+A
+13 10
+A
+14 50
+E
+ball fire~
+The ball of fire is hot to the touch and very very bright.
+~
+#5308
+scimitar stone~
+a stone scimitar~
+A curved scimitar made of stone rests on the ground.~
+~
+5 bgmno 8193
+0 4 3 3
+18 10000 750
+A
+18 2
+A
+19 3
+E
+scimitar stone~
+The scimitar is formed from solid stone, chipped and carved to perfection,
+with a sharp, cold blade that is marred only by a few nicks here and there.
+~
+#5309
+key stone~
+a stone key~
+A stone key has been dropped here.~
+~
+18 c 16385
+5309 0 0 0
+15 0 0
+E
+key stone~
+The key is made from stone, but is otherwise unremarkable.
+~
+#5310
+sarcophagus stone~
+a mighty stone sarcophagus~
+A mighty stone sarcophagus lies in the center of the tomb.~
+~
+15 0 0
+500 15 5309 0
+5000 5000 5000
+E
+sarcophagus stone~
+The sarcophagus is engraved on the sides with the images of pharoahs,
+great wars fought long ago, mighty pyramids being constructed...
+
+A raised image atop the sarcophagus is formed in the visage of one of
+the mighty pharoahs, painted in gold and studded with precious gems.
+
+You see a small keyhole in the side of the sarcophagus.
+~
+#5311
+dust~
+some ancient dust~
+A small pile of dust is being scattered by the breeze.~
+~
+13 0 1
+0 0 0 0
+1 1 1
+E
+dust~
+The dust is old.  As you sift it through your hands you find tiny chips
+of aged bone inside -- it must be the ancient remains of something.
+~
+#5312
+scarab emerald~
+a small emerald scarab~
+A small emerald scarab lies here on the ground.~
+~
+18 c 16385
+5312 0 0 0
+5 0 0
+E
+scarab emerald~
+The scarab is intricately detailed, down to the tiny hairs on its
+insectile legs and the faceting of the emeralds in its eyes.
+~
+#5313
+lamp~
+the lamp~
+A small, tarnished, battered lamp has been dropped here.~
+~
+4 abgk 16385
+25 5 5 51
+10 25000 600
+A
+17 -5
+A
+18 1
+E
+lamp~
+The lamp is quite old and tarnished.  You rub at it to get some of the
+grime off, but it doesn't seem like anybody is home.
+~
+#5314
+ankh~
+an ankh~
+A small brass ankh has been left here.~
+~
+9 ik 16385
+7 0 0 0
+9 10000 300
+A
+3 1
+A
+4 2
+E
+ankh~
+The ankh is a small brass symbol of an ancient religion.  It glows
+with a soft bright light that is soothing to you.
+~
+#5315
+book riddles~
+a book of riddles~
+A medium-sized parchment book with well-worn pages lies here.~
+~
+2 0 1
+21 201 20 22
+15 7500 250
+E
+book riddles~
+The book has well-worn pages, containing many befuddling riddles
+to surprise, confuse, and amuse you.  You find yourself bewildered
+by its contents and put it down to sort your head out.
+~
+#5316
+paw lion~
+a lion's paw~
+The mighty paw of a lion-like creature has been dropped here.~
+~
+5 g 8193
+0 1 14 5
+20 18000 600
+A
+5 1
+A
+18 4
+E
+paw lion~
+The massive paw has straps on it formed of bronze, so that it will
+fit snugly over your hand.  As you put it on, it melds with your hand,
+becoming an extension of your arm.
+~
+#5317
+parchment answer~
+the answer~
+A small piece of parchment covered in hieroglyphics lies here.~
+~
+18 c 16385
+5317 0 0 0
+1 1 1
+E
+answer hieroglyphics parchment~
+You cannot decipher the strange hieroglyphics that cover the
+sheet of parchment.
+~
+#5318
+treasure~
+the treasure of the sphinx~
+The massive treasure of the sphinx lies here in a big pile.~
+~
+20 0 1
+23850 0 0 0
+23 23850 0
+E
+treasure~
+The treasure is incredibly large, filled with gold coins and valuables, more 
+wealth than you could ever possibly imagine accumulated in one place.
+~
+#5319
+sand pile~
+a pile of sand~
+You see a small pile of sand.~
+~
+20 0 1
+12986 0 0 0
+12 12986 0
+E
+sand pile~
+You think you see some coins and valuables glinting amongst the grains of
+sand.
+~
+#5320
+curse mummy~
+the curse of the mummy~
+Some fortunate soul has escaped the mummy's curse, for now.~
+~
+13 cdfgh 16385
+0 0 0 0
+1 500 50
+A
+13 -50
+A
+14 -100
+E
+curse mummy~
+Rumor has it that whomever disturbs the grave of the mummy shall be 
+cursed for all eternity, and that the descendents of that person shall
+likewise be cursed for ten generations to follow.
+~
+#5321
+elixir small glass~
+a small elixir~
+A small glass elixir lies under your feet.~
+~
+10 g 1
+30 39 1 36
+2 10000 500
+E
+elixir small glass~
+The elixir is deceptively small.  Something tells you that its
+contents are truly quite potent.  Perhaps too potent for ordinary
+mortals to attempt to consume.
+~
+#5322
+mask golden~
+a golden mask~
+A beautiful, intricately detailed mask has been forgotten here.~
+~
+9 g 17
+10 0 0 0
+10 15000 750
+A
+12 25
+A
+13 10
+E
+mask golden~
+This beautiful mask was shaped from solid gold and magically enchanted
+to perfectly fit the face of any who choose to wear it, its golden features
+and turquoise highlights even moving to match the expressions of the face
+of the wearer.
+~
+#5323
+diamond~
+the diamond~
+~
+~
+13 0 1
+0 0 0 0
+5 0 0
+E
+diamond~
+Aha!
+
+You see a multifaceted gemstone, which strangely reflects no
+light, making it very hard to see when it lies on the ground.
+~
+#5324
+wand sun brass pipe~
+a blazing sun wand~
+A small length of brass pipe shines here with its own light.~
+~
+3 agp 16385
+25 5 5 27
+10 25000 1000
+A
+21 -5
+A
+24 -5
+E
+wand sun brass pipe~
+This small brass shaft is a holy weapon used by the ancient people of 
+this land to defend against the deadliest of foes.  It shines with the 
+brilliant blazing light of the sun.
+~
+#5325
+ring sandy~
+a sandy-coloured ring~
+A small sandy-coloured ring has been carelessly dropped here.~
+~
+9 bg 3
+8 0 0 0
+5 20000 750
+A
+3 1
+A
+12 35
+E
+ring sandy~
+The ring is small, smooth, sandy-coloured and unremarkable, save that
+it gives off a continuous low humming noise that tickles your fingertips.
+~
+#5326
+sphinx golden~
+a small golden sphinx~
+A small golden sphinx glints in the light.~
+~
+8 g 16385
+0 0 0 0
+5 50000 750
+A
+4 2
+E
+sphinx golden~
+The golden sphinx is incredibly detailed and very small, fitting easily
+into the palm of your hand.  You can even make out the expression
+of wisdom and peace on its face.
+~
+#5327
+leggings sphinxian~
+a pair of sphinxian leggings~
+Massive leggings formed from the body of a sphinx stand here.~
+~
+9 gk 33
+10 0 0 0
+20 20000 500
+A
+1 3
+A
+14 80
+E
+leggings sphinxian~
+These magically fashioned leggings impart the strength and stamina
+of the mightiest of the ancient sphinxes.  You feel ancient power 
+emanating from them; they seem to be almost alive.
+~
+$

@@ -1,0 +1,185 @@
+#5100
+longsword commoner~
+a commoner's longsword~
+A commoner's longsword made of adamantite has been left here.~
+~
+5 m 8193
+0 1 8 3
+12 1000 500
+A
+18 1
+A
+19 1
+#5101
+longsword noble~
+a noble's longsword~
+A drow noble's longsword, made of adamantite, lies here.~
+~
+5 m 8193
+0 1 8 3
+12 1500 800
+A
+18 2
+A
+19 2
+#5102
+whip snake twoheaded~
+a two-headed snake whip~
+A whip with two snakes heads lies here.~
+~
+5 ab 8193
+0 2 6 3
+12 1750 1500
+A
+18 2
+A
+19 2
+#5103
+whip snake threeheaded~
+a three-headed snake whip~
+A whip with three snake heads has been left here.~
+~
+5 ab 8193
+0 2 7 3
+12 5000 2300
+A
+18 2
+A
+19 2
+#5104
+whip snake fourheaded~
+a four-headed snake whip~
+A whip with four snake heads has been carelessly left here.~
+~
+5 ab 8193
+0 2 8 3
+12 10250 4000
+A
+18 2
+A
+19 2
+#5105
+longsword black~
+a black longsword~
+A black longsword has been carelessly left here.~
+~
+5 agm 8193
+0 2 8 3
+12 10250 4000
+A
+18 2
+A
+19 2
+#5106
+whip snake fiveheaded~
+a five-headed snake whip~
+A whip with 5 snake heads has been carelessly dropped here.~
+~
+5 agj 8193
+0 3 6 3
+12 12000 4500
+A
+1 -2
+A 
+3 -2
+#5107
+whip snake sixheaded~
+a six-headed snake whip~
+A whip with six snake heads has been dropped here very carelessly.~
+~
+5 agj 8193
+0 4 5 3
+12 15000 8000
+A
+1 -3
+A 
+3 -3
+#5108
+bracers iron~
+a pair of bracers~
+A pair of iron bracers has been dropped here.~
+~
+9 ag 257
+8 0 0 0
+3 2000 1000
+A
+18 -1
+#5109
+gauntlets~
+a pair of gauntlets~
+A pair of gauntlets is lying on the ground.~
+~
+11 a 129
+0 0 0 0
+2 10000 3000
+A
+1 2
+#5110
+wand blue silver~
+a silvery blue wand~
+A silvery blue wand has been dropped in the dirt.~
+~
+3 g 16385
+10 3 3 30
+1 4000 3000
+#5111
+helmet small~
+a small helmet~
+A small helmet lies up against a rock.~
+~
+9 g 17
+1 0 0 0 
+5 6000 3000
+A
+3 3
+#5112
+ring ruby~
+a small ruby ring~
+A small ruby ring lies in the dirt.~
+~
+11 g 3
+0 0 0 0 
+1 20000 8000
+A
+13 25
+#5113
+dagger sacrificial spider~
+a spider shaped dagger~
+A dagger with spider leg shaped blades lies on the ground.~
+~
+5 gjmnp 8193
+0 3 4 11
+8 12000 15000
+A
+18 3
+A
+19 3
+#5114
+hat green~
+a small bright green hat~
+A small bright green hat lies in the dirt.~
+~
+9 h 17
+10 0 0 0 
+1 2000 600
+A 
+9 -15
+A
+17 -2
+#5115
+key adamantite~
+an adamantite key~
+A key made of a strange metal is lying here.~
+~
+18 c 16385
+5115 0 0 0
+1 0 0
+#5116
+gold treasure coins~
+a pile of golden coins~
+A large pile of golden coins is lying here.~
+~
+20 0 1
+17645 0 0 0
+10 17645 0
+$

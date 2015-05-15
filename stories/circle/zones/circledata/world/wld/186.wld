@@ -1,0 +1,871 @@
+#18600
+The Entrance To The Newbie Zone~
+   Ahhh... the entrance to the newbie zone!  Just the place you have
+been looking for.  Well, when you've readied yourself you can enter
+to the north.
+~
+186 c 1
+D0
+You see the start of the newbie zone.
+~
+~
+0 -1 18601
+D3
+Back to the road that way... chickening out already?
+~
+~
+0 -1 3061
+S
+#18601
+The Beginning Of The Passage~
+   You find yourself entering a long corridor.  You can hear the sound
+of creatures roaming about, but you can't tell where the sound emanates
+from exactly.
+   Exits lead to the east along the hallway, and south back to the
+entrance.
+~
+186 d 0
+D1
+More of the hallway there... how exciting!
+~
+~
+0 -1 18602
+D2
+The entrance to the newbie zone... how dull
+~
+~
+0 -1 18600
+S
+#18602
+The Dirty Hallway~
+   You continue wandering down the hallway.  Nothing much different here,
+but you are positive you here noises behind the door to the south, and
+coming from the east.  The walls are a bit slimy and moldy here... yeech,
+couldn't they hire someone to clean this place?  What will the newbies
+think?  Oh well, you can continue along the hallway to the east or west.
+~
+186 d 0
+D1
+More of the hallway there... how exciting!
+~
+~
+0 -1 18603
+D2
+A small room lies to the south... you hear something moving about inside.
+~
+door~
+1 -1 18606
+D3
+More of the hallway there... how exciting!
+~
+~
+0 -1 18601
+S
+#18603
+A Nexus~
+   Well... you've reached an intersection of two passages, to the north
+and east, the passage brightens, while the darker hallway continues to
+the south.
+~
+186 d 0
+D0
+A brighter hallway leads off that way.
+~
+door~
+1 -1 18644
+D1
+A brighter hallway leads off that way.
+~
+door~
+1 -1 18646
+D2
+More of the hallway there... how exciting!
+~
+~
+0 -1 18607
+D3
+More of the hallway there... how exciting!
+~
+~
+0 -1 18602
+S
+#18604
+A Narrow Passage~
+   The thin passage is plain and undecorated, but still clean.  It
+ends abruptly to the south at a small oak door, behind which you here
+movement...
+~
+186 ad 0
+D0
+A large domed room.
+~
+~
+0 -1 18647
+D2
+A small cluttered room.
+~
+door~
+1 -1 18612
+S
+#18605
+The Dark Pit~
+   Ick... a dark damp dirty pit.  Even worse, what is that dark damp
+dirty thing looking at you from the corner?  Ewww... maybe you should
+go back up where it is a bit safer, unless you think you can tackle
+that thing in the corner.
+~
+186 ad 0
+D4
+You see a ladder leading up
+~
+grate~
+1 18608 18606
+S
+#18606
+A Small Room~
+   Hmmm... this is an interesting little room.  Ack, and there is
+an interesting little creature staring at you too.  He looks a bit
+surprised at your intrusion.  You can leave via the doors north or
+east, or you can stay and annoy him a bit more.  There also appears
+to be some type of well down here also, but it has a rather secure
+grate covering it.
+~
+186 d 0
+D0
+More of the hallway there... how exciting!
+~
+door~
+1 -1 18602
+D1
+More of the hallway there... how exciting!
+~
+door~
+1 -1 18607
+D5
+A ladder leads down into darkness.
+~
+grate~
+1 18608 18605
+S
+#18607
+More Of The Hallway~
+   Oh joy!  More of this annoying passage.  Perhaps there is something
+more exciting through that door to the west?  Or you can keep searching
+the hallways to the north or south.
+~
+186 d 0
+D0
+More of the hallway there... how exciting!
+~
+~
+0 -1 18603
+D2
+More of the hallway there... how exciting!
+~
+~
+0 -1 18611
+D3
+~
+door~
+1 -1 18606
+S
+#18608
+An Open Field By The Great Field~
+   Finally, you are in an open field... it is so nice to breathe fresh air
+again!  You can return to that dank, smelly place to the east, or take the
+exit to the north which appears to lead into a large field.
+~
+186 c 0
+D0
+There appears to be a field road to the north.
+~
+~
+0 -1 3061
+D1
+The end of that darn hallway lies back to the east.
+~
+~
+0 -1 18609
+S
+#18609
+The End Of The Passage~
+    Ahhh... at last, the end of the hallway... you can exit into open
+air to the west,or return to the east and make sure you didn't miss
+anything.
+~
+186 d 0
+D1
+More of the hallway there... how exciting!
+~
+~
+0 -1 18610
+D3
+An open field near The Great Field of Midgaard can be seen.
+~
+~
+0 -1 18608
+S
+#18610
+A Brighter Hallway~
+   The hallway continues on in a east-west direction... and it seems to
+be brightening up to the west.
+~
+186 d 0
+D1
+A corner in the passage lies to the east.
+~
+~
+0 -1 18611
+D3
+More of the hallway there... how exciting!
+~
+~
+0 -1 18609
+S
+#18611
+Another Corner~
+   Another corner of the passage, and just as untidy as the rest of
+this place (maybe more so?).  There is a door to the east though...
+wonder where that leads?  Oh, and the hallway continues west and
+north.
+~
+186 d 0
+D0
+More of the hallway there... how exciting!
+~
+~
+0 -1 18607
+D1
+You peer into a cluttered little room to the east.
+~
+door~
+1 -1 18612
+D3
+More of the hallway there... how exciting!
+~
+~
+0 -1 18610
+S
+#18612
+The Alchemist's Room~
+   Lots of bottles and flasks lie about this room, but it all looks like
+worthless clutter.  It appears whatever alchemist has been working here
+is really very adept at his art.  There are a lot of formulae and spells
+written on the walls too... couldn't he buy some paper?  There is a door
+to the north, and also a dark stairway in the corner leading down, with a
+large sign next to it that you probably should read...
+~
+186 d 0
+D0
+A nice shiny hallway!
+~
+door~
+1 -1 18604
+D3
+A corner in the passage lies to the west.
+~
+door~
+1 -1 18611
+D5
+A shadowed stairway leading down.
+~
+~
+0 -1 18632
+E
+sign stairs stairway~
+The sign next to the stairs says:
+
+If you are below level 7 and alone, or below level 4 then bugger off!
+Or else don't blame me if you die...
+
+~
+S
+#18620
+A Turn In The Passage~
+   This corner is much like all the others... except you see a strange
+glow coming from the south.  Could be an exit... you hope.
+~
+186 ad 0
+D1
+The passage continues east quite a ways.
+~
+~
+0 -1 18621
+D2
+You see an odd red glow from that direction.
+~
+~
+0 -1 18629
+S
+#18621
+A T-Intersection In The Passage~
+   This is an intersection of a long east-west passage with a corridor
+leading south.  The air seems a bit clearer here though, as if you were
+approaching an exit.
+~
+186 ad 0
+D1
+~
+~
+0 -1 18622
+D2
+~
+~
+0 -1 18633
+D3
+~
+~
+0 -1 18620
+S
+#18622
+Another Corner~
+   The passage turns from north to west here.  The walls are still
+covered with the same disgusting green fungus you have seen all
+along, and you hear sounds of creatures moving all around you...
+~
+186 ad 0
+D2
+~
+~
+0 -1 18628
+D3
+~
+~
+0 -1 18621
+S
+#18623
+A Corner In The Hallway~
+   You can hear creatures moving all around you... and it is not
+a comforting sound at all.  The furnishing is nothing to speak of
+either, plain grey brick walls with green fungus (or something)
+growing on them.
+~
+186 ad 0
+D1
+~
+~
+0 -1 18624
+D2
+~
+~
+0 -1 18627
+S
+#18624
+Another Turn~
+   Hmmm... the passage turns south here.  You beginning to realize you
+can easily lose your bearings if you aren't careful, and you don't think
+you would like spending too much time here...
+~
+186 ad 0
+D2
+~
+~
+0 -1 18630
+D3
+~
+~
+0 -1 18623
+S
+#18625
+A Large Room~
+   The passage opens into a large oval room.  There really isn't much of
+interest here though.
+~
+186 ad 0
+D1
+~
+~
+0 -1 18626
+D2
+~
+~
+0 -1 18631
+S
+#18626
+A Long East-West Passage~
+   This is a long, narrow passage leading east and west.  The walls are
+damp and covered with mildew and fungus.  There is a very unhealthy air
+about this place and you're beginning to want out of here... soon.
+~
+186 ad 0
+D1
+~
+~
+0 -1 18627
+D3
+~
+~
+0 -1 18625
+S
+#18627
+A Crossing Of Corridors~
+   Here a narrow east-west passage crosses with a wider passage to the
+north and south.  The air is dank, and has an odor of decay and debris.
+Not a nice place at all really...
+~
+186 ad 0
+D0
+~
+~
+0 -1 18623
+D1
+~
+~
+0 -1 18628
+D2
+~
+~
+0 -1 18632
+D3
+~
+~
+0 -1 18626
+S
+#18628
+A Corner Room~
+   This room is hardly more than a crossing of passages.  You do sense a
+slight breeze wafting down the passage to the north though, but it smells
+altogether bad...
+~
+186 ad 0
+D0
+~
+~
+0 -1 18622
+D3
+~
+~
+0 -1 18627
+S
+#18629
+The Red Room~
+   It takes you a moment to realize that the red glow here is coming
+from a round portal on the floor.  It looks almost as if someone had
+painted a picture of a dirt running through a field on the floor of
+this room.  Oddly enough, it is so realistic you can feel the wind in
+the field coming out of the picture.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18620
+D1
+~
+~
+0 -1 18630
+D5
+~
+~
+0 -1 3061
+E
+portal floor~
+It looks as if you could go down into it... but you can't be sure of where
+you will end up, or if you can get back.
+~
+S
+#18630
+A Branching Passage~
+   The north-south passage branches to the east here.  There is a queer red
+glow coming from that way as well, along with a faint breeze.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18624
+D2
+~
+~
+0 -1 18634
+D3
+A very odd red glow emanates from that direction.
+~
+~
+0 -1 18629
+S
+#18631
+A Passage~
+   Ick... this place is just disgusting.  You try and stay clear of the
+walls, but the passage is so narrow you keep bumping them anyway.  You
+are almost convinced that the fungus coating the walls is grabbing at
+you too.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18625
+D1
+~
+~
+0 -1 18632
+D2
+~
+~
+0 -1 18638
+S
+#18632
+The Entrance~
+   It is dark, dank, disgusting and cold up here.  Plus you here the
+sounds of creatures all around you... and somehow they don't sound
+friendly.  It is probably wise to exercise some degree of caution
+here... no telling what you may run into here.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18627
+D2
+~
+~
+0 -1 18635
+D3
+~
+~
+0 -1 18631
+D4
+~
+~
+0 -1 18612
+S
+#18633
+Another Corner~
+   Well... what is there to say.  More fungus, more weird sounds, and a
+slight breeze from the north.  Bet you want to sign a lease, don't ya...
+~
+186 ad 0
+D0
+~
+~
+0 -1 18621
+D1
+~
+~
+0 -1 18634
+S
+#18634
+An Intersection Of Passages~
+   Cold, smelly, and coated with green fungus... just like last week's
+left-overs.  Furthermore you want nothing to do with either, you just
+want out right now.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18630
+D2
+~
+~
+0 -1 18637
+D3
+~
+~
+0 -1 18633
+S
+#18635
+A Turn In The Passage~
+   This place is just plain nauseating... it certainly smells as if
+something (or someone) died in here.  You hope you aren't next, but
+from the sounds you hear all around you, it seems as if something has
+other ideas about that.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18632
+D1
+~
+~
+0 -1 18636
+S
+#18636
+A Branch To The South~
+   The east-west passage branches of to the south here.  All around you
+is the odour of death.  Actually, the mold and fungus on the walls is
+doing great, but otherwise... well... you don't want to think about what
+else lives here.
+~
+186 ad 0
+D1
+~
+~
+0 -1 18637
+D2
+~
+~
+0 -1 18639
+D3
+~
+~
+0 -1 18635
+S
+#18637
+Yet Another Corner~
+   The passage turns here and heads north.  You sense something up ahead
+that way, but you aren't sure what.  You aren't sure if you want to know
+what either at this point.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18634
+D3
+~
+~
+0 -1 18636
+S
+#18638
+A Large Room~
+   You almost stumble as you enter this room... the sudden feeling of no
+walls on either side of you makes you a bit nervous.  Suddenly you are
+vulnerable on all sides.  You can't even tell how big a room this is,
+because it extends to the east farther than you light will reach...
+~
+186 ad 0
+D0
+~
+~
+0 -1 18631
+D1
+The room extends into shadows...
+~
+~
+0 -1 18639
+S
+#18639
+A Large Room~
+   As you enter, you light glints of the wall to the east.  There appears
+to be words scrawled on the wall, and a crude picture.  To the west the
+room extends beyond the reach of your light, and the dark shadows make you
+paranoid... anything could be hiding there.  You are painfully aware of
+how exposed you are without walls around you.
+~
+186 ad 0
+D0
+~
+~
+0 -1 18636
+D3
+The room extends as far as (and farther than) you can see...
+~
+~
+0 -1 18638
+E
+writing words~
+The writing appears to says 'beware the Minotaur...'
+~
+E
+wall~
+There is a crude picture of a man with the head of a bull with some writing
+next to it.
+~
+S
+#18640
+The Statue's Room~
+   Here, the passage enters a small room.  Exits lead to the east and south,
+and you notice a wonderful, large (and tastefully done) statue to the north.
+~
+186 ad 0
+D1
+A long hallway, ending in a set of steps.
+~
+~
+0 -1 18641
+D2
+The hall extends to the south where it seems to lighten somewhat.
+~
+~
+0 -1 18644
+E
+statue~
+Upon closer inspection you see that the statue has a small plaque affixed
+to it.  The face looks remarkably familiar also.
+~
+E
+plaque nameplate name~
+It says:
+
+Maynard, Death Jester of the Harlequins
+
+~
+S
+#18641
+The Hallway~
+   As you continue wandering down the hallway, you notice banners,
+pictures, and other fine decorations adorning the walls all along
+this passage.  It seems very different from the dismal passage where
+you entered.
+~
+186 ad 0
+D1
+The hallway ends at a grand marble staircase.
+~
+~
+0 -1 18642
+D3
+The passage leads into a small room.
+~
+~
+0 -1 18640
+S
+#18642
+The North Stairs~
+   Here, the hall opens into a wide room, with a high domed roof.  Now that
+that you have come clear of the enclosed passage, you can see that the stair
+leads upward to an open air balcony overlooking the area.  To the south the
+room continues, and another stair is visible matching the one in front of
+you.
+~
+186 ad 0
+D2
+You see another staircase and two passages leading west and south.
+~
+~
+0 -1 18647
+D3
+An entrance to a bright passage.
+~
+~
+0 -1 18641
+D4
+An open air balcony.
+~
+~
+0 -1 18643
+E
+staircase stair stairs~
+They are constructed of smooth, beautiful marble
+~
+S
+#18643
+The Balcony~
+   Here you can look out and observe the world around.  Constructed in a
+semi-circle around the dome of the room, the balcony allows you to look
+out in almost any direction.  Wandering to the north end, you can see that
+the Great Fields north of Midgaard continue off towards the Dragonhelm
+Mountains to the north.
+~
+186 ad 0
+D2
+The south end of the balcony.
+~
+~
+0 -1 18645
+D5
+Down the stairs to a large, domed room.
+~
+~
+0 -1 18642
+E
+staircase stair stairs~
+They are constructed of smooth, beautiful marble
+~
+S
+#18644
+A Bright Hallway~
+   Wow!  What a change from the dismal passage to the south.  Whoever
+keeps this room up must really like newbies.  The walls and floor are
+clean, and tastefully decorated.  You also notice an interesting design
+on the floor.
+~
+186 ad 0
+D0
+A small room with a statue in it.
+~
+~
+0 -1 18640
+D2
+A intersection of passages.
+~
+door~
+1 -1 18603
+E
+floor design~
+It appears to be the Crest of the Harlequin Guild.
+~
+S
+#18645
+The Balcony~
+   Here you can look out and observe the world around.  Constructed in a
+semi-circle around the dome of the room, the balcony allows you to look out
+in almost any direction.  Wandering to the south end, you can see the great
+city of Midgaard off to the south-west.
+~
+186 ad 0
+D0
+The north end of the balcony.
+~
+~
+0 -1 18643
+D5
+Back down the south staircase.
+~
+~
+0 -1 18647
+E
+staircase stair stairs~
+They are constructed of smooth, beautiful marble.
+~
+S
+#18646
+A Bright Hallway~
+   Wow!  What a change from the dismal passage to the west.  Whoever keeps
+this  room up must really like newbies.  The walls and floor are clean, and
+tastefully decorated.  You also notice an interesting design on the floor.
+~
+186 ad 0
+D1
+The passage opens into a domed room with a grand marble staircase.
+~
+~
+0 -1 18647
+D3
+A dark intersection of passages.
+~
+door~
+1 -1 18603
+E
+floor design~
+It appears to be the crest of the Harlequin Guild.
+~
+S
+#18647
+The South Stairs~
+   Here, the hall opens into a wide room, with a high domed roof.  Now that
+that you have come clear of the enclosed passage, you can see that the stair
+leads upward to an open air balcony overlooking the area.  to the north the
+room continues, and another stair is visible matching the one in front of
+you.
+~
+186 ad 0
+D0
+Another stairway is to the north, as well as a passage to the west.
+~
+~
+0 -1 18642
+D2
+A narrow passage to the south, ending in a wood door.
+~
+~
+0 -1 18604
+D3
+Back down the bright hallway.
+~
+~
+0 -1 18646
+D4
+An open air balcony.
+~
+~
+0 -1 18645
+E
+staircase stair stairs~
+They are constructed of smooth, beautiful marble.
+~
+S
+$

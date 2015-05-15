@@ -1,0 +1,65 @@
+#186
+Newbie Zone~
+18600 18699 10 2
+*
+* Created by Maynard of StrangeMUD
+*
+* Mobiles
+M 0 18601 1 18605       Pit Beast
+E 1 18604 50 12                 Cloak
+M 0 18602 3 18600       Newbie Monster
+E 1 18602 99 5                  Vest
+M 0 18602 3 18607       Newbie Monster
+E 1 18606 99 16                 Dagger
+M 0 18611 1 18646       Annoying Newbie
+E 1 18606 99 16                 Dagger
+M 0 18612 1 18642       Clueless Newbie
+M 0 18613 1 18640       Friendly Newbie
+E 1 18602 99 5                  Vest
+M 0 18614 1 18604       Lost Newbie
+M 0 18615 1 18645       Smart Newbie
+E 1 18613 99 10                 Sleeves
+E 1 18612 99 7                  Leggings
+E 1 18602 99 5                  Vest
+E 1 18614 30 16                 Mace
+M 0 18603 1 18602       Dragon
+E 1 18607 99 3                  Collar
+M 0 18604 1 18606       Newbie Guard
+E 1 18605 60 1                  Ring
+G 1 18608 5                     Key
+E 1 18603 30 6                  Helm
+M 0 18605 1 18612       Alchemist
+G 1 18609 50                    Light
+M 0 18606 4 18602       Crawler
+M 0 18606 4 18606       Crawler
+M 0 18606 4 18609       Crawler
+M 0 18607 5 18620       Zombie
+M 0 18607 5 18624       Zombie
+M 0 18607 5 18637       Zombie
+M 0 18607 5 18633       Zombie
+M 0 18608 5 18627       Quasit
+M 0 18608 5 18636       Quasit
+M 0 18608 5 18638       Quasit
+M 0 18608 5 18621       Quasit
+M 0 18609 1 18629       Minotaur
+E 1 18610 50 6                  Horns
+E 1 18611 50 5                  Hide
+M 0 18610 1 18639       Spectre
+* Doors
+D 0 18602 2 1           A Small Room
+D 0 18606 0 1
+D 0 18603 0 1           Bright Hallway
+D 0 18644 2 1
+D 0 18603 1 1           Bright Hallway
+D 0 18646 3 1
+D 0 18604 2 1           Alchemist's Chamber
+D 0 18612 0 1
+D 0 18606 5 2           Dark Pit
+D 0 18605 4 2
+D 0 18607 3 1           A Small Room
+D 0 18606 1 1
+D 0 18611 1 1           Alchemist's Chamber
+D 0 18612 3 1
+*
+S
+$

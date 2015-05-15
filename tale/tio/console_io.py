@@ -87,8 +87,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # note that we don't print any prompt ">>", that needs to be done
                 # by the main thread that handles screen *output*
                 # (otherwise the prompt will often appear before any regular screen output)
-                cmd = input().strip()
-                player_connection.player.store_input_line(cmd)
+                player_connection.player.store_input_line(input())
             except KeyboardInterrupt:
                 self.break_pressed()
             except EOFError:

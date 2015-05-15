@@ -1,0 +1,1036 @@
+#5200
+The Grand Gate Of Thalos~
+   You stand in the archway of a gigantic stone archway.  The two
+steel gates have been forced open and have rusted in place.  A hollow
+gust of wind blows by you into the deserted, and seemingly destroyed,
+city.
+~
+52 0 1
+D1 
+The desert sands stretch on for miles and miles.
+~
+~
+0 -1 5044
+D3
+You see devastation everywhere.  Houses lie in ruin and skeletons litter
+the streets.  You see strange beasts stalking the shadows.
+~
+~
+0 -1 5201
+S
+#5201
+Main Street~
+   This was once a magnificent street, but now is in total ruin.  The
+streets are barren and windswept and the silence is unending.  To the south
+you see a ruined cottage while north leads into a dark back alley.  Howls
+and screams echo through the deserted city.
+~
+52 0 1
+D0
+It seems to be a dark alley.
+~
+~
+0 -1 5239
+D1
+The entrance to the city lies this way.
+~
+~
+0 -1 5200
+D2
+A ruined shack lies to the south.
+~
+~
+0 -1 5235
+D3
+Main Street lies this way.
+~
+~
+0 -1 5202
+S
+#5202
+Main Street~
+   This was once a magnificent street, but now is in total ruin.  The
+streets are barren and windswept and the silence is unending.  On one
+side is a collapsed house while on the other is the entrance to a large
+ruined mansion.  Eerie sounds echo within the mansion.  Near the center of 
+town you see a large domed building, relatively intact.
+~
+52 0 1
+D0
+The remnants of a store lie this way.
+~
+~
+0 -1 5236
+D1
+~
+~
+0 -1 5201
+D2
+It looks like what used to be the main building in the city.
+~
+~
+0 -1 5232
+D3
+A withered garden path lies this way.
+~
+~
+0 -1 5203
+S
+#5203
+A Garden Path~
+   A circular path surrounds a magnificent domed temple in the center
+of the city.  Flowers have withered away and the once lush trees are bare.
+Vines and ivy snake up the sides of the temple and entangle themselves
+around your feet.  A sudden volley of howls pierces the air.
+~
+52 0 1
+D0
+The garden path continues around the building.
+~
+~
+0 -1 5204
+D1
+This is the main street leading to the city's entrance.
+~
+~
+0 -1 5202
+D2
+The garden path continues around the building.
+~
+~
+0 -1 5206
+D3
+Inside the temple, small patches of light shoot through each doorway as
+well as a few holes in the ceiling.
+~
+~
+0 -1 5250
+S
+#5204
+A Garden Path~
+   A circular path surrounds a magnificent domed temple in the center
+of the city.  Flowers have withered away and the once lush trees are bare.
+Vines and ivy snake up the sides of the temple and entangle themselves
+around your feet.
+~
+52 0 1
+D0
+A side street leads of to the northern half of the city.
+~
+~
+0 -1 5211
+D1
+The garden path continues around the building.
+~
+~
+0 -1 5203
+D2
+Inside the temple, small patches of light shoot through each doorway as
+well as a few holes in the ceiling.
+~
+~
+0 -1 5250
+D3
+The garden path continues around the building.
+~
+~
+0 -1 5205
+S
+#5205
+A Garden Path~
+   A circular path surrounds a magnificent domed temple in the center
+of the city.  Flowers have withered away and the once lush trees are bare.
+Vines and ivy creep up the sides of the temple and entangle themselves 
+around your feet.
+~
+52 0 1
+D0
+The garden path continues around the building.
+~
+~
+0 -1 5204
+D1
+Inside the temple, small patches of light shoot through each doorway as
+well as a few cracks in the ceiling.
+~
+~
+0 -1 5250
+D2
+The garden path continues around the building.
+~
+~
+0 -1 5206
+D3
+What looks like a market place lies this way.
+~
+~
+0 -1 5207
+S
+#5206
+A Garden Path~
+   A circular path surrounds a magnificent domed temple in the center 
+of the city.  Flowers have withered away and the once lush trees are bare.
+Vines and ivy creep up the sides of the temple and entangle themselves 
+around your feet.
+~
+52 0 1
+D0
+Inside the temple, small patches of light shoot through each doorway as
+well as a few cracks in the ceiling.
+~
+~
+0 -1 5250
+D1
+The garden path continues around the building.
+~
+~
+0 -1 5203
+D2
+A small side street leads to the southern half of the city.
+~
+~
+0 -1 5212
+D3
+The garden path continues around the building.
+~
+~
+0 -1 5205
+S
+#5207
+The Market Place~
+   You stand in the middle of a large square lined on each side with
+baskets, carts, and stands of all shapes and sizes.  Abandoned, these
+little shops still contain some of their goods once sold to a demanding
+public.
+~
+52 0 1
+D0
+A small table has been toppled over, spilling fine jewellery and gems
+onto the ground.
+~
+~
+0 -1 5225
+D1
+A small garden path encircles a large domed temple in the center of the 
+city.
+~
+~
+0 -1 5205
+D2
+Rotted remains of fruits and vegetables lie strewn about.
+~
+~
+0 -1 5220
+D3
+The market place continues.
+~
+~
+0 -1 5208
+S
+#5208
+The Market Place~
+   You stand at the end of the market square.  Stands and carts line
+each side, filled with remnants of fine foods and exquisite goods.
+~
+52 0 1
+D0
+Tattered carpets and ruined bales of silk sit idly by a run down stand.
+~
+~
+0 -1 5222
+D1
+The center of the market lies this way.
+~
+~
+0 -1 5207
+D2
+From the massive stench, this must have been a meat and poultry stand.
+It lies totally bare.
+~
+~
+0 -1 5217
+S
+#5209
+A Side Street~
+   This small side street leads east and west into back alleys while
+to the south you see the temple.  The incessant howling tears at your
+mind.
+~
+52 0 1
+D1
+~
+~
+0 -1 5243
+D2
+~
+~
+0 -1 5210
+D3
+~
+~
+0 -1 5228
+S
+#5210
+A Side Street~
+   You are in the common section of the city.  Ruined buildings made of
+clay and stone is all the view has to offer.  Most of these homes are 
+nothing but piles of rubble, but some look almost safe enough to venture
+into.
+   The street continues north and south and buildings line the street.
+~
+52 0 1
+D0
+~
+~
+0 -1 5209
+D1
+A small doorway leads into a partially collapsed house.
+~
+~
+1 -1 5244
+D2
+~
+~
+0 -1 5211
+D3
+A small clay dwelling sits here.
+~
+~
+0 -1 5226
+S
+#5211
+A Side Street~
+   This small side street leads away from the garden path to the south.
+Around you stand large piles or rubble where the houses of commoners
+used to be.  A lone howl makes you worry greatly about your safety here.
+~
+52 0 1
+D0
+~
+~
+0 -1 5210
+D1
+An unusually tall dwelling stands looming over you.
+~
+~
+0 -1 5237
+D2
+A garden path circles around the temple.
+~
+~
+0 -1 5204
+D3
+Here lies a small stone house with a thatched roof.
+~
+~
+0 -1 5227
+S
+#5212
+A Side Street~
+   This small side street leads south away from the temple into the
+business section of town.  The destruction that leveled this city was not
+biased; these important looking buildings have been almost totally
+destroyed.  There is a hole in the wall of a very large structure to the
+east.
+~
+52 0 1
+D0
+A small garden path encircles the temple.
+~
+~
+0 -1 5206
+D1
+This possibly could be the city hall.
+~
+~
+0 -1 5232
+D2
+~
+~
+0 -1 5213
+D3
+Inside the building you see long pieces of metal, an oven, and some
+anvils.
+~
+~
+0 -1 5221
+S
+#5213
+A Side Street~
+   This small side street is lined with the remains of once great
+buildings.  To the west is a dark, foreboding structure while to the
+east lies the entrance to a small tavern.  The street continues north
+and south.
+~
+52 0 1
+D0
+~
+~
+0 -1 5212
+D1
+From the looks of it, this was once a two story abode.  The entire second
+floor has collapsed leaving a very little part of the bar still free
+from debris.
+~
+~
+0 -1 5230
+D2
+~
+~
+0 -1 5214
+D3
+This seems to be the only guild house in the entire city.  Its dark nature
+makes you wonder about its origins.
+~
+~
+0 -1 5219
+S
+#5214
+A Side Street~
+   You are at the end of a long street leading to the center of the city.
+A long dark alley runs east and west.
+~
+52 0 1
+D0
+~
+~
+0 -1 5213
+D1
+~
+~
+0 -1 5229
+D3
+~
+~
+0 -1 5218
+S
+#5215
+Under A Ruined Watchtower~
+   You stand at the base of a tall watchtower built to protect the city
+from invaders.  From the looks of things, it did not do a good job.
+~
+52 0 1
+D0
+~
+~
+0 -1 5216
+D1
+~
+~
+0 -1 5218
+D4
+~
+~
+0 -1 5247
+S
+#5216
+A Back Alley~
+   This alley leads to the rear of what used to be a meat stand.  You wince
+at the stench.  South is one of the city watchtowers.
+~
+52 0 1
+D0
+You see the back-side of the market place meat stand.
+~
+~
+0 -1 5217
+D2
+A tall watchtower stands a silent vigil over the city.
+~
+~
+0 -1 5215
+S
+#5217
+The Meat Stand~
+   A large stand has been set up here with metal hooks and wooden racks
+in the background.  Hanging on the hooks are very small scraps of meat
+and other game.  This stand is relatively empty, and a sudden burst of
+howling and screaming makes you realize why this is so.
+~
+52 0 1
+D0
+The market place lies this way.
+~
+~
+0 -1 5208
+D1
+This is a cart full of rotted vegetables and fruits.
+~
+~
+0 -1 5220
+D2
+~
+~
+0 -1 5216
+S
+#5218
+A Back Alley~
+   A narrow alley leads east to a wider street and west to one of 
+the city watchtowers.
+~
+52 0 1
+D1
+A small side street greets you.
+~
+~
+0 -1 5214
+D3
+A tall watchtower stands a silent vigil over the city.
+~
+~
+0 -1 5215
+S
+#5219
+The Guild House~
+   You are standing in what once was this city's ONLY guild house.
+Tables and chairs have been smashed and broken weapons lie strewn about
+the floor as if some massive battle had taken place here.  Draped along 
+the back wall is a tattered, jet-black banner with the symbol of the
+Darkside set upon it.
+~
+52 d 1
+D1
+A small side street runs past the building.
+~
+~
+0 -1 5213
+S
+#5220
+The Produce Stand~
+   A large cart sits here carrying rotted fruit and vegetables.  Flies 
+swarm all about what seems to be the last remaining bits of food left
+in the city.
+~
+52 0 1
+D0
+The market place is deserted.
+~
+~
+0 -1 5207
+D3
+A strong stench emanates from the meat stand next to you.
+~
+~
+0 -1 5217
+S
+#5221
+The Smithy~
+   In here you find tools and anvils used to make various weapons
+and items.  The walls have been stripped clean and only a few incomplete
+pieces of armor and weaponry are left.
+~
+52 d 1
+D1
+A small side street runs past the building.
+~
+~
+0 -1 5212
+S
+#5222
+The Tapestry Stand~
+   Tattered and torn tapestries and rugs lie heaped in piles.  Fancy
+robes and various articles of clothing are now just rags.  You stare at 
+the strange piles for a long time until a piercing howl makes you
+think these might be beds.
+~
+52 0 1
+D0
+~
+~
+0 -1 5223
+D1
+A fine jewellery stand lies in ruin next to you.
+~
+~
+0 -1 5225
+D2
+The market place is deserted.
+~
+~
+0 -1 5208
+S
+#5223
+A Back Alley~
+   A narrow alley leads north to one of the city watchtowers while
+to the south there lies a market stand full of torn clothes and rugs.
+~
+52 0 1
+D0
+A tall watchtower stands a silent vigil over the city.
+~
+~
+0 -1 5224
+D2
+~
+~
+0 -1 5222
+S
+#5224
+Under The Watchtower~
+   You stand under one of the city watchtowers built to protect
+the city from invaders.  Obviously, it failed.
+~
+52 0 1
+D1
+~
+~
+0 -1 5228
+D2
+~
+~
+0 -1 5223
+D4
+Above you looms a tall watchtower.
+~
+~
+0 -1 5246
+S
+#5225
+The Jewellery Stand~
+   A table has been tipped over, spilling fine jewellery and gems
+across the market place.  Most of these trinkets are battered and 
+tarnished and few would have any value anymore.
+~
+52 0 1
+D2
+The market place is deserted.
+~
+~
+0 -1 5207
+D3
+Next to you is a stand full of ruined clothes and rugs.
+~
+~
+0 -1 5222
+S
+#5226
+A Ruined Clay Dwelling~
+   This was once a very plain house with nothing more than a few chairs
+and a bed.  A cold fireplace suggests that the city has been abandoned
+for quite a while.  Almost nothing remains of this humble abode.
+~
+52 d 1
+D1
+Outside is a small side street.
+~
+~
+0 -1 5210
+S
+#5227
+A Collapsed Stone Dwelling~
+   This small house has completely collapsed upon itself leaving piles
+of debris here and there.  A few rafters still stand with thatched straw
+hanging down and a hot wind gusts through the hollow dwelling.
+~
+52 0 1
+D1
+A small side street runs past the house.
+~
+~
+0 -1 5211
+S
+#5228
+A Back Alley~
+   A narrow alley leads west to one of the city watchtowers and east to
+a small side street.
+~
+52 0 1
+D1
+~
+~
+0 -1 5209
+D3
+~
+~
+0 -1 5224
+S
+#5229
+An Abandoned Shop~
+   From the outside this place looks like an ordinary pile of rubble,
+but inside these cramped quarters you discover what used to be a shop
+filled with armor, weapons, and various other goods.  A small sign
+flutters in the wind.
+~
+52 d 1
+D3
+A small side street runs past the shop.
+~
+~
+0 -1 5214
+S
+#5230
+The Tavern Of The Sun~
+   A glorious place in its prime, this tavern now lies in ruin; tables
+and chairs are broken scattered, bottles and glasses shattered, and
+a small performance stage crushed.  Musical instruments and personal
+belongings lie under the rubble, but the people they once belonged to are 
+not with them.  Looking up you see that the entire second floor and roof 
+has fallen in, leaving a gaping hole above.
+~
+52 0 1
+D3
+A small side street runs past the tavern.
+~
+~
+0 -1 5213
+S
+#5231
+The South Wing Of The City Hall~
+   You stand in a large room attached to this end of the hallway which 
+leads back north to the reception area.  Pedestals and columns have fallen
+and most of the valuable items have been taken, leaving worthless debris.
+A few chairs have survived, as well as a large curved desk.  To the east
+is a vine-covered archway leading out into a private courtyard.
+~
+52 d 1
+D0
+The long hallway leads back to the main reception area of the city hall.
+~
+~
+0 -1 5232
+D1
+~
+~
+0 -1 5234
+S
+#5232
+The City Hall~
+   This is the main reception area of Thalos' city hall.  The walls have
+been charred and scored massively and debris is spread from wall to wall.
+A large gaping hole in the west wall allows you to see out to one of
+the city's side streets.  Obviously no one will be seeing you through today.  
+Hallways lead south and east.
+~
+52 d 1
+D0
+Main street runs past the city hall.
+~
+~
+0 -1 5202
+D1
+A hallway leads to the east wing of the city hall.
+~
+~
+0 -1 5233
+D2
+A hallway leads to the south wing of the city hall.
+~
+~
+0 -1 5231
+D3
+~
+~
+0 -1 5212
+S
+#5233 
+The East Wing Of The City Hall~
+   Here lies the remnants of a fancy office, possibly the mayor's.  A few
+withered plants and broken pieces of furniture make this place anything
+but fancy, though.  The only thing remaining intact here is a large
+glass cabinet.  A long hallway leads west back to the reception area and
+an ivy-covered archway leads south into a private courtyard.
+~
+52 d 1
+D2
+~
+~
+0 -1 5234
+D3
+~
+~
+0 -1 5232
+S
+#5234
+The Private Gardens And Courtyard Of Thalos~
+   What a shame that this mass destruction also touched this once
+beautiful place.  The temple's garden path has nothing on this garden.
+Flowers and trees have been smashed into the ground and lawn benches
+thrown through walls.  A large marble fountain in the center of the
+courtyard still stands, though, defying any attempts to destroy its
+beauty.  Above stands the remnants of one of the watchtowers.  Archways 
+north and west lead back into the city hall.
+~
+52 0 1
+D0
+~
+~
+0 -1 5233
+D3
+~
+~
+0 -1 5231
+S
+#5235
+A Small Guard House~
+   This was once the barracks for Thalos' Cityguards.  Now just an empty
+shell, this small shack still stands guarding the entrance both to the
+city and to the city hall.
+~
+52 d 1
+D0
+Main street runs by this building.
+~
+~
+0 -1 5201
+S
+#5236
+A Collapsed Home~
+   All that's left of this house is a few scattered piles of rubble
+and a very large blast crater.  Obviously someone or something important 
+was once housed here.  A shrieking howl chills your blood.
+~
+52 0 1
+D2
+Main street runs past this ruined home.
+~
+~
+0 -1 5202
+S
+#5237
+A Tall Dwelling~
+   This seems to be the tallest structure remaining in the city.  At
+one time this could have been an inn of some sort, but now it is just
+a mess.  The back wall as been completely knocked down revealing an 
+entrance into another building through yet another collapsed wall.
+Between the two buildings are a few blast craters and boulders.  An old
+set of wooden steps leads up to a creaking second floor.
+~
+52 d 1
+D1
+~
+~
+0 -1 5238
+D3
+A small side street winds past the dwelling.
+~
+~
+0 -1 5211
+D4
+The stairs and even the entire second floor itself looks very unsafe
+for travel.  Gusts of wind make them creak and shudder.
+~
+~
+0 -1 5245
+S
+#5238
+A Small Shack~
+   This cramped dwelling could not have housed more than one person.  Now
+with the back wall missing, it could hold many more.  Looking around you
+find broken shelves and workbenches with various vials and pouches spilling
+contents all across the floor.  This was possibly the magic shop of the
+city.  The doorway to the east is blocked, making the only exit back west.
+~
+52 d 1
+D3
+~
+~
+0 -1 5237
+S
+#5239
+A Back Alley~
+   A narrow back alley goes south to main street and north towards
+a watchtower.  A mass of howls catches you of guard.
+~
+52 0 1
+D0
+~
+~
+0 -1 5240
+D2
+Main street runs past here.
+~
+~
+0 -1 5201
+S
+#5240
+A Back Alley~
+   A narrow back alley leads north to one of the city watchtowers
+and south towards main street.  To the west is a doorway to a small
+house blocked by debris.
+~
+52 0 1
+D0
+A tall watchtower stands a silent vigil over the city.
+~
+~
+0 -1 5241
+D2
+~
+~
+0 -1 5239
+S
+#5241
+Under A Watchtower~
+   You stand under a tall watchtower.  Narrow back alleys lead west and
+south and a very weak looking ladder leads up into the tower.  Above you,
+you hear the screams of tens of starving lamias!  Beware!
+~
+52 0 1
+D2
+~
+~
+0 -1 5240
+D3
+~
+~
+0 -1 5243
+D4
+Winds howl high above your head in the tower above.  You hear the screams
+of tens of howling lamias above you!
+~
+~
+0 -1 5248
+S
+#5242
+A Bath House~
+   This was once the bath house for the commoners of the city.  Hot
+steamy water still wells up from a hole in the floor.  Obviously there
+is a hot spring located under the city (making the decision to put
+a city here seem much more reasonable).  Closer inspection of the water
+yields a dead body floating around in it, skin melted away from months
+of floating in there.  The west wall has collapsed revealing another
+collapsed house.
+~
+52 d 1
+D0
+~
+~
+0 -1 5243
+D3
+The wall has collapsed on the adjoining house, creating a new opening
+in it.
+~
+~
+0 -1 5244
+S
+#5243
+A Back Alley~
+   A narrow back alley leads west to a small side street and east to one 
+of the city watchtowers.  Great amounts of steam issue forth from the
+building to the south.
+~
+52 0 1
+D1
+A watchtower stands a silent vigil over the city.
+~
+~
+0 -1 5241
+D2
+~
+~
+0 -1 5242
+D3
+A side street runs by here.
+~
+~
+0 -1 5209
+S
+#5244
+An Upright House~
+   This home is practically the only one around that is still standing.
+Except for the massive hole in the east wall, everything else looks
+intact, including the windows.  Great amounts of steam issue forth from
+the hole in the east wall.
+~
+52 d 1
+D1
+~
+~
+0 -1 5242
+D3
+A small side street runs past the house.
+~
+~
+0 -1 5210
+S
+#5245
+On The Second Floor~
+   The minute you step off onto this floor you realize it was a mistake.
+The old rotted floorboards suddenly give way and you fall down, impaling
+yourself on jagged boards below.
+~
+52 bd 1
+S
+#5246
+The North-West Watchtower~
+   You stand atop one of the city watchtowers.  The view is magnificent
+from here and you can see all the way to the western mountains.  No wonder
+this place stood for so long.
+~
+52 0 1
+D5
+The city lies below.
+~
+~
+0 -1 5224
+S
+#5247
+The South-West Watchtower~
+   You stand atop one of the city watchtowers.  The view is magnificent
+from here and you can see all the way to the western mountains.  To the
+south the desert stretches to the horizon.  No wonder this place stood
+for so long.
+~
+52 0 1
+D5
+The city lies below.
+~
+~
+0 -1 5215
+S
+#5248
+The North-East Watchtower~
+   You stand atop one of the city watchtowers.  The view is magnificent
+from here and you the desert sand stretches to the horizon.  No wonder
+this place stood for so long.  The ladder leading down seems rotted in
+some places!
+~
+52 c 1
+D5
+The city lies below... far, far below.
+~
+~
+0 -1 5249
+S
+#5249
+Under A Watchtower~
+   As you descend the ladder, the rotted rungs break, sending you quickly
+to your demise far below on the city street.  Splat.
+~
+52 bd 1
+S
+#5250
+The Temple Of Thalos~
+   You stand within one of the most holy places in the realm.  This
+stunning domed temple once housed the city's worshipers en masse.  
+Unfortunately, it succumbed to the destruction brought on this city.
+Long benches lie toppled and the altar desecrated.  Large chunks of stone
+have fallen from the walls and roof, sending sunlight streaming in on
+you.  A few books lie about, conveying to you a holy message in a
+strange tongue.  
+     Wind gusts through the four archways and howls and screams can be
+heard from all parts of the city.
+~
+52 cdh 1
+D0
+A side street leads to the northern half of the city.
+~
+~
+0 -1 5204
+D1
+Main street leads out to the main gate of the city.
+~
+~
+0 -1 5203
+D2
+A side street leads to the southern part of the city.
+~
+~
+0 -1 5206
+D3
+The market place lies this way.
+~
+~
+0 -1 5205
+S
+$

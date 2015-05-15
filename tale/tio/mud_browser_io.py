@@ -60,7 +60,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver):
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
-        wsgi_server = make_server("127.0.0.1", 8180, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
+        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
 
     def wsgi_handle_story(self, environ, parameters, start_response):

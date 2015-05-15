@@ -14,11 +14,11 @@ from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
 from tale.errors import SecurityViolation, ParseError
 from tale.npc import NPC
-from tale.player import Player, TextBuffer, PlayerConnection
+from tale.player import Player, TextBuffer, PlayerConnection, MudAccounts
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
-from tale.charbuilder import CharacterBuilder, validate_name, validate_race, PlayerNaming
+from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
 from tale.driver import StoryConfig
 from tale import pubsub, mud_context
 from tale.demo.story import Story as DemoStory
@@ -448,7 +448,7 @@ class TestPlayerConnection(unittest.TestCase):
         with WrappedConsoleIO(None) as io:
             pc = PlayerConnection(player, io)
             player.tell("first this text")
-            player.store_input_line("input text\n")
+            player.store_input_line("      input text     \n")
             x = pc.input_direct("inputprompt")
             self.assertEqual("input text", x)
             self.assertEqual("  first this text\ninputprompt ", sys.stdout.getvalue())  # should have outputted the buffered text
@@ -543,21 +543,17 @@ class TestCharacterBuilder(unittest.TestCase):
             why, what = next(builder)
             self.assertEqual("input", why)
 
-    def test_validators(self):
-        self.assertEqual("Rinzwind", validate_name("Rinzwind"))
-        self.assertEqual("Bob", validate_name("Bob"))
+    def test_validate_race(self):
         self.assertEqual("human", validate_race("human"))
         self.assertEqual("human", validate_race("HUMAN"))
-        with self.assertRaises(ValueError):
-            validate_name("aa")
-        with self.assertRaises(ValueError):
-            validate_name("aabcde444")
-        with self.assertRaises(ValueError):
-            validate_name("aabc def")
         with self.assertRaises(ValueError):
             validate_race("elemental")
         with self.assertRaises(ValueError):
             validate_race("xyz12343")
+        with self.assertRaises(ValueError):
+            validate_race("")
+        with self.assertRaises(ValueError):
+            validate_race(None)
 
     def test_playernaming(self):
         n = PlayerNaming()
@@ -614,6 +610,62 @@ class TestTabCompletion(unittest.TestCase):
         io = IoAdapterBase(conn)
         conn.io = io
         self.assertEqual(["criticize"], io.tab_complete("critic", driver))
+
+
+class TestMudAccounts(unittest.TestCase):
+    def test_accept_name(self):
+        self.assertEqual("irm", MudAccounts.accept_name("irm"))
+        self.assertEqual("irmendejongyeahz", MudAccounts.accept_name("irmendejongyeahz"))
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("irmendejongyeahxy")   # too long
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("aa")   # too short
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("Irmen")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("irmen de jong")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("irmen_de_jong")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("irmen444")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name(" irmen")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_name("irmen ")
+
+    def test_accept_email(self):
+        self.assertEqual("x@y", MudAccounts.accept_email("x@y"))
+        self.assertEqual("test@some.domain.com", MudAccounts.accept_email("test@some.domain.com"))
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_email("@")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_email("test@")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_email("@test.com")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_email(" x@y")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_email("x@y ")
+
+    def test_accept_password(self):
+        pw = "hello3"
+        self.assertEqual(pw, MudAccounts.accept_password(pw))
+        pw = "hello this is a long pass pharse 12345"
+        self.assertEqual(pw, MudAccounts.accept_password(pw))
+        pw = "he44zzz"
+        self.assertEqual(pw, MudAccounts.accept_password(pw))
+        pw = "   test  2  "
+        self.assertEqual(pw, MudAccounts.accept_password(pw))
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_password("")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_password("shrt2")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_password("no digits")
+        with self.assertRaises(ValueError):
+            MudAccounts.accept_password("223242455")
 
 
 class WrappedConsoleIO(ConsoleIo):

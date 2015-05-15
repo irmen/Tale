@@ -1,0 +1,253 @@
+#15000
+nothingness universal~
+Sapowox's Universal Nothingness~
+You are quite unable to perceive Sapowox's Universal Nothingness here.~
+~
+5 bcg 8193
+0 6 4 1
+40 0 200000
+E
+nothingness universal~
+You are not sure, but you do not seem not able to figure out what
+it isn't, because it doesn't much resemble anything you haven't 
+ever seen.  You feel a bit of mortal confusion, but you notice a
+small inscription on it.
+~
+E
+text writing inscription~
+It just says: ' (void *) '
+Not very enlightening, is it?
+~
+A
+18 2
+A
+19 2
+#15001
+gold coins~
+the gold~
+A lot of gold is here.~
+~
+20 0 1
+32385 0 0 0
+0 32385 0
+#15002
+sceptre royal golden~
+a golden sceptre~
+A golden Royal sceptre lies on the ground.~
+~
+12 gk 16385
+0 0 0 0
+20 15000 3000
+A
+18 2
+#15003
+crown golden~
+a golden crown~
+A magnificently jewelled golden crown has been left here.~
+~
+9 gk 17
+7 0 0 0
+40 12000 10000
+A
+12 30
+A
+3 1
+#15004
+apple golden~
+a golden apple~
+There is a golden apple here.~
+~
+1 gk 16385
+0 0 -1 0
+5 8000 400
+#15005
+telescope scope~
+a large telescope~
+There is a large telescope here, pointing at the sky.~
+~
+12 0 0
+0 0 0 0
+0 0 0
+E
+telescope scope~
+A small sign says:
+
+Made in Siberia.
+
+~
+#15006
+sword training~
+a training sword~
+A training sword with blunt edges is leaned against a wall.~
+~
+5 0 8193
+0 1 4 3
+7 300 5
+A
+18 -2
+#15007
+key huge~
+a huge key~
+There is a huge, heavy-looking key on the floor here.~
+~
+18 c 16385
+15007 0 0 0
+1 0 0
+#15008
+Verminator sword~
+Verminator~
+A strange looking sword is lying upon the ground here.~
+~
+5 adjmnoq 8193
+0 3 4 11
+2 1 4000
+E
+verminator sword~
+This strange sword seems to be made of black metal, an eerie green glow
+surrounds the blade.
+~
+#15009
+key butlers butler~
+the Butler's key~
+The Butler's key is here.~
+~
+18 c 16385
+15009 0 0 0
+3 0 0
+#15010
+key small~
+a small key~
+A small key lies here.~
+~
+18 c 16385
+15010 0 0 0
+1 0 100
+#15011
+chest wooden~
+a large wooden chest~
+A large wooden chest stands here in a corner.~
+~
+15 0 1
+800 13 15010 0
+450 400 100
+E
+chest~
+It is equipped with a small lock, that any self-respecting thief
+should be able to pick.
+~
+#15012
+vial large potion brown~
+a large vial~
+A large vial has been left here.~
+~
+10 g 1
+15 15 -1 -1
+14 2000 2000
+E
+vial large brown potion~
+It is filled with a disgusting brown liquid.
+~
+#15013
+banner royal~
+a royal banner~
+The royal banner has been firmly planted in the ground here.~
+~
+12 0 0
+0 0 0 0
+0 0 0
+E
+banner royal standard~
+It is large and very heavy.  On top of it flutters King Welmar's flag
+proudly.
+~
+E
+flag~
+On the flag is the symbol of King Welmar's house, the rampant stag.
+~
+#15014
+key~
+a key~
+A key lies on the floor.~
+~
+18 c 1
+15014 0 0 0
+13 0 0
+E
+key~
+It has a finely carved letter 'W' inscribed on it.
+~
+#15015
+hauberk mail chain~
+a guard's chain mail hauberk~
+A chain mail hauberk lies on the floor~
+~
+9 0 9
+5 0 0 0
+60 2000 500
+#15016
+broadsword sword large~
+a large broadsword~
+There is a large broadsword lying here.~
+~
+5 0 8193
+0 2 6 3
+14 1300 3000
+#15017
+key cell~
+the cell key~
+A key lies on the floor.~
+~
+18 c 1
+15017 0 0 0
+3 0 0
+E
+key cell~
+This appears to be the key for the cells of the castle.
+~
+#15018
+corpse~
+a corpse~
+There is a corpse lying in the middle of the floor of the building here.~
+~
+13 0 0
+0 0 0 0
+0 0 0
+#15019
+lobster~
+a delicious-looking lobster~
+A delicious-looking lobster is lying here, tempting your appetite.~
+~
+19 0 1
+7 0 0 0 
+5 100 10
+#15020
+caviar~
+some Russian caviar~
+There is some delicious-looking Russian caviar here, making your mouth water.~
+~
+19 0 1
+2 0 0 0 
+1 250 20
+#15021
+glow~
+the glow from the west~
+There is a strange glow coming from the west.~
+~
+13 0 0
+0 0 0 0
+0 0 0
+E
+glow~
+The glow from the west appears to be quite strong, but it does not
+give enough light to see by here, nor can you see the source of the
+glow.
+~
+#15022
+wail sound~
+the wailing sound from the east~
+There is an eerie wailing sound coming from the house to the east.~
+~
+13 0 0
+0 0 0 0
+0 0 0
+$

@@ -1,0 +1,27 @@
+CircleMUD v3.0 Shop File~
+#3100~
+3100
+3101
+3102
+-1
+1.1
+0.9
+-1
+%s I haven't got such a drink.~
+%s I see no such thing.~
+%s I do not buy, would you like a drink?~
+%s BUG, Please report.~
+%s You can't afford such a fine drink, try the Grubby Inn.~
+%s Fine, that'll be %d gold pieces.~
+%s Bug, please report (%d).~
+0
+0
+3100
+0
+3106
+-1
+6
+22
+23
+24
+$~

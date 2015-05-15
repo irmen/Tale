@@ -1,0 +1,62 @@
+CircleMUD v3.0 Shop File~
+#2505~
+2504
+2545
+2546
+3010
+3100
+3101
+-1
+2.1
+0.5
+FOOD
+LIQ CONTAINER
+-1
+%s Haven't got that in storage, try LIST!~
+%s You can't sell what you don't HAVE!~
+%s Sorry, I'm not a fence.~
+%s I'd love to buy it, I just can't spare the coinage~
+%s Bah, come back when you can pay!~
+%s That'll be %d coins -- thank you.~
+%s I'll give ya %d coins for that!~
+0
+2
+2505
+112
+2518
+-1
+0
+28
+0
+0
+#2506~
+3050
+3051
+3053
+-1
+2.5
+0.3
+SCROLL
+WAND
+STAFF
+POTION
+-1
+%s Say again?~
+%s You don't have that, try INVENTORY!~
+%s What do I look like, a fence?~
+%s Sorry, I just can't afford such a costly item.~
+%s You can't afford it!~
+%s You're getting a bargain for that at only %d!~
+%s I guess I could give ya %d for that.~
+0
+2
+2506
+112
+2519
+-1
+0
+28
+0
+0
+$~
+

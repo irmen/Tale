@@ -1,0 +1,118 @@
+#900
+key golden heavy~
+a golden key~
+A heavy golden key lies here.~
+~
+18 c 16385
+900 0 0 0
+1 0 0
+#901
+shield minotaur~
+a dark minotaur shield~
+A dark minotaur shield has been left here.~
+~
+9 dgh 513
+12 0 0 0
+12 5000 1350
+E
+shield minotaur~
+A strong, sturdy shield.  It brings to mind legends of a shield that
+provided protection from poisonous gases.
+~
+A
+23 -4
+#902
+potion speckled~
+a speckled potion~
+A speckled potion speckles here.~
+~
+10 g 1
+15 15 15 15
+2 1300 500
+#903
+gauntlets troll~
+a pair of troll gauntlets~
+A pair of gauntlets made from troll skin lie on the ground.~
+~
+9 g 129
+5 0 0 0
+8 2000 1350
+#904
+ring platinum~
+a platinum ring~
+A shining ring of platinum lies here.  It has a tiny inscription.~
+~
+1 agh 16387
+0 0 -1 0
+1 2000 5500
+E
+ring platinum inscription~
+The inscription on the ring reads:
+
+Cursed be the gods that supply coins to mortals!
+And cursed be the mortal that accepts valuable gifts from the gods!
+Especially cursed are those who do not leave the toilet seat up!
+
+~
+A
+17 10
+A
+18 2
+#905
+flail~
+a flail~
+A flail has been carelessly left here.~
+~
+5 fgh 8193
+0 3 4 7
+8 5000 3500
+A
+19 2
+#906
+coins gold treasure~
+a great pile of treasure~
+A great, gleaming pile of treasure lies at your feet.~
+~
+20 0 1
+43500 0 0 0
+20 43500 0
+#907
+spear heavy~
+a heavy spear~
+A heavy spear has been tossed on the ground here.~
+~
+5 0 8193
+0 1 7 11
+8 450 200
+A
+19 1
+#908
+trident~
+a trident~
+There is a warrior's trident here.~
+~
+5 0 8193
+0 2 4 11
+8 350 200
+E
+trident~
+This is a common trident, often used by gladiators or mermen.  It has
+three sharp prongs jutting from the business end and a smooth wooden
+handle with two comfortable grip points.
+~
+#909
+boots boat~
+a pair of boots~
+A pair of boots sit here in a puddle of water.~
+~
+22 deq 65
+0 0 0 0
+1 5000 1850
+E
+boots boat~
+The boots are made of a strange lightweight hide and float in a puddle
+of water.
+~
+A
+14 -20
+$

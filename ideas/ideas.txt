@@ -7,10 +7,11 @@ Interesting link: http://www.brasslantern.org/writers/
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
+[feature] user banning
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] SSH interface via Paramiko?
-[feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state. (already have this for IF-mode)
+[feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
 [feature] Write stuff to a logfile for the server admins.
 [feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
@@ -21,13 +22,8 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
 [feature] Party: team up with other players and share quest and combat experience
 [feature] Skills: stealth, lockpicking, ...
-[feature] Vendors and shops: stock, sell stuff, buy stuff, haggle?
-[feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset?
-
-
-[info,feature] Do something with the circlemud xml data:
-    data files from: http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
-
+[feature] Vendors and shops: stock, sell stuff, buy stuff, haggle? Model them after the circle shop data first.
+[feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset? (circle has zones and zone resets)
 [info,feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
     trauma/wound, suffocation, deathray (zap-command), EMP, karma, pressure, decompression, inertia
@@ -35,34 +31,34 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[code] To allow for more complex objects and descriptions, add an 'extradesc' list to rooms and items.
+    That list maps keywords to extra descriptions.
+    Those descriptions appear when you 'examine' or 'look at' any of the keywords in the list,
+    but are not mentioned in a general 'look'. This allows for an easy way to make rooms and items more interesting.
+    The general description should at least give one keyword clue!
+    The circle data already contains this list but it is now largely unused (only the main keyword descr is added to the room)
+[code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
+[feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits)
+[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [feature] More commands should recognise object aliases (touch, take) like examine already does.
+[feature] allow livings to wear items/armour on various body parts
+[feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand)
 [cosmetic] Add <center> text style which centers the line(s) on the screen.
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
-[code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
 [feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
-[code] To allow for more complex objects and descriptions, add a 'part' object that belongs to its owner object.
-    They're not mentioned in a general 'look' but can be accessed if referenced directly by name.
-    Other objects/livings/locations descriptions may ofcourse mention them as clues.
-    This allows for a car with an engine and doors, where only the car is mentioned in a 'look'.
-    Or a garden with trees which have branches you can examine, but only
-    It is lightweight (no logic, only descriptions). Moving the owning object moves all its parts along with it.
-    This requires adding code to all places an item is searched.... (it needs to search the parts too now)
-    Interaction with the part is done by owner object's handle_part_verb? (which by default only prints a description?)
-[feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it.
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
 [code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
 [test] double names.
     What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
     What happens with multiple items of same name in room, in inventory, in bag
     make a little menu that gives an enumerated choice of the stuff with the same name?
-[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [code] prototypes to extend items/npc instead of inheritance?
-[code] Use a DSL to define the basic world stuff, and convert it to python source
+[code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly). Much like the circle importers
 [feature] Change living location logic so that livings can sit inside a container item too.
     Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
     + take <living> can actually work! (take ant, trap rabbit in cage, ...)

@@ -1,0 +1,166 @@
+#6500
+guard dwarf dwarven~
+the dwarf guard~
+A dwarven guard is here.
+~
+The guard looks very tough and mean.  He wears his beard long, and he
+smells like he hasn't bathed in over a month.
+~
+ablm dhk 1000 S
+21 0 -1 4d20+336 2d8+9
+10000 60000
+8 8 1
+#6501
+worker dwarf dwarven~
+the dwarf worker~
+A dwarven mining worker is here.
+~
+He is very dirty, and looks extremely over-worked.
+~
+glm 0 900 S
+13 7 2 25d5+170 2d4+6
+3500 16000
+8 8 1
+#6502
+wraith~
+the wraith~
+A wraith is awaiting your first move here.
+~
+A black, almost transparent wraith.
+~
+abfnopr dfk -900 S
+25 4 -6 9d7+500 4d5+25
+45708 125000
+8 8 1
+#6503
+storekeeper~
+the Hide & Tooth storekeeper~
+The Hide & Tooth storekeeper is standing here, waiting patiently.
+~
+The storekeeper is very rotund, but looks in excellent condition.
+~
+ablm d 1000 S
+33 0 -10 1d1+30000 2d8+32
+33500 800000
+8 8 1
+#6504
+baker granite head~
+Granite Head the baker~
+Granite Head, the baker, is waiting for a customer here.
+~
+Granite Head is covered with flour and grains.
+~
+ablm d 900 S
+33 0 -10 1d1+30000 2d8+22
+55000 800000
+8 8 1
+#6505
+lizard giant~
+the giant lizard~
+A giant lizard is foraging for food along the cavern floor here.
+~
+This scaly creature looks like it is well adapted to its underground
+habitat.  He looks very powerful.
+~
+g dk 100 S
+21 0 1 4d20+340 3d7+4
+200 55000
+8 8 1
+#6506
+giant~
+the giant~
+A giant is wandering around the mountainside here.
+~
+The giant is about 18 feet tall, with arms of steel, and looks in
+excellent physical condition.
+~
+gl k 600 S
+19 2 0 4d20+300 3d3+8
+2000 45000
+8 8 1
+#6507
+mineworker dwarven dwarf miner worker~
+the dwarven mineworker~
+A dwarven mineworker is here.
+~
+The mineworker is very tired, and very dirty, and he has bulging muscles.
+~
+bl k 500 S
+4 16 7 3d13+40 1d3+2
+600 700
+8 8 1
+#6508
+mineleader dwarven dwarf mine leader~
+the mine leader~
+A dwarven mine leader is here, supervising the work.
+~
+The mine leader is very big and very strong, though he must be fairly
+bright also, to have gotten this job.
+~
+bl k 700 S
+19 1 0 50d2+270 3d4+6
+18000 35000
+8 8 1
+#6509
+doctor dwarven healer~
+the dwarven doctor~
+The dwarven doctor is here, aiding the sick of his people.
+~
+He is a very skilled healer, and extremely faithful to his god.
+~
+abl dhk 999 S
+22 0 -1 9d4+375 3d8+4
+20000 60000
+8 8 1
+#6510
+peon dwarven~
+the dwarven peon~
+A dwarven peon is awaiting help here.
+~
+~
+bm k 500 S
+3 18 7 10d3+35 2d3+2
+75 350
+8 8 1
+#6511
+dwarf~
+the Dwarf~
+A dwarf is here.
+~
+~
+b k 500 S
+6 15 4 1d15+70 3d3+1
+625 1500
+8 8 1
+#6514
+guard barrack~
+the barrack guard~
+A barrack guard is here, lounging around while off duty.
+~
+~
+bm k 100 S
+14 6 1 5d10+170 2d5+4
+1300 20000
+8 8 1
+#6516
+mazekeeper keeper~
+the mazekeeper~
+A mazekeeper is here.
+~
+He looks VERY tough.
+~
+abfl dhk -1000 S
+29 0 -7 250d4+2000 4d3+5
+2000 1700000
+8 8 1
+#6517
+snake giant~
+the giant snake~
+There is a giant snake here.
+~
+~
+bf k -1000 S
+33 0 -10 300d6+600 4d4+22
+3000 800000
+8 8 1
+$

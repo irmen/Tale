@@ -1,0 +1,278 @@
+#3300
+farmer~
+the farmer~
+A farmer walks around, looking for something to do.
+~
+This farmer is a resident of Stanneg by the Mountains,
+and as such, is one of the most boring people on earth.
+~
+cgh 0 500 S
+7 14 4 3d5+83 2d4+1
+1000 2250
+8 8 1
+#3301
+storekeeper~
+the storekeeper~
+A bored storekeeper waits for you to do something.
+~
+The bored storekeeper keeps a lazy eye on you as he
+waits for you to buy something.  Whee.
+~
+b 0 750 S
+20 1 -40 3d5+245 3d6+6
+10000 40000
+8 8 1
+#3302
+cowgirl~
+the cowgirl~
+A cowgirl stand here ready to defend her horses...
+~
+This woman seems ready for anything you might do...
+she is truly a woman to be reckoned with...
+~
+blm dst 750 S
+20 1 -60 3d5+245 3d6+4
+8000 40000
+8 8 2
+#3303
+horse~
+the horse~
+A horse does horsely things here.
+~
+This horse looks like a nice horse.  It looks at you
+with soft brown eyes and you want to give it a carrot.
+~
+b 0 250 E
+5 16 5 1d10+60 2d4+0
+0 1000
+8 8 1
+BareHandAttack: 4
+E
+#3304
+farmer's wife~
+the farmer's wife~
+A farmer's wife offers you some vegetables.
+~
+This woman has many different types of fruits and
+vegetables for you to buy.  She looks bored, though.
+~
+b 0 500 S
+20 1 -40 3d5+245 3d6+6
+10000 40000
+8 8 2
+#3305
+aglandiir dragon~
+Aglandiir~
+The Dragon Prince, Aglandiir, sits here looking at you curiously.
+~
+Aglandiir is a prince of his kind, and he didn't get where 
+he is today by letting people steal from his horde!
+~
+beflnopqr dh 750 E
+30 0 -100 1d1+1499 8d5+5
+500000 1000000
+8 8 1
+BareHandAttack: 8
+Str: 25
+Int: 25
+Wis: 25
+Dex: 25
+Con: 25
+Cha: 16
+E
+#3306
+cyclops~
+the Cyclops~
+A Cyclops is here, trying to judge range with no depth perception.
+~
+This Cyclops throws rocks real good.  With one eye though, 
+hitting the target is another matter.  He looks at you and 
+growls as he misses again!
+~
+bcflnq 0 -500 E
+16 8 0 3d5+295 2d8+2
+10000 24000
+8 8 1
+BareHandAttack: 13
+E
+#3307
+salle woman~
+Salle~
+A woman ignores you completely, so intent is she upon her sword.
+~
+She is a stunning woman, all hair and eyes, it seems.
+Her clothing is of the same tawny brown of her skin and
+hair.  Her blue eyes look at you appraisingly, seemingly
+to show great intelligence.  Her mouth twitches into a 
+sneer...
+~
+bm 0 -600 S
+15 6 -30 3d5+200 2d6+6
+6500 24000
+8 8 2
+#3308
+duwick man~
+Duwick~
+A truly immense man laughs at you, and draws his knife!
+~
+This has to be one of the biggest men you've ever seen.  He is
+a full seven feet toe to head, and weighs a good three hundred
+pounds -- mostly on his biceps and pectorals it appears.  An
+ornate scabbard slaps by his side, with the pommel of a silvered
+dagger sticking out... a tiny weapon for such a large man!
+~
+bm 0 -900 S
+22 0 -70 3d5+400 3d6+10
+15000 70000
+8 8 1
+#3309
+receptionist~
+the Receptionist~
+A receptionist offers you a room.
+~
+He looks like a retired farmer now making an honest living in an inn.
+More power to him!
+~
+b 0 400 S
+12 9 -30 3d5+140 2d7+1
+8000 8000
+8 8 1
+#3310
+innkeeper~
+the innkeeper~
+An aged innkeeper greets you as you enter.
+~
+He is old and greying, but seems to have been able to
+keep his mental faculties through the years.  A large
+woolen sweater is wrapped about him for warmth.  His
+blue eyes dance with amusement as he notices your weapons,
+but he doesn't seem too terribly startled.
+~
+b 0 750 S
+10 11 20 3d5+120 2d6+1
+2000 9000
+8 8 1
+#3311
+hunter~
+the hunter~
+A hunter walks through the town streets on his own time.
+~
+He looks mean, as if the very personality of the mountains
+had infected him with hardness.  His stride is purposeful,
+his face weathered, his eyes cold and dark.  Others are
+standing out of his way as he walks on by.
+~
+cgm 0 500 S
+11 10 -20 3d5+133 2d6+2
+1200 11000
+8 8 1
+#3312
+waiter~
+a waiter~
+A waiter rushes by, intent on his business.
+~
+He looks harried from the way he hastily takes orders and 
+rushes in the back to get food, and to the bar for drinks.  
+He doesn't even spare you a glance as he passes by.
+~
+b 0 0 S
+5 16 70 3d5+60 2d4+0
+500 850
+8 8 1
+#3313
+waitress~
+a waitress~
+A waitress rushes by, intent on her business.
+~
+She looks harried from the way she hastily takes orders and rushes
+in the back to get food, and to the bar for drinks.  She doesn't
+even spare you a glance as she passes by.
+~
+b 0 0 S
+5 16 70 3d5+60 2d4+0
+500 850
+8 8 2
+#3314
+bartender~
+a bartender~
+A bartender washes a glass idly here.
+~
+He nods, smiles, and asks you what you would like to drink.
+As you decide, he slowly polishes a glass with an old bar
+rag.  The glass is completely clean, but he polishes it anyway.
+Go figure.
+~
+b 0 200 S
+15 6 10 3d5+180 2d8+2
+10000 21000
+8 8 1
+#3315
+bandit~
+the bandit~
+A bandit springs into action upon seeing you.
+~
+Whew!  Has this guy ever seen a bath?  His face, hands, arms...
+nearly every bit of him is covered with grime, dust, dirt and
+decay.  His sword is polished and cleaned though...
+~
+chjk 0 -500 S
+16 5 -20 3d5+195 2d8+3
+1000 25000
+8 8 1
+#3316
+bandit guard~
+the bandit guard~
+A bandit guard stands at attention here.
+~
+He may be a bandit, but he's no slacker.  You wonder
+who would be able to keep these bandits in line enough
+to pull a good guard duty...
+
+(boy is this guy DIRTY!!!)
+~
+bjk 0 -500 S
+18 3 -30 3d5+220 3d6+2
+2400 32000
+8 8 1
+#3317
+miner worker slave~
+the slave~
+A slave here is mining out a new passageway.
+~
+The slave looks up at you with pleading eyes.  He
+wants his freedom.  The chains around his ankles are
+tight, and you wonder if you should set him free, and
+if you even can.
+~
+bh 0 1000 S
+6 15 100 3d5+70 1d8+1
+0 1500
+8 8 1
+#3318
+farmer~
+the farmer~
+A farmer walks around, looking for something to do.
+~
+This farmer is a resident of Stanneg by the Mountains,
+and as such, is one of the most boring people on earth.
+~
+bcgh 0 500 S
+7 14 4 3d5+83 2d4+1
+1000 2250
+8 8 1
+#3319
+hunter~
+the hunter~
+A hunter walks through the town streets on his own time.
+~
+He looks mean, as if the very personality of the mountains
+had infected him with hardness.  His stride is purposeful,
+his face weathered, his eyes cold and dark.  Others are
+standing out of his way as he walks on by.
+~
+bcgm 0 500 S
+11 10 -20 3d5+133 2d6+2
+1200 11000
+8 8 1
+$
+

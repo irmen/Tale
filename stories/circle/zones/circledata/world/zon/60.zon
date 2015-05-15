@@ -1,0 +1,132 @@
+#60
+Haon-Dor, Light Forest~
+6000 6099 13 2
+*
+* Mobiles
+M 0 6000 1 6009         John The Lumberjack
+E 1 6000 2 16                   Lumber Axe
+E 1 6001 10 5                   Chequered Shirt
+E 1 6002 20 8                   Leather Boots
+M 0 6001 6 6012         Rabbit
+G 1 6023 10                     Meat
+M 0 6001 6 6015         Rabbit
+G 1 6023 10                     Meat
+M 0 6001 6 6017         Rabbit
+G 1 6023 10                     Meat
+M 0 6001 6 6019         Rabbit     
+G 1 6023 10                     Meat
+M 0 6002 1 6022         Brown Bear
+M 0 6004 1 6023         Fallow Deer
+G 1 6024 4                      Venison
+M 0 6005 4 6014         Brown Fox
+* Objects
+O 0 6003 1 6010         Fireplace
+P 1 6006 1 6003                 Key To Wooden Chest
+R 0 6010 6004
+O 0 6004 50 6010        Lantern
+O 0 6005 1 6010         Wooden Chest
+P 1 6007 1 6005                 Coins
+R 0 6010 6013
+O 0 6013 100 6010       Water Barrel
+O 0 6010 1 6023         Blackberries
+R 0 6006 6011
+O 0 6011 10 6006        Mushroom
+R 0 6013 6011
+O 0 6011 10 6013        Mushroom 
+R 0 6016 6011
+O 0 6011 10 6016        Mushroom         
+R 0 6019 6011
+O 0 6011 10 6019        Mushroom
+R 0 6065 6011
+O 0 6011 10 6065        Mushroom
+R 0 6062 6011
+O 0 6011 10 6062        Mushroom
+R 0 6069 6011
+O 0 6011 10 6069        Mushroom
+R 0 6078 6011
+O 0 6011 10 6078        Mushroom
+O 0 6012 1 6000         The News Sign
+*
+*  Haon-Dor Addition, By Derkhil
+*
+* Mobiles
+M 0 6006 1 6033         Bird With Broken Wing
+M 0 6007 1 6033         Bobcat
+M 0 6008 4 6005         Sparrow
+M 0 6008 4 6013         Sparrow
+M 0 6008 4 6062         Sparrow
+M 0 6009 3 6032         Robin
+M 0 6009 4 6066         Robin 
+M 0 6009 4 6013         Robin
+M 0 6009 4 6016         Robin
+M 0 6010 2 6030         Nested (Hidden) Squirrel
+M 0 6010 2 6030         Nested (Hidden) Squirrel
+M 0 6011 1 6067         (Hidden) Badger
+M 0 6012 7 6003         Grey Squirrel
+M 0 6012 7 6007         Grey Squirrel
+M 0 6012 7 6028         Grey Squirrel
+M 0 6012 7 6032         Grey Squirrel
+M 0 6012 7 6030         Grey Squirrel
+M 0 6012 7 6064         Grey Squirrel
+M 0 6012 7 6075         Grey Squirrel
+M 0 6013 4 6030         Chipmunk
+M 0 6013 4 6021         Chipmunk
+M 0 6013 4 6067         Chipmunk
+M 0 6013 4 6061         Chipmunk
+M 0 6014 4 6026         Crow
+M 0 6014 4 6026         Crow
+M 0 6014 4 6026         Crow
+M 0 6014 4 6027         Crow
+M 0 6015 1 6026         Vulture
+M 0 6016 1 6025         Small 5-Pt Buck
+G 1 6024 4                      Venison
+M 0 6017 3 6027         Fish
+M 0 6017 3 6027         Fish
+M 0 6017 3 6027         Fish
+M 0 6018 2 6027         Duckling
+M 0 6018 2 6027         Duckling
+M 0 6019 2 6027         Duck
+M 0 6019 2 6027         Duck    
+M 0 6001 11 6068        Rabbit
+G 1 6023 16                     Meat
+M 0 6001 11 6062        Rabbit
+G 1 6023 16                     Meat
+M 0 6001 11 6071        Rabbit
+G 1 6023 16                     Meat
+M 0 6001 11 6070        Rabbit
+G 1 6023 16                     Meat
+M 0 6001 11 6060        Rabbit
+G 1 6023 16                     Meat
+M 0 6005 8 6069         Brown Fox
+M 0 6005 8 6074         Brown Fox
+M 0 6005 8 6060         Brown Fox
+* Objects
+R 0 6006 6014
+R 0 6007 6014
+R 0 6008 6014
+R 0 6013 6014
+R 0 6014 6014
+O 0 6014 5 6006         Brook
+O 0 6014 5 6007         Brook
+O 0 6014 5 6008         Brook
+O 0 6014 5 6013         Brook
+O 0 6014 5 6014         Brook
+R 0 6025 6015
+O 0 6015 2 6025         Lake
+R 0 6025 6015
+O 0 6015 2 6027         Lake
+O 0 6016 1 6033         Oaken Cudgel
+O 0 6017 1 6026         Corpse Of The Boar
+P 1 6018 1 6017                 Meat
+P 1 6019 1 6017                 Tusks
+O 0 6020 1 6067         Invis Floating Log
+O 0 6021 1 6032         Invis Bird's Nest
+P 1 6022 3 6021                 Robin's Egg
+P 1 6022 3 6021                 Robin's Egg
+P 1 6022 3 6021                 Robin's Egg
+* Doors
+D 0 6009 0 1            Cabin
+D 0 6010 2 1
+*
+S
+$

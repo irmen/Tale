@@ -1,0 +1,845 @@
+#6400
+A Mountain Trail~
+   This trail leads up, up, up into the mountains.  You
+hope you don't fall down, because that would hurt, hurt,
+hurt!  The trail continues to the east, and you can go
+back down to the small hidden valley to the west.
+~
+64 0 5
+D1
+~
+~
+0 -1 6401
+D3
+~
+~
+0 -1 4078
+S
+#6401
+A Mountain Trail~
+   You're really high up now.  You can keep going even
+farther up into the mountains to the east, or go back
+down to the west.
+~
+64 0 5
+D1
+~
+~
+0 -1 6402
+D3
+~
+~
+0 -1 6400
+S
+#6402
+A Mountain Trail~
+   Wispy clouds are beginning to surround you now, and
+your ears pop due to the altitude.  To the east, you see
+the summit of the mountain, and from the way the nearby
+mountains are arranged behind it, you believe you're
+on your way to a big valley.  You can also go down
+to the west.
+~
+64 0 5
+D1
+~
+~
+0 -1 6403
+D3
+~
+~
+0 -1 6401
+S
+#6403
+Near The Mountain's Peak~
+   The peak of this mountain is another couple hundred
+feet above you, but here is where the trail leads down
+into the valley...  What an odd valley!
+   The valley seems to have been filled up by a hundreds
+of feet of lava many years ago.  It gives the valley an
+odd, 'flat' look and darkish ground.  The path leads
+down east into the valley, and west back to civilization.
+~
+64 0 5
+D1
+~
+~
+0 -1 6404
+D3
+~
+~
+0 -1 6402
+S
+#6404
+The Trail To The Valley~
+   The trail leads down into the valley, where, by judging
+by the height of the trees, the lava had cooled tens
+of decades ago.  Down below you see the path lead into
+the small forest in the valley, and disappear out of
+sight.  East leads into the valley, West back to civilization.
+~
+64 0 5
+D1
+~
+~
+0 -1 6405
+D3
+~
+~
+0 -1 6403
+S
+#6405
+In The Valley~
+   The ground has taken on the texture of dirt on the top,
+but this valley is far too flat and too rocky to disguise
+the catastrophe that happened here so long ago.  Looking
+up to the mountains ringing this area, you notice several
+mountains look as if they had 'exploded', which is strange,
+considering that they are not volcanos.
+   The path leads into the woods to the east, and back up
+the mountain to the west.
+~
+64 0 3
+D1
+~
+~
+0 -1 6406
+D3
+~
+~
+0 -1 6404
+S
+#6406
+In A Clearing~
+   You come to a small clearing now, after walking for several
+minutes through the silent woods.  An odd block sticks up
+here and there in   the ground... wait a minute.  These
+stones seem a little too regular, and from the circle 
+formation and size you could almost swear that they were...
+crenellations?  Could some sort of building been buried
+by the lava here?  A rusty ring sticks out of the earth
+in the center... a trapdoor?  This is almost too good to
+be true!
+~
+64 0 3
+D3
+~
+~
+0 -1 6405
+D5
+An ancient trapdoor, grimed with earth and age.
+~
+trapdoor trap~
+1 -1 6407
+S
+#6407
+A Stairwell~
+   This small room is the top of a stairwell leading down
+deep into the tower.  A small trapdoor overhead leaks
+the light of day around its edges.  To the south is a 
+wooden door, preserved through the ages by means 
+unknown.  To the west is a short hall.
+~
+64 ad 0
+D2
+~
+door~
+1 -1 6408
+D3
+~
+~
+0 -1 6409
+D4
+An ancient trapdoor, grimed with earth and age.
+~
+trapdoor trap~
+1 -1 6406
+D5
+~
+~
+0 -1 6413
+S
+#6408
+A Linen Closet~
+   This small room holds many types of linen on shelves 
+along the walls.  They are undoubtedly preserved by
+magic against the toil of the ages, since they seem
+freshly washed and folded.  You wonder what sort of
+mage could wield so much power to waste on such little
+things.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6407
+E
+linen shelf shelves~
+White sheets, pillow-cases, etc.  Not really anything that
+you need, but interesting.
+~
+S
+#6409
+A Corridor~
+   This is only a clean corridor, that leads back to the 
+stairwell to the east, and has doors leading to other
+rooms to the north and south.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6411
+D1
+~
+~
+0 -1 6407
+D2
+~
+door~
+1 -1 6410
+S
+#6410
+A Bathroom~
+   This is some sort of bathroom, like you've never seen
+before...  Water appliances leading from nowhere deliver
+hot and cold running water to basins that drain to...
+where?  How strange!
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6409
+S
+#6411
+The Master Bedroom~
+   This is an opulent room, decorated in silks and gold.
+There is an ebony desk against one wall, cooled lava rock
+spilling over its surface from the window it once looked
+out at.  A nice, spacious closet is filled with clothes
+just cleaned and pressed.
+~
+64 ad 0
+D2
+~
+door~
+1 -1 6409
+E
+desk~
+The desk is basically uninteresting, as are the papers 
+on top of it...
+~
+E
+closet~
+Nice clothes, but not your size at all.
+~
+S
+#6412
+The Library~
+   A great mages' library is contained on this floor of 
+the tower.  You feel you could learn anything you wanted
+to if you only looked and read long enough.  A door
+opens up back on the stairwell to the east.
+~
+64 ad 0
+D1
+~
+door~
+1 -1 6413
+D3
+A big bookcase, that looks rather odd.
+~
+bookcase~
+1 -1 6414
+E
+book books~
+There are lots of books about everything here!
+~
+S
+#6413
+The Stairwell~
+   This stairwell continues up and down, and there is
+a door to the west.
+~
+64 ad 0
+D3
+~
+door~
+1 -1 6412
+D4
+~
+~
+0 -1 6407
+D5
+~
+~
+0 -1 6415
+S
+#6414
+A Hidden Hall~
+   This is a small hidden hall with a secret entrance to the
+library on the north end of the west wall, and a trapdoor 
+on the south end.
+~
+64 ad 0
+D1
+The backside of a movable bookcase.
+~
+book bookcase~
+1 -1 6412
+D5
+~
+trapdoor trap~
+1 -1 6416
+S
+#6415
+A Stairwell~
+   This stairwell continues up and down, and there is a door
+to the west opening up onto this level.
+~
+64 ad 0
+D3
+~
+door~
+1 -1 6417
+D4
+~
+~
+0 -1 6413
+D5
+~
+~
+0 -1 6422
+S
+#6416
+The Hidden Treasure Room~
+   Jackpot!  A small room filled with treasure chests!  Go get them!
+~
+64 ad 0
+D4
+~
+trapdoor trap~
+1 -1 6414
+S
+#6417
+A Hallway~
+   This hall runs through the tower.  There's more hall to
+the west, and doors to your north and south.  A door to
+the east leads back to the stairwell.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6419
+D1
+~
+door~
+1 -1 6415
+D2
+~
+door~
+1 -1 6418
+D3
+~
+~
+0 -1 6420
+S
+#6418
+A Servant's Room~
+   This seems to be a small servant's bedroom, sparsely
+decorated and outfitted with a bed, nightstand, chair
+and table, etc.  Nothing real important here.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6417
+S
+#6419
+A Servant's Room~
+   This seems to be a small servant's bedroom, sparsely 
+decorated and outfitted with a bed, nightstand, chair
+and table, etc.  Nothing real important here.
+~
+64 ad 0
+D2
+~
+door~
+1 -1 6417
+S
+#6420
+A Hallway~
+   This hallway continues to the east, and has a door to 
+the north.  You could swear that the way this level is
+arranged... nah, couldn't be.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6421
+D1
+~
+~
+0 -1 6417
+S
+#6421
+A Servant's Room~
+   This seems to be a small servant's bedroom, sparsely
+decorated and outfitted with a bed, nightstand, chair
+and a table, etc.  Nothing real important here.
+~
+64 ad 0
+D2
+~
+door~
+1 -1 6420
+S
+#6422
+The Stairwell~
+   This stairwell leads up and down, and there is a big
+open room to your west.
+~
+64 ad 0
+D3
+~
+~
+0 -1 6423
+D4
+~
+~
+0 -1 6415
+D5
+~
+~
+0 -1 6425
+S
+#6423
+The Dining Hall~
+   This is a large dining hall, with a long table that runs
+down the length of it.  Chairs are set up along the sides
+to accomodate approximately 10 people.  There are paintings
+and tapestries on the walls, adding color to the stonework,
+The cooled lava that had poured in the windows makes the place 
+seem eerie somehow .  There is a door to the north, and
+the stairwell is to the east.
+~
+64 ad 0
+D0
+~
+door~
+1 -1 6424
+D1
+~
+~
+0 -1 6422
+E
+tapestry tapestries painting paintings~
+Many of these show scenes of high magic and heroism.
+Just like almost every tapestry and painting you've seen.
+~
+S
+#6424
+The Kitchen Area~
+   This is a well-stocked kitchen, the larders still fresh
+and full as if by magic.  Perhaps this would be a good
+place to take a break.
+~
+64 ad 0
+D2
+~
+door~
+1 -1 6423
+S
+#6425
+The Stairwell~
+   The stairwell leads up and down here, and there is a hall
+you can enter to the west.
+~
+64 ad 0
+D3
+~
+~
+0 -1 6426
+D4
+~
+~
+0 -1 6422
+D5
+~
+~
+0 -1 6429
+S
+#6426
+A Hall~
+   This area of the tower seems dank and oppressive.  The
+hall runs north-south, and there is an empty cell to your
+west.  The stairwell is to your east.
+~
+64 ad 0
+D0
+~
+~
+0 -1 6427
+D1
+~
+~
+0 -1 6425
+D2
+~
+~
+0 -1 6428
+E
+cell cells~
+It is open, empty, and uninteresting.
+~
+S
+#6427
+A Hall~
+   This is the northern end of the hall.  There are cells to
+your right and left, empty and awaiting occupants.
+~
+64 ad 0
+D2
+~
+~
+0 -1 6426
+E
+cell cells~
+It is open, empty, and uninteresting.
+~
+S
+#6428
+A Hall~
+   This is the southern end of the hall.  There are cells to
+your right and left, empty and awaiting occupants.
+~
+64 ad 0
+D0
+~
+~
+0 -1 6426
+E
+cell cells~
+It is open, empty, and uninteresting.
+~
+S
+#6429
+A Stairwell~
+   The stairwell continues up and down here.  A large room
+opens up to the west.
+~
+64 ad 0
+D3
+~
+~
+0 -1 6430
+D4
+~
+~
+0 -1 6425
+D5
+~
+~
+0 -1 6431
+S
+#6430
+A Mage's Office~
+   A small desk here is cluttered with magically preserved
+papers and documents.  None seem of value, except perhaps
+to a historian.  This place seems vaguely uninteresting...
+~
+64 ad 0
+D1
+~
+~
+0 -1 6429
+E
+paper papers documents document~
+Well, one of the papers relate a story about how the mage
+of this tower, Rand, angered many kings, and relates how
+they set his armies on him.  You wonder if the lava
+outside was a failed attempt to destroy the armies...
+~
+E
+desk~
+It is cluttered with all sorts of papers.  Some look
+half interesting, actually.
+~
+S
+#6431
+The Stairwell~
+   The stairs go up and down here, and there is a room to the
+west...
+~
+64 ad 0
+D3
+~
+~
+0 -1 6432
+D4
+~
+~
+0 -1 6429
+D5
+~
+~
+0 -1 6433
+S
+#6432
+A Sitting Room~
+   This is a simply furnished room, with chairs all about.
+A fireplace is inset into an inner wall, the chimney
+undoubtedly directed by magic...
+   This would be a nice place to rest awhile...
+~
+64 cd 0
+D1
+~
+~
+0 -1 6431
+S
+#6433
+The Stairwell~
+    This is where the stairwell finally ends.  There is a hall
+to your west.
+~
+64 ad 0
+D3
+~
+~
+0 -1 6434
+D4
+~
+~
+0 -1 6431
+S
+#6434
+A Hallway~
+   This small hallway on the former 'ground floor' ran north-
+south.  To the east is the stairwell that leads up into 
+the shadowy recesses of the tower.  To the west is the
+entrance way to the tower.  The north is completely blocked
+off by lava, and the way south is still clear.
+~
+64 ad 0
+D1
+~
+~
+0 -1 6433
+D2
+~
+~
+0 -1 6437
+D3
+~
+~
+0 -1 6435
+S
+#6435
+The Entranceway~
+   This is a grand chamber with giant double-doors to the
+west.  To the east is the main floor of the tower.  This
+room is arranged highly attractively and very impressively,
+with sculptures and tapistries everywhere.  The doors seem
+impenetrable... you don't think you'd be able to get through
+them if you really had to...
+~
+64 ad 0
+D1
+~
+~
+0 -1 6434
+D3
+These doors seem incredible.  Unfortunately, they're locked.
+~
+door double~
+1 0 6436
+E
+sculpture tapestry sculptures tapestries~
+They look nice, but aren't very valuable.
+~
+S
+#6436
+The Doorway~
+   This was the entrance to the tower.  Now lava has blocked
+it up completely.  However:
+   It seems when the lava came down a man was outside the
+doors.  He was blasted into the doors, and died instantly,
+but his skeleton still clutches a staff in perfect 
+condition...
+~
+64 ad 0
+D1
+These double doors have the outline of a man blasted into them...
+~
+double doors~
+1 0 6435
+S
+#6437
+The Hallway~
+    This is the southern part of the hallway.  There is 
+a door to the west, barred with gleaming bands of lights.
+To the north is more hallway.
+~
+64 ad 0
+D0
+~
+~
+0 -1 6434
+D3
+~
+door~
+1 -1 6438
+S
+#6438
+The Stairs~
+   Stairs lead down here into the tower's basement, or you
+can head east into the main floor of the tower.
+~
+64 ad 0
+D1
+~
+door~
+1 -1 6437
+D5
+~
+~
+0 -1 6439
+S
+#6439
+The Stairs~
+   Stairs lead up here to the main level, or you can go east
+to the basement of the tower.
+~
+64 ad 0
+D1
+~
+~
+0 -1 6440
+D4
+~
+~
+0 -1 6438
+S
+#6440
+An Alcove~
+   This alcove leads into a huge room to your north, and
+to stairs leading down to the east, and stairs going 
+up to your west.
+~
+64 ad 0
+D0
+~
+~
+0 -1 6441
+D1
+~
+~
+0 -1 6442
+D3
+~
+~
+0 -1 6439
+S
+#6441
+The Laboratory~
+   This laboratory has lots of stuff in it.  Beakers,
+flasks, burners, tongs, mortars and pestles, jars filled
+with normal things, jars filled with abnormal things, jars
+filled with things you'd rather not think about...
+A search could reveal many things...
+~
+64 ad 0
+D2
+~
+~
+0 -1 6440
+E
+beaker beakers flask flasks burner burners tong tongs~
+Looks like normal, fragile lab equipment to you.
+~
+E
+mortar mortars pestle pestles jar jars~
+Looks like normal, fragile lab equipment to you.
+~
+S
+#6442
+The Stairs~
+   Stairs lead down here to the second level of the basement,
+or back west to the alcove.
+~
+64 ad 0
+D3
+~
+~
+0 -1 6440
+D5
+~
+~
+0 -1 6443
+S
+#6443
+The Stairs~
+   Stairs lead up here to the first level of the basement, or
+you can go east to another big room.
+~
+64 ad 0
+D1
+~
+~
+0 -1 6444
+D4
+~
+~
+0 -1 6442
+S
+#6444
+The Summoning Room~
+   This room is darkly lit by a giant glowing pentagram in
+the center of the room.  Bands of force encircle some
+sort of being trapped inside.  You think that going
+inside would be an EXTREMELY BAD idea...
+~
+64 d 0
+D0
+~
+~
+0 -1 6445
+D3
+~
+~
+0 -1 6443
+E
+pentagram~
+It is centuries old.  You don't think standing close by
+would be a good idea.
+~
+E
+being~
+You can't see it clearly through the energy field of the
+pentagram, but you sense that whatever it is, it is very,
+very, very, very angry.
+~
+S
+#6445
+Inside A Pentagram~
+   The small god entrapped by the wizard looks at you with
+an insane expression.  Four hundred years of imprisonment
+doesn't do much for one's...
+
+   OOPS!
+
+   He killed you!
+   You are dead, R.I.P.
+~
+64 bd 0
+D2
+~
+~
+0 -1 6444
+S
+$

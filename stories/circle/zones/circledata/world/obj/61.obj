@@ -1,0 +1,283 @@
+#6101
+sign~
+a sign~
+An old, battered sign lies on the ground.~
+~
+12 0 1
+0 0 0 0
+10 2 2
+E
+sign~
+Only some of the letters are legible :-
+                _
+      _________| |_________
+     /         | |         \
+    /  CAR.AX  | |  M.STY   \
+    \  M..SI.N | |  SW..P   /
+     \_________| |_________/
+               | |
+
+~
+#6102
+tree opening~
+a colossal tree~
+A colossal tree blocks the way westward.~
+~
+15 0 0
+1000 0 0 0
+0 0 0
+E
+tree~
+This enormous tree must be a thousand years old.  Its rough bark looks grey
+and pale and is decorated with scratches and clawmarks.  On its west side is
+a small opening just above ground level.
+~
+E
+opening~
+The opening is far too narrow for you to squeeze through but it looks as if
+the tree is hollow.
+~
+#6103
+branch grey long~
+a long, grey branch~
+A long, grey branch rests heavily on the ground.~
+~
+1 0 16385
+0 0 25 0
+20 1 3
+E
+branch grey long~
+It is quite heavy and looks as if it has been dropped from great height.  It
+is long dead and very dry.  Could probably be lighted quite easily.
+~
+#6104
+branch grey long~
+a long, grey branch~
+A long, grey branch rests heavily on the ground.~
+~
+5 0 8193
+0 2 6 7
+18 60 20
+E
+branch grey long~
+It is very heavy and looks as if it has been dropped from great height.  It
+is long and straight and the wood is very hard, still being full of sap.
+Although it does not fit very well in your hand, it could be used as a clumsy
+but very heavy weapon.
+~
+A
+18 -2
+#6105
+branch grey long~
+a long, grey branch~
+A long, grey branch rests heavily on the ground.~
+~
+13 0 1
+0 0 0 0
+40 0 0
+E
+branch grey long~
+It is very heavy and looks as if it has been dropped from great height.  It
+is somewhat twisted and the hard wood is still full of sap.
+~
+#6106
+toadstool~
+a toadstool~
+A large toadstool grows nearby.~
+~
+19 0 1
+12 0 0 0
+5 20 20
+E
+toadstool~
+It is a large, brown boletus that must weigh nearly five pounds.  The top
+surface is covered in a thin layer of transparent slime that emits a weak,
+musty smell.  Not the most delicious thing you have seen.
+~
+#6107
+toadstool~
+a toadstool~
+A large toadstool grows nearby.~
+~
+19 0 1
+12 0 0 1
+5 20 20
+E
+toadstool~
+It is a large, brown boletus that must weigh nearly five pounds.  It
+has small white spots and the top surface is covered in a thin layer
+of transparent slime that emits a weak, musty smell.  Not the most
+delicious thing you have seen.
+~
+#6108
+coins gold~
+a big pile of gold coins~
+A big pile of gold coins is lying here.~
+~
+20 0 1
+15326 0 0 0
+15 15326 0
+#6109
+potion blue~
+a blue potion~
+A blue potion has been left here.~
+~
+10 g 1
+15 28 -1 -1
+2 68000 5000
+E
+potion blue~
+It has a nice deep blue color and a smell like peppermint.
+~
+#6110
+potion yellow musky~
+a musky yellow potion~
+A yellow potion has been left here.~
+~
+10 g 1
+15 39 -1 -1
+2 1000 200
+E
+potion yellow musky~
+It has a deep yellow color and and a strong spicy smell.
+~
+#6111
+shield round large~
+a large round shield~
+A large round shield has been left here.~
+~
+9 0 513
+5 0 0 0
+15 300 800
+E
+shield round large~
+It is made from hard wood that has been reinforced with heavy iron bands.
+~
+#6112
+crown iron~
+an iron crown~
+An iron crown rests on the ground.~
+~
+9 g 17
+6 0 0 0
+20 7000 500
+E
+crown iron~
+It is a heavy human-sized crown made from solid iron.
+~
+#6113
+sceptre iron~
+an iron sceptre~
+An iron sceptre lies on the ground.~
+~
+1 g 16385
+0 0 -1 0
+10 5000 700
+E
+sceptre iron~
+It is a heavy sceptre made from solid iron.
+~
+#6114
+ring iron~
+an iron ring~
+An iron ring has been left here.~
+~
+11 g 3
+0 0 0 0
+10 5000 500
+E
+ring iron~
+It is a quite heavy human-sized ring made from solid iron.  It lacks
+decorations of any kind.
+~
+A
+17 -4
+A
+9 1
+#6115
+star morning-star~
+the morning star~
+the morning star is here collecting dust while it lies on the ground.~
+~
+5 g 8193
+0 2 9 7
+10 15000 2000
+A
+18 2
+#6116
+shirt scale~
+a black dragon scale shirt~
+A black dragon scale shirt has been left here.~
+~
+9 g 9
+6 0 0 0
+10 10000 100
+E
+shirt scale~
+It is a sleeveless shirt made from big, black dragon scales joined
+with silver threads.  Its inside has been made from the soft skin
+on the dragon's belly, making it very comfortable to wear.  The word
+'Isha' has been engraved on one of the scales.
+~
+#6117
+skirt scale~
+a black dragon scale skirt~
+A black dragon scale skirt has been left here.~
+~
+9 g 33
+6 0 0 0
+8 5000 100
+E
+skirt scale~
+It is a short skirt made from big, black dragon scales joined with
+silver threads.  Its inside has been made from the soft skin on the
+dragon's belly, making it very comfortable to wear.  The word 'Isha'
+has been engraved on one of the scales.
+~
+#6118
+cloak black~
+a black, hooded cloak~
+A large, hooded cloak, as dark as the night, has been left here.~
+~
+11 g 1025
+0 0 0 0
+20 8000 4000
+E
+cloak black~
+It is a heavy, black cloak with a large hood.  The word 'Isha' is written
+inside it with a silver thread.
+~
+A
+17 -6
+A
+24 -4
+#6119
+belt silver~
+a broad silver belt~
+A broad silver belt has been left here.~
+~
+9 ag 2049
+6 0 0 0
+4 5000 3500
+E
+belt silver~
+It is a broad belt made from tiny silver rings woven together.
+~
+#6120
+sword long slender~
+a long, slender sword~
+A long, slender sword lies on the ground.~
+~
+5 agjl 8193
+0 3 6 3
+4 30000 6000
+E
+sword long slender~
+It is a long, slender sword that seems to be made from silver.  The word
+'Isha' has been engraved on the hilt.
+~
+A
+18 4
+A
+19 2
+$

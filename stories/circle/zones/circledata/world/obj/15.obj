@@ -1,0 +1,223 @@
+#1500
+scales justice scale~
+the Scales of Justice~
+Two beautiful plates shaped like scales have been left here.~
+~
+12 ak ao
+0 0 0 0
+10 15000 2200
+A
+3 1
+A
+4 2
+E
+scales justice scale~
+As you look at the scales, you notice that they seem to sway back and forth
+of their own accord, as if weighing something that is to you still unseen.
+~
+#1501
+scroll parchment~
+the Scroll of the Messenger~
+You see a solid and silver-lined scroll resting on the ground.~
+~
+12 g ao
+0 0 0 0
+1 500 500
+A
+14 15
+A
+19 -1
+E
+scroll parchment~
+It seems to be some sort of spell designed to transport its user across
+vast distances, but how to make use of it is impossible to tell.
+~
+#1502
+sword blazing~
+a blazing sword~
+You are startled by the sight of a sword that glows as you approach it.~
+~
+5 abgkn an
+0 3 4 11
+10 5000 900
+A
+13 -5
+E
+sword blazing~
+The edge of the blade is lined with writing, religious verse apparently, in
+a fine, silver-laced and flowing script.
+~
+#1503
+protector faithful shield~
+the Protector of the Faithful~
+A weighty looking shield has been abandoned by one unworthy to hold it.~
+~
+9 kn aj
+15 0 0 0
+20 5000 1500
+E
+protector faithful shield~
+It evades your attempts to focus on it, deflecting your gaze as it deflects
+the weapons that will try to kill you.
+~
+#1504
+armband band faded~
+a faded armband~
+A ragged and faded looking piece of cloth has been left here, forgotten.~
+~
+12 j ai
+0 0 0 0
+0 15 50
+A
+6 2
+A
+5 -1
+E
+armband faded band~
+It has some sort of militia insignia on it, perhaps an indication of a rank
+or award in some military order unknown to you.
+~
+#1505
+scimitar jeweled~
+a jeweled scimitar~
+A stunning curved blade glistens on the ground.~
+~
+5 akn an
+0 7 1 3
+5 5000 500
+E
+scimitar jeweled~
+The entire rim and edge of the scimitar's handle is bedecked in a gorgeous
+array of stones and precious metals.
+~
+#1506
+ember charred~
+a charred ember~
+You glance briefly at a smouldering ember that rests at your feet.~
+~
+1 ajnop ao
+0 0 -1 0
+0 5 2500
+A
+18 2
+A
+12 10
+E
+ember charred~
+It glares back at you, almost angrily.
+~
+#1507
+ethereal flame~
+an ethereal flame~
+The entire room is aglow from the flame at your feet.~
+~
+1 ajkop ao
+0 0 -1 0
+0 5 2500
+A
+12 8
+A
+13 10
+E
+ethereal flame~
+Even being near it fills you with a peaceful and comforted feeling.
+~
+#1508
+key gates~
+the Key to the Gates~
+You have found at last the Key to the Gates of eternity.~
+~
+18 aikl ao
+1508 0 0 0
+0 1000 500
+A
+3 2
+E
+key gates~
+There are no gates.  They are inside of you.
+~
+#1509
+history burnt book~
+a burnt history~
+You have found a burnt book, some forgotten history lying on the ground.~
+~
+13 0 ao
+0 0 0 0
+2 10 500
+A
+4 2
+E
+history burnt book~
+So this is the jester's joke.  All of our works have turned to dust,
+and will end in nothing.  It is for this that he laughs.
+~
+#1510
+surah book~
+a surah of the book~
+You notice a thin parchment, with flowing script and rich decorative trim.~
+~
+1 dklmn ao
+0 0 -1 0
+0 500 8000
+A
+18 3
+A
+19 3
+E
+surah book~
+Al-Kafirun
+Say: "Oh ye that reject the Faith, I do not worship what you worship, nor
+do you worship what I worship.  To you be your Way, and to me mine."
+~
+#1511
+forge unity~
+the Forge of Unity~
+It is surely the best of men who has left these gloves to aid you.~
+~
+9 iklmn ah
+5 0 0 0
+5 12000 4000
+A
+19 2
+A
+13 10
+#1512
+ankh~
+an Ankh~
+You see a beautiful pendant of ancient and noble craftsmanship.~
+~
+11 al ac
+0 0 0 0
+3 5000 2000
+A
+12 10
+A
+12 5
+E
+ankh~
+It is an even earlier version of the old Christian cross, an oval loop
+above the crossed arms of white gold.
+~
+#1513
+amulet ra~
+the Amulet of Ra~
+You have found a beautiful gleaming disc with a golden image of the sun god.~
+~
+11 ag ac
+0 0 0 0
+5 7500 1500
+A
+3 2
+A
+4 2
+#1514
+image azathoth graven~
+a graven image of Azathoth~
+You frown in disgust at the hideous icon of a false god that you have found.~
+~
+1 jlq ao
+0 0 0 0
+2 1000 500
+A
+6 2
+$

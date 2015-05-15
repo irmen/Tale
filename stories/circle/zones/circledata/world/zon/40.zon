@@ -1,0 +1,93 @@
+#40
+Mines of Moria~
+4000 4198 20 2
+*
+*  Created for DikuMud
+*  Heavily rewritten descriptions for CircleMud by Furry
+*
+* Level 1
+*
+* Mobiles
+M 0 4000 1 4030         Large Snake
+G 1 4001 1                      Goblin Corpse
+P 1 4002 1 4001                         500 Coins
+M 0 4001 2 4025         Green Snake
+M 0 4001 2 4015         Green Snake
+M 0 4002 3 4023         Centipede
+M 0 4002 3 4017         Centipede
+M 0 4002 3 4020         Centipede
+M 0 4003 6 4021         Kobold
+M 0 4003 6 4021         Kobold
+M 0 4003 6 4013         Kobold
+M 0 4003 6 4013         Kobold
+M 0 4003 6 4027         Kobold
+M 0 4003 6 4027         Kobold
+M 0 4004 3 4015         Orc
+M 0 4004 3 4028         Orc
+M 0 4004 3 4028         Orc
+M 0 4005 1 4022         Large Orc
+E 1 4000 5 1                    Yellow Green Ring
+*
+* Level 2
+*
+M 0 4050 1 4062         Warrior
+G 1 4051 3                      Helmet
+M 0 4051 4 4070         Warrior
+M 0 4051 4 4050         Warrior
+M 0 4051 4 4073         Warrior
+M 0 4051 4 4055         Warrior
+M 0 4052 3 4056         Hobgoblin
+M 0 4052 3 4065         Hobgoblin
+M 0 4052 3 4059         Hobgoblin
+M 0 4053 2 4058         Snake
+M 0 4053 2 4068         Snake
+M 0 4054 3 4060         Centipede
+M 0 4054 3 4053         Centipede
+M 0 4054 3 4052         Centipede
+M 0 4055 2 4064         Hobgoblin
+G 1 4050 20                     Purple Potion
+M 0 4055 2 4071         Hobgoblin
+G 1 4050 20                     Purple Potion
+M 0 4056 2 4067         Orc
+M 0 4056 2 4057         Orc
+* Objects
+R 0 4068 4052
+O 0 4052 8 4068         Mushroom
+R 0 4069 4052
+O 0 4052 8 4069         Mushroom
+R 0 4070 4052
+O 0 4052 8 4070         Mushroom
+R 0 4071 4052
+O 0 4052 8 4071         Mushroom
+*
+* Level 3
+*
+* Mobiles
+M 0 4100 1 4114         Mage
+G 1 4102 2                      Scroll Of Identify
+M 0 4101 1 4122         Troll
+G 1 4100 2                      Demon Blade
+M 0 4102 3 4111         Snake
+G 1 4103 10                     Slime
+M 0 4102 3 4111         Snake
+G 1 4104 3                      Poisoned slime
+M 0 4103 6 4103         Thief
+M 0 4103 2 4124         Thief
+E 1 4053 3 16                   Dirk
+M 0 4105 3 4108         Centipede
+M 0 4106 2 4113         Warrior
+G 1 4101 1                      Swordsman's Gloves
+M 0 4107 1 4119         Kobold
+G 1 4104 10                     Slime
+* Doors
+D 0 4119 3 1            Secret Passage
+D 0 4121 1 1
+*
+* North Of Mountain -- Wilderness
+*
+M 0 4057 2 4038         Lion
+M 0 4057 2 4041         Lion
+M 0 4058 1 4044         Hill Giant
+*
+S
+$

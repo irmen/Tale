@@ -1,0 +1,126 @@
+#3100
+maid~
+the Maid~
+The Maid is waiting for your order.
+~
+She is very beautiful with golden hair, and deep blue eyes.  A good reason
+for coming here more often, you think to yourself.
+~
+ablno d 1000 S
+33 0 -10 1d1+30000 1d8+22
+2000 80000
+8 8 2
+#3101
+sexton~
+the Sexton~
+A Sexton is sitting here, drinking hot tea.
+~
+The Sexton looks like he is relaxing after another gravedigging job.
+~
+b 0 800 S
+3 18 7 2d6+35 1d7+0
+13 300
+6 6 1
+#3102
+chief guard~
+the Chief Guard~
+The Chief Guard is looking very upset.
+~
+A very angry chief.
+~
+bcf d 800 S
+17 3 1 1d12+210 1d8+18
+0 28000
+8 8 1
+#3103
+cityguard guard~
+the upset cityguard~
+A cityguard stands here, looking very upset.
+~
+A big, strong, angry guard.
+~
+bcf 0 1000 S
+10 10 2 1d12+123 1d8+3
+0 9000
+8 8 1
+#3104
+secretary~
+the Secretary~
+A secretary is sitting at the desk, typing away on the typewriter.
+~
+She looks very busy.
+
+The Secretary says 'Sorry, but the Mayor is extremely busy today.'
+The Secretary says 'Please sit down and have a seat in the meantime.'
+~
+b 0 900 S
+12 9 2 1d12+148 2d7+1
+100 13000
+8 8 2
+#3105
+mayor~
+the Mayor~
+The Mayor is sitting in his huge chair, snoring loudly.
+~
+He is a stocky, middle-aged man with thin, grey hair.
+~
+ablno d 1000 S
+24 0 -4 6d10+790 1d8+18
+1000 130000
+4 4 1
+#3106
+crier~
+the Town Crier~
+The Town Crier is here, weeping quietly.
+~
+He is very good at his job - completely dissolved in tears.
+~
+h 0 900 S
+1 20 9 2d6+10 1d5+0
+34 100
+8 8 1
+#3120
+swan~
+the swan~
+A swan is swimming around in the pond.
+~
+The white swan is very elegant.
+~
+b 0 1000 S
+1 20 9 2d6+10 1d5+0
+0 100
+8 8 0
+#3121
+duckling~
+the duckling~
+A duckling is swimming around in the pond.
+~
+The duckling is adorable, it looks most of all like a tiny furball.
+~
+b 0 1000 S
+0 20 10 1d1+0 1d1+0
+0 1
+8 8 0
+#3122
+sparrow~
+the sparrow~
+A sparrow is flapping around on the ground.
+~
+The sparrow looks like it is enjoying life.
+~
+gh 0 1000 S
+0 20 10 2d6+0 1d3+0
+0 25
+8 8 0
+#3123
+duck~
+the duck~
+A duck is here, quacking happily.
+~
+The duck is quite fat.  It looks like it is enjoying life.
+~
+g 0 1000 S
+1 20 10 2d6+5 1d4+0
+0 75
+8 8 0
+$

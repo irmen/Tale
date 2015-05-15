@@ -1,0 +1,37 @@
+#0
+The Void~
+   You don't think that you are not floating in nothing.  You can see
+a strange portal located above you.
+~
+0 d 1
+D4
+The Temple of Midgaard floats above you.
+~
+~
+0 -1 3001
+S
+#1
+Limbo~
+   You are floating in a formless void, detached from all sensation of physical
+matter, surrounded by swirling glowing light, which fades into the relative
+darkness around you without any trace of edges or shadow.
+   There is a "No Tipping" notice pinned to the darkness.
+~
+0 d 1
+S
+#3
+A Totally Empty Room~
+   The walls are completely bare... nothing at all in the room.
+How... utterly bizarre and completely weird.  There is a strange
+portal just above you, and it almost looks as if there is some
+sort of room above you.
+~
+1 dj 0
+D4
+You notice that the portal above you looks almost like glass,
+albeit very dirty glass.
+~
+~
+0 -1 3048
+S
+$
