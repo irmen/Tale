@@ -287,9 +287,16 @@ class Driver(pubsub.Listener):
         conn.output("\n")
         while True:
             name = yield "input", ("Please type in your player name.", player.MudAccounts.accept_name)
-            if self.search_player(name):
-                conn.player.tell("That player is already logged in elsewhere.")
-                continue
+            existing_player = self.search_player(name)
+            if existing_player:
+                conn.player.tell("That player is already logged in elsewhere. Their current location is", existing_player.location.name)
+                conn.player.tell("and their idle time is %d seconds." % existing_player.idle_time)
+                if existing_player.idle_time < 30:
+                    conn.player.tell("They are still active.")
+                    continue
+                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
+                    conn.player.tell("Okay, leaving them in peace.")
+                    continue
             try:
                 self.mud_accounts.get(name)
                 password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
@@ -324,22 +331,47 @@ class Driver(pubsub.Listener):
                 conn.output("<it>%s</it>" % x)
                 continue
             else:
+                if existing_player:
+                    existing_player.tell("\n")
+                    existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
+                    existing_player.tell("\n")
+                    state = existing_player.__getstate__()
+                    state["name"] = conn.player.name   #  we properly rename it just below
+                    existing_player_location = existing_player.location
+                    self._disconnect_mud_player(existing_player)
+                    ctx = util.Context(self, self.game_clock, self.config, None)
+                    # mr smith move: delete the other player and restore its properties in us
+                    existing_player.destroy(ctx)
+                    conn.player.__setstate__(state)
+                    name_info = charbuilder.PlayerNaming()
+                    name_info.money = state["money"]
+                    name_info.name = state["name"]
+                    name_info.gender = state["gender"]
+                    name_info.race = state["race"]
+                    self.__rename_player(conn.player, name_info)
+                    conn.output("\n")
+                    conn.player.move(existing_player_location)
+                    break
+                # get the account and log in
                 account = self.mud_accounts.get(name)
                 self.mud_accounts.logged_in(name)
                 if account["logged_in"]:
                     conn.output("Last login: " + account["logged_in"])
                 break
-        name_info = charbuilder.PlayerNaming()
-        name_info.name = account["name"]
-        name_info.gender = account["gender"]
-        name_info.race = account["race"]
-        self.__rename_player(conn.player, name_info)
-        conn.player.privileges = set(account["privileges"])
-        conn.output("\n")
-        if "wizard" in conn.player.privileges:
-            conn.player.move(self.config.startlocation_wizard)
-        else:
-            conn.player.move(self.config.startlocation_player)
+        if not existing_player:
+            # for a new login, we need to rename the transitional player object
+            # to the proper account name, and move the player to the starting location.
+            name_info = charbuilder.PlayerNaming()
+            name_info.name = account["name"]
+            name_info.gender = account["gender"]
+            name_info.race = account["race"]
+            self.__rename_player(conn.player, name_info)
+            conn.player.privileges = set(account["privileges"])
+            conn.output("\n")
+            if "wizard" in conn.player.privileges:
+                conn.player.move(self.config.startlocation_wizard)
+            else:
+                conn.player.move(self.config.startlocation_player)
         prompt = self.story.welcome(conn.player)
         if prompt:
             yield "input", "\n" + prompt
