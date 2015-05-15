@@ -160,13 +160,6 @@ class SessionMiddleware(object):
         forwarded_uri = environ.get("HTTP_X_FORWARDED_URI", "/tale/")
         cookie_path = os.path.split(forwarded_uri)[0]
 
-        # If the server runs behind a reverse proxy, you can configure the proxy
-        # to pass along the uri that it exposes (our internal uri can be different)
-        # via the X-Forwarded-Uri header. If we find this header we use it to
-        # replace the "/tale" uri base by the one from the header, to use as cookie path.
-        forwarded_uri = environ.get("HTTP_X_FORWARDED_URI", "/tale/")
-        cookie_path = os.path.split(forwarded_uri)[0]
-
         def wrapped_start_response(status, response_headers, exc_info=None):
             sid = self.factory.save(environ["wsgi.session"])
             cookies = SimpleCookie()
