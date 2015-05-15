@@ -370,7 +370,7 @@ class PlayerConnection(object):
             self.player = None
 
 
-class MudAccounts(object):          # @todo unit tests
+class MudAccounts(object):          # @todo more unit tests
     """Handles the accounts (login, creation, etc) of mud users"""
     def __init__(self, database_opener=None):
         self.open_db = database_opener or self.__shelve_db_opener
@@ -478,7 +478,7 @@ class MudAccounts(object):          # @todo unit tests
                 pwhash, salt = self.__pwhash(new_password)
                 account["pw_hash"] = pwhash
                 account["pw_salt"] = salt
-            new_email = new_email.strip()
+            new_email = new_email.strip() if new_email else None
             if new_email:
                 self.accept_email(new_email)
                 account["email"] = new_email

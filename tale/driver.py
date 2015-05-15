@@ -55,7 +55,7 @@ class Driver(pubsub.Listener):
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
-        self.waiting_for_input = {}   # maps playerconnection to tuple (dialog, validator)
+        self.waiting_for_input = {}   # maps playerconnection to tuple (dialog, validator, echo_input)
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
@@ -269,11 +269,19 @@ class Driver(pubsub.Listener):
         assert self.config.server_mode == "mud"
         conn.write_output()
         conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
-        conn.output("Creating new admin user.")
-        name = yield "input", ("Please type in the admin's player name.", player.MudAccounts.accept_name)
-        password = yield "input", ("Please type in the admin password.", player.MudAccounts.accept_password)    # XXX cloak the password input on the screen
-        email = yield "input", ("Please type in the admin's email address.", player.MudAccounts.accept_email)
-        gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
+        while True:
+            conn.output("Creating new admin user.")
+            name = yield "input-noecho", ("Please type in the admin's player name.", player.MudAccounts.accept_name)
+            password = yield "input-noecho", ("Please type in the admin password.", player.MudAccounts.accept_password)
+            email = yield "input", ("Please type in the admin's email address.", player.MudAccounts.accept_email)
+            gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
+            # review the account
+            conn.player.tell("<bright>Please review your new character.</>", end=True)
+            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>email:</> %s" % (name, lang.GENDERS[gender], email), end=True)
+            if not (yield "input", ("You cannot change your name later. Do you want to create this admin account?", lang.yesno)):
+                continue
+            else:
+                break
         self.mud_accounts.create(name, password, email, gender[0], "human", privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
@@ -286,7 +294,7 @@ class Driver(pubsub.Listener):
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
         conn.output("\n")
         while True:
-            name = yield "input", ("Please type in your player name.", player.MudAccounts.accept_name)
+            name = yield "input-noecho", ("Please type in your player name.", player.MudAccounts.accept_name)
             existing_player = self.search_player(name)
             if existing_player:
                 conn.player.tell("That player is already logged in elsewhere. Their current location is", existing_player.location.name)
@@ -299,7 +307,7 @@ class Driver(pubsub.Listener):
                     continue
             try:
                 self.mud_accounts.get(name)
-                password = yield "input", "Please type in your password."    # XXX cloak the password input on the screen
+                password = yield "input-noecho", "Please type in your password."
             except KeyError:
                 conn.player.tell("'<player>%s</>' is the name of a new character." % name)
                 if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
@@ -307,18 +315,16 @@ class Driver(pubsub.Listener):
                 # self-service account creation
                 conn.player.tell("\n")
                 conn.player.tell("<ul><bright>New character creation: '%s'.</>" % name, end=True)
-                password = yield "input", ("Please type in the desired password.", player.MudAccounts.accept_password)    # XXX cloak the password input on the screen
+                password = yield "input-noecho", ("Please type in the desired password.", player.MudAccounts.accept_password)
                 email = yield "input", ("Please type in your email address.", player.MudAccounts.accept_email)
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
                 conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
                 race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
                 # review the account
                 conn.player.tell("<bright>Please review your new character.</>", end=True)
-                conn.player.tell("<dim> name:</> " + name, end=True)
+                conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s" % (name, lang.GENDERS[gender], race), end=True)
                 conn.player.tell("<dim> email:</> " + email, end=True)
-                conn.player.tell("<dim> gender:</> " + gender, end=True)
-                conn.player.tell("<dim> race:</> " + race, end=True)
-                if not (yield "input", ("You cannot change anything later (except your email address). Do you want to create this character?", lang.yesno)):
+                if not (yield "input", ("You cannot change your name later. Do you want to create this character?", lang.yesno)):
                     # abort
                     conn.player.tell("Ok, let's get back to the beginning then.", end=True)
                     continue
@@ -412,7 +418,7 @@ class Driver(pubsub.Listener):
             conn.player.tell(str(x))
             conn.write_output()
         else:
-            if why == "input":
+            if why in ("input", "input-noecho"):
                 if type(what) is tuple:
                     prompt, validator = what
                 else:
@@ -423,7 +429,8 @@ class Driver(pubsub.Listener):
                     conn.write_output()
                     conn.output_no_newline(prompt)  # the input prompt
                 assert conn not in self.waiting_for_input, "can only run one async dialog at the same time"
-                self.waiting_for_input[conn] = (dialog, validator)
+                conn.io.dont_echo_next_cmd = why == "input-noecho"  # this avoids echoing of the password
+                self.waiting_for_input[conn] = (dialog, validator, why != "input-noecho")
             else:
                 raise ValueError("invalid generator wait reason: " + why)
 
@@ -561,16 +568,17 @@ class Driver(pubsub.Listener):
                 try:
                     if conn in self.waiting_for_input:
                         # this connection is processing direct input, rather than regular commands
-                        dialog, validator = self.waiting_for_input.pop(conn)
+                        dialog, validator, echo_input = self.waiting_for_input.pop(conn)
                         response = conn.player.get_pending_input()[0]
                         if validator:
                             try:
                                 response = validator(response)
                             except ValueError as x:
                                 prompt = conn.last_output_line
+                                conn.io.dont_echo_next_cmd = not echo_input
                                 conn.output(str(x) or "That is not a valid answer.")
                                 conn.output_no_newline(prompt)   # print the input prompt again
-                                self.waiting_for_input[conn] = (dialog, validator)   # reschedule
+                                self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
                                 continue
                         self.__continue_dialog(conn, dialog, response)
                     else:
@@ -664,16 +672,17 @@ class Driver(pubsub.Listener):
                     try:
                         if conn in self.waiting_for_input:
                             # this connection is processing direct input, rather than regular commands
-                            dialog, validator = self.waiting_for_input.pop(conn)
+                            dialog, validator, echo_input = self.waiting_for_input.pop(conn)
                             response = conn.player.get_pending_input()[0]
                             if validator:
                                 try:
                                     response = validator(response)
                                 except ValueError as x:
                                     prompt = conn.last_output_line
+                                    conn.io.dont_echo_next_cmd = not echo_input
                                     conn.output(str(x) or "That is not a valid answer.")
                                     conn.output_no_newline(prompt)   # print the input prompt again
-                                    self.waiting_for_input[conn] = (dialog, validator)   # reschedule
+                                    self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
                                     continue
                             self.__continue_dialog(conn, dialog, response)
                         else:

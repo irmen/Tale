@@ -291,7 +291,10 @@ class TaleWsgiAppBase(object):
         else:
             cmd = html_escape(cmd, False)
             if cmd:
-                conn.io.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+                if conn.io.dont_echo_next_cmd:
+                    conn.io.dont_echo_next_cmd = False
+                else:
+                    conn.io.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
             conn.player.store_input_line(cmd)
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []

@@ -1522,9 +1522,9 @@ def do_teststyles(player, parsed, ctx):
 @disabled_in_gamemode("if")
 def do_change_pw(player, parsed, ctx):
     """Lets you change your account password."""
-    player.tell("Changing your password.")
-    current_pw = yield "input", "Type your current password."
-    new_pw = yield "input", ("Type your new password.", MudAccounts.accept_password)
+    player.tell("<it>Changing your password.</>")
+    current_pw = yield "input-noecho", "Type your current password."
+    new_pw = yield "input-noecho", ("Type your new password.", MudAccounts.accept_password)
     try:
         ctx.driver.mud_accounts.change_password_email(player.name, current_pw, new_password=new_pw)
         player.tell("Password updated.")
@@ -1537,8 +1537,8 @@ def do_change_pw(player, parsed, ctx):
 def do_change_email(player, parsed, ctx):
     """Lets you change the email address on file for your account."""
     account = ctx.driver.mud_accounts.get(player.name)
-    player.tell("Changing your email. It is currently set to: %s" % account["email"])
-    current_pw = yield "input", "Type your current password."
+    player.tell("<it>Changing your email. It is currently set to: %s</>" % account["email"])
+    current_pw = yield "input-noecho", "Type your current password."
     new_email = yield "input", ("Type your new email address.", MudAccounts.accept_email)
     try:
         ctx.driver.mud_accounts.change_password_email(player.name, current_pw, new_email=new_email)

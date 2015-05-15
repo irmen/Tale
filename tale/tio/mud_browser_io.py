@@ -6,24 +6,20 @@ Webbrowser based I/O for a multi player ('mud') server.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division
-from .if_browser_io import HttpIo, TaleWsgiAppBase
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
-try:
-    from socketserver import ThreadingMixIn  # py 3.x
-except ImportError:
-    from SocketServer import ThreadingMixIn  # py 2.x
 import time
 import random
 import sys
 import hashlib
-try:
-    from http.cookies import SimpleCookie
-except ImportError:
+if sys.version_info < (3, 0):
+    from SocketServer import ThreadingMixIn
     from Cookie import SimpleCookie
-try:
-    from html import escape as html_escape
-except ImportError:
     from cgi import escape as html_escape
+else:
+    from socketserver import ThreadingMixIn
+    from http.cookies import SimpleCookie
+    from html import escape as html_escape
+from .if_browser_io import HttpIo, TaleWsgiAppBase
 from . import vfs
 from .. import __version__ as tale_version_str
 
@@ -37,6 +33,7 @@ class MudHttpIo(HttpIo):
     def __init__(self, player_connection):
         super(MudHttpIo, self).__init__(player_connection, None)
         self.supports_blocking_input = False
+        self.dont_echo_next_cmd = False   # used to cloak password input
 
     def __repr__(self):
         return "<MudHttpIo @ 0x%x>" % id(self)
