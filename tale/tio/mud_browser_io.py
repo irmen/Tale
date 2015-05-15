@@ -152,8 +152,6 @@ class SessionMiddleware(object):
         if "session_id" in cookie:
             sid = cookie["session_id"].value
         environ["wsgi.session"] = self.factory.load(sid)
-        import pdb
-        pdb.set_trace()
 
         # If the server runs behind a reverse proxy, you can configure the proxy
         # to pass along the uri that it exposes (our internal uri can be different)
