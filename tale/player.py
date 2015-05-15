@@ -370,7 +370,7 @@ class PlayerConnection(object):
             self.player = None
 
 
-class MudAccounts(object):          # @todo more unit tests
+class MudAccounts(object):
     """Handles the accounts (login, creation, etc) of mud users"""
     def __init__(self, database_opener=None):
         self.open_db = database_opener or self.__shelve_db_opener
@@ -411,12 +411,13 @@ class MudAccounts(object):          # @todo more unit tests
         with self.db_lock, self.open_db() as db:
             if name in db:
                 account = db[name]
-                pwhash, _ = self.__pwhash(password, account["pw_salt"])
+                pwhash, _ = self._pwhash(password, account["pw_salt"])
                 if pwhash == account["pw_hash"]:
                     return
             raise ValueError("Invalid name or password.")
 
-    def __pwhash(self, password, salt=None):
+    @staticmethod
+    def _pwhash(password, salt=None):
         if not salt:
             salt = str(random.random() * time.time() + id(password)).replace('.', '')
         pwhash = sha1((salt + password).encode("utf-8")).hexdigest()
@@ -455,7 +456,7 @@ class MudAccounts(object):          # @todo more unit tests
                 raise ValueError("That name is not available.")
             self.accept_password(password)
             self.accept_email(email)
-            pwhash, salt = self.__pwhash(password)
+            pwhash, salt = self._pwhash(password)
             db[name] = {"name": name,
                         "email": email,
                         "pw_hash": pwhash,
@@ -475,7 +476,7 @@ class MudAccounts(object):          # @todo more unit tests
             account = db[name]
             if new_password:
                 self.accept_password(new_password)
-                pwhash, salt = self.__pwhash(new_password)
+                pwhash, salt = self._pwhash(new_password)
                 account["pw_hash"] = pwhash
                 account["pw_salt"] = salt
             new_email = new_email.strip() if new_email else None

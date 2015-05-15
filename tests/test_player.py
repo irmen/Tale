@@ -667,6 +667,16 @@ class TestMudAccounts(unittest.TestCase):
         with self.assertRaises(ValueError):
             MudAccounts.accept_password("223242455")
 
+    def test_pwhash(self):
+        pw, salt = MudAccounts._pwhash("secret")
+        pw2, salt2 = MudAccounts._pwhash("secret")
+        self.assertNotEqual(pw, pw2)
+        self.assertNotEqual(salt, salt2)
+        pw, salt = MudAccounts._pwhash("secret", "some salt")
+        pw2, salt2 = MudAccounts._pwhash("secret", "some salt")
+        self.assertEqual(pw, pw2)
+        self.assertEqual(salt, salt2)
+
 
 class WrappedConsoleIO(ConsoleIo):
     def __init__(self, connection):
