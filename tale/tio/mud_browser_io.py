@@ -15,6 +15,7 @@ except ImportError:
 import time
 import random
 import sys
+import os
 import hashlib
 try:
     from http.cookies import SimpleCookie
@@ -151,13 +152,22 @@ class SessionMiddleware(object):
         if "session_id" in cookie:
             sid = cookie["session_id"].value
         environ["wsgi.session"] = self.factory.load(sid)
+        import pdb
+        pdb.set_trace()
+
+        # If the server runs behind a reverse proxy, you can configure the proxy
+        # to pass along the uri that it exposes (our internal uri can be different)
+        # via the X-Forwarded-Uri header. If we find this header we use it to
+        # replace the "/tale" uri base by the one from the header, to use as cookie path.
+        forwarded_uri = environ.get("HTTP_X_FORWARDED_URI", "/tale/")
+        cookie_path = os.path.split(forwarded_uri)[0]
 
         def wrapped_start_response(status, response_headers, exc_info=None):
             sid = self.factory.save(environ["wsgi.session"])
             cookies = SimpleCookie()
             cookies["session_id"] = sid
             cookie = cookies["session_id"]
-            cookie["path"] = "/tale"
+            cookie["path"] = cookie_path
             cookie["httponly"] = 1
             response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
             return start_response(status, response_headers, exc_info)
@@ -170,7 +180,7 @@ class SessionMiddleware(object):
             cookies = SimpleCookie()
             cookies["session_id"] = "deleted"
             cookie = cookies["session_id"]
-            cookie["path"] = "/tale"
+            cookie["path"] = cookie_path
             cookie["httponly"] = 1
             cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
             response_headers = [('Content-Type', x.content_type)]
