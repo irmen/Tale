@@ -35,6 +35,7 @@ class Story(object):
         startlocation_player="house.livingroom",
         startlocation_wizard="house.livingroom",
         savegames_enabled=True,
+        show_exits_in_look=True,
         license_file=None
     )
 

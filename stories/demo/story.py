@@ -35,6 +35,7 @@ class Story(object):
         startlocation_player="town.square",
         startlocation_wizard="wizardtower.hall",
         savegames_enabled=True,
+        show_exits_in_look=True,
         license_file="messages/license.txt"
     )
 

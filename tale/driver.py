@@ -1003,6 +1003,7 @@ class StoryConfig(object):
         "startlocation_player",
         "startlocation_wizard",
         "savegames_enabled",
+        "show_exits_in_look",
         "license_file"
     }
 

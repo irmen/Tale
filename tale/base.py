@@ -113,6 +113,7 @@ class MudObject(object):
         self.name = name.lower()
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
+            assert not title.startswith("a ") and not title.startswith("A "), "title must not start with 'a'"
         self._title = title or name
         self._description = dedent(description).strip() if description else ""
         self._short_description = short_description
@@ -386,7 +387,7 @@ class Location(MudObject):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
         paragraphs = ["<location>[" + self.name + "]</>"]
         if short:
-            if self.exits:
+            if self.exits and mud_context.config.show_exits_in_look:
                 paragraphs.append("<exit>Exits</>: " + ", ".join(sorted(set(self.exits.keys()))))
             if self.items:
                 item_names = sorted(item.name for item in self.items)
@@ -399,7 +400,7 @@ class Location(MudObject):
         # normal (long) output
         if self.description:
             paragraphs.append(self.description)
-        if self.exits:
+        if self.exits and mud_context.config.show_exits_in_look:
             exits_seen = set()
             exit_paragraph = []
             for exit_name in sorted(self.exits):

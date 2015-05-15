@@ -17,11 +17,13 @@ from tale.player import Player
 from tale.soul import ParseResult
 from tale.tio.iobase import strip_text_styles
 from tale import pubsub, mud_context
+from tale.demo.story import Story as DemoStory
 
 
 class TestLocations(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
+        mud_context.config = DemoStory().config
         self.hall = Location("Main hall", "A very large hall.")
         self.attic = Location("Attic", "A dark attic.")
         self.street = Location("Street", "An endless street.")
@@ -210,6 +212,10 @@ class TestLocations(unittest.TestCase):
 
 
 class TestDoorsExits(unittest.TestCase):
+    def setUp(self):
+        mud_context.driver = TestDriver()
+        mud_context.config = DemoStory().config
+
     def test_state(self):
         Door("out", "xyz", "short desc", locked=False, opened=False)
         Door("out", "xyz", "short desc", locked=False, opened=True)

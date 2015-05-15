@@ -57,9 +57,9 @@ removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
 normal_gem = clone(gem)
 removeonly_box.init_inventory([normal_gem])
 
-cursed_gem = CursedGem("black gem", "a black gem")
+cursed_gem = CursedGem("black gem")
 cursed_gem.aliases = {"gem"}
-normal_gem = Item("blue gem", "a blue gem")
+normal_gem = Item("blue gem")
 normal_gem.aliases = {"gem"}
 lane.add_exits([Exit("south", square, "The town square lies to the south.")])
 

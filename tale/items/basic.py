@@ -25,7 +25,7 @@ class Boxlike(Container):
         self.txt_title_closed = self._title
         self.txt_title_open_filled = "filled " + self._title
         self.txt_title_open_empty = "empty " + self._title
-        self.txt_descr_closed = "It looks old. The lid is closed."
+        self.txt_descr_closed = "The lid is closed."
         self.txt_descr_open_filled = "It is a %s, with an open lid, and there's something in it." % self.name
         self.txt_descr_open_empty = "It is a %s, with an open lid." % self.name
 

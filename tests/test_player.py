@@ -20,7 +20,10 @@ from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, validate_name, validate_race, PlayerNaming
 from tale.driver import StoryConfig
-from tale import pubsub
+from tale import pubsub, mud_context
+from tale.demo.story import Story as DemoStory
+
+
 if sys.version_info < (3, 0):
     from StringIO import StringIO
 else:
@@ -527,6 +530,10 @@ class TestTextbuffer(unittest.TestCase):
 
 
 class TestCharacterBuilder(unittest.TestCase):
+    def setUp(self):
+        mud_context.driver = TestDriver()
+        mud_context.config = DemoStory().config
+
     def test_build(self):
         conn = PlayerConnection()
         with WrappedConsoleIO(conn) as io:
