@@ -285,7 +285,7 @@ class TaleWsgiAppBase(object):
             suggestions = conn.io.tab_complete(cmd, self.driver)
             if suggestions:
                 conn.io.html_to_browser.append("<br><p><em>Suggestions:</em></p>")
-                conn.io.html_to_browser.append("<p><code>" + " &nbsp; ".join(suggestions) + "</code></p>")
+                conn.io.html_to_browser.append("<p class='txt-monospaced'>" + " &nbsp; ".join(suggestions) + "</p>")
             else:
                 conn.io.html_to_browser.append("<p>No matching commands.</p>")
         else:

@@ -515,6 +515,7 @@ god
 allah
 jesus
 jezus
+hitler
 neuk
 fuck
 cunt
@@ -537,6 +538,7 @@ nigga
 jew
 muslim
 moslim
+binladen
 chink
 cancer
 kanker

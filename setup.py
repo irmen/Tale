@@ -50,7 +50,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
     scripts=["scripts/tale-run.cmd", "scripts/tale-run"],
     platforms="any",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Environment :: MacOS X",
         "Environment :: Win32 (MS Windows)",

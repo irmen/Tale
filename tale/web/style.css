@@ -1,25 +1,35 @@
+html, body {
+    height: 100%;
+}
 body {
-    font-family: Cambria, Georgia, 'DejaVu Serif', 'Droid Serif', serif;
+    font-family: Georgia, 'DejaVu Serif', 'Droid Serif', serif;
     font-size: 12pt;
     color: black;
     background: #f8f8f0;
-    margin-left: 1em;
+    margin: 1em;
 }
-h2 {
-    margin: 1ex 0 0 0;
+h1, h2, h3, h4, h5 {
+    font-weight: normal;
+    padding-bottom: 0.5ex;
 }
+h1 { font-size: 160%; }
+h2 { font-size: 140%; }
+h3 { font-size: 120%; }
+h4 { font-size: 100%; }
+h5 { font-size: 100%; }
+
 pre, #input-cmd {
-    font-family: Consolas, Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
-    font-size: 13pt;
+    font-family: Consolas, Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
+    white-space: pre;
 }
-#input-cmd {
-    padding: 3pt;
-    width: 30em;
-}
-input {
-    font-size: inherit;
+p {
+    line-height: 1.5;
 }
 
+#input-cmd {
+    padding: 3px;
+    width: 28em;
+}
 .location {
     text-align: right;
     margin-bottom: 2pt;
@@ -28,11 +38,10 @@ input {
     color: green;
 }
 .story {
-    width: 90%;
+    width: 100%;
+    max-width: 51em;
 }
 .textframe {
-    font-family: Cambria, Georgia, 'DejaVu Serif', 'Droid Serif', serif;
-    font-size: 14pt;
     border: 1px solid cadetblue;
     overflow: auto;
     height: 34em;
@@ -41,8 +50,7 @@ input {
 }
 
 p, pre {
-    padding: 0pt;
-    margin: 0 0 0.5ex 0;
+    margin-bottom: 1ex;
 }
 
 .txt-bright {
@@ -51,7 +59,7 @@ p, pre {
 }
 .txt-normal {}
 .txt-dim {
-    color: brown;
+    color: cadetblue;
 }
 .txt-ul {
     text-decoration: underline;
@@ -76,11 +84,10 @@ p, pre {
 }
 
 .txt-monospaced, .txt-userinput {
-    font-family: Consolas, Monaco, "Lucida Console", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+    font-family: Consolas, Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
 }
 
 .txt-userinput {
-    font-size: 90%;
     color: maroon;
     font-style: italic;
     padding-left: 2em;
@@ -92,4 +99,8 @@ p, pre {
     color: white;
     background-color: maroon;
     font-style: italic;
+}
+
+#img-logo {
+    vertical-align: top;
 }

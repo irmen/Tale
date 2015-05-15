@@ -282,10 +282,11 @@ class Driver(pubsub.Listener):
     def __login_dialog_mud(self, conn):
         assert self.config.server_mode == "mud"
         conn.write_output()
-        conn.output("<bright>Welcome. We have to know your name before you can continue.</>")
-        conn.output("<dim>(If you are not yet known with us, you can register a new name. Otherwise use the name you registered with)</>\n\n")
+        conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
+        conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
+        conn.output("\n")
         while True:
-            name = yield "input", ("Please type in your name.", player.MudAccounts.accept_name)
+            name = yield "input", ("Please type in your player name.", player.MudAccounts.accept_name)
             if self.search_player(name):
                 conn.player.tell("That player is already logged in elsewhere.")
                 continue
