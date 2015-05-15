@@ -714,6 +714,7 @@ class Driver(pubsub.Listener):
         4) pending pubsub events
         5) write buffered output
         6) verify validity and idle state of connected players
+        7) remove idle wiretaps
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.config, None)
@@ -750,6 +751,14 @@ class Driver(pubsub.Listener):
             else:
                 # disconnect corrupt player connection
                 self._disconnect_mud_player(conn)
+        # clean up idle wiretap topics
+        topicinfo = pubsub.pending()
+        for topicname in topicinfo:
+            if isinstance(topicname, tuple) and topicname[0].startswith("wiretap-"):
+                events, idle_time, subbers = topicinfo[topicname]
+                if events == 0 and not subbers and idle_time > 30:
+                    pubsub.topic(topicname).destroy()
+
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)

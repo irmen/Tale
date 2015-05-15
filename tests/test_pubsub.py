@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import unittest
 import gc
+import time
 from tale.pubsub import topic, unsubscribe_all, Listener, sync, pending
 
 
@@ -77,9 +78,11 @@ class TestPubsub(unittest.TestCase):
         self.assertIsNone(result)
         self.assertEqual([], subber.messages)
         self.assertEqual([], subber2.messages)
-        self.assertEqual(["event1"], pending()["test1async"])
+        events, idle, subbers = pending()["test1async"]
+        self.assertEqual(1, events)
         result = sync()
-        self.assertEqual([], pending()["test1async"])
+        events, idle, subbers = pending()["test1async"]
+        self.assertEqual(0, events)
         self.assertIsNone(result)
         self.assertEqual([("test1async", "event1")], subber.messages)
         self.assertEqual([("test1async", "event1")], subber2.messages)
@@ -172,6 +175,15 @@ class TestPubsub(unittest.TestCase):
         p = pending()
         self.assertNotIn("testA", p)
         self.assertNotIn("testB", p)
+
+    def test_idletime(self):
+        sync()
+        s = topic("testA")
+        self.assertLess(s.idle_time, 0.1)
+        time.sleep(0.2)
+        self.assertGreater(s.idle_time, 0.1)
+        s.send("event")
+        self.assertLess(s.idle_time, 0.1)
 
 
 if __name__ == '__main__':

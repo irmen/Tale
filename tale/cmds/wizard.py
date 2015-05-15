@@ -471,15 +471,16 @@ def do_events(player, parsed, ctx):
 
 @wizcmd("pubsub")
 def do_pubsub(player, parsed, ctx):
-    """Dump pending pubsub messages."""
+    """Give an overview of the pubsub topics."""
     pending = pubsub.pending()
-    player.tell("<bright>Pending pubsub messages overview.</>", "Pubsub topics (%d):" % len(pending))
+    player.tell("<bright>Pending pubsub messages overview.</>", "Active topics (from %d total):" % len(pending))
     total_pending = 0
-    txt = ["<ul>  topic                                            <dim>|</><ul> #pending</>"]
+    txt = ["<ul>  topic                                            <dim>|</><ul>#pending</><dim>|</><ul>idle sec.</><dim>|</><ul>subs</>"]
     for topic in sorted(pending, key=lambda t: str(t)):
-        num_pending = len(pending[topic])
+        num_pending, idle_time, subbers = pending[topic]
         total_pending += num_pending
-        txt.append("%-50.50s <dim>|</>   %d" % (topic, num_pending))
+        if num_pending or subbers or idle_time < 10:
+            txt.append("%-50.50s <dim>|</>  %3d   <dim>|</>  %4d   <dim>|</> %d" % (topic, num_pending, int(idle_time), subbers))
     txt.append(("total pending:  " + str(total_pending)).rjust(56))
     txt.append("")
     player.tell(*txt, format=False)

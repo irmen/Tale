@@ -34,6 +34,7 @@ Currently defined pubsub topics used by the Tale driver:
 
 import weakref
 import threading
+import time
 
 
 __all__ = ["topic", "unsubscribe_all", "Listener"]
@@ -60,11 +61,11 @@ def sync(topic=None):
             t.sync()
 
 
-def pending(topic=None):
-    """Return a dictionary from topic name to list of pending events"""
+def pending(topicname=None):
+    """Return a dictionary from topic name to tuple (number of pending events, idle time, num subbers)"""
     with __topic_lock:
-        names = [topic] if topic else all_topics.keys()
-        return {name: list(all_topics[name].events) for name in names}
+        topics = [all_topics[topicname]] if topicname else all_topics.values()
+        return {t.name: (len(t.events), t.idle_time, len(t.subscribers)) for t in topics}
 
 
 def unsubscribe_all(subscriber):
@@ -89,6 +90,11 @@ class Topic(object):
         self.name = name
         self.subscribers = set()
         self.events = []
+        self.last_event = time.time()
+
+    @property
+    def idle_time(self):
+        return time.time() - self.last_event
 
     def destroy(self):
         self.sync()
@@ -107,6 +113,7 @@ class Topic(object):
 
     def send(self, event, synchronous=False):
         self.events.append(event)
+        self.last_event = time.time()
         if synchronous:
             return self.sync()
 
