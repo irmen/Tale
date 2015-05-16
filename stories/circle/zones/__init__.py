@@ -12,7 +12,7 @@ from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
 from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon
-from tale.items.basic import Boxlike, Newspaper
+from tale.items.basic import Boxlike
 from tale.npc import Monster
 from tale.errors import LocationIntegrityError
 import pprint
@@ -46,6 +46,8 @@ def make_location(vnum):
         c_room = rooms[vnum]
         loc = Location(c_room.name, c_room.desc)
         loc.vnum = vnum  # keep the circle vnum
+        for ed in c_room.extradesc:
+            loc.add_extradesc(ed["keywords"], ed["text"])
         converted_rooms[vnum] = loc
         for circle_exit in c_room.exits.values():
             if circle_exit.roomlink >= 0:
@@ -95,6 +97,9 @@ def make_mob(vnum):
         title = title[2:]
     mob = Monster(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
     mob.vnum = vnum  # keep the vnum
+    if hasattr(c_mob, "extradesc"):
+        for ed in c_mob.extradesc:
+            mob.add_extradesc(ed["keywords"], ed["text"])
     mob.aliases = aliases
     mob.aggressive = "aggressive" in c_mob.actions
     # XXX todo stats, alignment, ...
@@ -112,26 +117,22 @@ def make_item(vnum):
         title = title[4:]
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
-    # make a long description text from extradesc if it exists.
-    # this can only deal with extra description texts that are linked to the item name/alias itself.
-    descr = None
-    for extra in c_obj.extradesc:
-        if set(c_obj.aliases) & extra["keywords"]:
-            descr = extra["text"]
     if c_obj.type == "container":
         if c_obj.typespecific.get("closeable"):
-            item = Boxlike(name, title, description=descr, short_description=c_obj.longdesc)
+            item = Boxlike(name, title, short_description=c_obj.longdesc)
             item.opened = True
             if "closed" in c_obj.typespecific:
                 item.opened = not c_obj.typespecific["closed"]
         else:
-            item = Container(name, title, description=descr, short_description=c_obj.longdesc)
+            item = Container(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "weapon":
-        item = Weapon(name, title, description=descr, short_description=c_obj.longdesc)
+        item = Weapon(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "armor":
-        item = Armour(name, title, description=descr, short_description=c_obj.longdesc)
+        item = Armour(name, title, short_description=c_obj.longdesc)
     else:
-        item = Item(name, title, description=descr, short_description=c_obj.longdesc)
+        item = Item(name, title, short_description=c_obj.longdesc)
+    for ed in c_obj.extradesc:
+        item.add_extradesc(ed["keywords"], ed["text"])
     item.aliases = aliases
     # XXX todo cost, effects, wear, weight, typespecific array, ...
     item.vnum = vnum  # keep the vnum

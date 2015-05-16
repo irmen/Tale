@@ -34,7 +34,10 @@ class Drone(Monster):
             self.location.tell("%s hums softly." % tale.lang.capital(self.title))
 
 
-drone = Drone("drone", "n", race="bot", title="mindless drone", description="A stupid metallic drone. It just hovers here with no apparent reason.")
+drone = Drone("drone", "n", race="bot", title="mindless drone",
+              description="A stupid metallic drone. It just hovers here with no apparent reason. It has a little label attached to it.")
+drone.add_extradesc({"label"}, "The label reads: \"Wall-E was my cousin\".")
+
 hall.init_inventory([table, key, drone])
 
 attic = Location("Tower attic",
@@ -44,6 +47,9 @@ attic = Location("Tower attic",
     it once held great magical power. All of it is now covered with a thick
     layer of dust.
     """)
+attic.add_extradesc({"dust", "stuff", "scrolls"}, "The scrolls look ancient. One looks like a spell!")
+attic.add_extradesc({"spell"}, "The scroll looks like it contains a spell, but on closer inspection, it has become too faded to be understood anymore.")
+
 
 kitchen = Location("Tower kitchen",
     """

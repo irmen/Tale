@@ -648,15 +648,13 @@ def do_examine(player, parsed, ctx):
         #     tell(repr(living), end=True)
         if living.name.lower() != name.lower() and name.lower() in living.aliases:
             p("<dim>(By %s you probably meant %s.)</>" % (name, living.name), end=True)
-        p("This is <living>%s</>." % living.title)
         if living.description:
             p(living.description)
-        race = races.races[living.race]
-        if living.race == "human":
-            # don't print as much info when dealing with mere humans
-            msg = lang.capital("%s speaks %s." % (living.subjective, race["language"]))
-            p(msg)
         else:
+            p("This is <living>%s</>." % living.title)
+        race = races.races[living.race]
+        if living.race != "human":
+            # don't print this race related info when dealing with mere humans
             p("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
                 subj=lang.capital(living.subjective),
                 size=races.sizes[race["size"]],
@@ -664,19 +662,26 @@ def do_examine(player, parsed, ctx):
                 race=living.race,
                 lang=race["language"]
             ))
+        if name in living.extra_desc:
+            p(living.extra_desc[name])   # print the extra description, rather than a generic message
+        if name in player.location.extra_desc:
+            p(player.location.extra_desc[name])   # print the extra description, rather than a generic message
         return
     item, container = player.locate_item(name)
     if item:
         if item.name.lower() != name.lower() and name.lower() in item.aliases:
             p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
-        if item in player:
-            p("You're carrying <item>%s</>." % lang.a(item.title))
-        elif container and container in player:
-            util.print_object_location(player, item, container)
+        if name in item.extra_desc:
+            p(item.extra_desc[name])   # print the extra description, rather than a generic message
         else:
-            p("You see <item>%s</>." % lang.a(item.title))
-        if item.description:
-            p(item.description)
+            if item in player:
+                p("You're carrying <item>%s</>." % lang.a(item.title))
+            elif container and container in player:
+                util.print_object_location(player, item, container)
+            else:
+                p("You see <item>%s</>." % lang.a(item.title))
+            if item.description:
+                p(item.description)
         try:
             inventory = item.inventory
         except ActionRefused:
@@ -693,7 +698,12 @@ def do_examine(player, parsed, ctx):
         p("It seems you can go there:")
         p("<exit>" + player.location.exits[abbreviations[name]].description + "</>")
     else:
-        raise ActionRefused("%s isn't here." % name)
+        # check if name is in location's or an item's extradesc
+        text = player.search_extradesc(name)
+        if text:
+            p(text)
+        else:
+            raise ActionRefused("%s isn't here." % name)
 
 
 @cmd("stats")
@@ -1088,9 +1098,9 @@ def do_exits(player, parsed, ctx):
         player.tell("The following exits are defined for your current location:", end=True)
         for direction, exit in player.location.exits.items():
             if exit.bound:
-                player.tell("Exit: <exit>%s</> <dim>-></> <location>%s</>" % (direction, exit.target.name), end=True)
+                player.tell(" <exit>%s</> <dim>--></> <location>%s</>" % (direction, exit.target.name), end=True)
             else:
-                player.tell("Exit: <exit>%s</> <dim>-></> <location>%s</> (unbound)" % (direction, exit.target), end=True)
+                player.tell(" <exit>%s</> <dim>--></> <location>%s</> (unbound)" % (direction, exit.target), end=True)
     else:
         player.tell("If you want to know about the possible exits from your location,")
         player.tell("look around the room. Usually the exits are easily visible.")

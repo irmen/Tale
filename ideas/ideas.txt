@@ -31,12 +31,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[code] To allow for more complex objects and descriptions, add an 'extradesc' list to rooms and items.
-    That list maps keywords to extra descriptions.
-    Those descriptions appear when you 'examine' or 'look at' any of the keywords in the list,
-    but are not mentioned in a general 'look'. This allows for an easy way to make rooms and items more interesting.
-    The general description should at least give one keyword clue!
-    The circle data already contains this list but it is now largely unused (only the main keyword descr is added to the room)
 [code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?

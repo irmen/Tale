@@ -13,10 +13,9 @@ from tale import lang
 
 
 def register_all(cmd_processor):
-    print("CIRCLE CUSTOM COMMANS") # XXX
-    cmd_processor.add("!go_vnum", go_vnum, "wizard")
+    cmd_processor.add("!vgo", go_vnum, "wizard")
     cmd_processor.add("!vnum", show_vnum, "wizard")
-    cmd_processor.add("!spawn_vnum", spawn_vnum, "wizard")
+    cmd_processor.add("!vspawn", spawn_vnum, "wizard")
 
 
 @wizcmd

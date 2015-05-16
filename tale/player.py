@@ -186,6 +186,42 @@ class Player(base.Living, pubsub.Listener):
                 self.transcript = None
                 self.tell("Transcript ended.")
 
+    def search_extradesc(self, keyword, include_inventory=True, include_containers_in_inventory=False):
+        """
+        Searches the extradesc keywords for an location/living/item within the 'visible' world around the player,
+        including their inventory.  If there's more than one hit, just return the first extradesc description text.
+        """
+        assert keyword
+        keyword = keyword.lower()
+        desc = self.location.extra_desc.get(keyword)
+        if desc:
+            return desc
+        for item in self.location.items:
+            desc = item.extra_desc.get(keyword)
+            if desc:
+                return desc
+        for living in self.location.livings:
+            desc = living.extra_desc.get(keyword)
+            if desc:
+                return desc
+        if include_inventory:
+            for item in self.inventory:
+                desc = item.extra_desc.get(keyword)
+                if desc:
+                    return desc
+        if include_containers_in_inventory:
+            for container in self.inventory:
+                try:
+                    inventory = container.inventory
+                except ActionRefused:
+                    continue    # no access to inventory, just skip this item silently
+                else:
+                    for item in inventory:
+                        desc = item.extra_desc.get(keyword)
+                        if desc:
+                            return desc
+        return None
+
     def test_peek_output_paragraphs(self):
         """
         Returns a copy of the output paragraphs that sit in the buffer so far

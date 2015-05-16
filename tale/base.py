@@ -59,8 +59,15 @@ class MudObject(object):
     an optional short title (shown when listed in a room),
     and an optional longer description (shown when explicitly 'examined').
     The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
-    Short_description is optional, and is used in the text when a player 'looks' around.
+    Short_description is also optional, and is used in the text when a player 'looks' around.
     If it's not set, a generic 'look' message will be shown (something like "XYZ is here").
+
+    Extra descriptions (extra_desc) are used to make stuff more interesting and interactive
+    Extra descriptions are accessed by players when they type ``look at <thing>``
+    where <thing> is any keyword you choose.  For example, you might write a room description which
+    includes the tantalizing sentence, ``The wall looks strange here.``
+    Using extra descriptions, players could then see additional detail by typing
+    ``look at wall.``  There can be an unlimited number of Extra Descriptions.
     """
     subjective = "it"
     possessive = "its"
@@ -91,6 +98,14 @@ class MudObject(object):
     def short_description(self, value):
         self._short_description = value
 
+    @property
+    def extra_desc(self):
+        return self._extradesc
+
+    @extra_desc.setter
+    def extra_desc(self, value):
+        self._extradesc = value
+
     def __init__(self, name, title=None, description=None, short_description=None):
         self.name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
@@ -117,6 +132,13 @@ class MudObject(object):
         self._title = title or name
         self._description = dedent(description).strip() if description else ""
         self._short_description = short_description
+        self._extradesc = {}   # maps keyword to description
+
+    def add_extradesc(self, keywords, description):
+        """For the list of keywords, add the extra description text"""
+        assert isinstance(keywords, (set, tuple, list))
+        for keyword in keywords:
+            self._extradesc[keyword] = description
 
     def __repr__(self):
         return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))

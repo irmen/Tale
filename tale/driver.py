@@ -152,7 +152,6 @@ class Driver(pubsub.Listener):
             return
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
-        base._Limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
         if self.config.server_mode == "if":
             # create the single player mode player automatically
             if args.gui:
@@ -171,6 +170,7 @@ class Driver(pubsub.Listener):
             connection.singleplayer_mainloop()
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
+            base._Limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
             self.mud_accounts = player.MudAccounts()
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
@@ -869,7 +869,7 @@ class Driver(pubsub.Listener):
             self._stop_driver()
             raise SystemExit(10)
         except IOError:
-            print("No saved game data found.")
+            print("No saved game data found.")   # XXX print this to the player, not to the standard output
             return None
         else:
             if state["version"] != self.config.version:
