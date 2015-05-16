@@ -240,5 +240,9 @@ class CircleMob(Monster):
         super(CircleMob, self).init()
 
     def do_wander(self, ctx):
-        # @todo let the mob wander
+        # let the mob wander randomly
+        direction = self.select_random_move()
+        if direction:
+            self.tell_others("{Title} walks away to the %s." % direction.name)  # XXX always 'walk' ?
+            self.move(direction.target, self)
         ctx.driver.defer(random.randint(20, 60), self.do_wander)

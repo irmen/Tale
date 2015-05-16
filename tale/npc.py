@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
+import random
 from . import base
 from . import lang
 from .errors import ActionRefused
@@ -31,6 +32,25 @@ class NPC(base.Living):
         """Do we accept money? Raise ActionRefused if not."""
         if self.race != "human":
             raise ActionRefused("You can't do that.")
+
+    def select_random_move(self):
+        """
+        Select a random accessible exit to move to.
+        Avoids exits to a room that have no exits (traps).
+        If no suitable exit is found in a few random attempts, return None.
+        """
+        directions_with_exits = [d for d, e in self.location.exits.items() if e.target.exits]
+        if directions_with_exits:
+            for tries in range(4):
+                direction = random.choice(directions_with_exits)
+                xt = self.location.exits[direction]
+                try:
+                    xt.allow_passage(self)
+                except ActionRefused:
+                    continue
+                else:
+                    return xt
+        return None
 
 
 class Monster(NPC):

@@ -11,7 +11,6 @@ from tale import lang, mud_context
 from tale.npc import NPC, Monster
 from tale.base import heartbeat
 from tale.util import message_nearby_locations
-from tale.errors import ActionRefused
 
 
 @heartbeat
@@ -74,16 +73,8 @@ class WalkingRat(Monster):
         ctx.driver.defer(random.randint(5, 15), self.do_idle_action)
 
     def do_random_move(self, ctx):
-        directions_with_way_back = [d for d, e in self.location.exits.items() if e.target.exits]  # avoid traps
-        for tries in range(3):
-            direction = random.choice(directions_with_way_back)
-            exit = self.location.exits[direction]
-            try:
-                exit.allow_passage(self)
-            except ActionRefused:
-                continue
-            else:
-                self.tell_others("{Title} scurries away to the %s." % direction)
-                self.move(exit.target, self)
-                break
+        direction = self.select_random_move()
+        if direction:
+            self.tell_others("{Title} scurries away to the %s." % direction.name)
+            self.move(direction.target, self)
         ctx.driver.defer(random.randint(10, 20), self.do_random_move)
