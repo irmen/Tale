@@ -76,7 +76,7 @@ bodytypes = {
 # stat_class 1 means it is the most important stat for that race, and that stat may
 # get an increase at every level. stat_class 5 means low importance and may get an
 # increase every 5 levels only.
-# stat types: AGIlity, CHArisma, INTelligence, LuCK, SPeeD, STAmina, STRength, WISdom. PSIonic
+# stat types: AGIlity, CHArisma, INTelligence, LuCK, SPeeD, STAmina, STRength, WISdom.
 races = {
  'amphibian': {'bodytype': B_QUADRUPED,
                'language': 'Batrachian',
@@ -233,7 +233,6 @@ races = {
                        'spd': (1, 5),
                        'sta': (43, 1),
                        'str': (43, 1),
-                       'ugliness': (91, 3),
                        'wis': (31, 2)}},
  'cat': {'bodytype': B_QUADRUPED,
          'language': 'Feline',
@@ -327,7 +326,6 @@ races = {
                      'cha': (31, 2),
                      'int': (31, 2),
                      'lck': (43, 1),
-                     'psi': (50, 2),
                      'spd': (31, 2),
                      'sta': (31, 2),
                      'str': (31, 2),
@@ -924,7 +922,7 @@ races = {
            'language': 'Aspish',
            'mass': 1.2,
            'size': S_SMALL,
-           'stats': {'agi': (10, 4),     # AGI, CHA, INT, LCK, SPD, STA, STR, WIS
+           'stats': {'agi': (10, 4),
                      'cha': (1, 5),
                      'int': (10, 4),
                      'lck': (43, 1),
@@ -940,7 +938,6 @@ races = {
                       'cha': (1, 5),
                       'int': (70, 1),
                       'lck': (1, 1),
-                      'psi': (20, 1),
                       'spd': (30, 3),
                       'sta': (30, 1),
                       'str': (30, 5),

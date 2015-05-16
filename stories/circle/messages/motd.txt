@@ -1,0 +1,3 @@
+<bright>CIRCLE ADMINS:</> A few custom commands have been provided for admins.
+They are <monospaced>!vnum</monospaced>, <monospaced>!go_vnum</monospaced>
+and <monospaced>!spawn_vnum</monospaced>.

@@ -22,6 +22,7 @@ import types
 import traceback
 import appdirs
 import distutils.version
+import pkgutil
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
@@ -111,11 +112,9 @@ class Driver(pubsub.Listener):
         # Register the driver and some other stuff in the global context.
         mud_context.driver = self
         mud_context.config = self.config
-        try:
+        self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
+        if pkgutil.get_importer("cmds"):   # check for existence of cmds package in the story root
             story_cmds = __import__("cmds", level=0)
-        except (ImportError, ValueError):
-            pass
-        else:
             story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)
         tale_version = distutils.version.LooseVersion(tale_version_str)
@@ -124,7 +123,6 @@ class Driver(pubsub.Listener):
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
-        self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
         user_data_dir = appdirs.user_data_dir("Tale", "Razorvine", roaming=True)
         if not os.path.isdir(user_data_dir):
             try:

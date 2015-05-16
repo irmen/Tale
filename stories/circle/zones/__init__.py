@@ -47,21 +47,21 @@ def make_location(vnum):
         loc = Location(c_room.name, c_room.desc)
         loc.vnum = vnum  # keep the circle vnum
         converted_rooms[vnum] = loc
-        for xt in c_room.exits.values():
-            if xt.roomlink >= 0:
-                exit = make_exit(xt)
+        for circle_exit in c_room.exits.values():
+            if circle_exit.roomlink >= 0:
+                xt = make_exit(circle_exit)
                 while True:
                     try:
-                        exit.bind(loc)
+                        xt.bind(loc)
                         break
                     except LocationIntegrityError as x:
-                        if x.direction in exit.aliases:
+                        if x.direction in xt.aliases:
                             # circlemud exit keywords can be duplicated over various exits
                             # if we have a conflict, just remove the alias from the exit and try again
-                            exit.aliases = exit.aliases - {x.direction}
+                            xt.aliases = xt.aliases - {x.direction}
                             continue
                         else:
-                            if loc.exits[x.direction] is exit:
+                            if loc.exits[x.direction] is xt:
                                 # this can occur, the exit is already bound
                                 break
                             else:
@@ -69,7 +69,7 @@ def make_location(vnum):
                                 raise
             else:
                 # add the description of the inaccessible exit to the room's own description.
-                loc.description += " " + xt.desc
+                loc.description += " " + circle_exit.desc
         return loc
 
 

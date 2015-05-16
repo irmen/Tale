@@ -86,6 +86,9 @@ class Listener(object):
 
 
 class Topic(object):
+    """
+    A pubsub topic to send/receive events. You get these from the topic function.
+    """
     def __init__(self, name):
         self.name = name
         self.subscribers = set()
