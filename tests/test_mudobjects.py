@@ -9,9 +9,9 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 import datetime
 from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
-from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door
+from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door, Key, clone
 from tale.util import Context, MoneyFormatter
-from tale.errors import ActionRefused
+from tale.errors import ActionRefused, LocationIntegrityError
 from tale.npc import NPC, Monster
 from tale.player import Player
 from tale.soul import ParseResult
@@ -289,18 +289,23 @@ class TestDoorsExits(unittest.TestCase):
 
     def test_with_key(self):
         player = Player("julie", "f")
-        key = Item("key", "door key")
-        key.door_code = 12345
+        key = Key("key", "door key")
+        key.key_for(code=12345)
         hall = Location("hall")
         door = Door("north", hall, "a locked door", locked=True, opened=False)
+        door2 = Door("south", hall, "another locked door", locked=True, opened=False)
         with self.assertRaises(ActionRefused):
             door.unlock(player)
         with self.assertRaises(ActionRefused):
             door.unlock(player, key)
-        door.door_code = 12345
+        door.key_code = 12345
+        door2.key_code = 9999
+        key.key_for(door)
         self.assertTrue(door.locked)
         door.unlock(player, key)
         self.assertFalse(door.locked)
+        with self.assertRaises(ActionRefused):
+            door2.unlock(key)
         door.locked = True
         with self.assertRaises(ActionRefused):
             door.unlock(player)
@@ -309,6 +314,13 @@ class TestDoorsExits(unittest.TestCase):
         self.assertFalse(door.locked)
         door.lock(player)
         self.assertTrue(door.locked)
+        door.unlock(player)
+        player.remove(key, player)
+        with self.assertRaises(ActionRefused):
+            door.lock(player)
+        door.key_code = None
+        with self.assertRaises(LocationIntegrityError):
+            key.key_for(door)
 
     def test_exits(self):
         hall = Location("hall")
@@ -897,6 +909,27 @@ class TestMudObject(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             x.read(None)
         x.destroy(Context(None, None, None, None))
+
+
+class TestFunctions(unittest.TestCase):
+    def test_clone(self):
+        item = Item("thing", "description")
+        item.aliases = ["a1", "a2"]
+        item2 = clone(item)
+        self.assertNotEqual(item, item2)
+        item2.aliases.append("a3")
+        self.assertNotEqual(item.aliases, item2.aliases)
+        player = Player("julie", "f")
+        player.insert(item, player)
+        with self.assertRaises(ValueError):
+            clone(player)   # can't clone something with stuff in it
+        player.remove(item, player)
+        player2 = clone(player)
+        player2.insert(item2, player2)
+        self.assertNotEqual(player.inventory_size, player2.inventory_size)
+        self.assertNotEqual(player.inventory, player2.inventory)
+        self.assertFalse(item in player)
+        self.assertFalse(item in player2)
 
 
 if __name__ == '__main__':

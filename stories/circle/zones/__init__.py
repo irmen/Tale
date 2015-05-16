@@ -11,7 +11,7 @@ from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
 from tale.items.basic import Boxlike
 from tale.npc import Monster
 from tale.errors import LocationIntegrityError
@@ -129,6 +129,9 @@ def make_item(vnum):
         item = Weapon(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "armor":
         item = Armour(name, title, short_description=c_obj.longdesc)
+    elif c_obj.type == "key":
+        item = Key(name, title, short_description=c_obj.longdesc)
+        item.key_for(code=vnum)   # the key code is just the item's vnum
     else:
         item = Item(name, title, short_description=c_obj.longdesc)
     for ed in c_obj.extradesc:

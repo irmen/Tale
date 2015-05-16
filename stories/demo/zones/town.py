@@ -7,12 +7,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-from tale.base import Location, Exit, Door, Item, Container
+from tale.base import Location, Exit, Door, Item, Container, Key, clone
 from tale.npc import NPC
 from tale.player import Player
 from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
-from tale.util import clone
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -141,7 +140,7 @@ class EndDoor(Door):
 
 
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
-end_door.door_code = 999
+end_door.key_code = 999
 lane.add_exits([end_door])
 
 
@@ -246,7 +245,7 @@ computer.verbs = {
 alley.insert(computer, None)
 
 
-class DoorKey(Item):
+class DoorKey(Key):
     def notify_moved(self, source_container, target_container, actor):
         # check if a player picked up this key
         player = None
@@ -261,7 +260,7 @@ class DoorKey(Item):
 
 
 doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
-doorkey.door_code = end_door.door_code
+doorkey.key_for(end_door)
 alley.insert(doorkey, None)
 
 

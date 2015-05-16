@@ -16,6 +16,7 @@ object hierarchy::
       |     +-- Weapon
       |     +-- Armour
       |     +-- Container
+      |     +-- Key
       |
       +-- Living
       |     |
@@ -37,6 +38,7 @@ Use its enter/leave methods instead.
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 from textwrap import dedent
+import copy
 from . import lang
 from . import util
 from . import pubsub
@@ -46,10 +48,38 @@ from .errors import ActionRefused, ParseError, LocationIntegrityError
 from .races import races
 
 
-__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Location", "Weapon", "heartbeat"]
+__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Location", "Weapon", "Key", "heartbeat", "clone"]
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
+
+
+def heartbeat(klass):
+    """
+    Decorator to use on a class to make it have a heartbeat.
+    Use sparingly as it is less efficient than using a deferred, because the driver
+    has to call all heartbeats every tick even though they do nothing yet.
+    With deferreds, the driver only calls a deferred at the time it is needed.
+    """
+    klass._register_heartbeat = True
+    return klass
+
+
+def clone(obj):
+    """Create a copy of an existing (Mud)Object. Only when it has an empty inventory (to avoid problems)"""
+    if isinstance(obj, MudObject):
+        try:
+            if obj.inventory_size > 0:
+                raise ValueError("can't clone something that has other stuff in it")
+        except ActionRefused:
+            pass
+        if obj.location:
+            # avoid deepcopying the location
+            location, obj.location = obj.location, None
+            duplicate = copy.deepcopy(obj)
+            obj.location = duplicate.location = location
+            return duplicate
+    return copy.deepcopy(obj)
 
 
 class MudObject(object):
@@ -293,7 +323,7 @@ class Item(MudObject):
     def wiz_clone(self, actor):
         if "wizard" not in actor.privileges:
             raise ActionRefused("You're not allowed to do that.")
-        item = util.clone(self)
+        item = clone(self)
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item))
         actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
@@ -712,12 +742,13 @@ class Living(MudObject):
 
     def wiz_clone(self, actor):
         if "wizard" not in actor.privileges:
-            raise ActionRefused("You're not allowed to do that.")
-        clone = util.clone(self)
-        actor.tell("Cloned into: " + repr(clone))
-        actor.tell_others("{Title} summons %s." % lang.a(clone.title))
-        actor.location.insert(clone, actor)
-        return clone
+            raise ActionRefused("You're not allowed to do that.")           # XXX use @authorized decorator for these kind of checks?
+        duplicate = clone(self)
+        actor.tell("Cloned into: " + repr(duplicate))
+        actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
+        actor.location.insert(duplicate, actor)
+        actor.location.tell("%s appears." % lang.capital(duplicate.title))
+        return duplicate
 
     def wiz_destroy(self, actor, ctx):
         if "wizard" not in actor.privileges:
@@ -994,7 +1025,7 @@ class Door(Exit):
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_description or short_description
-        self.door_code = None   # you can set this to any code that a key must match to unlock the door
+        self.key_code = None   # you can optionally set this to any code that a key must match to unlock the door
         super(Door, self).__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
@@ -1081,9 +1112,9 @@ class Door(Exit):
         actor.tell_others("{Title} unlocked the exit %s with %s." % (self.name, lang.a(key.title)))
 
     def check_key(self, item):
-        """Check if the item is a proper key for this door (based on door_code)"""
-        door_code = getattr(item, "door_code", None)
-        return door_code and door_code == self.door_code
+        """Check if the item is a proper key for this door (based on key_code)"""
+        key_code = getattr(item, "key_code", None)
+        return key_code and key_code == self.key_code
 
     def search_key(self, actor):
         """Does the actor have a proper key? Return the item if so, otherwise return None."""
@@ -1093,12 +1124,18 @@ class Door(Exit):
         return None
 
 
-def heartbeat(klass):
-    """
-    Decorator to use on a class to make it have a heartbeat.
-    Use sparingly as it is less efficient than using a deferred, because the driver
-    has to call all heartbeats every tick even though they do nothing yet.
-    With deferreds, the driver only calls a deferred at the time it is needed.
-    """
-    klass._register_heartbeat = True
-    return klass
+class Key(Item):
+    """A key which has a unique code. It can be used to open the matching Door."""
+    def init(self):
+        super(Key, self).init()
+        self.key_code = None
+
+    def key_for(self, door=None, code=None):
+        """Makes this key a key for the given door. (basically just copies the door's key_code)"""
+        if code:
+            assert door is None
+            self.key_code = code
+        else:
+            self.key_code = door.key_code
+            if not self.key_code:
+                raise LocationIntegrityError("door has no key_code set", None, door, door.target)

@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import random
-from tale.base import Location, Exit, Door, Item
+from tale.base import Location, Exit, Door, Item, Key
 from tale.npc import NPC
 from tale import mud_context
 from tale.lang import capital
@@ -36,7 +36,7 @@ door = Door(
     ["garden", "door"], outside,
     "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.",
     locked=True, opened=False)
-door.door_code = 1
+door.key_code = 1
 # use an exit with an unbound target (string), the driver will link this up:
 closet_exit = Exit("closet", "house.closet", "There's a small closet in your house.")
 livingroom.add_exits([door, closet_exit])
@@ -71,6 +71,6 @@ class Cat(NPC):
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")
 livingroom.insert(cat, None)
-key = Item("key", "small rusty key", "This key is small and rusty. It has a label attached, reading \"garden door\".")
-key.door_code = 1
+key = Key("key", "small rusty key", "This key is small and rusty. It has a label attached, reading \"garden door\".")
+key.key_for(door)
 closet.insert(key, None)

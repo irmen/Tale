@@ -122,27 +122,37 @@ class GameClock(Item):
         actor.tell(self.description)
 
 
-class Newspaper(Item):
+class Note(Item):
     """
-    A newspaper with a headline article in it.
+    A (paper) note with or without something written on it. You can read it.
     """
     def init(self):
-        super(Newspaper, self).init()
-        self.article = '''
+        super(Note, self).init()
+        self._text = "There is nothing written on it."
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, text):
+        self._text = textwrap.dedent(text)
+
+    def read(self, actor):
+        actor.tell("The %s reads:" % self.title, end=True)
+        actor.tell(self.text)
+
+
+newspaper = Note("newspaper", description="""
+    Looking at the date on the front page, you see that it is last week's newspaper.
+    Perhaps by reading the paper you can see if it still has something interesting to say.
+    The paper faintly smells of fish though.""")
+newspaper.text = """
         "Last year's Less Popular Sports."
         "Any fan will tell you the big-name leagues aren't the whole sporting world.
          As time expired on last year, we take a look at major accomplishments, happenings,
          and developments in the less popular sports."
-        It looks like a boring article, you have better things to do.
-        '''
-        self.article = textwrap.dedent(self.article)
-
-    def read(self, actor):
-        actor.tell("The newspaper reads:", end=True)
-        actor.tell(self.article)
-
-
-newspaper = Newspaper("newspaper", description="Reading the date, you see it is last week's newspaper. It smells of fish.")
+        It looks like a boring article, and you have better things to do."""
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")

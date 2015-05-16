@@ -10,7 +10,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 import random
 import sys
-import copy
 from . import lang
 from .errors import ParseError
 
@@ -333,11 +332,6 @@ def format_docstring(docstring):
         trimmed.pop(0)
     # Return a single string:
     return '\n'.join(trimmed)
-
-
-def clone(obj):
-    """Create a copy of an existing MudObject"""
-    return copy.deepcopy(obj)
 
 
 def storyname_to_filename(name):

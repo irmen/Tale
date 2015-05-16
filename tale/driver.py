@@ -113,7 +113,7 @@ class Driver(pubsub.Listener):
         mud_context.driver = self
         mud_context.config = self.config
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
-        if pkgutil.get_importer("cmds"):   # check for existence of cmds package in the story root
+        if pkgutil.get_loader("cmds"):   # check for existence of cmds package in the story root
             story_cmds = __import__("cmds", level=0)
             story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)

@@ -269,22 +269,6 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("overwrittenappended", vfs["unittest.txt"].data)
         del vfs["unittest.txt"]
 
-    def test_clone(self):
-        item = Item("thing", "description")
-        item.aliases = ["a1", "a2"]
-        item2 = util.clone(item)
-        self.assertNotEqual(item, item2)
-        item2.aliases.append("a3")
-        self.assertNotEqual(item.aliases, item2.aliases)
-        player = Player("julie", "f")
-        player.insert(item, player)
-        player2 = util.clone(player)
-        player2.insert(item2, player2)
-        self.assertNotEqual(player.inventory_size, player2.inventory_size)
-        self.assertNotEqual(player.inventory, player2.inventory)
-        self.assertTrue(item in player)
-        self.assertFalse(item in player2)
-
     def test_gametime_realtime(self):
         epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
         gt = util.GameDateTime(epoch)  # realtime=1
