@@ -8,7 +8,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import datetime
 import unittest
 from tale import util, mud_context, pubsub
-from tale.errors import ParseError
+from tale.errors import ParseError, ActionRefused
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
 from tale.tio.vfs import VirtualFileSystem, VfsError
@@ -345,6 +345,31 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("story_name_dot", util.storyname_to_filename("story name.dot"))
         self.assertEqual("name", util.storyname_to_filename("name\\/*"))
         self.assertEqual("name", util.storyname_to_filename("name'\""))
+
+    def test_authorized(self):
+        with self.assertRaises(SyntaxError):
+            @util.authorized("wizard", "god")
+            def func_no_actor(args):
+                pass
+
+        @util.authorized("wizard", "god")
+        def func(args, actor=None):
+            pass
+
+        class Actor(object):
+            pass
+        actor = Actor()
+        actor2 = Actor()
+        actor2.privileges = {"nobody"}
+        actor3 = Actor()
+        actor3.privileges = {"wizard", "noob"}
+        with self.assertRaises(ActionRefused):
+            func(42)
+        with self.assertRaises(ActionRefused):
+            func(42, actor=actor)
+        with self.assertRaises(ActionRefused):
+            func(42, actor=actor2)
+        func(42, actor=actor3)
 
 
 if __name__ == '__main__':

@@ -10,8 +10,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 import random
 import sys
+import functools
+import inspect
 from . import lang
-from .errors import ParseError
+from .errors import ParseError, ActionRefused
 
 if sys.version_info < (3, 0):
     basestring_type = basestring
@@ -405,3 +407,33 @@ class Context(object):
 
     def __eq__(self, other):
         return vars(self) == vars(other)
+
+
+def authorized(*privileges):
+    """
+    Decorator for callables that need a privilege check.
+    The callable should have an 'actor' argument that is passed an
+    appropriate actor object with .privileges to check against.
+    If they don't match with the privileges given in this decorator,
+    an ActionRefused error is raised.
+    """
+    def checked(f):
+        if "actor" not in inspect.getargspec(f).args:
+            raise SyntaxError("callable requires 'actor' argument: " + f.__name__)
+        allowed_privs = set(privileges)
+
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            # check if the supplied actor
+            actor = inspect.getcallargs(f, *args, **kwargs)["actor"]
+            try:
+                if actor and allowed_privs & actor.privileges:
+                    return f(*args, **kwargs)
+            except AttributeError:
+                # actors without .privileges, are also not allowed to do anything
+                pass
+            raise ActionRefused("You're not allowed to do that.")
+        return wrapped
+    if not privileges:
+        raise ValueError("privileges must contain at least one value")
+    return checked

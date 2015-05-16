@@ -521,8 +521,8 @@ class MudAccounts(object):
                 account["email"] = new_email
             db[name] = account
 
+    @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
-        assert "wizard" in actor.privileges
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")

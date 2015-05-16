@@ -320,18 +320,16 @@ class Item(MudObject):
     def unlock(self, actor, item=None):
         raise ActionRefused("You can't unlock that.")
 
+    @util.authorized("wizard")
     def wiz_clone(self, actor):
-        if "wizard" not in actor.privileges:
-            raise ActionRefused("You're not allowed to do that.")
         item = clone(self)
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item))
         actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
         return item
 
+    @util.authorized("wizard")
     def wiz_destroy(self, actor, ctx):
-        if "wizard" not in actor.privileges:
-            raise ActionRefused("You're not allowed to do that.")
         if self in actor:
             actor.remove(self, actor)
         else:
@@ -740,9 +738,8 @@ class Living(MudObject):
         # @todo: remove attack status, etc.
         self.soul = None   # truly die ;-)
 
+    @util.authorized("wizard")
     def wiz_clone(self, actor):
-        if "wizard" not in actor.privileges:
-            raise ActionRefused("You're not allowed to do that.")           # XXX use @authorized decorator for these kind of checks?
         duplicate = clone(self)
         actor.tell("Cloned into: " + repr(duplicate))
         actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
@@ -750,9 +747,8 @@ class Living(MudObject):
         actor.location.tell("%s appears." % lang.capital(duplicate.title))
         return duplicate
 
+    @util.authorized("wizard")
     def wiz_destroy(self, actor, ctx):
-        if "wizard" not in actor.privileges:
-            raise ActionRefused("You're not allowed to do that.")
         if self is actor:
             raise ActionRefused("You can't destroy yourself, are you insane?!")
         self.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % lang.capital(actor.title))
