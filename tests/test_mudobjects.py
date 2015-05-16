@@ -9,7 +9,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 import datetime
 from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
-from tale.base import Location, Exit, Item, Living, MudObject, _Limbo, Container, Weapon, Door, Key, clone
+from tale.base import Location, Exit, Item, Living, MudObject, _limbo, Container, Weapon, Door, Key, clone
 from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused, LocationIntegrityError
 from tale.npc import NPC, Monster
@@ -152,7 +152,7 @@ class TestLocations(unittest.TestCase):
         julie = NPC("julie", "f")
         with self.assertRaises(TypeError):
             hall.insert(12345, julie)
-        self.assertEqual(_Limbo, rat1.location)
+        self.assertEqual(_limbo, rat1.location)
         self.assertFalse(rat1 in hall.livings)
         wiretap = Wiretap(hall)
         hall.insert(rat1, julie)
@@ -698,8 +698,8 @@ class TestDestroy(unittest.TestCase):
         self.assertTrue(len(loc.exits) == 0)
         self.assertTrue(len(loc.items) == 0)
         self.assertTrue(len(loc.livings) == 0)
-        self.assertEqual(_Limbo, player.location)
-        self.assertEqual(_Limbo, liv.location)
+        self.assertEqual(_limbo, player.location)
+        self.assertEqual(_limbo, liv.location)
 
     def test_destroy_player(self):
         ctx = Context(None, None, None, None)
@@ -880,7 +880,7 @@ class TestItem(unittest.TestCase):
         self.assertIsNone(key.location)
         self.assertTrue(backpack in person)
         self.assertEqual(person, backpack.contained_in)
-        self.assertEqual(_Limbo, backpack.location)
+        self.assertEqual(_limbo, backpack.location)
         hall.init_inventory([person, key])
         self.assertEqual(hall, key.contained_in)
         self.assertEqual(hall, key.location)

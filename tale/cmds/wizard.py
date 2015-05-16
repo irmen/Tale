@@ -269,7 +269,7 @@ def teleport_to(player, location):
     player.tell_others("%s jumps into the portal, which quickly closes behind %s." % (lang.capital(player.subjective), player.objective))
     player.teleported_from = player.location  # used for the 'return' command
     player.move(location, silent=True)
-    player.tell("You've been teleported.")
+    player.tell("You've been teleported.", end=True)
     player.look()
     location.tell("Suddenly, a shimmering portal opens!", exclude_living=player)
     location.tell("%s jumps out, and the portal quickly closes behind %s." %

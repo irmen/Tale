@@ -170,7 +170,7 @@ class Driver(pubsub.Listener):
             connection.singleplayer_mainloop()
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
-            base._Limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
+            base._limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
             self.mud_accounts = player.MudAccounts()
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
@@ -1211,23 +1211,33 @@ class Commands(object):
                     self.no_soul_parsing.add(cmd)
 
 
+@base.heartbeat
 class LimboReaper(npc.Monster):
-    """
-    The Grim Reaper hanging about in Limbo, to make sure no one stays there for too long.
-    """
+    """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
     def __init__(self):
         super(LimboReaper, self).__init__(
             "reaper", "m", "elemental", "Grim Reaper",
-            description="He wears black robes with a hood. Where a face should be, there is only nothingness. He is carrying a large omnious scythe that looks very, very sharp.",
+            description="He wears black robes with a hood. Where a face should be, there is only nothingness. "
+                        "He is carrying a large omnious scythe that looks very, very sharp.",
             short_description="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
-        self.register_heartbeat()
         self.candidates = {}    # player --> (first_seen, texts shown)
+
+    def notify_action(self, parsed, actor):
+        if parsed.verb == "say":
+            actor.tell("%s just stares blankly at you, not saying a word." % lang.capital(self.title))
+        else:
+            actor.tell("%s stares blankly at you." % lang.capital(self.title))
 
     def heartbeat(self, ctx):
         # consider all livings currently in Limbo or having their location set to Limbo
+        if self.location is not base._limbo:
+            # we somehow got misplaced, teleport back to limbo
+            self.tell_others("{Title} looks around in wonder and says, \"I'm not supposed to be here.\"")
+            self.move(base._limbo, self)
+            return
         in_limbo = {living for living in self.location.livings if living is not self}
-        in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._Limbo})
+        in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._limbo})
         now = time.time()
         for candidate in in_limbo:
             if candidate not in self.candidates:
@@ -1249,10 +1259,10 @@ class LimboReaper(npc.Monster):
             elif duration >= 60 and shown < 3:
                 candidate.tell(self.title + " menacingly raises his scythe!")
                 shown = 3
-            elif duration >= 61 and shown < 4:
+            elif duration >= 62 and shown < 4:
                 candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
                 shown = 4
-            elif duration >= 62:
+            elif duration >= 63:
                 try:
                     conn = ctx.driver.all_players[candidate.name]
                 except KeyError:

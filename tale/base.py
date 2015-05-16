@@ -398,7 +398,7 @@ class Location(MudObject):
         super(Location, self).destroy(ctx)
         for living in self.livings:
             if living.location is self:
-                living.location = _Limbo
+                living.location = _limbo
         self.livings.clear()
         self.items.clear()
         self.exits.clear()
@@ -559,7 +559,7 @@ class Location(MudObject):
         pass
 
 
-_Limbo = Location("Limbo",
+_limbo = Location("Limbo",
                   """
                   The intermediate or transitional place or state. There's only nothingness.
                   Living beings end up here if they're not in a proper location yet.
@@ -665,7 +665,7 @@ class Living(MudObject):
     def __init__(self, name, gender, race, title=None, description=None, short_description=None):
         self.init_race(race, gender)
         self.soul = soul.Soul()
-        self.location = _Limbo  # set transitional location
+        self.location = _limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
