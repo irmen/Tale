@@ -248,6 +248,9 @@ class Item(MudObject):
     def init(self):
         self.contained_in = None
         self.default_verb = "examine"
+        self.cost = None    # price to buy
+        self.rent = None    # price to keep in store / day
+        self.weight = None  # some abstract unit
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")
@@ -666,6 +669,8 @@ class Living(MudObject):
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
+        self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
+        self.xp = 0
         self.default_verb = "examine"
         # Make a copy of the race stats, because they can change dynamically.
         # There's no need to copy the whole race data dict because it's available

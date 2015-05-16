@@ -6,16 +6,21 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
+import pprint
+import re
+import random
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
 from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
-from tale.items.basic import Boxlike
+from tale.items.basic import Boxlike, Note
 from tale.npc import Monster
 from tale.errors import LocationIntegrityError
-import pprint
+from tale.util import roll_dice
+from tale import mud_context
+
 
 print("Loading circle data files.")
 mobs = get_mobs()
@@ -95,14 +100,31 @@ def make_mob(vnum):
         title = title[4:]
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
-    mob = Monster(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
+    mob = CircleMob(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
     mob.vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:
             mob.add_extradesc(ed["keywords"], ed["text"])
     mob.aliases = aliases
     mob.aggressive = "aggressive" in c_mob.actions
-    # XXX todo stats, alignment, ...
+    mob.money = float(c_mob.gold)
+    mob.alignment = c_mob.alignment
+    mob.xp = c_mob.xp
+    number, sides, hp = map(int, re.match(r"(\d+)d(\d+)\+(\d+)$", c_mob.maxhp_dice).groups())
+    if number > 0 and sides > 0:
+        hp += roll_dice(number, sides)[0]
+    #@todo store hp
+    level = max(1, c_mob.level)   # 1..50
+    #@todo store level
+    # convert AC -10..10 to more modern 0..20   (naked person(0)...plate armor(10)...battletank(20))
+    # special elites can go higher (limit 100), weaklings with utterly no defenses can go lower (limit -100)
+    ac = max(-100, min(100, 10 - c_mob.ac))
+    #@todo store ac
+    if "sentinel" not in c_mob.actions:
+        mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
+    #@todo load position? (standing/sleeping/sitting...)
+    #@todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
+    # XXX todo stats, actions, affection,...
     converted_mobs.add(vnum)
     return mob
 
@@ -132,13 +154,18 @@ def make_item(vnum):
     elif c_obj.type == "key":
         item = Key(name, title, short_description=c_obj.longdesc)
         item.key_for(code=vnum)   # the key code is just the item's vnum
+    elif c_obj.type == "note":  # doesn't yet occur in the obj files though
+        item = Note(name, title, short_description=c_obj.longdesc)
     else:
         item = Item(name, title, short_description=c_obj.longdesc)
     for ed in c_obj.extradesc:
         item.add_extradesc(ed["keywords"], ed["text"])
-    item.aliases = aliases
-    # XXX todo cost, effects, wear, weight, typespecific array, ...
     item.vnum = vnum  # keep the vnum
+    item.aliases = aliases
+    item.cost = c_obj.cost
+    item.rent = c_obj.rent
+    item.weight = c_obj.weight
+    # @todo: affects, effects, wear, typespecifics
     converted_items.add(vnum)
     return item
 
@@ -207,3 +234,11 @@ def init_zones():
     print("unused item types (%d):" % len(missing))
     pprint.pprint([objs[v] for v in sorted(missing)])
 
+
+class CircleMob(Monster):
+    def init(self):
+        super(CircleMob, self).init()
+
+    def do_wander(self, ctx):
+        # @todo let the mob wander
+        ctx.driver.defer(random.randint(20, 60), self.do_wander)

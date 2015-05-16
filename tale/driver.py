@@ -717,8 +717,8 @@ class Driver(pubsub.Listener):
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.config, None)
-        for object in self.heartbeat_objects:
-            object.heartbeat(ctx)
+        for obj in self.heartbeat_objects:
+            obj.heartbeat(ctx)
         while self.deferreds:
             deferred = None
             with self.deferreds_lock:

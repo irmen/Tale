@@ -114,15 +114,17 @@ class TestUtil(unittest.TestCase):
         self.assertAlmostEqual(46.15, mf.parse(["$ 46.15"]), places=4)
         self.assertAlmostEqual(46.15, mf.parse(["$", "46.15"]), places=4)
 
-    def test_roll_die(self):
-        total, values = util.roll_die()
+    def test_roll_dice(self):
+        total, values = util.roll_dice()
         self.assertTrue(1 <= total <= 6)
         self.assertEqual(1, len(values))
         self.assertEqual(total, values[0])
-        total, values = util.roll_die(20, 10)   # 20d10
+        total, values = util.roll_dice(20, 10)   # 20d10
         self.assertEqual(20, len(values))
         with self.assertRaises(AssertionError):
-            util.roll_die(21, 10)
+            util.roll_dice(0, 10)
+        with self.assertRaises(AssertionError):
+            util.roll_dice(400, 10)
 
     def test_parse_duration(self):
         duration = util.parse_duration(["1", "hour", "1", "minute", "1", "second"])

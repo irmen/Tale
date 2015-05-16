@@ -357,9 +357,9 @@ def parse_file(objFile):
                 desc["keywords"] = set(arg[0])
                 desc["text"] = arg[1].replace("\n", " ")
                 obj.extradesc.append(desc)
-            obj.affect={}
+            obj.affects = {}
             for k, v in affectArg.items():
-                obj.affect[affectTypes[k]] = int(v)
+                obj.affects[affectTypes[k]] = int(v)
 
             objs[obj.vnum] = obj
             readState = 'vNum'

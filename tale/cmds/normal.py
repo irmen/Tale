@@ -1159,7 +1159,7 @@ def do_dice(player, parsed, ctx):
             raise ActionRefused("What kind of dice do you want to roll (such as 3d6)?")
     if not (1 <= number <= 20 and sides >= 2):
         raise ActionRefused("Please try a bit more sensible values.")
-    total, values = util.roll_die(number, sides)
+    total, values = util.roll_dice(number, sides)
     die = "a die"
     if (number, sides) != (1, 6):
         die = "%dd%d" % (number, sides)
@@ -1172,7 +1172,7 @@ def do_dice(player, parsed, ctx):
 @cmd("coin")
 def do_coin(player, parsed, ctx):
     """Toss a coin."""
-    number, _ = util.roll_die(sides=2)
+    number, _ = util.roll_dice(sides=2)
     result = ["heads", "tails"][number - 1]
     player.tell("You toss a coin. The result is: %s!" % result)
     player.tell_others("{Title} tosses a coin. The result is: %s!" % result)

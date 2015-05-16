@@ -461,9 +461,10 @@ def do_events(player, parsed, ctx):
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
     player.tell(*txt, format=False)
-    player.tell("Deferreds (%d):   (server tick: %.1f sec)" % (len(driver.deferreds), config.server_tick_time), end=True)
+    num_shown = min(50, len(driver.deferreds))
+    player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" % (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
     txt = ["<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
-    for d in sorted(driver.deferreds):
+    for d in sorted(driver.deferreds)[:50]:
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
     txt.append("")
     player.tell(*txt, format=False)

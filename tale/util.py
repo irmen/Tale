@@ -29,9 +29,9 @@ else:
         return next(iterable)
 
 
-def roll_die(number=1, sides=6):
-    """rolls a number (max 20) of dice with configurable number of sides"""
-    assert 1 <= number <= 20
+def roll_dice(number=1, sides=6):
+    """rolls a number (max 300) of dice with configurable number of sides"""
+    assert 1 <= number <= 300
     values = [random.randint(1, sides) for _ in range(number)]
     return sum(values), values
 
