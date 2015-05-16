@@ -1,5 +1,8 @@
 """
 Parse CircleMUD world files.
+
+Based on code by Al Sweigart;
+http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
 import os

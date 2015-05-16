@@ -31,12 +31,13 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[code] Streamline the output of the 'look' command when several items/livings contain the exact same description. (fold them into 1?) (room vnum 3357)
 [code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [feature] More commands should recognise object aliases (touch, take) like examine already does.
-[feature] allow livings to wear items/armour on various body parts
-[feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand)
+[feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
+[feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [cosmetic] Add <center> text style which centers the line(s) on the screen.
 [code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
     commands, adverbs, names - all should be lowercased and compared by lowercase.

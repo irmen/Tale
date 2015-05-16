@@ -1,5 +1,8 @@
 """
 Parse CirleMUD shop files.
+
+Based on code by Al Sweigart;
+http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
 import os
@@ -44,9 +47,9 @@ def parse_file(shpFile):
             lineNum += 1
         lineNum += 1  # skip "-1" line
 
-        profitWhenBuyingArg = content[lineNum]
-        lineNum += 1
         profitWhenSellingArg = content[lineNum]
+        lineNum += 1
+        profitWhenBuyingArg = content[lineNum]
         lineNum += 1
 
         buyTypeArg = []

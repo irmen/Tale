@@ -6,7 +6,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from __future__ import absolute_import, print_function, division, unicode_literals
-import pprint
 import re
 import random
 from .circledata.parse_mob_files import get_mobs
@@ -14,15 +13,16 @@ from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
-from tale.items.basic import Boxlike, Note
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, clone
+from tale.items.basic import *
 from tale.npc import Monster
+from tale.shop import ShopBehavior, Shopkeeper
 from tale.errors import LocationIntegrityError
 from tale.util import roll_dice
 from tale import mud_context
 
 
-print("Loading circle data files.")
+print("\nLoading circle data files.")
 mobs = get_mobs()
 print(len(mobs), "mobs loaded.")
 objs = get_objs()
@@ -35,14 +35,29 @@ zones = get_zones()
 print(len(zones), "zones loaded.")
 
 
-converted_rooms = {}   # doubles as a cache for the rooms
+converted_rooms = {}   # cache for the rooms
 converted_mobs = set()
 converted_items = set()
+converted_shops = {}  # cache for the shop data
+
+
+class CircleMob(Monster):
+    """Monster NPC having tailored behavior to suit circle data"""
+    def init(self):
+        super(CircleMob, self).init()
+
+    def do_wander(self, ctx):
+        # let the mob wander randomly
+        direction = self.select_random_move()
+        if direction:
+            self.tell_others("{Title} wanders to the %s." % direction.name)
+            self.move(direction.target, self)
+        ctx.driver.defer(random.randint(20, 60), self.do_wander)
 
 
 def make_location(vnum):
     """
-    Get a Tale location object for the given circle room vnum
+    Get a Tale location object for the given circle room vnum.
     This performs an on-demand conversion of the circle room data to Tale.
     """
     try:
@@ -81,6 +96,7 @@ def make_location(vnum):
 
 
 def make_exit(c_exit):
+    """Create an instance of a door or exit for the given circle exit"""
     if c_exit.type in ("normal", "pickproof"):
         xt = Door(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
     else:
@@ -89,18 +105,19 @@ def make_exit(c_exit):
     return xt
 
 
-def make_mob(vnum):
+def make_mob(vnum, mob_class=CircleMob):
+    """Create an instance of an item for the given vnum"""
     c_mob = mobs[vnum]
     aliases = list(c_mob.aliases)
     name = aliases[0]
     aliases = set(aliases[1:])
-    race = "human"  # XXX todo find solution for race, which is not a concept in circle
+    race = "human"  # @todo find solution for race, which is not a concept in circle
     title = c_mob.shortdesc
     if title.startswith("the ") or title.startswith("The "):
         title = title[4:]
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
-    mob = CircleMob(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
+    mob = mob_class(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
     mob.vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:
@@ -124,12 +141,13 @@ def make_mob(vnum):
         mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
     #@todo load position? (standing/sleeping/sitting...)
     #@todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
-    # XXX todo stats, actions, affection,...
+    #@todo stats, actions, affection,...
     converted_mobs.add(vnum)
     return mob
 
 
 def make_item(vnum):
+    """Create an instance of an item for the given vnum"""
     c_obj = objs[vnum]
     aliases = list(c_obj.aliases)
     name = aliases[0]
@@ -156,8 +174,46 @@ def make_item(vnum):
         item.key_for(code=vnum)   # the key code is just the item's vnum
     elif c_obj.type == "note":  # doesn't yet occur in the obj files though
         item = Note(name, title, short_description=c_obj.longdesc)
-    else:
+    elif c_obj.type == "food":
+        item = Food(name, title, short_description=c_obj.longdesc)
+        #@todo food attrs
+    elif c_obj.type == "light":
+        item = Light(name, title, short_description=c_obj.longdesc)
+        #@todo light attrs
+    elif c_obj.type == "scroll":
+        item = Scroll(name, title, short_description=c_obj.longdesc)
+        #@todo scroll attrs
+    elif c_obj.type in ("staff", "wand"):
+        item = MagicItem(name, title, short_description=c_obj.longdesc)
+        #@todo staff/wand attrs
+    elif c_obj.type == "trash":
+        item = Scroll(name, title, short_description=c_obj.longdesc)
+        #@todo trash attrs
+    elif c_obj.type == "drinkcontainer":
+        item = Drink(name, title, short_description=c_obj.longdesc)
+        #@todo drink attrs
+    elif c_obj.type == "potion":
+        item = Potion(name, title, short_description=c_obj.longdesc)
+        #@todo potion attrs
+    elif c_obj.type == "food":
+        item = Food(name, title, short_description=c_obj.longdesc)
+        #@todo food attrs
+    elif c_obj.type == "money":
+        item = Money(name, title, short_description=c_obj.longdesc)
+        #@todo money attrs
+    elif c_obj.type == "boat":
+        item = Boat(name, title, short_description=c_obj.longdesc)
+        #@todo boat attrs
+    elif c_obj.type == "worn":
+        item = Wearable(name, title, short_description=c_obj.longdesc)
+        #@todo worn attrs
+    elif c_obj.type == "fountain":
+        item = Wearable(name, title, short_description=c_obj.longdesc)
+        #@todo fountain attrs
+    elif c_obj.type in ("treasure", "other"):
         item = Item(name, title, short_description=c_obj.longdesc)
+    else:
+        raise ValueError("invalid obj type: " + c_obj.type)
     for ed in c_obj.extradesc:
         item.add_extradesc(ed["keywords"], ed["text"])
     item.vnum = vnum  # keep the vnum
@@ -170,26 +226,74 @@ def make_item(vnum):
     return item
 
 
+def make_shop(vnum):
+    """Create an instance of a shop given by the vnum"""
+    try:
+        return converted_shops[vnum]
+    except KeyError:
+        c_shop = shops[vnum]
+        shop = ShopBehavior()
+        shop.vnum = c_shop.vnum  # keep the vnum
+        shop.shopkeeper_vnum = c_shop.shopkeeper   # keep the vnum of the shopkeeper
+        shop.banks_money = c_shop.banks
+        shop.will_fight = c_shop.fights
+        shop.buyprofit = c_shop.buyprofit
+        assert shop.buyprofit <= 1.0
+        shop.sellprofit = c_shop.sellprofit
+        assert shop.sellprofit >= 1.0
+        shop.open_hours = [(c_shop.open1, c_shop.close1)]
+        if c_shop.open2 and c_shop.close2:
+            shop.open_hours.append((c_shop.open2, c_shop.close2))
+        shop.forsale = c_shop.forsale
+        shop.msg_playercantafford = c_shop.msg_playercantafford
+        shop.msg_playercantbuy = c_shop.msg_playercantbuy
+        shop.msg_playercantsell = c_shop.msg_playercantsell
+        shop.msg_shopboughtitem = c_shop.msg_shopboughtitem
+        shop.msg_shopcantafford = c_shop.msg_shopcantafford
+        shop.msg_shopdoesnotbuy = c_shop.msg_shopdoesnotbuy
+        shop.msg_shopsolditem = c_shop.msg_shopsolditem
+        shop.msg_temper = c_shop.msg_temper
+        shop.willbuy = c_shop.willbuy
+        shop.wontdealwith = c_shop.wontdealwith
+        converted_shops[vnum] = shop
+        return shop
+
+
 def init_zones():
+    """Populate the zones and initialize inventories and door states. Set up shops."""
     print("Initializing zones.")
+    num_shops = num_mobs = num_items = 0
+    all_shopkeepers = set(shop.shopkeeper for shop in shops.values())
     for vnum in sorted(zones):
         zone = zones[vnum]
-        print("%3d  %s" % (zone.vnum, zone.name))
         for mobref in zone.mobs:
-            mob = make_mob(mobref.vnum)
+            if mobref.vnum in all_shopkeepers:
+                # mob is a shopkeeper, we need to make a shop+shopkeeper rather than a regular mob
+                mob = make_mob(mobref.vnum, mob_class=Shopkeeper)
+                # find the shop it works for
+                shop_vnums = [vnum for vnum, shop in shops.items() if shop.shopkeeper == mobref.vnum]
+                assert len(shop_vnums) == 1
+                shop_vnum = shop_vnums[0]
+                shop = make_shop(shop_vnum)
+                mob.shop = shop
+                num_shops += 1
+            else:
+                mob = make_mob(mobref.vnum)
             #@todo globalmax
             for vnum, details in mobref.equipped.items():
                 obj = make_item(vnum)
                 # @todo actually wield the item
-                pass
+                num_items += 1
             inventory = set()
             for vnum, maxexists in mobref.inventory.items():
                 obj = make_item(vnum)
                 inventory.add(obj)
+                num_items += 1
             if inventory:
                 mob.init_inventory(inventory)
             loc = make_location(mobref.room)
             loc.insert(mob, None)
+            num_mobs += 1
         for details in zone.objects:
             obj = make_item(details["vnum"])
             loc = make_location(details["room"])
@@ -198,10 +302,12 @@ def init_zones():
             inventory = set()
             for vnum, maxexists in details["contains"].items():
                 sub_item = make_item(vnum)
+                num_items += 1
                 inventory.add(sub_item)
             if inventory:
                 assert isinstance(obj, Container)
                 obj.init_inventory(inventory)
+            num_items += 1
         for door_state in zone.doors:
             loc = make_location(door_state["room"])
             try:
@@ -227,22 +333,9 @@ def init_zones():
     # create the handful of rooms that have no incoming paths (unreachable)
     for vnum in (0, 3, 3055):
         make_location(vnum)
-    print("Activated: %d mob types, %d item types, %d rooms, %d zones" % (
-        len(converted_mobs), len(converted_items), len(converted_rooms), len(zones)
-    ))
+
+    print("Activated: %d mob types, %d item types, %d rooms, %d shop types" % (
+        len(converted_mobs), len(converted_items), len(converted_rooms), len(converted_shops)))
+    print("Spawned: %d mobs, %d items, %d shops" % (num_mobs, num_items, num_shops))
     missing = set(objs) - set(converted_items)
-    print("unused item types (%d):" % len(missing))
-    pprint.pprint([objs[v] for v in sorted(missing)])
-
-
-class CircleMob(Monster):
-    def init(self):
-        super(CircleMob, self).init()
-
-    def do_wander(self, ctx):
-        # let the mob wander randomly
-        direction = self.select_random_move()
-        if direction:
-            self.tell_others("{Title} walks away to the %s." % direction.name)  # XXX always 'walk' ?
-            self.move(direction.target, self)
-        ctx.driver.defer(random.randint(20, 60), self.do_wander)
+    print(len(missing), "unused item types.")

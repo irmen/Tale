@@ -104,8 +104,8 @@ class Player(base.Living, pubsub.Listener):
         if messages == ("\n",):
             self._output.p()
         else:
-            for msg in messages:
-                self._output.print(str(msg), **kwargs)
+            msg = " ".join(str(msg) for msg in messages)
+            self._output.print(msg, **kwargs)
         return self
 
     def look(self, short=None):

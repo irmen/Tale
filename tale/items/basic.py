@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-Basic items.
+A couple of basic items that go beyond the few base types.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
@@ -8,9 +8,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import textwrap
-from ..base import Item, Container
+from ..base import Item, Container, Weapon
 from ..errors import ActionRefused
 from .. import lang, mud_context
+
+
+__all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
+           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable"]
 
 
 class Boxlike(Container):
@@ -143,6 +147,72 @@ class Note(Item):
         actor.tell(self.text)
 
 
+class Light(Item):
+    def init(self):
+        self.capacity = 0   # hours (-1=eternal, 0=burned out)
+
+
+class Scroll(Item):
+    def init(self):
+        self.spell_level = 0   # level of spells
+        self.spells = set()
+
+
+class MagicItem(Weapon):
+    def init(self):
+        self.spell_level = 0
+        self.charges = 0
+        self.spell = None
+
+
+class Trash(Item):
+    """Trash -- junked by cleaners, not bought by any shopkeeper."""
+    pass
+
+
+class Drink(Item):
+    def init(self):
+        self.contents = "water"
+        self.capacity = 1
+        self.quantity = 0
+        self.affect_drunkness = 0
+        self.affect_fullness = 0
+        self.affect_thirst = 0
+        self.poisoned = False
+
+
+class Potion(Drink):
+    def init(self):
+        self.spell_level = 0
+        self.spells = set()
+
+
+class Food(Item):
+    def init(self):
+        self.affect_fullness = 0
+        self.poisoned = False
+
+
+class Money(Item):
+    pass
+
+
+class Boat(Item):
+    pass
+
+
+class Wearable(Item):
+    pass
+
+
+class Fountain(Item):
+    def init(self):
+        self.contents = "water"
+        self.capacity = 1
+        self.quantity = 0
+        self.poisoned = False
+
+
 newspaper = Note("newspaper", description="""
     Looking at the date on the front page, you see that it is last week's newspaper.
     Perhaps by reading the paper you can see if it still has something interesting to say.
@@ -153,6 +223,7 @@ newspaper.text = """
          As time expired on last year, we take a look at major accomplishments, happenings,
          and developments in the less popular sports."
         It looks like a boring article, and you have better things to do."""
+
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")

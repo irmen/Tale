@@ -20,7 +20,7 @@ class Story(object):
         name="Circle",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
-        version="1.0",                  # arbitrary but is used to check savegames for compatibility
+        version="1.1",                  # arbitrary but is used to check savegames for compatibility
         requires_tale="2.2",            # tale library required to run the game
         supported_modes={"mud"},        # what driver modes (if/mud) are supported by this story
         player_name=None,               # set a name to create a prebuilt player, None to use the character builder
