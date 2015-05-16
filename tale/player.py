@@ -21,7 +21,7 @@ from . import hints
 from . import pubsub
 from . import mud_context
 from . import util
-from .errors import SecurityViolation, ActionRefused
+from .errors import ActionRefused
 from .util import queue
 from .tio.iobase import strip_text_styles
 from threading import Event
@@ -129,7 +129,7 @@ class Player(base.Living, pubsub.Listener):
 
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
-            raise SecurityViolation("wiretap requires wizard privilege")
+            raise ActionRefused("wiretap requires wizard privilege")
         tap = target.get_wiretap()
         tap.subscribe(self)
 

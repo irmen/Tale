@@ -87,7 +87,13 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # note that we don't print any prompt ">>", that needs to be done
                 # by the main thread that handles screen *output*
                 # (otherwise the prompt will often appear before any regular screen output)
-                player_connection.player.store_input_line(input())
+                old_player = player_connection.player
+                cmd = input()  # blocking console input call
+                player_connection.player.store_input_line(cmd)
+                if old_player is not player_connection.player:
+                    # this situation occurs when a save game has been restored,
+                    # we also have to unblock the old_player
+                    old_player.store_input_line(cmd)
             except KeyboardInterrupt:
                 self.break_pressed()
             except EOFError:

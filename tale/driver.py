@@ -478,29 +478,30 @@ class Driver(pubsub.Listener):
         # Interactive fiction (singleplayer): create a player. This is a generator function (async input).
         # Initialize it directly from the story's configuration, load a saved game,
         # or let the user create a new player manually.
+        # Be sure to always reference conn.player here (and not get a cached copy),
+        # because it will get replaced when loading a saved game!
         assert self.config.server_mode == "if"
-        player = conn.player
         if not self.config.savegames_enabled:
             load_saved_game = False
         else:
-            player.tell("\n")
+            conn.player.tell("\n")
             load_saved_game = yield "input", ("Do you want to load a saved game ('<bright>n</>' will start a new game)?", lang.yesno)
-        player.tell("\n")
+        conn.player.tell("\n")
         if load_saved_game:
-            loaded_player = self.__load_saved_game()
+            loaded_player = self.__load_saved_game(conn.player)
             if loaded_player:
-                conn.player = player = loaded_player
-                player.tell("\n")
-                prompt = self.story.welcome_savegame(player)
+                conn.player = loaded_player
+                conn.player.tell("\n")
+                prompt = self.story.welcome_savegame(conn.player)
                 if prompt:
                     yield "input", "\n" + prompt
-                player.tell("\n")
+                conn.player.tell("\n")
             else:
                 load_saved_game = False
 
         if load_saved_game:
-            self.story.init_player(player)
-            player.look(short=False)   # force a 'look' command to get our bearings
+            self.story.init_player(conn.player)
+            conn.player.look(short=False)   # force a 'look' command to get our bearings
             return
 
         if self.config.player_name:
@@ -510,7 +511,7 @@ class Driver(pubsub.Listener):
             name_info.race = self.config.player_race
             name_info.gender = self.config.player_gender
             name_info.money = self.config.player_money or 0.0
-            name_info.wizard = "wizard" in player.privileges
+            name_info.wizard = "wizard" in conn.player.privileges
             self.__login_dialog_if_2(conn, name_info)   # finish the login dialog
         else:
             # No story player config: create a character with the builder
@@ -855,7 +856,7 @@ class Driver(pubsub.Listener):
                     raise ValueError("location not found: " + location_name)
         return location
 
-    def __load_saved_game(self):
+    def __load_saved_game(self, player):
         assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
@@ -869,14 +870,14 @@ class Driver(pubsub.Listener):
             self._stop_driver()
             raise SystemExit(10)
         except IOError:
-            print("No saved game data found.")   # XXX print this to the player, not to the standard output
+            player.tell("No saved game data found.", end=True)
             return None
         else:
             if state["version"] != self.config.version:
-                print("This saved game data was from a different version of the game and cannot be used.")
-                print("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
-                self._stop_driver()
-                raise SystemExit(10)
+                player.tell("This saved game data was from a different version of the game and cannot be used.")
+                player.tell("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                player.tell("\n")
+                return None
             # Because loading a complete saved game is strictly for single player 'if' mode,
             # we load a new player and simply replace all players with this one.
             player = state["player"]
@@ -885,6 +886,7 @@ class Driver(pubsub.Listener):
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
             self.config = state["config"]
+            self.waiting_for_input = {}   # can't keep the old waiters around
             player.tell("\n")
             player.tell("Game loaded.")
             if self.config.display_gametime:

@@ -12,7 +12,7 @@ import unittest
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item
-from tale.errors import SecurityViolation, ParseError
+from tale.errors import ActionRefused, ParseError
 from tale.npc import NPC
 from tale.player import Player, TextBuffer, PlayerConnection, MudAccounts
 from tale.soul import NonSoulVerb, ParseResult
@@ -243,7 +243,7 @@ class TestPlayer(unittest.TestCase):
         julie.tell("message for julie")
         attic.tell("message for room")
         self.assertEqual(["message for room\n"], player.test_get_output_paragraphs())
-        with self.assertRaises(SecurityViolation):
+        with self.assertRaises(ActionRefused):
             player.create_wiretap(julie)
         player.privileges = {"wizard"}
         player.create_wiretap(julie)
