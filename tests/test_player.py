@@ -172,16 +172,7 @@ class TestPlayer(unittest.TestCase):
         player.tell("apple", "bee", "zinc", "rose")
         self.assertEqual(["apple bee zinc rose\n"], player.test_get_output_paragraphs())
         pc.get_output()
-        player.tell("apple", "bee", "zinc", "rose", sep="@")
-        self.assertEqual(["apple@bee@zinc@rose\n"], player.test_get_output_paragraphs())
-        pc.get_output()
         player.tell("apple", "bee", "zinc", "rose", format=False)
-        self.assertEqual("apple bee zinc rose\n", pc.get_output())
-        player.tell("apple", "bee", "zinc", "rose", format=False, sep="@")
-        self.assertEqual("apple@bee@zinc@rose\n", pc.get_output())
-        player.tell("apple", "bee", "zinc", "rose", format=True, sep="\n")
-        self.assertEqual("apple bee\nzinc rose\n", pc.get_output())
-        player.tell("apple", "bee", "zinc", "rose", format=False, sep="\n")
         self.assertEqual("apple\nbee\nzinc\nrose\n", pc.get_output())
 
     def test_look(self):

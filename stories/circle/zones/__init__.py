@@ -241,10 +241,21 @@ def make_shop(vnum):
         assert shop.buyprofit <= 1.0
         shop.sellprofit = c_shop.sellprofit
         assert shop.sellprofit >= 1.0
-        shop.open_hours = [(c_shop.open1, c_shop.close1)]
+        open_hrs = (max(0, c_shop.open1), min(24, c_shop.close1))
+        shop.open_hours = [open_hrs]
         if c_shop.open2 and c_shop.close2:
-            shop.open_hours.append((c_shop.open2, c_shop.close2))
-        shop.forsale = c_shop.forsale
+            open_hrs = (max(0, c_shop.open2), min(24, c_shop.close2))
+            shop.open_hours.append(open_hrs)
+        # items to be cloned when sold (endless supply):
+        shop.forsale = set()
+        missing_items = set()
+        for item_vnum in c_shop.forsale:
+            try:
+                shop.forsale.add(make_item(item_vnum))
+            except KeyError:
+                missing_items.add(item_vnum)
+        if missing_items:
+            print("Shop #%d: unknown items:" % vnum, missing_items)
         shop.msg_playercantafford = c_shop.msg_playercantafford
         shop.msg_playercantbuy = c_shop.msg_playercantbuy
         shop.msg_playercantsell = c_shop.msg_playercantsell

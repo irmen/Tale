@@ -97,17 +97,15 @@ class Player(base.Living, pubsub.Listener):
         For efficiency, messages are gathered in a buffer and printed later.
         If you want to output a paragraph separator, either set end=True or tell a single newline.
         If you provide format=False, this paragraph of text won't be formatted when it is outputted,
-        and whitespace is untouched. An empty string isn't outputted at all.
-        Multiple messages are separated by a space. The player object is returned so you can chain calls.
+        and whitespace is untouched. Empty strings aren't outputted at all.
+        Multiple messages are separated by a space (or newline, if format=False).
+        The player object is returned so you can chain calls.
         """
         super(Player, self).tell(*messages)
         if messages == ("\n",):
             self._output.p()
         else:
-            sep = " "
-            if "sep" in kwargs:
-                sep = kwargs["sep"]
-                del kwargs["sep"]
+            sep = " " if kwargs.get("format", True) else "\n"
             msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self

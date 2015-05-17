@@ -381,7 +381,7 @@ def do_debug(player, parsed, ctx):
         txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
     if obj in ctx.driver.heartbeat_objects:
         txt.append("%s receives heartbeats." % obj.name)
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
 
 
 @wizcmd("set")
@@ -447,7 +447,7 @@ def do_server(player, parsed, ctx):
         txt.append("Loop duration:  %.2f sec. (avg)" % avg_loop_duration)
     elif config.server_tick_method == "command":
         txt.append("Loop duration:  n/a (command driven)")
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
 
 
 @wizcmd("events")
@@ -460,14 +460,14 @@ def do_events(player, parsed, ctx):
     txt = []
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
     num_shown = min(50, len(driver.deferreds))
     player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" % (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
     txt = ["<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
     for d in sorted(driver.deferreds)[:50]:
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
     txt.append("")
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
 
 
 @wizcmd("pubsub")
@@ -484,7 +484,7 @@ def do_pubsub(player, parsed, ctx):
             txt.append("%-50.50s <dim>|</>  %3d   <dim>|</>  %4d   <dim>|</> %d" % (topic, num_pending, int(idle_time), subbers))
     txt.append(("total pending:  " + str(total_pending)).rjust(56))
     txt.append("")
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
 
 
 @wizcmd("force")
@@ -526,7 +526,7 @@ def do_accounts(player, parsed, ctx):
         txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
                    (account["name"], account["logged_in"], account["email"], lang.join(account["privileges"], None)))
     txt.append("\nWizards: " + lang.join(wizards))
-    player.tell(*txt, format=False, sep="\n")
+    player.tell(*txt, format=False)
 
 
 @wizcmd("add_priv")

@@ -47,7 +47,7 @@ General ideas/TODO:
 [feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + item.verbs=....
+[code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + mudobj.verbs=....
 [test] double names.
     What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
     What happens with multiple items of same name in room, in inventory, in bag

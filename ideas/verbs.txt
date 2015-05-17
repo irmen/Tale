@@ -1,5 +1,6 @@
 ADMIN/WIZARD STUFF
 ------------------
+See also http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/lib/text/help/wizhelp.hlp
 broadcast
     like shout, except overrides all blocking
 anchor, unanchor
