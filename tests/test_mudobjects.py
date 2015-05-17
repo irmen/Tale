@@ -197,7 +197,7 @@ class TestLocations(unittest.TestCase):
         room.init_inventory([chair1, player, chair2, monster])
         room.add_exits([exit])
         custom_verbs = mud_context.driver.current_custom_verbs(player)
-        all_verbs = mud_context.driver.get_current_verbs(player)
+        all_verbs = mud_context.driver.current_verbs(player)
         self.assertEqual({"xywobble", "snakeverb", "frobnitz", "kowabooga", "boxverb", "exitverb"}, set(custom_verbs))
         self.assertEqual(set(), set(custom_verbs) - set(all_verbs))
 
@@ -553,7 +553,7 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
         dragon = Monster("dragon", "f", race="dragon")
-        self.assertTrue(dragon.aggressive)
+        self.assertFalse(dragon.aggressive)
 
     def test_init_inventory(self):
         rat = NPC("rat", "n", race="rodent")
@@ -605,6 +605,7 @@ class TestNPC(unittest.TestCase):
 class TestMonster(unittest.TestCase):
     def test_init_inventory(self):
         rat = Monster("rat", "n", race="rodent")
+        rat.aggressive = True
         with self.assertRaises(ActionRefused):
             rat.insert(Item("thing"), None)
         rat.insert(Item("thing"), rat)
@@ -840,6 +841,7 @@ class TestItem(unittest.TestCase):
         hall = Location("hall")
         person = Living("person", "m", race="human")
         monster = Monster("dragon", "f", race="dragon")
+        monster.aggressive = True
         key = Item("key")
         stone = Item("stone")
         hall.init_inventory([person, key])
@@ -856,8 +858,10 @@ class TestItem(unittest.TestCase):
         self.assertTrue(key in person)
         self.assertEqual([], wiretap.msgs, "item.move() should be silent")
         with self.assertRaises(ActionRefused) as x:
-            key.move(monster, person)
+            key.move(monster, person)  # aggressive monster should fail
         self.assertTrue("not a good idea" in str(x.exception))
+        monster.aggressive = False
+        key.move(monster, person)   # non-aggressive should be ok
 
     def test_lang(self):
         thing = Item("thing")

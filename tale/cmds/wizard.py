@@ -15,9 +15,9 @@ import gc
 import platform
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
-from .. import base, lang, util, pubsub
 from ..player import Player
-from .. import __version__
+from ..soul import NonSoulVerb
+from .. import base, lang, util, pubsub, __version__
 
 all_commands = {}
 LIBRARY_MODULE_NAME = "tale"
@@ -497,8 +497,8 @@ def do_force(player, parsed, ctx):
         raise ActionRefused("You cannot force <item>%s</> to do anything." % target.title)
     verb = parsed.args[1]
     # simple check for verb validness
-    if verb not in ctx.driver.get_current_verbs(target) and not player.soul.is_verb(verb):
-        raise ParseError("You cannot let them do '%s'; I don't know thatverb." % verb)
+    if verb not in ctx.driver.current_verbs(target) and not player.soul.is_verb(verb) and verb not in target.location.exits:
+        raise ParseError("You cannot let them do '%s'; I don't know that verb." % verb)
     cmd = parsed.unparsed.partition(verb)
     cmd = cmd[1] + cmd[2]
     room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
@@ -507,10 +507,22 @@ def do_force(player, parsed, ctx):
     player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
     if isinstance(target, Player):
         target.store_input_line(cmd)   # insert the command into the target player's input buffer
-    else:
-        # re-parse and execute the actual command for the target, from the viewpoint of the current player!
-        target_parsed = player.parse(cmd)
-        pubsub.topic("driver-pending-actions").send(lambda: target.do_socialize_cmd(target_parsed))
+        return
+    # re-parse and execute the actual command for the target, from the viewpoint of the current player!
+    # This duplicates some code from the driver (which executes it on the player's behalf)
+    # but here we execute it on the target's behalf (and not support all possibilities)
+    custom_verbs = set(ctx.driver.current_custom_verbs(target))
+    command_verbs = set(ctx.driver.current_verbs(target))
+    all_verbs = custom_verbs | command_verbs
+    try:
+        target_parsed = target.parse(cmd, all_verbs)
+        # simple soul emote, deal with it by socializing
+        # async: topic_pending_actions.send(lambda: target.do_socialize_cmd(target_parsed))
+        target.do_socialize_cmd(target_parsed)
+    except NonSoulVerb as x:
+        # not a soul emote, find the appropriate command to run.
+        # async: topic_pending_actions.send(lambda actor=player, parsed=x.parsed, ctx=ctx: target.do_forced_cmd(actor, parsed, ctx))
+        target.do_forced_cmd(player, x.parsed, ctx)
 
 
 @wizcmd("accounts")

@@ -125,7 +125,7 @@ class IoAdapterBase(object):
         if not prefix:
             return
         player = self.player_connection.player
-        verbs = [verb for verb in driver.get_current_verbs(player) if verb.startswith(prefix)]
+        verbs = [verb for verb in driver.current_verbs(player) if verb.startswith(prefix)]
         livings = [living.name for living in player.location.livings if living.name.startswith(prefix)]
         livings_aliases = [alias for living in player.location.livings for alias in living.aliases if alias.startswith(prefix)]
         items = [item.name for item in player.location.items if item.name.startswith(prefix)]

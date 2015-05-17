@@ -57,14 +57,15 @@ class Monster(NPC):
     """
     Special kind of NPC: a monster can be hostile and attack other Livings.
     Usually has Weapons, Armour, and attack actions.
+    Only of you set it to aggressive, it will be hostile upfront.
     """
     def init(self):
-        self.aggressive = True
+        self.aggressive = False
 
     def insert(self, item, actor):
-        """Giving stuff to a monster is... unwise."""
-        if actor is self or actor is not None and "wizard" in actor.privileges:
-            super(Monster, self).insert(item, actor)
+        """Giving stuff to an aggressive monster is... unwise."""
+        if actor is self or (actor is not None and "wizard" in actor.privileges) or not self.aggressive:
+            super(Monster, self).insert(item, self)
         else:
             raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
 

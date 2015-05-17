@@ -181,7 +181,7 @@ class ShopBehavior(object):
     msg_playercantsell = "I don't think you have that."
     msg_shopboughtitem = "Thank-you very much.  Here are your %d coins as payment."   # @todo money speller
     msg_shopcantafford = "I can't afford to buy anything, I'm only a poor peddler."
-    msg_shopdoesnotbuy = "I don't stock that stuff.  Try another shop."
+    msg_shopdoesnotbuy = "I don't buy that stuff.  Try another shop."
     msg_shopsolditem = "Here you go.  That'll be... %d coins."   # @todo money speller
     action_temper = "smoke"
     willbuy = set()

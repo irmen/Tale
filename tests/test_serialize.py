@@ -99,10 +99,10 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         self.assert_base_attrs(x)
         m = npc.Monster("name", "n", title="title", description="description", race="dragon")
-        self.assertTrue(m.aggressive)
+        self.assertFalse(m.aggressive)
         x = serializecycle(m)
         self.assert_base_attrs(x)
-        self.assertTrue(x.aggressive)
+        self.assertFalse(x.aggressive)
 
     def test_player_and_soul(self):
         o = soul.Soul()

@@ -111,7 +111,7 @@ class Player(base.Living, pubsub.Listener):
         return self
 
     def look(self, short=None):
-        """look around in your surroundings (exclude player from livings)"""
+        """look around in your surroundings (it excludes the player himself from livings)"""
         if short is None:
             if self.brief == 2:
                 short = True

@@ -283,6 +283,7 @@ alley.insert(MagicGameEnd(), None)
 shopinfo = ShopBehavior()
 shopkeeper = Shopkeeper("Lucy", "f", short_description="Lucy, the shop owner, is looking happily at her newly arrived customer.")
 shopkeeper.shop = shopinfo
+shopkeeper.money = 20000
 shop = Location("Curiosity Shoppe", "A weird little shop. It sells odd stuff.")
 shop.insert(shopkeeper, shop)
 shop.add_exits([Exit(["door", "out"], lane, "A fancy door provides access back to the lane outside.")])

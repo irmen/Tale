@@ -815,7 +815,7 @@ class Driver(pubsub.Listener):
                         parse_error = "Please be more specific."
                 if not handled:
                     if parsed.verb in player.location.exits:
-                        self.__go_through_exit(player, parsed.verb)
+                        self._go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                         func = command_verbs[parsed.verb]
@@ -836,10 +836,10 @@ class Driver(pubsub.Listener):
             except errors.RetryParse as x:
                 return self.__process_player_command(x.command, conn)   # try again but with new command string
 
-    def __go_through_exit(self, player, direction):
-        exit = player.location.exits[direction]
-        exit.allow_passage(player)
-        player.move(exit.target)
+    def _go_through_exit(self, player, direction):
+        xt = player.location.exits[direction]
+        xt.allow_passage(player)
+        player.move(xt.target)
         player.look()
 
     def __lookup_location(self, location_name):
@@ -909,6 +909,13 @@ class Driver(pubsub.Listener):
             verbs.update(exit.verbs)
         return verbs
 
+    def current_verbs(self, player):
+        """return a dict of all currently recognised verbs, and their help text"""
+        normal_verbs = self.commands.get(player.privileges)
+        verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
+        verbs.update(self.current_custom_verbs(player))
+        return verbs
+
     def show_motd(self, player, notify_no_motd=False):
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         try:
@@ -933,13 +940,6 @@ class Driver(pubsub.Listener):
         """
         conn = self.all_players.get(name)
         return conn.player if conn else None
-
-    def get_current_verbs(self, player):
-        """return a dict of all currently recognised verbs, and their help text"""
-        normal_verbs = self.commands.get(player.privileges)
-        verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
-        verbs.update(self.current_custom_verbs(player))
-        return verbs
 
     def do_wait(self, duration):
         # let time pass, duration is in game time (not real time).

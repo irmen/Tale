@@ -52,6 +52,7 @@ __all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living",
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
+async_dialogs = pubsub.topic("driver-async-dialogs")
 
 
 def heartbeat(klass):
@@ -248,9 +249,9 @@ class Item(MudObject):
     def init(self):
         self.contained_in = None
         self.default_verb = "examine"
-        self.cost = None    # price to buy
-        self.rent = None    # price to keep in store / day
-        self.weight = None  # some abstract unit
+        self.cost = 0.0    # price to buy
+        self.rent = 0.0    # price to keep in store / day
+        self.weight = 0.0  # some abstract unit
 
     def __contains__(self, item):
         raise ActionRefused("You can't look inside of that.")
@@ -859,6 +860,48 @@ class Living(MudObject):
                     if getattr(living, "aggressive", False):
                         pending_actions.send(lambda: living.start_attack(self))
 
+    @util.authorized("wizard")
+    def do_forced_cmd(self, actor, parsed, ctx):
+        """
+        Perform a (pre-parsed) command because the actor forced us to do it.
+
+        This code is fairly similar to the __process_player_command from the driver
+        but it doesn't deal with as many error situations, and just bails out if it gets confused.
+        It does try its best to support the following:
+         - custom location verbs (such as 'sell' in a shop)
+         - exit handling
+         - built-in cmds (such as 'drop'/'take')
+        Note that soul emotes are handled by do_socialize_cmd instead.
+        """
+        try:
+            if parsed.qualifier:
+                raise ParseError("That action doesn't support qualifiers.")  # for now, qualifiers are only supported on soul-verbs (emotes).
+            custom_verbs = set(ctx.driver.current_custom_verbs(self))
+            if parsed.verb in custom_verbs:
+                if self.location.handle_verb(parsed, self):       # @todo can't deal with yields yet
+                    pending_actions.send(lambda: self.location.notify_action(parsed, self))
+                    return
+                else:
+                    raise ParseError("That custom verb is not understood by the environment.")
+            if parsed.verb in self.location.exits:
+                ctx.driver._go_through_exit(self, parsed.verb)
+                return
+            command_verbs = set(ctx.driver.current_verbs(self))
+            if parsed.verb in command_verbs:
+                # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
+                func = ctx.driver.commands.get(self.privileges)[parsed.verb]
+                if getattr(func, "is_generator", False):
+                    dialog = func(self, parsed, ctx)
+                    async_dialogs.send((ctx.conn, dialog))    # enqueue as async, and continue
+                    return
+                func(self, parsed, ctx)
+                if func.enable_notify_action:
+                    pending_actions.send(lambda: self.location.notify_action(parsed, self))
+                return
+            raise ParseError("Command not understood.")
+        except Exception as x:
+            actor.tell("Error result from forced cmd: " + str(x))
+
     def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
         """
         Leave the current location, enter the new location (transactional).
@@ -971,6 +1014,10 @@ class Living(MudObject):
 
     def notify_action(self, parsed, actor):
         """Notify the living of an action performed by someone."""
+        pass
+
+    def look(self, short=None):
+        """look around in your surroundings. Dummy for base livings."""
         pass
 
 
