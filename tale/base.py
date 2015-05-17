@@ -444,11 +444,11 @@ class Location(MudObject):
                 paragraphs.append("<exit>Exits</>: " + ", ".join(sorted(set(self.exits.keys()))))
             if self.items:
                 item_names = sorted(item.name for item in self.items)
-                paragraphs.append("<item>You see</>: " + ", ".join(item_names))
+                paragraphs.append("<item>You see</>: " + lang.join(item_names))
             if self.livings:
                 living_names = sorted(living.name for living in self.livings if living != exclude_living)
                 if living_names:
-                    paragraphs.append("<living>Present</>: " + ", ".join(living_names))
+                    paragraphs.append("<living>Present</>: " + lang.join(living_names))
             return paragraphs
         # normal (long) output
         if self.description:

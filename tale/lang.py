@@ -9,6 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import re
 import bisect
+import collections
 from .tio import vfs
 
 # genders are m,f,n
@@ -18,16 +19,42 @@ OBJECTIVE = {"m": "him", "f": "her", "n": "it"}
 GENDERS = {"m": "male", "f": "female", "n": "neuter"}
 
 
-def join(words, conj="and"):
-    """join a list of words to 'a,b,c, and e'"""
-    words = list(words)
+class OrderedCounter(collections.Counter, collections.OrderedDict):
+    pass
+
+
+def join(words, conj="and", group_multi=True):
+    """
+    Join a list of words to 'a,b,c, and e'
+    If a word occurs multiple times (and group_multi=True),
+    show 'thing and thing' as 'two things' instead.
+    """
+    def apply_amount(count, word):
+        prefix, _, rest = word.partition(' ')
+        if rest and prefix in __articles:
+            # remove the article when we're dealing with multiple occurrences
+            word = rest
+        return spell_number(count) + " " + pluralize(word)
     if not words:
         return ""
+    words = list(words)
     if len(words) == 1:
         return words[0]
+    if group_multi and len(set(words)) == 1:
+        return apply_amount(len(words), words[0])  # all words are the same
     if len(words) == 2:
         return "%s %s %s" % (words[0], conj, words[1])
+    if group_multi:
+        counts = OrderedCounter(words)
+        words = []
+        for word, count in counts.items():
+            if count == 1:
+                words.append(word)
+            else:
+                words.append(apply_amount(count, word))
+        return join(words, conj, group_multi=False)
     return "%s, %s %s" % (", ".join(words[:-1]), conj, words[-1])
+
 
 
 __a_exceptions = {
@@ -37,6 +64,8 @@ __a_exceptions = {
     "hour": "an"
     # probably more, but these will have to do for now
 }
+
+__articles = {"the", "a", "an"}
 
 
 def a(word):
@@ -134,26 +163,47 @@ __number_words = [
     "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
 ]
-
+__tens_words = [
+    None, None, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+]
 
 def spell_number(number):
-    result = ""
+    """
+    Return a spelling of the number. Supports positive and negative ints,
+    floats, and recognises popular fractions such as 0.5 and 0.25.
+    Numbers that are very near a whole number are also returned as "about N".
+    Any fraction that can not be spelled out (or is larger than +/- 100) will
+    not be spelled out in words, but returned in numerical form.
+    """
+    def spell_positive_int(n):
+        if n <= 20:
+            return __number_words[n]
+        tens, ones = divmod(n, 10)
+        if tens <= 9:
+            if ones > 0:
+                return __tens_words[tens] + " " + __number_words[ones]
+            return __tens_words[tens]
+        return str(n)
+    sign = ""
+    orig_number = number
     if number < 0:
-        result = "minus "
+        sign = "minus "
         number = -number
-    if number > 20:
-        return result + str(number)
-    if number is int:
-        return result + __number_words[number]
-    int_number = int(number)
-    fraction = number - int_number
-    if fraction == 0:
-        fraction_txt = ""
+    whole, fraction = divmod(number, 1)
+    whole = int(whole)
+    if fraction == 0.0:
+        return sign + spell_positive_int(whole)
     elif fraction == 0.5:
-        fraction_txt = " and a half"
-    else:
-        return str(number)  # can't spell fractions other than 0.5
-    return result + __number_words[int_number] + fraction_txt
+        return sign + spell_positive_int(whole) + " and a half"
+    elif fraction == 0.25:
+        return sign + spell_positive_int(whole) + " and a quarter"
+    elif fraction == 0.75:
+        return sign + spell_positive_int(whole) + " and three quarters"
+    elif fraction > 0.995:
+        return "about " + sign + spell_positive_int(whole + 1)
+    elif fraction < 0.005:
+        return "about " + sign + spell_positive_int(whole)
+    return str(orig_number)  # can't spell other fractions
 
 
 __plural_irregularities = {
@@ -195,6 +245,8 @@ def pluralize(word, amount=2):
     if word.endswith("s") or word.endswith("ch") or word.endswith("x") or word.endswith("sh"):
         return word + "es"
     if word.endswith("y"):
+        if len(word) > 1 and word[-2] in "aeiou":
+            return word + "s"
         return word[:-1] + "ies"
     if word.endswith("f"):
         return word[:-1] + "ves"

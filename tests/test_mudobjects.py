@@ -33,7 +33,9 @@ class TestLocations(unittest.TestCase):
         self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
         self.key = Item("key", "rusty key", "an old rusty key without a label", short_description="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
+        self.magazine2 = Item("magazine", "university magazine")
         self.rat = NPC("rat", "n", race="rodent")
+        self.rat2 = NPC("rat", "n", race="rodent")
         self.fly = NPC("fly", "n", race="insect", short_description="A fly buzzes around your head.")
         self.julie = NPC("julie", "f", title="attractive Julie", description="She's quite the looker.")
         self.julie.aliases = {"chick"}
@@ -45,7 +47,7 @@ class TestLocations(unittest.TestCase):
         self.bag.insert(self.notebook_in_bag, self.player)
         self.player.insert(self.pencil, self.player)
         self.player.insert(self.bag, self.player)
-        self.hall.init_inventory([self.table, self.key, self.magazine, self.rat, self.julie, self.player, self.fly])
+        self.hall.init_inventory([self.table, self.key, self.magazine, self.magazine2, self.rat, self.rat2, self.julie, self.player, self.fly])
 
     def test_names(self):
         loc = Location("The Attic", "A dusty attic.")
@@ -62,11 +64,11 @@ class TestLocations(unittest.TestCase):
     def test_look(self):
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
-                    "Someone forgot a key. You see a university magazine and an oak table. Player, attractive Julie, and rat are here. A fly buzzes around your head."]
+                    "Someone forgot a key. You see two university magazines and an oak table. Player, attractive Julie, and two rats are here. A fly buzzes around your head."]
         self.assertEqual(expected, strip_text_styles(self.hall.look()))
         expected = ["[Main hall]", "A very large hall.",
                     "A heavy wooden door to the east blocks the noises from the street outside. A ladder leads up.",
-                    "Someone forgot a key. You see a university magazine and an oak table. Attractive Julie and rat are here. A fly buzzes around your head."]
+                    "Someone forgot a key. You see two university magazines and an oak table. Attractive Julie and two rats are here. A fly buzzes around your head."]
         self.assertEqual(expected, strip_text_styles(self.hall.look(exclude_living=self.player)))
         expected = ["[Attic]", "A dark attic."]
         self.assertEqual(expected, strip_text_styles(self.attic.look()))
@@ -74,15 +76,15 @@ class TestLocations(unittest.TestCase):
     def test_look_short(self):
         expected = ["[Attic]"]
         self.assertEqual(expected, strip_text_styles(self.attic.look(short=True)))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, player, rat"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present: fly, julie, player, and two rats"]
         self.assertEqual(expected, strip_text_styles(self.hall.look(short=True)))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, magazine, table", "Present: fly, julie, rat"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present: fly, julie, and two rats"]
         self.assertEqual(expected, strip_text_styles(self.hall.look(exclude_living=self.player, short=True)))
 
     def test_search_living(self):
         self.assertEqual(None, self.hall.search_living("<notexisting>"))
         self.assertEqual(None, self.attic.search_living("<notexisting>"))
-        self.assertEqual(self.rat, self.hall.search_living("rat"))
+        self.assertEqual(self.fly, self.hall.search_living("fly"))
         self.assertEqual(self.julie, self.hall.search_living("Julie"))
         self.assertEqual(self.julie, self.hall.search_living("attractive julie"))
         self.assertEqual(self.julie, self.hall.search_living("chick"))
