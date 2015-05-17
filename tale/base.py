@@ -948,22 +948,14 @@ class Living(MudObject):
         """
         if not name:
             raise ValueError("name must be given")
-        name = name.lower()
-        matches = containing_object = None
+        found = containing_object = None
         if include_inventory:
-            # @todo use util function search_item
             containing_object = self
-            matches = [item for item in self.__inventory if item.name == name]
-            if not matches:
-                # try the aliases or titles
-                matches = [item for item in self.__inventory if name in item.aliases or item.title.lower() == name]
-        if not matches and include_location:
+            found = util.search_item(name, self.__inventory)
+        if not found and include_location:
             containing_object = self.location
-            matches = [item for item in self.location.items if item.name == name]
-            if not matches:
-                # try the aliases or titles
-                matches = [item for item in self.location.items if name in item.aliases or item.title.lower() == name]
-        if not matches and include_containers_in_inventory:
+            found = util.search_item(name, self.location.items)
+        if not found and include_containers_in_inventory:
             # check if an item in the inventory might contain it
             for container in self.__inventory:
                 containing_object = container
@@ -972,13 +964,10 @@ class Living(MudObject):
                 except ActionRefused:
                     continue    # no access to inventory, just skip this item silently
                 else:
-                    matches = [item for item in inventory if item.name == name]
-                    if not matches:
-                        # try the aliases or titles
-                        matches = [item for item in inventory if name in item.aliases or item.title.lower() == name]
-                    if matches:
+                    found = util.search_item(name, inventory)
+                    if found:
                         break
-        return (matches[0], containing_object) if matches else (None, None)
+        return (found, containing_object) if found else (None, None)
 
     def start_attack(self, living):
         """Starts attacking the given living until death ensues on either side."""
