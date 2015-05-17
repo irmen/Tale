@@ -9,7 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import random
 from tale.base import Location, Exit, Item, heartbeat
-from tale.npc import Monster
+from tale.npc import NPC
 import tale.lang
 
 
@@ -23,7 +23,7 @@ key = Item("key", "rusty key", "An old rusty key without a label.")
 
 
 @heartbeat
-class Drone(Monster):
+class Drone(NPC):
     def heartbeat(self, ctx):
         rand = random.random()
         if rand < 0.07:

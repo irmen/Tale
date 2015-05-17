@@ -23,7 +23,7 @@ object hierarchy::
       |     +-- Player
       |     +-- NPC
       |          |
-      |          +-- Monster
+      |          +-- Shopkeeper
       |
       +-- Exit
             |
@@ -525,7 +525,7 @@ class Location(MudObject):
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
-        #@todo can't deal with yields yet so every handle_verb must return immediately without additional dialog
+        # @todo can't deal with yields yet so every handle_verb must return immediately without additional dialog
         handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)
         if not handled:
             handled = any(item.handle_verb(parsed, actor) for item in self.items)

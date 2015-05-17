@@ -56,7 +56,6 @@ def join(words, conj="and", group_multi=True):
     return "%s, %s %s" % (", ".join(words[:-1]), conj, words[-1])
 
 
-
 __a_exceptions = {
     "universe": "a",
     "university": "a",
@@ -167,6 +166,7 @@ __number_words = [
 __tens_words = [
     None, None, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
 ]
+
 
 def spell_number(number):
     """

@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import random
 from tale import lang, mud_context
-from tale.npc import NPC, Monster
+from tale.npc import NPC
 from tale.base import heartbeat
 from tale.util import message_nearby_locations
 
@@ -59,7 +59,7 @@ class TownCrier(NPC):
             self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
 
 
-class WalkingRat(Monster):
+class WalkingRat(NPC):
     def init(self):
         super(WalkingRat, self).init()
         mud_context.driver.defer(2, self.do_idle_action)

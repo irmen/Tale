@@ -340,7 +340,7 @@ class Driver(pubsub.Listener):
                     existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
                     existing_player.tell("\n")
                     state = existing_player.__getstate__()
-                    state["name"] = conn.player.name   #  we properly rename it just below
+                    state["name"] = conn.player.name   # we properly rename it just below
                     existing_player_location = existing_player.location
                     self._disconnect_mud_player(existing_player)
                     ctx = util.Context(self, self.game_clock, self.config, None)
@@ -758,7 +758,6 @@ class Driver(pubsub.Listener):
                 events, idle_time, subbers = topicinfo[topicname]
                 if events == 0 and not subbers and idle_time > 30:
                     pubsub.topic(topicname).destroy()
-
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
@@ -1213,7 +1212,7 @@ class Commands(object):
 
 
 @base.heartbeat
-class LimboReaper(npc.Monster):
+class LimboReaper(npc.NPC):
     """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
     def __init__(self):
         super(LimboReaper, self).__init__(

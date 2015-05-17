@@ -28,14 +28,14 @@ VALUE/APPRAISE  (ask shop keeper how much he is willing to pay for an item)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import random
 import datetime
-from .npc import Monster
+from .npc import NPC
 from .base import Item
 from .errors import ActionRefused, ParseError
 from . import mud_context
 from . import lang
 
 
-class Shopkeeper(Monster):
+class Shopkeeper(NPC):
     def init(self):
         super(Shopkeeper, self).init()
         self.shop = ShopBehavior()

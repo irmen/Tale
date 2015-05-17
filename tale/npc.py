@@ -16,16 +16,19 @@ from .errors import ActionRefused
 class NPC(base.Living):
     """
     Non-Player-Character: computer controlled entity.
-    These are neutral or friendly, aggressive NPCs should be Monsters.
+    These are neutral or friendly or aggressive (defaults to non-aggressive)
     """
     def __init__(self, name, gender, race="human", title=None, description=None, short_description=None):
         super(NPC, self).__init__(name, gender, race, title, description, short_description)
+        self.aggressive = False
 
     def insert(self, item, actor):
         """NPC have a bit nicer refuse message when giving items to them."""
-        if actor is self or actor is not None and "wizard" in actor.privileges:
-            super(NPC, self).insert(item, actor)
+        if not self.aggressive or actor is self or actor is not None and "wizard" in actor.privileges:
+            super(NPC, self).insert(item, self)
         else:
+            if self.aggressive:
+                raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
             raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
     def allow_give_money(self, actor, amount):
@@ -51,23 +54,6 @@ class NPC(base.Living):
                 else:
                     return xt
         return None
-
-
-class Monster(NPC):
-    """
-    Special kind of NPC: a monster can be hostile and attack other Livings.
-    Usually has Weapons, Armour, and attack actions.
-    Only of you set it to aggressive, it will be hostile upfront.
-    """
-    def init(self):
-        self.aggressive = False
-
-    def insert(self, item, actor):
-        """Giving stuff to an aggressive monster is... unwise."""
-        if actor is self or (actor is not None and "wizard" in actor.privileges) or not self.aggressive:
-            super(Monster, self).insert(item, self)
-        else:
-            raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
 
     def start_attack(self, victim):
         """

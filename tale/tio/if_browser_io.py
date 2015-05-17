@@ -53,7 +53,7 @@ def singlyfy_parameters(parameters):
     return parameters
 
 
-#@todo: protect the display and transmission of account/password input text
+# @todo: protect the display and transmission of account/password input text
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface.

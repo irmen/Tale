@@ -12,7 +12,7 @@ from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
 from tale.base import Location, Exit, Item, Living, MudObject, _limbo, Container, Weapon, Door, Key, clone
 from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused, LocationIntegrityError
-from tale.npc import NPC, Monster
+from tale.npc import NPC
 from tale.player import Player
 from tale.soul import ParseResult
 from tale.tio.iobase import strip_text_styles
@@ -180,7 +180,7 @@ class TestLocations(unittest.TestCase):
     def test_custom_verbs(self):
         player = Player("julie", "f")
         player.verbs["xywobble"] = "p1"
-        monster = Monster("snake", "f")
+        monster = NPC("snake", "f")
         monster.verbs["snakeverb"] = "s1"
         room = Location("room")
         chair1 = Item("chair1")
@@ -552,14 +552,12 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats["agi"] < 100)
-        dragon = Monster("dragon", "f", race="dragon")
+        dragon = NPC("dragon", "f", race="dragon")
         self.assertFalse(dragon.aggressive)
 
     def test_init_inventory(self):
         rat = NPC("rat", "n", race="rodent")
-        with self.assertRaises(ActionRefused):
-            rat.insert(Item("thing"), None)
-        rat.insert(Item("thing"), rat)
+        rat.insert(Item("thing"), None)
         wizz = Player("wizard", "f")
         wizz.privileges.add("wizard")
         rat.insert(Item("thing2"), wizz)
@@ -602,9 +600,9 @@ class TestNPC(unittest.TestCase):
         self.assertEqual(room1, room2.npc_arrived_from)
 
 
-class TestMonster(unittest.TestCase):
+class TestAggressiveNpc(unittest.TestCase):
     def test_init_inventory(self):
-        rat = Monster("rat", "n", race="rodent")
+        rat = NPC("rat", "n", race="rodent")
         rat.aggressive = True
         with self.assertRaises(ActionRefused):
             rat.insert(Item("thing"), None)
@@ -616,7 +614,8 @@ class TestMonster(unittest.TestCase):
         stuff = [Item("thing")]
         with self.assertRaises(AssertionError):
             rat.init_inventory(stuff)
-        rat = Monster("rat", "n", race="rodent")
+        rat = NPC("rat", "n", race="rodent")
+        rat.aggressive = True
         rat.init_inventory(stuff)
         self.assertEqual(1, rat.inventory_size)
 
@@ -731,7 +730,7 @@ class TestDestroy(unittest.TestCase):
         ctx = Context(driver=mud_context.driver, clock=None, config=None, player_connection=None)
         thing = Item("thing")
         player = Player("julie", "f")
-        wolf = Monster("wolf", "m")
+        wolf = NPC("wolf", "m")
         loc = Location("loc")
         mud_context.driver.defer(datetime.datetime.now(), thing.move)
         mud_context.driver.defer(datetime.datetime.now(), player.move)
@@ -840,7 +839,7 @@ class TestItem(unittest.TestCase):
     def test_move(self):
         hall = Location("hall")
         person = Living("person", "m", race="human")
-        monster = Monster("dragon", "f", race="dragon")
+        monster = NPC("dragon", "f", race="dragon")
         monster.aggressive = True
         key = Item("key")
         stone = Item("stone")
