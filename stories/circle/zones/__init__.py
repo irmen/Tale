@@ -187,7 +187,7 @@ def make_item(vnum):
         item = MagicItem(name, title, short_description=c_obj.longdesc)
         #@todo staff/wand attrs
     elif c_obj.type == "trash":
-        item = Scroll(name, title, short_description=c_obj.longdesc)
+        item = Trash(name, title, short_description=c_obj.longdesc)
         #@todo trash attrs
     elif c_obj.type == "drinkcontainer":
         item = Drink(name, title, short_description=c_obj.longdesc)
@@ -195,9 +195,6 @@ def make_item(vnum):
     elif c_obj.type == "potion":
         item = Potion(name, title, short_description=c_obj.longdesc)
         #@todo potion attrs
-    elif c_obj.type == "food":
-        item = Food(name, title, short_description=c_obj.longdesc)
-        #@todo food attrs
     elif c_obj.type == "money":
         item = Money(name, title, short_description=c_obj.longdesc)
         #@todo money attrs
@@ -208,7 +205,7 @@ def make_item(vnum):
         item = Wearable(name, title, short_description=c_obj.longdesc)
         #@todo worn attrs
     elif c_obj.type == "fountain":
-        item = Wearable(name, title, short_description=c_obj.longdesc)
+        item = Fountain(name, title, short_description=c_obj.longdesc)
         #@todo fountain attrs
     elif c_obj.type in ("treasure", "other"):
         item = Item(name, title, short_description=c_obj.longdesc)
@@ -237,9 +234,9 @@ def make_shop(vnum):
         shop.shopkeeper_vnum = c_shop.shopkeeper   # keep the vnum of the shopkeeper
         shop.banks_money = c_shop.banks
         shop.will_fight = c_shop.fights
-        shop.buyprofit = c_shop.buyprofit
+        shop.buyprofit = c_shop.buyprofit       # price factor when shop buys an item
         assert shop.buyprofit <= 1.0
-        shop.sellprofit = c_shop.sellprofit
+        shop.sellprofit = c_shop.sellprofit     # price factor when shop sells item
         assert shop.sellprofit >= 1.0
         open_hrs = (max(0, c_shop.open1), min(24, c_shop.close1))
         shop.open_hours = [open_hrs]
@@ -263,7 +260,7 @@ def make_shop(vnum):
         shop.msg_shopcantafford = c_shop.msg_shopcantafford
         shop.msg_shopdoesnotbuy = c_shop.msg_shopdoesnotbuy
         shop.msg_shopsolditem = c_shop.msg_shopsolditem
-        shop.msg_temper = c_shop.msg_temper
+        shop.action_temper = c_shop.msg_temper
         shop.willbuy = c_shop.willbuy
         shop.wontdealwith = c_shop.wontdealwith
         converted_shops[vnum] = shop
@@ -302,6 +299,13 @@ def init_zones():
                 num_items += 1
             if inventory:
                 mob.init_inventory(inventory)
+            if mobref.vnum in all_shopkeepers:
+                # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
+                if mob.inventory_size < len(mob.shop.forsale):
+                    raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" % (mobref.vnum, mob.shop.vnum))
+                for item in mob.shop.forsale:
+                    if not any(i for i in mob.inventory if i.title == item.title):
+                        raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" % (item.vnum, item.title, mobref.vnum))
             loc = make_location(mobref.room)
             loc.insert(mob, None)
             num_mobs += 1

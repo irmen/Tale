@@ -476,7 +476,7 @@ def do_pubsub(player, parsed, ctx):
     pending = pubsub.pending()
     player.tell("<bright>Pending pubsub messages overview.</>", "Active topics (from %d total):" % len(pending))
     total_pending = 0
-    txt = ["<ul>  topic                                            <dim>|</><ul>#pending</><dim>|</><ul>idle sec.</><dim>|</><ul>subs</>"]
+    txt = ["<ul>  topic                                            <dim>|</><ul>#pending<dim>|</><ul>idle sec.<dim>|</><ul>subs</>"]
     for topic in sorted(pending, key=lambda t: str(t)):
         num_pending, idle_time, subbers = pending[topic]
         total_pending += num_pending

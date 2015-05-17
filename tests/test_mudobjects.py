@@ -522,7 +522,7 @@ class TestLiving(unittest.TestCase):
         julie.show_inventory(julie, ctx)
         pubsub.sync()
         text = " ".join(msg.strip() for msg in collector.messages)
-        self.assertEqual("Julie is carrying: key Money in possession: 9 dollar and 23 cent.", text)
+        self.assertEqual("Julie is carrying: key Money in possession: 9 dollars and 23 cents.", text)
         ctx.config.money_type = None
         ctx.driver.moneyfmt = None
         collector.clear()

@@ -11,7 +11,8 @@ from tale.base import Location, Exit, Door, Item, Container, Key, clone
 from tale.npc import NPC
 from tale.player import Player
 from tale.errors import ActionRefused
-from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
+from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch, diamond
+from tale.shop import ShopBehavior, Shopkeeper
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -146,6 +147,7 @@ lane.add_exits([end_door])
 
 class Computer(Item):
     def init(self):
+        super(Computer, self).init()
         self.aliases = {"keyboard", "screen", "wires"}
 
     def allow_item_move(self, actor, verb="move"):
@@ -275,3 +277,30 @@ class MagicGameEnd(Item):
 
 
 alley.insert(MagicGameEnd(), None)
+
+
+# add a shop next to the square
+shopinfo = ShopBehavior()
+shopkeeper = Shopkeeper("Lucy", "f", short_description="Lucy, the shop owner, is looking happily at her newly arrived customer.")
+shopkeeper.shop = shopinfo
+shop = Location("Curiosity Shoppe", "A weird little shop. It sells odd stuff.")
+shop.insert(shopkeeper, shop)
+shop.add_exits([Exit(["door", "out"], lane, "A fancy door provides access back to the lane outside.")])
+lane.add_exits([Exit(["shop", "north east", "northeast", "ne"], shop, "There's a curiosity shop to the north-east.")])
+# provide some items in the shop
+clock = clone(gameclock)
+clock.cost = 500
+paper = clone(newspaper)
+gem2 = clone(diamond)
+gem2.cost = 80000
+gem3 = clone(gem)
+gem3.cost = 9055
+shopkeeper.init_inventory([gem2, gem3])
+shop.insert(clock, shop)
+shop.insert(paper, shop)
+lamp = Item("lamp", "rather small lamp")
+lamp.cost = 600
+customer = NPC("James", "m", title="Sir James")
+customer.insert(lamp, customer)
+shop.insert(customer, shop)
+

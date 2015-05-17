@@ -630,7 +630,8 @@ class Driver(pubsub.Listener):
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
             except soul.UnknownVerbException as x:
-                if x.verb in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest", "up", "down"}:
+                if x.verb in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest",
+                              "north east", "north west", "south east", "south west", "up", "down"}:
                     p.tell("You can't go in that direction.")
                 else:
                     p.tell("The verb '%s' is unrecognized." % x.verb)
@@ -807,7 +808,7 @@ class Driver(pubsub.Listener):
                 parse_error = "That doesn't make much sense."
                 handled = False
                 if parsed.verb in custom_verbs:
-                    handled = player.location.handle_verb(parsed, player)
+                    handled = player.location.handle_verb(parsed, player)       # @todo can't deal with yields yet
                     if handled:
                         topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
                     else:

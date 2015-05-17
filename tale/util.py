@@ -113,9 +113,9 @@ class MoneyFormatter(object):
         cents = round(cents * 100.0)
         result = []
         if dollar:
-            result.append("%d dollar" % dollar)
+            result.append("%d " % dollar + lang.pluralize("dollar", dollar))
         if cents:
-            result.append("%d cent" % cents)
+            result.append("%d " % cents + lang.pluralize("cent", cents))
         if result:
             return lang.join(result)
         return zero_msg

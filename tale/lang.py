@@ -135,6 +135,7 @@ def possessive(name):
 
 
 def capital(string):
+    # cannot use string.capitalize because that lowercases the rest
     if string:
         string = string[0].upper() + string[1:]
     return string

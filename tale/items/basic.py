@@ -14,7 +14,7 @@ from .. import lang, mud_context
 
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
-           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable"]
+           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain"]
 
 
 class Boxlike(Container):
@@ -149,17 +149,20 @@ class Note(Item):
 
 class Light(Item):
     def init(self):
+        super(Light, self).init()
         self.capacity = 0   # hours (-1=eternal, 0=burned out)
 
 
 class Scroll(Item):
     def init(self):
+        super(Scroll, self).init()
         self.spell_level = 0   # level of spells
         self.spells = set()
 
 
 class MagicItem(Weapon):
     def init(self):
+        super(MagicItem, self).init()
         self.spell_level = 0
         self.charges = 0
         self.spell = None
@@ -172,6 +175,7 @@ class Trash(Item):
 
 class Drink(Item):
     def init(self):
+        super(Drink, self).init()
         self.contents = "water"
         self.capacity = 1
         self.quantity = 0
@@ -183,30 +187,36 @@ class Drink(Item):
 
 class Potion(Drink):
     def init(self):
+        super(Potion, self).init()
         self.spell_level = 0
         self.spells = set()
 
 
 class Food(Item):
     def init(self):
+        super(Food, self).init()
         self.affect_fullness = 0
         self.poisoned = False
 
 
 class Money(Item):
-    pass
+    def init(self):
+        super(Money, self).init()
 
 
 class Boat(Item):
-    pass
+    def init(self):
+        super(Boat, self).init()
 
 
 class Wearable(Item):
-    pass
+    def init(self):
+        super(Wearable, self).init()
 
 
 class Fountain(Item):
     def init(self):
+        super(Fountain, self).init()
         self.contents = "water"
         self.capacity = 1
         self.quantity = 0
@@ -226,6 +236,7 @@ newspaper.text = """
 
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
+diamond = Item("diamond", "large blinking diamond", "This is the biggest diamond you have ever seen.")
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
 trashcan = Boxlike("trashcan", "dented steel trashcan")
 gameclock = GameClock("clock")

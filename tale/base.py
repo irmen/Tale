@@ -288,7 +288,8 @@ class Item(MudObject):
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
-        The silent and is_player arguments are not used when moving items.
+        The silent and is_player arguments are not used when moving items -- they're used
+        for the movement of livings.
         """
         actor = actor or self
         self.allow_item_move(actor, verb)
@@ -523,6 +524,7 @@ class Location(MudObject):
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
+        #@todo can't deal with yields yet so every handle_verb must return immediately without additional dialog
         handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)
         if not handled:
             handled = any(item.handle_verb(parsed, actor) for item in self.items)

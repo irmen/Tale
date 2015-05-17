@@ -84,9 +84,9 @@ def parse_file(shpFile):
         if temperArg == '-1':
             temperArg = None
         elif temperArg == '0':
-            temperArg = 'The shopkeeper pukes on the player.'
+            temperArg = 'puke'
         elif temperArg == '1':
-            temperArg = 'The shopkeeper smokes his joint.'
+            temperArg = 'smoke'
         else:
             temperArg = None
 

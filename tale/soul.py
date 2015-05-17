@@ -148,6 +148,7 @@ VERBS = {
 "excuse":    ( PERS, None, " \nHOW excuse$ \nMYself", " \nHOW excuse$ \nMYself to \nWHO" ),
 "beg":       ( PERS, None, "beg$ \nHOW", "beg$ \nWHO for mercy \nHOW" ),
 "fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
+"fear":      ( PERS, None, "shiver$ \nHOW with fear", "fear$ \nWHO \nHOW" ),
 "headshake": ( SIMP, None, "shake$ \nYOUR head \nAT \nHOW", "at" ),
 "shake":     ( SIMP, ( "like a bowlful of jello", ), "shake$ \nAT \nHOW", "" ),
 "jiggle":    ( SIMP, ( "like a bowlful of jello", ), "jiggle$ \nAT \nHOW", "" ),
@@ -172,6 +173,7 @@ VERBS = {
 # "search":    ( DEUX, ("thoroughly",), "search \nWHO \nHOW, where is it?", "searches \nWHO \nHOW, where is it?"),    # replaced by a command
 "sniff":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
 "smell":     ( PERS, None, "sniff$. What's that smell?", "sniff$ \nWHO. What's that smell?" ),
+"smoke":     ( PERS, None, "smoke$ a cigar, and blow$ out the smoke.", "smoke$ a cigar, and blow$ the smoke at \nWHO." ),
 
 # Message-based verbs
 "curse":    ( PERS, None, "curse$ \nWHAT \nHOW", "curse$ \nWHO \nHOW" ),
