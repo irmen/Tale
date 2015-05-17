@@ -104,7 +104,11 @@ class Player(base.Living, pubsub.Listener):
         if messages == ("\n",):
             self._output.p()
         else:
-            msg = " ".join(str(msg) for msg in messages)
+            sep = " "
+            if "sep" in kwargs:
+                sep = kwargs["sep"]
+                del kwargs["sep"]
+            msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self
 
