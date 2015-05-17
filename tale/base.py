@@ -249,7 +249,7 @@ class Item(MudObject):
     def init(self):
         self.contained_in = None
         self.default_verb = "examine"
-        self.cost = 0.0    # price to buy
+        self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
 
@@ -951,6 +951,7 @@ class Living(MudObject):
         name = name.lower()
         matches = containing_object = None
         if include_inventory:
+            # @todo use util function search_item
             containing_object = self
             matches = [item for item in self.__inventory if item.name == name]
             if not matches:

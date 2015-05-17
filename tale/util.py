@@ -437,3 +437,21 @@ def authorized(*privileges):
     if not privileges:
         raise ValueError("privileges must contain at least one value")
     return checked
+
+
+def search_item(name, collection):
+    """
+    Searches an item (by name) in a collection of Items.
+    Returns the first match. Also considers aliases and titles.
+    """
+    name = name.lower()
+    items = [i for i in collection if i.name == name]
+    if not items:
+        # try the aliases or titles
+        items = [i for i in collection if name in i.aliases or i.title.lower() == name]
+    return items[0] if items else None
+
+
+def sorted_by_name(stuff):
+    return sorted(stuff, key=lambda thing: thing.name.lower())
+

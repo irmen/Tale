@@ -215,7 +215,7 @@ def make_item(vnum):
         item.add_extradesc(ed["keywords"], ed["text"])
     item.vnum = vnum  # keep the vnum
     item.aliases = aliases
-    item.cost = c_obj.cost
+    item.value = c_obj.cost
     item.rent = c_obj.rent
     item.weight = c_obj.weight
     # @todo: affects, effects, wear, typespecifics
@@ -282,8 +282,8 @@ def init_zones():
                 shop_vnums = [vnum for vnum, shop in shops.items() if shop.shopkeeper == mobref.vnum]
                 assert len(shop_vnums) == 1
                 shop_vnum = shop_vnums[0]
-                shop = make_shop(shop_vnum)
-                mob.shop = shop
+                shopdata = make_shop(shop_vnum)
+                mob.shop = shopdata
                 num_shops += 1
             else:
                 mob = make_mob(mobref.vnum)

@@ -12,7 +12,6 @@ LIST [item type]
 BUY
   > buy sword        (buy the first sword on the list)
   > buy #3           (buy the third item on the list)
-  > buy #4 sword     (buy the fourth sword on the list)
   > buy 10 bread     (buy 10 pieces of bread)
   > buy 10 #2        (buy 10 of the second item on the list)
 SELL
@@ -29,10 +28,14 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import random
 import datetime
 from .npc import NPC
-from .base import Item
+from .base import Item, clone
 from .errors import ActionRefused, ParseError
+from .util import search_item, sorted_by_name
 from . import mud_context
 from . import lang
+
+
+banking_money_limit = 15000.0
 
 
 class Shopkeeper(NPC):
@@ -47,6 +50,13 @@ class Shopkeeper(NPC):
             "value": "Ask the shopkeeper about what he's willing to pay for an item",
             "appraise": "Ask the shopkeeper about what he's willing to pay for an item",
         }
+
+    def set_shop(self, shop):
+        if any(item not in self for item in shop.forsale):
+            raise ValueError("not all items from shop.forsale are in the shopkeeper's inventory")
+        self.shop = shop
+        if self.shop.banks_money:
+            self.money = min(self.money, banking_money_limit)   # make sure we don't have surplus cash
 
     def do_wander(self, ctx):
         # let the shopkeeper wander randomly
@@ -84,12 +94,12 @@ class Shopkeeper(NPC):
         designator = info.previous_word or ""
         return item, designator
 
-    def _sorted_inventory(self):
-        return self.inventory
-
     def handle_verb(self, parsed, actor):
+        if self.shop.banks_money:
+            self.money = min(self.money, banking_money_limit)   # make sure we don't have surplus cash
         self.validate_open_hours(actor)
         subj_cap = lang.capital(self.subjective)
+        moneyfmt_display = mud_context.driver.moneyfmt.display
         if parsed.verb in ("shop", "list"):
             open_hrs = lang.join(["%d to %d" % hours for hours in self.shop.open_hours])
             actor.tell("%s says: \"Welcome. Our opening hours are:" % lang.capital(self.title), open_hrs)
@@ -105,9 +115,9 @@ class Shopkeeper(NPC):
             else:
                 actor.tell("%s shows you a list of what is in stock at the moment:" % subj_cap, end=True)
                 txt = ["<ul>  # <dim>|</><ul>  item                        <dim>|</><ul> price     </>"]
-                for i, item in enumerate(self._sorted_inventory(), start=1):
-                    price = item.cost * self.shop.sellprofit
-                    txt.append("%3d. %-30s  %s" % (i, item.title, mud_context.driver.moneyfmt.display(price)))
+                for i, item in enumerate(sorted_by_name(self.inventory), start=1):
+                    price = item.value * self.shop.sellprofit
+                    txt.append("%3d. %-30s  %s" % (i, item.title, moneyfmt_display(price)))
                 actor.tell(*txt, format=False)
             return True
 
@@ -115,29 +125,59 @@ class Shopkeeper(NPC):
             item, designator = self._parse_item(parsed, actor)
             if designator:
                 raise ParseError("designator not yet supported")   # @todo handle designator
-            if item.cost <= 0:
+            if item.value <= 0:
                 actor.tell("%s tells you it's worthless." % lang.capital(self.title))
                 return True
-            price = item.cost * self.shop.buyprofit
-            value_str = mud_context.driver.moneyfmt.display(price)
+            price = item.value * self.shop.buyprofit
+            value_str = moneyfmt_display(price)
             actor.tell("%s appraises the %s." % (lang.capital(self.title), item.name))
             actor.tell("%s tells you: \"I'll give you %s for it.\"" % (lang.capital(self.subjective), value_str))
             return True
 
         elif parsed.verb == "buy":
-            item, designator = None, None  # @todo buy from shop inventory
+            if len(parsed.args) == 2:
+                designator, name = parsed.args
+            elif len(parsed.args) == 1:
+                designator, name = None, parsed.args[0]
+            else:
+                raise ParseError("I don't understand what you want to buy.")
             if designator:
                 raise ParseError("designator not yet supported")   # @todo handle designator
-            actor.tell(self.shop.msg_playercantbuy)
-            # @todo check banks_money
+            # check if the item is in the limitless forsale list
+            item = search_item(name, self.shop.forsale)
+            if item:
+                item = clone(item)  # make a clone and sell that, the forsale items should never run out
+            else:
+                # search inventory
+                item = self.search_item(name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
+            if not item:
+                actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantbuy))
+                return True
+            # sell the item
+            price = item.value * self.shop.sellprofit
+            if price > actor.money:
+                actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantafford))
+                if self.shop.action_temper:
+                    self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
+                return True
+            item.move(actor, actor)
+            actor.money -= price
+            self.money += price
+            assert actor.money >= 0.0
             self.do_socialize("thank " + actor.name)
+            actor.tell("You've bought the %s!" % item.name)
+            if self.shop.banks_money:
+                # shopkeeper puts money over a limit in the bank
+                if self.money > banking_money_limit:
+                    self.tell_others("Swiftly, %s puts some excess money away in a secret stash somewhere. You failed to see where it went." % self.title)
+                    self.money = banking_money_limit
             return True
 
         elif parsed.verb == "sell":
             item, designator = self._parse_item(parsed, actor)
             if designator:
                 raise ParseError("designator not yet supported")   # @todo handle designator
-            if item.cost <= 0:
+            if item.value <= 0:
                 actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopdoesnotbuy))
                 if self.shop.action_temper:
                     self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
@@ -145,7 +185,7 @@ class Shopkeeper(NPC):
             # @todo check wontdealwith
             # @todo check item type
             # check money
-            price = item.cost * self.shop.buyprofit
+            price = item.value * self.shop.buyprofit
             limit = self.money * 0.75   # shopkeeper should not spend more than 75% of his money on a single sale
             if price >= limit:
                 actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopcantafford))
@@ -156,9 +196,15 @@ class Shopkeeper(NPC):
             assert self.money >= 0.0
             actor.tell("You've sold the %s." % item.name)
             if self.shop.msg_shopboughtitem:
-                actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopboughtitem % price))   # @todo money format
+                if "%d" in self.shop.msg_shopboughtitem:
+                    # old-style (circle) message with just a numeric value for the money
+                    bought_msg = self.shop.msg_shopboughtitem % price
+                else:
+                    # new-style (tale) message with a %s placeholder for the money text
+                    bought_msg = self.shop.msg_shopboughtitem % moneyfmt_display(price)
+                actor.tell("%s says: \"%s\"" % (lang.capital(self.title), bought_msg))
             else:
-                actor.tell("%s gave you %s for it." % (lang.capital(self.title), mud_context.driver.moneyfmt.display(price)))
+                actor.tell("%s gave you %s for it." % (lang.capital(self.title), moneyfmt_display(price)))
             self.do_socialize("thank " + actor.name)
             return True
 
@@ -175,14 +221,14 @@ class ShopBehavior(object):
     _buyprofit = 0.3     # price factor when shop buys item
     _sellprofit = 1.6    # price factor when shop sells item
     open_hours = [(9, 17), (18, 22)]
-    forsale = set()     # items the shop always sells no matter how many are bought
+    forsale = set()     # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
     msg_playercantafford = "No cash, no goods!"
     msg_playercantbuy = "We don't sell that."
     msg_playercantsell = "I don't think you have that."
-    msg_shopboughtitem = "Thank-you very much.  Here are your %d coins as payment."   # @todo money speller
+    msg_shopboughtitem = "Thank-you very much.  Here are your %s as payment."
     msg_shopcantafford = "I can't afford to buy anything, I'm only a poor peddler."
     msg_shopdoesnotbuy = "I don't buy that stuff.  Try another shop."
-    msg_shopsolditem = "Here you go.  That'll be... %d coins."   # @todo money speller
+    msg_shopsolditem = "Here you go.  That'll be... %s."
     action_temper = "smoke"
     willbuy = set()
     wontdealwith = set()

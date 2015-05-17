@@ -281,27 +281,32 @@ alley.insert(MagicGameEnd(), None)
 
 # add a shop next to the square
 shopinfo = ShopBehavior()
+toothpick = Item("toothpick", "pointy wooden toothpick")
+toothpick.value = 0.12
+shopinfo.forsale.add(toothpick)
+shopinfo.banks_money = True
 shopkeeper = Shopkeeper("Lucy", "f", short_description="Lucy, the shop owner, is looking happily at her newly arrived customer.")
-shopkeeper.shop = shopinfo
-shopkeeper.money = 20000
+shopkeeper.money = 14000
 shop = Location("Curiosity Shoppe", "A weird little shop. It sells odd stuff.")
 shop.insert(shopkeeper, shop)
 shop.add_exits([Exit(["door", "out"], lane, "A fancy door provides access back to the lane outside.")])
 lane.add_exits([Exit(["shop", "north east", "northeast", "ne"], shop, "There's a curiosity shop to the north-east.")])
 # provide some items in the shop
 clock = clone(gameclock)
-clock.cost = 500
+clock.value = 500
 paper = clone(newspaper)
 gem2 = clone(diamond)
-gem2.cost = 80000
+gem2.value = 80000
 gem3 = clone(gem)
-gem3.cost = 9055
-shopkeeper.init_inventory([gem2, gem3])
+gem3.value = 9055
+shopkeeper.init_inventory([gem2, gem3, toothpick])
+shopkeeper.set_shop(shopinfo)
 shop.insert(clock, shop)
 shop.insert(paper, shop)
 lamp = Item("lamp", "rather small lamp")
-lamp.cost = 600
-customer = NPC("James", "m", title="Sir James")
+lamp.value = 600
+customer = NPC("James", "m", title="Sir James", description="Sir James is trying to sell something, it looks like a lamp.")
+customer.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather unremarkable. There is something weird going on with the cord though!")
+customer.add_extradesc({"cord"}, "Even when the lamp doesn't move, the power cord keeps snaking around as if it were alive. How odd.")
 customer.insert(lamp, customer)
 shop.insert(customer, shop)
-

@@ -17,7 +17,7 @@ class TestShopping(unittest.TestCase):
         self.shopkeeper = Shopkeeper("lucy", "f")
         shop = ShopBehavior()
         shop.open_hours = [(9, 17), (22, 3)]    # from 9 to 17 and in the night from 22 to 03
-        self.shopkeeper.shop = shop
+        self.shopkeeper.set_shop(shop)
 
     def test_open_hours(self):
         self.shopkeeper.validate_open_hours(current_time=datetime.time(9, 0))

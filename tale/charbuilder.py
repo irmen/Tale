@@ -46,8 +46,9 @@ class CharacterBuilder(object):
         naming.name = yield "input", ("Name?", MudAccounts.accept_name)
         naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
         naming.gender = naming.gender[0]
-        self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
-        naming.race = yield "input", ("Player race?", validate_race)
+        naming.race = "human"   # @todo race fixed at 'human' for now
+        # self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+        # naming.race = yield "input", ("Player race?", validate_race)
         naming.description = "A regular person."
         self.continue_dialog(naming)
 
