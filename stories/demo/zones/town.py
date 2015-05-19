@@ -16,9 +16,9 @@ from tale.shop import ShopBehavior, Shopkeeper
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
-square = Location("Essglen Town square",
+square = Location("Town square",
     """
-    The old town square of Essglen. It is not much really, and narrow
+    The old town square of the village. It is not much really, and narrow
     streets quickly lead away from the small fountain in the center.
     """)
 
@@ -74,7 +74,7 @@ class WizardTowerEntry(Exit):
 
 lane.add_exits([WizardTowerEntry("west", "wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
-towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier of Essglen is awfully quiet today. She seems rather preoccupied with something.")
+towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier is awfully quiet today. She seems rather preoccupied with something.")
 towncrier.aliases = {"crier", "town crier"}
 
 idiot = VillageIdiot("idiot", "m", title="blubbering idiot", description="""

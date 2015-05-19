@@ -318,23 +318,24 @@ class Shopkeeper(NPC):
 
 class ShopBehavior(object):
     """the data describing the behavior of a particular shop"""
-    shopkeeper_vnum = None     # used for circle data to designate the shopkeeper belonging to this shop
-    banks_money = False
-    will_fight = False
-    _buyprofit = 0.3     # price factor when shop buys item
-    _sellprofit = 1.6    # price factor when shop sells item
-    open_hours = [(9, 17), (18, 22)]
-    forsale = set()     # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
-    msg_playercantafford = "No cash, no goods!"
-    msg_playercantbuy = "We don't sell that."
-    msg_playercantsell = "I don't think you have that."
-    msg_shopboughtitem = "Thank-you very much.  Here are your %s as payment."
-    msg_shopcantafford = "I can't afford to buy anything, I'm only a poor peddler."
-    msg_shopdoesnotbuy = "I don't buy that stuff.  Try another shop."
-    msg_shopsolditem = "Here you go.  That'll be... %s."
-    action_temper = "smoke"
-    willbuy = set()
-    wontdealwith = set()
+    def __init__(self):
+        self.shopkeeper_vnum = None     # used for circle data to designate the shopkeeper belonging to this shop
+        self.banks_money = False
+        self.will_fight = False
+        self._buyprofit = 0.3     # price factor when shop buys item
+        self._sellprofit = 1.6    # price factor when shop sells item
+        self.open_hours = [(9, 17), (18, 22)]
+        self.forsale = set()     # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
+        self.msg_playercantafford = "No cash, no goods!"
+        self.msg_playercantbuy = "We don't sell that."
+        self.msg_playercantsell = "I don't think you have that."
+        self.msg_shopboughtitem = "Thank-you very much.  Here are your %s as payment."
+        self.msg_shopcantafford = "I can't afford to buy anything, I'm only a poor peddler."
+        self.msg_shopdoesnotbuy = "I don't buy that stuff.  Try another shop."
+        self.msg_shopsolditem = "Here you go.  That'll be... %s."
+        self.action_temper = "smoke"
+        self.willbuy = set()
+        self.wontdealwith = set()
 
     @property
     def buyprofit(self):

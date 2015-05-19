@@ -91,8 +91,8 @@ You may want to go to the Town Square and say hello to the people standing there
 
     >> look
 
-      [Essglen Town square]
-      The old town square of Essglen.  It is not much really, and narrow
+      [Town square]
+      The old town square of the village.  It is not much really, and narrow
       streets quickly lead away from the small fountain in the center.
       There's an alley to the south.  A long straight lane leads north towards
       the horizon.

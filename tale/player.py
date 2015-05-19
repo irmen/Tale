@@ -14,6 +14,7 @@ import shelve
 import threading
 import datetime
 import re
+import sys
 from contextlib import closing
 from . import base
 from . import lang
@@ -36,6 +37,10 @@ except ImportError:
 except Exception as x:
     # pypy can generate a distutils error somehow if dbm is not available
     dbm = None
+if sys.version_info < (3, 0):
+    input = raw_input
+else:
+    input = input
 
 
 class Player(base.Living, pubsub.Listener):
