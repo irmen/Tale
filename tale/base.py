@@ -467,9 +467,11 @@ class Location(MudObject):
         items_and_livings = []
         items_with_short_descr = [item for item in self.items if item.short_description]
         items_without_short_descr = [item for item in self.items if not item.short_description]
+        uniq_descriptions = set()
         if items_with_short_descr:
             for item in items_with_short_descr:
-                items_and_livings.append(item.short_description)
+                uniq_descriptions.add(item.short_description)
+        items_and_livings.extend(uniq_descriptions)
         if items_without_short_descr:
             titles = sorted([lang.a(item.title) for item in items_without_short_descr])
             items_and_livings.append("You see " + lang.join(titles) + ".")
@@ -484,9 +486,11 @@ class Location(MudObject):
                 else:
                     titles_str += " is here."
                 items_and_livings.append(lang.capital(titles_str))
+        uniq_descriptions = set()
         if livings_with_short_descr:
             for living in livings_with_short_descr:
-                items_and_livings.append(living.short_description)
+                uniq_descriptions.add(living.short_description)
+        items_and_livings.extend(uniq_descriptions)
         if items_and_livings:
             paragraphs.append(" ".join(items_and_livings))
         return paragraphs
@@ -850,7 +854,7 @@ class Living(MudObject):
         who, actor_message, room_message, target_message = self.soul.process_verb_parsed(self, parsed)
         self.tell(actor_message)
         self.location.tell(room_message, self, who, target_message)
-        pending_actions.send(lambda: self.location.notify_action(parsed, self))
+        pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
         if parsed.verb in soul.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
@@ -858,7 +862,7 @@ class Living(MudObject):
             if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
-                        pending_actions.send(lambda: living.start_attack(self))
+                        pending_actions.send(lambda victim=self: living.start_attack(victim))
 
     @util.authorized("wizard")
     def do_forced_cmd(self, actor, parsed, ctx):
@@ -879,7 +883,7 @@ class Living(MudObject):
             custom_verbs = set(ctx.driver.current_custom_verbs(self))
             if parsed.verb in custom_verbs:
                 if self.location.handle_verb(parsed, self):       # @todo can't deal with yields yet
-                    pending_actions.send(lambda: self.location.notify_action(parsed, self))
+                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
                     return
                 else:
                     raise ParseError("That custom verb is not understood by the environment.")
@@ -896,7 +900,7 @@ class Living(MudObject):
                     return
                 func(self, parsed, ctx)
                 if func.enable_notify_action:
-                    pending_actions.send(lambda: self.location.notify_action(parsed, self))
+                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
                 return
             raise ParseError("Command not understood.")
         except Exception as x:
@@ -922,18 +926,18 @@ class Living(MudObject):
                 original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
             # queue event
             if is_player:
-                pending_actions.send(lambda: original_location.notify_player_left(self, target))
+                pending_actions.send(lambda who=self, where=target: original_location.notify_player_left(who, where))
             else:
-                pending_actions.send(lambda: original_location.notify_npc_left(self, target))
+                pending_actions.send(lambda who=self, where=target: original_location.notify_npc_left(who, where))
         else:
             target.insert(self, actor)
         if not silent:
             target.tell("%s arrives." % lang.capital(self.title), exclude_living=self)
         # queue event
         if is_player:
-            pending_actions.send(lambda: target.notify_player_arrived(self, original_location))
+            pending_actions.send(lambda who=self, where=original_location: target.notify_player_arrived(who, where))
         else:
-            pending_actions.send(lambda: target.notify_npc_arrived(self, original_location))
+            pending_actions.send(lambda who=self, where=original_location: target.notify_npc_arrived(who, where))
 
     def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
         """The same as locate_item except it only returns the item, or None."""

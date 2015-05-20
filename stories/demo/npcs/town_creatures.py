@@ -64,6 +64,7 @@ class WalkingRat(NPC):
         super(WalkingRat, self).init()
         mud_context.driver.defer(2, self.do_idle_action)
         mud_context.driver.defer(4, self.do_random_move)
+        self.aggressive = True
 
     def do_idle_action(self, ctx):
         if random.random() < 0.5:

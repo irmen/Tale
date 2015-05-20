@@ -46,6 +46,7 @@ class Story(object):
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
+        self.driver.load_zones(["town", "wizardtower", "shoppe"])
 
     def init_player(self, player):
         """

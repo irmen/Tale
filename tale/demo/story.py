@@ -46,6 +46,7 @@ class Story(object):
 
     def init(self, driver):
         self.driver = driver
+        self.driver.load_zones(["house"])
 
     def init_player(self, player):
         player.money = 12.65

@@ -809,7 +809,7 @@ class Driver(pubsub.Listener):
                 if parsed.verb in custom_verbs:
                     handled = player.location.handle_verb(parsed, player)       # @todo can't deal with yields yet
                     if handled:
-                        topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
+                        topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -825,7 +825,7 @@ class Driver(pubsub.Listener):
                         else:
                             func(player, parsed, ctx)
                         if func.enable_notify_action:
-                            topic_pending_actions.send(lambda: player.location.notify_action(parsed, player))
+                            topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb:
@@ -841,7 +841,7 @@ class Driver(pubsub.Listener):
         player.move(xt.target)
         player.look()
 
-    def __lookup_location(self, location_name):
+    def __lookup_location(self, location_name, only_module=False):
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
@@ -850,11 +850,19 @@ class Driver(pubsub.Listener):
             else:
                 modulename = modulename + "." + name
                 try:
-                    __import__(modulename)
+                    imported_module = __import__(modulename)
+                    if only_module:
+                        return getattr(imported_module, name)
                     location = getattr(location, name)
                 except (ImportError, AttributeError):
                     raise ValueError("location not found: " + location_name)
         return location
+
+    def load_zones(self, zone_names):
+        """Pre-load the provided zones (essentially, load the named modules from the zones package"""
+        for zone in zone_names:
+            module = self.__lookup_location(zone, only_module=True)
+            module.init(self)
 
     def __load_saved_game(self, player):
         assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"

@@ -6,6 +6,12 @@ The house, where the player starts the game
 from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door
 
+
+def init(driver):
+    # called when zone is first loaded
+    pass
+
+
 # define the locations
 
 

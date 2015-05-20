@@ -233,6 +233,7 @@ newspaper.text = """
          As time expired on last year, we take a look at major accomplishments, happenings,
          and developments in the less popular sports."
         It looks like a boring article, and you have better things to do."""
+newspaper.aliases.add("paper")
 
 rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
 gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")

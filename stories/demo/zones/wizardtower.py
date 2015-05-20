@@ -13,6 +13,11 @@ from tale.npc import NPC
 import tale.lang
 
 
+def init(driver):
+    # called when zone is first loaded
+    pass
+
+
 hall = Location("Main hall of the Tower of Magic",
     """
     The main hall of this ancient wizard tower sparkles with traces of magic.
@@ -37,6 +42,7 @@ class Drone(NPC):
 drone = Drone("drone", "n", race="bot", title="mindless drone",
               description="A stupid metallic drone. It just hovers here with no apparent reason. It has a little label attached to it.")
 drone.add_extradesc({"label"}, "The label reads: \"Wall-E was my cousin\".")
+drone.aggressive = True
 
 hall.init_inventory([table, key, drone])
 

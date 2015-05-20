@@ -13,6 +13,12 @@ from tale.npc import NPC
 from tale import mud_context
 from tale.lang import capital
 
+
+def init(driver):
+    # called when zone is first loaded
+    pass
+
+
 # define the various locations
 
 
