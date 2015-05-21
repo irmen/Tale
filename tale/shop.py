@@ -15,16 +15,11 @@ INFO/INQUIRE/ASK about [item/number]
 BUY
   > buy sword        (buy the first sword on the list)
   > buy #3           (buy the third item on the list)
-  > buy 10 bread     (buy 10 pieces of bread)
-  > buy 10 #2        (buy 10 of the second item on the list)
 SELL
   > sell sword       (sell the first sword in your inventory)
-  > sell #3 sword    (sell the third sword in your inventory)
-  > sell 3 sword     (sell the first three swords in your inventory)
 VALUE/APPRAISE
     ask shop keeper how much he is willing to pay for an item:
   > value sword      (appraise the first sword in your inventory)
-  > value #3 sword   (appraise the third sword in your inventory)
 
 """
 
@@ -221,7 +216,7 @@ class Shopkeeper(NPC):
     def shop_appraise(self, parsed, actor):
         item, designator = self._parse_item(parsed, actor)
         if designator:
-            raise ParseError("designator not yet supported")   # @todo handle designator
+            raise ParseError("It's not clear what item you mean.")
         if item.value <= 0:
             actor.tell("%s tells you it's worthless." % lang.capital(self.title))
             return True
@@ -232,25 +227,34 @@ class Shopkeeper(NPC):
         return True
 
     def shop_buy(self, parsed, actor):
-        if len(parsed.args) == 2:
-            designator, name = parsed.args
-        elif len(parsed.args) == 1:
-            designator, name = None, parsed.args[0]
-        else:
+        if len(parsed.args) != 1:
             raise ParseError("I don't understand what you want to buy.")
-        if designator:
-            raise ParseError("designator not yet supported")   # @todo handle designator
-        # check if the item is in the limitless forsale list
-        item = search_item(name, self.shop.forsale)
-        if item:
-            item = clone(item)  # make a clone and sell that, the forsale items should never run out
-        else:
-            # search inventory
-            item = self.search_item(name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
+        item = None
+        name = parsed.args[0]
+        if name[0] == '#':
+            # it's the Nth from the list
+            try:
+                num = int(name[1:])
+                if num <= 0:
+                    raise ValueError("num needs to be 1 or higher")
+                item = sorted_by_name(self.inventory)[num - 1]
+                if search_item(item.title, self.shop.forsale):
+                    item = clone(item)  # make a clone and sell that, the forsale items should never run out
+            except ValueError:
+                raise ParseError("What number on the list do you mean?")
+            except IndexError:
+                raise ParseError("That number is not on the list.")
+        if not item:
+            item = search_item(name, self.shop.forsale)
+            if item:
+                item = clone(item)  # make a clone and sell that, the forsale items should never run out
+            else:
+                # search inventory
+                item = self.search_item(name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
         if not item:
             actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantbuy))
             return True
-        # sell the item
+        # sell the item to the customer
         price = item.value * self.shop.sellprofit
         if price > actor.money:
             actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantafford))
@@ -283,11 +287,15 @@ class Shopkeeper(NPC):
     def shop_sell(self, parsed, actor):
         item, designator = self._parse_item(parsed, actor)
         if designator:
-            raise ParseError("designator not yet supported")   # @todo handle designator
+            raise ParseError("It's not clear what item you want to sell.")
         if item.value <= 0:
             actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopdoesnotbuy))
             if self.shop.action_temper:
                 self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
+            return True
+        if search_item(item.title, self.shop.forsale):
+            # if the item is on the forsale list, don't buy it (we already have an endless supply)
+            actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopdoesnotbuy))
             return True
         # @todo check wontdealwith
         # @todo check item type
