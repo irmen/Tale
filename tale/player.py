@@ -438,6 +438,7 @@ class MudAccounts(object):
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
     def get(self, name):
+        name = name.encode("utf-8")
         with self.db_lock, self.open_db() as db:
             return db[name]
 
@@ -446,12 +447,14 @@ class MudAccounts(object):
             return dict(db)
 
     def logged_in(self, name):
+        name = name.encode("utf-8")
         with self.db_lock, self.open_db() as db:
             account = db[name]
             account["logged_in"] = str(datetime.datetime.now().replace(microsecond=0))
             db[name] = account
 
     def valid_password(self, name, password):
+        name = name.encode("utf-8")
         with self.db_lock, self.open_db() as db:
             if name in db:
                 account = db[name]
@@ -491,28 +494,30 @@ class MudAccounts(object):
 
     def create(self, name, password, email, gender, stats, privileges=[]):
         name = name.strip()
+        dbname = name.encode("utf-8")
         email = email.strip()
         gender = gender.strip()
         self.accept_name(name)
         with self.db_lock, self.open_db() as db:
-            if name in db:
+            if dbname in db:
                 raise ValueError("That name is not available.")
             self.accept_password(password)
             self.accept_email(email)
             pwhash, salt = self._pwhash(password)
-            db[name] = {"name": name,
-                        "email": email,
-                        "pw_hash": pwhash,
-                        "pw_salt": salt,
-                        "privileges": privileges,
-                        "gender": gender,
-                        "stats": stats,
-                        "created": str(datetime.datetime.now().replace(microsecond=0)),
-                        "logged_in": None}
-            return db[name]
+            db[dbname] = {"name": name,
+                          "email": email,
+                          "pw_hash": pwhash,
+                          "pw_salt": salt,
+                          "privileges": privileges,
+                          "gender": gender,
+                          "stats": stats,
+                          "created": str(datetime.datetime.now().replace(microsecond=0)),
+                          "logged_in": None}
+            return db[dbname]
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):
         self.valid_password(name, old_password)
+        name = name.encode("utf-8")
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
@@ -530,6 +535,7 @@ class MudAccounts(object):
 
     @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
+        name = name.encode("utf-8")
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
