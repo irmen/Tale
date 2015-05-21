@@ -20,9 +20,8 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Pets: tame/befriend/abandon (charisma/luck)
 [feature] Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
 [feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
-[feature] Party: team up with other players and share quest and combat experience
+[feature] Groups: team up with other players and share quest and combat experience
 [feature] Skills: stealth, lockpicking, ...
-[feature] Vendors and shops: stock, sell stuff, buy stuff, haggle? Model them after the circle shop data first.
 [feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset? (circle has zones and zone resets)
 [info,feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
@@ -31,8 +30,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[code] Streamline the output of the 'look' command when several items/livings contain the exact same description. (fold them into 1?) (room vnum 3357)
-[code] Add more items/templates to items.basic.  Take ideas from objects in other mudlibs
+[code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [feature] More commands should recognise object aliases (touch, take) like examine already does.
@@ -47,7 +45,6 @@ General ideas/TODO:
 [feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[code,cosmetic,API] Use a decorator to add custom verbs to items, rather than handle_verb + mudobj.verbs=....
 [test] double names.
     What happens when player name == npc name (movement, examine, talk, soul emotes, destroy player)
     What happens with multiple items of same name in room, in inventory, in bag
@@ -57,6 +54,7 @@ General ideas/TODO:
 [feature] Change living location logic so that livings can sit inside a container item too.
     Then:  go-in (wizard): step into something, go-out (wizard): step out of current location
     + take <living> can actually work! (take ant, trap rabbit in cage, ...)
+[feature] Hunger/thirst/fatigue?
 
 
 [feature] Light/Dark
@@ -64,4 +62,3 @@ General ideas/TODO:
 light level in rooms: dark/light? or three states?  (0=pitch black, 0.5=dark/dusk, 1=normal daylight)
 darkness in locations -> can't see location/exits/items/players (unless they're fluorescent, or unless you explicitly examine <direction>?)
 if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit.
- Conditional location description (light/dark etc)

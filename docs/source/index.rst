@@ -21,7 +21,8 @@ or in your web browser.
 .. note::
     The multi-user aspects are fairly new and still somewhat incomplete.
     Until recently, the focus has been on the (single player) interactive fiction things.
-    However if my server is up, you can find a running MUD instance here: http://www.razorvine.net/tale/
+    However if my server is up, you can find running MUD instances here: http://www.razorvine.net/tale/
+    and here: http://www.razorvine.net/circle/
 
 .. note::
     This documentation is still a stub. I hope to write some real documentation soon,
