@@ -161,7 +161,7 @@ class Scroll(Item):
 
     def read(self, actor):
         actor.tell("The %s reads:" % self.title, end=True)
-        actor.tell(self.spells)   # @todo
+        actor.tell(self.spells)   # @todo spell descriptions
 
 
 class MagicItem(Weapon):

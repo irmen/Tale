@@ -18,6 +18,7 @@ from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 def init(driver):
     # called when zone is first loaded
+    board.load()
     pass
 
 
@@ -57,7 +58,6 @@ board.posts = [
 ]
 # try to load the persisted board messages:
 board.storage_file = "boards/board.json"
-board.load()
 lane.init_inventory([board])
 
 

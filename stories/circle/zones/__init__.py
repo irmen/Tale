@@ -13,7 +13,7 @@ from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Stats
 from tale.npc import NPC
 from tale.items.basic import *
 from tale.shop import ShopBehavior, Shopkeeper
@@ -50,7 +50,7 @@ class CircleMob(NPC):
         # let the mob wander randomly
         direction = self.select_random_move()
         if direction:
-            self.tell_others("{Title} wanders to the %s." % direction.name)
+            self.tell_others("{Title} heads to the %s." % direction.name)
             self.move(direction.target, self)
         ctx.driver.defer(random.randint(20, 60), self.do_wander)
 
@@ -111,13 +111,13 @@ def make_mob(vnum, mob_class=CircleMob):
     aliases = list(c_mob.aliases)
     name = aliases[0]
     aliases = set(aliases[1:])
-    race = "human"  # @todo find solution for race, which is not a concept in circle
     title = c_mob.shortdesc
     if title.startswith("the ") or title.startswith("The "):
         title = title[4:]
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
-    mob = mob_class(name, c_mob.gender, race, title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
+    # we take the stats from the 'human' race because the circle data lacks race and stats
+    mob = mob_class(name, c_mob.gender, "human", title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
     mob.vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:
@@ -125,23 +125,23 @@ def make_mob(vnum, mob_class=CircleMob):
     mob.aliases = aliases
     mob.aggressive = "aggressive" in c_mob.actions
     mob.money = float(c_mob.gold)
-    mob.alignment = c_mob.alignment
-    mob.xp = c_mob.xp
+    mob.stats.alignment = c_mob.alignment
+    mob.stats.xp = c_mob.xp
     number, sides, hp = map(int, re.match(r"(\d+)d(\d+)\+(\d+)$", c_mob.maxhp_dice).groups())
     if number > 0 and sides > 0:
         hp += roll_dice(number, sides)[0]
-    #@todo store hp
-    level = max(1, c_mob.level)   # 1..50
-    #@todo store level
+    mob.stats.hp = hp
+    mob.stats.maxhp_dice = c_mob.maxhp_dice
+    mob.stats.level = max(1, c_mob.level)   # 1..50
     # convert AC -10..10 to more modern 0..20   (naked person(0)...plate armor(10)...battletank(20))
     # special elites can go higher (limit 100), weaklings with utterly no defenses can go lower (limit -100)
-    ac = max(-100, min(100, 10 - c_mob.ac))
-    #@todo store ac
+    mob.stats.ac = max(-100, min(100, 10 - c_mob.ac))
+    mob.stats.attack_dice = c_mob.barehanddmg_dice
     if "sentinel" not in c_mob.actions:
         mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
     #@todo load position? (standing/sleeping/sitting...)
     #@todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
-    #@todo stats, actions, affection,...
+    #@todo actions, affection,...
     converted_mobs.add(vnum)
     return mob
 
@@ -167,8 +167,10 @@ def make_item(vnum):
             item = Container(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "weapon":
         item = Weapon(name, title, short_description=c_obj.longdesc)
+        #@todo weapon attrs
     elif c_obj.type == "armor":
         item = Armour(name, title, short_description=c_obj.longdesc)
+        #@todo armour attrs
     elif c_obj.type == "key":
         item = Key(name, title, short_description=c_obj.longdesc)
         item.key_for(code=vnum)   # the key code is just the item's vnum
@@ -218,7 +220,7 @@ def make_item(vnum):
     item.value = c_obj.cost
     item.rent = c_obj.rent
     item.weight = c_obj.weight
-    # @todo: affects, effects, wear, typespecifics
+    # @todo: affects, effects, wear
     converted_items.add(vnum)
     return item
 

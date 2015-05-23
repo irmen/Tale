@@ -11,7 +11,7 @@ import time
 import unittest
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
-from tale.base import Location, Exit, Item
+from tale.base import Location, Exit, Item, Stats
 from tale.errors import ActionRefused, ParseError
 from tale.npc import NPC
 from tale.player import Player, TextBuffer, PlayerConnection, MudAccounts
@@ -20,7 +20,7 @@ from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
 from tale.driver import StoryConfig
-from tale import pubsub, mud_context
+from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
 
 
@@ -42,10 +42,10 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("fritz", player.name)
         self.assertEqual("Fritz the great", player.title)
         self.assertEqual("", player.description)
-        self.assertEqual("human", player.race)
+        self.assertEqual("human", player.stats.race)
         self.assertEqual("m", player.gender)
         self.assertEqual(set(), player.privileges)
-        self.assertTrue(1 < player.stats["agi"] < 100)
+        self.assertTrue(1 < player.stats.agi < 100)
         self.assertGreater(player.output_line_delay, 1)
 
     def test_tell(self):
@@ -571,7 +571,7 @@ class TestCharacterBuilder(unittest.TestCase):
         n.name = "RINZWIND"
         n.description = "a wizard"
         n.money = 999
-        n.race = "elemental"
+        n.stats = Stats.from_race("elemental")
         n.title = "grand master"
         self.assertEqual("rinzwind", n.name)
         p = Player("dummy", "f")
@@ -582,7 +582,8 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual({"wiz"}, p.privileges)
         self.assertEqual("a wizard", p.description)
         self.assertEqual(999, p.money)
-        self.assertEqual("elemental", p.race)
+        self.assertEqual("elemental", p.stats.race)
+        self.assertEqual(races.B_NEBULOUS, p.stats.bodytype)
         self.assertEqual("grand master", p.title)
 
     def test_idle(self):

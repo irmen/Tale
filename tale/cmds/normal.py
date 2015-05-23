@@ -418,9 +418,7 @@ def take_stuff(player, items, container, where_str=None):
 
 def try_pick_up_living(player, living):
     p = player.tell
-    living_race = races.races[living.race]
-    player_race = races.races[player.race]
-    if player_race["size"] - living_race["size"] >= 2:
+    if player.stats.size - living.stats.size >= 2:
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
         p("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
@@ -652,16 +650,15 @@ def do_examine(player, parsed, ctx):
             p(living.description)
         else:
             p("This is <living>%s</>." % living.title)
-        race = races.races[living.race]
-        if living.race != "human":
+        if living.stats.race != "human":
             # don't print this race related info when dealing with mere humans
-            p("{subj}'s a {size} {btype} {race}, and speaks {lang}.".format(
-                subj=lang.capital(living.subjective),
-                size=races.sizes[race["size"]],
-                btype=races.bodytypes[race["bodytype"]],
-                race=living.race,
-                lang=race["language"]
-            ))
+            if living.stats.bodytype and living.stats.size:
+                p("{subj}'s a {size} {btype} {race}.".format(
+                    subj=lang.capital(living.subjective),
+                    size=races.sizes[living.stats.size],
+                    btype=races.bodytypes[living.stats.bodytype],
+                    race=living.stats.race or "creature"
+                ))
         if name in living.extra_desc:
             p(living.extra_desc[name])   # print the extra description, rather than a generic message
         if name in player.location.extra_desc:
@@ -720,15 +717,22 @@ def do_stats(player, parsed, ctx):
     else:
         raise ActionRefused("Show stats from who?")
     gender = lang.GENDERS[target.gender]
-    living_type = target.__class__.__name__.lower()
-    race = races.races[target.race]
-    race_size = races.sizes[race["size"]]
-    race_bodytype = races.bodytypes[race["bodytype"]]
-    player.tell("<living>%s</> (%s) - %s %s %s" % (target.title, target.name, gender, target.race, living_type), end=True)
-    player.tell("%s %s, speaks %s, weighs ~%s kg." % (lang.capital(race_size), race_bodytype, race["language"], race["mass"]), end=True)
+    race = target.stats.race or "creature"
+    player.tell("<living>%s</> (%s)" % (target.title, target.name), end=True)
+    if target.stats.size:
+        player.tell("%s %s %s." % (lang.capital(races.sizes[target.stats.size]), gender, race))
+    else:
+        player.tell("%s %s." % (lang.capital(gender), race))
+    if target.stats.bodytype:
+        player.tell("%s." % lang.capital(races.bodytypes[target.stats.bodytype]))
+    if target.stats.weight:
+        player.tell("Weighs ~%s kg." % target.stats.weight)
+    if target.stats.language:
+        player.tell("Speaks %s." % target.stats.language)
     if target.aggressive:
-        player.tell("%s seems to be aggressive." % lang.capital(target.subjective), end=True)
-    player.tell(", ".join("%s<dim>:</>%s" % (s[0], s[1]) for s in sorted(target.stats.items())))
+        player.tell("%s seems to be aggressive." % lang.capital(target.subjective))
+    player.tell("\n")
+    player.tell("Stats: agi={agi} cha={cha} int={int} lck={lck} spd={spd} sta={sta} str={str} wis={wis}".format(**vars(target.stats)))
 
 
 @cmd("tell")
@@ -1022,9 +1026,9 @@ def do_what(player, parsed, ctx):
             gender = lang.GENDERS[living.gender]
             subj = lang.capital(living.subjective)
             if type(living) is type(player):
-                p("<player>%s</> is a %s %s (player). %s's here." % (title, gender, living.race, subj))
+                p("<player>%s</> is a %s %s (player). %s's here." % (title, gender, living.stats.race or "creature", subj))
             else:
-                p("<living>%s</> is a %s %s. %s's here." % (title, gender, living.race, subj))
+                p("<living>%s</> is a %s %s. %s's here." % (title, gender, living.stats.race or "creature", subj))
     # is it an item somewhere?
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:

@@ -26,6 +26,7 @@ import pkgutil
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
+from .base import Stats
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -272,15 +273,17 @@ class Driver(pubsub.Listener):
             name = yield "input-noecho", ("Please type in the admin's player name.", player.MudAccounts.accept_name)
             password = yield "input-noecho", ("Please type in the admin password.", player.MudAccounts.accept_password)
             email = yield "input", ("Please type in the admin's email address.", player.MudAccounts.accept_email)
+            conn.output("You can choose one of the following races: ", lang.join(races.player_races))
+            race = yield "input", ("Player race?", charbuilder.validate_race)
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             # review the account
             conn.player.tell("<bright>Please review your new character.</>", end=True)
-            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>email:</> %s" % (name, lang.GENDERS[gender], email), end=True)
+            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" % (name, lang.GENDERS[gender], race, email), end=True)
             if not (yield "input", ("You cannot change your name later. Do you want to create this admin account?", lang.yesno)):
                 continue
             else:
                 break
-        self.mud_accounts.create(name, password, email, gender[0], "human", privileges={"wizard"})
+        self.mud_accounts.create(name, password, email, gender[0], Stats.from_race(race), privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
@@ -326,7 +329,7 @@ class Driver(pubsub.Listener):
                     # abort
                     conn.player.tell("Ok, let's get back to the beginning then.", end=True)
                     continue
-                account = self.mud_accounts.create(name, password, email, gender[0], race)
+                account = self.mud_accounts.create(name, password, email, gender[0], Stats.from_race(race))
                 conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
                 conn.player.tell("\n")
             try:
@@ -351,7 +354,7 @@ class Driver(pubsub.Listener):
                     name_info.money = state["money"]
                     name_info.name = state["name"]
                     name_info.gender = state["gender"]
-                    name_info.race = state["race"]
+                    name_info.stats = state["stats"]
                     self.__rename_player(conn.player, name_info)
                     conn.output("\n")
                     conn.player.move(existing_player_location)
@@ -368,7 +371,7 @@ class Driver(pubsub.Listener):
             name_info = charbuilder.PlayerNaming()
             name_info.name = account["name"]
             name_info.gender = account["gender"]
-            name_info.race = account["race"]
+            name_info.stats = account["stats"]
             self.__rename_player(conn.player, name_info)
             conn.player.privileges = set(account["privileges"])
             conn.output("\n")
@@ -509,7 +512,7 @@ class Driver(pubsub.Listener):
             # story config provides a name etc.
             name_info = charbuilder.PlayerNaming()
             name_info.name = self.config.player_name
-            name_info.race = self.config.player_race
+            name_info.stats.race = self.config.player_race
             name_info.gender = self.config.player_gender
             name_info.money = self.config.player_money or 0.0
             name_info.wizard = "wizard" in conn.player.privileges

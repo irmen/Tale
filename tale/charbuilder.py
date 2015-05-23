@@ -10,20 +10,22 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from . import races
 from . import lang
 from . import mud_context
+from .base import Stats
 from .player import MudAccounts
 
 
 class PlayerNaming(object):
     def __init__(self):
-        self._name = self.title = self.gender = self.race = self.description = None
+        self._name = self.title = self.gender = self.description = None
         self.money = mud_context.config.player_money
+        self.stats = Stats()
 
     def apply_to(self, player):
         assert self._name
         assert self.gender
-        assert self.race
-        player.init_race(self.race, self.gender)
+        player.init_gender(self.gender)
         player.init_names(self._name, self.title, self.description, None)
+        player.stats = self.stats
         player.money = self.money
 
     @property
@@ -46,10 +48,10 @@ class CharacterBuilder(object):
         naming.name = yield "input", ("Name?", MudAccounts.accept_name)
         naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
         naming.gender = naming.gender[0]
-        naming.race = "human"   # @todo race fixed at 'human' for now
-        # self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
-        # naming.race = yield "input", ("Player race?", validate_race)
-        naming.description = "A regular person."
+        self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+        race = yield "input", ("Player race?", validate_race)
+        naming.stats = Stats.from_race(race)
+        naming.description = "A regular person." if naming.stats.race == "human" else "A weird creature."
         self.continue_dialog(naming)
 
 

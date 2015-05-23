@@ -64,7 +64,7 @@ class Shopkeeper(NPC):
         # let the shopkeeper wander randomly
         direction = self.select_random_move()
         if direction:
-            self.tell_others("{Title} wanders to the %s." % direction.name)
+            self.tell_others("{Title} heads to the %s." % direction.name)
             self.move(direction.target, self)
         ctx.driver.defer(random.randint(20, 60), self.do_wander)
 
@@ -220,6 +220,7 @@ class Shopkeeper(NPC):
         if item.value <= 0:
             actor.tell("%s tells you it's worthless." % lang.capital(self.title))
             return True
+        # @todo charisma bonus/malus
         price = item.value * self.shop.buyprofit
         value_str = mud_context.driver.moneyfmt.display(price)
         actor.tell("%s appraises the %s." % (lang.capital(self.title), item.name))
@@ -255,6 +256,7 @@ class Shopkeeper(NPC):
             actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantbuy))
             return True
         # sell the item to the customer
+        # @todo charisma bonus/malus
         price = item.value * self.shop.sellprofit
         if price > actor.money:
             actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantafford))
@@ -299,7 +301,7 @@ class Shopkeeper(NPC):
             return True
         # @todo check wontdealwith
         # @todo check item type
-        # check money
+        # check money  # @todo charisma bonus/malus
         price = item.value * self.shop.buyprofit
         limit = self.money * 0.75   # shopkeeper should not spend more than 75% of his money on a single sale
         if price >= limit:

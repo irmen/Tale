@@ -38,17 +38,18 @@ Use its enter/leave methods instead.
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 from textwrap import dedent
+from collections import defaultdict
 import copy
 from . import lang
 from . import util
 from . import pubsub
 from . import mud_context
 from . import soul
+from . import races
 from .errors import ActionRefused, ParseError, LocationIntegrityError
-from .races import races
 
 
-__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Location", "Weapon", "Key", "heartbeat", "clone"]
+__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location", "Weapon", "Key", "heartbeat", "clone"]
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
@@ -529,7 +530,8 @@ class Location(MudObject):
 
     def handle_verb(self, parsed, actor):
         """Handle a custom verb. Return True if handled, False if not handled."""
-        # @todo can't deal with yields yet so every handle_verb must return immediately without additional dialog
+        # this code cannot deal with yields directly but you can raise AsyncDialog exception,
+        # that indicates to the driver that it should initiate the given async dialog when continuing.
         handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)
         if not handled:
             handled = any(item.handle_verb(parsed, actor) for item in self.items)
@@ -662,6 +664,58 @@ class Exit(MudObject):
         raise ActionRefused("It makes no sense to %s in that direction." % verb)
 
 
+class Stats(object):
+    def __init__(self):
+        self.level = 0
+        self.xp = 0
+        self.hp = 0
+        self.maxhp_dice = None
+        self.ac = 0
+        self.attack_dice = None     # damage roll when attacking without a weapon
+        self.agi = 0
+        self.cha = 0
+        self.int = 0
+        self.lck = 0
+        self.spd = 0
+        self.sta = 0
+        self.str = 0
+        self.wis = 0
+        self.stat_prios = None      # per agi/cha/etc stat, priority level of it (see races.py)
+        self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
+        self.bodytype = None
+        self.language = None
+        self.weight = 0
+        self.size = 0
+        self.race = None    # optional, can use the stats template from races
+
+    def __repr__(self):
+        return "<Stats: %s>" % vars(self)
+
+    @classmethod
+    def from_race(cls, race):
+        r = races.races[race]
+        s = cls()
+        s.race = race
+        s.bodytype = r["bodytype"]
+        s.language = r["language"]
+        s.weight = r["mass"]
+        s.size = r["size"]
+        rs = r["stats"]
+        s.agi = rs["agi"][0]
+        s.cha = rs["cha"][0]
+        s.int = rs["int"][0]
+        s.lck = rs["lck"][0]
+        s.spd = rs["spd"][0]
+        s.sta = rs["sta"][0]
+        s.str = rs["str"][0]
+        s.wis = rs["wis"][0]
+        s.stat_prios = defaultdict(list)
+        for stat, (_, prio) in r["stats"].items():
+            s.stat_prios[prio].append(stat)
+        #@todo xp, hp, maxhp, ac, attack, alignment
+        return s
+
+
 class Living(MudObject):
     """
     Root class of the living entities in the mud world.
@@ -669,34 +723,29 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
-    def __init__(self, name, gender, race, title=None, description=None, short_description=None):
-        self.init_race(race, gender)
+    def __init__(self, name, gender, race=None, title=None, description=None, short_description=None):
+        self.init_gender(gender)
         self.soul = soul.Soul()
         self.location = _limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
-        self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
-        self.xp = 0
+        if race:
+            self.stats = Stats.from_race(race)
+        else:
+            self.stats = Stats()
         self.default_verb = "examine"
-        # Make a copy of the race stats, because they can change dynamically.
-        # There's no need to copy the whole race data dict because it's available
-        # from tale.races, look it up by the race name.
-        self.stats = {}
-        for stat_name, (stat_avg, stat_class) in races[race]["stats"].items():
-            self.stats[stat_name] = stat_avg
         self.__inventory = set()
         self.previous_commandline = None
         self._previous_parsed = None
         super(Living, self).__init__(name, title, description, short_description)
 
-    def init_race(self, race, gender):
-        """(re)set race and gender attributes"""
+    def init_gender(self, gender):
+        """(re)set gender attributes"""
         self.gender = gender
         self.subjective = lang.SUBJECTIVE[self.gender]
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
-        self.race = race
 
     def init_inventory(self, items):
         """Set the living's initial inventory"""

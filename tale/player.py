@@ -488,11 +488,10 @@ class MudAccounts(object):
             return email
         raise ValueError("Invalid email address.")
 
-    def create(self, name, password, email, gender, race, privileges=[]):
+    def create(self, name, password, email, gender, stats, privileges=[]):
         name = name.strip()
         email = email.strip()
         gender = gender.strip()
-        race = race.strip()
         self.accept_name(name)
         with self.db_lock, self.open_db() as db:
             if name in db:
@@ -506,7 +505,7 @@ class MudAccounts(object):
                         "pw_salt": salt,
                         "privileges": privileges,
                         "gender": gender,
-                        "race": race,
+                        "stats": stats,
                         "created": str(datetime.datetime.now().replace(microsecond=0)),
                         "logged_in": None}
             return db[name]

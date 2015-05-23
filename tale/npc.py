@@ -33,7 +33,7 @@ class NPC(base.Living):
 
     def allow_give_money(self, actor, amount):
         """Do we accept money? Raise ActionRefused if not."""
-        if self.race != "human":
+        if self.stats.race not in (None, "human"):
             raise ActionRefused("You can't do that.")
 
     def select_random_move(self):
