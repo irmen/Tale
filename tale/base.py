@@ -882,7 +882,7 @@ class Living(MudObject):
                 raise ParseError("That action doesn't support qualifiers.")  # for now, qualifiers are only supported on soul-verbs (emotes).
             custom_verbs = set(ctx.driver.current_custom_verbs(self))
             if parsed.verb in custom_verbs:
-                if self.location.handle_verb(parsed, self):       # @todo can't deal with yields yet
+                if self.location.handle_verb(parsed, self):       # note: can't deal with async dialogs
                     pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
                     return
                 else:

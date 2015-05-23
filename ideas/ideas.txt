@@ -16,7 +16,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Write stuff to a logfile for the server admins.
 [feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
 [feature] Notify player if mail arrived.
-[feature] Simple Bulletin boards. Readonly (except by wizards) and read/write for everyone.
 [feature] Pets: tame/befriend/abandon (charisma/luck)
 [feature] Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
 [feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade

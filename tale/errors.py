@@ -47,3 +47,11 @@ class LocationIntegrityError(Exception):
         self.direction = direction
         self.exit = exit
         self.location = location
+
+
+class AsyncDialog(Exception):
+    """Command execution needs to continue with an async dialog"""
+    def __init__(self, dialog, *args):
+        self.dialog = dialog
+        self.args = args
+

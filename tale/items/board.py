@@ -8,33 +8,28 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 from ..base import Item
-from ..errors import ActionRefused, ParseError
+from ..errors import ActionRefused, ParseError, AsyncDialog
+from .. import lang, mud_context
+import json
 import datetime
-
 
 __all__ = ["BulletinBoard", "bulletinboard"]
 
 
 class BulletinBoard(Item):
-    class Post(object):
-        def __init__(self, author, date, subject, text):
-            self.author = author
-            self.date = date
-            self.subject = subject.strip()
-            self.text = text.strip()
-
     def init(self):
         super(BulletinBoard, self).init()
         self.posts = []
         self.max_num_posts = 20
-        self.verbs = {
-            "post": "write a new message on the board",
-            "write": "write a new message on the board",
-            "list": "show the list of messages currently on the board",
-            "read": "read a specific message on the board (or just the list of messages)",
-            "reply": "write a reply to a message already on the board",
-            "remove": "remove a message that you wrote earlier"}
         self.readonly = False
+        self.storage_file = None
+        self.verbs = {
+            "post": "Write a new message on the board.",
+            "write": "Write a new message on the board.",
+            "list": "Show the list of messages currently on the board.",
+            "read": "Read a specific message on the board (or just the list of messages).",
+            "reply": "Write a reply to a message already on the board (indicate the number of the message).",
+            "remove": "Remove a message that you wrote earlier (indicate the number of the message)."}
 
     def allow_item_move(self, actor, verb="move"):
         raise ActionRefused("You can't %s %s." % (verb, self.title))
@@ -50,8 +45,11 @@ class BulletinBoard(Item):
             else:
                 txt.append("There are several messages on it.")
             txt.append("You can 'list' the messages, or 'read 3' to read the third in the list. ")
-        txt.append("You can 'post' or 'write' a new message, 'reply 3' to write a reply to the third in the list.")
-        txt.append("Finally it is possible to use 'remove 3' to remove the third in the list (only if you wrote it).")
+        if self.readonly:
+            txt.append("It seems like it's not possible to change anything on the %s." % self.name)
+        else:
+            txt.append("You can 'post' or 'write' a new message, 'reply 3' to write a reply to the third in the list.")
+            txt.append("Finally it is possible to use 'remove 3' to remove the third in the list (only if you wrote it).")
         return "\n".join(txt)
 
     def handle_verb(self, parsed, actor):
@@ -97,7 +95,7 @@ class BulletinBoard(Item):
                 actor.tell("There are several messages on it:", end=True)
             txt = ["<ul> # <dim>|</><ul> subject                           <dim>|</><ul> author         <dim>|</><ul> date     </>"]
             for num, post in enumerate(self.posts, start=1):
-                txt.append("%2d.  %-35s %-15s %s" % (num, post.subject, post.author, post.date))
+                txt.append("%2d.  %-35s %-15s %s" % (num, post["subject"], post["author"], post["date"]))
             actor.tell(*txt, format=False)
 
     def _get_post(self, num):
@@ -114,35 +112,106 @@ class BulletinBoard(Item):
         raise ActionRefused("It is unclear what number you mean.")
 
     def do_write_message(self, actor):
+        if self.readonly and "wizard" not in actor.privileges:
+            raise ActionRefused("You can't write on it.")
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
-        print("@todo dialog WRITE MSG") # XXX
+        raise AsyncDialog(self.dialog_write_message(actor, None))
+
+    def dialog_write_message(self, actor, in_reply_to=None):
+        if in_reply_to:
+            subject = "re: {subject}".format(**in_reply_to)
+            actor.tell("You're replying to the message '{subject}' by {author}, on {date}.".format(**in_reply_to))
+            text = ["(in reply to '{subject}' by {author} on {date})".format(**in_reply_to), "\n"]
+        else:
+            subject = yield "input", ("Give the subject of your message:", self._subject_valid)
+            text = []
+        actor.tell("Please type your message. It can span multiple lines, but can not be longer than 1000 characters. "
+                   "Type an empty line or slash ('/') for a paragraph separator, type TWO dots ('..') to end the message.", end=True)
+        actor.tell("\n")
+        text = ""
+        while len(text) <= 1000:
+            line = yield "input", None
+            if line == "..":
+                break
+            if line == "/":
+                line = ""
+            text += line.strip() + "\n"
+        text = text.strip()
+        if text:
+            actor.tell("\n")
+            actor.tell("<ul>Review your message:</>", end=True)
+            for paragraph in text.split("\n\n"):
+                actor.tell(paragraph, end=True)
+            if (yield "input", ("Post this message?", lang.yesno)):
+                post = {
+                    "author": actor.name,
+                    "date": datetime.datetime.now().date().isoformat(),
+                    "subject": subject,
+                    "text": text
+                }
+                self.posts.insert(0, post)
+                self.posts = self.posts[:self.max_num_posts]
+                self.save()
+                actor.tell("\n")
+                actor.tell("You've added the message on top of the list on the %s." % self.name)
+                return
+        actor.tell("The message is discarded.")
+
+    def _subject_valid(self, subj):
+        subj = subj.strip()
+        if subj:
+            return subj
+        raise ValueError("You need to type something.")
 
     def do_reply_message(self, arg, actor):
-        num = self._get_post(arg)
+        if self.readonly and "wizard" not in actor.privileges:
+            raise ActionRefused("You can't write on it.")
+        num, post = self._get_post(arg)
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
-        print("@todo dialog REPLY MSG", num) # XXX
+        raise AsyncDialog(self.dialog_write_message(actor, post))
 
     def do_remove_message(self, arg, actor):
+        if self.readonly and "wizard" not in actor.privileges:
+            raise ActionRefused("You can't remove messages from it.")
         num, post = self._get_post(arg)
-        if "wizard" in actor.privileges or actor.name == post.author:
+        if "wizard" in actor.privileges or actor.name == post["author"]:
             del self.posts[num - 1]
-            actor.tell("You've removed message #%d from the board." % num)
+            actor.tell("You've removed message #%d ('%s') from the board." % (num, post["subject"]))
             actor.tell_others("{Title} took a message off the %s." % self.title)
+            self.save()
         else:
             raise ActionRefused("You cannot remove that message.")
 
     def do_read_message(self, arg, actor):
         num, post = self._get_post(arg)
         actor.tell_others("{Title} reads something on the %s." % self.title)
-        actor.tell("The message is titled '%s'." % post.subject)
-        actor.tell("It was written by %s on %s, and it reads:" % (post.author, post.date), end=True)
-        actor.tell("\n")
-        for paragraph in post.text.split("\n\n"):
+        actor.tell("<ul>Subject: '{subject}' by {author} on {date}. It reads:</>".format(**post), end=True)
+        for paragraph in post["text"].split("\n\n"):
             actor.tell(paragraph, end=True)
 
+    def load(self):
+        """Load persisted messages from the datafile. Note: only the posts are loaded from the datafile, not the descriptive texts"""
+        if not self.storage_file:
+            return
+        try:
+            data = json.loads(mud_context.driver.user_resources[self.storage_file].data.decode("UTF-8"))
+            self.posts = data["posts"][:self.max_num_posts]
+        except IOError:
+            pass
 
-bulletinboard = BulletinBoard("board", "wooden bulletin board", "It displays: \"important announcements\".", "On a wall, a bulletin board is visible.")
-bulletinboard.posts = [
-    BulletinBoard.Post("irmen", datetime.datetime.now().date(), "hello and welcome to the mud", "Hello all who read this! Welcome to the mud"),
-    BulletinBoard.Post("irmen", datetime.datetime.now().date(), "behavior", "Please behave responsibly.\n\nSigned, Irmen")
-]
+    def save(self):
+        """save the messages to persistent data file"""
+        if not self.storage_file:
+            return
+        data = {
+            "board-name": self.name,
+            "board-title": self.title,
+            "posts": self.posts
+        }
+        mud_context.driver.user_resources[self.storage_file] = json.dumps(data, indent=4, sort_keys=True).encode("UTF-8")
+
+
+bulletinboard = BulletinBoard("board", "wooden bulletin board", "The board contains a little plaque: \"important announcements\".",
+                              "On a wall, a bulletin board is visible.")
+bulletinboard.aliases.add("messages")
+bulletinboard.aliases.add("bulletin")

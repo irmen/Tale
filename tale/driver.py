@@ -123,7 +123,7 @@ class Driver(pubsub.Listener):
             raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
-        user_data_dir = appdirs.user_data_dir("Tale", "Razorvine", roaming=True)
+        user_data_dir = appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.config.name), "Razorvine", roaming=True)
         if not os.path.isdir(user_data_dir):
             try:
                 os.makedirs(user_data_dir, mode=0o700)
@@ -808,7 +808,8 @@ class Driver(pubsub.Listener):
                 parse_error = "That doesn't make much sense."
                 handled = False
                 if parsed.verb in custom_verbs:
-                    handled = player.location.handle_verb(parsed, player)       # @todo can't deal with yields yet
+                    # note: can't deal with yields directly, use errors.AsyncDialog in handle_verb to initiate a dialog
+                    handled = player.location.handle_verb(parsed, player)
                     if handled:
                         topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))
                     else:
@@ -835,6 +836,9 @@ class Driver(pubsub.Listener):
                 player.do_socialize_cmd(parsed)
             except errors.RetryParse as x:
                 return self.__process_player_command(x.command, conn)   # try again but with new command string
+            except errors.AsyncDialog as x:
+                # the player command ended but signaled that an async dialog should be initiated
+                topic_async_dialogs.send((conn, x.dialog))
 
     def _go_through_exit(self, player, direction):
         xt = player.location.exits[direction]

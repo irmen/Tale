@@ -425,7 +425,7 @@ class MudAccounts(object):
 
     def __shelve_db_opener(self):
         """If not specified, a simple shelve database is used in the user's data directry"""
-        dbpath = mud_context.driver.user_resources.validate_path(util.storyname_to_filename(mud_context.config.name) + ".useraccounts.shelve")
+        dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
         try:
             return closing(shelve.open(dbpath, flag='w'))
         except dbm.error:

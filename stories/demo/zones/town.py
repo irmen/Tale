@@ -39,8 +39,27 @@ paper = clone(newspaper)
 paper.aliases = {"paper"}
 paper.short_description = "Last day's newspaper lies on the floor."
 
+# add a bulletin board to the town
 board = clone(bulletinboard)
+board.posts = [
+    {
+        "author": "irmen",
+        "date": "2015-05-23",
+        "subject": "hello and welcome to this world",
+        "text": "Hello all who read this! Welcome to this world."
+    },
+    {
+        "author": "irmen",
+        "date": "2015-05-23",
+        "subject": "behavior",
+        "text": "Please behave responsibly.\n\nSigned, Irmen"
+    },
+]
+# try to load the persisted board messages:
+board.storage_file = "boards/board.json"
+board.load()
 lane.init_inventory([board])
+
 
 class CursedGem(Item):
     def move(self, target, actor, silent=False, is_player=False, verb="move"):
