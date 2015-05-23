@@ -407,7 +407,8 @@ class Driver(pubsub.Listener):
         try:
             why, what = dialog.send(message)
         except StopIteration:
-            pass
+            if conn.player:
+                conn.write_output()   # immediately give feedback (if any) once the dialog ends
         except errors.ActionRefused as x:
             conn.player.remember_parsed()
             conn.player.tell(str(x))
