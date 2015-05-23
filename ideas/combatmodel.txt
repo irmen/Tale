@@ -1,0 +1,52 @@
+COMBAT MODEL
+------------
+
+This needs a lot of work!
+
+LEVEL  [1 - 30]
+---------------
+Player level goes from 1 - 30.
+NPC level goes from 1 - 50. (50 = the Grand Mistress, vnum 2564)
+
+
+HIT POINTS  [0 - 20000]
+----------------------
+Hit points range from 0 (dead) to a lot (20000+).
+Hit points of players per level depend on class? level 1 starts with 10 hp 100 mana.
+Hit points of MOBS per level rule of thumb is about LEVEL SQUARED (low lvls get some compensation)
+    level  1: ~10
+    level 10: ~150
+    level 20: ~400
+    level 40: ~1500
+
+
+STATS   [1 - 100]
+-----------------
+
+Stats range from 1 to 100.  They may increase per level gained, depending on stat priority (see races.py)
+
+Stats that have effect on MELEE combat:
+    AGIlity:    how nimble you are, how easy you avoid sudden blows, etc.
+    STRength:   the force with which you can hit, how much you can carry, etc.
+
+Stats that have effect on SPELL combat:
+    INTelligence : spell power/level
+    WISdom       : mana? something else?
+
+
+ARMOUR CLASS [ -100 - 0 - +100 ]
+------------------------------
+Ac ranges from -100 to +100
+<0: utterly no defenses whatsoever
+ 0: naked person
+ 1: linnen clothing
+ 5: leather armour
+10: full plate armour
+20: battle tank
+30: epic armor with magical properties, etc.
+...100: impenetrable
+
+
+ATTACK BONUS/POWER/?
+--------------------
+@todo (based on thac0 from circle data)

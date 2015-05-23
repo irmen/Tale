@@ -72,6 +72,7 @@ bodytypes = {
 
 # mass is in KG.
 # stats are (stat, stat_class).
+# stat ranges from 1 to 100.
 # stat_class means: the typical priority this stat is for a certain race (1..5)
 # stat_class 1 means it is the most important stat for that race, and that stat may
 # get an increase at every level. stat_class 5 means low importance and may get an
@@ -131,7 +132,7 @@ races = {
              'mass': 48.0,
              'size': S_SOMEWHAT_SMALL,
              'stats': {'agi': (50, 1),
-                       'cha': (0, 4),
+                       'cha': (1, 4),
                        'int': (10, 4),
                        'lck': (33, 3),
                        'spd': (40, 2),
@@ -292,7 +293,7 @@ races = {
                         'lck': (50, 1),
                         'spd': (40, 3),
                         'sta': (30, 3),
-                        'strenght': (25, 4),
+                        'str': (25, 4),
                         'wis': (60, 1)}},
  'deer': {'bodytype': B_QUADRUPED,
           'language': 'Tier',
