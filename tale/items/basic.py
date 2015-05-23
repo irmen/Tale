@@ -159,6 +159,10 @@ class Scroll(Item):
         self.spell_level = 0   # level of spells
         self.spells = set()
 
+    def read(self, actor):
+        actor.tell("The %s reads:" % self.title, end=True)
+        actor.tell(self.spells)   # @todo
+
 
 class MagicItem(Weapon):
     def init(self):

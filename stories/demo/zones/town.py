@@ -12,6 +12,7 @@ from tale.npc import NPC
 from tale.player import Player
 from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
+from tale.items.board import bulletinboard
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -38,6 +39,8 @@ paper = clone(newspaper)
 paper.aliases = {"paper"}
 paper.short_description = "Last day's newspaper lies on the floor."
 
+board = clone(bulletinboard)
+lane.init_inventory([board])
 
 class CursedGem(Item):
     def move(self, target, actor, silent=False, is_player=False, verb="move"):
