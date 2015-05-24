@@ -29,6 +29,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[bug] Fix handling of non-ascii texts and input (python 2.7 crashes, py 3 encodes it wrong)
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
