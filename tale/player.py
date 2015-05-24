@@ -425,6 +425,7 @@ class MudAccounts(object):
 
     def __shelve_db_opener(self):
         """If not specified, a simple shelve database is used in the user's data directry"""
+        # XXX shelve doesn't work correctly with IronPython (crashes with a TypeError)
         dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
         try:
             return closing(shelve.open(dbpath, flag='w'))

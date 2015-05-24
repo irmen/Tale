@@ -121,7 +121,7 @@ class VirtualFileSystem(object):
         else:
             # direct filesystem access
             with io.open(phys_path, mode=mode, encoding=encoding) as f:
-                mtime = os.fstat(f.fileno()).st_mtime
+                mtime = os.path.getmtime(phys_path)  # os.fstat(f.fileno()).st_mtime
                 return Resource(name, f.read(), mimetype, mtime)
 
     def __setitem__(self, name, data):

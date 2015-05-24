@@ -19,3 +19,46 @@ Eerst genoeg geld vinden (1x $4,50  1x $5,50 = $10)
 
 YELL-> dit hoor je in de kamer ernaast. Mensen die opgesloten zitten gillen om hulp, dan hoort de speler dat automatisch (zie town crier)
 als je zelf yellt dan moeten mensen in de buurt daar op reageren, en wanderers ook!
+
+
+                                               +-------------+     +----------+
+                                               |             |     |          |
+                                               |  car parking<-----+  gate    |
+                                               |             |     |          |
+                                               |             |     +--+---+---+
+                                               +-------------+        |   |
+                                               locked fence           |   |
+             +-------------+                      ^                   |   |
+             |             |                      |                   |   |
+             |             |                      |                   |   |
+             |   House     |  +-------+           |                   |   |
+             |  (start)    +->|kitchen|    +------+--------+        Rose st.
+             |             |  +-------+....|               |        (north)
+             |             |               |  Playground   <----------+   |
+             +---------+---+               |               |          |   |
+                       |                   +---^-----------+          |   |
++----------+           |                       |                      |   |
+|          |           |                       |                  +---+---+----+                  +-----------+
+| Pharmacy +-----------v------+----------------+------------------+            +------------------+           |
+|          |                  |         Magnolia st.              |  Crossing  |    Magnolia st   |  ArtiGrow |
+|          +------------------+--------+---------------^----------+            +----(east)--------+  factory  |
+|          |                           |          1-way^          |            |                  |           |
++----------+                           |               ^          |            |                  |           |
+                                 +-----v----+     +----+-+        +---+---+----+                  +-----------+
+                                 |          |     |      |            |   |
+                                 | House    +----->      |            |   |
+                                 |          |     | Gar  |            |   |
+                                 +------+---+     | den  |            |   |
+                                        |         |      |            Rose street
+                                 +------v---+     |      |            |   |
+                                 |          +----->      |            |   |
+                                 |  Bedroom | ladder     |            |   |
+                                 |          |     +------+            |   |
+                                 +----------+         .               |   |
+                                                      .               |   |
+                                                 +-----------+    +---+---+---+
+                                                 |           |    |           |
+                                                 |  storage  <----+ butcher   |
+                                                 |           |    |           |
+                                                 |           |    |           |
+                                                 +-----------+    +-----------+

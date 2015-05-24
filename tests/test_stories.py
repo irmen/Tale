@@ -41,8 +41,12 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
         self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
 
     def test_zones(self):
-        import zones.house
-        self.assertEqual("Living room", zones.house.livingroom.name)
+        import zones.houses
+        self.assertEqual("Living room", zones.houses.livingroom.name)
+        import zones.magnolia_st
+        self.assertEqual("Pharmacy", zones.magnolia_st.pharmacy.name)
+        import zones.rose_st
+        self.assertEqual("Butcher shop", zones.rose_st.butcher.name)
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
@@ -62,7 +66,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = "."
+    directory = "demo-story-dummy-path"
 
     def test_story(self):
         import tale.demo.story

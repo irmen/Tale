@@ -8,10 +8,6 @@ recursive-include tests *
 recursive-include ideas *
 recursive-include stories *
 recursive-include docs *
-prune sandbox
-prune stories/zed_is_me
-prune stories/circle
-exclude stories/play_zed_is_me*
 global-exclude */.svn/*
 global-exclude */.idea/*
 global-exclude */__pycache__/*

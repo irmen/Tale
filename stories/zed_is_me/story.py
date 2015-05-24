@@ -5,7 +5,6 @@
 Written for Tale IF framework.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-# @todo: this game is not yet finished and is excluded in the MANIFEST.in for now
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
@@ -32,8 +31,8 @@ class Story(object):
         max_wait_hours=2,               # the max. number of hours (gametime) the player is allowed to wait (>=0)
         display_gametime=False,         # enable/disable display of the game time at certain moments
         epoch=None,                     # start date/time of the game clock
-        startlocation_player="house.livingroom",
-        startlocation_wizard="house.livingroom",
+        startlocation_player="houses.livingroom",
+        startlocation_wizard="houses.livingroom",
         savegames_enabled=True,
         show_exits_in_look=True,
         license_file=None,
@@ -46,7 +45,7 @@ class Story(object):
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
-        self.driver.load_zones(["house"])
+        self.driver.load_zones(["houses", "magnolia_st", "rose_st"])
 
     def init_player(self, player):
         """
