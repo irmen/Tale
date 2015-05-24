@@ -13,9 +13,10 @@ from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Stats
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
 from tale.npc import NPC
 from tale.items.basic import *
+from tale.items.board import BulletinBoard
 from tale.shop import ShopBehavior, Shopkeeper
 from tale.errors import LocationIntegrityError
 from tale.util import roll_dice
@@ -146,6 +147,14 @@ def make_mob(vnum, mob_class=CircleMob):
     return mob
 
 
+circle_bulletin_boards = {
+    3096: "boards/social.json",
+    3097: "boards/frozen.json",
+    3098: "boards/immort.json",
+    3099: "boards/mort.json"
+}   # the four bulletin boards  @todo board levels, readonly, etc.
+
+
 def make_item(vnum):
     """Create an instance of an item for the given vnum"""
     c_obj = objs[vnum]
@@ -157,7 +166,14 @@ def make_item(vnum):
         title = title[4:]
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
-    if c_obj.type == "container":
+    if vnum in circle_bulletin_boards:
+        # it's a bulletin board
+        item = BulletinBoard(name, title, short_description=c_obj.longdesc)
+        item.storage_file = circle_bulletin_boards[vnum]   # XXX the mortal board is duplicated in the circle data...
+        item.load()
+        # remove the item name from the extradesc
+        c_obj.extradesc = [ed for ed in c_obj.extradesc if item.name not in ed["keywords"]]
+    elif c_obj.type == "container":
         if c_obj.typespecific.get("closeable"):
             item = Boxlike(name, title, short_description=c_obj.longdesc)
             item.opened = True

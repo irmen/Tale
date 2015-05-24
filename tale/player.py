@@ -437,8 +437,13 @@ class MudAccounts(object):
             else:
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
+    def __shelve_encode_key(self, key):
+        if sys.version_info < (3, 0):
+            return key.encode("utf-8")
+        return key
+
     def get(self, name):
-        name = name.encode("utf-8")
+        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             return db[name]
 
@@ -447,14 +452,14 @@ class MudAccounts(object):
             return dict(db)
 
     def logged_in(self, name):
-        name = name.encode("utf-8")
+        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             account = db[name]
             account["logged_in"] = str(datetime.datetime.now().replace(microsecond=0))
             db[name] = account
 
     def valid_password(self, name, password):
-        name = name.encode("utf-8")
+        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name in db:
                 account = db[name]
@@ -494,7 +499,7 @@ class MudAccounts(object):
 
     def create(self, name, password, email, gender, stats, privileges=[]):
         name = name.strip()
-        dbname = name.encode("utf-8")
+        dbname = self.__shelve_encode_key(name)
         email = email.strip()
         gender = gender.strip()
         self.accept_name(name)
@@ -517,7 +522,7 @@ class MudAccounts(object):
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):
         self.valid_password(name, old_password)
-        name = name.encode("utf-8")
+        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
@@ -535,7 +540,7 @@ class MudAccounts(object):
 
     @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
-        name = name.encode("utf-8")
+        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
