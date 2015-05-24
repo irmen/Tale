@@ -120,10 +120,12 @@ class BulletinBoard(Item):
     def dialog_write_message(self, actor, in_reply_to=None):
         if in_reply_to:
             subject = "re: {subject}".format(**in_reply_to)
+            subject = subject[:50]
             actor.tell("You're replying to the message '{subject}' by {author}, on {date}.".format(**in_reply_to))
             text = ["(in reply to '{subject}' by {author} on {date})".format(**in_reply_to), "\n"]
         else:
-            subject = yield "input", ("Give the subject of your message:", self._subject_valid)
+            subject = yield "input", ("Give the subject of your message (max 50 chars):", self._subject_valid)
+            subject = subject[:50]
             text = []
         actor.tell("Please type your message. It can span multiple lines, but can not be longer than 1000 characters. "
                    "Type an empty line or slash ('/') for a paragraph separator, type TWO dots ('..') to end the message.", end=True)
