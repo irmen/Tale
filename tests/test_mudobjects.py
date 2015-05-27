@@ -398,6 +398,43 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual({"up", "door", "down", "hatch", "manhole", "east", "garden"}, set(loc.exits.keys()))
         self.assertEqual(loc.exits["down"], loc.exits["hatch"])
 
+    def test_door_pair(self):
+        loc1 = Location("room1", "room one")
+        loc2 = Location("room2", "room two")
+        key = Key("key")
+        door_one_two = Door("two", loc2, "door to room two", locked=True, opened=False)
+        door_two_one = door_one_two.reverse_door("one", loc1, "door to room one", reverse_open_msg="door one open", reverse_close_msg="door one close",
+                                                 this_open_msg="door two open", this_close_msg="door two close")
+        loc1.add_exits([door_one_two])
+        loc2.add_exits([door_two_one])
+        door_one_two.key_code = 555
+        key.key_for(door_one_two)
+        pubsub1 = PubsubCollector()
+        pubsub2 = PubsubCollector()
+        loc1.get_wiretap().subscribe(pubsub1)
+        loc2.get_wiretap().subscribe(pubsub2)
+        self.assertTrue(door_two_one.locked)
+        self.assertFalse(door_two_one.opened)
+        lucy = Living("lucy", "f")
+
+        door_two_one.unlock(lucy, item=key)
+        self.assertFalse(door_one_two.locked)
+        door_two_one.open(lucy)
+        self.assertTrue(door_one_two.opened)
+        pubsub.sync()
+        self.assertEqual(["door one open"], pubsub1.messages)
+        self.assertEqual([], pubsub2.messages)
+        door_one_two.close(lucy)
+        door_one_two.lock(lucy, item=key)
+        self.assertTrue(door_two_one.locked)
+        self.assertFalse(door_two_one.opened)
+        pubsub1.clear()
+        pubsub2.clear()
+        pubsub.sync()
+        self.assertEqual([], pubsub1.messages)
+        self.assertEqual(["door two close"], pubsub2.messages)
+
+
 
 class PubsubCollector(pubsub.Listener):
     def __init__(self):

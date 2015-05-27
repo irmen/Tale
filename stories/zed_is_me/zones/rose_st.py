@@ -10,7 +10,7 @@ butcher, storage room
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door, Key, _limbo
-
+import zones.magnolia_st
 
 def init(driver):
     # called when zone is first loaded
@@ -48,7 +48,8 @@ playground = Location("Playground", "Children's playground. You see a rusty merr
 playground.add_extradesc({"west", "house"}, "You can see your house from here!")
 playground.add_exits([
     Door("fence", _limbo, "On the north end of the playground is a sturdy looking padlocked fence.", locked=True, opened=False),  # this door is never meant to be opened
-    Exit(["east", "street"], north_street, "Rose Street is back east.")
+    Exit(["east", "street"], north_street, "Rose Street is back east."),
+    zones.magnolia_st.street_gate
 ])
 
 carpark = Location("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "

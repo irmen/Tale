@@ -25,10 +25,16 @@ kitchen.add_extradesc({"window", "outside"}, "Through the kitchen window you can
 
 front_door = Door(["door", "outside", "street"], "magnolia_st.street1", "Your front door leads outside, to the street.",
                   "There's a heavy front door here that leads to the streets outside.", opened=False)
+house_door = front_door.reverse_door(["house", "north", "inside"], livingroom,
+                                     "You can go back inside your house.", "It's your house, on the north side of the street.",
+                                     reverse_open_msg="Someone outside opens the door.",
+                                     reverse_close_msg="Someone outside closes the door.",
+                                     this_open_msg="Someone in the house opens the door.",
+                                     this_close_msg="Someone in the house closes the door.")
 livingroom.add_exits([
     Exit("kitchen", kitchen, "Your kitchen is adjacent to this room.",
                              "You can see your kitchen. The previous house owners had a door there but you removed it."),
-    front_door  # @todo make doors 2-way
+    front_door
 ])
 
 kitchen.add_exits([

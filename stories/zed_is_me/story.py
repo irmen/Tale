@@ -17,8 +17,8 @@ class Story(object):
         name="Zed is me",
         author="Irmen de Jong",
         author_address="irmen@razorvine.net",
-        version="1.0",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="2.3",            # tale library required to run the game
+        version="1.1",                  # arbitrary but is used to check savegames for compatibility
+        requires_tale="2.4",            # tale library required to run the game
         supported_modes={"if"},         # what driver modes (if/mud) are supported by this story
         player_name="julie",            # set a name to create a prebuilt player, None to use the character builder
         player_gender="f",              # m/f/n

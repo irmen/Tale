@@ -1122,6 +1122,25 @@ class Door(Exit):
         super(Door, self).__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
+        self.linked_door = None
+
+    class DoorPairLink(object):
+        def __init__(self, other_door, other_open_msg=None, other_close_msg=None):
+            self.door = other_door
+            self.open_msg = other_open_msg
+            self.close_msg = other_close_msg
+
+    def reverse_door(self, directions, returning_location, short_description, long_description=None,
+                     reverse_open_msg=None, reverse_close_msg=None, this_open_msg=None, this_close_msg=None):
+        """
+        Set up a second door in the other location that is paired with this door.
+        Opening this door will also open the other door etc.    Returns the new door object.
+        """
+        other_door = Door(directions, returning_location, short_description, long_description, locked=self.locked, opened=self.opened)
+        self.linked_door = Door.DoorPairLink(other_door, this_open_msg, this_close_msg)
+        other_door.linked_door = Door.DoorPairLink(self, reverse_open_msg, reverse_close_msg)
+        other_door.key_code = self.key_code
+        return other_door
 
     @property
     def description(self):
@@ -1156,7 +1175,11 @@ class Door(Exit):
         else:
             self.opened = True
             actor.tell("You opened it.")
-            actor.tell_others("{Title} opened the exit %s." % self.name)
+            actor.tell_others("{Title} opened the %s." % self.name)
+            if self.linked_door:
+                self.linked_door.door.opened = True
+                if self.linked_door.open_msg:
+                    self.target.tell(self.linked_door.open_msg)
 
     def close(self, actor, item=None):
         """Close the door with optional item. Notifies actor and room of this event."""
@@ -1164,7 +1187,11 @@ class Door(Exit):
             raise ActionRefused("It's already closed.")
         self.opened = False
         actor.tell("You closed it.")
-        actor.tell_others("{Title} closed the exit %s." % self.name)
+        actor.tell_others("{Title} closed the %s." % self.name)
+        if self.linked_door:
+            self.linked_door.door.opened = False
+            if self.linked_door.close_msg:
+                self.target.tell(self.linked_door.close_msg)
 
     def lock(self, actor, item=None):
         """Lock the door with the proper key (optional)."""
@@ -1183,7 +1210,9 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
         actor.tell("Your %s fits, it is now locked." % key.title)
-        actor.tell_others("{Title} locked the exit %s with %s." % (self.name, lang.a(key.title)))
+        actor.tell_others("{Title} locked the %s with %s." % (self.name, lang.a(key.title)))
+        if self.linked_door:
+            self.linked_door.door.locked = True
 
     def unlock(self, actor, item=None):
         """Unlock the door with the proper key (optional)."""
@@ -1202,11 +1231,21 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
         actor.tell("Your %s fits, it is now unlocked." % key.title)
-        actor.tell_others("{Title} unlocked the exit %s with %s." % (self.name, lang.a(key.title)))
+        actor.tell_others("{Title} unlocked the %s with %s." % (self.name, lang.a(key.title)))
+        if self.linked_door:
+            self.linked_door.door.locked = False
 
     def check_key(self, item):
         """Check if the item is a proper key for this door (based on key_code)"""
         key_code = getattr(item, "key_code", None)
+        if self.linked_door:
+            # if this door has a linked door, it could be that the key_code was set on the other door.
+            # in that case, copy the key code from the other door.
+            other_code = self.linked_door.door.key_code
+            if self.key_code is None:
+                self.key_code = other_code
+            else:
+                assert self.key_code == other_code, "door key codes must match"
         return key_code and key_code == self.key_code
 
     def search_key(self, actor):
