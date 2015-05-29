@@ -773,12 +773,12 @@ class Driver(pubsub.Listener):
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
-            cmd = cmd[0] + " " + cmd[1:]
+            cmd = cmd[0] + u" " + cmd[1:]
         # check for an abbreviation, replace it with the full verb if present
-        _verb, _sep, _rest = cmd.partition(" ")
+        _verb, _sep, _rest = cmd.partition(u" ")
         if _verb in cmds.abbreviations:
             _verb = cmds.abbreviations[_verb]
-            cmd = "".join([_verb, _sep, _rest])
+            cmd = u"".join([_verb, _sep, _rest])
 
         player = conn.player
         # We pass in all 'external verbs' (non-soul verbs) so it will do the

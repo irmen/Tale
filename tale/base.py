@@ -40,6 +40,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from textwrap import dedent
 from collections import defaultdict
 import copy
+import sys
 from . import lang
 from . import util
 from . import pubsub
@@ -840,7 +841,10 @@ class Living(MudObject):
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
         """
-        msg = " ".join(str(msg) for msg in messages)
+        if sys.version_info < (3, 0):
+            msg = u" ".join(unicode(msg) for msg in messages)
+        else:
+            msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
         tap.send((self.name, msg))
 

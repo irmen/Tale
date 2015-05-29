@@ -110,8 +110,11 @@ class Player(base.Living, pubsub.Listener):
         if messages == ("\n",):
             self._output.p()
         else:
-            sep = " " if kwargs.get("format", True) else "\n"
-            msg = sep.join(str(msg) for msg in messages)
+            sep = u" " if kwargs.get("format", True) else u"\n"
+            if sys.version_info < (3, 0):
+                msg = sep.join(unicode(msg) for msg in messages)
+            else:
+                msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self
 
@@ -171,7 +174,7 @@ class Player(base.Living, pubsub.Listener):
         cmd = cmd.strip()
         self._input.put(cmd)
         if self.transcript:
-            self.transcript.write("\n\n>> %s\n" % cmd)
+            self.transcript.write(u"\n\n>> %s\n" % cmd)
         self.input_is_available.set()
         self.last_input_time = time.time()
 

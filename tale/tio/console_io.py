@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import sys
 import os
 import signal
+import locale
 import threading
 from . import styleaware_wrapper, iobase
 try:
@@ -89,6 +90,8 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # (otherwise the prompt will often appear before any regular screen output)
                 old_player = player_connection.player
                 cmd = input()  # blocking console input call
+                if sys.version_info < (3, 0):
+                    cmd = cmd.decode(sys.stdin.encoding or locale.getpreferredencoding(True))
                 player_connection.player.store_input_line(cmd)
                 if old_player is not player_connection.player:
                     # this situation occurs when a save game has been restored,

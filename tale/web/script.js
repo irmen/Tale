@@ -57,8 +57,9 @@ function submit_cmd() {
         }
     }
     ajax.open("POST", "input", true);
-    ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    ajax.send("cmd=" + encodeURIComponent(cmd_input.value));
+    ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded; charset=UTF-8");
+    var encoded_cmd = encodeURIComponent(cmd_input.value);
+    ajax.send("cmd=" + encoded_cmd);
     cmd_input.value="";
     cmd_input.focus();
     return false;
