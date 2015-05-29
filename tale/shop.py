@@ -28,6 +28,7 @@ import random
 import datetime
 from .npc import NPC
 from .base import Item, clone
+from .items.basic import Trash
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .util import search_item, sorted_by_name
 from . import mud_context
@@ -290,7 +291,7 @@ class Shopkeeper(NPC):
         item, designator = self._parse_item(parsed, actor)
         if designator:
             raise ParseError("It's not clear what item you want to sell.")
-        if item.value <= 0:
+        if item.value <= 0 or isinstance(item, Trash):
             actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopdoesnotbuy))
             if self.shop.action_temper:
                 self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))

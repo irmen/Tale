@@ -337,7 +337,7 @@ def parse_file(objFile):
                             if value == '0':
                                 key = None  # don't put in "ispoisoned" attribute if not poisoned.
                             else:
-                                value = 'true'
+                                value = True
                         elif key in ('spell1', 'spell2', 'spell3', 'spell'):
                             if value == '-1':
                                 key = None

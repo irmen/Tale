@@ -194,37 +194,59 @@ def make_item(vnum):
         item = Note(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "food":
         item = Food(name, title, short_description=c_obj.longdesc)
-        #@todo food attrs
+        item.affect_fullness = c_obj.typespecific["filling"]
+        item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type == "light":
         item = Light(name, title, short_description=c_obj.longdesc)
-        #@todo light attrs
+        item.capacity = c_obj.typespecific["capacity"]
     elif c_obj.type == "scroll":
         item = Scroll(name, title, short_description=c_obj.longdesc)
-        #@todo scroll attrs
+        item.spell_level = c_obj.typespecific["level"]
+        item.spells.add(c_obj.typespecific["spell1"])
+        if "spell2" in c_obj.typespecific:
+            item.spells.add(c_obj.typespecific["spell2"])
+        if "spell3" in c_obj.typespecific:
+            item.spells.add(c_obj.typespecific["spell3"])
     elif c_obj.type in ("staff", "wand"):
         item = MagicItem(name, title, short_description=c_obj.longdesc)
-        #@todo staff/wand attrs
+        item.level = c_obj.typespecific["level"]
+        item.capacity = c_obj.typespecific["capacity"]
+        item.remaining = c_obj.typespecific["remaining"]
+        item.spell = c_obj.typespecific["spell"]
     elif c_obj.type == "trash":
         item = Trash(name, title, short_description=c_obj.longdesc)
-        #@todo trash attrs
     elif c_obj.type == "drinkcontainer":
         item = Drink(name, title, short_description=c_obj.longdesc)
-        #@todo drink attrs
+        item.capacity = c_obj.typespecific["capacity"]
+        item.quantity = c_obj.typespecific["remaining"]
+        item.contents  = c_obj.typespecific["drinktype"]
+        drinktype = Drink.drinktypes[item.contents]
+        item.affect_drunkness = drinktype.drunkness
+        item.affect_fullness = drinktype.fullness
+        item.affect_thirst = drinktype.thirst
+        item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type == "potion":
         item = Potion(name, title, short_description=c_obj.longdesc)
-        #@todo potion attrs
+        item.spell_level = c_obj.typespecific["level"]
+        item.spells.add(c_obj.typespecific["spell1"])
+        if "spell2" in c_obj.typespecific:
+            item.spells.add(c_obj.typespecific["spell2"])
+        if "spell3" in c_obj.typespecific:
+            item.spells.add(c_obj.typespecific["spell3"])
     elif c_obj.type == "money":
         item = Money(name, title, short_description=c_obj.longdesc)
-        #@todo money attrs
+        item.value = c_obj.typespecific["amount"]
     elif c_obj.type == "boat":
         item = Boat(name, title, short_description=c_obj.longdesc)
-        #@todo boat attrs
     elif c_obj.type == "worn":
         item = Wearable(name, title, short_description=c_obj.longdesc)
         #@todo worn attrs
     elif c_obj.type == "fountain":
         item = Fountain(name, title, short_description=c_obj.longdesc)
-        #@todo fountain attrs
+        item.capacity = c_obj.typespecific["capacity"]
+        item.quantity = c_obj.typespecific["remaining"]
+        item.contents  = c_obj.typespecific["drinktype"]
+        item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type in ("treasure", "other"):
         item = Item(name, title, short_description=c_obj.longdesc)
     else:
@@ -305,7 +327,6 @@ def init_zones():
                 num_shops += 1
             else:
                 mob = make_mob(mobref.vnum)
-            #@todo globalmax
             for vnum, details in mobref.equipped.items():
                 obj = make_item(vnum)
                 # @todo actually wield the item
@@ -331,7 +352,6 @@ def init_zones():
             obj = make_item(details["vnum"])
             loc = make_location(details["room"])
             loc.insert(obj, None)
-            #@todo globalmax
             inventory = set()
             for vnum, maxexists in details["contains"].items():
                 sub_item = make_item(vnum)

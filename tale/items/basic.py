@@ -8,13 +8,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import textwrap
+from collections import namedtuple
 from ..base import Item, Container, Weapon
 from ..errors import ActionRefused
 from .. import lang, mud_context
 
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
-           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain"]
+           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain" ]
 
 
 class Boxlike(Container):
@@ -168,7 +169,8 @@ class MagicItem(Weapon):
     def init(self):
         super(MagicItem, self).init()
         self.spell_level = 0
-        self.charges = 0
+        self.capacity = 0
+        self.remaining = 0
         self.spell = None
 
 
@@ -178,6 +180,24 @@ class Trash(Item):
 
 
 class Drink(Item):
+    drinkeffects = namedtuple("drinkeffects", ["drunkness", "fullness", "thirst"])
+    drinktypes = { 'water':         drinkeffects( 0, 1, 10),
+                   'beer':          drinkeffects( 3, 2, 5),
+                   'wine':          drinkeffects( 5, 2, 5),
+                   'ale':           drinkeffects( 2, 2, 5),
+                   'darkale':       drinkeffects( 1, 2, 5),
+                   'whisky':        drinkeffects( 6, 1, 4),
+                   'lemonade':      drinkeffects( 0, 1, 8),
+                   'firebreath':    drinkeffects(10, 0, 0),
+                   'localspecial':  drinkeffects( 3, 3, 3),
+                   'slime':         drinkeffects( 0, 4, -8),
+                   'milk':          drinkeffects( 0, 3, 6),
+                   'tea':           drinkeffects( 0, 1, 6),
+                   'coffee':        drinkeffects( 0, 1, 6),
+                   'blood':         drinkeffects( 0, 2, -1),
+                   'saltwater':     drinkeffects( 0, 1, -2),
+                   'clearwater':    drinkeffects( 0, 0, 13),
+                   }
     def init(self):
         super(Drink, self).init()
         self.contents = "water"
@@ -189,7 +209,9 @@ class Drink(Item):
         self.poisoned = False
 
 
-class Potion(Drink):
+
+
+class Potion(Item):
     def init(self):
         super(Potion, self).init()
         self.spell_level = 0
@@ -206,6 +228,7 @@ class Food(Item):
 class Money(Item):
     def init(self):
         super(Money, self).init()
+        # the amount of money is stored in item.value
 
 
 class Boat(Item):
