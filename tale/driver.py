@@ -114,9 +114,15 @@ class Driver(pubsub.Listener):
         mud_context.driver = self
         mud_context.config = self.config
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
-        if pkgutil.get_loader("cmds"):   # check for existence of cmds package in the story root
-            story_cmds = __import__("cmds", level=0)
-            story_cmds.register_all(self.commands)
+        try:
+            pkgutil.get_loader("cmds")
+        except AttributeError:
+            # workaround for http://bugs.python.org/issue14710 in python 3.4.0/3.4.1
+            pass
+        else:
+            if pkgutil.get_loader("cmds"):   # check for existence of cmds package in the story root
+                story_cmds = __import__("cmds", level=0)
+                story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)
         tale_version = distutils.version.LooseVersion(tale_version_str)
         tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
