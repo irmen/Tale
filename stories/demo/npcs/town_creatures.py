@@ -76,6 +76,5 @@ class WalkingRat(NPC):
     def do_random_move(self, ctx):
         direction = self.select_random_move()
         if direction:
-            self.tell_others("{Title} scurries away to the %s." % direction.name)
             self.move(direction.target, self)
         ctx.driver.defer(random.randint(10, 20), self.do_random_move)

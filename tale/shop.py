@@ -65,7 +65,6 @@ class Shopkeeper(NPC):
         # let the shopkeeper wander randomly
         direction = self.select_random_move()
         if direction:
-            self.tell_others("{Title} heads to the %s." % direction.name)
             self.move(direction.target, self)
         ctx.driver.defer(random.randint(20, 60), self.do_wander)
 

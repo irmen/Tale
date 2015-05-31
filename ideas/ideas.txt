@@ -7,20 +7,16 @@ Interesting link: http://www.brasslantern.org/writers/
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
+[feature] Write stuff to a logfile for the server admins.
 [feature] user banning
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] SSH interface via Paramiko?
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state. (already have this for IF-mode)
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
-[feature] Write stuff to a logfile for the server admins.
 [feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
 [feature] Notify player if mail arrived.
-[feature] Pets: tame/befriend/abandon (charisma/luck)
-[feature] Combat: backstab (stealth/charisma/luck/agility?  vs luck/wisdom/agility)
-[feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade
-[feature] Groups: team up with other players and share quest and combat experience
-[feature] Skills: stealth, lockpicking, ...
+[feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade/flee
 [feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset? (circle has zones and zone resets)
 [info,feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
@@ -30,7 +26,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 General ideas/TODO:
 -------------------
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
-[feature] conditional/changing exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
+[feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [feature] More commands should recognise object aliases (touch, take) like examine already does.
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
