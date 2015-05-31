@@ -33,7 +33,7 @@ function poll_text() {
                 document.getElementById("player-location").innerHTML = json["location"];
                 // document.getElementById("player-turns").innerHTML = json["turns"];
                 txtdiv.innerHTML += json["text"];
-                txtdiv.scrollTop = txtdiv.scrollHeight;
+                smoothscroll(txtdiv, 0);
             }
         }
     }
@@ -46,6 +46,16 @@ function poll_text() {
     ajax.open("GET", "text", true);
     ajax.send(null);
 }
+
+function smoothscroll(div, previousTop) {
+    if(div.scrollTop < div.scrollHeight) {
+        div.scrollTop += 3;
+        if(div.scrollTop > previousTop) {
+            setTimeout(function(){smoothscroll(div, div.scrollTop);}, 10);
+        }
+    }
+}
+
 
 function submit_cmd() {
     var cmd_input = document.getElementById("input-cmd");
