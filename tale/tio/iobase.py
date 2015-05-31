@@ -124,6 +124,7 @@ class IoAdapterBase(object):
     def tab_complete(self, prefix, driver):
         if not prefix:
             return
+        prefix = prefix.lower()
         player = self.player_connection.player
         verbs = [verb for verb in driver.current_verbs(player) if verb.startswith(prefix)]
         livings = [living.name for living in player.location.livings if living.name.startswith(prefix)]
