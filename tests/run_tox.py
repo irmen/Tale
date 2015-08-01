@@ -8,8 +8,9 @@ def run_tests(args):
         if args[0] == "-c":
             os.chdir(args[1])
     suite = unittest.defaultTestLoader.discover(".")
-    unittest.TextTestRunner(verbosity=1).run(suite)
+    test_results = unittest.TextTestRunner(verbosity=1).run(suite)
+    return len(test_results.errors) + len(test_results.failures)
 
 
 if __name__ == "__main__":
-    run_tests(sys.argv[1:])
+    exit(run_tests(sys.argv[1:]))
