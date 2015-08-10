@@ -1571,7 +1571,6 @@ def do_account(player, parsed, ctx):
     player.tell("email: %s" % account["email"], end=True)
     player.tell("privileges: %s" % (lang.join(account["privileges"], None) or "-"), end=True)
     player.tell("gender: %s" % lang.GENDERS[account["gender"]], end=True)
-    player.tell("race: %s" % account["race"], end=True)
     player.tell("created: %s" % account["created"], end=True)
     player.tell("last login: %s" % account["logged_in"], end=True)
     player.tell("\n")
