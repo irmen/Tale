@@ -784,7 +784,7 @@ def do_yell(player, parsed, ctx):
         message += "!"
     player.tell("You yell:", message)
     player.tell_others("{Title} yells: %s" % message)
-    util.message_nearby_locations(player.location, "Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
+    player.location.message_nearby_locations("Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
 
 
 @cmd("say")

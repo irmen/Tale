@@ -440,6 +440,37 @@ class Location(MudObject):
             tap = self.get_wiretap()
             tap.send((self.name, room_msg))
 
+    def message_nearby_locations(self, message):
+        """
+        Tells a message to adjacent locations, where adjacent is defined by being connected via an exit.
+        If the adjacent location has an obvious returning exit to the source location (via one of the
+        most obvious routes n/e/s/w/up/down/etc.), it hen also get information on what direction
+        the sound originated from.  This is used for loud noises such as yells!
+        """
+        if self.exits:
+            yelled_locations = set()
+            for exit in self.exits.values():
+                if exit.target in yelled_locations:
+                    continue   # skip double locations (possible because there can be multiple exits to the same location)
+                if exit.target is not self:
+                    exit.target.tell(message)
+                    yelled_locations.add(exit.target)
+                    for direction, return_exit in exit.target.exits.items():
+                        if return_exit.target is self:
+                            if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast",
+                                             "southwest", "left", "right", "front", "back"}:
+                                direction = "the " + direction
+                            elif direction in {"up", "above", "upstairs"}:
+                                direction = "above"
+                            elif direction in {"down", "below", "downstairs"}:
+                                direction = "below"
+                            else:
+                                continue  # no direction description possible for this exit
+                            exit.target.tell("The sound is coming from %s." % direction)
+                            break
+                    else:
+                        exit.target.tell("You can't hear where the sound is coming from.")
+
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
         paragraphs = ["<location>[" + self.name + "]</>"]

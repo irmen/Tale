@@ -10,7 +10,6 @@ import random
 from tale import lang, mud_context
 from tale.npc import NPC
 from tale.base import heartbeat
-from tale.util import message_nearby_locations
 
 
 @heartbeat
@@ -43,7 +42,7 @@ class TownCrier(NPC):
 
     def do_cry(self, ctx):
         self.tell_others("{Title} yells: welcome everyone!")
-        message_nearby_locations(self.location, "Someone nearby is yelling: welcome everyone!")
+        self.location.message_nearby_locations("Someone nearby is yelling: welcome everyone!")
         ctx.driver.defer(random.randint(20, 40), self.do_cry)
 
     def notify_action(self, parsed, actor):

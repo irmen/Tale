@@ -193,33 +193,6 @@ class MoneyFormatter(object):
         raise ParseError("That is not an amount of money.")
 
 
-def message_nearby_locations(source_location, message):
-    """Yells a message to adjacent locations."""
-    if source_location.exits:
-        yelled_locations = set()
-        for exit in source_location.exits.values():
-            if exit.target in yelled_locations:
-                continue   # skip double locations (possible because there can be multiple exits to the same location)
-            if exit.target is not source_location:
-                exit.target.tell(message)
-                yelled_locations.add(exit.target)
-                for direction, return_exit in exit.target.exits.items():
-                    if return_exit.target is source_location:
-                        if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast",
-                                         "southwest", "left", "right", "front", "back"}:
-                            direction = "the " + direction
-                        elif direction in {"up", "above", "upstairs"}:
-                            direction = "above"
-                        elif direction in {"down", "below", "downstairs"}:
-                            direction = "below"
-                        else:
-                            continue  # no direction description possible for this exit
-                        exit.target.tell("The sound is coming from %s." % direction)
-                        break
-                else:
-                    exit.target.tell("You can't hear where the sound is coming from.")
-
-
 def parse_time(args):
     """parses a time from args like: 13:44:59, or like a duration such as 1h 30m 15s"""
     try:
