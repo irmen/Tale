@@ -27,6 +27,7 @@ from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, 
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
+from .story import StoryConfig
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -1062,54 +1063,6 @@ class Driver(pubsub.Listener):
         hours, seconds = divmod(uptime.total_seconds(), 3600)
         minutes, seconds = divmod(seconds, 60)
         return hours, minutes, seconds
-
-
-class StoryConfig(object):
-    """Container for the configuration settings for a Story"""
-    config_items = {
-        "name",
-        "author",
-        "author_address",
-        "version",
-        "requires_tale",
-        "supported_modes",
-        "player_name",
-        "player_gender",
-        "player_race",
-        "player_money",
-        "money_type",
-        "server_tick_method",
-        "server_tick_time",
-        "gametime_to_realtime",
-        "max_wait_hours",
-        "display_gametime",
-        "epoch",
-        "startlocation_player",
-        "startlocation_wizard",
-        "savegames_enabled",
-        "show_exits_in_look",
-        "license_file",
-        "mud_host",
-        "mud_port"
-    }
-
-    def __init__(self, **kwargs):
-        difference = self.config_items ^ set(kwargs)
-        if difference:
-            raise ValueError("invalid story config; mismatch in config arguments: "+str(difference))
-        for k, v in kwargs.items():
-            if k in self.config_items:
-                setattr(self, k, v)
-            else:
-                raise AttributeError("unrecognised config attribute: " + k)
-
-    def __eq__(self, other):
-        return vars(self) == vars(other)
-
-    @staticmethod
-    def copy_from(config):
-        assert isinstance(config, StoryConfig)
-        return StoryConfig(**vars(config))
 
 
 @total_ordering

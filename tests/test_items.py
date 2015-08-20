@@ -12,7 +12,7 @@ from tale.items import basic
 from tale import mud_context
 from tale import util, player, base
 from tests.supportstuff import TestDriver
-from tale.driver import StoryConfig
+from tale.story import StoryConfig
 
 
 class TestItems(unittest.TestCase):

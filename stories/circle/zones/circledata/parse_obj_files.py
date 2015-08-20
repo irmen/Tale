@@ -87,7 +87,6 @@ def parse_file(objFile):
                     affectArg[affectline[0]] = affectline[1]
                     lineNum += 1
 
-
             # process this obj
             typeFlagArg = {'1': 'light',
                            '2': 'scroll',

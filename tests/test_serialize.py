@@ -8,7 +8,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 import pickle
 from tale import mud_context, races, base, npc, soul, player, util, hints
-from tale.driver import StoryConfig
+from tale.story import StoryConfig
 from tests.supportstuff import TestDriver
 
 

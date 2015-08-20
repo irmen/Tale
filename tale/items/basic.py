@@ -198,6 +198,7 @@ class Drink(Item):
                    'saltwater':     drinkeffects( 0, 1, -2),
                    'clearwater':    drinkeffects( 0, 0, 13),
                    }
+
     def init(self):
         super(Drink, self).init()
         self.contents = "water"
@@ -207,8 +208,6 @@ class Drink(Item):
         self.affect_fullness = 0
         self.affect_thirst = 0
         self.poisoned = False
-
-
 
 
 class Potion(Item):

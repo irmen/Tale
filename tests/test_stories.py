@@ -10,7 +10,7 @@ import os
 import sys
 import tale
 from tale import mud_context
-from tale.driver import StoryConfig
+from tale.story import StoryConfig
 from tests.supportstuff import TestDriver
 
 

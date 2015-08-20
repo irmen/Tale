@@ -8,8 +8,6 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 import os
 import re
 import io
-import sys
-from tale.tio import vfs
 
 __all__ = ["get_mobs"]
 

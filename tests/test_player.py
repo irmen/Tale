@@ -19,7 +19,7 @@ from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
-from tale.driver import StoryConfig
+from tale.story import StoryConfig
 from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
 

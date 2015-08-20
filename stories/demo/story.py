@@ -9,11 +9,11 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 import sys
 from tale.hints import Hint
-from tale.driver import StoryConfig
+from tale.story import StoryConfig, Storybase
 from tale.main import run_story
 
 
-class Story(object):
+class Story(Storybase):
     config = StoryConfig(
         name="Tale Demo",
         author="Irmen de Jong",

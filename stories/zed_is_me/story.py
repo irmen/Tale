@@ -8,11 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
-from tale.driver import StoryConfig
+from tale.story import StoryConfig, Storybase
 from tale.main import run_story
 
 
-class Story(object):
+class Story(Storybase):
     config = StoryConfig(
         name="Zed is me",
         author="Irmen de Jong",
@@ -75,11 +75,6 @@ class Story(object):
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
         return "Press enter to continue where you were before."
-
-    def goodbye(self, player):
-        """goodbye text when player quits the game"""
-        player.tell("Goodbye. Please come back again soon to finish the story.")
-        player.tell("\n")
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""

@@ -10,11 +10,11 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 import tale
-from tale.driver import StoryConfig
+from tale.story import StoryConfig, Storybase
 from tale.main import run_story
 
 
-class Story(object):
+class Story(Storybase):
     config = StoryConfig(
         name="Tale demo story",
         author="Irmen de Jong",
@@ -42,11 +42,8 @@ class Story(object):
         mud_port=None
     )
 
-    driver = None     # will be set by driver init()
-
     def init(self, driver):
-        self.driver = driver
-        self.driver.load_zones(["house"])
+        driver.load_zones(["house"])
 
     def init_player(self, player):
         player.money = 12.65
@@ -54,7 +51,8 @@ class Story(object):
     def welcome(self, player):
         player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
-        player.tell("Try to fool around with your pet, and exit the house to win the game.")
+        player.tell("Try to communicate with your pet, and exit the house to win the game.")
+        player.tell("\n")
         player.tell("\n")
 
     def welcome_savegame(self, player):
@@ -65,7 +63,7 @@ class Story(object):
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("Congratulations on finding the exit! Someone else has to look after Garfield now though...")
+        player.tell("Congratulations on escaping the house! Someone else has to look after Garfield now though...")
 
 
 if __name__ == "__main__":

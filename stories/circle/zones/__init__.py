@@ -139,9 +139,9 @@ def make_mob(vnum, mob_class=CircleMob):
     mob.stats.attack_dice = c_mob.barehanddmg_dice
     if "sentinel" not in c_mob.actions:
         mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
-    #@todo load position? (standing/sleeping/sitting...)
-    #@todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
-    #@todo actions, affection,...
+    # @todo load position? (standing/sleeping/sitting...)
+    # @todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
+    # @todo actions, affection,...
     converted_mobs.add(vnum)
     return mob
 
@@ -182,10 +182,10 @@ def make_item(vnum):
             item = Container(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "weapon":
         item = Weapon(name, title, short_description=c_obj.longdesc)
-        #@todo weapon attrs
+        # @todo weapon attrs
     elif c_obj.type == "armor":
         item = Armour(name, title, short_description=c_obj.longdesc)
-        #@todo armour attrs
+        # @todo armour attrs
     elif c_obj.type == "key":
         item = Key(name, title, short_description=c_obj.longdesc)
         item.key_for(code=vnum)   # the key code is just the item's vnum
@@ -218,7 +218,7 @@ def make_item(vnum):
         item = Drink(name, title, short_description=c_obj.longdesc)
         item.capacity = c_obj.typespecific["capacity"]
         item.quantity = c_obj.typespecific["remaining"]
-        item.contents  = c_obj.typespecific["drinktype"]
+        item.contents = c_obj.typespecific["drinktype"]
         drinktype = Drink.drinktypes[item.contents]
         item.affect_drunkness = drinktype.drunkness
         item.affect_fullness = drinktype.fullness
@@ -239,12 +239,12 @@ def make_item(vnum):
         item = Boat(name, title, short_description=c_obj.longdesc)
     elif c_obj.type == "worn":
         item = Wearable(name, title, short_description=c_obj.longdesc)
-        #@todo worn attrs
+        # @todo worn attrs
     elif c_obj.type == "fountain":
         item = Fountain(name, title, short_description=c_obj.longdesc)
         item.capacity = c_obj.typespecific["capacity"]
         item.quantity = c_obj.typespecific["remaining"]
-        item.contents  = c_obj.typespecific["drinktype"]
+        item.contents = c_obj.typespecific["drinktype"]
         item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type in ("treasure", "other"):
         item = Item(name, title, short_description=c_obj.longdesc)

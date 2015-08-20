@@ -12,6 +12,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from tale.base import Location, Exit, Door, Key, _limbo
 import zones.magnolia_st
 
+
 def init(driver):
     # called when zone is first loaded
     pass

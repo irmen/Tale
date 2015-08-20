@@ -9,12 +9,12 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import datetime
-from tale.driver import StoryConfig
+from tale.story import StoryConfig, Storybase
 from tale.main import run_story
 from zones import init_zones
 
 
-class Story(object):
+class Story(Storybase):
     config = StoryConfig(
         name="Circle",
         author="Irmen de Jong",
@@ -63,14 +63,6 @@ class Story(object):
         """
         player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.config.name), end=True)
         player.tell("--", end=True)
-
-    def welcome_savegame(self, player):
-        pass    # not used in MUD
-
-    def goodbye(self, player):
-        """goodbye text when player quits the game"""
-        player.tell("Goodbye. Please come back again soon to finish the story.")
-        player.tell("\n")
 
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""

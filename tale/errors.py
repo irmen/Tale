@@ -54,4 +54,3 @@ class AsyncDialog(Exception):
     def __init__(self, dialog, *args):
         self.dialog = dialog
         self.args = args
-

@@ -9,4 +9,3 @@ icebox_vnum = 1202   # start room for frozen
 boardroom = make_location(boardroom_vnum)
 
 icebox = make_location(icebox_vnum)
-

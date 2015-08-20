@@ -44,13 +44,13 @@ def parse_file(zonFile):
     allremove = []
 
     #import pdb; pdb.set_trace()
-    vnumArg = content[lineNum][1:];
+    vnumArg = content[lineNum][1:]
     lineNum += 1
     while content[lineNum].startswith('*'): lineNum += 1
-    zonenameArg = content[lineNum][:-1];
+    zonenameArg = content[lineNum][:-1]
     lineNum += 1
     while content[lineNum].startswith('*'): lineNum += 1
-    startroomArg, endroomArg, lifespanArg, resetArg = content[lineNum].split();
+    startroomArg, endroomArg, lifespanArg, resetArg = content[lineNum].split()
     lineNum += 1
 
     while lineNum < len(content):  # read in commands

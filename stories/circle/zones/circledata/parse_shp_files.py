@@ -61,21 +61,21 @@ def parse_file(shpFile):
             lineNum += 1
         lineNum += 1  # skip "-1" line
 
-        playertobuydoesnotexistArg = content[lineNum][3:-1];
+        playertobuydoesnotexistArg = content[lineNum][3:-1]
         lineNum += 1
-        playertoselldoesnotexistArg = content[lineNum][3:-1];
+        playertoselldoesnotexistArg = content[lineNum][3:-1]
         lineNum += 1
-        shopdoesnotbuyArg = content[lineNum][3:-1];
+        shopdoesnotbuyArg = content[lineNum][3:-1]
         lineNum += 1
-        shopcannotaffordArg = content[lineNum][3:-1];
+        shopcannotaffordArg = content[lineNum][3:-1]
         lineNum += 1
-        playercannotaffordArg = content[lineNum][3:-1];
+        playercannotaffordArg = content[lineNum][3:-1]
         lineNum += 1
-        shopsolditemArg = content[lineNum][3:-1];
+        shopsolditemArg = content[lineNum][3:-1]
         lineNum += 1
-        shopboughtitemArg = content[lineNum][3:-1];
+        shopboughtitemArg = content[lineNum][3:-1]
         lineNum += 1
-        temperArg = content[lineNum];
+        temperArg = content[lineNum]
         lineNum += 1
 
         if shopboughtitemArg == 'Oops - %d a minor bug - please report!':
@@ -110,9 +110,9 @@ def parse_file(shpFile):
         lineNum += 1
         close1Arg = content[lineNum]
         lineNum += 1
-        open2Arg = content[lineNum];
+        open2Arg = content[lineNum]
         lineNum += 1
-        close2Arg = content[lineNum];
+        close2Arg = content[lineNum]
         lineNum += 1
 
         # don't show open2 and close2 if they are both 0

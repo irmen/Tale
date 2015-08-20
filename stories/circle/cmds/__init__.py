@@ -6,7 +6,7 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from tale.cmds.decorators import wizcmd, cmd
+from tale.cmds.decorators import wizcmd
 from tale.errors import ActionRefused, ParseError
 from zones import make_location, make_item, make_mob
 from tale import lang
@@ -28,7 +28,7 @@ def go_vnum(player, parsed, ctx):
         room = make_location(vnum)
     except KeyError:
         raise ActionRefused("No room with that vnum exists.")
-    player.tell("Teleporting to room", room,"...")
+    player.tell("Teleporting to room", room, "...")
     player.tell("\n")
     player.move(room, actor=player)
     player.look()

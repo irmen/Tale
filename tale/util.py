@@ -427,4 +427,3 @@ def search_item(name, collection):
 
 def sorted_by_name(stuff):
     return sorted(stuff, key=lambda thing: thing.name.lower())
-
