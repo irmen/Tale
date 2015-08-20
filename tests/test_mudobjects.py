@@ -162,6 +162,22 @@ class TestLocations(unittest.TestCase):
         self.assertTrue(("house", "boing") in wiretap_house.msgs)
         self.assertTrue(("house", "You can't hear where the sound is coming from.") in wiretap_house.msgs, "in the house you can't locate the sound direction")
 
+    def test_nearby(self):
+        plaza = Location("plaza")
+        road = Location("road")
+        house = Location("house")
+        alley = Location("alley")  # no exits
+        attic = Location("attic")
+        plaza.add_exits([Exit("north", road, "road leads north"), Exit("door", house, "door to a house"),
+                         Exit("west", alley, "small alleywith no way back")])
+        road.add_exits([Exit("south", plaza, "plaza to the south")])
+        house.add_exits([Exit("door", plaza, "door to the plaza"), Exit("ladder", attic, "dusty attic")])
+        attic.add_exits([Exit("ladder", house, "the house")])
+        adj = set(plaza.nearby())
+        self.assertSetEqual({road, house}, adj)
+        adj = set(plaza.nearby(no_traps=False))
+        self.assertSetEqual({road, house, alley}, adj)
+
     def test_verbs(self):
         room = Location("room")
         room.verbs["smurf"] = ""

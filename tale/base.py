@@ -471,6 +471,15 @@ class Location(MudObject):
                     else:
                         exit.target.tell("You can't hear where the sound is coming from.")
 
+    def nearby(self, no_traps=True):
+        """
+        Returns an iterable of all adjacent locations, normally avoiding 'traps' (locations without a way back).
+        (this may be expanded in the future with a way to search further than just 1 step away)
+        """
+        if no_traps:
+            return (e.target for e in self.exits.values() if e.target.exits)
+        return (e.target for e in self.exits.values())
+
     def look(self, exclude_living=None, short=False):
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
         paragraphs = ["<location>[" + self.name + "]</>"]
