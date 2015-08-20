@@ -1027,7 +1027,10 @@ class Soul(object):
             # but maybe the thing the user typed refers to an object or creature.
             # In that case, set the verb to that object's default verb.
             if len(who_order) == 1:
-                verb = who_order[0].default_verb
+                try:
+                    verb = who_order[0].default_verb
+                except AttributeError:
+                    verb = "examine"   # fallback for everything that hasn't explicitly set a default_verb
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResult(verb, who_info=who_info, who_order=who_order,
