@@ -19,9 +19,9 @@ from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
-from tale.story import StoryConfig
 from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
+from tale.story import Storybase
 
 
 if sys.version_info < (3, 0):
@@ -33,7 +33,7 @@ else:
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
-        tale.mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        tale.mud_context.config = Storybase().copy_config()
         tale.mud_context.config.server_mode = "if"
 
     def test_init(self):
@@ -450,7 +450,7 @@ class TestPlayer(unittest.TestCase):
 class TestPlayerConnection(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
-        tale.mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        tale.mud_context.config = Storybase().copy_config()
         tale.mud_context.config.server_mode = "if"
 
     def test_input(self):
@@ -542,7 +542,7 @@ class TestTextbuffer(unittest.TestCase):
 class TestCharacterBuilder(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
-        mud_context.config = DemoStory().config
+        mud_context.config = DemoStory().copy_config()
 
     def test_build(self):
         conn = PlayerConnection()

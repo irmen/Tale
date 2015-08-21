@@ -965,9 +965,9 @@ class Living(MudObject):
         This code is fairly similar to the __process_player_command from the driver
         but it doesn't deal with as many error situations, and just bails out if it gets confused.
         It does try its best to support the following:
-         - custom location verbs (such as 'sell' in a shop)
-         - exit handling
-         - built-in cmds (such as 'drop'/'take')
+        - custom location verbs (such as 'sell' in a shop)
+        - exit handling
+        - built-in cmds (such as 'drop'/'take')
         Note that soul emotes are handled by do_socialize_cmd instead.
         """
         try:

@@ -57,6 +57,11 @@ Tale API
 .. automodule:: tale.pubsub
     :members:
 
+:mod:`tale.story` --- Story configuration
+-----------------------------------------
+.. automodule:: tale.story
+    :members:
+
 :mod:`tale.util` --- Generic utilities
 --------------------------------------
 .. automodule:: tale.util

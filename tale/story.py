@@ -9,8 +9,67 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 
 
+class _Storyconfig(object):
+    def __init__(self, story):
+        config_items = {
+            "name",
+            "author",
+            "author_address",
+            "version",
+            "requires_tale",
+            "supported_modes",
+            "player_name",
+            "player_gender",
+            "player_race",
+            "player_money",
+            "money_type",
+            "server_tick_method",
+            "server_tick_time",
+            "gametime_to_realtime",
+            "max_wait_hours",
+            "display_gametime",
+            "epoch",
+            "startlocation_player",
+            "startlocation_wizard",
+            "savegames_enabled",
+            "show_exits_in_look",
+            "license_file",
+            "mud_host",
+            "mud_port"
+        }
+        for attr in config_items:
+            setattr(self, attr, getattr(story, attr))
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+
 class Storybase(object):
     """base class for tale story classes."""
+    name = None                     # the name of the story
+    author = None                   # the story's author name
+    author_address = None           # the author's email address
+    version = "1.1"                 # arbitrary but is used to check savegames for compatibility
+    requires_tale = "2.5"           # tale library required to run the game
+    supported_modes = {"if"}        # what driver modes (if/mud) are supported by this story
+    player_name = None              # set a name to create a prebuilt player, None to use the character builder
+    player_gender = None            # m/f/n
+    player_race = None              # default is "human" ofcourse, but you can select something else if you want
+    player_money = 0.0              # starting money
+    money_type = None               # money type modern/fantasy/None
+    server_tick_method = "command"  # 'command' (waits for player entry) or 'timer' (async timer driven)
+    server_tick_time = 5.0          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
+    gametime_to_realtime = 1        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
+    max_wait_hours = 2              # the max. number of hours (gametime) the player is allowed to wait (>=0)
+    display_gametime = False        # enable/disable display of the game time at certain moments
+    epoch = None                    # start date/time of the game clock
+    startlocation_player = None     # name of the location where a player starts the game in
+    startlocation_wizard = None     # name of the location where a wizard player starts the game in
+    savegames_enabled = True        # allow savegames?
+    show_exits_in_look = True       # with the look command, also show exit descriptions automatically?
+    license_file = None             # game license file, if applicable
+    mud_host = None                 # for mud mode: hostname to bind the server on
+    mud_port = None                 # for mud mode: port number to bind the server on
 
     def init(self, driver):
         """
@@ -55,50 +114,6 @@ class Storybase(object):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
 
-
-class StoryConfig(object):
-    """Container for the configuration settings for a Story"""
-    config_items = {
-        "name",
-        "author",
-        "author_address",
-        "version",
-        "requires_tale",
-        "supported_modes",
-        "player_name",
-        "player_gender",
-        "player_race",
-        "player_money",
-        "money_type",
-        "server_tick_method",
-        "server_tick_time",
-        "gametime_to_realtime",
-        "max_wait_hours",
-        "display_gametime",
-        "epoch",
-        "startlocation_player",
-        "startlocation_wizard",
-        "savegames_enabled",
-        "show_exits_in_look",
-        "license_file",
-        "mud_host",
-        "mud_port"
-    }
-
-    def __init__(self, **kwargs):
-        difference = self.config_items ^ set(kwargs)
-        if difference:
-            raise ValueError("invalid story config; mismatch in config arguments: "+str(difference))
-        for k, v in kwargs.items():
-            if k in self.config_items:
-                setattr(self, k, v)
-            else:
-                raise AttributeError("unrecognised config attribute: " + k)
-
-    def __eq__(self, other):
-        return vars(self) == vars(other)
-
-    @staticmethod
-    def copy_from(config):
-        assert isinstance(config, StoryConfig)
-        return StoryConfig(**vars(config))
+    def copy_config(self):
+        """create a copy of the story's configuration settings"""
+        return _Storyconfig(self)

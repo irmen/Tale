@@ -9,40 +9,36 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import datetime
-from tale.story import StoryConfig, Storybase
+from tale.story import Storybase
 from tale.main import run_story
 from zones import init_zones
 
 
 class Story(Storybase):
-    config = StoryConfig(
-        name="Circle",
-        author="Irmen de Jong",
-        author_address="irmen@razorvine.net",
-        version="1.1",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="2.4",            # tale library required to run the game
-        supported_modes={"mud"},        # what driver modes (if/mud) are supported by this story
-        player_name=None,               # set a name to create a prebuilt player, None to use the character builder
-        player_gender=None,             # m/f/n
-        player_race=None,               # default is "human" ofcourse, but you can select something else if you want
-        player_money=0.0,               # starting money
-        money_type="fantasy",           # money type modern/fantasy/None
-        server_tick_method="timer",     # 'command' (waits for player entry) or 'timer' (async timer driven)
-        server_tick_time=1.0,           # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        gametime_to_realtime=5,         # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
-        max_wait_hours=2,               # the max. number of hours (gametime) the player is allowed to wait (>=0)
-        display_gametime=True,          # enable/disable display of the game time at certain moments
-        epoch=datetime.datetime(2015, 5, 14, 14, 0, 0),       # start date/time of the game clock
-        startlocation_player="midgaard_city.temple",
-        startlocation_wizard="god_simplex.boardroom",
-        savegames_enabled=False,
-        show_exits_in_look=False,       # circle room descriptions contain hints about the exits, no need to show this twice
-        license_file=None,
-        mud_host="localhost",
-        mud_port=8200
-    )
+    name = "Circle"
+    author = "Irmen de Jong"
+    author_address = "irmen@razorvine.net"
+    version = "1.1"
+    requires_tale = "2.5"
+    supported_modes = {"mud"}
+    player_name = None
+    player_gender = None
+    player_race = None
+    player_money = 0.0
+    money_type = "fantasy"
+    server_tick_method = "timer"
+    server_tick_time = 1.0
+    gametime_to_realtime = 5
+    display_gametime = True
+    epoch = datetime.datetime(2015, 5, 14, 14, 0, 0)       # start date/time of the game clock
+    startlocation_player = "midgaard_city.temple"
+    startlocation_wizard = "god_simplex.boardroom"
+    savegames_enabled = False
+    show_exits_in_look = False
+    mud_host = "localhost"
+    mud_port = 8200
 
-    driver = None     # will be set by driver init()
+    driver = None     # will be set by init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""

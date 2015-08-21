@@ -8,7 +8,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import unittest
 import pickle
 from tale import mud_context, races, base, npc, soul, player, util, hints
-from tale.story import StoryConfig
+from tale.story import Storybase
 from tests.supportstuff import TestDriver
 
 
@@ -112,12 +112,15 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(42, x.money)
 
     def test_storyconfig(self):
-        s = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        s = Storybase()
         s.server_mode = "if"
         s.display_gametime = True
         s.name = "test"
         x = serializecycle(s)
-        self.assertEqual(s, x)
+        self.assertEqual(s.__dict__, x.__dict__)
+        config = s.copy_config()
+        x = serializecycle(config)
+        self.assertEqual(config, x)
 
     def test_Context(self):
         c = util.Context(driver=1, clock=2, config=3, player_connection=4)

@@ -27,7 +27,6 @@ from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, 
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
-from .story import StoryConfig
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -99,13 +98,15 @@ class Driver(pubsub.Listener):
         else:
             raise IOError("Cannot find specified game")
         story = __import__("story", level=0)
+        if not hasattr(story, "Story"):
+            raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()
-        if len(self.story.config.supported_modes) == 1 and args.mode != "mud":
+        if len(self.story.supported_modes) == 1 and args.mode != "mud":
             # There's only one mode this story runs in. Just select that one.
-            args.mode = list(self.story.config.supported_modes)[0]
-        if args.mode not in self.story.config.supported_modes:
-            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
-        self.config = StoryConfig.copy_from(self.story.config)
+            args.mode = list(self.story.supported_modes)[0]
+        if args.mode not in self.story.supported_modes:
+            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.supported_modes)))
+        self.config = self.story.copy_config()
         self.config.mud_host = self.config.mud_host or "localhost"
         self.config.mud_port = self.config.mud_port or 8180
         self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
@@ -155,7 +156,7 @@ class Driver(pubsub.Listener):
             x._bind_target(self.zones)
         del self.unbound_exits
         if args.verify:
-            print("Story: '%s' v%s, by %s." % (self.story.config.name, self.story.config.version, self.story.config.author))
+            print("Story: '%s' v%s, by %s." % (self.story.name, self.story.version, self.story.author))
             print("Verified, all seems to be fine.")
             return
         if args.delay < 0 or args.delay > 100:

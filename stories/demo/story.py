@@ -9,39 +9,29 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import datetime
 import sys
 from tale.hints import Hint
-from tale.story import StoryConfig, Storybase
+from tale.story import Storybase
 from tale.main import run_story
 
 
 class Story(Storybase):
-    config = StoryConfig(
-        name="Tale Demo",
-        author="Irmen de Jong",
-        author_address="irmen@razorvine.net",
-        version="1.3",                  # arbitrary but is used to check savegames for compatibility
-        requires_tale="2.4",            # tale library required to run the game
-        supported_modes={"if", "mud"},  # what driver modes (if/mud) are supported by this story
-        player_name=None,               # set a name to create a prebuilt player, None to use the character builder
-        player_gender=None,             # m/f/n
-        player_race=None,               # default is "human" of course, but you can select something else if you want
-        player_money=15.5,              # starting money
-        money_type="modern",            # money type modern/fantasy/None
-        server_tick_method="timer",     # 'command' (waits for player entry) or 'timer' (async timer driven)
-        server_tick_time=1.0,           # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        gametime_to_realtime=5,         # meaning: game time is X times the speed of real time (only used with "timer" tick method)
-        max_wait_hours=2,               # the max. number of hours (game time) the player is allowed to wait
-        display_gametime=True,          # enable/disable display of the game time at certain moments
-        epoch=datetime.datetime(2012, 4, 19, 14, 0, 0),    # start date/time of the game clock
-        startlocation_player="town.square",
-        startlocation_wizard="wizardtower.hall",
-        savegames_enabled=True,
-        show_exits_in_look=True,
-        license_file="messages/license.txt",
-        mud_host=None,
-        mud_port=None
-    )
+    name = "Tale Demo"
+    author = "Irmen de Jong"
+    author_address  ="irmen@razorvine.net"
+    version = "1.3"
+    requires_tale = "2.5"
+    supported_modes = {"if", "mud"}
+    player_money = 15.5
+    money_type = "modern"
+    server_tick_method = "timer"
+    server_tick_time = 1.0
+    gametime_to_realtime = 5
+    display_gametime = True
+    epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
+    startlocation_player = "town.square"
+    startlocation_wizard = "wizardtower.hall"
+    license_file = "messages/license.txt"
 
-    driver = None     # will be set by driver init()
+    driver = None     # will be set by init()
 
     def init(self, driver):
         """Called by the game driver when it is done with its initial initialization"""
@@ -60,14 +50,14 @@ class Story(Storybase):
 
     def welcome(self, player):
         """welcome text when player enters a new game"""
-        player.tell("<bright>Hello, <player>%s</><bright>! Welcome to %s.</>" % (player.title, self.config.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>! Welcome to %s.</>" % (player.title, self.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
 
     def welcome_savegame(self, player):
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("<bright>Hello, <player>%s</><bright>, welcome back to %s.</>" % (player.title, self.config.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>, welcome back to %s.</>" % (player.title, self.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")

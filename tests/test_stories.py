@@ -10,7 +10,7 @@ import os
 import sys
 import tale
 from tale import mud_context
-from tale.story import StoryConfig
+from tale.story import Storybase
 from tests.supportstuff import TestDriver
 
 
@@ -19,7 +19,7 @@ class StoryCaseBase(object):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = TestDriver()
-        mud_context.config = StoryConfig(**dict.fromkeys(StoryConfig.config_items))   # empty config
+        mud_context.config = Storybase().copy_config()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -37,8 +37,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual("Zed is me", s.config.name)
-        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
+        self.assertEqual("Zed is me", s.name)
 
     def test_zones(self):
         import zones.houses
@@ -55,8 +54,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
-        self.assertEqual("Tale Demo", s.config.name)
+        self.assertEqual("Tale Demo", s.name)
 
     def test_zones(self):
         import zones.town
@@ -71,10 +69,9 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
-        self.assertEqual(len(StoryConfig.config_items), len(vars(s.config)))
-        self.assertEqual("Tale demo story", s.config.name)
-        config = StoryConfig.copy_from(s.config)
-        self.assertEqual(config.author_address, s.config.author_address)
+        self.assertEqual("Tale demo story", s.name)
+        config = s.copy_config()
+        self.assertEqual(config.author_address, s.author_address)
 
     def test_zones(self):
         import tale.demo.zones.house
