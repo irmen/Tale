@@ -417,15 +417,14 @@ def take_stuff(player, items, container, where_str=None):
 
 
 def try_pick_up_living(player, living):
-    p = player.tell
     if player.stats.size - living.stats.size >= 2:
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
-        p("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+        player.tell("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
-            p("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
+            player.tell("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
             living.start_attack(player)
     else:
-        p("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
+        player.tell("You can't carry {obj} with you, {subj}'s too large.".format(subj=living.subjective, obj=living.objective))
 
 
 @cmd("throw")

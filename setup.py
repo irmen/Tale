@@ -62,6 +62,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Communications :: Chat",
         "Topic :: Games/Entertainment",
         "Topic :: Games/Entertainment :: Role-Playing",

@@ -753,7 +753,7 @@ class Stats(object):
         s.stat_prios = defaultdict(list)
         for stat, (_, prio) in r["stats"].items():
             s.stat_prios[prio].append(stat)
-        # @todo xp, hp, maxhp, ac, attack, alignment, level
+        # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
 
 
