@@ -1299,6 +1299,15 @@ class Door(Exit):
                 return item
         return None
 
+    def insert(self, item, actor):
+        """used when the player tries to put a key into the door, for instance."""
+        if self.check_key(item):
+            if self.locked:
+                raise ActionRefused("You could try to unlock the door with it instead.")
+            else:
+                raise ActionRefused("You could try to lock the door with it instead.")
+        raise ActionRefused("The %s doesn't fit." % item.title)
+
 
 class Key(Item):
     """A key which has a unique code. It can be used to open the matching Door."""
