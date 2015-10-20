@@ -106,7 +106,7 @@ class Driver(pubsub.Listener):
             args.mode = list(self.story.supported_modes)[0]
         if args.mode not in self.story.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.supported_modes)))
-        self.config = self.story.copy_config()
+        self.config = self.story._get_config()
         self.config.mud_host = self.config.mud_host or "localhost"
         self.config.mud_port = self.config.mud_port or 8180
         self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)

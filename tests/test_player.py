@@ -33,7 +33,7 @@ else:
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
-        tale.mud_context.config = Storybase().copy_config()
+        tale.mud_context.config = Storybase()._get_config()
         tale.mud_context.config.server_mode = "if"
 
     def test_init(self):
@@ -450,7 +450,7 @@ class TestPlayer(unittest.TestCase):
 class TestPlayerConnection(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
-        tale.mud_context.config = Storybase().copy_config()
+        tale.mud_context.config = Storybase()._get_config()
         tale.mud_context.config.server_mode = "if"
 
     def test_input(self):
@@ -542,7 +542,7 @@ class TestTextbuffer(unittest.TestCase):
 class TestCharacterBuilder(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
-        mud_context.config = DemoStory().copy_config()
+        mud_context.config = DemoStory()._get_config()
 
     def test_build(self):
         conn = PlayerConnection()

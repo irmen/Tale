@@ -614,6 +614,8 @@ def do_look(player, parsed, ctx):
                 return
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
             player.tell(player.location.exits[abbreviations[arg]].short_description)
+        elif arg=="around":
+            player.look(short=False)
         else:
             raise ParseError("Maybe you should examine that instead.")
     else:
@@ -1091,6 +1093,25 @@ def do_what(player, parsed, ctx):
         p("Sorry, there is no information available about that.")
         if "wizard" in player.privileges:
             p("Maybe you meant to type a wizard command like '!%s'?" % name)
+
+
+@cmd("where")
+@disable_notify_action
+def do_where(player, parsed, ctx):
+    """Gives some information on your current whereabouts, or that of something else perhaps. Similar to 'locate'."""
+    if not parsed.args:
+        raise ParseError("Where is what or who?")
+    if len(parsed.args)==2 and parsed.args[0] == "am":
+        if parsed.args[1].rstrip("?") in ("i", "I"):
+            player.tell("You're in %s." % player.location.title)
+            player.tell("Perhaps you want to look around to get your bearings?")
+            return
+    if parsed.args[0] in ("is", "are") and len(parsed.args) > 2:
+        raise ActionRefused("Be more specific.")
+    if len(parsed.args) >= 2 and parsed.args[0] in ("is", "are"):
+        del parsed.args[0]
+    name = parsed.args[0].rstrip("?")
+    raise RetryParse("locate "+name)
 
 
 @cmd("exits")

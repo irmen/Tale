@@ -50,7 +50,7 @@ class Storybase(object):
     author = None                   # the story's author name
     author_address = None           # the author's email address
     version = "1.1"                 # arbitrary but is used to check savegames for compatibility
-    requires_tale = "2.5"           # tale library required to run the game
+    requires_tale = "2.6"           # tale library required to run the game
     supported_modes = {"if"}        # what driver modes (if/mud) are supported by this story
     player_name = None              # set a name to create a prebuilt player, None to use the character builder
     player_gender = None            # m/f/n
@@ -114,6 +114,6 @@ class Storybase(object):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
 
-    def copy_config(self):
-        """create a copy of the story's configuration settings"""
+    def _get_config(self):
+        # create a copy of the story's configuration settings
         return _Storyconfig(self)

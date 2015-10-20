@@ -118,7 +118,7 @@ class TestSerializing(unittest.TestCase):
         s.name = "test"
         x = serializecycle(s)
         self.assertEqual(s.__dict__, x.__dict__)
-        config = s.copy_config()
+        config = s._get_config()
         x = serializecycle(config)
         self.assertEqual(config, x)
 

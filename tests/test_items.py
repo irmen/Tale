@@ -17,7 +17,7 @@ from tale.story import Storybase
 class TestItems(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
-        mud_context.config = Storybase().copy_config()
+        mud_context.config = Storybase()._get_config()
         self.actor = player.Player("julie", "f")
 
     def test_gameclock(self):

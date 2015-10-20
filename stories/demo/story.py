@@ -18,7 +18,7 @@ class Story(Storybase):
     author = "Irmen de Jong"
     author_address  ="irmen@razorvine.net"
     version = "1.3"
-    requires_tale = "2.5"
+    requires_tale = "2.6"
     supported_modes = {"if", "mud"}
     player_money = 15.5
     money_type = "modern"

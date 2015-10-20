@@ -19,7 +19,7 @@ class StoryCaseBase(object):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = TestDriver()
-        mud_context.config = Storybase().copy_config()
+        mud_context.config = Storybase()._get_config()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -70,7 +70,7 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
         import tale.demo.story
         s = tale.demo.story.Story()
         self.assertEqual("Tale demo story", s.name)
-        config = s.copy_config()
+        config = s._get_config()
         self.assertEqual(config.author_address, s.author_address)
 
     def test_zones(self):

@@ -19,7 +19,7 @@ class Story(Storybase):
     author = "Irmen de Jong"
     author_address = "irmen@razorvine.net"
     version = "1.1"
-    requires_tale = "2.5"
+    requires_tale = "2.6"
     supported_modes = {"mud"}
     player_name = None
     player_gender = None
@@ -57,7 +57,7 @@ class Story(Storybase):
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.config.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.name), end=True)
         player.tell("--", end=True)
 
     def completion(self, player):

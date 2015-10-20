@@ -435,7 +435,8 @@ class MudAccounts(object):
         except dbm.error:
             print("%s: Can't open the user accounts database." % mud_context.config.name)
             print("Location:", dbpath)
-            if input("\nDo you want to create a new one? ").lower() == "y":
+            response = input("\nDo you want to create a new one? ")
+            if lang.yesno(response):
                 return closing(shelve.open(dbpath, flag='c'))
             else:
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")
