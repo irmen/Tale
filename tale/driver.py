@@ -61,6 +61,7 @@ class Driver(pubsub.Listener):
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
+        sys.excepthook = util.excepthook   # install custom verbose crash reporter
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -97,6 +98,7 @@ class Driver(pubsub.Listener):
             sys.path.insert(0, args.game)
         else:
             raise IOError("Cannot find specified game")
+        assert "story" not in sys.modules
         story = __import__("story", level=0)
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
@@ -122,9 +124,14 @@ class Driver(pubsub.Listener):
             # workaround for http://bugs.python.org/issue14710 in python 3.4.0/3.4.1
             pass
         else:
-            if pkgutil.get_loader("cmds"):   # check for existence of cmds package in the story root
-                story_cmds = __import__("cmds", level=0)
-                story_cmds.register_all(self.commands)
+            # check for existence of cmds package in the story root
+            loader = pkgutil.get_loader("cmds")
+            if loader:
+                ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
+                sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
+                if ld==sd:   # only load them if the directory is the same as where the story was loaded from
+                    story_cmds = __import__("cmds", level=0)
+                    story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)
         tale_version = distutils.version.LooseVersion(tale_version_str)
         tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
@@ -140,6 +147,10 @@ class Driver(pubsub.Listener):
                 pass
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
+        if "zones" in sys.modules:
+            # slight hack to cope with scenario of multiple unit tests that may load different zones after each other
+            import imp
+            imp.reload(sys.modules["zones"])
         import zones
         self.zones = zones
         self.config.startlocation_player = self.__lookup_location(self.config.startlocation_player)
@@ -204,6 +215,7 @@ class Driver(pubsub.Listener):
                 while not self.__stop_mainloop:
                     self.__main_loop_multiplayer()
         except:
+            # TODO should we perhaps not kill the driver but just try to continue (after reporting the error details)?
             for conn in self.all_players.values():
                 conn.critical_error()
             self.__stop_mainloop = True

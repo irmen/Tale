@@ -519,6 +519,12 @@ class TestLiving(unittest.TestCase):
         orc.remove(axe, orc)
         self.assertFalse(axe in orc)
 
+    def test_nonitem_insert_fail(self):
+        something = MudObject("thing that is not an Item")
+        orc = Living("orc", "m", race="half-orc")
+        with self.assertRaises(AssertionError):
+            orc.insert(something, orc)
+
     def test_move(self):
         hall = Location("hall")
         attic = Location("attic")

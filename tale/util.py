@@ -12,6 +12,7 @@ import random
 import sys
 import functools
 import inspect
+import traceback
 from . import lang
 from .errors import ParseError, ActionRefused
 
@@ -427,3 +428,84 @@ def search_item(name, collection):
 
 def sorted_by_name(stuff):
     return sorted(stuff, key=lambda thing: thing.name.lower())
+
+
+def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True):
+    """Formats an exception traceback. If you ask for detailed formatting,
+    the result will contain info on the variables in each stack frame.
+    You don't have to provide the exception info objects, if you omit them,
+    this function will obtain them itself using ``sys.exc_info()``."""
+    if ex_type is not None and ex_value is None and ex_tb is None:
+        # possible old (3.x) call syntax where caller is only providing exception object
+        if type(ex_type) is not type:
+            raise TypeError("invalid argument: ex_type should be an exception type, or just supply no arguments at all")
+    width = 55
+    result = ["\n\n", "-" * width + "\n", " CRASH OCCURRED! TIMESTAMP: %s\n" % datetime.datetime.now()]    # XXX
+    if ex_type is None and ex_tb is None:
+        ex_type, ex_value, ex_tb = sys.exc_info()
+    if detailed and sys.platform != "cli":  # detailed tracebacks don't work in ironpython (most of the local vars are omitted)
+        def makeStrValue(value):
+            try:
+                return repr(value)
+            except:
+                try:
+                    return str(value)
+                except:
+                    return "<ERROR>"
+
+        import linecache
+        try:
+            result.append("-" * width + "\n")
+            result.append(" EXCEPTION: %s\n" % ex_type.__name__)
+            result.append(" MESSAGE: %s\n" % ex_value)
+            result.append(" Extended stacktrace follows (most recent call last):\n")
+            skipLocals = True  # don't print the locals of the very first stack frame
+            while ex_tb:
+                frame = ex_tb.tb_frame
+                sourceFileName = frame.f_code.co_filename
+                if "self" in frame.f_locals:
+                    location = "%s.%s" % (frame.f_locals["self"].__class__.__name__, frame.f_code.co_name)
+                else:
+                    location = frame.f_code.co_name
+                result.append("   ----\n")
+                result.append("File \"%s\", line %d, in %s\n" % (sourceFileName, ex_tb.tb_lineno, location))
+                result.append("Source code:\n")
+                result.append("    " + linecache.getline(sourceFileName, ex_tb.tb_lineno).strip() + "\n")
+                if not skipLocals:
+                    names = set()
+                    names.update(getattr(frame.f_code, "co_varnames", ()))
+                    names.update(getattr(frame.f_code, "co_names", ()))
+                    names.update(getattr(frame.f_code, "co_cellvars", ()))
+                    names.update(getattr(frame.f_code, "co_freevars", ()))
+                    result.append("Local values:\n")
+                    for name2 in sorted(names):
+                        if name2 in frame.f_locals:
+                            value = frame.f_locals[name2]
+                            result.append("    %s = %s\n" % (name2, makeStrValue(value)))
+                            if name2 == "self":
+                                # print the local variables of the class instance
+                                for name3, value in vars(value).items():
+                                    result.append("        self.%s = %s\n" % (name3, makeStrValue(value)))
+                skipLocals = False
+                ex_tb = ex_tb.tb_next
+            result.append(" EXCEPTION HERE: %s: %s\n" % (ex_type.__name__, ex_value))
+            result.append("-" * width + "\n")
+            return result
+        except Exception:
+            result.extend(
+                 ["-" * width + "\nError building extended traceback!!! :\n",
+                    "".join(traceback.format_exception(*sys.exc_info())) + '-' * width + '\n',
+                    "Original Exception follows:\n",
+                    "".join(traceback.format_exception(ex_type, ex_value, ex_tb))])
+            return result
+    else:
+        # default traceback format.
+        result.extend(traceback.format_exception(ex_type, ex_value, ex_tb))
+        result.append("-" * width + "\n")
+        return result
+
+
+def excepthook(ex_type, ex_value, ex_tb):
+    """An exception hook you can use for ``sys.excepthook``, to automatically print detailed tracebacks"""
+    traceback = "".join(formatTraceback(ex_type, ex_value, ex_tb, detailed=True))
+    sys.stderr.write(traceback)
