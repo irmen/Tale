@@ -936,8 +936,17 @@ class Living(MudObject):
 
     def do_socialize(self, cmdline, external_verbs=frozenset()):
         """perform a command line with a socialize/soul verb on the living's behalf"""
-        parsed = self.parse(cmdline, external_verbs=external_verbs)
-        self.do_socialize_cmd(parsed)
+        try:
+            parsed = self.parse(cmdline, external_verbs=external_verbs)
+            self.do_socialize_cmd(parsed)
+        except soul.UnknownVerbException as ex:
+            if ex.verb=="say":
+                # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
+                verb, _, rest = cmdline.partition(u" ")
+                rest = rest.strip()
+                self.tell_others("{Title} says: "+rest)
+            else:
+                raise
 
     def do_socialize_cmd(self, parsed):
         """

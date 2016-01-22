@@ -168,7 +168,7 @@ def make_item(vnum):
     if vnum in circle_bulletin_boards:
         # it's a bulletin board
         item = BulletinBoard(name, title, short_description=c_obj.longdesc)
-        item.storage_file = circle_bulletin_boards[vnum]   # XXX the mortal board is duplicated in the circle data...
+        item.storage_file = circle_bulletin_boards[vnum]   # note that some instances reuse the same board
         item.load()
         # remove the item name from the extradesc
         c_obj.extradesc = [ed for ed in c_obj.extradesc if item.name not in ed["keywords"]]

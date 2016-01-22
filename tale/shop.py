@@ -105,11 +105,14 @@ class Shopkeeper(NPC):
 
     def notify_action(self, parsed, actor):
         # react to some things people might say such as "ask about <item>/<number>"
+        if actor is self:
+            return  # avoid reacting to ourselves
         if parsed.verb in self.verbs:
             return  # avoid reacting to verbs we already have a handler for
         unparsed = parsed.unparsed.split()
         if self in parsed.who_info or self.name in unparsed or lang.capital(self.name) in unparsed \
-                or parsed.verb in ("hi", "hello", "greet", "wave"):
+                or parsed.verb in ("hi", "hello", "greet", "wave") \
+                or (parsed.verb=="say" and ("hello" in unparsed or "hi" in unparsed)):
             # someone referred to us
             if random.random() < 0.2:
                 self.do_socialize("smile at " + actor.name)
@@ -117,6 +120,8 @@ class Shopkeeper(NPC):
                 self.do_socialize("wave at " + actor.name)
             elif random.random() < 0.2:
                 self.do_socialize("nod at " + actor.name)
+            elif random.random() < 0.2:
+                self.do_socialize("say \"Hello, how may I help you?\"")
 
     def handle_verb(self, parsed, actor):
         if self.shop.banks_money:

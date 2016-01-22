@@ -1018,7 +1018,10 @@ class Soul(object):
                         raise ParseError("The word %s makes no sense at that location." % word)
                     else:
                         # no idea what the user typed, generic error
-                        raise ParseError("It's not clear what you mean by '%s'." % word)
+                        message = "It's not clear what you mean by '%s'." % word
+                        if word[0].isupper():
+                            message += " Just type in lowercase ('%s')." % word.lower()
+                        raise ParseError(message)
             previous_word = word
 
         message = " ".join(message)

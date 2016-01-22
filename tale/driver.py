@@ -205,21 +205,21 @@ class Driver(pubsub.Listener):
         # Kick off the appropriate driver main event loop.
         # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
-        try:
-            if self.config.server_mode == "if":
-                # single player interactive fiction event loop
-                while not self.__stop_mainloop:
-                    self.__main_loop_singleplayer(conn)
-            else:
-                # multi player mud event loop
-                while not self.__stop_mainloop:
-                    self.__main_loop_multiplayer()
-        except:
-            # TODO should we perhaps not kill the driver but just try to continue (after reporting the error details)?
-            for conn in self.all_players.values():
-                conn.critical_error()
-            self.__stop_mainloop = True
-            raise
+        while not self.__stop_mainloop:
+            try:
+                if self.config.server_mode == "if":
+                    # single player interactive fiction event loop
+                    while not self.__stop_mainloop:
+                        self.__main_loop_singleplayer(conn)
+                else:
+                    # multi player mud event loop
+                    while not self.__stop_mainloop:
+                        self.__main_loop_multiplayer()
+            except:
+                # XXX TODO: only print it to the player that caused the error (if possible) + to the error log
+                for conn in self.all_players.values():
+                    conn.critical_error()
+                # note that the game loop continues and tries to ignore the error...
 
     def _connect_if_player(self, player_io, line_delay, wizard_override):
         connection = player.PlayerConnection()
@@ -614,8 +614,10 @@ class Driver(pubsub.Listener):
                     self._stop_driver()
                     break
                 except Exception:
-                    txt = "* internal error:\n" + traceback.format_exc()
+                    tb = "".join(util.formatTraceback())
+                    txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
                     conn.player.tell(txt, format=False)
+                    conn.player.tell("<rev><it>Please report this problem.</>")
             # sync pubsub events
             pubsub.sync("driver-pending-tells")
             # server TICK
@@ -659,6 +661,8 @@ class Driver(pubsub.Listener):
                     p.tell("You can't go in that direction.")
                 else:
                     p.tell("The verb '%s' is unrecognized." % x.verb)
+                    if x.verb[0].isupper():
+                        p.tell("Just type in lowercase ('%s')." % x.verb.lower())
             except errors.ActionRefused as x:
                 p.remember_parsed()
                 p.tell(str(x))
@@ -718,8 +722,10 @@ class Driver(pubsub.Listener):
                         self.story.goodbye(conn.player)
                         topic_pending_tells.send(lambda conn=conn: self._disconnect_mud_player(conn))
                     except Exception:
-                        txt = "* internal error:\n" + traceback.format_exc()
+                        tb = "".join(util.formatTraceback())
+                        txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
                         conn.player.tell(txt, format=False)
+                        conn.player.tell("<rev><it>Please report this problem.</>")
             pubsub.sync("driver-pending-tells")
             # server TICK
             now = time.time()
@@ -785,8 +791,8 @@ class Driver(pubsub.Listener):
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
-        print(traceback.format_exc(), file=sys.stderr)
-        print("(continuing...)", file=sys.stderr)
+        print("".join(util.formatTraceback()), file=sys.stderr)
+        print("(Please report this problem)", file=sys.stderr)
 
     def __process_player_command(self, cmd, conn):
         if not cmd:

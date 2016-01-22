@@ -6,9 +6,6 @@ GUI input/output using Tkinter.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
-import sys
-import re
-import os
 import textwrap
 import collections
 import threading
@@ -24,6 +21,7 @@ from . import iobase
 from . import vfs
 from .. import mud_context
 from .. import __version__ as tale_version
+from ..util import formatTraceback
 
 __all__ = ["TkinterIo"]
 
@@ -51,14 +49,12 @@ class TkinterIo(iobase.IoAdapterBase):
         """Clear the screen"""
         self.gui.clear_screen()
 
-    def critical_error(self, message="Critical Error. Shutting down."):
+    def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         super(TkinterIo, self).critical_error(message)
-        import traceback
-        tb = traceback.format_exc()
-        self.output("<bright><red>%s</>\n" % message)
-        self.output("<rev>" + tb + "</>")
-        self.output("<red>All you can do now is close this window... Sorry for the inconvenience.</>")
+        tb = "".join(formatTraceback())
+        self.output("<monospaced>" + tb + "</>")
+        self.output("<rev><it>Please report this problem.</>\n")
 
     def destroy(self):
         self.gui.destroy()

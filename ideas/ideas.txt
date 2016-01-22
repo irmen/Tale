@@ -32,8 +32,6 @@ General ideas/TODO:
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
 [feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [cosmetic] Add <center> text style which centers the line(s) on the screen.
-[code,cosmetic] input should be case insensitive (everything except stuff in quotes - the message)
-    commands, adverbs, names - all should be lowercased and compared by lowercase.
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")

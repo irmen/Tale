@@ -7,8 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
-import traceback
-from ..util import basestring_type
+from ..util import basestring_type, formatTraceback
 from .. import soul
 try:
     import HTMLParser
@@ -67,11 +66,12 @@ class IoAdapterBase(object):
         """Clear the screen"""
         pass
 
-    def critical_error(self, message="Critical Error. Shutting down."):
+    def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
-        tb = traceback.format_exc()
-        print(message, file=sys.stderr)
+        tb = "".join(formatTraceback())
+        self.output("\n<bright><rev>"+message+"</>")
         print(tb, file=sys.stderr)
+        self.output("<rev><it>Please report this problem.</>\n")
 
     def abort_all_input(self, player):
         """abort any blocking input, if at all possible"""
