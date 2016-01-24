@@ -522,7 +522,7 @@ class TestLiving(unittest.TestCase):
     def test_nonitem_insert_fail(self):
         something = MudObject("thing that is not an Item")
         orc = Living("orc", "m", race="half-orc")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ActionRefused):
             orc.insert(something, orc)
 
     def test_move(self):
