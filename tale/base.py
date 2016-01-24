@@ -814,8 +814,7 @@ class Living(MudObject):
 
     def insert(self, item, actor):
         """Add an item to the inventory."""
-        if actor is self or actor is not None and "wizard" in actor.privileges:
-            assert isinstance(item, Item)
+        if isinstance(item, Item) and (actor is self or actor is not None and "wizard" in actor.privileges):
             self.__inventory.add(item)
             item.contained_in = self
         else:
