@@ -93,7 +93,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             return self.wsgi_handle_license(environ, parameters, start_response)
         start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
         resource = vfs.internal_resources["web/about_mud.html"]
-        player_table = ["<br><p><em>Connected players:</em></p><pre>"]
+        player_table = []
         for name, conn in self.driver.all_players.items():
             player_table.append(html_escape("Name:  %s   connection: %s" % (name, conn.io)))
         player_table.append("</pre>")
