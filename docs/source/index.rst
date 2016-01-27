@@ -125,7 +125,7 @@ A random list of the features of the current codebase:
 - can load and run games/stories from a zipfile or from extracted folders.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
   while testing/debugging the game.
-- the parser uses a soul based on LPC-MUD's 'soul.c', it has been converted to Python and adapted
+- the parser uses a soul based on the classic LPC-MUD's 'soul.c', it has been converted to Python and adapted
 - the soul has 250+ 'emotes' such as bounce and shrug.
 - tab-completion of commands (command line requires readline/pyreadline for this)
 - it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
@@ -138,7 +138,7 @@ A random list of the features of the current codebase:
 - you can refer to earlier used items and persons by using a pronoun ("examine box / drop it", "examine idiot / slap him").
 - yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
   someone is yelling something, and if possible, where the sound is coming from.
-- text is nicely formatted when outputted (wrapped to a configurable width).
+- text is nicely formatted when outputted (dynamically wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
 - uses smartypants to automatically render quotes, dashes, ellipsis in a nicer way.
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
@@ -162,6 +162,7 @@ A random list of the features of the current codebase:
 - hint and story-recap system that can adapt dynamically to the progress of the story.
 - contains a simple virtual file system to provide easy resource loading / datafile storage.
 - provides a simple pubsub/event signaling mechanism
+- crashes are reported as detailed tracebacks showing local variable values per frame, to ease error reporting and debugging
 - I/O abstraction layer to be able to create alternative interfaces to the engine
 - for now, the game object model is object-oriented. You defined objects by instantiating prebuilt classes,
   or derive new classes from them with changed behavior. Currently this means that writing a game is
