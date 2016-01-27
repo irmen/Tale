@@ -27,6 +27,10 @@ from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, 
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
+if sys.version_info < (3, 0):
+    input = raw_input
+else:
+    input = input
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -215,11 +219,18 @@ class Driver(pubsub.Listener):
                     # multi player mud event loop
                     while not self.__stop_mainloop:
                         self.__main_loop_multiplayer()
+            except KeyboardInterrupt:
+                # a ctrl-c will exit the server
+                print("* break - stopping server loop")
+                if self.all_players:
+                    print("  %d players are connected: %s" % (len(self.all_players), "; ".join(self.all_players)))
+                self.__stop_mainloop = lang.yesno(input("Are you sure you want to exit the Tale driver? "))
             except:
+                # other exceptions are logged but don't break the server loop (hopefully the game can continue)
                 # XXX TODO: only print it to the player that caused the error (if possible) + to the error log
+                print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.formatTraceback()), file=sys.stderr)
                 for conn in self.all_players.values():
                     conn.critical_error()
-                # note that the game loop continues and tries to ignore the error...
 
     def _connect_if_player(self, player_io, line_delay, wizard_override):
         connection = player.PlayerConnection()
