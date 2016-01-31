@@ -68,7 +68,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Topic :: Games/Entertainment :: Role-Playing",
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
-    install_requires=["appdirs", "colorama>=0.3.6", "smartypants>=1.8.6"],
+    install_requires=["appdirs", "colorama>=0.3.3", "smartypants>=1.8.6"],
     options={"install": {"optimize": 0}}
 )
 

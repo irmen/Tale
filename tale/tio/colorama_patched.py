@@ -18,7 +18,10 @@ if not hasattr(colorama.ansi.AnsiStyle, "ITALIC"):
     colorama.ansi.AnsiStyle.UNDERLINED = 4
     colorama.ansi.AnsiStyle.BLINK = 5
     colorama.ansi.AnsiStyle.REVERSEVID = 7
-    colorama.ansi.Style = colorama.Style = colorama.ansi.AnsiStyle()
+    if colorama.__version__ >= "0.3.4":
+        colorama.ansi.Style = colorama.Style = colorama.ansi.AnsiStyle()
+    else:
+        colorama.ansi.Style = colorama.Style = colorama.ansi.AnsiCodes(colorama.ansi.AnsiStyle)
 
 # Patch in a trick to use reverse video on windows console (where REVERSEVID doesn't work natively)
 if colorama.win32.windll is not None and not hasattr(colorama.ansitowin32.AnsiToWin32, "style_reverse_vid"):
@@ -46,7 +49,7 @@ from colorama import *
 
 if __name__ == "__main__":
     colorama.init()
-    print("\x1b[1;1H\x1b[2J-----------------colorama test----------------")
+    # XXX print("\x1b[1;1H\x1b[2J-----------------colorama test----------------")
     print(colorama.Style.BRIGHT + "bright" + colorama.Style.RESET_ALL)
     print(colorama.Style.UNDERLINED + "underlined" + colorama.Style.RESET_ALL)
     print(colorama.Style.BLINK + "blink" + colorama.Style.RESET_ALL)
