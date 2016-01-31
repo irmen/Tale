@@ -49,7 +49,7 @@ from colorama import *
 
 if __name__ == "__main__":
     colorama.init()
-    # XXX print("\x1b[1;1H\x1b[2J-----------------colorama test----------------")
+    print("\x1b[1;1H\x1b[2J------------colorama test (clear screen)-------------")
     print(colorama.Style.BRIGHT + "bright" + colorama.Style.RESET_ALL)
     print(colorama.Style.UNDERLINED + "underlined" + colorama.Style.RESET_ALL)
     print(colorama.Style.BLINK + "blink" + colorama.Style.RESET_ALL)
