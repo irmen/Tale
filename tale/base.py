@@ -939,7 +939,7 @@ class Living(MudObject):
             parsed = self.parse(cmdline, external_verbs=external_verbs)
             self.do_socialize_cmd(parsed)
         except soul.UnknownVerbException as ex:
-            if ex.verb=="say":
+            if ex.verb == "say":
                 # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
                 verb, _, rest = cmdline.partition(u" ")
                 rest = rest.strip()

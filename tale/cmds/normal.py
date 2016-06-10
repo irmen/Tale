@@ -614,7 +614,7 @@ def do_look(player, parsed, ctx):
                 return
         elif arg in abbreviations and abbreviations[arg] in player.location.exits:
             player.tell(player.location.exits[abbreviations[arg]].short_description)
-        elif arg=="around":
+        elif arg == "around":
             player.look(short=False)
         else:
             raise ParseError("Maybe you should examine that instead.")
@@ -1101,7 +1101,7 @@ def do_where(player, parsed, ctx):
     """Gives some information on your current whereabouts, or that of something else perhaps. Similar to 'locate'."""
     if not parsed.args:
         raise ParseError("Where is what or who?")
-    if len(parsed.args)==2 and parsed.args[0] == "am":
+    if len(parsed.args) == 2 and parsed.args[0] == "am":
         if parsed.args[1].rstrip("?") in ("i", "I"):
             player.tell("You're in %s." % player.location.title)
             player.tell("Perhaps you want to look around to get your bearings?")

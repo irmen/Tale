@@ -133,7 +133,7 @@ class Driver(pubsub.Listener):
             if loader:
                 ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
                 sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
-                if ld==sd:   # only load them if the directory is the same as where the story was loaded from
+                if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                     story_cmds = __import__("cmds", level=0)
                     story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)

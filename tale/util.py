@@ -494,9 +494,9 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
         except Exception:
             result.extend(
                  ["-" * width + "\nError building extended traceback!!! :\n",
-                    "".join(traceback.format_exception(*sys.exc_info())) + '-' * width + '\n',
-                    "Original Exception follows:\n",
-                    "".join(traceback.format_exception(ex_type, ex_value, ex_tb))])
+                  "".join(traceback.format_exception(*sys.exc_info())) + '-' * width + '\n',
+                  "Original Exception follows:\n",
+                  "".join(traceback.format_exception(ex_type, ex_value, ex_tb))])
             return result
     else:
         # default traceback format.

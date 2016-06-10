@@ -112,7 +112,7 @@ class Shopkeeper(NPC):
         unparsed = parsed.unparsed.split()
         if self in parsed.who_info or self.name in unparsed or lang.capital(self.name) in unparsed \
                 or parsed.verb in ("hi", "hello", "greet", "wave") \
-                or (parsed.verb=="say" and ("hello" in unparsed or "hi" in unparsed)):
+                or (parsed.verb == "say" and ("hello" in unparsed or "hi" in unparsed)):
             # someone referred to us
             if random.random() < 0.2:
                 self.do_socialize("smile at " + actor.name)
