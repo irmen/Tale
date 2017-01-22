@@ -68,9 +68,6 @@ class ConsoleIo(iobase.IoAdapterBase):
                 chr(8230).encode(encoding)
         except (UnicodeEncodeError, TypeError):
             self.supports_smartquotes = False
-        if sys.platform == "win32":
-            # the windows console by default can't output nice unicode quote characters, so we disable that feature
-            self.supports_smartquotes = False
         self.stop_main_loop = False
         self.input_not_paused = threading.Event()
         self.input_not_paused.set()
@@ -111,6 +108,7 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def clear_screen(self):
         """Clear the screen"""
+        # @todo can be smarter
         if style_words:
             print("\033[1;1H\033[2J", end="")
         else:
@@ -119,6 +117,7 @@ class ConsoleIo(iobase.IoAdapterBase):
     def install_tab_completion(self, driver):
         """Install tab completion using readline, if available, and if not running on windows (it behaves weird)"""
         if sys.platform == "win32":
+            # @todo is this perhaps better in later python versions?
             return
         try:
             import readline
@@ -229,3 +228,11 @@ class ReadlineTabCompleter(object):
             return self.candidates[index]
         except IndexError:
             return None
+
+
+if __name__=="__main__":
+    co = ConsoleIo(None)
+    lines = ["test Tale Console output", "'singlequotes'", '"double quotes"', "ellipsis...", "<bright>BRIGHT <rev>REVERSE </>NORMAL"]
+    paragraphs = [(text, False) for text in lines]
+    output = co.render_output(paragraphs, indent=2, width=50)
+    co.output(output)

@@ -9,7 +9,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 # this is intentionally left empty; don't put stuff here that other modules
 # might need, it's too easy to cause circular dependencies
 
-__version__ = "2.8.dev0"
+__version__ = "2.8"
 
 
 class _MudContext(object):
