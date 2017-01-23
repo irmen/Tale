@@ -5,7 +5,7 @@ Decorator functions to help with defining commands.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
+
 import inspect
 import functools
 from .. import util
@@ -22,7 +22,7 @@ def cmd(func):
     # If changes are made, make sure to update both occurrences
     if inspect.isgeneratorfunction(func):
         func.is_generator = True   # contains async yields
-    argspec = inspect.getargspec(func)
+    argspec = inspect.getargspec(func)   # @todo signature()
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)
         func.is_tale_command_func = True
@@ -52,7 +52,7 @@ def wizcmd(func):
 
     if inspect.isgeneratorfunction(func):
         func.is_generator = True   # contains async yields
-    argspec = inspect.getargspec(func)
+    argspec = inspect.getargspec(func)   # @todo signature()
     if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
         func.__doc__ = util.format_docstring(func.__doc__)
         return executewizcommand

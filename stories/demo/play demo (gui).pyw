@@ -12,12 +12,8 @@ if not tale_from_lib:
         sys.path.insert(0, os.path.abspath("../.."))
         import tale.driver
     else:
-        try:
-            import Tkinter as tkinter
-            import tkMessageBox as tkmsgbox
-        except ImportError:
-            import tkinter
-            import tkinter.messagebox as tkmsgbox
+        import tkinter
+        import tkinter.messagebox as tkmsgbox
         root = tkinter.Tk()
         root.withdraw()
         tkmsgbox.showerror("Installation error", "Cannot launch the game:\nTale is not properly installed.", master=root)

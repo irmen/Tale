@@ -5,10 +5,10 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals, absolute_import
 import sys
 import time
 import unittest
+from io import StringIO
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item, Stats
@@ -22,12 +22,6 @@ from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
 from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
 from tale.story import Storybase
-
-
-if sys.version_info < (3, 0):
-    from StringIO import StringIO
-else:
-    from io import StringIO
 
 
 class TestPlayer(unittest.TestCase):

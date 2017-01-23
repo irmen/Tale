@@ -4,7 +4,6 @@ Unit tests for util functions
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 import datetime
 import unittest
 from tale import util, mud_context, pubsub

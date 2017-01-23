@@ -5,11 +5,9 @@ Console-based input/output.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 import os
 import signal
-import locale
 import threading
 from . import styleaware_wrapper, iobase
 try:
@@ -18,11 +16,6 @@ try:
     assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (preferrably 0.3.6+)"
 except ImportError:
     from . import ansi_codes as colorama        # fallback
-
-if sys.version_info < (3, 0):
-    input = raw_input
-else:
-    input = input
 
 __all__ = ["ConsoleIo"]
 
@@ -62,10 +55,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         try:
             # try to output a unicode character such as smartypants uses for nicer formatting
             encoding = getattr(sys.stdout, "encoding", sys.getfilesystemencoding())
-            if sys.version_info < (3, 0):
-                unichr(8230).encode(encoding)
-            else:
-                chr(8230).encode(encoding)
+            chr(8230).encode(encoding)
         except (UnicodeEncodeError, TypeError):
             self.supports_smartquotes = False
         self.stop_main_loop = False
@@ -88,8 +78,6 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # (otherwise the prompt will often appear before any regular screen output)
                 old_player = player_connection.player
                 cmd = input()  # blocking console input call
-                if sys.version_info < (3, 0):
-                    cmd = cmd.decode(sys.stdin.encoding or locale.getpreferredencoding(True))
                 player_connection.player.store_input_line(cmd)
                 if old_player is not player_connection.player:
                     # this situation occurs when a save game has been restored,
@@ -120,7 +108,10 @@ class ConsoleIo(iobase.IoAdapterBase):
             # @todo is this perhaps better in later python versions?
             return
         try:
-            import readline
+            import readline     # @todo does this still work okay?
+        except ImportError:
+            return
+        else:
             completer = ReadlineTabCompleter(driver, self)
             readline.set_completer(completer.complete)
             if readline.__doc__ and "libedit" in readline.__doc__:
@@ -128,8 +119,6 @@ class ConsoleIo(iobase.IoAdapterBase):
                 readline.parse_and_bind("bind ^I rl_complete")
             else:
                 readline.parse_and_bind("tab: complete")
-        except ImportError:
-            return
 
     def abort_all_input(self, player):
         """abort any blocking input, if at all possible"""

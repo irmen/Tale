@@ -6,13 +6,13 @@ Wizard commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
 import inspect
 import functools
 import sys
 import gc
 import platform
+import importlib
 from .decorators import disabled_in_gamemode
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from ..player import Player
@@ -46,7 +46,7 @@ def wizcmd(command, *aliases):
 
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
-        argspec = inspect.getargspec(func)
+        argspec = inspect.getargspec(func)   # @todo signature()
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
             all_commands[command] = executewizcommand
@@ -327,8 +327,7 @@ def do_reload(player, parsed, ctx):
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
-    import imp
-    imp.reload(module)
+    importlib.reload(module)
     player.tell("Module has been reloaded:", module.__name__)
 
 

@@ -5,18 +5,12 @@ GUI input/output using Tkinter.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
 import textwrap
 import collections
 import threading
-try:
-    from tkinter import *
-    import tkinter.font as tkfont
-    import tkinter.messagebox as tkmsgbox
-except ImportError:
-    from Tkinter import *
-    import tkFont as tkfont
-    import tkMessageBox as tkmsgbox
+from tkinter import *
+import tkinter.font as tkfont    # @todo
+import tkinter.messagebox as tkmsgbox   # @todo
 from . import iobase
 from . import vfs
 from .. import mud_context

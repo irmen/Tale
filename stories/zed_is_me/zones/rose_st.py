@@ -8,7 +8,6 @@ rose street north, crossing, rose street south
 butcher, storage room
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door, Key, _limbo
 import zones.magnolia_st
 

@@ -6,7 +6,6 @@ Utility stuff
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import datetime
 import random
 import sys
@@ -16,18 +15,11 @@ import traceback
 from . import lang
 from .errors import ParseError, ActionRefused
 
-if sys.version_info < (3, 0):
-    basestring_type = basestring
-    import Queue as queue
+basestring_type = str  # @todo
 
-    def next_iter(iterable):
-        return iterable.next()
-else:
-    basestring_type = str
-    import queue
 
-    def next_iter(iterable):
-        return next(iterable)
+def next_iter(iterable):  # @todo
+    return next(iterable)
 
 
 def roll_dice(number=1, sides=6):
@@ -392,7 +384,7 @@ def authorized(*privileges):
     an ActionRefused error is raised.
     """
     def checked(f):
-        if "actor" not in inspect.getargspec(f).args:
+        if "actor" not in inspect.getargspec(f).args:   # @todo signature()
             raise SyntaxError("callable requires 'actor' argument: " + f.__name__)
         allowed_privs = set(privileges)
 

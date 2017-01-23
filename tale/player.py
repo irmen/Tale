@@ -6,15 +6,14 @@ Player code
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import time
 import random
-from hashlib import sha1
-import shelve
+import shelve       # @todo replace with sqlite3
 import threading
+import queue
 import datetime
 import re
-import sys
+from hashlib import sha1
 from contextlib import closing
 from . import base
 from . import lang
@@ -23,24 +22,13 @@ from . import pubsub
 from . import mud_context
 from . import util
 from .errors import ActionRefused
-from .util import queue
 from .tio.iobase import strip_text_styles
 from threading import Event
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 try:
-    import anydbm as dbm   # python 2
+    import dbm      # @todo replace with sqlite3
 except ImportError:
-    try:
-        import dbm   # python 3
-    except ImportError:
-        dbm = None
-except Exception as x:
-    # pypy can generate a distutils error somehow if dbm is not available
     dbm = None
-if sys.version_info < (3, 0):
-    input = raw_input
-else:
-    input = input
 
 
 class Player(base.Living, pubsub.Listener):
@@ -111,10 +99,7 @@ class Player(base.Living, pubsub.Listener):
             self._output.p()
         else:
             sep = u" " if kwargs.get("format", True) else u"\n"
-            if sys.version_info < (3, 0):
-                msg = sep.join(unicode(msg) for msg in messages)
-            else:
-                msg = sep.join(str(msg) for msg in messages)
+            msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self
 
@@ -441,13 +426,7 @@ class MudAccounts(object):
             else:
                 raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
-    def __shelve_encode_key(self, key):
-        if sys.version_info < (3, 0):
-            return key.encode("utf-8")
-        return key
-
     def get(self, name):
-        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             return db[name]
 
@@ -456,14 +435,12 @@ class MudAccounts(object):
             return dict(db)
 
     def logged_in(self, name):
-        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             account = db[name]
             account["logged_in"] = str(datetime.datetime.now().replace(microsecond=0))
             db[name] = account
 
     def valid_password(self, name, password):
-        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name in db:
                 account = db[name]
@@ -503,7 +480,7 @@ class MudAccounts(object):
 
     def create(self, name, password, email, gender, stats, privileges=[]):
         name = name.strip()
-        dbname = self.__shelve_encode_key(name)
+        dbname = name
         email = email.strip()
         gender = gender.strip()
         self.accept_name(name)
@@ -526,7 +503,6 @@ class MudAccounts(object):
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):
         self.valid_password(name, old_password)
-        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")
@@ -544,7 +520,6 @@ class MudAccounts(object):
 
     @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
-        name = self.__shelve_encode_key(name)
         with self.db_lock, self.open_db() as db:
             if name not in db:
                 raise KeyError("Unknown name.")

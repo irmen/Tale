@@ -6,7 +6,6 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door, Item, Container, Key, clone
 from tale.npc import NPC
 from tale.player import Player

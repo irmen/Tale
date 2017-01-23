@@ -6,7 +6,6 @@ Non-Player-Character classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import random
 from . import base
 from . import lang

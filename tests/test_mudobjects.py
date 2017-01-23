@@ -5,7 +5,6 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import print_function, division, unicode_literals, absolute_import
 import unittest
 import datetime
 from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap

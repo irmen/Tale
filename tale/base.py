@@ -36,11 +36,9 @@ Except Location: it separates the items and livings it contains internally.
 Use its enter/leave methods instead.
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 from textwrap import dedent
 from collections import defaultdict
 import copy
-import sys
 from . import lang
 from . import util
 from . import pubsub
@@ -880,10 +878,7 @@ class Living(MudObject):
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
         """
-        if sys.version_info < (3, 0):
-            msg = u" ".join(unicode(msg) for msg in messages)
-        else:
-            msg = " ".join(str(msg) for msg in messages)
+        msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
         tap.send((self.name, msg))
 

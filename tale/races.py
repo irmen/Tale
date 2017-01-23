@@ -7,8 +7,6 @@ Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare m
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
-
 flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin', 'insect', 'pegasus', 'vehicle', 'wraith'}
 limbless_combat_races = {'android', 'blob', 'bot', 'elemental', 'fish', 'god', 'mech', 'plant', 'slug', 'snake', 'strider', 'tree', 'vehicle', 'viper'}
 limbless_races = {'blob', 'elemental', 'fish', 'slug', 'snake', 'viper'}

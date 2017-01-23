@@ -5,7 +5,6 @@ Textwrapper that doesn't count the length of the embedded formatting tags.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
 import textwrap
 import re
 

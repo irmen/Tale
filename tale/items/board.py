@@ -6,12 +6,11 @@ Bulletin boards.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
+import json
+import datetime
 from ..base import Item
 from ..errors import ActionRefused, ParseError, AsyncDialog
 from .. import lang, mud_context
-import json
-import datetime
 
 __all__ = ["BulletinBoard", "bulletinboard"]
 

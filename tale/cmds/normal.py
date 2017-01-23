@@ -6,7 +6,6 @@ Normal player commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import inspect
 import datetime
 import random
@@ -36,7 +35,7 @@ def cmd(command, *aliases):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
         func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
-        argspec = inspect.getargspec(func)
+        argspec = inspect.getargspec(func)   # @todo signature()
         if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
             func.__doc__ = util.format_docstring(func.__doc__)
             func.is_tale_command_func = True

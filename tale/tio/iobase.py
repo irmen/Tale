@@ -5,20 +5,16 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
+import html.parser
+if hasattr(html.parser, "unescape"):
+    unescape_entity = html.parser.unescape  # 3.4+
+else:
+    unescape_entity = html.parser.HTMLParser().unescape
+import smartypants
 from ..util import basestring_type, formatTraceback
 from .. import soul
-try:
-    import HTMLParser
-    unescape_entity = HTMLParser.HTMLParser().unescape
-except ImportError:
-    import html.parser
-    if hasattr(html.parser, "unescape"):
-        unescape_entity = html.parser.unescape  # 3.4+
-    else:
-        unescape_entity = html.parser.HTMLParser().unescape
-import smartypants
+
 smartypants.process_escapes = lambda txt: txt  # disable the escape processing
 smartypants = smartypants.smartypants
 

@@ -6,9 +6,6 @@ Story configuration and base classes to create your own story with.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
-
-
 class _Storyconfig(object):
     def __init__(self, story):
         config_items = {

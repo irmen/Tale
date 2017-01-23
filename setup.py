@@ -4,20 +4,19 @@ Setup script for distutils
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import tale
-try:
-    # try setuptools first, to get access to build_sphinx and test commands
-    from setuptools import setup
-    using_setuptools = True
-except ImportError:
-    from distutils.core import setup
-    using_setuptools = False
+import re
+from setuptools import setup
 
-print("version=" + tale.__version__)
+with open("tale/__init__.py") as version_file:
+    # extract the VERSION definition from the tale package without importing it
+    version_line = next(line for line in version_file if line.startswith("__version__"))
+    tale_version = re.match(r"__version__\s?=\s?['\"](.+)['\"]", version_line).group(1)
 
-setup_args = dict(
+print("version=" + tale_version)
+
+setup(
     name='tale',
-    version=tale.__version__,
+    version=tale_version,
     packages=['tale', 'tale.cmds', 'tale.items', 'tale.tio', 'tale.demo', 'tale.demo.zones', 'tale.web'],
     package_data={
         'tale': ['soul_adverbs.txt'],
@@ -68,10 +67,6 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
     install_requires=["appdirs", "colorama>=0.3.6", "smartypants>=1.8.6"],
-    options={"install": {"optimize": 0}}
+    options={"install": {"optimize": 0}},
+    test_suite="tests"
 )
-
-if using_setuptools:
-    setup_args["test_suite"] = "tests"
-
-setup(**setup_args)

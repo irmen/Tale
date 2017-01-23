@@ -1,4 +1,3 @@
-from __future__ import absolute_import, print_function, division, unicode_literals
 from . import make_location
 
 zone_vnum = 12   # god simplex

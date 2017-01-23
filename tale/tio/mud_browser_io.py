@@ -5,20 +5,14 @@ Webbrowser based I/O for a multi player ('mud') server.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division
-from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 import time
 import random
 import sys
 import hashlib
-if sys.version_info < (3, 0):
-    from SocketServer import ThreadingMixIn
-    from Cookie import SimpleCookie
-    from cgi import escape as html_escape
-else:
-    from socketserver import ThreadingMixIn
-    from http.cookies import SimpleCookie
-    from html import escape as html_escape
+from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
+from socketserver import ThreadingMixIn
+from http.cookies import SimpleCookie
+from html import escape as html_escape
 from .if_browser_io import HttpIo, TaleWsgiAppBase
 from . import vfs
 from .. import __version__ as tale_version_str

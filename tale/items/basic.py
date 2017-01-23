@@ -6,7 +6,6 @@ A couple of basic items that go beyond the few base types.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import textwrap
 from collections import namedtuple
 from ..base import Item, Container, Weapon

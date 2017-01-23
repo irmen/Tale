@@ -5,23 +5,17 @@ Webbrowser based I/O for a single player ('if') story.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from __future__ import absolute_import, print_function, division
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 import json
 import time
-import sys
+from html import escape as html_escape
+from urllib.parse import parse_qs
 from hashlib import md5
 from email.utils import formatdate, parsedate
 from . import iobase
 from . import vfs
 from .styleaware_wrapper import tag_split_re
 from .. import __version__ as tale_version_str
-if sys.version_info < (3, 0):
-    from cgi import escape as html_escape
-    from urlparse import parse_qs
-else:
-    from html import escape as html_escape
-    from urllib.parse import parse_qs
 
 __all__ = ["HttpIo", "TaleWsgiApp", "TaleWsgiAppBase"]
 
@@ -167,17 +161,10 @@ class TaleWsgiAppBase(object):
                     if clength > 1e6:
                         raise ValueError('Maximum content length exceeded')
                     inputstream = environ['wsgi.input']
-                    qs = inputstream.read(clength)
-                    if sys.version_info >= (3, 0):
-                        qs = qs.decode("utf-8")
+                    qs = inputstream.read(clength).decode("utf-8")
                 elif method == "GET":
                     qs = environ.get("QUERY_STRING", "")
-                if sys.version_info < (3, 0):
-                    parameters = singlyfy_parameters(parse_qs(qs))
-                    for key, value in parameters.items():
-                        parameters[key] = value.decode("UTF-8")
-                else:
-                    parameters = singlyfy_parameters(parse_qs(qs, encoding="UTF-8"))
+                parameters = singlyfy_parameters(parse_qs(qs, encoding="UTF-8"))
                 return self.wsgi_route(environ, path[5:], parameters, start_response)
             else:
                 return self.wsgi_invalid_request(start_response)

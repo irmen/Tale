@@ -6,7 +6,6 @@ Written for Tale IF framework.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import sys
 from tale.story import Storybase
 from tale.main import run_story

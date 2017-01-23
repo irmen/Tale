@@ -7,7 +7,6 @@ magnolia st. 1, pharmacy
 magnolia st. 2, magnolia st. 3, factory
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 from tale.base import Location, Exit, Door
 from zones import houses
 

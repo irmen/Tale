@@ -6,7 +6,6 @@ Mud driver (server).
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from __future__ import absolute_import, print_function, division, unicode_literals
 import collections
 from functools import total_ordering
 import datetime
@@ -23,14 +22,11 @@ import traceback
 import appdirs
 import distutils.version
 import pkgutil
+import importlib
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
-if sys.version_info < (3, 0):
-    input = raw_input
-else:
-    input = input
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -153,8 +149,7 @@ class Driver(pubsub.Listener):
         self.story.init(self)
         if "zones" in sys.modules:
             # slight hack to cope with scenario of multiple unit tests that may load different zones after each other
-            import imp
-            imp.reload(sys.modules["zones"])
+            importlib.reload(sys.modules["zones"])
         import zones
         self.zones = zones
         self.config.startlocation_player = self.__lookup_location(self.config.startlocation_player)
@@ -1157,7 +1152,7 @@ class Deferred(object):
                 else:
                     raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
-        if "ctx" in inspect.getargspec(func).args:
+        if "ctx" in inspect.getargspec(func).args:   # @todo signature()
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
         func(*self.vargs, **self.kwargs)
         # our lifetime has ended, remove references:
