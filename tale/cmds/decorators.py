@@ -22,15 +22,14 @@ def cmd(func):
     # If changes are made, make sure to update both occurrences
     if inspect.isgeneratorfunction(func):
         func.is_generator = True   # contains async yields
-    argspec = inspect.getargspec(func)   # @todo signature()
-    if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
+    if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
         func.is_tale_command_func = True
         if not hasattr(func, "enable_notify_action"):
             func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
         return func
     else:
-        raise SyntaxError("invalid cmd function signature for: " + func.__name__)
+        raise SyntaxError("invalid cmd function signature: " + func.__name__)
 
 
 def wizcmd(func):
@@ -52,12 +51,20 @@ def wizcmd(func):
 
     if inspect.isgeneratorfunction(func):
         func.is_generator = True   # contains async yields
-    argspec = inspect.getargspec(func)   # @todo signature()
-    if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
+    if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
         return executewizcommand
     else:
-        raise SyntaxError("invalid wizcmd function signature for: " + func.__name__)
+        raise SyntaxError("invalid wizcmd function signature: " + func.__name__)
+
+
+def cmdfunc_signature_valid(func):
+    # the signature of a command function must be exactly this:  def func(player, parsed, ctx) -> None
+    sig = inspect.signature(func)
+    expected_params = ["player", "parsed", "ctx"]
+    if list(sig.parameters) != expected_params or sig.return_annotation not in (sig.empty, None):
+        return False
+    return all(sig.parameters[p].default is sig.empty and sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
 
 
 def disable_notify_action(func):

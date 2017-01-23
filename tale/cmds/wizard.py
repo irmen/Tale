@@ -13,7 +13,7 @@ import sys
 import gc
 import platform
 import importlib
-from .decorators import disabled_in_gamemode
+from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from ..player import Player
 from ..soul import NonSoulVerb
@@ -46,8 +46,7 @@ def wizcmd(command, *aliases):
 
         if command in all_commands:
             raise ValueError("Command defined more than once: " + command)
-        argspec = inspect.getargspec(func)   # @todo signature()
-        if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
+        if cmdfunc_signature_valid(func):
             func.__doc__ = util.format_docstring(func.__doc__)
             all_commands[command] = executewizcommand
             for alias in aliases:

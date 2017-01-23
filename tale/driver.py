@@ -1152,7 +1152,7 @@ class Deferred(object):
                 else:
                     raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
-        if "ctx" in inspect.getargspec(func).args:   # @todo signature()
+        if "ctx" in inspect.signature(func).parameters:
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
         func(*self.vargs, **self.kwargs)
         # our lifetime has ended, remove references:

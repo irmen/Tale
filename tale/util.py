@@ -378,8 +378,8 @@ def authorized(*privileges):
     an ActionRefused error is raised.
     """
     def checked(f):
-        if "actor" not in inspect.getargspec(f).args:   # @todo signature()
-            raise SyntaxError("callable requires 'actor' argument: " + f.__name__)
+        if "actor" not in inspect.signature(f).parameters:
+            raise SyntaxError("callable requires 'actor' parameter: " + f.__name__)
         allowed_privs = set(privileges)
 
         @functools.wraps(f)

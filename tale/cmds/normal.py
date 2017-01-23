@@ -18,7 +18,7 @@ from .. import base
 from ..player import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
-from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
+from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 
 all_commands = {}
 cmds_aliases = {}   # commands -> tuple of aliases
@@ -35,8 +35,7 @@ def cmd(command, *aliases):
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
         func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
-        argspec = inspect.getargspec(func)   # @todo signature()
-        if argspec.args == ["player", "parsed", "ctx"] and argspec.varargs is None and argspec.keywords is None and argspec.defaults is None:
+        if cmdfunc_signature_valid(func):
             func.__doc__ = util.format_docstring(func.__doc__)
             func.is_tale_command_func = True
             if not hasattr(func, "enable_notify_action"):
