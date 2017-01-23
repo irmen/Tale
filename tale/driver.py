@@ -1145,7 +1145,7 @@ class Deferred(object):
         else:
             # deferred action is stored as the name of the function to call,
             # so we need to obtain the actual function from the owner object.
-            if isinstance(self.owner, util.basestring_type):
+            if isinstance(self.owner, str):
                 if self.owner.startswith("module:"):
                     # the owner refers to a module
                     self.owner = sys.modules[self.owner[7:]]

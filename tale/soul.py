@@ -15,7 +15,6 @@ import re
 from collections import defaultdict
 from . import lang
 from .errors import ParseError
-from .util import next_iter
 
 
 class SoulException(Exception):
@@ -959,13 +958,13 @@ class Soul(object):
                     who_order.append(exit)
                     arg_words.append(exit_name)
                     while wordcount > 1:
-                        next_iter(words_enumerator)
+                        next(words_enumerator)
                         wordcount -= 1
                     continue
             item, full_name, wordcount = check_name_with_spaces(words, index, all_livings, all_items)
             if item:
                 while wordcount > 1:
-                    next_iter(words_enumerator)
+                    next(words_enumerator)
                     wordcount -= 1
                 if include_flag:
                     who_info[item].sequence = who_sequence

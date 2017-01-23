@@ -7,16 +7,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import sys
 import html.parser
+import smartypants
+from ..util import formatTraceback
+from .. import soul
+
+smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
+smartypants = smartypants.smartypants
 if hasattr(html.parser, "unescape"):
     unescape_entity = html.parser.unescape  # 3.4+
 else:
     unescape_entity = html.parser.HTMLParser().unescape
-import smartypants
-from ..util import basestring_type, formatTraceback
-from .. import soul
-
-smartypants.process_escapes = lambda txt: txt  # disable the escape processing
-smartypants = smartypants.smartypants
 
 ALL_STYLE_TAGS = {
     "dim", "normal", "bright", "ul", "it", "rev", "clear", "/",
@@ -32,7 +32,7 @@ def strip_text_styles(text):
         for tag in ALL_STYLE_TAGS:
             text = text.replace("<%s>" % tag, "")
         return text
-    if isinstance(text, basestring_type):
+    if isinstance(text, str):
         return strip(text)
     return [strip(line) for line in text]
 

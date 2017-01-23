@@ -15,12 +15,6 @@ import traceback
 from . import lang
 from .errors import ParseError, ActionRefused
 
-basestring_type = str  # @todo
-
-
-def next_iter(iterable):  # @todo
-    return next(iterable)
-
 
 def roll_dice(number=1, sides=6):
     """rolls a number (max 300) of dice with configurable number of sides"""

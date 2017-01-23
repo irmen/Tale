@@ -627,8 +627,8 @@ class Exit(MudObject):
     Note that the exit's origin is not stored in the exit object.
     """
     def __init__(self, directions, target_location, short_description, long_description=None):
-        assert isinstance(target_location, (Location, util.basestring_type)), "target must be a Location or a string"
-        if isinstance(directions, util.basestring_type):
+        assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
+        if isinstance(directions, str):
             direction = directions
             aliases = frozenset()
         else:
