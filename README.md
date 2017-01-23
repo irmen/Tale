@@ -9,9 +9,13 @@ This software is released under the GPL v3 software license.
 This license, including disclaimer, is available in the 'LICENSE.txt' file.
 
 
-Tale is 100% pure Python and runs on Python 2.7 and 3.3+ as well as PyPy 2 and 3.
+Tale is 100% pure Python and is supported on Python 3.5 or newer.
+(If you have an older version of Python, stick to Tale 2.8 or older, which still supports Python 2.7 as well)
 
-It requires the smartypants library (for nicely quoted string output) the colorama library (for colorized console output), and the appdirs library (to load and save games in the correct folder).
+Required third party libraries:
+- ``smartypants`` (for nicely quoted string output) 
+- ``appdirs`` (to load and save games in the correct folder).
+- ``colorama`` (on Windows only, for colorized console output)
 
 Read the documentation for more details on how to get started. It is online at http://pythonhosted.org/tale/
 

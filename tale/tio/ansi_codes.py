@@ -5,7 +5,7 @@ Fallback ansi escape sequence definitions, used when 'colorama' is not installed
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-
+# @todo get rid of decorator
 def ansi_escapes(clazz):
     for name, code in clazz.tags.items():
         escape_seq = "\033[" + str(code) + "m"

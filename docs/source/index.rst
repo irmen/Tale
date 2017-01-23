@@ -11,8 +11,8 @@ What is Tale?
 It is a library for building `Interactive Fiction <http://en.wikipedia.org/wiki/Interactive_fiction>`_,
 mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
-Tale is 100% pure Python and runs on Python 2.7 and 3.4+.
-(maybe it runs on 3.2 and 3.3 as well, but that is not tested).
+Tale is 100% pure Python and is supported on Python 3.5 or newer.
+(If you have an older version of Python, stick to Tale 2.8 or older, which still supports Python 2.7 as well)
 
 You can run Tale in console mode, where it is a pure text interface running in your
 console window. But you can also run Tale in a simple GUI application (built with Tkinter)
@@ -117,7 +117,7 @@ Features
 
 A random list of the features of the current codebase:
 
-- Runs on Python 2.7 and 3.4+ (maybe on 3.2 and 3.3 too but that is not tested)
+- supports Python 3.5 and newer
 - game engine and framework code is separated from the actual game code
 - single-player Interactive Fiction mode and multi-player MUD mode
 - text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
