@@ -5,23 +5,12 @@ Fallback ansi escape sequence definitions, used when 'colorama' is not installed
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-# @todo get rid of decorator
-def ansi_escapes(clazz):
-    for name, code in clazz.tags.items():
-        escape_seq = "\033[" + str(code) + "m"
-        setattr(clazz, name, escape_seq)
-    return clazz
-
-
-@ansi_escapes
 class Style(object):
-    tags = {
-        "BRIGHT": 1,
-        "DIM": 2,
-        "ITALIC": 3,
-        "UNDERLINED": 4,
-        "BLINK": 5,
-        "REVERSEVID": 7,
-        "NORMAL": 22,
-        "RESET_ALL": 0
-    }
+    RESET_ALL = "\033[0m"
+    BRIGHT = "\033[1m"
+    DIM = "\033[2m"
+    ITALIC = "\033[3m"
+    UNDERLINED = "\033[4m"
+    BLINK = "\033[5m"
+    REVERSEVID = "\033[7m"
+    NORMAL = "\033[22m"

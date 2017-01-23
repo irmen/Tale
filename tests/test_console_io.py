@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import sys
 import io
-from tale.tio import console_io, styleaware_wrapper, iobase
+from tale.tio import console_io, styleaware_wrapper, iobase, ansi_codes
 from tale.player import TextBuffer
 
 
@@ -61,6 +61,16 @@ class TestConsoleIo(unittest.TestCase):
         self.assertEqual("&#8216;txt&#8217;", iobase.smartypants("'txt'"))
         self.assertEqual("&#8220;txt&#8221;", iobase.smartypants('"txt"'))
         self.assertEqual(r"slashes\\slashes", iobase.smartypants(r"slashes\\slashes"))
+
+
+class TestAnsi(unittest.TestCase):
+    def testAnsiCodesDefined(self):
+        self.assertEqual("\033[5m", ansi_codes.Style.BLINK)
+        self.assertEqual("\033[7m", ansi_codes.Style.REVERSEVID)
+        self.assertEqual("\033[22m", ansi_codes.Style.NORMAL)
+        self.assertEqual(ansi_codes.Style.NORMAL, console_io.colorama.Style.NORMAL)
+        self.assertEqual(ansi_codes.Style.REVERSEVID, console_io.colorama.Style.REVERSEVID)
+        self.assertEqual(ansi_codes.Style.BLINK, console_io.colorama.Style.BLINK)
 
 
 class TextWrapper(unittest.TestCase):

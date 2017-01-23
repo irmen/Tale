@@ -9,8 +9,8 @@ import textwrap
 import collections
 import threading
 from tkinter import *
-import tkinter.font as tkfont    # @todo
-import tkinter.messagebox as tkmsgbox   # @todo
+import tkinter.font
+import tkinter.messagebox
 from . import iobase
 from . import vfs
 from .. import mud_context
@@ -110,7 +110,7 @@ class TaleWindow(Toplevel):
             self.fontsize_monospace += 3
             self.fontsize_normal += 5
         self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal)
-        self.boldFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, weight=tkfont.BOLD)
+        self.boldFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, weight=tkinter.font.BOLD)
         self.italicFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, slant="italic")
         self.underlinedFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, underlined=True)
         self.CreateWidgets()
@@ -151,7 +151,7 @@ class TaleWindow(Toplevel):
         self.commandPrompt = Label(frameCommands, text="> ")
         fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
-            fixedFont = tkfont.nametofont('TkFixedFont').copy()
+            fixedFont = tkinter.font.nametofont('TkFixedFont').copy()
             fixedFont["size"] = self.fontsize_monospace
         self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
         self.commandEntry.bind('<Return>', self.user_cmd)
@@ -183,11 +183,11 @@ class TaleWindow(Toplevel):
         frameCommands.pack(side=BOTTOM, fill=X)
         self.commandEntry.focus_set()
 
-    def FindFont(self, families, size, weight=tkfont.NORMAL, slant=tkfont.ROMAN, underlined=False):
-        fontfamilies = tkfont.families()
+    def FindFont(self, families, size, weight=tkinter.font.NORMAL, slant=tkinter.font.ROMAN, underlined=False):
+        fontfamilies = tkinter.font.families()
         for family in families:
             if family in fontfamilies:
-                return tkfont.Font(family=family, size=size, weight=weight, slant=slant, underline=underlined)
+                return tkinter.font.Font(family=family, size=size, weight=weight, slant=slant, underline=underlined)
         return None
 
     def f1_pressed(self, e):
@@ -259,7 +259,7 @@ class TaleWindow(Toplevel):
             self.textView.yview(END)
 
     def quit_button_clicked(self, event=None):
-        quit = tkmsgbox.askokcancel("Quit Confirmation", "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?", master=self)
+        quit = tkinter.messagebox.askokcancel("Quit Confirmation", "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?", master=self)
         if quit:
             self.gui.destroy(True)
             self.gui.window_closed()
@@ -347,5 +347,5 @@ def show_error_dialog(title, message):
     """show a modal error dialog"""
     root = Tk()
     root.withdraw()
-    tkmsgbox.showerror(title, message)
+    tkinter.messagebox.showerror(title, message)
     root.destroy()

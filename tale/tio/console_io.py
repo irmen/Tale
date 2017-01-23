@@ -103,12 +103,12 @@ class ConsoleIo(iobase.IoAdapterBase):
             print("\n" * 5)
 
     def install_tab_completion(self, driver):
-        """Install tab completion using readline, if available, and if not running on windows (it behaves weird)"""
+        """Install tab completion using readline, if available"""
         if sys.platform == "win32":
-            # @todo is this perhaps better in later python versions?
+            # pyreadline on windows behaves weird and screws up the output. So disable by default.
             return
         try:
-            import readline     # @todo does this still work okay?
+            import readline
         except ImportError:
             return
         else:
