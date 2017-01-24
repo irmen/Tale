@@ -17,8 +17,8 @@ class Story(Storybase):
     name = "Circle"
     author = "Irmen de Jong"
     author_address = "irmen@razorvine.net"
-    version = "1.1"
-    requires_tale = "2.6"
+    version = "1.2"
+    requires_tale = "3.0"
     supported_modes = {"mud"}
     player_name = None
     player_gender = None

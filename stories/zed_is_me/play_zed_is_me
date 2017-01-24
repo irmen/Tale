@@ -14,4 +14,4 @@ then
 fi
 
 # start the game
-python -m tale.main --game . $*
+python3 -m tale.main --game . $*

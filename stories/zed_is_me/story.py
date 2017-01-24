@@ -15,7 +15,8 @@ class Story(Storybase):
     name = "Zed is me"
     author = "Irmen de Jong"
     author_address = "irmen@razorvine.net"
-    version = "1.2"
+    version = "1.3"
+    requires_tale = "3.0"
     supported_modes = {"if"}
     player_name = "julie"
     player_gender = "f"

@@ -11,5 +11,5 @@ SET PYTHONPATH=..\..;%PYTHONPATH%
 :use_lib_tail
 
 REM start the game
-python -m tale.main --mode mud --game . %*
+py -3 -m tale.main --mode mud --game . %*
 

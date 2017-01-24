@@ -14,4 +14,4 @@ then
 fi
 
 # start the game
-python -m tale.main --mode mud --game . $*
+python3 -m tale.main --mode mud --game . $*

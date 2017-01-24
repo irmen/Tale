@@ -16,8 +16,8 @@ class Story(Storybase):
     name = "Tale Demo"
     author = "Irmen de Jong"
     author_address  ="irmen@razorvine.net"
-    version = "1.3"
-    requires_tale = "2.6"
+    version = "1.4"
+    requires_tale = "3.0"
     supported_modes = {"if", "mud"}
     player_money = 15.5
     money_type = "modern"
