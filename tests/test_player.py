@@ -5,6 +5,8 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+import os
+import tempfile
 import sys
 import time
 import unittest
@@ -690,15 +692,20 @@ class TestMudAccounts(unittest.TestCase):
         self.assertEqual(salt, salt2)
 
     def test_dbcreate(self):
-        accounts = MudAccounts(":memory:")
-        stats = Stats()
-        stats.gender = "f"
-        accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
-        accs = accounts.all_accounts()
-        self.assertEqual(1, len(accs))
-        self.assertEqual("testname", accs[0].name)
-        self.assertEqual({"wizard"}, accs[0].privileges)
-        self.assertEqual("f", accs[0].stats.gender)
+        dbfile = os.path.join(tempfile.gettempdir(), "tale_test_accdb_"+str(time.time())+".sqlite")
+        try:
+            accounts = MudAccounts(dbfile)
+            stats = Stats()
+            stats.race = "human"
+            stats.gender = "f"
+            accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+            accs = list(accounts.all_accounts())
+            self.assertEqual(1, len(accs))
+            self.assertEqual("testname", accs[0].name)
+            self.assertEqual({"wizard"}, accs[0].privileges)
+            self.assertEqual("f", accs[0].stats.gender)
+        finally:
+            os.remove(dbfile)
 
 
 class WrappedConsoleIO(ConsoleIo):
