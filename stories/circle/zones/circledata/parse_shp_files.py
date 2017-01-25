@@ -155,7 +155,7 @@ def parse_file(shpFile):
             close1=int(close1Arg),
             open2=int(open2Arg) if open2Arg else None,
             close2=int(close2Arg) if close2Arg else None,
-            forsale=set(int(vnum) for vnum in forSaleVNumArg),
+            forsale={int(vnum) for vnum in forSaleVNumArg},
             willbuy=set(buyTypeArg),
             msg_playercantbuy=playertobuydoesnotexistArg,
             msg_playercantsell=playertoselldoesnotexistArg,
@@ -165,7 +165,7 @@ def parse_file(shpFile):
             msg_shopsolditem=shopsolditemArg,
             msg_shopboughtitem=shopboughtitemArg,
             msg_temper=temperArg,
-            rooms=set(int(vnum) for vnum in shopRoomsArg),
+            rooms={int(vnum) for vnum in shopRoomsArg},
             wontdealwith=wontdealattr
         )
         shops[shop.vnum] = shop

@@ -550,7 +550,7 @@ class MudAccounts(object):
         self.accept_name(name)
         self.accept_password(password)
         self.accept_email(email)
-        privileges = set(p.strip() for p in privileges)
+        privileges = {p.strip() for p in privileges}
         for p in privileges:
             self.accept_privilege(p)
         created = datetime.datetime.now().replace(microsecond=0)
@@ -585,7 +585,7 @@ class MudAccounts(object):
 
     @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
-        privileges = set(p.strip() for p in privileges)
+        privileges = {p.strip() for p in privileges}
         for p in privileges:
             self.accept_privilege(p)
         with self._sqlite_connect() as conn:

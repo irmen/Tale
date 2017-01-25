@@ -309,7 +309,7 @@ def init_zones():
     """Populate the zones and initialize inventories and door states. Set up shops."""
     print("Initializing zones.")
     num_shops = num_mobs = num_items = 0
-    all_shopkeepers = set(shop.shopkeeper for shop in shops.values())
+    all_shopkeepers = {shop.shopkeeper for shop in shops.values()}
     for vnum in sorted(zones):
         zone = zones[vnum]
         for mobref in zone.mobs:
