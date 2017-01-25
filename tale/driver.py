@@ -266,8 +266,7 @@ class Driver(pubsub.Listener):
         self.__print_game_intro(connection)
         connection.output("\n")
         # check if we have at least 1 admin user
-        all_accounts = self.mud_accounts.all_accounts()
-        if not any("wizard" in acc["privileges"] for acc in all_accounts.values()):
+        if len(self.mud_accounts.all_accounts(having_privilege="wizard"))==0:
             # there is no wizard, create a dialog to construct the initial admin user
             topic_async_dialogs.send((connection, self.__login_dialog_mud_create_admin(connection)))
             return connection
@@ -388,18 +387,18 @@ class Driver(pubsub.Listener):
                 # get the account and log in
                 account = self.mud_accounts.get(name)
                 self.mud_accounts.logged_in(name)
-                if account["logged_in"]:
-                    conn.output("Last login: " + account["logged_in"])
+                if account.logged_in:
+                    conn.output("Last login: " + str(account.logged_in))
                 break
         if not existing_player:
             # for a new login, we need to rename the transitional player object
             # to the proper account name, and move the player to the starting location.
             name_info = charbuilder.PlayerNaming()
-            name_info.name = account["name"]
-            name_info.gender = account["gender"]
-            name_info.stats = account["stats"]
+            name_info.name = account.name
+            name_info.gender = "m"  # @todo get this from account stats instead of directly from account
+            name_info.stats = account.stats
             self.__rename_player(conn.player, name_info)
-            conn.player.privileges = set(account["privileges"])
+            conn.player.privileges = account.privileges
             conn.output("\n")
             if "wizard" in conn.player.privileges:
                 conn.player.move(self.config.startlocation_wizard)

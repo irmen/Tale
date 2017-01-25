@@ -1569,7 +1569,7 @@ def do_change_pw(player, parsed, ctx):
 def do_change_email(player, parsed, ctx):
     """Lets you change the email address on file for your account."""
     account = ctx.driver.mud_accounts.get(player.name)
-    player.tell("<it>Changing your email. It is currently set to: %s</>" % account["email"])
+    player.tell("<it>Changing your email. It is currently set to: %s</>" % account.email)
     current_pw = yield "input-noecho", "Type your current password."
     new_email = yield "input", ("Type your new email address.", MudAccounts.accept_email)
     try:
@@ -1585,10 +1585,10 @@ def do_account(player, parsed, ctx):
     """Displays your player account data."""
     account = ctx.driver.mud_accounts.get(player.name)
     player.tell("<ul>Your account data.</ul>", end=True)
-    player.tell("name: %s" % account["name"], end=True)
-    player.tell("email: %s" % account["email"], end=True)
-    player.tell("privileges: %s" % (lang.join(account["privileges"], None) or "-"), end=True)
-    player.tell("gender: %s" % lang.GENDERS[account["gender"]], end=True)
-    player.tell("created: %s" % account["created"], end=True)
-    player.tell("last login: %s" % account["logged_in"], end=True)
+    player.tell("name: %s" % account.name, end=True)
+    player.tell("email: %s" % account.email, end=True)
+    player.tell("privileges: %s" % (lang.join(account.privileges, None) or "-"), end=True)
+    # @todo get gender from account stats: player.tell("gender: %s" % lang.GENDERS[account.gender], end=True)
+    player.tell("created: %s" % account.created, end=True)
+    player.tell("last login: %s" % account.logged_in, end=True)
     player.tell("\n")

@@ -8,13 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import random
-import shelve       # @todo replace with sqlite3
-import threading
+import sqlite3
 import queue
 import datetime
 import re
 from hashlib import sha1
-from contextlib import closing
 from . import base
 from . import lang
 from . import hints
@@ -25,10 +23,6 @@ from .errors import ActionRefused
 from .tio.iobase import strip_text_styles
 from threading import Event
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
-try:
-    import dbm      # @todo replace with sqlite3
-except ImportError:
-    dbm = None
 
 
 class Player(base.Living, pubsub.Listener):
@@ -402,52 +396,118 @@ class PlayerConnection(object):
 
 
 class MudAccounts(object):
-    """Handles the accounts (login, creation, etc) of mud users"""
-    def __init__(self, database_opener=None):
-        self.open_db = database_opener or self.__shelve_db_opener
-        self.db_lock = threading.Lock()
-        try:
-            self.get("trigger")
-        except KeyError:
-            pass
+    """
+    Handles the accounts (login, creation, etc) of mud users
 
-    def __shelve_db_opener(self):
-        """If not specified, a simple shelve database is used in the user's data directry"""
-        # XXX shelve doesn't work correctly with IronPython (crashes with a TypeError)... replace this with sqlite3?
-        dbpath = mud_context.driver.user_resources.validate_path("useraccounts.shelve")
+    Database:
+        account(name, email, pw_hash, pw_salt, created, logged_in, locked)
+        privilege(account, privilege)
+        charstat(account, gender, stat1, stat2,...) @todo
+    """
+
+    class Account:
+        def __init__(self, name, email, pw_hash, pw_salt, privileges, created, logged_in, stats):
+            # validation on the suitability of names, emails etc is taken care of by the creating code
+            self.name = name
+            self.email = email
+            self.pw_hash = pw_hash
+            self.pw_salt = pw_salt
+            self.privileges = privileges or set()  # simply a set of strings
+            self.created = created
+            self.logged_in = logged_in
+            self.stats = stats   # @todo
+
+    def __init__(self, databasefile=None):
+        self.sqlite_dbpath = databasefile or mud_context.driver.user_resources.validate_path("useraccounts.sqlite")
+        self._create_database()
+
+    def _sqlite_connect(self):
+        conn = sqlite3.connect(self.sqlite_dbpath, detect_types=sqlite3.PARSE_DECLTYPES, timeout=5)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys=ON;")
+        return conn
+
+    def _create_database(self):
         try:
-            return closing(shelve.open(dbpath, flag='w'))
-        except dbm.error:
-            print("%s: Can't open the user accounts database." % mud_context.config.name)
-            print("Location:", dbpath)
-            response = input("\nDo you want to create a new one? ")
-            if lang.yesno(response):
-                return closing(shelve.open(dbpath, flag='c'))
-            else:
-                raise SystemExit("Cannot launch mud mode without a user accounts database.")
+            with self._sqlite_connect() as conn:
+                table_exists = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Account'").fetchone()
+                if not table_exists:
+                    print("%s: Creating new user accounts database." % mud_context.config.name)
+                    print("Location:", self.sqlite_dbpath, "\n")
+                    # create the schema
+                    conn.execute("""
+                        CREATE TABLE Account(
+                            id integer PRIMARY KEY,
+                            name varchar NOT NULL,
+                            email varchar NOT NULL,
+                            pw_hash varchar NOT NULL,
+                            pw_salt varchar NOT NULL,
+                            created timestamp NOT NULL,
+                            logged_in timestamp NULL
+                        );""")
+                    conn.execute("CREATE INDEX idx_account_name ON Account(name)")
+                    conn.execute("""
+                        CREATE TABLE Privilege(
+                            id integer PRIMARY KEY,
+                            account integer NOT NULL,
+                            privilege varchar NOT NULL,
+                            FOREIGN KEY(account) REFERENCES Account(id)
+                        );""")
+                    conn.execute("CREATE INDEX idx_privilege_account ON Privilege(account)")
+                    conn.execute("""
+                        CREATE TABLE CharStat(
+                            id integer PRIMARY KEY,
+                            account integer NOT NULL,
+                            gender char(1) NOT NULL,
+                            FOREIGN KEY(account) REFERENCES Account(id)
+                        );
+                        """)
+                    conn.commit()
+        except sqlite3.Error as x:
+            print("%s: Can't open or create the user accounts database." % mud_context.config.name)
+            print("Location:", self.sqlite_dbpath)
+            print("Error:", repr(x))
+            raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
     def get(self, name):
-        with self.db_lock, self.open_db() as db:
-            return db[name]
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
+            if not result:
+                raise KeyError(name)
+            return self._fetch_account(conn, result["id"])
 
-    def all_accounts(self):
-        with self.db_lock, self.open_db() as db:
-            return dict(db)
+    def _fetch_account(self, conn, account_id):
+        result = conn.execute("SELECT * FROM Account WHERE id=?", (account_id,)).fetchone()
+        priv_result = conn.execute("SELECT privilege FROM Privilege WHERE account=?", (account_id,)).fetchall()
+        privileges = {pr["privilege"] for pr in priv_result}
+        stats = None   # @ todo
+        return MudAccounts.Account(result["name"], result["email"], result["pw_hash"], result["pw_salt"],
+                                   privileges, result["created"], result["logged_in"], stats)
+
+    def all_accounts(self, having_privilege=None):
+        with self._sqlite_connect() as conn:
+            if having_privilege:
+                result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=?", (having_privilege,)).fetchall()
+            else:
+                result = conn.execute("SELECT id FROM Account").fetchall()
+            account_ids = [ar["id"] for ar in result]
+            accounts = {self._fetch_account(conn, account_id) for account_id in account_ids}
+            return accounts
 
     def logged_in(self, name):
-        with self.db_lock, self.open_db() as db:
-            account = db[name]
-            account["logged_in"] = str(datetime.datetime.now().replace(microsecond=0))
-            db[name] = account
+        timestamp = datetime.datetime.now().replace(microsecond=0)
+        with self._sqlite_connect() as conn:
+            conn.execute("UPDATE Account SET logged_in=? WHERE name=?", (timestamp, name))
 
     def valid_password(self, name, password):
-        with self.db_lock, self.open_db() as db:
-            if name in db:
-                account = db[name]
-                pwhash, _ = self._pwhash(password, account["pw_salt"])
-                if pwhash == account["pw_hash"]:
-                    return
-            raise ValueError("Invalid name or password.")
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT pw_hash, pw_salt FROM Account WHERE name=?", (name,)).fetchone()
+        if result:
+            stored_hash, stored_salt = result["pw_hash"], result["pw_salt"]
+            pwhash, _ = self._pwhash(password, stored_salt)
+            if pwhash == stored_hash:
+                return
+        raise ValueError("Invalid name or password.")
 
     @staticmethod
     def _pwhash(password, salt=None):
@@ -478,54 +538,65 @@ class MudAccounts(object):
             return email
         raise ValueError("Invalid email address.")
 
+    @staticmethod
+    def accept_privilege(priv):
+        if priv not in {"wizard"}:
+            raise ValueError("Invalid privilege: "+priv)
+
     def create(self, name, password, email, gender, stats, privileges=[]):
         name = name.strip()
-        dbname = name
         email = email.strip()
-        gender = gender.strip()
+        gender = gender.strip()   # @todo move gender to stats instead of on account directly
         self.accept_name(name)
-        with self.db_lock, self.open_db() as db:
-            if dbname in db:
+        self.accept_password(password)
+        self.accept_email(email)
+        privileges = set(p.strip() for p in privileges)
+        for p in privileges:
+            self.accept_privilege(p)
+        created = datetime.datetime.now().replace(microsecond=0)
+        pwhash, salt = self._pwhash(password)
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT COUNT(*) FROM Account WHERE name=?", (name,)).fetchone()[0]
+            if result > 0:
                 raise ValueError("That name is not available.")
-            self.accept_password(password)
-            self.accept_email(email)
-            pwhash, salt = self._pwhash(password)
-            db[dbname] = {"name": name,
-                          "email": email,
-                          "pw_hash": pwhash,
-                          "pw_salt": salt,
-                          "privileges": privileges,
-                          "gender": gender,
-                          "stats": stats,
-                          "created": str(datetime.datetime.now().replace(microsecond=0)),
-                          "logged_in": None}
-            return db[dbname]
+            result = conn.execute("INSERT INTO Account('name', 'email', 'pw_hash', 'pw_salt', 'created') VALUES (?,?,?,?,?)", (name, email, pwhash, salt, created))
+            for privilege in privileges:
+                conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (result.lastrowid, privilege))
+            # @todo store the stats
+        return MudAccounts.Account(name, email, pwhash, salt, privileges, created, None, stats)
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):
         self.valid_password(name, old_password)
-        with self.db_lock, self.open_db() as db:
-            if name not in db:
+        new_email = new_email.strip() if new_email else None
+        if new_password:
+            self.accept_password(new_password)
+        if new_email:
+            self.accept_email(new_email)
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
+            if not result:
                 raise KeyError("Unknown name.")
-            account = db[name]
+            account_id = result["id"]
             if new_password:
-                self.accept_password(new_password)
                 pwhash, salt = self._pwhash(new_password)
-                account["pw_hash"] = pwhash
-                account["pw_salt"] = salt
-            new_email = new_email.strip() if new_email else None
+                conn.execute("UPDATE Account SET pw_hash=?, pw_salt=? WHERE id=?", (pwhash, salt, account_id))
             if new_email:
-                self.accept_email(new_email)
-                account["email"] = new_email
-            db[name] = account
+                conn.execute("UPDATE Account SET email=? WHERE id=?", (new_email, account_id))
 
     @util.authorized("wizard")
     def update_privileges(self, name, privileges, actor):
-        with self.db_lock, self.open_db() as db:
-            if name not in db:
+        privileges = set(p.strip() for p in privileges)
+        for p in privileges:
+            self.accept_privilege(p)
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
+            if not result:
                 raise KeyError("Unknown name.")
-            account = db[name]
-            account["privileges"] = set(privileges)
-            db[name] = account
+            account_id = result["id"]
+            conn.execute("DELETE FROM Privilege WHERE account=?", (account_id,))
+            for privilege in privileges:
+                conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (account_id, privilege))
+        return privileges
 
     blocked_names = """irmen
 me

@@ -530,11 +530,11 @@ def do_accounts(player, parsed, ctx):
     accounts = ctx.driver.mud_accounts.all_accounts()
     wizards = set()
     txt = ["<ul> account      <dim>|</><ul> logged in           <dim>|</><ul> email                <dim>|</><ul> privileges </>"]
-    for name, account in accounts.items():
-        if "wizard" in account["privileges"]:
-            wizards.add(name)
+    for account in accounts:
+        if "wizard" in account.privileges:
+            wizards.add(account.name)
         txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
-                   (account["name"], account["logged_in"], account["email"], lang.join(account["privileges"], None)))
+                   (account.name, account.logged_in, account.email, lang.join(account.privileges, None)))
     txt.append("\nWizards: " + lang.join(wizards))
     player.tell(*txt, format=False)
 
@@ -552,10 +552,9 @@ def do_add_priv(player, parsed, ctx):
         account = ctx.driver.mud_accounts.get(name)
     except KeyError:
         raise ActionRefused("No such account.")
-    privileges = set(account["privileges"])
-    privileges.add(priv)
-    ctx.driver.mud_accounts.update_privileges(name, privileges, player)
-    player.tell("Privileges of account <player>%s</> updated to: %s." % (name, privileges))
+    account.privileges.add(priv)
+    new_privs = ctx.driver.mud_accounts.update_privileges(name, account.privileges, player)
+    player.tell("Privileges of account <player>%s</> updated to: %s." % (name, new_privs))
     player.tell("It will become active on their next login.")
 
 
@@ -574,11 +573,10 @@ def do_remove_priv(player, parsed, ctx):
         account = ctx.driver.mud_accounts.get(name)
     except KeyError:
         raise ActionRefused("No such account.")
-    if priv in account["privileges"]:
-        privileges = set(account["privileges"])
-        privileges.remove(priv)
-        ctx.driver.mud_accounts.update_privileges(name, privileges, player)
-        player.tell("Privileges of account <player>%s</> updated to: %s." % (name, privileges))
+    if priv in account.privileges:
+        account.privileges.remove(priv)
+        new_privs = ctx.driver.mud_accounts.update_privileges(name, account.privileges, player)
+        player.tell("Privileges of account <player>%s</> updated to: %s." % (name, new_privs))
         other = ctx.driver.search_player(name)
         if other:
             other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. Sorry for the inconvenience." % lang.capital(player.title))
