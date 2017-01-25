@@ -23,7 +23,7 @@ import appdirs
 import distutils.version
 import pkgutil
 import importlib
-from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races
+from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
@@ -190,7 +190,7 @@ class Driver(pubsub.Listener):
         else:
             # mud mode: driver runs as main thread, wsgi webserver runs in background thread
             base._limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
-            self.mud_accounts = player.MudAccounts()
+            self.mud_accounts = accounts.MudAccounts()
             from .tio.mud_browser_io import TaleMudWsgiApp
             wsgi_server = TaleMudWsgiApp.create_app_server(self)
             wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
@@ -295,9 +295,9 @@ class Driver(pubsub.Listener):
         conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
         while True:
             conn.output("Creating new admin user.")
-            name = yield "input-noecho", ("Please type in the admin's player name.", player.MudAccounts.accept_name)
-            password = yield "input-noecho", ("Please type in the admin password.", player.MudAccounts.accept_password)
-            email = yield "input", ("Please type in the admin's email address.", player.MudAccounts.accept_email)
+            name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
+            password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
+            email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
             conn.output("You can choose one of the following races: ", lang.join(races.player_races))
             race = yield "input", ("Player race?", charbuilder.validate_race)
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
@@ -308,7 +308,9 @@ class Driver(pubsub.Listener):
                 continue
             else:
                 break
-        self.mud_accounts.create(name, password, email, gender[0], Stats.from_race(race), privileges={"wizard"})
+        stats = Stats.from_race(race)
+        stats.gender = gender[0]
+        self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
@@ -320,7 +322,7 @@ class Driver(pubsub.Listener):
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
         conn.output("\n")
         while True:
-            name = yield "input-noecho", ("Please type in your player name.", player.MudAccounts.accept_name)
+            name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
             existing_player = self.search_player(name)
             if existing_player:
                 conn.player.tell("That player is already logged in elsewhere. Their current location is", existing_player.location.name)
@@ -341,8 +343,8 @@ class Driver(pubsub.Listener):
                 # self-service account creation
                 conn.player.tell("\n")
                 conn.player.tell("<ul><bright>New character creation: '%s'.</>" % name, end=True)
-                password = yield "input-noecho", ("Please type in the desired password.", player.MudAccounts.accept_password)
-                email = yield "input", ("Please type in your email address.", player.MudAccounts.accept_email)
+                password = yield "input-noecho", ("Please type in the desired password.", accounts.MudAccounts.accept_password)
+                email = yield "input", ("Please type in your email address.", accounts.MudAccounts.accept_email)
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
                 conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
                 race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
@@ -354,7 +356,9 @@ class Driver(pubsub.Listener):
                     # abort
                     conn.player.tell("Ok, let's get back to the beginning then.", end=True)
                     continue
-                account = self.mud_accounts.create(name, password, email, gender[0], Stats.from_race(race))
+                stats = Stats.from_race(race)
+                stats.gender = gender[0]
+                account = self.mud_accounts.create(name, password, email, stats)
                 conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
                 conn.player.tell("\n")
             try:

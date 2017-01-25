@@ -14,7 +14,8 @@ from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item, Stats
 from tale.errors import ActionRefused, ParseError
 from tale.npc import NPC
-from tale.player import Player, TextBuffer, PlayerConnection, MudAccounts
+from tale.accounts import MudAccounts
+from tale.player import Player, TextBuffer, PlayerConnection
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
@@ -38,9 +39,15 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("", player.description)
         self.assertEqual("human", player.stats.race)
         self.assertEqual("m", player.gender)
+        self.assertEqual("m", player.stats.gender)
+        self.assertEqual("he", player.subjective)
         self.assertEqual(set(), player.privileges)
         self.assertTrue(1 < player.stats.agi < 100)
         self.assertGreater(player.output_line_delay, 1)
+        player.init_gender("f")
+        self.assertEqual("f", player.gender)
+        self.assertEqual("f", player.stats.gender)
+        self.assertEqual("she", player.subjective)
 
     def test_tell(self):
         player = Player("fritz", "m")
@@ -681,6 +688,17 @@ class TestMudAccounts(unittest.TestCase):
         pw2, salt2 = MudAccounts._pwhash("secret", "some salt")
         self.assertEqual(pw, pw2)
         self.assertEqual(salt, salt2)
+
+    def test_dbcreate(self):
+        accounts = MudAccounts(":memory:")
+        stats = Stats()
+        stats.gender = "f"
+        accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+        accs = accounts.all_accounts()
+        self.assertEqual(1, len(accs))
+        self.assertEqual("testname", accs[0].name)
+        self.assertEqual({"wizard"}, accs[0].privileges)
+        self.assertEqual("f", accs[0].stats.gender)
 
 
 class WrappedConsoleIO(ConsoleIo):

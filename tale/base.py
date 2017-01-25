@@ -705,6 +705,7 @@ class Exit(MudObject):
 
 class Stats(object):
     def __init__(self):
+        self.gender = 'n'
         self.level = 0
         self.xp = 0
         self.hp = 0
@@ -723,7 +724,7 @@ class Stats(object):
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
         self.bodytype = None
         self.language = None
-        self.weight = 0
+        self.weight = 0.0
         self.size = 0
         self.race = None    # optional, can use the stats template from races
 
@@ -763,16 +764,16 @@ class Living(MudObject):
     They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name, gender, race=None, title=None, description=None, short_description=None):
+        if race:
+            self.stats = Stats.from_race(race)
+        else:
+            self.stats = Stats()
         self.init_gender(gender)
         self.soul = soul.Soul()
         self.location = _limbo  # set transitional location
         self.privileges = set()  # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
-        if race:
-            self.stats = Stats.from_race(race)
-        else:
-            self.stats = Stats()
         self.default_verb = "examine"
         self.__inventory = set()
         self.previous_commandline = None
@@ -782,6 +783,7 @@ class Living(MudObject):
     def init_gender(self, gender):
         """(re)set gender attributes"""
         self.gender = gender
+        self.stats.gender = gender  # notice that for completeness, gender is also present on the stats object
         self.subjective = lang.SUBJECTIVE[self.gender]
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]

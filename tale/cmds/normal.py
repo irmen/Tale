@@ -15,7 +15,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
-from ..player import MudAccounts
+from ..accounts import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid

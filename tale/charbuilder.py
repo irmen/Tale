@@ -10,7 +10,7 @@ from . import races
 from . import lang
 from . import mud_context
 from .base import Stats
-from .player import MudAccounts
+from .accounts import MudAccounts
 
 
 class PlayerNaming(object):
