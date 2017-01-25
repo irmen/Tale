@@ -87,6 +87,26 @@ class MudAccounts(object):
                             id integer PRIMARY KEY,
                             account integer NOT NULL,
                             gender char(1) NOT NULL,
+                            level integer NOT NULL,
+                            xp integer NOT NULL,
+                            hp integer NOT NULL,
+                            ac integer NOT NULL,
+                            maxhp_dice varchar NULL,
+                            attack_dice varchar NULL,
+                            agi integer NOT NULL,
+                            cha integer NOT NULL,
+                            int integer NOT NULL,
+                            lck integer NOT NULL,
+                            spd integer NOT NULL,
+                            sta integer NOT NULL,
+                            str integer NOT NULL,
+                            wis integer NOT NULL,
+                            alignment integer NOT NULL,
+                            bodytype integer NULL,
+                            language varchar NULL,
+                            weight double NOT NULL,
+                            size integer NOT NULL,
+                            race varchar NULL,
                             FOREIGN KEY(account) REFERENCES Account(id)
                         );
                         """)
@@ -117,8 +137,8 @@ class MudAccounts(object):
                 setattr(stats, key, value)
             else:
                 raise AttributeError("stats doesn't have attribute: "+key)
-        return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"],
-                                   privileges, acc["created"], acc["logged_in"], stats)
+        stats.set_stat_prios()
+        return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges, acc["created"], acc["logged_in"], stats)
 
     def all_accounts(self, having_privilege=None):
         with self._sqlite_connect() as conn:
@@ -189,7 +209,6 @@ class MudAccounts(object):
         privileges = {p.strip() for p in privileges}
         for p in privileges:
             self.accept_privilege(p)
-        stats = base.Stats()
         created = datetime.datetime.now().replace(microsecond=0)
         pwhash, salt = self._pwhash(password)
         with self._sqlite_connect() as conn:
@@ -203,14 +222,15 @@ class MudAccounts(object):
         return Account(name, email, pwhash, salt, privileges, created, None, stats)
 
     def _store_stats(self, conn, account_id, stats):
-        print("STORING STATS", stats)   # XXX
         columns = ["account"]
         values = [account_id]
-        for key, value in vars(stats).items():
+        stat_vars = vars(stats)
+        del stat_vars["stat_prios"]   # stat_prios will always be obtained from the race codetable, so we won't store them
+        # @todo we store all other stats. This is perhaps overkill because many more can be looked up in races.py tables at load time?
+        for key, value in stat_vars.items():
             columns.append(key)
             values.append(value)
         sql = "INSERT INTO CharStat(" + ",".join(columns) + ") VALUES (" + ",".join('?'*len(columns)) + ")"
-        print("SQL:", sql)  # XXX
         conn.execute(sql, values)
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):

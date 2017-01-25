@@ -399,7 +399,7 @@ class Driver(pubsub.Listener):
             # to the proper account name, and move the player to the starting location.
             name_info = charbuilder.PlayerNaming()
             name_info.name = account.name
-            name_info.gender = "m"  # @todo get this from account stats instead of directly from account
+            name_info.gender = account.stats.gender
             name_info.stats = account.stats
             self.__rename_player(conn.player, name_info)
             conn.player.privileges = account.privileges

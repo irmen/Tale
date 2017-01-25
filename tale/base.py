@@ -749,11 +749,15 @@ class Stats(object):
         s.sta = rs["sta"][0]
         s.str = rs["str"][0]
         s.wis = rs["wis"][0]
-        s.stat_prios = defaultdict(list)
-        for stat, (_, prio) in r["stats"].items():
-            s.stat_prios[prio].append(stat)
+        s.set_stat_prios()  # these are always re-initialized from the codetable
         # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
+
+    def set_stat_prios(self):
+        self.stat_prios = defaultdict(list)
+        r = races.races[self.race]
+        for stat, (_, prio) in r["stats"].items():
+            self.stat_prios[prio].append(stat)
 
 
 class Living(MudObject):
