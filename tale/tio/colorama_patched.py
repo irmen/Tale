@@ -5,6 +5,7 @@ Monkeypatch colorama to support a few additional text styles
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 def monkeypatch_extra_styles():
     import colorama
 
@@ -19,6 +20,7 @@ def monkeypatch_extra_styles():
     # Patch in a trick to use reverse video on windows console (where REVERSEVID doesn't work natively)
     if colorama.ansitowin32.winterm is not None:
         orig_get_win32_calls = colorama.ansitowin32.AnsiToWin32.get_win32_calls
+
         def monkeypatched_get_win32_calls(self, **args):
             def style_reverse_vid(on_stderr=None, **args):
                 term = colorama.ansitowin32.winterm
@@ -27,6 +29,7 @@ def monkeypatch_extra_styles():
             result = orig_get_win32_calls(self, **args)
             result[colorama.ansi.AnsiStyle.REVERSEVID] = (style_reverse_vid,)
             return result
+
         colorama.ansitowin32.AnsiToWin32.get_win32_calls = monkeypatched_get_win32_calls
 
 

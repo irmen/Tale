@@ -6,6 +6,7 @@ Story configuration and base classes to create your own story with.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 class _Storyconfig(object):
     def __init__(self, story):
         config_items = {

@@ -10,6 +10,7 @@ with certain key events and actions that the player performed earlier.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 class Hint(object):
     def __init__(self, checkpoint, location, text):
         """

@@ -692,7 +692,7 @@ class TestMudAccounts(unittest.TestCase):
         self.assertEqual(salt, salt2)
 
     def test_dbcreate(self):
-        dbfile = os.path.join(tempfile.gettempdir(), "tale_test_accdb_"+str(time.time())+".sqlite")
+        dbfile = os.path.join(tempfile.gettempdir(), "tale_test_accdb_" + str(time.time()) + ".sqlite")
         try:
             accounts = MudAccounts(dbfile)
             stats = Stats()

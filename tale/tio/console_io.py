@@ -219,7 +219,7 @@ class ReadlineTabCompleter(object):
             return None
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     co = ConsoleIo(None)
     lines = ["test Tale Console output", "'singlequotes'", '"double quotes"', "ellipsis...", "<bright>BRIGHT <rev>REVERSE </>NORMAL"]
     paragraphs = [(text, False) for text in lines]

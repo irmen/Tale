@@ -65,7 +65,7 @@ class IoAdapterBase(object):
     def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         tb = "".join(formatTraceback())
-        self.output("\n<bright><rev>"+message+"</>")
+        self.output("\n<bright><rev>" + message + "</>")
         print(tb, file=sys.stderr)
         self.output("<rev><it>Please report this problem.</>\n")
 

@@ -14,7 +14,7 @@ from .. import lang, mud_context
 
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
-           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain" ]
+           "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain"]
 
 
 class Boxlike(Container):
@@ -180,23 +180,23 @@ class Trash(Item):
 
 class Drink(Item):
     drinkeffects = namedtuple("drinkeffects", ["drunkness", "fullness", "thirst"])
-    drinktypes = { 'water':         drinkeffects( 0, 1, 10),
-                   'beer':          drinkeffects( 3, 2, 5),
-                   'wine':          drinkeffects( 5, 2, 5),
-                   'ale':           drinkeffects( 2, 2, 5),
-                   'darkale':       drinkeffects( 1, 2, 5),
-                   'whisky':        drinkeffects( 6, 1, 4),
-                   'lemonade':      drinkeffects( 0, 1, 8),
-                   'firebreath':    drinkeffects(10, 0, 0),
-                   'localspecial':  drinkeffects( 3, 3, 3),
-                   'slime':         drinkeffects( 0, 4, -8),
-                   'milk':          drinkeffects( 0, 3, 6),
-                   'tea':           drinkeffects( 0, 1, 6),
-                   'coffee':        drinkeffects( 0, 1, 6),
-                   'blood':         drinkeffects( 0, 2, -1),
-                   'saltwater':     drinkeffects( 0, 1, -2),
-                   'clearwater':    drinkeffects( 0, 0, 13),
-                   }
+    drinktypes = {'water':        drinkeffects(0, 1, 10),
+                  'beer':         drinkeffects(3, 2, 5),
+                  'wine':         drinkeffects(5, 2, 5),
+                  'ale':          drinkeffects(2, 2, 5),
+                  'darkale':      drinkeffects(1, 2, 5),
+                  'whisky':       drinkeffects(6, 1, 4),
+                  'lemonade':     drinkeffects(0, 1, 8),
+                  'firebreath':   drinkeffects(10, 0, 0),
+                  'localspecial': drinkeffects(3, 3, 3),
+                  'slime':        drinkeffects(0, 4, -8),
+                  'milk':         drinkeffects(0, 3, 6),
+                  'tea':          drinkeffects(0, 1, 6),
+                  'coffee':       drinkeffects(0, 1, 6),
+                  'blood':        drinkeffects(0, 2, -1),
+                  'saltwater':    drinkeffects(0, 1, -2),
+                  'clearwater':   drinkeffects(0, 0, 13),
+                  }
 
     def init(self):
         super(Drink, self).init()

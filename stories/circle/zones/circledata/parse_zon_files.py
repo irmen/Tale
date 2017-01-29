@@ -43,7 +43,7 @@ def parse_file(zonFile):
     allobjects = []
     allremove = []
 
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     vnumArg = content[lineNum][1:]
     lineNum += 1
     while content[lineNum].startswith('*'): lineNum += 1
@@ -67,31 +67,31 @@ def parse_file(zonFile):
         command = line[0]
 
         if command == 'M':
-            #output.write('m %s' % lineNum)
-            # add a mob
-            # NOTE - I'm ignoring the if-flag for mobs
+            # output.write('m %s' % lineNum)
+            #  add a mob
+            #  NOTE - I'm ignoring the if-flag for mobs
             allmobs.append({'vnum': line[2], 'max': line[3], 'room': line[4], 'inv': [], 'equip': {}})
         elif command == 'G':
-            #output.write('g %s' % lineNum)
+            # output.write('g %s' % lineNum)
             allmobs[-1]['inv'].append({'vnum': line[2], 'max': line[3]})
         elif command == 'E':
-            #output.write('e %s' % lineNum)
+            # output.write('e %s' % lineNum)
             allmobs[-1]['equip'][line[4]] = {'vnum': line[2], 'max': line[3]}
         elif command == 'O':
-            #output.write('o %s' % lineNum)
+            # output.write('o %s' % lineNum)
             allobjects.append({'vnum': line[2], 'max': line[3], 'room': line[4], 'contains': []})
         elif command == 'P':
-            #output.write('p %s' % lineNum)
+            # output.write('p %s' % lineNum)
             obj_to_load = line[2]
             obj_to_put_into = line[4]
             for o in allobjects:
                 if o['vnum'] == obj_to_put_into:
                     o['contains'].append({'vnum': obj_to_load, 'max': line[3]})
         elif command == 'D':
-            #output.write('d %s' % lineNum)
+            # output.write('d %s' % lineNum)
             alldoors.append({'room': line[2], 'exit': line[3], 'state': line[4]})
         elif command == 'R':
-            #output.write('r %s' % lineNum)
+            # output.write('r %s' % lineNum)
             allremove.append({'room': line[2], 'vnum': line[3]})
         lineNum += 1
 

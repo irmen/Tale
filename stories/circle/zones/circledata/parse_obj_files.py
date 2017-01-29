@@ -40,26 +40,26 @@ def parse_file(objFile):
             vNumArg = line[1:]
             aliasArg = content[lineNum + 1][:-1].split()
             shortDescArg = content[lineNum + 2][:-1]
-            #if shortDescArg == 'a scroll of recall':
-            #    pass#import pdb; pdb.set_trace()
+            # if shortDescArg == 'a scroll of recall':
+            #     pass#import pdb; pdb.set_trace()
             longDescArg = content[lineNum + 3][:-1]
             actionDescArg = content[lineNum + 4][:-1]
             readState = 'bitVector'
             lineNum += 5
-        #elif readState == 'longdesc':
-        #    doneLineNum = lineNum
-        #    while content[doneLineNum] != '~':
-        #        doneLineNum += 1
-        #    longDescArg = '\n'.join(content[lineNum:doneLineNum])
-        #    lineNum = doneLineNum + 1
-        #    readState = 'actiondesc'
-        #elif readState == 'actiondesc':
-        #    doneLineNum = lineNum
-        #    while content[doneLineNum] != '~':
-        #        doneLineNum += 1
-        #    actionDescArg = '\n'.join(content[lineNum:doneLineNum])
-        #    lineNum = doneLineNum + 1
-        #    readState = 'bitVector'
+        # elif readState == 'longdesc':
+        #     doneLineNum = lineNum
+        #     while content[doneLineNum] != '~':
+        #         doneLineNum += 1
+        #     longDescArg = '\n'.join(content[lineNum:doneLineNum])
+        #     lineNum = doneLineNum + 1
+        #     readState = 'actiondesc'
+        # elif readState == 'actiondesc':
+        #     doneLineNum = lineNum
+        #     while content[doneLineNum] != '~':
+        #         doneLineNum += 1
+        #     actionDescArg = '\n'.join(content[lineNum:doneLineNum])
+        #     lineNum = doneLineNum + 1
+        #     readState = 'bitVector'
 
         elif readState == 'bitVector':
             typeFlagArg, effectsBitVectorArg, wearBitVectorArg = content[lineNum].split()
@@ -74,7 +74,7 @@ def parse_file(objFile):
                 # this is the extended mob format.
                 if content[lineNum] == 'E':
                     lineNum += 1
-                    #import pdb; pdb.set_trace()
+                    # import pdb; pdb.set_trace()
                     doneLineNum = lineNum
                     while content[doneLineNum] != '~':
                         doneLineNum += 1
@@ -180,7 +180,7 @@ def parse_file(objFile):
                     wearBitVectorArg -= 2
                     wearAttribs.append('finger')
                 if wearBitVectorArg < 1:
-                    #wearBitVectorArg -= 1
+                    # wearBitVectorArg -= 1
                     wearAttribs.append('canttake')
             else:
                 if 'a' in wearBitVectorArg: wearAttribs.append('takeable')
@@ -307,7 +307,7 @@ def parse_file(objFile):
             )
 
             if valueDefs[typeFlagArg] != [None, None, None, None]:
-                #import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 typespecificArg = {}
                 for i in range(4):
                     key = valueDefs[typeFlagArg][i]

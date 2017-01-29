@@ -6,6 +6,7 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 class SecurityViolation(Exception):
     """Some security constraint was violated"""
     pass

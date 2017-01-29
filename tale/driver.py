@@ -266,7 +266,7 @@ class Driver(pubsub.Listener):
         self.__print_game_intro(connection)
         connection.output("\n")
         # check if we have at least 1 admin user
-        if len(self.mud_accounts.all_accounts(having_privilege="wizard"))==0:
+        if len(self.mud_accounts.all_accounts(having_privilege="wizard")) == 0:
             # there is no wizard, create a dialog to construct the initial admin user
             topic_async_dialogs.send((connection, self.__login_dialog_mud_create_admin(connection)))
             return connection

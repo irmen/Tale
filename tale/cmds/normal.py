@@ -1109,7 +1109,7 @@ def do_where(player, parsed, ctx):
     if len(parsed.args) >= 2 and parsed.args[0] in ("is", "are"):
         del parsed.args[0]
     name = parsed.args[0].rstrip("?")
-    raise RetryParse("locate "+name)
+    raise RetryParse("locate " + name)
 
 
 @cmd("exits")

@@ -15,7 +15,7 @@ from tale.main import run_story
 class Story(Storybase):
     name = "Tale Demo"
     author = "Irmen de Jong"
-    author_address  ="irmen@razorvine.net"
+    author_address = "irmen@razorvine.net"
     version = "1.4"
     requires_tale = "3.0"
     supported_modes = {"if", "mud"}

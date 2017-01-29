@@ -944,7 +944,7 @@ class Living(MudObject):
                 # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
                 verb, _, rest = cmdline.partition(u" ")
                 rest = rest.strip()
-                self.tell_others("{Title} says: "+rest)
+                self.tell_others("{Title} says: " + rest)
             else:
                 raise
 

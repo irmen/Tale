@@ -5,6 +5,7 @@ Fallback ansi escape sequence definitions, used when 'colorama' is not installed
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+
 class Style(object):
     RESET_ALL = "\033[0m"
     BRIGHT = "\033[1m"

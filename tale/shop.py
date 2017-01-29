@@ -98,7 +98,7 @@ class Shopkeeper(NPC):
     def _get_from_list(self, number):
         shoplist = sorted_by_name(self.inventory)
         try:
-            return shoplist[number-1]
+            return shoplist[number - 1]
         except IndexError:
             raise ActionRefused("That number doesn't appear on the list of items that are for sale.")
 

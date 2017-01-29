@@ -136,7 +136,7 @@ class MudAccounts(object):
             if hasattr(stats, key):
                 setattr(stats, key, value)
             else:
-                raise AttributeError("stats doesn't have attribute: "+key)
+                raise AttributeError("stats doesn't have attribute: " + key)
         stats.set_stat_prios()
         return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges, acc["created"], acc["logged_in"], stats)
 
@@ -197,7 +197,7 @@ class MudAccounts(object):
     @staticmethod
     def accept_privilege(priv):
         if priv not in {"wizard"}:
-            raise ValueError("Invalid privilege: "+priv)
+            raise ValueError("Invalid privilege: " + priv)
 
     def create(self, name, password, email, stats, privileges=set()):
         name = name.strip()
@@ -230,7 +230,7 @@ class MudAccounts(object):
         for key, value in stat_vars.items():
             columns.append(key)
             values.append(value)
-        sql = "INSERT INTO CharStat(" + ",".join(columns) + ") VALUES (" + ",".join('?'*len(columns)) + ")"
+        sql = "INSERT INTO CharStat(" + ",".join(columns) + ") VALUES (" + ",".join('?' * len(columns)) + ")"
         conn.execute(sql, values)
 
     def change_password_email(self, name, old_password, new_password=None, new_email=None):

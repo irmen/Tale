@@ -169,13 +169,16 @@ class TestVarious(unittest.TestCase):
 def func1(player, parsed, ctx):
     pass
 
+
 @cmd
 def func2(player, parsed, ctx):
     pass
 
+
 @cmd
 def func3(player, parsed, ctx):
     pass
+
 
 @wizcmd
 def func4(player, parsed, ctx):

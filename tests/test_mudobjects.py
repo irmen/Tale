@@ -472,7 +472,6 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual(["door two close"], pubsub2.messages)
 
 
-
 class PubsubCollector(pubsub.Listener):
     def __init__(self):
         self.messages = []
