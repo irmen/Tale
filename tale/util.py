@@ -429,7 +429,7 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
     result = ["\n\n", "-" * width + "\n", " CRASH OCCURRED! TIMESTAMP: %s\n" % datetime.datetime.now()]
     if ex_type is None and ex_tb is None:
         ex_type, ex_value, ex_tb = sys.exc_info()
-    if detailed and sys.platform != "cli":  # detailed tracebacks don't work in ironpython (most of the local vars are omitted)
+    if detailed:
         def makeStrValue(value):
             try:
                 return repr(value)

@@ -434,8 +434,7 @@ def do_server(player, parsed, ctx):
         txt.append("Game time:      %s  (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
         txt.append("Game time:      %s" % ctx.clock)
-    gc_objects = "??" if sys.platform == "cli" else str(len(gc.get_objects()))
-    txt.append("Python objects: %s" % gc_objects)
+    txt.append("Python objects: %s" % len(gc.get_objects()))
     txt.append("Players:        %d" % len(ctx.driver.all_players))
     txt.append("Heartbeats:     %d" % len(driver.heartbeat_objects))
     txt.append("Deferreds:      %d" % len(driver.deferreds))

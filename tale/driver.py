@@ -222,7 +222,7 @@ class Driver(pubsub.Listener):
                 self.__stop_mainloop = lang.yesno(input("Are you sure you want to exit the Tale driver? "))
             except:
                 # other exceptions are logged but don't break the server loop (hopefully the game can continue)
-                # XXX TODO: only print it to the player that caused the error (if possible) + to the error log
+                # @todo only print it to the player that caused the error (if possible) + to the error log
                 print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.formatTraceback()), file=sys.stderr)
                 for conn in self.all_players.values():
                     conn.critical_error()

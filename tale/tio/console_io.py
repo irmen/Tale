@@ -38,12 +38,9 @@ style_words = {
 }
 assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
-if sys.platform == "win32":
+if os.name == "nt":
     if not hasattr(colorama, "win32") or colorama.win32.windll is None:
-        style_words.clear()  # running on win32 without colorama ansi support
-
-if sys.platform == "cli":
-    style_words.clear()  # IronPython doesn't support console styling at all
+        style_words.clear()  # running on windows without colorama ansi support
 
 
 class ConsoleIo(iobase.IoAdapterBase):
@@ -96,15 +93,18 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def clear_screen(self):
         """Clear the screen"""
-        # @todo can be smarter
         if style_words:
+            # if we have ansi support, use that instead of an external command
             print("\033[1;1H\033[2J", end="")
         else:
-            print("\n" * 5)
+            if os.name == "nt":
+                os.system("cls")
+            else:
+                os.system("clear")
 
     def install_tab_completion(self, driver):
         """Install tab completion using readline, if available"""
-        if sys.platform == "win32":
+        if os.name == "nt":
             # pyreadline on windows behaves weird and screws up the output. So disable by default.
             return
         try:
