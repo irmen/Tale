@@ -41,7 +41,7 @@ class MudAccounts(object):
     Database:
         account(name, email, pw_hash, pw_salt, created, logged_in, locked)
         privilege(account, privilege)
-        charstat(account, gender, stat1, stat2,...) @todo
+        charstat(account, gender, stat1, stat2,...)
     """
 
     def __init__(self, databasefile=None):
@@ -87,6 +87,7 @@ class MudAccounts(object):
                             id integer PRIMARY KEY,
                             account integer NOT NULL,
                             gender char(1) NOT NULL,
+                            race varchar NULL,
                             level integer NOT NULL,
                             xp integer NOT NULL,
                             hp integer NOT NULL,
@@ -102,14 +103,13 @@ class MudAccounts(object):
                             str integer NOT NULL,
                             wis integer NOT NULL,
                             alignment integer NOT NULL,
-                            bodytype integer NULL,
-                            language varchar NULL,
-                            weight double NOT NULL,
-                            size integer NOT NULL,
-                            race varchar NULL,
                             FOREIGN KEY(account) REFERENCES Account(id)
                         );
                         """)
+                    # note: stats not stored in the database are the following:
+                    #       all stat_prios (for agi, cha, int etcetera)
+                    #       bodytype, language, weight, and size.
+                    #       Those are all static and will be initialized from the races table.
                     conn.commit()
         except sqlite3.Error as x:
             print("%s: Can't open or create the user accounts database." % mud_context.config.name)
@@ -137,7 +137,7 @@ class MudAccounts(object):
                 setattr(stats, key, value)
             else:
                 raise AttributeError("stats doesn't have attribute: " + key)
-        stats.set_stat_prios()
+        stats.set_stats_from_race()   # initialize static stats from races table
         return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges, acc["created"], acc["logged_in"], stats)
 
     def all_accounts(self, having_privilege=None):
@@ -203,6 +203,8 @@ class MudAccounts(object):
         name = name.strip()
         email = email.strip()
         lang.validate_gender(stats.gender)
+        if stats.stat_prios is None or not stats.language:
+            raise ValueError("cannot create an account with un-initialized stats")
         self.accept_name(name)
         self.accept_password(password)
         self.accept_email(email)
@@ -224,9 +226,9 @@ class MudAccounts(object):
     def _store_stats(self, conn, account_id, stats):
         columns = ["account"]
         values = [account_id]
-        stat_vars = vars(stats)
-        del stat_vars["stat_prios"]   # stat_prios will always be obtained from the race codetable, so we won't store them
-        # @todo we store all other stats. This is perhaps overkill because many more can be looked up in races.py tables at load time?
+        stat_vars = dict(vars(stats))
+        for not_stored in ["bodytype", "language", "weight", "size", "stat_prios"]:
+            del stat_vars[not_stored]    # these are not stored, but always initialized from the races table
         for key, value in stat_vars.items():
             columns.append(key)
             values.append(value)

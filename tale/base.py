@@ -732,14 +732,11 @@ class Stats(object):
         return "<Stats: %s>" % vars(self)
 
     @classmethod
-    def from_race(cls, race):
+    def from_race(cls, race, gender='n'):
         r = races.races[race]
         s = cls()
+        s.gender = gender
         s.race = race
-        s.bodytype = r["bodytype"]
-        s.language = r["language"]
-        s.weight = r["mass"]
-        s.size = r["size"]
         rs = r["stats"]
         s.agi = rs["agi"][0]
         s.cha = rs["cha"][0]
@@ -749,15 +746,20 @@ class Stats(object):
         s.sta = rs["sta"][0]
         s.str = rs["str"][0]
         s.wis = rs["wis"][0]
-        s.set_stat_prios()  # these are always re-initialized from the codetable
+        s.set_stats_from_race()
         # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
 
-    def set_stat_prios(self):
+    def set_stats_from_race(self):
+        # the stats that are statica are always initialized from the races table
         self.stat_prios = defaultdict(list)
         r = races.races[self.race]
         for stat, (_, prio) in r["stats"].items():
             self.stat_prios[prio].append(stat)
+        self.bodytype = r["bodytype"]
+        self.language = r["language"]
+        self.weight = r["mass"]
+        self.size = r["size"]
 
 
 class Living(MudObject):
@@ -769,7 +771,7 @@ class Living(MudObject):
     """
     def __init__(self, name, gender, race=None, title=None, description=None, short_description=None):
         if race:
-            self.stats = Stats.from_race(race)
+            self.stats = Stats.from_race(race, gender=gender)
         else:
             self.stats = Stats()
         self.init_gender(gender)

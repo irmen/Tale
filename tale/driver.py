@@ -308,8 +308,7 @@ class Driver(pubsub.Listener):
                 continue
             else:
                 break
-        stats = Stats.from_race(race)
-        stats.gender = gender[0]
+        stats = Stats.from_race(race, gender=gender[0])
         self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
@@ -356,8 +355,7 @@ class Driver(pubsub.Listener):
                     # abort
                     conn.player.tell("Ok, let's get back to the beginning then.", end=True)
                     continue
-                stats = Stats.from_race(race)
-                stats.gender = gender[0]
+                stats = Stats.from_race(race, gender=gender[0])
                 account = self.mud_accounts.create(name, password, email, stats)
                 conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
                 conn.player.tell("\n")

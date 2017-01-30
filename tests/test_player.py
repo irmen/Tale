@@ -586,6 +586,7 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual("a wizard", p.description)
         self.assertEqual(999, p.money)
         self.assertEqual("elemental", p.stats.race)
+        self.assertEqual("n", p.stats.gender)
         self.assertEqual(races.B_NEBULOUS, p.stats.bodytype)
         self.assertEqual("grand master", p.title)
 
@@ -627,6 +628,11 @@ class TestTabCompletion(unittest.TestCase):
 
 
 class TestMudAccounts(unittest.TestCase):
+    def setUp(self):
+        tale.mud_context.driver = TestDriver()
+        tale.mud_context.config = Storybase()._get_config()
+        tale.mud_context.config.server_mode = "if"
+
     def test_accept_name(self):
         self.assertEqual("irm", MudAccounts.accept_name("irm"))
         self.assertEqual("irmendejongyeahz", MudAccounts.accept_name("irmendejongyeahz"))
@@ -691,19 +697,31 @@ class TestMudAccounts(unittest.TestCase):
         self.assertEqual(pw, pw2)
         self.assertEqual(salt, salt2)
 
+    def test_accountcreate_fail(self):
+        stats = Stats()
+        accounts = MudAccounts(":memory:")
+        with self.assertRaises(ValueError):
+            accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+
     def test_dbcreate(self):
         dbfile = os.path.join(tempfile.gettempdir(), "tale_test_accdb_" + str(time.time()) + ".sqlite")
         try:
             accounts = MudAccounts(dbfile)
-            stats = Stats()
-            stats.race = "human"
-            stats.gender = "f"
-            accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+            stats = Stats.from_race("elf", gender='f')
+            account = accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+            self.assertEqual(60.0, account.stats.weight)
             accs = list(accounts.all_accounts())
             self.assertEqual(1, len(accs))
-            self.assertEqual("testname", accs[0].name)
-            self.assertEqual({"wizard"}, accs[0].privileges)
-            self.assertEqual("f", accs[0].stats.gender)
+            account = accs[0]
+            self.assertEqual("testname", account.name)
+            self.assertEqual({"wizard"}, account.privileges)
+            self.assertEqual("f", account.stats.gender)
+            self.assertTrue("agi" in account.stats.stat_prios[3])
+            self.assertEqual(40, account.stats.agi)
+            self.assertEqual(races.B_HUMANOID, account.stats.bodytype)
+            self.assertEqual(60.0, account.stats.weight)
+            self.assertEqual(races.S_HUMAN_SIZED, account.stats.size)
+            self.assertEqual("Edhellen", account.stats.language)
         finally:
             os.remove(dbfile)
 

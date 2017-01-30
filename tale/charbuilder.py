@@ -49,7 +49,7 @@ class CharacterBuilder(object):
         naming.gender = naming.gender[0]
         self.conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
         race = yield "input", ("Player race?", validate_race)
-        naming.stats = Stats.from_race(race)
+        naming.stats = Stats.from_race(race, gender=naming.gender)
         naming.description = "A regular person." if naming.stats.race == "human" else "A weird creature."
         self.continue_dialog(naming)
 
