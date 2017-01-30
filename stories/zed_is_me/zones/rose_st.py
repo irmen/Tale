@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Rose street.
 Connects with Magnolia street on the Crossing.

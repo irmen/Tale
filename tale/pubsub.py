@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Simple Pubsub signaling. Provides immediate (synchronous) sending,
 or store-and-forward sending when the sync() function is called.

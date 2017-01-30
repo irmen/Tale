@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Package containing new and overridden game commands.
 

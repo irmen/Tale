@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Story configuration and base classes to create your own story with.
 

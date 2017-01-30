@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Webbrowser based I/O for a multi player ('mud') server.
 

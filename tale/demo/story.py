@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Embedded Demo story, start it with python -m tale.demo.story
 

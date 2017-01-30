@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 'Circle' -  an attempt to run the CircleMUD world data.
 

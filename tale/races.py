@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Race defintions.
 Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare mudlib).

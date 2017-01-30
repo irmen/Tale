@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 The Olde Shoppe in the town.
 

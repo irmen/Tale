@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Basic Input/Output stuff not tied to a specific I/O implementation.
 

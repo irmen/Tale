@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 The house, where the player starts the game
 

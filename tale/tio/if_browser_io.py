@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Webbrowser based I/O for a single player ('if') story.
 

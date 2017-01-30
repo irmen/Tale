@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Decorator functions to help with defining commands.
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 The central town, which is the place where mud players start/log in
 

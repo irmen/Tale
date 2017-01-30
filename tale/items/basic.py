@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 A couple of basic items that go beyond the few base types.
 
