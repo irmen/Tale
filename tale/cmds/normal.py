@@ -717,6 +717,9 @@ def do_stats(player, parsed, ctx):
     gender = lang.GENDERS[target.gender]
     race = target.stats.race or "creature"
     player.tell("<living>%s</> (%s)" % (target.title, target.name), end=True)
+    if target is player:
+        # if the target inspected is self, show level as well
+        player.tell("Level %d " % target.stats.level)
     if target.stats.size:
         player.tell("%s %s %s." % (lang.capital(races.sizes[target.stats.size]), gender, race))
     else:
@@ -1587,7 +1590,10 @@ def do_account(player, parsed, ctx):
     player.tell("name: %s" % account.name, end=True)
     player.tell("email: %s" % account.email, end=True)
     player.tell("privileges: %s" % (lang.join(account.privileges, None) or "-"), end=True)
-    # @todo get gender from account stats: player.tell("gender: %s" % lang.GENDERS[account.gender], end=True)
-    player.tell("created: %s" % account.created, end=True)
+    gender = lang.GENDERS[account.stats.gender]
+    race = account.stats.race or "creature"
+    player.tell("character: level %d %s %s" % (account.stats.level, gender, race), end=True)
+    days_ago = datetime.datetime.now() - account.created
+    player.tell("created: %s (%d days ago)" % (account.created, days_ago.days), end=True)
     player.tell("last login: %s" % account.logged_in, end=True)
     player.tell("\n")
