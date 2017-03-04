@@ -1,45 +1,10 @@
 *.py[cod]
-
-# C extensions
-*.so
-
-# Packages
-*.idea
+*.class
 *.egg
 *.egg-info
-dist
-build
-eggs
-parts
-bin
-target
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-
-build
-target
-
-# mstest test results
-TestResults
-TEST-*.xml
-TestResult.xml
-
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-
-# Translations
-*.mo
-
-# java
-*.class
-
+/MANIFEST
+/.idea/
+/.tox/
+/build/
+/dist/
+/.cache/
