@@ -1,7 +1,9 @@
-'Tale' - mud, mudlib & interactive fiction framework
-
+[![saythanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)](https://saythanks.io/to/irmen)
 [![Build Status](https://travis-ci.org/irmen/Tale.svg?branch=master)](https://travis-ci.org/irmen/Tale)
 [![Latest Version](https://img.shields.io/pypi/v/tale.svg)](https://pypi.python.org/pypi/tale/)
+
+'Tale' - mud, mudlib & interactive fiction framework
+====================================================
 
 This software is copyright (c) by Irmen de Jong (irmen@razorvine.net).
 
