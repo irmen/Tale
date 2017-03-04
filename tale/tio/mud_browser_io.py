@@ -24,7 +24,7 @@ class MudHttpIo(HttpIo):
     I/O adapter for a http/browser based interface.
     """
     def __init__(self, player_connection):
-        super(MudHttpIo, self).__init__(player_connection, None)
+        super().__init__(player_connection, None)
         self.supports_blocking_input = False
         self.dont_echo_next_cmd = False   # used to cloak password input
 
@@ -45,7 +45,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     This one is capable of dealing with multiple connected clients (multi-player).
     """
     def __init__(self, driver):
-        super(TaleMudWsgiApp, self).__init__(driver)
+        super().__init__(driver)
 
     @classmethod
     def create_app_server(cls, driver):
@@ -59,7 +59,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             # create a new connection
             conn = self.driver._connect_mud_player()
             session["player_connection"] = conn
-        return super(TaleMudWsgiApp, self).wsgi_handle_story(environ, parameters, start_response)
+        return super().wsgi_handle_story(environ, parameters, start_response)
 
     def wsgi_handle_text(self, environ, parameters, start_response):
         session = environ["wsgi.session"]
@@ -68,7 +68,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             return self.wsgi_internal_server_error(start_response, "not logged in")
         if not conn or not conn.player or not conn.io:
             raise SessionMiddleware.CloseSession("{\"error\": \"no longer a valid connection\"}", "application/json")
-        return super(TaleMudWsgiApp, self).wsgi_handle_text(environ, parameters, start_response)
+        return super().wsgi_handle_text(environ, parameters, start_response)
 
     def wsgi_handle_quit(self, environ, parameters, start_response):
         # Quit/logged out page. For multi player, get rid of the player connection.
@@ -121,7 +121,7 @@ class SessionMiddleware(object):
         The exception message is returned as last goodbye text to the browser.
         """
         def __init__(self, message, content_type="text/html"):
-            super(SessionMiddleware.CloseSession, self).__init__(message)
+            super().__init__(message)
             self.content_type = content_type
 
     def __init__(self, app, factory):

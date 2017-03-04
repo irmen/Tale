@@ -58,7 +58,7 @@ class TownCrier(NPC):
 
 class WalkingRat(NPC):
     def init(self):
-        super(WalkingRat, self).init()
+        super().init()
         mud_context.driver.defer(2, self.do_idle_action)
         mud_context.driver.defer(4, self.do_random_move)
         self.aggressive = True

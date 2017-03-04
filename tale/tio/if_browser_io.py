@@ -56,7 +56,7 @@ class HttpIo(iobase.IoAdapterBase):
     This way it is a simple call for the driver, it starts everything that is needed.
     """
     def __init__(self, player_connection, wsgi_server):
-        super(HttpIo, self).__init__(player_connection)
+        super().__init__(player_connection)
         self.wsgi_server = wsgi_server
         self.html_to_browser = []     # the lines that need to be displayed in the player's browser
         self.html_special = []      # special out of band commands (such as 'clear')
@@ -94,12 +94,12 @@ class HttpIo(iobase.IoAdapterBase):
                 self.html_to_browser.append("<pre>" + text + "</pre>\n")
 
     def output(self, *lines):
-        super(HttpIo, self).output(*lines)
+        super().output(*lines)
         for line in lines:
             self.output_no_newline(line)
 
     def output_no_newline(self, text):
-        super(HttpIo, self).output_no_newline(text)
+        super().output_no_newline(text)
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
@@ -371,7 +371,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
     player connection; it only works for 'if' single-player game mode.
     """
     def __init__(self, driver, player_connection):
-        super(TaleWsgiApp, self).__init__(driver)
+        super().__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
 

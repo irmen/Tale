@@ -28,7 +28,7 @@ class UnknownVerbException(SoulException):
     If nothing recognises it, this error should be shown to the user in a nice way.
     """
     def __init__(self, verb, words, qualifier):
-        super(UnknownVerbException, self).__init__(verb)
+        super().__init__(verb)
         self.verb = verb
         self.words = words
         self.qualifier = qualifier
@@ -42,7 +42,7 @@ class NonSoulVerb(SoulException):
     """
     def __init__(self, parsed):
         assert isinstance(parsed, ParseResult)
-        super(NonSoulVerb, self).__init__(parsed.verb)
+        super().__init__(parsed.verb)
         self.parsed = parsed
 
 

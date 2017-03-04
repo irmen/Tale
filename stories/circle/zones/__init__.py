@@ -44,7 +44,7 @@ converted_shops = {}  # cache for the shop data
 class CircleMob(NPC):
     """Monster NPC having tailored behavior to suit circle data"""
     def init(self):
-        super(CircleMob, self).init()
+        super().init()
 
     def do_wander(self, ctx):
         # let the mob wander randomly

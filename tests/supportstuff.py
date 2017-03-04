@@ -23,7 +23,7 @@ class Thing(object):
 
 class TestDriver(driver.Driver):
     def __init__(self):
-        super(TestDriver, self).__init__()
+        super().__init__()
         # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
 

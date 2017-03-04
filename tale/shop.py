@@ -39,7 +39,7 @@ banking_money_limit = 15000.0
 
 class Shopkeeper(NPC):
     def init(self):
-        super(Shopkeeper, self).init()
+        super().init()
         self.shop = ShopBehavior()
         self.verbs = {
             "shop": "Go shopping! This shows some information about the shop, and what it has for sale.",

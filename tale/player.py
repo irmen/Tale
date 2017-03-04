@@ -26,7 +26,7 @@ class Player(base.Living, pubsub.Listener):
     """
     def __init__(self, name, gender, race="human", description=None, short_description=None):
         title = lang.capital(name)
-        super(Player, self).__init__(name, gender, race, title, description, short_description)
+        super().__init__(name, gender, race, title, description, short_description)
         self.turns = 0
         self.state = {}
         self.hints = hints.HintSystem()
@@ -51,14 +51,14 @@ class Player(base.Living, pubsub.Listener):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
 
     def __getstate__(self):
-        state = super(Player, self).__getstate__()
+        state = super().__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
         for name in ["_input", "_output", "input_is_available", "transcript"]:
             del state[name]
         return state
 
     def __setstate__(self, state):
-        super(Player, self).__setstate__(state)
+        super().__setstate__(state)
         self.init_nonserializables()
 
     def set_screen_sizes(self, indent, width):
@@ -82,7 +82,7 @@ class Player(base.Living, pubsub.Listener):
         Multiple messages are separated by a space (or newline, if format=False).
         The player object is returned so you can chain calls.
         """
-        super(Player, self).tell(*messages)
+        super().tell(*messages)
         if messages == ("\n",):
             self._output.p()
         else:
@@ -108,7 +108,7 @@ class Player(base.Living, pubsub.Listener):
 
     def move(self, target, actor=None, silent=False, is_player=True, verb="move"):
         """delegate to Living but with is_player set to True"""
-        return super(Player, self).move(target, actor, silent, True, verb)
+        return super().move(target, actor, silent, True, verb)
 
     def create_wiretap(self, target):
         if "wizard" not in self.privileges:
@@ -126,7 +126,7 @@ class Player(base.Living, pubsub.Listener):
 
     def destroy(self, ctx):
         self.activate_transcript(None, None)
-        super(Player, self).destroy(ctx)
+        super().destroy(ctx)
 
     def allow_give_money(self, actor, amount):
         """Do we accept money? Raise ActionRefused if not."""

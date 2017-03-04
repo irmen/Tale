@@ -17,13 +17,13 @@ class NPC(base.Living):
     These are neutral or friendly or aggressive (defaults to non-aggressive)
     """
     def __init__(self, name, gender, race="human", title=None, description=None, short_description=None):
-        super(NPC, self).__init__(name, gender, race, title, description, short_description)
+        super().__init__(name, gender, race, title, description, short_description)
         self.aggressive = False
 
     def insert(self, item, actor):
         """NPC have a bit nicer refuse message when giving items to them."""
         if not self.aggressive or actor is self or actor is not None and "wizard" in actor.privileges:
-            super(NPC, self).insert(item, self)
+            super().insert(item, self)
         else:
             if self.aggressive:
                 raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))

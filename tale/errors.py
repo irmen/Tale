@@ -40,7 +40,7 @@ class RetryParse(Exception):
 class LocationIntegrityError(Exception):
     """When the driver notices an integrity problem with locations, exits, etc."""
     def __init__(self, msg, direction, exit, location):
-        super(LocationIntegrityError, self).__init__(msg)
+        super().__init__(msg)
         self.direction = direction
         self.exit = exit
         self.location = location

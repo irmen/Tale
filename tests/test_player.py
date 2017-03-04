@@ -728,7 +728,7 @@ class TestMudAccounts(unittest.TestCase):
 
 class WrappedConsoleIO(ConsoleIo):
     def __init__(self, connection):
-        super(WrappedConsoleIO, self).__init__(connection)
+        super().__init__(connection)
 
     def __enter__(self):
         self._old_stdout = sys.stdout

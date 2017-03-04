@@ -63,7 +63,7 @@ class CursedGem(Item):
     def move(self, target, actor, silent=False, is_player=False, verb="move"):
         if self.contained_in is actor and "wizard" not in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
-        super(CursedGem, self).move(target, actor, verb=verb)
+        super().move(target, actor, verb=verb)
 
 
 class InsertOnlyBox(Container):
@@ -146,7 +146,7 @@ class GameEnd(Location):
         # Normally you would use notify_player_arrived() to trigger an action.
         # but for the game ending, we require an immediate response.
         # So instead we hook into the direct arrival of something in this location.
-        super(GameEnd, self).insert(obj, actor)
+        super().insert(obj, actor)
         try:
             obj.story_completed()   # player arrived! Great Success!
         except AttributeError:
@@ -158,7 +158,7 @@ game_end = GameEnd("Game End", "It seems like it is game over!")
 
 class EndDoor(Door):
     def unlock(self, actor, item):
-        super(EndDoor, self).unlock(actor, item)
+        super().unlock(actor, item)
         if not self.locked:
             if "unlocked_enddoor" not in actor.hints.checkpoints:
                 actor.tell_later("<dim>(You will remember this event.)</>")
@@ -172,7 +172,7 @@ lane.add_exits([end_door])
 
 class Computer(Item):
     def init(self):
-        super(Computer, self).init()
+        super().init()
         self.aliases = {"keyboard", "screen", "wires"}
 
     def allow_item_move(self, actor, verb="move"):
@@ -293,7 +293,7 @@ alley.insert(doorkey, None)
 
 class MagicGameEnd(Item):
     def __init__(self):
-        super(MagicGameEnd, self).__init__("magic orb", description="A magic orb of some sort.")
+        super().__init__("magic orb", description="A magic orb of some sort.")
         self.aliases = "orb"
 
     def notify_moved(self, source_container, target_container, actor):

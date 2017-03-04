@@ -24,7 +24,7 @@ class GameEnd(Location):
         # Normally you would use notify_player_arrived() to trigger an action.
         # but for the game ending, we require an immediate response.
         # So instead we hook into the direct arrival of something in this location.
-        super(GameEnd, self).insert(obj, actor)
+        super().insert(obj, actor)
         try:
             obj.story_completed()   # player arrived! Great Success!
         except AttributeError:

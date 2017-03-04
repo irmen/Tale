@@ -372,7 +372,7 @@ class Location(MudObject):
     You can test for containment with 'in': item in loc, npc in loc
     """
     def __init__(self, name, description=None):
-        super(Location, self).__init__(name, description=description)
+        super().__init__(name, description=description)
         self.name = name      # make sure we preserve the case; base object stores it lowercase
         self.livings = set()  # set of livings in this location
         self.items = set()    # set of all items in the room
@@ -396,7 +396,7 @@ class Location(MudObject):
             self.insert(obj, self)
 
     def destroy(self, ctx):
-        super(Location, self).destroy(ctx)
+        super().destroy(ctx)
         for living in self.livings:
             if living.location is self:
                 living.location = _limbo
@@ -640,7 +640,7 @@ class Exit(MudObject):
         else:
             title = "Exit to <unbound:%s>" % self.target
         long_description = long_description or short_description
-        super(Exit, self).__init__(direction, title=title, description=long_description, short_description=short_description)
+        super().__init__(direction, title=title, description=long_description, short_description=short_description)
         self.aliases = aliases
         # The driver needs to know about all exits,
         # it will hook them all up once initialization is complete.
@@ -783,7 +783,7 @@ class Living(MudObject):
         self.__inventory = set()
         self.previous_commandline = None
         self._previous_parsed = None
-        super(Living, self).__init__(name, title, description, short_description)
+        super().__init__(name, title, description, short_description)
 
     def init_gender(self, gender):
         """(re)set gender attributes"""
@@ -834,7 +834,7 @@ class Living(MudObject):
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
     def destroy(self, ctx):
-        super(Living, self).destroy(ctx)
+        super().destroy(ctx)
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
         self.location = None
@@ -1125,7 +1125,7 @@ class Container(Item):
     You can test for containment with 'in': item in bag
     """
     def init(self):
-        super(Container, self).init()
+        super().init()
         self.__inventory = set()
 
     def init_inventory(self, items):
@@ -1147,7 +1147,7 @@ class Container(Item):
         return item in self.__inventory
 
     def destroy(self, ctx):
-        super(Container, self).destroy(ctx)
+        super().destroy(ctx)
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
@@ -1173,7 +1173,7 @@ class Door(Exit):
         self.opened = opened
         self.__description_prefix = long_description or short_description
         self.key_code = None   # you can optionally set this to any code that a key must match to unlock the door
-        super(Door, self).__init__(directions, target_location, short_description, long_description)
+        super().__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
         self.linked_door = None
@@ -1322,7 +1322,7 @@ class Door(Exit):
 class Key(Item):
     """A key which has a unique code. It can be used to open the matching Door."""
     def init(self):
-        super(Key, self).init()
+        super().init()
         self.key_code = None
 
     def key_for(self, door=None, code=None):

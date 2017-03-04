@@ -24,7 +24,7 @@ class TkinterIo(iobase.IoAdapterBase):
     Tkinter-GUI based Input/Output adapter.
     """
     def __init__(self, config, player_connection):
-        super(TkinterIo, self).__init__(player_connection)
+        super().__init__(player_connection)
         self.gui = TaleGUI(self, config)
         self.textwrapper = textwrap.TextWrapper()
 
@@ -44,7 +44,7 @@ class TkinterIo(iobase.IoAdapterBase):
 
     def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
-        super(TkinterIo, self).critical_error(message)
+        super().critical_error(message)
         tb = "".join(formatTraceback())
         self.output("<monospaced>" + tb + "</>")
         self.output("<rev><it>Please report this problem.</>\n")
@@ -82,13 +82,13 @@ class TkinterIo(iobase.IoAdapterBase):
 
     def output(self, *lines):
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
-        super(TkinterIo, self).output(*lines)
+        super().output(*lines)
         for line in lines:
             self.gui.write_line(line)
 
     def output_no_newline(self, text):
         """Like output, but just writes a single line, without end-of-line."""
-        super(TkinterIo, self).output_no_newline(text)
+        super().output_no_newline(text)
         self.gui.write_line(text)
 
 

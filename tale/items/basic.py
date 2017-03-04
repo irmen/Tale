@@ -23,7 +23,7 @@ class Boxlike(Container):
     You can set a couple of txt attributes that change the visual aspect of this object.
     """
     def init(self):
-        super(Boxlike, self).init()
+        super().init()
         self.opened = False
         self.txt_title_closed = self._title
         self.txt_title_open_filled = "filled " + self._title
@@ -69,26 +69,26 @@ class Boxlike(Container):
     @property
     def inventory(self):
         if self.opened:
-            return super(Boxlike, self).inventory
+            return super().inventory
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     @property
     def inventory_size(self):
         if self.opened:
-            return super(Boxlike, self).inventory_size
+            return super().inventory_size
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     def insert(self, item, actor):
         if self.opened:
-            super(Boxlike, self).insert(item, actor)
+            super().insert(item, actor)
         else:
             raise ActionRefused("You can't put things in the %s: you should open it first." % self.title)
 
     def remove(self, item, actor):
         if self.opened:
-            super(Boxlike, self).remove(item, actor)
+            super().remove(item, actor)
         else:
             raise ActionRefused("You can't take things from the %s: you should open it first." % self.title)
 
@@ -98,7 +98,7 @@ class GameClock(Item):
     A clock that is able to tell you the in-game time.
     """
     def init(self):
-        super(GameClock, self).init()
+        super().init()
         self.use_locale = True
 
     @property
@@ -130,7 +130,7 @@ class Note(Item):
     A (paper) note with or without something written on it. You can read it.
     """
     def init(self):
-        super(Note, self).init()
+        super().init()
         self._text = "There is nothing written on it."
 
     @property
@@ -148,13 +148,13 @@ class Note(Item):
 
 class Light(Item):
     def init(self):
-        super(Light, self).init()
+        super().init()
         self.capacity = 0   # hours (-1=eternal, 0=burned out)
 
 
 class Scroll(Item):
     def init(self):
-        super(Scroll, self).init()
+        super().init()
         self.spell_level = 0   # level of spells
         self.spells = set()
 
@@ -165,7 +165,7 @@ class Scroll(Item):
 
 class MagicItem(Weapon):
     def init(self):
-        super(MagicItem, self).init()
+        super().init()
         self.spell_level = 0
         self.capacity = 0
         self.remaining = 0
@@ -198,7 +198,7 @@ class Drink(Item):
                   }
 
     def init(self):
-        super(Drink, self).init()
+        super().init()
         self.contents = "water"
         self.capacity = 1
         self.quantity = 0
@@ -210,37 +210,37 @@ class Drink(Item):
 
 class Potion(Item):
     def init(self):
-        super(Potion, self).init()
+        super().init()
         self.spell_level = 0
         self.spells = set()
 
 
 class Food(Item):
     def init(self):
-        super(Food, self).init()
+        super().init()
         self.affect_fullness = 0
         self.poisoned = False
 
 
 class Money(Item):
     def init(self):
-        super(Money, self).init()
+        super().init()
         # the amount of money is stored in item.value
 
 
 class Boat(Item):
     def init(self):
-        super(Boat, self).init()
+        super().init()
 
 
 class Wearable(Item):
     def init(self):
-        super(Wearable, self).init()
+        super().init()
 
 
 class Fountain(Item):
     def init(self):
-        super(Fountain, self).init()
+        super().init()
         self.contents = "water"
         self.capacity = 1
         self.quantity = 0

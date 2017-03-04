@@ -16,7 +16,7 @@ __all__ = ["BulletinBoard", "bulletinboard"]
 
 class BulletinBoard(Item):
     def init(self):
-        super(BulletinBoard, self).init()
+        super().init()
         self.posts = []
         self.max_num_posts = 20
         self.readonly = False

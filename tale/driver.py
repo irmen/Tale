@@ -1215,7 +1215,7 @@ class Commands(object):
 class LimboReaper(npc.NPC):
     """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
     def __init__(self):
-        super(LimboReaper, self).__init__(
+        super().__init__(
             "reaper", "m", "elemental", "Grim Reaper",
             description="He wears black robes with a hood. Where a face should be, there is only nothingness. "
                         "He is carrying a large omnious scythe that looks very, very sharp.",
