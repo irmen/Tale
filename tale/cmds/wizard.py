@@ -16,6 +16,7 @@ from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from ..player import Player
 from ..soul import NonSoulVerb
+from ..story import *
 from .. import base, lang, util, pubsub, __version__
 
 all_commands = {}
@@ -174,7 +175,7 @@ def do_clean(player, parsed, ctx):
 
 
 @wizcmd("pdb")
-@disabled_in_gamemode("mud")
+@disabled_in_gamemode(GameMode.MUD)
 def do_pdb(player, parsed, ctx):
     """Starts a Python debugging session. (Only available in IF mode)"""
     ctx.conn.pause()
@@ -429,7 +430,7 @@ def do_server(player, parsed, ctx):
     txt.append("Uptime:         %d:%02d:%02d  (since %s)" % (up_hours, up_minutes, up_seconds, driver.server_started))
     txt.append("Server mode:    %s" % config.server_mode)
     txt.append("Real time:      %s" % realtime)
-    if config.server_tick_method == "timer":
+    if config.server_tick_method == TickMethod.TIMER:
         txt.append("Game time:      %s  (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
         txt.append("Game time:      %s" % ctx.clock)
@@ -438,10 +439,10 @@ def do_server(player, parsed, ctx):
     txt.append("Heartbeats:     %d" % len(driver.heartbeat_objects))
     txt.append("Deferreds:      %d" % len(driver.deferreds))
     txt.append("Loop tick:      %.1f sec" % config.server_tick_time)
-    if config.server_tick_method == "timer":
+    if config.server_tick_method == TickMethod.TIMER:
         avg_loop_duration = sum(driver.server_loop_durations) / len(driver.server_loop_durations)
         txt.append("Loop duration:  %.2f sec. (avg)" % avg_loop_duration)
-    elif config.server_tick_method == "command":
+    elif config.server_tick_method == TickMethod.COMMAND:
         txt.append("Loop duration:  n/a (command driven)")
     player.tell(*txt, format=False)
 
@@ -522,7 +523,7 @@ def do_force(player, parsed, ctx):
 
 
 @wizcmd("accounts")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_accounts(player, parsed, ctx):
     """Show all registered player accounts"""
     accounts = ctx.driver.mud_accounts.all_accounts()
@@ -538,7 +539,7 @@ def do_accounts(player, parsed, ctx):
 
 
 @wizcmd("add_priv")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_add_priv(player, parsed, ctx):
     """
     Usage: add_priv <account> <privilege>. Adds a privilege to a user account. It will become active on next login.
@@ -557,7 +558,7 @@ def do_add_priv(player, parsed, ctx):
 
 
 @wizcmd("remove_priv")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_remove_priv(player, parsed, ctx):
     """
     Usage: remove_priv <account> <privilege>.

@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import sys
 from tale.hints import Hint
-from tale.story import Storybase
+from tale.story import *
 from tale.main import run_story
 
 
@@ -17,10 +17,10 @@ class Story(Storybase):
     author_address = "irmen@razorvine.net"
     version = "1.4"
     requires_tale = "3.0"
-    supported_modes = {"if", "mud"}
+    supported_modes = {GameMode.IF, GameMode.MUD}
     player_money = 15.5
-    money_type = "modern"
-    server_tick_method = "timer"
+    money_type = MoneyType.MODERN
+    server_tick_method = TickMethod.TIMER
     server_tick_time = 1.0
     gametime_to_realtime = 5
     display_gametime = True

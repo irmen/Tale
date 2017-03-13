@@ -6,12 +6,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import unittest
-from tale import util, mud_context, pubsub
+from tale import util, mud_context
 from tale.errors import ParseError, ActionRefused
 from tale.base import Item, Container, Location, Exit
 from tale.player import Player
+from tale.story import MoneyType
 from tale.tio.vfs import VirtualFileSystem, VfsError
-from tests.supportstuff import TestDriver, Wiretap
+from tests.supportstuff import TestDriver
 
 
 class TestUtil(unittest.TestCase):
@@ -44,7 +45,7 @@ class TestUtil(unittest.TestCase):
 
     def test_moneydisplay(self):
         # fantasy
-        mf = util.MoneyFormatter("fantasy")
+        mf = util.MoneyFormatter(MoneyType.FANTASY)
         self.assertEqual("nothing", mf.display(0))
         self.assertEqual("zilch", mf.display(0, zero_msg="zilch"))
         self.assertEqual("nothing", mf.display(0.01))
@@ -55,7 +56,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("12g/3s/2c", mf.display(123.24, True))
         self.assertEqual("12g/3s/3c", mf.display(123.26, True))
         # modern
-        mf = util.MoneyFormatter("modern")
+        mf = util.MoneyFormatter(MoneyType.MODERN)
         self.assertEqual("nothing", mf.display(0))
         self.assertEqual("zilch", mf.display(0, zero_msg="zilch"))
         self.assertEqual("nothing", mf.display(0.001))
@@ -72,13 +73,13 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(ValueError):
             util.MoneyFormatter("bubblewrap")
         # fantasy
-        mf = util.MoneyFormatter("fantasy")
+        mf = util.MoneyFormatter(MoneyType.FANTASY)
         self.assertEqual(0.0, mf.money_to_float({}))
         self.assertAlmostEqual(0.3, mf.money_to_float({"copper": 1.0, "coppers": 2.0}), places=4)
         self.assertAlmostEqual(325.6, mf.money_to_float({"gold": 22.5, "silver": 100.2, "copper": 4}), places=4)
         self.assertAlmostEqual(289.3, mf.money_to_float("22g/66s/33c"), places=4)
         # modern
-        mf = util.MoneyFormatter("modern")
+        mf = util.MoneyFormatter(MoneyType.MODERN)
         self.assertEqual(0.0, mf.money_to_float({}))
         self.assertAlmostEqual(0.55, mf.money_to_float({"cent": 22, "cents": 33}), places=4)
         self.assertAlmostEqual(55.0, mf.money_to_float({"dollar": 22, "dollars": 33}), places=4)
@@ -88,7 +89,7 @@ class TestUtil(unittest.TestCase):
 
     def test_words_to_money(self):
         # fantasy
-        mf = util.MoneyFormatter("fantasy")
+        mf = util.MoneyFormatter(MoneyType.FANTASY)
         with self.assertRaises(ParseError):
             mf.parse([])
         with self.assertRaises(ParseError):
@@ -100,7 +101,7 @@ class TestUtil(unittest.TestCase):
         self.assertAlmostEqual(451.6, mf.parse(["44", "gold", "5", "silver", "66", "copper"]), places=4)
         self.assertAlmostEqual(451.6, mf.parse(["44g/5s/66c"]), places=4)
         # modern
-        mf = util.MoneyFormatter("modern")
+        mf = util.MoneyFormatter(MoneyType.MODERN)
         with self.assertRaises(ParseError):
             mf.parse([])
         with self.assertRaises(ParseError):

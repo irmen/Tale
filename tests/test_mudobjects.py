@@ -14,6 +14,7 @@ from tale.errors import ActionRefused, LocationIntegrityError
 from tale.npc import NPC
 from tale.player import Player
 from tale.soul import ParseResult
+from tale.story import MoneyType
 from tale.tio.iobase import strip_text_styles
 from tale import pubsub, mud_context
 from tale.demo.story import Story as DemoStory
@@ -588,7 +589,7 @@ class TestLiving(unittest.TestCase):
             pass
 
         ctx = Ctx()
-        ctx.config.money_type = "modern"
+        ctx.config.money_type = MoneyType.MODERN
         ctx.driver = MoneyDriverDummy()
         ctx.driver.moneyfmt = MoneyFormatter(ctx.config.money_type)
         julie = Living("julie", "f", race="human")
@@ -602,7 +603,7 @@ class TestLiving(unittest.TestCase):
         pubsub.sync()
         text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key Money in possession: 9 dollars and 23 cents.", text)
-        ctx.config.money_type = None
+        ctx.config.money_type = MoneyType.NOTHING
         ctx.driver.moneyfmt = None
         collector.clear()
         julie.show_inventory(julie, ctx)

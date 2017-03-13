@@ -17,6 +17,7 @@ from .. import base
 from ..accounts import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
+from ..story import GameMode
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 
 all_commands = {}
@@ -703,7 +704,7 @@ def do_examine(player, parsed, ctx):
 
 @cmd("stats")
 @disable_notify_action
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_stats(player, parsed, ctx):
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
@@ -763,7 +764,7 @@ def do_tell(player, parsed, ctx):
 
 
 @cmd("emote")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_emote(player, parsed, ctx):
     """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
     if not parsed.unparsed:
@@ -810,7 +811,7 @@ def do_say(player, parsed, ctx):
 
 
 @cmd("wait")
-@disabled_in_gamemode("mud")
+@disabled_in_gamemode(GameMode.MUD)
 @overrides_soul
 def do_wait(player, parsed, ctx):
     """
@@ -862,7 +863,7 @@ def do_wait(player, parsed, ctx):
 def do_quit(player, parsed, ctx):
     """Quit the game."""
     if (yield "input", ("Are you sure you want to quit?", lang.yesno)):
-        if ctx.config.server_mode != "mud" and ctx.config.savegames_enabled:
+        if ctx.config.server_mode != GameMode.MUD and ctx.config.savegames_enabled:
             if (yield "input", ("Would you like to save your progress?", lang.yesno)):
                 do_save(player, parsed, ctx)
         player.tell("\n")
@@ -896,7 +897,7 @@ def do_who(player, parsed, ctx):
     if parsed.args == ["am", "i"]:
         # who am i
         raise RetryParse("examine myself")      # 'who am i' -> 'examine myself')
-    if ctx.config.server_mode == "if":
+    if ctx.config.server_mode == GameMode.IF:
         # in interactive fiction mode, revert to a simple substitute (examine)
         return do_examine(player, parsed, ctx)
     if parsed.args:
@@ -1204,7 +1205,7 @@ def do_coin(player, parsed, ctx):
 
 @cmd("motd")
 @disable_notify_action
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_motd(player, parsed, ctx):
     """Show the message-of-the-day again."""
     ctx.driver.show_motd(player, notify_no_motd=True)
@@ -1245,7 +1246,7 @@ def do_flee(player, parsed, ctx):
 
 @cmd("save")
 @disable_notify_action
-@disabled_in_gamemode("mud")
+@disabled_in_gamemode(GameMode.MUD)
 def do_save(player, parsed, ctx):
     """Save your game."""
     ctx.driver.do_save(player)
@@ -1253,7 +1254,7 @@ def do_save(player, parsed, ctx):
 
 @cmd("load", "reload", "restore", "restart")
 @disable_notify_action
-@disabled_in_gamemode("mud")
+@disabled_in_gamemode(GameMode.MUD)
 def do_load(player, parsed, ctx):
     """Load a previously saved game."""
     if ctx.config.savegames_enabled:
@@ -1266,7 +1267,7 @@ def do_load(player, parsed, ctx):
 
 @cmd("transcript")
 @disable_notify_action
-@disabled_in_gamemode("mud")
+@disabled_in_gamemode(GameMode.MUD)
 def do_transcript(player, parsed, ctx):
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if parsed.unparsed == "off" or (parsed.args and parsed.args[0] == "off"):
@@ -1553,7 +1554,7 @@ def do_teststyles(player, parsed, ctx):
 
 
 @cmd("@change_password")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_change_pw(player, parsed, ctx):
     """Lets you change your account password."""
     player.tell("<it>Changing your password.</>")
@@ -1567,7 +1568,7 @@ def do_change_pw(player, parsed, ctx):
 
 
 @cmd("@change_email")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_change_email(player, parsed, ctx):
     """Lets you change the email address on file for your account."""
     account = ctx.driver.mud_accounts.get(player.name)
@@ -1582,7 +1583,7 @@ def do_change_email(player, parsed, ctx):
 
 
 @cmd("@account")
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def do_account(player, parsed, ctx):
     """Displays your player account data."""
     account = ctx.driver.mud_accounts.get(player.name)

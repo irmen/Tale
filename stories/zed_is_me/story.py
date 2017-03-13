@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import sys
-from tale.story import Storybase
+from tale.story import *
 from tale.main import run_story
 
 
@@ -16,7 +16,7 @@ class Story(Storybase):
     author_address = "irmen@razorvine.net"
     version = "1.3"
     requires_tale = "3.0"
-    supported_modes = {"if"}
+    supported_modes = {GameMode.MUD}
     player_name = "julie"
     player_gender = "f"
     player_race = "human"

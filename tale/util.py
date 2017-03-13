@@ -12,6 +12,7 @@ import functools
 import inspect
 import traceback
 from . import lang
+from .story import MoneyType
 from .errors import ParseError, ActionRefused
 
 
@@ -57,11 +58,11 @@ class MoneyFormatter(object):
     money_words_modern = {"dollar", "dollars", "cent", "cents"}
 
     def __init__(self, money_type):
-        if money_type == "fantasy":
+        if money_type == MoneyType.FANTASY:
             self.display = self.money_display_fantasy
             self.money_to_float = self.money_to_float_fantasy
             self.money_words = self.money_words_fantasy
-        elif money_type == "modern":
+        elif money_type == MoneyType.MODERN:
             self.display = self.money_display_modern
             self.money_to_float = self.money_to_float_modern
             self.money_words = self.money_words_modern

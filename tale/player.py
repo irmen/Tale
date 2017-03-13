@@ -17,6 +17,7 @@ from .errors import ActionRefused
 from .tio.iobase import strip_text_styles
 from threading import Event
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
+from .story import GameMode
 
 
 class Player(base.Living, pubsub.Listener):
@@ -323,7 +324,7 @@ class PlayerConnection(object):
             # (re)set a few io parameters because they can be changed dynamically
             self.io.do_styles = self.player.screen_styles_enabled
             self.io.do_smartquotes = self.player.smartquotes_enabled
-            if mud_context.config.server_mode == "if" and self.player.output_line_delay > 0:
+            if mud_context.config.server_mode == GameMode.IF and self.player.output_line_delay > 0:
                 for line in output.rstrip().splitlines():
                     self.io.output(line)
                     time.sleep(self.player.output_line_delay / 1000.0)  # delay the output for a short period
@@ -379,7 +380,7 @@ class PlayerConnection(object):
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
-            if self.player and mud_context.config.server_mode == "if":
+            if self.player and mud_context.config.server_mode == GameMode.IF:
                 self.io.abort_all_input(self.player)
             self.io = None
         if self.player:

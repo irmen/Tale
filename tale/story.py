@@ -5,6 +5,29 @@ Story configuration and base classes to create your own story with.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+import enum
+
+__all__ = ["TickMethod", "GameMode", "MoneyType", "Storybase"]
+
+
+class TickMethod(enum.Enum):
+    COMMAND = "command"
+    TIMER = "timer"
+
+
+class GameMode(enum.Enum):
+    IF = "if"
+    MUD = "mud"
+
+
+class MoneyType(enum.Enum):
+    FANTASY = "fantasy"
+    MODERN = "modern"
+    NOTHING = None
+
+    def __bool__(self):
+        return bool(self.value)
+
 
 class _Storyconfig(object):
     def __init__(self, story):
@@ -48,13 +71,13 @@ class Storybase(object):
     author_address = None           # the author's email address
     version = "1.2"                 # arbitrary but is used to check savegames for compatibility
     requires_tale = "3.0"           # tale library required to run the game
-    supported_modes = {"if"}        # what driver modes (if/mud) are supported by this story
+    supported_modes = {GameMode.IF}    # what driver modes (if/mud) are supported by this story
     player_name = None              # set a name to create a prebuilt player, None to use the character builder
     player_gender = None            # m/f/n
     player_race = None              # default is "human" ofcourse, but you can select something else if you want
     player_money = 0.0              # starting money
-    money_type = None               # money type modern/fantasy/None
-    server_tick_method = "command"  # 'command' (waits for player entry) or 'timer' (async timer driven)
+    money_type = None               # money type modern/fantasy/nothing(=None)
+    server_tick_method = TickMethod.COMMAND   # command (waits for player entry) or timer (async timer driven)
     server_tick_time = 5.0          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
     gametime_to_realtime = 1        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
     max_wait_hours = 2              # the max. number of hours (gametime) the player is allowed to wait (>=0)

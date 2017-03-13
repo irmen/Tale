@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import sys
 import datetime
-from tale.story import Storybase
+from tale.story import *
 from tale.main import run_story
 from zones import init_zones
 
@@ -18,13 +18,13 @@ class Story(Storybase):
     author_address = "irmen@razorvine.net"
     version = "1.2"
     requires_tale = "3.0"
-    supported_modes = {"mud"}
+    supported_modes = {GameMode.MUD}
     player_name = None
     player_gender = None
     player_race = None
     player_money = 0.0
-    money_type = "fantasy"
-    server_tick_method = "timer"
+    money_type = MoneyType.FANTASY
+    server_tick_method = TickMethod.TIMER
     server_tick_time = 1.0
     gametime_to_realtime = 5
     display_gametime = True

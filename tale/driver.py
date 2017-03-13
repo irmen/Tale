@@ -26,6 +26,7 @@ from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, 
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
+from .story import TickMethod, GameMode, MoneyType
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -71,7 +72,7 @@ class Driver(pubsub.Listener):
             """ % tale_version_str)
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
-        parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
+        parser.add_argument('-m', '--mode', type=GameMode, help='game mode, default=if', default=GameMode.IF, choices=[GameMode.IF, GameMode.MUD])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
@@ -102,7 +103,10 @@ class Driver(pubsub.Listener):
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()
-        if len(self.story.supported_modes) == 1 and args.mode != "mud":
+        self.story.supported_modes = {GameMode(mode) for mode in self.story.supported_modes}
+        self.story.money_type = MoneyType(self.story.money_type)
+        self.story.server_tick_method = TickMethod(self.story.server_tick_method)
+        if len(self.story.supported_modes) == 1 and args.mode != GameMode.MUD:    # XXX
             # There's only one mode this story runs in. Just select that one.
             args.mode = list(self.story.supported_modes)[0]
         if args.mode not in self.story.supported_modes:
@@ -111,7 +115,7 @@ class Driver(pubsub.Listener):
         self.config.mud_host = self.config.mud_host or "localhost"
         self.config.mud_port = self.config.mud_port or 8180
         self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        if self.config.server_mode != "if" and self.config.server_tick_method == "command":
+        if self.config.server_mode != GameMode.IF and self.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and some other stuff in the global context.
         mud_context.driver = self
@@ -153,7 +157,7 @@ class Driver(pubsub.Listener):
         self.zones = zones
         self.config.startlocation_player = self.__lookup_location(self.config.startlocation_player)
         self.config.startlocation_wizard = self.__lookup_location(self.config.startlocation_wizard)
-        if self.config.server_tick_method == "command":
+        if self.config.server_tick_method == TickMethod.COMMAND:
             # If the server tick is synchronized with player commands, this factor needs to be 1,
             # because at every command entered the game time simply advances 1 x server_tick_time.
             self.config.gametime_to_realtime = 1
@@ -170,7 +174,7 @@ class Driver(pubsub.Listener):
             return
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
-        if self.config.server_mode == "if":
+        if self.config.server_mode == GameMode.IF:
             # create the single player mode player automatically
             if args.gui:
                 player_io = "gui"
@@ -205,7 +209,7 @@ class Driver(pubsub.Listener):
         self.__stop_mainloop = False
         while not self.__stop_mainloop:
             try:
-                if self.config.server_mode == "if":
+                if self.config.server_mode == GameMode.IF:
                     # single player interactive fiction event loop
                     while not self.__stop_mainloop:
                         self.__main_loop_singleplayer(conn)
@@ -289,7 +293,7 @@ class Driver(pubsub.Listener):
         self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
 
     def __login_dialog_mud_create_admin(self, conn):
-        assert self.config.server_mode == "mud"
+        assert self.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
         while True:
@@ -314,7 +318,7 @@ class Driver(pubsub.Listener):
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
 
     def __login_dialog_mud(self, conn):
-        assert self.config.server_mode == "mud"
+        assert self.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
@@ -510,7 +514,7 @@ class Driver(pubsub.Listener):
         # or let the user create a new player manually.
         # Be sure to always reference conn.player here (and not get a cached copy),
         # because it will get replaced when loading a saved game!
-        assert self.config.server_mode == "if"
+        assert self.config.server_mode == GameMode.IF
         if not self.config.savegames_enabled:
             load_saved_game = False
         else:
@@ -581,10 +585,10 @@ class Driver(pubsub.Listener):
             pubsub.sync("driver-async-dialogs")
             if conn not in self.waiting_for_input:
                 conn.write_input_prompt()
-            if self.config.server_tick_method == "command":
+            if self.config.server_tick_method == TickMethod.COMMAND:
                 conn.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
-            elif self.config.server_tick_method == "timer":
+            elif self.config.server_tick_method == TickMethod.TIMER:
                 # server tick goes on a timer, wait a limited time for player input before going on
                 input_wait_time = max(0.01, self.config.server_tick_time - loop_duration)
                 has_input = conn.player.input_is_available.wait(input_wait_time)
@@ -631,7 +635,7 @@ class Driver(pubsub.Listener):
             if now - previous_server_tick >= self.config.server_tick_time:
                 self.__server_tick()
                 previous_server_tick = now
-            if self.config.server_tick_method == "command":
+            if self.config.server_tick_method == TickMethod.COMMAND:
                 # Even though the server tick may be skipped, the pubsub events
                 # should be processed every player command no matter what.
                 pubsub.sync()
@@ -776,7 +780,7 @@ class Driver(pubsub.Listener):
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
                 idle_limit = 3 * 60 * 60 if "wizard" in conn.player.privileges else 30 * 60
-                if self.config.server_mode == "mud" and conn.idle_time > idle_limit:
+                if self.config.server_mode == GameMode.MUD and conn.idle_time > idle_limit:
                     idle_limit_minutes = int(idle_limit / 60)
                     conn.player.tell("\n")
                     conn.player.tell("<it><rev>Automatic logout:  You have been logged out because you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
@@ -905,7 +909,7 @@ class Driver(pubsub.Listener):
             module.init(self)
 
     def __load_saved_game(self, player):
-        assert self.config.server_mode == "if", "games can only be loaded in single player 'if' mode"
+        assert self.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
         try:
@@ -992,7 +996,7 @@ class Driver(pubsub.Listener):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times.
         # @todo be able to detect if something happened during the wait
-        assert self.config.server_mode == "if"
+        assert self.config.server_mode == GameMode.IF
         if self.config.gametime_to_realtime == 0:
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick
@@ -1203,7 +1207,7 @@ class Commands(object):
         for commands in self.commands_per_priv.values():
             for cmd, func in list(commands.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
-                if server_mode == disabled_mode:
+                if server_mode == disabled_mode:        # XXX does this work with Enum???
                     del commands[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]

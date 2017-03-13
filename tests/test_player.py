@@ -24,14 +24,14 @@ from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
 from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
-from tale.story import Storybase
+from tale.story import *
 
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = Storybase()._get_config()
-        tale.mud_context.config.server_mode = "if"
+        tale.mud_context.config.server_mode = GameMode.IF
 
     def test_init(self):
         player = Player("fritz", "m")
@@ -454,7 +454,7 @@ class TestPlayerConnection(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = Storybase()._get_config()
-        tale.mud_context.config.server_mode = "if"
+        tale.mud_context.config.server_mode = GameMode.IF
 
     def test_input(self):
         player = Player("julie", "f")
@@ -631,7 +631,7 @@ class TestMudAccounts(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = Storybase()._get_config()
-        tale.mud_context.config.server_mode = "if"
+        tale.mud_context.config.server_mode = GameMode.IF
 
     def test_accept_name(self):
         self.assertEqual("irm", MudAccounts.accept_name("irm"))

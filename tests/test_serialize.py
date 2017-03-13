@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import pickle
 from tale import mud_context, races, base, npc, soul, player, util, hints
-from tale.story import Storybase
+from tale.story import *
 from tests.supportstuff import TestDriver
 
 
@@ -112,7 +112,7 @@ class TestSerializing(unittest.TestCase):
 
     def test_storyconfig(self):
         s = Storybase()
-        s.server_mode = "if"
+        s.server_mode = GameMode.IF
         s.display_gametime = True
         s.name = "test"
         x = serializecycle(s)

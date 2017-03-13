@@ -19,6 +19,7 @@ import tale.util
 import tale.demo
 from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
 from tests.supportstuff import Thing
+from tale.story import GameMode
 
 
 def module_level_func(ctx):
@@ -165,7 +166,7 @@ class TestVarious(unittest.TestCase):
 
 
 @cmd
-@disabled_in_gamemode("if")
+@disabled_in_gamemode(GameMode.IF)
 def func1(player, parsed, ctx):
     pass
 
@@ -205,7 +206,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual({"verb1", "verb2", "verb3"}, set(wiz.keys()))
         wiz = self.cmds.get([None])
         self.assertEqual({"verb1", "verb2"}, set(wiz.keys()))
-        self.cmds.adjust_available_commands("if")
+        self.cmds.adjust_available_commands(GameMode.IF)
         wiz = self.cmds.get(["wizard"])
         self.assertEqual({"verb2", "verb3"}, set(wiz.keys()))
         wiz = self.cmds.get([None])
