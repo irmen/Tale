@@ -301,7 +301,7 @@ class Driver(pubsub.Listener):
             name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
             password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
             email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
-            conn.output("You can choose one of the following races: ", lang.join(races.player_races))
+            conn.output("You can choose one of the following races: ", lang.join(races.playable_races))
             race = yield "input", ("Player race?", charbuilder.validate_race)
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             # review the account
@@ -348,7 +348,7 @@ class Driver(pubsub.Listener):
                 password = yield "input-noecho", ("Please type in the desired password.", accounts.MudAccounts.accept_password)
                 email = yield "input", ("Please type in your email address.", accounts.MudAccounts.accept_email)
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
-                conn.player.tell("You can choose one of the following races: ", lang.join(races.player_races))
+                conn.player.tell("You can choose one of the following races: ", lang.join(races.playable_races))
                 race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
                 # review the account
                 conn.player.tell("<bright>Please review your new character.</>", end=True)
@@ -1207,7 +1207,7 @@ class Commands(object):
         for commands in self.commands_per_priv.values():
             for cmd, func in list(commands.items()):
                 disabled_mode = getattr(func, "disabled_in_mode", None)
-                if server_mode == disabled_mode:        # XXX does this work with Enum???
+                if server_mode == disabled_mode:
                     del commands[cmd]
                 elif getattr(func, "overrides_soul", False):
                     del soul.VERBS[cmd]

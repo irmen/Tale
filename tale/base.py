@@ -721,10 +721,10 @@ class Stats(object):
         self.wis = 0
         self.stat_prios = None      # per agi/cha/etc stat, priority level of it (see races.py)
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
-        self.bodytype = None
+        self.bodytype = races.BodyType.HUMANOID
         self.language = None
         self.weight = 0.0
-        self.size = 0
+        self.size = races.BodySize.HUMAN_SIZED
         self.race = None    # optional, can use the stats template from races
 
     def __repr__(self):
@@ -736,29 +736,28 @@ class Stats(object):
         s = cls()
         s.gender = gender
         s.race = race
-        rs = r["stats"]
-        s.agi = rs["agi"][0]
-        s.cha = rs["cha"][0]
-        s.int = rs["int"][0]
-        s.lck = rs["lck"][0]
-        s.spd = rs["spd"][0]
-        s.sta = rs["sta"][0]
-        s.str = rs["str"][0]
-        s.wis = rs["wis"][0]
+        s.agi = r.stats.agi[0]
+        s.cha = r.stats.cha[0]
+        s.int = r.stats.int[0]
+        s.lck = r.stats.lck[0]
+        s.spd = r.stats.spd[0]
+        s.sta = r.stats.sta[0]
+        s.str = r.stats.str[0]
+        s.wis = r.stats.wis[0]
         s.set_stats_from_race()
         # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
 
     def set_stats_from_race(self):
-        # the stats that are statica are always initialized from the races table
+        # the stats that are static are always initialized from the races table
         self.stat_prios = defaultdict(list)
         r = races.races[self.race]
-        for stat, (_, prio) in r["stats"].items():
+        for stat, (_, prio) in r.stats._asdict().items():
             self.stat_prios[prio].append(stat)
-        self.bodytype = r["bodytype"]
-        self.language = r["language"]
-        self.weight = r["mass"]
-        self.size = r["size"]
+        self.bodytype = r.body
+        self.language = r.language
+        self.weight = r.mass
+        self.size = r.size
 
 
 class Living(MudObject):

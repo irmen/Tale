@@ -587,7 +587,7 @@ class TestCharacterBuilder(unittest.TestCase):
         self.assertEqual(999, p.money)
         self.assertEqual("elemental", p.stats.race)
         self.assertEqual("n", p.stats.gender)
-        self.assertEqual(races.B_NEBULOUS, p.stats.bodytype)
+        self.assertEqual(races.BodyType.NEBULOUS, p.stats.bodytype)
         self.assertEqual("grand master", p.title)
 
     def test_idle(self):
@@ -718,9 +718,9 @@ class TestMudAccounts(unittest.TestCase):
             self.assertEqual("f", account.stats.gender)
             self.assertTrue("agi" in account.stats.stat_prios[3])
             self.assertEqual(40, account.stats.agi)
-            self.assertEqual(races.B_HUMANOID, account.stats.bodytype)
+            self.assertEqual(races.BodyType.HUMANOID, account.stats.bodytype)
             self.assertEqual(60.0, account.stats.weight)
-            self.assertEqual(races.S_HUMAN_SIZED, account.stats.size)
+            self.assertEqual(races.BodySize.HUMAN_SIZED, account.stats.size)
             self.assertEqual("Edhellen", account.stats.language)
         finally:
             os.remove(dbfile)
