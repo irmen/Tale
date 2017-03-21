@@ -73,7 +73,7 @@ def show_vnum(player, parsed, ctx):
 
 @wizcmd
 def spawn_vnum(player, parsed, ctx):
-    """Spawn an item or monster with the given vnum"""
+    """Spawn an item or monster with the given vnum (or both if the vnum is the same)."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the rooms' vnum.")
     vnum = int(parsed.args[0])

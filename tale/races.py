@@ -6,7 +6,7 @@ Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare m
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import enum
-from collections import namedtuple
+from typing import NamedTuple
 from functools import total_ordering
 
 
@@ -971,15 +971,22 @@ def create_classes():
     swimming_races = {'amphibian', 'android', 'artrell', 'bear', 'bot', 'bugbear', 'cat', 'dark-elf', 'demi-god', 'demon', 'dragon', 'elephant', 'elf', 'fish', 'giant', 'gnoll', 'gnome', 'goblin', 'god', 'half-elf', 'halfling', 'hobbit', 'human', 'kender', 'lizard', 'nymph', 'replicant', 'rodent', 'troll', 'vehicle', 'vulcan'}
     nonmeat_races = {'android', 'balrog', 'bot', 'dummy', 'elemental', 'god', 'golem', 'mech', 'plant', 'strider', 'tree', 'vehicle', 'wraith'}
 
-    Stats = namedtuple("Stats", [StatType.AGILITY.value,
-                                 StatType.CHARISMA.value,
-                                 StatType.INTELLIGENCE.value,
-                                 StatType.LUCK.value,
-                                 StatType.SPEED.value,
-                                 StatType.STAMINA.value,
-                                 StatType.STRENGTH.value,
-                                 StatType.WISDOM.value])
-    Flags = namedtuple("Flags", ["flying", "limbless", "nonbiting", "swimming", "nonmeat", "playable"])
+    Stats = NamedTuple("Stats", [(StatType.AGILITY.value, int),
+                                 (StatType.CHARISMA.value, int),
+                                 (StatType.INTELLIGENCE.value, int),
+                                 (StatType.LUCK.value, int),
+                                 (StatType.SPEED.value, int),
+                                 (StatType.STAMINA.value, int),
+                                 (StatType.STRENGTH.value, int),
+                                 (StatType.WISDOM.value, int)])
+
+    Flags = NamedTuple("Flags", [("flying", bool),
+                                 ("limbless", bool),
+                                 ("nonbiting", bool),
+                                 ("swimming", bool),
+                                 ("nonmeat", bool),
+                                 ("playable", bool)])
+
     races = {}
     for race, attrs in _races.items():
         stats_kws = {StatType(s).value: value for s, value in attrs["stats"].items()}

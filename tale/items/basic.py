@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import textwrap
-from collections import namedtuple
+from typing import NamedTuple
 from ..base import Item, Container, Weapon
 from ..errors import ActionRefused
 from .. import lang, mud_context
@@ -178,7 +178,7 @@ class Trash(Item):
 
 
 class Drink(Item):
-    drinkeffects = namedtuple("drinkeffects", ["drunkness", "fullness", "thirst"])
+    drinkeffects = NamedTuple("drinkeffects", [("drunkness", int), ("fullness", int), ("thirst", int)])
     drinktypes = {'water':        drinkeffects(0, 1, 10),
                   'beer':         drinkeffects(3, 2, 5),
                   'wine':         drinkeffects(5, 2, 5),

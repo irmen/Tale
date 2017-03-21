@@ -19,8 +19,7 @@ def cmd(func):
     """
     # NOTE: this code is VERY similar to the internal @cmd decorator in cmds/normal.py
     # If changes are made, make sure to update both occurrences
-    if inspect.isgeneratorfunction(func):
-        func.is_generator = True   # contains async yields
+    func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
     if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
         func.is_tale_command_func = True
@@ -48,8 +47,7 @@ def wizcmd(func):
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)
 
-    if inspect.isgeneratorfunction(func):
-        func.is_generator = True   # contains async yields
+    func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
     if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
         return executewizcommand
