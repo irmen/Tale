@@ -654,8 +654,8 @@ def do_examine(player, parsed, ctx):
             if living.stats.bodytype and living.stats.size:
                 p("{subj}'s a {size} {btype} {race}.".format(
                     subj=lang.capital(living.subjective),
-                    size=races.sizes[living.stats.size],
-                    btype=races.bodytypes[living.stats.bodytype],
+                    size=living.stats.size.value,
+                    btype=living.stats.bodytype.value,
                     race=living.stats.race or "creature"
                 ))
         if name in living.extra_desc:
@@ -722,11 +722,11 @@ def do_stats(player, parsed, ctx):
         # if the target inspected is self, show level as well
         player.tell("Level %d " % target.stats.level)
     if target.stats.size:
-        player.tell("%s %s %s." % (lang.capital(races.sizes[target.stats.size]), gender, race))
+        player.tell("%s %s %s." % (lang.capital(target.stats.size.value), gender, race))
     else:
         player.tell("%s %s." % (lang.capital(gender), race))
     if target.stats.bodytype:
-        player.tell("%s." % lang.capital(races.bodytypes[target.stats.bodytype]))
+        player.tell("%s." % lang.capital(target.stats.bodytype.value))
     if target.stats.weight:
         player.tell("Weighs ~%s kg." % target.stats.weight)
     if target.stats.language:
@@ -1007,9 +1007,9 @@ def do_what(player, parsed, ctx):
     if name in races.races:
         found = True
         race = races.races[name]
-        size_msg = races.sizes[race["size"]]
-        body_msg = races.bodytypes[race["bodytype"]]
-        lang_msg = race["language"]
+        size_msg = race.size.value
+        body_msg = race.body.value
+        lang_msg = race.language
         p("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
     # is it an exit in the current room?
     if name in player.location.exits:

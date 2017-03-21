@@ -72,7 +72,7 @@ class Driver(pubsub.Listener):
             """ % tale_version_str)
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
         parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
-        parser.add_argument('-m', '--mode', type=GameMode, help='game mode, default=if', default=GameMode.IF, choices=[GameMode.IF, GameMode.MUD])
+        parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
         parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
@@ -106,15 +106,16 @@ class Driver(pubsub.Listener):
         self.story.supported_modes = {GameMode(mode) for mode in self.story.supported_modes}
         self.story.money_type = MoneyType(self.story.money_type)
         self.story.server_tick_method = TickMethod(self.story.server_tick_method)
-        if len(self.story.supported_modes) == 1 and args.mode != GameMode.MUD:    # XXX
+        story_mode = GameMode(args.mode)
+        if len(self.story.supported_modes) == 1 and story_mode != GameMode.MUD:
             # There's only one mode this story runs in. Just select that one.
-            args.mode = list(self.story.supported_modes)[0]
-        if args.mode not in self.story.supported_modes:
+            story_mode = list(self.story.supported_modes)[0]
+        if story_mode not in self.story.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.supported_modes)))
         self.config = self.story._get_config()
         self.config.mud_host = self.config.mud_host or "localhost"
         self.config.mud_port = self.config.mud_port or 8180
-        self.config.server_mode = args.mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        self.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         if self.config.server_mode != GameMode.IF and self.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and some other stuff in the global context.
