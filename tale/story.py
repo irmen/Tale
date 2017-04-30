@@ -6,9 +6,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import enum
-from typing import Optional, Any
 import datetime
 import distutils.version
+from typing import Optional, Any
 from tale.errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "Storybase"]
@@ -27,7 +27,7 @@ class GameMode(enum.Enum):
 class MoneyType(enum.Enum):
     FANTASY = "fantasy"
     MODERN = "modern"
-    NOTHING = None  # type: Optional[str]
+    NOTHING = None  # type: str
 
     def __bool__(self):
         return bool(self.value)
@@ -116,7 +116,7 @@ class Storybase(object):
         return _Storyconfig(self)
 
 
-class _Storyconfig(object):
+class _Storyconfig(object):   # XXX get rid of this
     def __init__(self, story: Storybase) -> None:
         config_items = {
             "name",

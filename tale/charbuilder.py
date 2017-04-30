@@ -5,20 +5,22 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Callable, Generator
 from . import races
 from . import lang
 from . import mud_context
 from .base import Stats
 from .accounts import MudAccounts
+from .player import Player, PlayerConnection
 
 
 class PlayerNaming(object):
-    def __init__(self):
-        self._name = self.title = self.gender = self.description = None
+    def __init__(self) -> None:
+        self._name = self.title = self.gender = self.description = None  # type: str
         self.money = mud_context.config.player_money
         self.stats = Stats()
 
-    def apply_to(self, player):
+    def apply_to(self, player: Player) -> None:
         assert self._name
         assert self.gender
         player.init_gender(self.gender)
@@ -27,33 +29,33 @@ class PlayerNaming(object):
         player.money = self.money
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value.lower()
 
 
 class CharacterBuilder(object):
-    def __init__(self, conn, continue_dialog):
+    def __init__(self, conn: PlayerConnection, continue_dialog: Callable[[PlayerNaming], None]) -> None:
         self.conn = conn
         self.continue_dialog = continue_dialog
 
-    def build_async(self):
+    def build_async(self) -> Generator:
         self.conn.output("Creating a player character.\n")
         naming = PlayerNaming()
         naming.name = yield "input", ("Name?", MudAccounts.accept_name)
         naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
         naming.gender = naming.gender[0]
         self.conn.player.tell("You can choose one of the following races: ", lang.join(races.playable_races))
-        race = yield "input", ("Player race?", validate_race)
+        race = yield "input", ("Player race?", valid_playable_race)
         naming.stats = Stats.from_race(race, gender=naming.gender)
         naming.description = "A regular person." if naming.stats.race == "human" else "A weird creature."
         self.continue_dialog(naming)
 
 
-def validate_race(value):
+def valid_playable_race(value: str) -> str:
     value = value.lower() if value else ""
     if value in races.playable_races:
         return value

@@ -294,7 +294,7 @@ class Driver(pubsub.Listener):
             password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
             email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
             conn.output("You can choose one of the following races: ", lang.join(races.playable_races))
-            race = yield "input", ("Player race?", charbuilder.validate_race)
+            race = yield "input", ("Player race?", charbuilder.valid_playable_race)
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             # review the account
             conn.player.tell("<bright>Please review your new character.</>", end=True)
@@ -341,7 +341,7 @@ class Driver(pubsub.Listener):
                 email = yield "input", ("Please type in your email address.", accounts.MudAccounts.accept_email)
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
                 conn.player.tell("You can choose one of the following races: ", lang.join(races.playable_races))
-                race = yield "input", ("What should be the race of your player character?", charbuilder.validate_race)
+                race = yield "input", ("What should be the race of your player character?", charbuilder.valid_playable_race)
                 # review the account
                 conn.player.tell("<bright>Please review your new character.</>", end=True)
                 conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s" % (name, lang.GENDERS[gender], race), end=True)

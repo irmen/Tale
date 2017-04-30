@@ -21,7 +21,7 @@ from tale.player import Player, TextBuffer, PlayerConnection
 from tale.soul import NonSoulVerb, ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
-from tale.charbuilder import CharacterBuilder, validate_race, PlayerNaming
+from tale.charbuilder import CharacterBuilder, valid_playable_race, PlayerNaming
 from tale import races, pubsub, mud_context
 from tale.demo.story import Story as DemoStory
 from tale.story import *
@@ -557,16 +557,16 @@ class TestCharacterBuilder(unittest.TestCase):
             self.assertEqual("input", why)
 
     def test_validate_race(self):
-        self.assertEqual("human", validate_race("human"))
-        self.assertEqual("human", validate_race("HUMAN"))
+        self.assertEqual("human", valid_playable_race("human"))
+        self.assertEqual("human", valid_playable_race("HUMAN"))
         with self.assertRaises(ValueError):
-            validate_race("elemental")
+            valid_playable_race("elemental")
         with self.assertRaises(ValueError):
-            validate_race("xyz12343")
+            valid_playable_race("xyz12343")
         with self.assertRaises(ValueError):
-            validate_race("")
+            valid_playable_race("")
         with self.assertRaises(ValueError):
-            validate_race(None)
+            valid_playable_race(None)
 
     def test_playernaming(self):
         n = PlayerNaming()

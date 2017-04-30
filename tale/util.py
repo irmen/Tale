@@ -331,7 +331,7 @@ class Context(object):
     A new instance of this context is passed to every command function and obj.destroy.
     Note that the player object isn't in here because it is already explicitly passed to these functions.
     """
-    def __init__(self, driver, clock: str, config: str, player_connection: str) -> None:  # XXX types!
+    def __init__(self, driver: Any, clock: datetime.datetime, config: Any, player_connection: Any) -> None:
         self.driver = driver
         self.clock = clock
         self.config = config
