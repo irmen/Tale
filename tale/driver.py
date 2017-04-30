@@ -218,7 +218,7 @@ class Driver(pubsub.Listener):
             except:
                 # other exceptions are logged but don't break the server loop (hopefully the game can continue)
                 # @todo only print it to the player that caused the error (if possible) + to the error log
-                print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.formatTraceback()), file=sys.stderr)
+                print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.format_traceback()), file=sys.stderr)
                 for conn in self.all_players.values():
                     conn.critical_error()
 
@@ -270,10 +270,10 @@ class Driver(pubsub.Listener):
         return connection
 
     def _disconnect_mud_player(self, conn_or_player):
-        if type(conn_or_player) is player.PlayerConnection:
+        if isinstance(conn_or_player, player.PlayerConnection):
             name = conn_or_player.player.name
             conn = conn_or_player
-        elif type(conn_or_player) is player.Player:
+        elif isinstance(conn_or_player, player.Player):
             name = conn_or_player.name
             conn = self.all_players[name]
         else:
@@ -443,7 +443,7 @@ class Driver(pubsub.Listener):
             conn.write_output()
         else:
             if why in ("input", "input-noecho"):
-                if type(what) is tuple:
+                if isinstance(what, tuple):
                     prompt, validator = what
                 else:
                     prompt, validator = what, None
@@ -616,7 +616,7 @@ class Driver(pubsub.Listener):
                     self._stop_driver()
                     break
                 except Exception:
-                    tb = "".join(util.formatTraceback())
+                    tb = "".join(util.format_traceback())
                     txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
                     conn.player.tell(txt, format=False)
                     conn.player.tell("<rev><it>Please report this problem.</>")
@@ -724,7 +724,7 @@ class Driver(pubsub.Listener):
                         self.story.goodbye(conn.player)
                         topic_pending_tells.send(lambda conn=conn: self._disconnect_mud_player(conn))
                     except Exception:
-                        tb = "".join(util.formatTraceback())
+                        tb = "".join(util.format_traceback())
                         txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
                         conn.player.tell(txt, format=False)
                         conn.player.tell("<rev><it>Please report this problem.</>")
@@ -793,7 +793,7 @@ class Driver(pubsub.Listener):
 
     def __report_deferred_exception(self, deferred):
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
-        print("".join(util.formatTraceback()), file=sys.stderr)
+        print("".join(util.format_traceback()), file=sys.stderr)
         print("(Please report this problem)", file=sys.stderr)
 
     def __process_player_command(self, cmd, conn):

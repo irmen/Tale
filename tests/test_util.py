@@ -8,7 +8,7 @@ import datetime
 import unittest
 from tale import util, mud_context
 from tale.errors import ParseError, ActionRefused
-from tale.base import Item, Container, Location, Exit
+from tale.base import Item, Container, Location
 from tale.player import Player
 from tale.story import MoneyType
 from tale.tio.vfs import VirtualFileSystem, VfsError
@@ -28,19 +28,19 @@ class TestUtil(unittest.TestCase):
         p.insert(bag, p)
         room.insert(p, p)
         with self.assertRaises(Exception):
-            util.print_object_location(p, None, None)
-        util.print_object_location(p, key, None)
+            p.tell_object_location(None, None)
+        p.tell_object_location(key, None)
         self.assertEqual(["(It's not clear where key is).\n"], p.test_get_output_paragraphs())
-        util.print_object_location(p, key, None, print_parentheses=False)
+        p.tell_object_location(key, None, print_parentheses=False)
         self.assertEqual(["It's not clear where key is.\n"], p.test_get_output_paragraphs())
-        util.print_object_location(p, key, bag)
+        p.tell_object_location(key, bag)
         result = "".join(p.test_get_output_paragraphs())
         self.assertTrue("in bag" in result and "in your inventory" in result)
-        util.print_object_location(p, key, room)
+        p.tell_object_location(key, room)
         self.assertTrue("in your current location" in "".join(p.test_get_output_paragraphs()))
-        util.print_object_location(p, bag, p)
+        p.tell_object_location(bag, p)
         self.assertTrue("in your inventory" in "".join(p.test_get_output_paragraphs()))
-        util.print_object_location(p, p, room)
+        p.tell_object_location(p, room)
         self.assertTrue("in your current location" in "".join(p.test_get_output_paragraphs()))
 
     def test_moneydisplay(self):

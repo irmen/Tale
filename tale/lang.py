@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import re
 import bisect
 import collections
+from typing import List, Iterable
 from .tio import vfs
 
 # genders are m,f,n
@@ -18,10 +19,14 @@ GENDERS = {"m": "male", "f": "female", "n": "neuter"}
 
 
 class OrderedCounter(collections.Counter, collections.OrderedDict):
-    pass
+    """A counter that remembers the order in which things are being counted."""
+    @classmethod
+    def fromkeys(cls, iterable, v=None):
+        # There is no equivalent method for counters because setting v=1 means that no element can have a count greater than one.
+        raise NotImplementedError('OrderedCounter.fromkeys() is undefined.  Use OrderedCounter(iterable) instead.')
 
 
-def join(words, conj="and", group_multi=True):
+def join(words: Iterable[str], conj: str="and", group_multi: bool=True) -> str:
     """
     Join a list of words to 'a,b,c, and e'
     If a word occurs multiple times (and group_multi=True),
@@ -65,7 +70,7 @@ __a_exceptions = {
 __articles = {"the", "a", "an"}
 
 
-def a(word):
+def a(word: str) -> str:
     """a or an? simplistic version: if the word starts with aeiou, returns an, otherwise a"""
     if not word:
         return ""
@@ -84,7 +89,7 @@ def reg_a_exceptions(exceptions):
     __a_exceptions.update(exceptions)
 
 
-def fullstop(sentence, punct="."):
+def fullstop(sentence: str, punct: str=".") -> str:
     """adds a fullstop to the end of a sentence if needed"""
     sentence = sentence.rstrip()
     if sentence.endswith(('!', '?', '.', ';', ':', '-', '=')):
@@ -97,7 +102,7 @@ ADVERB_LIST = sorted(vfs.internal_resources["soul_adverbs.txt"].data.splitlines(
 ADVERBS = frozenset(ADVERB_LIST)
 
 
-def adverb_by_prefix(prefix, amount=5):
+def adverb_by_prefix(prefix: str, amount: int=5) -> List[str]:
     """
     Return a list of adverbs starting with the given prefix, up to the given amount
     Uses binary search in the sorted adverbs list, O(log n)
@@ -116,7 +121,7 @@ def adverb_by_prefix(prefix, amount=5):
         return []
 
 
-def possessive_letter(name):
+def possessive_letter(name: str) -> str:
     if not name:
         return ""
     if name[-1] in ('s', 'z', 'x'):
@@ -127,25 +132,25 @@ def possessive_letter(name):
         return "'s"        # mark's foot
 
 
-def possessive(name):
+def possessive(name: str) -> str:
     return name + possessive_letter(name)
 
 
-def capital(string):
+def capital(string: str) -> str:
     # cannot use string.capitalize because that lowercases the rest
     if string:
         string = string[0].upper() + string[1:]
     return string
 
 
-def fullverb(verb):
+def fullverb(verb: str) -> str:
     """return the full verb: shoot->shooting, poke->poking"""
     if verb[-1] == "e":
         return verb[:-1] + "ing"
     return verb + "ing"
 
 
-def split(string):
+def split(string: str) -> List[str]:
     """
     Split a string on whitespace, but keeps words enclosed in quotes (' or ") together.
     The quotes themselves are stripped out.
@@ -166,7 +171,7 @@ __tens_words = [
 ]
 
 
-def spell_number(number):
+def spell_number(number: float) -> str:
     """
     Return a spelling of the number. Supports positive and negative ints,
     floats, and recognises popular fractions such as 0.5 and 0.25.
@@ -232,7 +237,7 @@ __plural_irregularities = {
 }
 
 
-def pluralize(word, amount=2):
+def pluralize(word: str, amount: float=2) -> str:
     if amount == 1:
         return word
     if word in __plural_irregularities:
@@ -256,7 +261,7 @@ def pluralize(word, amount=2):
     return word + "s"
 
 
-def yesno(value):
+def yesno(value: str) -> bool:
     value = value.lower() if value else ""
     if value in {"y", "yes", "sure", "yep", "yeah", "yessir", "sure thing"}:
         return True
@@ -265,7 +270,7 @@ def yesno(value):
     raise ValueError("That is not an understood yes or no.")
 
 
-def validate_gender(value):
+def validate_gender(value: str) -> str:
     value = value.lower() if value else ""
     if value in GENDERS:
         return value

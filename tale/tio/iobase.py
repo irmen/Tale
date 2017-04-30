@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import html.parser
 import smartypants
-from ..util import formatTraceback
+from ..util import format_traceback
 from .. import soul
 
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
@@ -63,7 +63,7 @@ class IoAdapterBase(object):
 
     def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
-        tb = "".join(formatTraceback())
+        tb = "".join(format_traceback())
         self.output("\n<bright><rev>" + message + "</>")
         print(tb, file=sys.stderr)
         self.output("<rev><it>Please report this problem.</>\n")

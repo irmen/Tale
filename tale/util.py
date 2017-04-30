@@ -11,45 +11,17 @@ import sys
 import functools
 import inspect
 import traceback
+from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 from . import lang
 from .story import MoneyType
 from .errors import ParseError, ActionRefused
 
 
-def roll_dice(number=1, sides=6):
+def roll_dice(number: int=1, sides: int=6) -> Tuple[int, List[int]]:
     """rolls a number (max 300) of dice with configurable number of sides"""
     assert 1 <= number <= 300
     values = [random.randint(1, sides) for _ in range(number)]
     return sum(values), values
-
-
-def print_object_location(player, obj, container, print_parentheses=True):
-    if not container:
-        if print_parentheses:
-            player.tell("(It's not clear where %s is)." % obj.name)
-        else:
-            player.tell("It's not clear where %s is." % obj.name)
-        return
-    if container in player:
-        if print_parentheses:
-            player.tell("(%s was found in %s, in your inventory)." % (obj.name, container.title))
-        else:
-            player.tell("%s was found in %s, in your inventory." % (lang.capital(obj.name), container.title))
-    elif container is player.location:
-        if print_parentheses:
-            player.tell("(%s was found in your current location)." % obj.name)
-        else:
-            player.tell("%s was found in your current location." % lang.capital(obj.name))
-    elif container is player:
-        if print_parentheses:
-            player.tell("(%s was found in your inventory)." % obj.name)
-        else:
-            player.tell("%s was found in your inventory." % lang.capital(obj.name))
-    else:
-        if print_parentheses:
-            player.tell("(%s was found in %s)." % (obj.name, container.name))
-        else:
-            player.tell("%s was found in %s." % (lang.capital(obj.name), container.name))
 
 
 class MoneyFormatter(object):
@@ -57,7 +29,7 @@ class MoneyFormatter(object):
     money_words_fantasy = {"gold", "silver", "copper", "coppers"}
     money_words_modern = {"dollar", "dollars", "cent", "cents"}
 
-    def __init__(self, money_type):
+    def __init__(self, money_type: MoneyType) -> None:
         if money_type == MoneyType.FANTASY:
             self.display = self.money_display_fantasy
             self.money_to_float = self.money_to_float_fantasy
@@ -67,9 +39,9 @@ class MoneyFormatter(object):
             self.money_to_float = self.money_to_float_modern
             self.money_words = self.money_words_modern
         else:
-            raise ValueError("invalid money type " + money_type)
+            raise ValueError("invalid money type " + str(money_type))
 
-    def money_display_fantasy(self, amount, short=False, zero_msg="nothing"):
+    def money_display_fantasy(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
         """
         Display amount of money in gold/silver/copper units,
         base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
@@ -90,7 +62,7 @@ class MoneyFormatter(object):
             return lang.join(result)
         return zero_msg
 
-    def money_display_modern(self, amount, short=False, zero_msg="nothing"):
+    def money_display_modern(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
         """
         Display amount of money in modern currency (dollars/cents).
         """
@@ -107,9 +79,9 @@ class MoneyFormatter(object):
             return lang.join(result)
         return zero_msg
 
-    def money_to_float_fantasy(self, coins):
+    def money_to_float_fantasy(self, coins: Union[str, Dict[str, float]]) -> float:
         """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
-        if type(coins) is not dict:
+        if isinstance(coins, str):
             if not coins:
                 raise ValueError("That's not an amount of money.")
             result = 0.0
@@ -133,9 +105,9 @@ class MoneyFormatter(object):
         result += coins.get("coppers", 0.0) / 10.0
         return result
 
-    def money_to_float_modern(self, coins):
+    def money_to_float_modern(self, coins: Union[str, Dict[str, float]]) -> float:
         """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
-        if type(coins) is not dict:
+        if isinstance(coins, str):
             if coins.startswith("$"):
                 return float(coins[1:])
             else:
@@ -146,7 +118,7 @@ class MoneyFormatter(object):
         result += coins.get("cents", 0.0) / 100.0
         return result
 
-    def parse(self, words):
+    def parse(self, words: Sequence[str]) -> float:
         """Convert a parsed sequence of words to the amount of money it represents (float)"""
         if len(words) == 1:
             try:
@@ -158,7 +130,7 @@ class MoneyFormatter(object):
                 return self.money_to_float(words[0] + words[1])
             except ValueError:
                 pass
-        coins = {}
+        coins = {}  # type: Dict[str, float]
         if set(words) & self.money_words:
             # check if all words are either a number (currency) or a money word
             amount = None
@@ -180,7 +152,7 @@ class MoneyFormatter(object):
         raise ParseError("That is not an amount of money.")
 
 
-def parse_time(args):
+def parse_time(args: str) -> datetime.time:
     """parses a time from args like: 13:44:59, or like a duration such as 1h 30m 15s"""
     try:
         duration = parse_duration(args)
@@ -208,7 +180,7 @@ def parse_time(args):
                     raise ParseError("It's not clear what time you mean.")
 
 
-def parse_duration(args):
+def parse_duration(args: str) -> datetime.timedelta:
     """parses a duration from args like: 1 hour 20 minutes 15 seconds (hour/h, minutes/min/m, seconds/sec/s)"""
     hours = minutes = seconds = 0
     if args:
@@ -247,7 +219,7 @@ def parse_duration(args):
         raise ParseError("It's not clear what duration you mean.")
 
 
-def duration_display(duration):
+def duration_display(duration: datetime.timedelta) -> str:
     secs = duration.total_seconds()
     if secs == 0:
         return "no time at all"
@@ -269,7 +241,7 @@ def duration_display(duration):
     return lang.join(result)
 
 
-def format_docstring(docstring):
+def format_docstring(docstring: str) -> str:
     """Format a docstring according to the algorithm in PEP-257"""
     if not docstring:
         return ''
@@ -296,7 +268,7 @@ def format_docstring(docstring):
     return '\n'.join(trimmed)
 
 
-def storyname_to_filename(name):
+def storyname_to_filename(name: str) -> str:
     """converts the story name to a suitable name for a file on disk"""
     filename = name.lower()
     filename = filename.replace(" ", "_")
@@ -315,40 +287,40 @@ class GameDateTime(object):
     times_realtime means how much faster the game time is running than real time.
     The internal 'clock' tracks the time in game-time (not real-time).
     """
-    def __init__(self, date_time, times_realtime=1):
+    def __init__(self, date_time: datetime.datetime, times_realtime: float=1) -> None:
         assert times_realtime >= 0
         self.times_realtime = times_realtime
         self.clock = date_time
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.clock)
 
-    def add_gametime(self, timedelta):
+    def add_gametime(self, timedelta: datetime.timedelta) -> None:
         """advance the game clock by a time delta expressed in game time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock += timedelta
 
-    def sub_gametime(self, timedelta):
+    def sub_gametime(self, timedelta: datetime.timedelta) -> None:
         """rewind the game clock by a time delta expressed in game time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock -= timedelta
 
-    def plus_realtime(self, timedelta):
+    def plus_realtime(self, timedelta: datetime.timedelta) -> datetime.datetime:
         """return the game clock plus a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         return self.clock + timedelta * self.times_realtime
 
-    def minus_realtime(self, timedelta):
+    def minus_realtime(self, timedelta: datetime.timedelta) -> datetime.datetime:
         """return the game clock minus a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         return self.clock - timedelta * self.times_realtime
 
-    def add_realtime(self, timedelta):
+    def add_realtime(self, timedelta: datetime.timedelta) -> None:
         """advance the game clock by a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock += timedelta * self.times_realtime
 
-    def sub_realtime(self, timedelta):
+    def sub_realtime(self, timedelta: datetime.timedelta) -> None:
         """rewind the game clock by a time delta expressed in real time"""
         assert isinstance(timedelta, datetime.timedelta)
         self.clock -= timedelta * self.times_realtime
@@ -359,17 +331,17 @@ class Context(object):
     A new instance of this context is passed to every command function and obj.destroy.
     Note that the player object isn't in here because it is already explicitly passed to these functions.
     """
-    def __init__(self, driver, clock, config, player_connection):
+    def __init__(self, driver, clock: str, config: str, player_connection: str) -> None:  # XXX types!
         self.driver = driver
         self.clock = clock
         self.config = config
         self.conn = player_connection
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return vars(self) == vars(other)
 
 
-def authorized(*privileges):
+def authorized(*privileges: Sequence[str]) -> Callable:
     """
     Decorator for callables that need a privilege check.
     The callable should have an 'actor' argument that is passed an
@@ -377,7 +349,7 @@ def authorized(*privileges):
     If they don't match with the privileges given in this decorator,
     an ActionRefused error is raised.
     """
-    def checked(f):
+    def checked(f: Callable) -> Callable:
         if "actor" not in inspect.signature(f).parameters:
             raise SyntaxError("callable requires 'actor' parameter: " + f.__name__)
         allowed_privs = set(privileges)
@@ -399,24 +371,12 @@ def authorized(*privileges):
     return checked
 
 
-def search_item(name, collection):
-    """
-    Searches an item (by name) in a collection of Items.
-    Returns the first match. Also considers aliases and titles.
-    """
-    name = name.lower()
-    items = [i for i in collection if i.name == name]
-    if not items:
-        # try the aliases or titles
-        items = [i for i in collection if name in i.aliases or i.title.lower() == name]
-    return items[0] if items else None
-
-
-def sorted_by_name(stuff):
+def sorted_by_name(stuff: Iterable[Any]) -> Iterable[Any]:
+    """Returns the objects sorted by their name attribute (case insensitive)"""
     return sorted(stuff, key=lambda thing: thing.name.lower())
 
 
-def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, withSelf=False):
+def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, detailed: bool=True, with_self: bool=False) -> List[str]:
     """Formats an exception traceback. If you ask for detailed formatting,
     the result will contain info on the variables in each stack frame.
     You don't have to provide the exception info objects, if you omit them,
@@ -430,7 +390,7 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
     if ex_type is None and ex_tb is None:
         ex_type, ex_value, ex_tb = sys.exc_info()
     if detailed:
-        def makeStrValue(value):
+        def makestrvalue(value: Any) -> str:
             try:
                 return repr(value)
             except:
@@ -445,20 +405,20 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
             result.append(" EXCEPTION: %s\n" % ex_type.__name__)
             result.append(" MESSAGE: %s\n" % ex_value)
             result.append(" Extended stacktrace follows (most recent call last):\n")
-            skipLocals = True  # don't print the locals of the very first stack frame
+            skiplocals = True  # don't print the locals of the very first stack frame
             while ex_tb:
                 frame = ex_tb.tb_frame
-                sourceFileName = frame.f_code.co_filename
+                sourcefilename = frame.f_code.co_filename
                 if "self" in frame.f_locals:
                     location = "%s.%s" % (frame.f_locals["self"].__class__.__name__, frame.f_code.co_name)
                 else:
                     location = frame.f_code.co_name
                 result.append("   ----\n")
-                result.append("File \"%s\", line %d, in %s\n" % (sourceFileName, ex_tb.tb_lineno, location))
+                result.append("File \"%s\", line %d, in %s\n" % (sourcefilename, ex_tb.tb_lineno, location))
                 result.append("Source code:\n")
-                result.append("    " + linecache.getline(sourceFileName, ex_tb.tb_lineno).strip() + "\n")
-                if not skipLocals:
-                    names = set()
+                result.append("    " + linecache.getline(sourcefilename, ex_tb.tb_lineno).strip() + "\n")
+                if not skiplocals:
+                    names = set()  # type: Set[str]
                     names.update(getattr(frame.f_code, "co_varnames", ()))
                     names.update(getattr(frame.f_code, "co_names", ()))
                     names.update(getattr(frame.f_code, "co_cellvars", ()))
@@ -467,12 +427,12 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
                     for name2 in sorted(names):
                         if name2 in frame.f_locals:
                             value = frame.f_locals[name2]
-                            result.append("    %s = %s\n" % (name2, makeStrValue(value)))
-                            if name2 == "self" and withSelf:
+                            result.append("    %s = %s\n" % (name2, makestrvalue(value)))
+                            if name2 == "self" and with_self:
                                 # print the local variables of the class instance
                                 for name3, value in vars(value).items():
-                                    result.append("        self.%s = %s\n" % (name3, makeStrValue(value)))
-                skipLocals = False
+                                    result.append("        self.%s = %s\n" % (name3, makestrvalue(value)))
+                skiplocals = False
                 ex_tb = ex_tb.tb_next
             result.append("\n EXCEPTION HERE: %s: %s\n" % (ex_type.__name__, ex_value))
             result.append("-" * width + "\n")
@@ -490,7 +450,7 @@ def formatTraceback(ex_type=None, ex_value=None, ex_tb=None, detailed=True, with
         return result
 
 
-def excepthook(ex_type, ex_value, ex_tb):
+def excepthook(ex_type: Type, ex_value: Any, ex_tb: Any) -> None:
     """An exception hook you can use for ``sys.excepthook``, to automatically print detailed tracebacks"""
-    traceback = "".join(formatTraceback(ex_type, ex_value, ex_tb, detailed=True, withSelf=False))
+    traceback = "".join(format_traceback(ex_type, ex_value, ex_tb, detailed=True, with_self=False))
     sys.stderr.write(traceback)

@@ -156,6 +156,35 @@ class Player(base.Living, pubsub.Listener):
     def idle_time(self):
         return time.time() - self.last_input_time
 
+    def tell_object_location(self, object: base.MudObject, container: base.MudObject, print_parentheses: bool=True) -> None:
+        """Tells the player some details about the location of the given object."""
+        if not container:
+            if print_parentheses:
+                self.tell("(It's not clear where %s is)." % object.name)
+            else:
+                self.tell("It's not clear where %s is." % object.name)
+            return
+        if container in self:
+            if print_parentheses:
+                self.tell("(%s was found in %s, in your inventory)." % (object.name, container.title))
+            else:
+                self.tell("%s was found in %s, in your inventory." % (lang.capital(object.name), container.title))
+        elif container is self.location:
+            if print_parentheses:
+                self.tell("(%s was found in your current location)." % object.name)
+            else:
+                self.tell("%s was found in your current location." % lang.capital(object.name))
+        elif container is self:
+            if print_parentheses:
+                self.tell("(%s was found in your inventory)." % object.name)
+            else:
+                self.tell("%s was found in your inventory." % lang.capital(object.name))
+        else:
+            if print_parentheses:
+                self.tell("(%s was found in %s)." % (object.name, container.name))
+            else:
+                self.tell("%s was found in %s." % (lang.capital(object.name), container.name))
+
     def activate_transcript(self, file, vfs):
         if file:
             if self.transcript:

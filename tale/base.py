@@ -37,14 +37,15 @@ Use its enter/leave methods instead.
 
 from textwrap import dedent
 from collections import defaultdict
+from typing import Iterable
 import copy
 from . import lang
-from . import util
 from . import pubsub
 from . import mud_context
 from . import soul
 from . import races
-from .errors import ActionRefused, ParseError, LocationIntegrityError
+from . import util
+from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError
 
 
 __all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location", "Weapon", "Key", "heartbeat", "clone"]
@@ -348,6 +349,19 @@ class Item(MudObject):
                 actor.tell("  " + item.title, format=False)
         else:
             actor.tell("It's empty.")
+
+    @staticmethod
+    def search_item(name: str, collection: Iterable["Item"]) -> "Item":
+        """
+        Searches an item (by name) in a collection of Items.
+        Returns the first match. Also considers aliases and titles.
+        """
+        name = name.lower()
+        items = [i for i in collection if i.name == name]
+        if not items:
+            # try the aliases or titles
+            items = [i for i in collection if name in i.aliases or i.title.lower() == name]
+        return items[0] if items else None
 
 
 class Weapon(Item):
@@ -781,7 +795,7 @@ class Living(MudObject):
         self.default_verb = "examine"
         self.__inventory = set()
         self.previous_commandline = None
-        self._previous_parsed = None
+        self._previous_parsed = None  # type: tale.soul.ParseResult
         super().__init__(name, title, description, short_description)
 
     def init_gender(self, gender):
@@ -1057,10 +1071,10 @@ class Living(MudObject):
         found = containing_object = None
         if include_inventory:
             containing_object = self
-            found = util.search_item(name, self.__inventory)
+            found = Item.search_item(name, self.__inventory)
         if not found and include_location:
             containing_object = self.location
-            found = util.search_item(name, self.location.items)
+            found = Item.search_item(name, self.location.items)
         if not found and include_containers_in_inventory:
             # check if an item in the inventory might contain it
             for container in self.__inventory:
@@ -1070,7 +1084,7 @@ class Living(MudObject):
                 except ActionRefused:
                     continue    # no access to inventory, just skip this item silently
                 else:
-                    found = util.search_item(name, inventory)
+                    found = Item.search_item(name, inventory)
                     if found:
                         break
         return (found, containing_object) if found else (None, None)
@@ -1206,6 +1220,10 @@ class Door(Exit):
         else:
             status += "and unlocked."
         return self.__description_prefix + " " + status
+
+    @description.setter
+    def description(self, value):
+        raise TaleError("you cannot set the description of a Door because it is dynamic")
 
     def __repr__(self):
         target = self.target.name if self.bound else self.target

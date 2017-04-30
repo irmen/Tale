@@ -11,8 +11,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 __version__ = "3.0.dev0"
 
 
-class _MudContext(object):
-    pass
+class _MudContext(object):   # XXX get rid of this
+    driver = None  # type: ignore
+    config = None  # type: ignore
 
 
 # The mud_context is a global container for the following attributes,

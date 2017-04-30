@@ -62,7 +62,7 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("two apples, bike, and two keys", lang.join(["apple", "apple", "bike", "key", "key"]))
         self.assertEqual("two apples, two keys, and bike", lang.join(["apple", "apple", "key", "bike", "key"]))
         self.assertEqual("two apples, two keys, and a bike", lang.join(["an apple", "an apple", "a key", "a bike", "a key"]))
-        self.assertEqual("two apples, two keys, and someone", lang.join(["an apple", "an apple", "the key", "someone", "the key"]))
+        self.assertEqual("three apples, two keys, and someone", lang.join(["an apple", "an apple", "the key", "an apple", "someone", "the key"]))
         self.assertEqual("key, bike, key, and bike", lang.join(["key", "bike"] * 2, group_multi=False))
 
     def testAdverbs(self):

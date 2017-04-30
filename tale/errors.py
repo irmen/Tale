@@ -5,6 +5,8 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Coroutine
+
 
 class TaleError(Exception):
     """base class for tale related errors"""
@@ -48,13 +50,13 @@ class RetrySoulVerb(TaleFlowControlException):
 
 class RetryParse(TaleFlowControlException):
     """Retry the command as a different one"""
-    def __init__(self, command):
+    def __init__(self, command: str) -> None:
         self.command = command
 
 
 class LocationIntegrityError(TaleError):
     """When the driver notices an integrity problem with locations, exits, etc."""
-    def __init__(self, msg, direction, exit, location):
+    def __init__(self, msg: str, direction: str, exit: str, location: str) -> None:
         super().__init__(msg)
         self.direction = direction
         self.exit = exit
@@ -63,6 +65,6 @@ class LocationIntegrityError(TaleError):
 
 class AsyncDialog(TaleFlowControlException):
     """Command execution needs to continue with an async dialog"""
-    def __init__(self, dialog, *args):
+    def __init__(self, dialog: Coroutine, *args) -> None:
         self.dialog = dialog
         self.args = args

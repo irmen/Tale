@@ -14,7 +14,7 @@ from . import iobase
 from . import vfs
 from .. import mud_context
 from .. import __version__ as tale_version
-from ..util import formatTraceback
+from ..util import format_traceback
 
 __all__ = ["TkinterIo"]
 
@@ -45,7 +45,7 @@ class TkinterIo(iobase.IoAdapterBase):
     def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
         """called when the driver encountered a critical error and the session needs to shut down"""
         super().critical_error(message)
-        tb = "".join(formatTraceback())
+        tb = "".join(format_traceback())
         self.output("<monospaced>" + tb + "</>")
         self.output("<rev><it>Please report this problem.</>\n")
 

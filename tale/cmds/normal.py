@@ -14,6 +14,7 @@ from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from ..player import Player
 from ..accounts import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
@@ -94,9 +95,9 @@ def do_locate(player, parsed, ctx):
             if isinstance(thing, base.Living):
                 p("<living>%s</> is here next to you." % lang.capital(thing.title))
             else:
-                util.print_object_location(player, thing, player.location, False)
+                player.tell_object_location(thing, player.location, False)
         elif thing in player:
-            util.print_object_location(player, thing, player, False)
+            player.tell_object_location(thing, player, False)
         else:
             p("You can't find that.")
     else:
@@ -106,7 +107,7 @@ def do_locate(player, parsed, ctx):
         if item:
             if item.name.lower() != name.lower() and name.lower() in item.aliases:
                 p("<dim>(By %s you probably mean %s.)</>" % (name, item.name))
-            util.print_object_location(player, item, container, False)
+            player.tell_object_location(item, container, False)
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
@@ -162,7 +163,7 @@ def do_drop(player, parsed, ctx):
             item, container = player.locate_item(arg, include_location=False)
             if item:
                 if container is not player:
-                    util.print_object_location(player, item, container)
+                    player.tell_object_location(item, container)
                 drop_stuff([item], container)
             else:
                 raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
@@ -673,7 +674,7 @@ def do_examine(player, parsed, ctx):
             if item in player:
                 p("You're carrying <item>%s</>." % lang.a(item.title))
             elif container and container in player:
-                util.print_object_location(player, item, container)
+                player.tell_object_location(player, item, container)
             else:
                 p("You see <item>%s</>." % lang.a(item.title))
             if item.description:
@@ -1027,7 +1028,7 @@ def do_what(player, parsed, ctx):
             title = lang.capital(living.title)
             gender = lang.GENDERS[living.gender]
             subj = lang.capital(living.subjective)
-            if type(living) is type(player):
+            if isinstance(living, Player):
                 p("<player>%s</> is a %s %s (player). %s's here." % (title, gender, living.stats.race or "creature", subj))
             else:
                 p("<living>%s</> is a %s %s. %s's here." % (title, gender, living.stats.race or "creature", subj))

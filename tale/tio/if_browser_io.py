@@ -354,7 +354,7 @@ class TaleWsgiAppBase(object):
                 return self.wsgi_not_modified(start_response)
             headers.append(("ETag", etag))
             headers.append(("Last-Modified", formatdate(resource.mtime)))
-        if type(resource.data) is bytes:
+        if isinstance(resource.data, bytes):
             headers.append(('Content-Type', resource.mimetype))
             data = resource.data
         else:

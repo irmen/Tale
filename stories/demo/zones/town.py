@@ -276,9 +276,9 @@ class DoorKey(Key):
     def notify_moved(self, source_container, target_container, actor):
         # check if a player picked up this key
         player = None
-        if type(target_container) is Player:
+        if isinstance(target_container, Player):
             player = target_container
-        elif type(self.contained_in) is Player:
+        elif isinstance(self.contained_in, Player):
             player = self.contained_in
         if player:
             if "got_doorkey" not in actor.hints.checkpoints:

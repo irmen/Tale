@@ -11,6 +11,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import re
+from typing import List, Set, FrozenSet, Dict, Tuple, Sequence, Optional, Any
 from collections import defaultdict
 from . import lang
 from .errors import ParseError
@@ -27,23 +28,11 @@ class UnknownVerbException(SoulException):
     The engine can and should search for other places that define this verb first.
     If nothing recognises it, this error should be shown to the user in a nice way.
     """
-    def __init__(self, verb, words, qualifier):
+    def __init__(self, verb: str, words: List[str], qualifier: str) -> None:
         super().__init__(verb)
         self.verb = verb
         self.words = words
         self.qualifier = qualifier
-
-
-class NonSoulVerb(SoulException):
-    """
-    The soul's parser encountered a verb that cannot be handled by the soul itself.
-    However the command string has been parsed and the calling code could try
-    to handle the verb by itself instead.
-    """
-    def __init__(self, parsed):
-        assert isinstance(parsed, ParseResult)
-        super().__init__(parsed.verb)
-        self.parsed = parsed
 
 
 DEFA = 1  # adds HOW+AT   (you smile happily at Fritz)
@@ -360,7 +349,8 @@ VERBS = {
 "relax":    ( DEUX, None, "relax \nHOW", "relaxes \nHOW" ),
 "duck":     ( PERS, None, "duck$ \nHOW out of the way", "duck$ \nHOW out of \nPOSS way" ),
 
-}
+}  # type: Dict[str, Tuple]
+
 
 assert all(v[1] is None or type(v[1]) is tuple for v in VERBS.values()), "Second specifier in verb list must be None or tuple, not str"
 
@@ -396,18 +386,18 @@ assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
 MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run", "move"}     # used to move through an exit
 
 
-def adjust_available_verbs(allowed_verbs=None, remove_verbs=[], add_verbs={}):
+def adjust_available_verbs(allowed_verbs: Sequence[str]=None, remove_verbs: Sequence[str]=[], add_verbs: Dict[str, Tuple]={}) -> None:
     """Adjust the available verbs"""
     global VERBS, AGGRESSIVE_VERBS, NONLIVING_OK_VERBS, MOVEMENT_VERBS
     if allowed_verbs is not None:
         for v in allowed_verbs:
             if v not in VERBS:
                 raise KeyError(v)
-        allowed_verbs = set(allowed_verbs)
-        VERBS = {v: k for v, k in VERBS.items() if v in allowed_verbs}
-        AGGRESSIVE_VERBS &= allowed_verbs
-        NONLIVING_OK_VERBS &= allowed_verbs
-        MOVEMENT_VERBS &= allowed_verbs
+        allowed_verbs_set = set(allowed_verbs)
+        VERBS = {v: k for v, k in VERBS.items() if v in allowed_verbs_set}
+        AGGRESSIVE_VERBS &= allowed_verbs_set
+        NONLIVING_OK_VERBS &= allowed_verbs_set
+        MOVEMENT_VERBS &= allowed_verbs_set
     for v in remove_verbs:
         del VERBS[v]
         AGGRESSIVE_VERBS.discard(v)
@@ -461,18 +451,18 @@ BODY_PARTS = {
 }
 
 
-def check_person(action, who):
+def check_person(action: str, who: Sequence[str]) -> bool:
     if not who and ("\nWHO" in action or "\nPOSS" in action):
         return False
     return True
 
 
-def spacify(string):
+def spacify(string: str) -> str:
     """returns string prefixed with a space, if it has contents. If it is empty, prefix nothing"""
     return " " + string.lstrip(" \t") if string else ""
 
 
-def who_replacement(actor, target, observer):
+def who_replacement(actor, target, observer) -> str:
     """determines what word to use for a WHO"""
     if target is actor:
         if actor is observer:
@@ -486,7 +476,7 @@ def who_replacement(actor, target, observer):
             return target.title      # ... kicks ...
 
 
-def poss_replacement(actor, target, observer):
+def poss_replacement(actor, target, observer) -> str:
     """determines what word to use for a POSS"""
     if target is actor:
         if actor is observer:
@@ -506,20 +496,17 @@ _skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "ont
 
 
 class WhoInfo(object):
-    __slots__ = ("sequence", "previous_word")
-
-    def __init__(self, sequence=0):
+    def __init__(self, sequence: int=0) -> None:
         self.sequence = sequence
-        self.previous_word = None
+        self.previous_word = None  # type: Optional[str]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "[sequence=%d, prev_word=%s]" % (self.sequence, self.previous_word)
 
 
 class ParseResult(object):
-    __slots__ = ("verb", "adverb", "message", "bodypart", "qualifier", "who_info", "who_order", "args", "unrecognized", "unparsed")
-
-    def __init__(self, verb, adverb=None, message=None, bodypart=None, qualifier=None, args=None, who_info=None, who_order=None, unrecognized=None, unparsed=""):
+    def __init__(self, verb: str, adverb: str=None, message: str=None, bodypart: str=None, qualifier: str=None,
+                 args: Sequence[str]=None, who_info: Dict=None, who_order: Sequence=None, unrecognized: Sequence=None, unparsed: str="") -> None:
         self.verb = verb
         self.adverb = adverb
         self.message = message
@@ -533,12 +520,12 @@ class ParseResult(object):
         if self.who_order and not self.who_info:
             self.recalc_who_info()
 
-    def recalc_who_info(self):
+    def recalc_who_info(self) -> None:
         self.who_info = {}
         for sequence, who in enumerate(self.who_order):
             self.who_info[who] = WhoInfo(sequence)
 
-    def __str__(self):
+    def __str__(self) -> str:
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]
         s = [
             "ParseResult:",
@@ -556,7 +543,19 @@ class ParseResult(object):
         return "\n".join(s)
 
 
-def check_name_with_spaces(words, index, all_livings, all_items):
+class NonSoulVerb(SoulException):
+    """
+    The soul's parser encountered a verb that cannot be handled by the soul itself.
+    However the command string has been parsed and the calling code could try
+    to handle the verb by itself instead.
+    """
+    def __init__(self, parsed: ParseResult) -> None:
+        assert isinstance(parsed, ParseResult)
+        super().__init__(parsed.verb)
+        self.parsed = parsed
+
+
+def check_name_with_spaces(words: Sequence[str], index: int, all_livings: Dict[str, Any], all_items: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], int]:
     wordcount = 1
     name = words[index]
     try:
@@ -577,13 +576,14 @@ class Soul(object):
     The 'soul' of a Player. Handles the high level verb actions and allows for social player interaction.
     Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.
     """
-    def __init__(self):
-        self.previously_parsed = None
+    def __init__(self) -> None:
+        self.previously_parsed = None  # type: ParseResult
+        # XXX don't expose previously_parsed directly
 
-    def is_verb(self, verb):
+    def is_verb(self, verb: str) -> bool:
         return verb in VERBS
 
-    def process_verb(self, player, commandstring, external_verbs=frozenset()):
+    def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) -> Tuple[str, Tuple[FrozenSet, str, str, str]]:
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
         and another tuple containing the targets of the action and the various action messages.
@@ -599,7 +599,7 @@ class Soul(object):
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, parsed):
+    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[FrozenSet, str, str, str]:
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,
@@ -638,7 +638,7 @@ class Soul(object):
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = spacify(adverb)
 
-        def result_messages(action, action_room):
+        def result_messages(action: str, action_room: str) -> Tuple[FrozenSet, str, str, str]:
             action = action.strip()
             action_room = action_room.strip()
             if parsed.qualifier:
@@ -688,10 +688,10 @@ class Soul(object):
             if player in parsed.who_info:
                 who = set(parsed.who_info)
                 who.remove(player)  # the player should not be part of the remaining targets.
-                who = frozenset(who)
+                whof = frozenset(who)
             else:
-                who = frozenset(parsed.who_info)
-            return who, player_msg, room_msg, target_msg
+                whof = frozenset(parsed.who_info)
+            return whof, player_msg, room_msg, target_msg
 
         # construct the action string
         action = None
@@ -759,18 +759,18 @@ class Soul(object):
         action_room = action_room.replace("$", "s")
         return result_messages(action, action_room)
 
-    def parse(self, player, cmd, external_verbs=frozenset()):
+    def parse(self, player, cmd: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse a command string, returns a ParseResult object."""
         qualifier = None
         message_verb = False  # does the verb expect a message?
         external_verb = False  # is it a non-soul verb?
-        adverb = None
-        message = []
-        bodypart = None
-        arg_words = []
-        unrecognized_words = []
-        who_info = defaultdict(WhoInfo)
-        who_order = []
+        adverb = None   # type: Optional[str]
+        message = []  # type: List[str]
+        bodypart = None   # type: str
+        arg_words = []  # type: List[str]
+        unrecognized_words = []   # type: List[str]
+        who_info = defaultdict(WhoInfo)   # type: Dict[Any, WhoInfo]
+        who_order = []   # type: List[Any]
         who_sequence = 0
         unparsed = cmd
 
@@ -950,11 +950,11 @@ class Soul(object):
             if player.location:
                 exit, exit_name, wordcount = check_name_with_spaces(words, index, player.location.exits, {})
                 if exit:
-                    who_info[exit].sequence = who_sequence
+                    who_info[exit].sequence = who_sequence     # XXX exit is not a MudObject???
                     who_info[exit].previous_word = previous_word
                     previous_word = None
                     who_sequence += 1
-                    who_order.append(exit)
+                    who_order.append(exit)  # XXX who_order contains Livings not str!
                     arg_words.append(exit_name)
                     while wordcount > 1:
                         next(words_enumerator)
@@ -1015,13 +1015,13 @@ class Soul(object):
                         raise ParseError("The word %s makes no sense at that location." % word)
                     else:
                         # no idea what the user typed, generic error
-                        message = "It's not clear what you mean by '%s'." % word
+                        errormsg = "It's not clear what you mean by '%s'." % word
                         if word[0].isupper():
-                            message += " Just type in lowercase ('%s')." % word.lower()
-                        raise ParseError(message)
+                            errormsg += " Just type in lowercase ('%s')." % word.lower()
+                        raise ParseError(errormsg)
             previous_word = word
 
-        message = " ".join(message)
+        message_text = " ".join(message)
         if not verb:
             # This is interesting: there's no verb.
             # but maybe the thing the user typed refers to an object or creature.
@@ -1034,10 +1034,10 @@ class Soul(object):
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResult(verb, who_info=who_info, who_order=who_order,
-                           adverb=adverb, message=message, bodypart=bodypart, qualifier=qualifier,
+                           adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
-    def match_previously_parsed(self, player, pronoun):
+    def match_previously_parsed(self, player, pronoun: str) -> List[Tuple[Any, str]]:
         """
         Try to connect the pronoun (it, him, her, them) to a previously parsed item/living.
         Returns a list of (who, replacement-name) tuples.
