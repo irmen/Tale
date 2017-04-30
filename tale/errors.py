@@ -5,7 +5,7 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Coroutine
+from typing import Generator, Tuple, Any
 
 
 class TaleError(Exception):
@@ -65,6 +65,6 @@ class LocationIntegrityError(TaleError):
 
 class AsyncDialog(TaleFlowControlException):
     """Command execution needs to continue with an async dialog"""
-    def __init__(self, dialog: Coroutine, *args) -> None:
+    def __init__(self, dialog: Generator[Tuple[str, Any], str, None], *args) -> None:
         self.dialog = dialog
         self.args = args

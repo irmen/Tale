@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import json
 import datetime
 from ..base import Item
-from ..errors import ActionRefused, ParseError, AsyncDialog
+from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
 from .. import lang, mud_context
 
 __all__ = ["BulletinBoard", "bulletinboard"]
@@ -49,6 +49,10 @@ class BulletinBoard(Item):
             txt.append("You can 'post' or 'write' a new message, 'reply 3' to write a reply to the third in the list.")
             txt.append("Finally it is possible to use 'remove 3' to remove the third in the list (only if you wrote it).")
         return "\n".join(txt)
+
+    @description.setter
+    def description(self, value):
+        raise TaleError("you cannot set the description of a BulletinBoard because it is dynamic")
 
     def handle_verb(self, parsed, actor):
         if parsed.verb == "read":
