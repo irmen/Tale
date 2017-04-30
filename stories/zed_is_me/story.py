@@ -16,7 +16,7 @@ class Story(Storybase):
     author_address = "irmen@razorvine.net"
     version = "1.3"
     requires_tale = "3.0"
-    supported_modes = {GameMode.MUD}
+    supported_modes = {GameMode.IF}
     player_name = "julie"
     player_gender = "f"
     player_race = "human"
