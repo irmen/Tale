@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import enum
+from typing import Optional
 import distutils.version
 from tale.errors import StoryConfigError
 
@@ -29,41 +30,6 @@ class MoneyType(enum.Enum):
 
     def __bool__(self):
         return bool(self.value)
-
-
-class _Storyconfig(object):
-    def __init__(self, story):
-        config_items = {
-            "name",
-            "author",
-            "author_address",
-            "version",
-            "requires_tale",
-            "supported_modes",
-            "player_name",
-            "player_gender",
-            "player_race",
-            "player_money",
-            "money_type",
-            "server_tick_method",
-            "server_tick_time",
-            "gametime_to_realtime",
-            "max_wait_hours",
-            "display_gametime",
-            "epoch",
-            "startlocation_player",
-            "startlocation_wizard",
-            "savegames_enabled",
-            "show_exits_in_look",
-            "license_file",
-            "mud_host",
-            "mud_port"
-        }
-        for attr in config_items:
-            setattr(self, attr, getattr(story, attr))
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
 
 class Storybase(object):
@@ -93,14 +59,14 @@ class Storybase(object):
     mud_host = None                 # for mud mode: hostname to bind the server on
     mud_port = None                 # for mud mode: port number to bind the server on
 
-    def init(self, driver):
+    def init(self, driver) -> None:
         """
         Called by the game driver when it is done with its initial initialization.
         Usually this is the place to tell the driver to (pre)load zones via driver.load_zones
         """
         pass
 
-    def init_player(self, player):
+    def init_player(self, player) -> None:
         """
         Called by the game driver when it has created the player object.
         You can set the hint texts on the player object, or change the state object, etc.
@@ -109,34 +75,34 @@ class Storybase(object):
         """
         pass
 
-    def welcome(self, player):
+    def welcome(self, player) -> Optional[str]:
         """
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
+        player.tell("<bright>Welcome to '%s'.</>" % self.name, end=True)
         player.tell("\n")
         return "Press enter to start."
 
-    def welcome_savegame(self, player):
+    def welcome_savegame(self, player) -> Optional[str]:
         """
         Welcome text when player enters the game after loading a saved game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Welcome back to '%s'.</>" % self.config.name, end=True)
+        player.tell("<bright>Welcome back to '%s'.</>" % self.name, end=True)
         player.tell("\n")
         return "Press enter to continue where you were before."
 
-    def goodbye(self, player):
+    def goodbye(self, player) -> None:
         """goodbye text when player quits the game"""
         player.tell("Goodbye! We hope you enjoyed playing.")
         player.tell("\n")
 
-    def completion(self, player):
+    def completion(self, player) -> None:
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
 
-    def _verify(self, driver):
+    def _verify(self, driver) -> None:
         """verify correctness and compatibility of the story configuration"""
         from tale import __version__ as tale_version_str
         tale_version = distutils.version.LooseVersion(tale_version_str)
@@ -144,6 +110,41 @@ class Storybase(object):
         if tale_version < tale_version_required:
             raise StoryConfigError("This game requires tale " + self.requires_tale + ", but " + tale_version_str + " is installed.")
 
-    def _get_config(self):
+    def _get_config(self) -> "_Storyconfig":
         # create a copy of the story's configuration settings
         return _Storyconfig(self)
+
+
+class _Storyconfig(object):
+    def __init__(self, story: Storybase):
+        config_items = {
+            "name",
+            "author",
+            "author_address",
+            "version",
+            "requires_tale",
+            "supported_modes",
+            "player_name",
+            "player_gender",
+            "player_race",
+            "player_money",
+            "money_type",
+            "server_tick_method",
+            "server_tick_time",
+            "gametime_to_realtime",
+            "max_wait_hours",
+            "display_gametime",
+            "epoch",
+            "startlocation_player",
+            "startlocation_wizard",
+            "savegames_enabled",
+            "show_exits_in_look",
+            "license_file",
+            "mud_host",
+            "mud_port"
+        }
+        for attr in config_items:
+            setattr(self, attr, getattr(story, attr))
+
+    def __eq__(self, other: "_Storyconfig"):
+        return self.__dict__ == other.__dict__

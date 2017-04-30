@@ -7,8 +7,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import sys
 import datetime
+from typing import Optional
 from tale.story import *
 from tale.main import run_story
+from tale.player import Player
+from tale.driver import Driver
 from zones import init_zones
 
 
@@ -38,27 +41,28 @@ class Story(Storybase):
 
     driver = None     # will be set by init()
 
-    def init(self, driver):
+    def init(self, driver: Driver) -> None:
         """Called by the game driver when it is done with its initial initialization"""
         self.driver = driver
         init_zones()
 
-    def init_player(self, player):
+    def init_player(self, player: Player) -> None:
         """
         Called by the game driver when it has created the player object.
         You can set the hint texts on the player object, or change the state object, etc.
         """
         pass
 
-    def welcome(self, player):
+    def welcome(self, player: Player) -> Optional[str]:
         """
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
         player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.name), end=True)
         player.tell("--", end=True)
+        return None
 
-    def display_text_file(self, player, filename):
+    def display_text_file(self, player: Player, filename: str) -> None:
         text = self.driver.resources[filename].data
         for paragraph in text.split("\n\n"):
             if paragraph.startswith("\n"):

@@ -6,7 +6,7 @@ Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare m
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import enum
-from typing import NamedTuple
+from typing import NamedTuple, Tuple, Dict
 from functools import total_ordering
 
 
@@ -963,52 +963,52 @@ _races = {
 
 playable_races = {'dwarf', 'elf', 'half-elf', 'half-orc', 'halfling', 'human', 'orc'}  # races that can be chosen by players
 
+Stats = NamedTuple("Stats", [("agi", Tuple[int, int]),
+                             ("cha", Tuple[int, int]),
+                             ("int", Tuple[int, int]),
+                             ("lck", Tuple[int, int]),
+                             ("spd", Tuple[int, int]),
+                             ("sta", Tuple[int, int]),
+                             ("str", Tuple[int, int]),
+                             ("wis", Tuple[int, int])])
 
-def create_classes():
+Flags = NamedTuple("Flags", [("flying", bool),
+                             ("limbless", bool),
+                             ("nonbiting", bool),
+                             ("swimming", bool),
+                             ("nonmeat", bool),
+                             ("playable", bool)])
+
+Race = NamedTuple("Race", [("name", str),
+                           ("body", BodyType),
+                           ("language", str),
+                           ("mass", float),
+                           ("size", BodySize),
+                           ("stats", Stats),
+                           ("flags", Flags)])
+
+
+races = {}  # type: Dict[str, Race]
+
+
+def _create_race_defs():
     flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin', 'insect', 'pegasus', 'vehicle', 'wraith'}
     limbless_races = {'blob', 'elemental', 'fish', 'plant', 'slug', 'snake', 'tree', 'vehicle', 'viper'}
     nonbiting_races = {'android', 'bot', 'cow', 'dark-elf', 'deer', 'dummy', 'elemental', 'elf', 'faerie', 'god', 'golem', 'mech', 'plant', 'strider', 'vehicle', 'vulcan'}
     swimming_races = {'amphibian', 'android', 'artrell', 'bear', 'bot', 'bugbear', 'cat', 'dark-elf', 'demi-god', 'demon', 'dragon', 'elephant', 'elf', 'fish', 'giant', 'gnoll', 'gnome', 'goblin', 'god', 'half-elf', 'halfling', 'hobbit', 'human', 'kender', 'lizard', 'nymph', 'replicant', 'rodent', 'troll', 'vehicle', 'vulcan'}
     nonmeat_races = {'android', 'balrog', 'bot', 'dummy', 'elemental', 'god', 'golem', 'mech', 'plant', 'strider', 'tree', 'vehicle', 'wraith'}
 
-    Stats = NamedTuple("Stats", [(StatType.AGILITY.value, int),
-                                 (StatType.CHARISMA.value, int),
-                                 (StatType.INTELLIGENCE.value, int),
-                                 (StatType.LUCK.value, int),
-                                 (StatType.SPEED.value, int),
-                                 (StatType.STAMINA.value, int),
-                                 (StatType.STRENGTH.value, int),
-                                 (StatType.WISDOM.value, int)])
-
-    Flags = NamedTuple("Flags", [("flying", bool),
-                                 ("limbless", bool),
-                                 ("nonbiting", bool),
-                                 ("swimming", bool),
-                                 ("nonmeat", bool),
-                                 ("playable", bool)])
-
-    races = {}
+    global races
     for race, attrs in _races.items():
         stats_kws = {StatType(s).value: value for s, value in attrs["stats"].items()}
-        v = {
-            "race": race,
-            "body": attrs["body"],
-            "language": attrs["language"],
-            "mass": attrs["mass"],
-            "size": attrs["size"],
-            "stats": Stats(**stats_kws),
-            "flags": Flags(flying=race in flying_races,
-                           limbless=race in limbless_races,
-                           nonbiting=race in nonbiting_races,
-                           swimming=race in swimming_races,
-                           nonmeat=race in nonmeat_races,
-                           playable=race in playable_races)
-            }
-        class_name = race.title().replace("-", "").replace(" ", "")
-        race_class = type(class_name, (), v)
-        globals()[class_name] = race_class
-        races[race] = race_class
-    globals()["races"] = races
+        stats = Stats(**stats_kws)
+        flags = Flags(flying=race in flying_races,
+                      limbless=race in limbless_races,
+                      nonbiting=race in nonbiting_races,
+                      swimming=race in swimming_races,
+                      nonmeat=race in nonmeat_races,
+                      playable=race in playable_races)
+        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"], mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)
     _all_races = set(_races)
     assert len(swimming_races - _all_races) == 0
     assert len(flying_races - _all_races) == 0
@@ -1018,5 +1018,5 @@ def create_classes():
     assert len(playable_races - _all_races) == 0
 
 
-create_classes()
-del create_classes
+_create_race_defs()
+del _create_race_defs

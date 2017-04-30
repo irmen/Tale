@@ -34,48 +34,18 @@ Currently defined pubsub topics used by the Tale driver:
 import weakref
 import threading
 import time
-
+from typing import Dict, List, Tuple, Union, Optional, Set, Any
+TopicNameType = Union[str, Tuple]
 
 __all__ = ["topic", "unsubscribe_all", "Listener"]
 
-all_topics = {}
+all_topics = {}  # type: Dict[TopicNameType, Topic]
 __topic_lock = threading.Lock()
-
-
-def topic(name):
-    """Create a topic object (singleton). Name can be a string or a tuple."""
-    with __topic_lock:
-        if name in all_topics:
-            return all_topics[name]
-        instance = all_topics[name] = Topic(name)
-        return instance
-
-
-def sync(topic=None):
-    """Sync all pending events (i.e. push them to the subscribers)"""
-    if topic:
-        return all_topics[topic].sync()
-    else:
-        for t in list(all_topics.values()):
-            t.sync()
-
-
-def pending(topicname=None):
-    """Return a dictionary from topic name to tuple (number of pending events, idle time, num subbers)"""
-    with __topic_lock:
-        topics = [all_topics[topicname]] if topicname else all_topics.values()
-        return {t.name: (len(t.events), t.idle_time, len(t.subscribers)) for t in topics}
-
-
-def unsubscribe_all(subscriber):
-    """unsubscribe the given subscriber object from all topics that it may have been subscribed to."""
-    for topic in list(all_topics.values()):
-        topic.unsubscribe(subscriber)
 
 
 class Listener(object):
     """Base class for all pubsub listeners (subscribers)"""
-    def pubsub_event(self, topicname, event):
+    def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
         """override this event receive method in a subclass"""
         raise NotImplementedError("implement this in subclass")
 
@@ -88,45 +58,46 @@ class Topic(object):
     """
     A pubsub topic to send/receive events. You get these from the topic function.
     """
-    def __init__(self, name):
+    def __init__(self, name: TopicNameType) -> None:
         self.name = name
-        self.subscribers = set()
-        self.events = []
-        self.last_event = time.time()
+        self.subscribers = set()  # type: Set[weakref.ReferenceType[Listener]]
+        self.events = []  # type: List[Any]
+        self.last_event = time.time()  # type: float
 
     @property
-    def idle_time(self):
+    def idle_time(self) -> float:
         return time.time() - self.last_event
 
-    def destroy(self):
+    def destroy(self) -> None:
         self.sync()
         del all_topics[self.name]
         self.name = "<defunct>"
         del self.subscribers
         del self.events
 
-    def subscribe(self, subscriber):
+    def subscribe(self, subscriber: Listener) -> None:
         if not isinstance(subscriber, Listener):
             raise TypeError("subscriber needs to be a Listener")
         self.subscribers.add(weakref.ref(subscriber))
 
-    def unsubscribe(self, subscriber):
+    def unsubscribe(self, subscriber: Listener) -> None:
         self.subscribers.discard(weakref.ref(subscriber))
 
-    def send(self, event, synchronous=False):
+    def send(self, event: Any, synchronous: bool=False) -> Optional[List[Any]]:
         self.events.append(event)
         self.last_event = time.time()
         if synchronous:
             return self.sync()
+        return None
 
-    def sync(self):
+    def sync(self) -> List[Any]:
         events, self.events = self.events, []
         results = []
         for event in events:
             results.extend(self.__sync_event(event))
         return results
 
-    def __sync_event(self, event):
+    def __sync_event(self, event: Any) -> List[Any]:
         results = []
         for subber_ref in self.subscribers:
             subber = subber_ref()
@@ -137,3 +108,35 @@ class Topic(object):
                 except Listener.NotYet:
                     pass
         return results
+
+
+def topic(name: TopicNameType) -> Topic:
+    """Create a topic object (singleton). Name can be a string or a tuple."""
+    with __topic_lock:
+        if name in all_topics:
+            return all_topics[name]
+        instance = all_topics[name] = Topic(name)
+        return instance
+
+
+def sync(topic: TopicNameType=None) -> List:
+    """Sync all pending events (i.e. push them to the subscribers)"""
+    if topic:
+        return all_topics[topic].sync()
+    else:
+        for t in list(all_topics.values()):
+            t.sync()
+        return []
+
+
+def pending(topicname: TopicNameType=None) -> Dict[TopicNameType, Tuple[int, float, int]]:
+    """Return a dictionary from topic name to tuple (number of pending events, idle time, num subbers)"""
+    with __topic_lock:
+        topics = [all_topics[topicname]] if topicname else list(all_topics.values())
+        return {t.name: (len(t.events), t.idle_time, len(t.subscribers)) for t in topics}
+
+
+def unsubscribe_all(subscriber: Listener) -> None:
+    """unsubscribe the given subscriber object from all topics that it may have been subscribed to."""
+    for topic in list(all_topics.values()):
+        topic.unsubscribe(subscriber)

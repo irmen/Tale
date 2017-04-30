@@ -83,7 +83,7 @@ class TestPubsub(unittest.TestCase):
         result = sync()
         events, idle, subbers = pending()["test1async"]
         self.assertEqual(0, events)
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertEqual([("test1async", "event1")], subber.messages)
         self.assertEqual([("test1async", "event1")], subber2.messages)
         subber.clear()
@@ -148,7 +148,7 @@ class TestPubsub(unittest.TestCase):
         s2.send("two")
         s3.send("three")
         sync()
-        self.assertEqual(set([('testA', 'one'), ('testB', 'two'), ('testC', 'three')]), set(subber.messages))
+        self.assertEqual({('testA', 'one'), ('testB', 'two'), ('testC', 'three')}, set(subber.messages))
         subber.clear()
         unsubscribe_all(subber)
         unsubscribe_all(subber)

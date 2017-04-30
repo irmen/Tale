@@ -18,15 +18,16 @@ class TestRaces(unittest.TestCase):
         self.assertEqual(races.BodySize.HUMAN_SIZED, human["size"])
         self.assertEqual("English", human["language"])
 
-    def test_generated_class(self):
-        self.assertEqual(72.0, races.Human.mass)
-        self.assertEqual(8, len(races.Human.stats))
-        self.assertEqual(races.BodyType.HUMANOID, races.Human.body)
-        self.assertEqual(races.BodySize.HUMAN_SIZED, races.Human.size)
-        self.assertEqual("English", races.Human.language)
-        self.assertEqual((33, 3), races.Human.stats.agi)
-        self.assertTrue(races.Human.flags.playable)
-        self.assertFalse(races.Plant.flags.playable)
+    def test_generated_race(self):
+        human = races.races["human"]
+        self.assertEqual(72.0, human.mass)
+        self.assertEqual(8, len(human.stats))
+        self.assertEqual(races.BodyType.HUMANOID, human.body)
+        self.assertEqual(races.BodySize.HUMAN_SIZED, human.size)
+        self.assertEqual("English", human.language)
+        self.assertEqual((33, 3), human.stats.agi)
+        self.assertTrue(human.flags.playable)
+        self.assertFalse(races.races["plant"].flags.playable)
 
     def test_enum_descriptions(self):
         self.assertEqual("somewhat large", races.BodySize.SOMEWHAT_LARGE.value)
@@ -41,7 +42,6 @@ class TestRaces(unittest.TestCase):
     def test_globals(self):
         self.assertIn("human", races.playable_races)
         self.assertIn("elf", races.races)
-        self.assertIs(races.Plant, races.races["plant"])
 
 
 if __name__ == '__main__':
