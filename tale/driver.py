@@ -19,7 +19,6 @@ import threading
 import types
 import traceback
 import appdirs
-import distutils.version
 import pkgutil
 import importlib
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
@@ -61,7 +60,6 @@ class Driver(pubsub.Listener):
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
-        sys.excepthook = util.excepthook   # install custom verbose crash reporter
 
     def start(self, command_line_args):
         """Parse the command line arguments and start the driver accordingly."""
@@ -75,7 +73,6 @@ class Driver(pubsub.Listener):
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
-        parser.add_argument('-v', '--verify', help='only verify the story files, dont run it', action='store_true')
         parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
         args = parser.parse_args(command_line_args)
         try:
@@ -106,6 +103,7 @@ class Driver(pubsub.Listener):
         self.story.supported_modes = {GameMode(mode) for mode in self.story.supported_modes}
         self.story.money_type = MoneyType(self.story.money_type)
         self.story.server_tick_method = TickMethod(self.story.server_tick_method)
+        self.story._verify(self)
         story_mode = GameMode(args.mode)
         if len(self.story.supported_modes) == 1 and story_mode != GameMode.MUD:
             # There's only one mode this story runs in. Just select that one.
@@ -137,10 +135,6 @@ class Driver(pubsub.Listener):
                     story_cmds = __import__("cmds", level=0)
                     story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)
-        tale_version = distutils.version.LooseVersion(tale_version_str)
-        tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
-        if tale_version < tale_version_required:
-            raise RuntimeError("The game requires tale " + self.config.requires_tale + " but " + tale_version_str + " is installed.")
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
         user_data_dir = appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.config.name), "Razorvine", roaming=True)
@@ -169,12 +163,9 @@ class Driver(pubsub.Listener):
         for x in self.unbound_exits:
             x._bind_target(self.zones)
         del self.unbound_exits
-        if args.verify:
-            print("Story: '%s' v%s, by %s." % (self.story.name, self.story.version, self.story.author))
-            print("Verified, all seems to be fine.")
-            return
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
+        sys.excepthook = util.excepthook  # install custom verbose crash reporter
         if self.config.server_mode == GameMode.IF:
             # create the single player mode player automatically
             if args.gui:

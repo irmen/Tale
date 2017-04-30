@@ -159,11 +159,6 @@ class TestVarious(unittest.TestCase):
             self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
 
-    def testStoryVerify(self):
-        gamedir = os.path.dirname(inspect.getabsfile(tale.demo))
-        d = the_driver.Driver()
-        d.start(["--game", gamedir, "--verify"])
-
 
 @cmd
 @disabled_in_gamemode(GameMode.IF)

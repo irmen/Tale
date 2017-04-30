@@ -6,38 +6,53 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 
-class SecurityViolation(Exception):
+class TaleError(Exception):
+    """base class for tale related errors"""
+    pass
+
+
+class TaleFlowControlException(Exception):
+    """base class for flow-control exceptions"""
+    pass
+
+
+class StoryConfigError(TaleError):
+    """There was a problem with the story configuration"""
+    pass
+
+
+class SecurityViolation(TaleError):
     """Some security constraint was violated"""
     pass
 
 
-class ParseError(Exception):
+class ParseError(TaleError):
     """Problem with parsing the user input. Should be shown to the user as a nice error message."""
     pass
 
 
-class ActionRefused(Exception):
+class ActionRefused(TaleFlowControlException):
     """The action that was tried was refused by the situation or target object"""
     pass
 
 
-class SessionExit(Exception):
+class SessionExit(TaleFlowControlException):
     """Player session ends."""
     pass
 
 
-class RetrySoulVerb(Exception):
+class RetrySoulVerb(TaleFlowControlException):
     """Retry a command as soul verb instead."""
     pass
 
 
-class RetryParse(Exception):
+class RetryParse(TaleFlowControlException):
     """Retry the command as a different one"""
     def __init__(self, command):
         self.command = command
 
 
-class LocationIntegrityError(Exception):
+class LocationIntegrityError(TaleError):
     """When the driver notices an integrity problem with locations, exits, etc."""
     def __init__(self, msg, direction, exit, location):
         super().__init__(msg)
@@ -46,7 +61,7 @@ class LocationIntegrityError(Exception):
         self.location = location
 
 
-class AsyncDialog(Exception):
+class AsyncDialog(TaleFlowControlException):
     """Command execution needs to continue with an async dialog"""
     def __init__(self, dialog, *args):
         self.dialog = dialog

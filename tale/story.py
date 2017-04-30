@@ -6,6 +6,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import enum
+import distutils.version
+from tale.errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "Storybase"]
 
@@ -133,6 +135,14 @@ class Storybase(object):
     def completion(self, player):
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("<bright>Congratulations! You've finished the game!</>")
+
+    def _verify(self, driver):
+        """verify correctness and compatibility of the story configuration"""
+        from tale import __version__ as tale_version_str
+        tale_version = distutils.version.LooseVersion(tale_version_str)
+        tale_version_required = distutils.version.LooseVersion(self.requires_tale)
+        if tale_version < tale_version_required:
+            raise StoryConfigError("This game requires tale " + self.requires_tale + ", but " + tale_version_str + " is installed.")
 
     def _get_config(self):
         # create a copy of the story's configuration settings
