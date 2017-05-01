@@ -106,10 +106,7 @@ class VirtualFileSystem:
             parts = name.split('/')
             parts.insert(0, os.path.dirname(rootmodule.__file__))
             name = os.path.join(*parts)
-            mtime = None
-            if hasattr(loader, "path_stats"):
-                # this method only exists in Python 3.3 or newer...
-                mtime = loader.path_stats(name)["mtime"]
+            mtime = loader.path_stats(name)["mtime"]
             data = loader.get_data(name)
             if encoding:
                 with io.StringIO(data.decode(encoding), newline=None) as f:

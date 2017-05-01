@@ -11,7 +11,7 @@ This software is released under the GPL v3 software license.
 This license, including disclaimer, is available in the 'LICENSE.txt' file.
 
 
-Tale is 100% pure Python and is supported on Python 3.5 or newer.
+Tale requires Python 3.5 or newer.
 (If you have an older version of Python, stick to Tale 2.8 or older, which still supports Python 2.7 as well)
 
 Required third party libraries:

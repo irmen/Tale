@@ -120,20 +120,14 @@ class Driver(pubsub.Listener):
         mud_context.driver = self
         mud_context.config = self.config
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
-        try:
-            pkgutil.get_loader("cmds")
-        except AttributeError:
-            # workaround for http://bugs.python.org/issue14710 in python 3.4.0/3.4.1
-            pass
-        else:
-            # check for existence of cmds package in the story root
-            loader = pkgutil.get_loader("cmds")
-            if loader:
-                ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
-                sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
-                if ld == sd:   # only load them if the directory is the same as where the story was loaded from
-                    story_cmds = __import__("cmds", level=0)
-                    story_cmds.register_all(self.commands)
+        # check for existence of cmds package in the story root
+        loader = pkgutil.get_loader("cmds")
+        if loader:
+            ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
+            sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
+            if ld == sd:   # only load them if the directory is the same as where the story was loaded from
+                story_cmds = __import__("cmds", level=0)
+                story_cmds.register_all(self.commands)
         self.commands.adjust_available_commands(self.config.server_mode)
         self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
         self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None

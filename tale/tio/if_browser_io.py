@@ -341,7 +341,6 @@ class TaleWsgiAppBase:
         headers = []
         resource = vfs.internal_resources[path]
         if resource.mtime:
-            # unfortunately, this is usually only present when running under python 3.x...
             mtime_formatted = formatdate(resource.mtime)
             etag = self.etag(id(vfs.internal_resources), resource.mtime, path)
             if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
