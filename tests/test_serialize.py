@@ -111,15 +111,14 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(42, x.money)
 
     def test_storyconfig(self):
-        s = Storybase()
+        s = StoryBase()
         s.server_mode = GameMode.IF
         s.display_gametime = True
         s.name = "test"
         x = serializecycle(s)
         self.assertEqual(s.__dict__, x.__dict__)
-        config = s._get_config()
-        x = serializecycle(config)
-        self.assertEqual(config, x)
+        x = serializecycle(s.config)
+        self.assertEqual(s.config, x)
 
     def test_Context(self):
         c = util.Context(driver=1, clock=2, config=3, player_connection=4)

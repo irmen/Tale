@@ -9,7 +9,7 @@ import os
 import sys
 import tale
 from tale import mud_context
-from tale.story import Storybase
+from tale.story import StoryConfig, StoryBase, StoryConfigError
 from tests.supportstuff import TestDriver
 
 
@@ -18,7 +18,7 @@ class StoryCaseBase:
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = TestDriver()
-        mud_context.config = Storybase()._get_config()
+        mud_context.config = StoryConfig()
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.
@@ -36,7 +36,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual("Zed is me", s.name)
+        self.assertEqual("Zed is me", s.config.name)
 
     def test_zones(self):
         import zones.houses
@@ -53,7 +53,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import story
         s = story.Story()
-        self.assertEqual("Tale Demo", s.name)
+        self.assertEqual("Tale Demo", s.config.name)
 
     def test_zones(self):
         import zones.town
@@ -65,12 +65,29 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     directory = "demo-story-dummy-path"
 
+    def test_story_verify(self):
+        s = StoryBase()
+        with self.assertRaises(StoryConfigError):
+            s._verify(TestDriver())
+        s.config.name = "dummy"
+        s._verify(TestDriver())
+        s.config = 1234
+        with self.assertRaises(StoryConfigError):
+            s._verify(TestDriver())
+
+    def test_storyconfig(self):
+        c1 = StoryConfig()
+        c2 = StoryConfig()
+        self.assertIsNone(c1.name)
+        self.assertEqual(c1, c2)
+        c2.name = "dummy"
+        self.assertNotEqual(c1, c2)
+
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
-        self.assertEqual("Tale demo story", s.name)
-        config = s._get_config()
-        self.assertEqual(config.author_address, s.author_address)
+        s._verify(TestDriver())
+        self.assertEqual("Tale demo story", s.config.name)
 
     def test_zones(self):
         import tale.demo.zones.house

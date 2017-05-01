@@ -14,24 +14,26 @@ from tale.player import Player
 from tale.driver import Driver
 
 
-class Story(Storybase):
-    name = "Tale Demo"
-    author = "Irmen de Jong"
-    author_address = "irmen@razorvine.net"
-    version = "1.4"
-    requires_tale = "3.0"
-    supported_modes = {GameMode.IF, GameMode.MUD}
-    player_money = 15.5
-    money_type = MoneyType.MODERN
-    server_tick_method = TickMethod.TIMER
-    server_tick_time = 1.0
-    gametime_to_realtime = 5
-    display_gametime = True
-    epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
-    startlocation_player = "town.square"
-    startlocation_wizard = "wizardtower.hall"
-    license_file = "messages/license.txt"
-
+class Story(StoryBase):
+    # create story configuration and customize:
+    config = StoryConfig()
+    config.name = "Tale Demo"
+    config.author = "Irmen de Jong"
+    config.author_address = "irmen@razorvine.net"
+    config.version = "1.4"
+    config.requires_tale = "3.0"
+    config.supported_modes = {GameMode.IF, GameMode.MUD}
+    config.player_money = 15.5
+    config.money_type = MoneyType.MODERN
+    config.server_tick_method = TickMethod.TIMER
+    config.server_tick_time = 1.0
+    config.gametime_to_realtime = 5
+    config.display_gametime = True
+    config.epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
+    config.startlocation_player = "town.square"
+    config.startlocation_wizard = "wizardtower.hall"
+    config.license_file = "messages/license.txt"
+    # story-specific fields follow:
     driver = None     # will be set by init()
 
     def init(self, driver: Driver) -> None:
@@ -51,7 +53,7 @@ class Story(Storybase):
 
     def welcome(self, player: Player) -> Optional[str]:
         """welcome text when player enters a new game"""
-        player.tell("<bright>Hello, <player>%s</><bright>! Welcome to %s.</>" % (player.title, self.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>! Welcome to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")
@@ -59,7 +61,7 @@ class Story(Storybase):
 
     def welcome_savegame(self, player: Player) -> Optional[str]:
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("<bright>Hello, <player>%s</><bright>, welcome back to %s.</>" % (player.title, self.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>, welcome back to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].data)
         player.tell("\n")

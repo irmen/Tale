@@ -11,13 +11,13 @@ from tale.items import basic
 from tale import mud_context
 from tale import util, player, base
 from tests.supportstuff import TestDriver
-from tale.story import Storybase
+from tale.story import StoryConfig
 
 
 class TestItems(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
-        mud_context.config = Storybase()._get_config()
+        mud_context.config = StoryConfig()
         self.actor = player.Player("julie", "f")
 
     def test_gameclock(self):

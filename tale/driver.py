@@ -25,7 +25,7 @@ from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, 
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats
-from .story import TickMethod, GameMode, MoneyType
+from .story import TickMethod, GameMode, MoneyType, StoryBase
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -99,18 +99,18 @@ class Driver(pubsub.Listener):
         story = __import__("story", level=0)
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
-        self.story = story.Story()
-        self.story.supported_modes = {GameMode(mode) for mode in self.story.supported_modes}
-        self.story.money_type = MoneyType(self.story.money_type)
-        self.story.server_tick_method = TickMethod(self.story.server_tick_method)
+        self.story = story.Story()  # type: StoryBase
+        self.story.config.supported_modes = {GameMode(mode) for mode in self.story.config.supported_modes}
+        self.story.config.money_type = MoneyType(self.story.config.money_type)
+        self.story.config.server_tick_method = TickMethod(self.story.config.server_tick_method)
         self.story._verify(self)
         story_mode = GameMode(args.mode)
-        if len(self.story.supported_modes) == 1 and story_mode != GameMode.MUD:
+        if len(self.story.config.supported_modes) == 1 and story_mode != GameMode.MUD:
             # There's only one mode this story runs in. Just select that one.
-            story_mode = list(self.story.supported_modes)[0]
-        if story_mode not in self.story.supported_modes:
-            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.supported_modes)))
-        self.config = self.story._get_config()
+            story_mode = list(self.story.config.supported_modes)[0]
+        if story_mode not in self.story.config.supported_modes:
+            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
+        self.config = self.story.config   # XXX get rid of this
         self.config.mud_host = self.config.mud_host or "localhost"
         self.config.mud_port = self.config.mud_port or 8180
         self.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)

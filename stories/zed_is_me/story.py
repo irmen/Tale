@@ -13,18 +13,21 @@ from tale.driver import Driver
 from typing import Optional
 
 
-class Story(Storybase):
-    name = "Zed is me"
-    author = "Irmen de Jong"
-    author_address = "irmen@razorvine.net"
-    version = "1.3"
-    requires_tale = "3.0"
-    supported_modes = {GameMode.IF}
-    player_name = "julie"
-    player_gender = "f"
-    player_race = "human"
-    startlocation_player = "houses.livingroom"
-    startlocation_wizard = "houses.livingroom"
+class Story(StoryBase):
+    # create story configuration and customize:
+    config = StoryConfig()
+    config.name = "Zed is me"
+    config.author = "Irmen de Jong"
+    config.author_address = "irmen@razorvine.net"
+    config.version = "1.3"
+    config.requires_tale = "3.0"
+    config.supported_modes = {GameMode.IF}
+    config.player_name = "julie"
+    config.player_gender = "f"
+    config.player_race = "human"
+    config.startlocation_player = "houses.livingroom"
+    config.startlocation_wizard = "houses.livingroom"
+    # story-specific fields follow:
     driver = None     # will be set by init()
 
     def init(self, driver: Driver) -> None:
@@ -44,7 +47,7 @@ class Story(Storybase):
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Welcome to '%s'.</>" % self.name, end=True)
+        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")
@@ -55,7 +58,7 @@ class Story(Storybase):
         Welcome text when player enters the game after loading a saved game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Welcome back to '%s'.</>" % self.name, end=True)
+        player.tell("<bright>Welcome back to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         self.display_text_file(player, "messages/welcome.txt")
         player.tell("\n")

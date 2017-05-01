@@ -15,30 +15,32 @@ from tale.driver import Driver
 from zones import init_zones
 
 
-class Story(Storybase):
-    name = "Circle"
-    author = "Irmen de Jong"
-    author_address = "irmen@razorvine.net"
-    version = "1.2"
-    requires_tale = "3.0"
-    supported_modes = {GameMode.MUD}
-    player_name = None
-    player_gender = None
-    player_race = None
-    player_money = 0.0
-    money_type = MoneyType.FANTASY
-    server_tick_method = TickMethod.TIMER
-    server_tick_time = 1.0
-    gametime_to_realtime = 5
-    display_gametime = True
-    epoch = datetime.datetime(2015, 5, 14, 14, 0, 0)       # start date/time of the game clock
-    startlocation_player = "midgaard_city.temple"
-    startlocation_wizard = "god_simplex.boardroom"
-    savegames_enabled = False
-    show_exits_in_look = False
-    mud_host = "localhost"
-    mud_port = 8200
-
+class Story(StoryBase):
+    # create story configuration and customize:
+    config = StoryConfig()
+    config.name = "Circle"
+    config.author = "Irmen de Jong"
+    config.author_address = "irmen@razorvine.net"
+    config.version = "1.2"
+    config.requires_tale = "3.0"
+    config.supported_modes = {GameMode.MUD}
+    config.player_name = None
+    config.player_gender = None
+    config.player_race = None
+    config.player_money = 0.0
+    config.money_type = MoneyType.FANTASY
+    config.server_tick_method = TickMethod.TIMER
+    config.server_tick_time = 1.0
+    config.gametime_to_realtime = 5
+    config.display_gametime = True
+    config.epoch = datetime.datetime(2015, 5, 14, 14, 0, 0)       # start date/time of the game clock
+    config.startlocation_player = "midgaard_city.temple"
+    config.startlocation_wizard = "god_simplex.boardroom"
+    config.savegames_enabled = False
+    config.show_exits_in_look = False
+    config.mud_host = "localhost"
+    config.mud_port = 8200
+    # story-specific fields follow:
     driver = None     # will be set by init()
 
     def init(self, driver: Driver) -> None:
@@ -58,7 +60,7 @@ class Story(Storybase):
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.name), end=True)
+        player.tell("<bright>Hello, <player>%s</><bright>!  Welcome to '%s'.</>" % (player.title, self.config.name), end=True)
         player.tell("--", end=True)
         return None
 

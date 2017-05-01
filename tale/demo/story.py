@@ -12,23 +12,25 @@ from tale.story import *
 from tale.main import run_story
 
 
-class Story(Storybase):
-    name = "Tale demo story"
-    author = "Irmen de Jong"
-    author_address = "irmen@razorvine.net"
-    version = tale.__version__
-    supported_modes = {GameMode.IF, GameMode.MUD}
-    player_name = "julie"
-    player_gender = "f"
-    player_race = "human"
-    player_money = 15.5
-    money_type = MoneyType.MODERN
-    server_tick_method = TickMethod.TIMER
-    server_tick_time = 1.0
-    gametime_to_realtime = 5
-    display_gametime = True
-    startlocation_player = "house.livingroom"
-    startlocation_wizard = "house.livingroom"
+class Story(StoryBase):
+    # create story configuration and customize:
+    config = StoryConfig()
+    config.name = "Tale demo story"
+    config.author = "Irmen de Jong"
+    config.author_address = "irmen@razorvine.net"
+    config.version = tale.__version__
+    config.supported_modes = {GameMode.IF, GameMode.MUD}
+    config.player_name = "julie"
+    config.player_gender = "f"
+    config.player_race = "human"
+    config.player_money = 15.5
+    config.money_type = MoneyType.MODERN
+    config.server_tick_method = TickMethod.TIMER
+    config.server_tick_time = 1.0
+    config.gametime_to_realtime = 5
+    config.display_gametime = True
+    config.startlocation_player = "house.livingroom"
+    config.startlocation_wizard = "house.livingroom"
 
     def init(self, driver):
         driver.load_zones(["house"])
@@ -37,7 +39,7 @@ class Story(Storybase):
         player.money = 12.65
 
     def welcome(self, player):
-        player.tell("<bright>Welcome to '%s'.</>" % self.name, end=True)
+        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to communicate with your pet, and exit the house to win the game.")
         player.tell("\n")
