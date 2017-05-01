@@ -112,7 +112,7 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     request_queue_size = 200
 
 
-class SessionMiddleware(object):
+class SessionMiddleware:
     """Wsgi middleware that injects session cookie logic."""
 
     class CloseSession(Exception):
@@ -176,7 +176,7 @@ class SessionMiddleware(object):
             return [str(x).encode("utf-8")]
 
 
-class MemorySessionFactory(object):
+class MemorySessionFactory:
     def __init__(self):
         self.storage = {}
 

@@ -36,7 +36,7 @@ def strip_text_styles(text):
     return [strip(line) for line in text]
 
 
-class IoAdapterBase(object):
+class IoAdapterBase:
     """
     I/O adapter base class
     """

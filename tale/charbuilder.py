@@ -14,7 +14,7 @@ from .accounts import MudAccounts
 from .player import Player, PlayerConnection
 
 
-class PlayerNaming(object):
+class PlayerNaming:
     def __init__(self) -> None:
         self._name = self.title = self.gender = self.description = None  # type: str
         self.money = mud_context.config.player_money
@@ -37,7 +37,7 @@ class PlayerNaming(object):
         self._name = value.lower()
 
 
-class CharacterBuilder(object):
+class CharacterBuilder:
     def __init__(self, conn: PlayerConnection, continue_dialog: Callable[[PlayerNaming], None]) -> None:
         self.conn = conn
         self.continue_dialog = continue_dialog

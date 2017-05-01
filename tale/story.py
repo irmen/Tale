@@ -33,7 +33,7 @@ class MoneyType(enum.Enum):
         return bool(self.value)
 
 
-class Storybase(object):
+class Storybase:
     """base class for tale story classes."""
     name = None                     # type: str # the name of the story
     author = None                   # type: str # the story's author name
@@ -116,7 +116,7 @@ class Storybase(object):
         return _Storyconfig(self)
 
 
-class _Storyconfig(object):   # XXX get rid of this
+class _Storyconfig:   # XXX get rid of this
     def __init__(self, story: Storybase) -> None:
         config_items = {
             "name",

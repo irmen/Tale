@@ -12,7 +12,7 @@ import io
 __all__ = ["get_rooms"]
 
 
-class Room(object):
+class Room:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 
@@ -20,7 +20,7 @@ class Room(object):
         return "<Room #%d: %s>" % (self.vnum, self.name)
 
 
-class Exit(object):
+class Exit:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 

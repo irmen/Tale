@@ -495,7 +495,7 @@ _skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "ont
                "the", "with", "from", "after", "before", "under", "above", "next"}
 
 
-class WhoInfo(object):
+class WhoInfo:
     def __init__(self, sequence: int=0) -> None:
         self.sequence = sequence
         self.previous_word = None  # type: Optional[str]
@@ -504,7 +504,7 @@ class WhoInfo(object):
         return "[sequence=%d, prev_word=%s]" % (self.sequence, self.previous_word)
 
 
-class ParseResult(object):
+class ParseResult:
     def __init__(self, verb: str, adverb: str=None, message: str=None, bodypart: str=None, qualifier: str=None,
                  args: Sequence[str]=None, who_info: Dict=None, who_order: Sequence=None, unrecognized: Sequence=None, unparsed: str="") -> None:
         self.verb = verb
@@ -571,7 +571,7 @@ def check_name_with_spaces(words: Sequence[str], index: int, all_livings: Dict[s
     return None, None, 0
 
 
-class Soul(object):
+class Soul:
     """
     The 'soul' of a Player. Handles the high level verb actions and allows for social player interaction.
     Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.

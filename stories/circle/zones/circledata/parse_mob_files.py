@@ -15,7 +15,7 @@ mobs = {}
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-class Mob(object):
+class Mob:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 

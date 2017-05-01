@@ -1087,7 +1087,7 @@ class Driver(pubsub.Listener):
 
 
 @total_ordering
-class Deferred(object):
+class Deferred:
     """
     Represents a callable action that will be invoked (with the given arguments) sometime in the future.
     This object captures the action that must be invoked in a way that is serializable.
@@ -1158,7 +1158,7 @@ class Deferred(object):
         del self.vargs
 
 
-class Commands(object):
+class Commands:
     """
     Some utility functions to manage the registered commands.
     """

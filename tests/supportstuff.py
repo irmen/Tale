@@ -12,7 +12,7 @@ from tale import util
 from tale import driver
 
 
-class Thing(object):
+class Thing:
     def __init__(self):
         self.x = []
 

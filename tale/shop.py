@@ -38,7 +38,7 @@ from . import lang
 banking_money_limit = 15000.0
 
 
-class ShopBehavior(object):
+class ShopBehavior:
     """the data describing the behavior of a particular shop"""
     def __init__(self):
         self.shopkeeper_vnum = None     # used for circle data to designate the shopkeeper belonging to this shop

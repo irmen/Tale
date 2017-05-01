@@ -267,7 +267,7 @@ class TaleWindow(Toplevel):
         self.commandEntry.config(state=DISABLED)
 
 
-class TaleGUI(object):
+class TaleGUI:
     """Helper class to set up the gui and connect events."""
     def __init__(self, io, config):
         self.io = io

@@ -337,7 +337,7 @@ class TestUtil(unittest.TestCase):
         def func(args, actor=None):
             pass
 
-        class Actor(object):
+        class Actor:
             pass
         actor = Actor()
         actor2 = Actor()

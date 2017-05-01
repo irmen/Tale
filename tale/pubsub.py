@@ -43,7 +43,7 @@ all_topics = {}  # type: Dict[TopicNameType, Topic]
 __topic_lock = threading.Lock()
 
 
-class Listener(object):
+class Listener:
     """Base class for all pubsub listeners (subscribers)"""
     def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
         """override this event receive method in a subclass"""
@@ -54,7 +54,7 @@ class Listener(object):
         pass
 
 
-class Topic(object):
+class Topic:
     """
     A pubsub topic to send/receive events. You get these from the topic function.
     """

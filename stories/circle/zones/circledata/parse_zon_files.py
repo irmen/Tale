@@ -13,7 +13,7 @@ import io
 __all__ = ["get_zones"]
 
 
-class Zone(object):
+class Zone:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 
@@ -21,7 +21,7 @@ class Zone(object):
         return "<Zone #%d: %s>" % (self.vnum, self.name)
 
 
-class MobRef(object):
+class MobRef:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 

@@ -140,7 +140,7 @@ class HttpIo(iobase.IoAdapterBase):
         return "".join(result)
 
 
-class TaleWsgiAppBase(object):
+class TaleWsgiAppBase:
     """
     Generic wsgi functionality that is not tied to a particular
     single or multiplayer web server.
@@ -411,7 +411,7 @@ class CustomWsgiServer(WSGIServer):
     request_queue_size = 10
 
 
-class SessionMiddleware(object):
+class SessionMiddleware:
     def __init__(self, app):
         self.app = app
 

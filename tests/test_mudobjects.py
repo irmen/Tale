@@ -394,7 +394,7 @@ class TestDoorsExits(unittest.TestCase):
             exit1.read(None)
 
     def test_bind_exit(self):
-        class ModuleDummy(object):
+        class ModuleDummy:
             pass
         zones = ModuleDummy()
         zones.town = ModuleDummy()
@@ -414,7 +414,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual("outside", exit.name)
         self.assertEqual("Exit to <unbound:town.square>", exit.title)
 
-        class ModuleDummy(object):
+        class ModuleDummy:
             pass
 
         zones = ModuleDummy()
@@ -580,12 +580,12 @@ class TestLiving(unittest.TestCase):
         self.assertEqual(["msg1 msg2", "msg3 msg4"], collector.messages)
 
     def test_show_inventory(self):
-        class Ctx(object):
-            class Config(object):
+        class Ctx:
+            class Config:
                 pass
             config = Config()
 
-        class MoneyDriverDummy(object):
+        class MoneyDriverDummy:
             pass
 
         ctx = Ctx()

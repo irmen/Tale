@@ -10,7 +10,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 
-class Hint(object):
+class Hint:
     def __init__(self, checkpoint, location, text):
         """
         Define a new hint. checkpoint=game checkpoint (string) for which the hint is active.
@@ -29,7 +29,7 @@ class Hint(object):
         return vars(self) == vars(other)
 
 
-class HintSystem(object):
+class HintSystem:
     def __init__(self):
         self.init([])
 

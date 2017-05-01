@@ -83,7 +83,7 @@ def clone(obj):
     return copy.deepcopy(obj)
 
 
-class MudObject(object):
+class MudObject:
     """
     Root class of all objects in the mud world
     All objects have an identifying short name (will be lowercased),
@@ -716,7 +716,7 @@ class Exit(MudObject):
         raise ActionRefused("It makes no sense to %s in that direction." % verb)
 
 
-class Stats(object):
+class Stats:
     def __init__(self):
         self.gender = 'n'
         self.level = 0
@@ -1191,7 +1191,7 @@ class Door(Exit):
             raise ValueError("door cannot be both locked and opened")
         self.linked_door = None
 
-    class DoorPairLink(object):
+    class DoorPairLink:
         def __init__(self, other_door, other_open_msg=None, other_close_msg=None):
             self.door = other_door
             self.open_msg = other_open_msg

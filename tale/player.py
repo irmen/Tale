@@ -252,13 +252,13 @@ class Player(base.Living, pubsub.Listener):
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
 
-class TextBuffer(object):
+class TextBuffer:
     """
     Buffered output for the text that the player will see on the screen.
     The buffer queues up output text into paragraphs.
     Notice that no actual output formatting is done here, that is performed elsewhere.
     """
-    class Paragraph(object):
+    class Paragraph:
         def __init__(self, format=True):
             self.format = format
             self.lines = []
@@ -315,7 +315,7 @@ class TextBuffer(object):
         return paragraphs
 
 
-class PlayerConnection(object):
+class PlayerConnection:
     """
     Represents a player and the i/o connection that is used for him/her.
     Provides high level i/o operations to input commands and write output for the player.

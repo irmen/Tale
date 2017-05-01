@@ -20,7 +20,7 @@ class VfsError(IOError):
     pass
 
 
-class Resource(object):
+class Resource:
     """Simple container of a resource name, its data (string or binary) and the mime type"""
     def __init__(self, name, data, mimetype, mtime):
         self.name = name
@@ -38,7 +38,7 @@ class Resource(object):
         return self.data[item]
 
 
-class VirtualFileSystem(object):
+class VirtualFileSystem:
     """
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
     If not readonly, you can write data as well. The API is loosely based on a dict.

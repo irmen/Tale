@@ -12,7 +12,7 @@ import io
 __all__ = ["get_shops"]
 
 
-class Shop(object):
+class Shop:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 

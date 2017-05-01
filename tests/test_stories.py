@@ -13,7 +13,7 @@ from tale.story import Storybase
 from tests.supportstuff import TestDriver
 
 
-class StoryCaseBase(object):
+class StoryCaseBase:
     def setUp(self):
         self.verbs = tale.soul.VERBS.copy()
         sys.path.insert(0, self.directory)

@@ -194,7 +194,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             return iobase.strip_text_styles(line)
 
 
-class ReadlineTabCompleter(object):
+class ReadlineTabCompleter:
     """
     Class used to provide tab-completion on the command line using readline.
     """

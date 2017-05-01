@@ -12,7 +12,7 @@ import io
 __all__ = ["get_objs"]
 
 
-class Obj(object):
+class Obj:
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 

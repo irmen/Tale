@@ -24,7 +24,7 @@ def roll_dice(number: int=1, sides: int=6) -> Tuple[int, List[int]]:
     return sum(values), values
 
 
-class MoneyFormatter(object):
+class MoneyFormatter:
     """Display and parsing of money. Supports 'fantasy' and 'modern' style money."""
     money_words_fantasy = {"gold", "silver", "copper", "coppers"}
     money_words_modern = {"dollar", "dollars", "cent", "cents"}
@@ -281,7 +281,7 @@ def storyname_to_filename(name: str) -> str:
     return filename
 
 
-class GameDateTime(object):
+class GameDateTime:
     """
     The datetime class that tracks game time.
     times_realtime means how much faster the game time is running than real time.
@@ -326,7 +326,7 @@ class GameDateTime(object):
         self.clock -= timedelta * self.times_realtime
 
 
-class Context(object):
+class Context:
     """
     A new instance of this context is passed to every command function and obj.destroy.
     Note that the player object isn't in here because it is already explicitly passed to these functions.

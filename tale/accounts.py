@@ -33,7 +33,7 @@ class Account:
         self.stats = stats
 
 
-class MudAccounts(object):
+class MudAccounts:
     """
     Handles the accounts (login, creation, etc) of mud users
 
