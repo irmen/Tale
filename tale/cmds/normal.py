@@ -111,7 +111,8 @@ def do_locate(player, parsed, ctx):
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
-                player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
+                player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." %
+                            (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
                 p("You can't find that.")
 
@@ -297,7 +298,8 @@ def do_loot(player, parsed, ctx):
 
 @cmd("take", "get", "steal", "rob")
 def do_take(player, parsed, ctx):
-    """Take something (or all things) from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
+    """Take something (or all things) from something or someone else.
+    Keep in mind that stealing and robbing is frowned upon, to say the least."""
     p = player.tell
     if len(parsed.args) == 0:
         raise ParseError("Take what?")
@@ -418,7 +420,8 @@ def take_stuff(player, items, container, where_str=None):
 def try_pick_up_living(player, living):
     if player.stats.size - living.stats.size >= 2:
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
-        player.tell("Even though {subj}'s small enough, you can't carry {obj} with you.".format(subj=living.subjective, obj=living.objective))
+        player.tell("Even though {subj}'s small enough, you can't carry {obj} with you."
+                    .format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
             player.tell("Trying to pick {0} up wasn't a very good idea, you've made {0} angry!".format(living.objective))
             living.start_attack(player)
@@ -582,7 +585,8 @@ def do_help(player, parsed, ctx):
         player.tell(", ".join(sorted(cmds_help)), end=True)
         player.tell("\n")
         if aliases:
-            player.tell("<bright>Synonyms:</> a different word for one of the commands mentioned above. Makes typing a bit more natural sometimes. The synonyms are: ")
+            player.tell("<bright>Synonyms:</> a different word for one of the commands mentioned above. "
+                        "Makes typing a bit more natural sometimes. The synonyms are: ")
             player.tell(", ".join(sorted(aliases)), end=True)
             player.tell("\n")
         player.tell("<bright>Abbreviations:</>")
@@ -740,7 +744,8 @@ def do_stats(player, parsed, ctx):
 
 @cmd("tell")
 def do_tell(player, parsed, ctx):
-    """Pass a message to another player or creature that nobody else can hear. The other player doesn't have to be in the same location as you."""
+    """Pass a message to another player or creature that nobody else can hear.
+    The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
     # we can't use parsed.who_order directly, because the message could be directed to a player
@@ -908,7 +913,8 @@ def do_who(player, parsed, ctx):
         otherplayer = ctx.driver.search_player(name)  # global player search
         if otherplayer:
             found = True
-            player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." % (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
+            player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." %
+                        (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
         try:
             do_examine(player, parsed, ctx)
         except ActionRefused:
@@ -921,7 +927,8 @@ def do_who(player, parsed, ctx):
         player.tell("\n")
         for conn in ctx.driver.all_players.values():
             other = conn.player
-            player.tell("<player>%s</> (%s): currently in <location>%s</>." % (lang.capital(other.name), other.title, other.location.name), end=True)
+            player.tell("<player>%s</> (%s): currently in <location>%s</>." %
+                        (lang.capital(other.name), other.title, other.location.name), end=True)
 
 
 @cmd("open", "close", "lock", "unlock")
@@ -943,7 +950,8 @@ def do_open(player, parsed, ctx):
             what = player.location.exits[what_name]
     if what:
         if with_item_name:
-            with_item = player.search_item(with_item_name, include_inventory=True, include_location=False, include_containers_in_inventory=False)
+            with_item = player.search_item(with_item_name,
+                                           include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
                 raise ActionRefused("You don't have <item>%s</>." % lang.a(with_item_name))
         getattr(what, parsed.verb)(player, with_item)
@@ -955,7 +963,9 @@ def do_open(player, parsed, ctx):
 @cmd("what")
 @disable_notify_action
 def do_what(player, parsed, ctx):
-    """Tries to answer your question about what something is. The topics range from game commands to location exits to creature and items. For more general help, try the 'help' command first."""
+    """Tries to answer your question about what something is.
+    The topics range from game commands to location exits to creature and items.
+    For more general help, try the 'help' command first."""
     p = player.tell
     if not parsed.args:
         raise ParseError("What do you mean?")

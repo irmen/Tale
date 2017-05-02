@@ -70,7 +70,8 @@ class James(NPC, Listener):
             mud_context.driver.defer(2, self.rat_scream, "smile at " + self.name)
 
 customer = James("James", "m", title="Sir James", description="Sir James is trying to sell something, it looks like a lamp.")
-lamp.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather unremarkable. There is something weird going on with the cord though!")
+lamp.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather unremarkable."
+                             " There is something weird going on with the cord though!")
 lamp.add_extradesc({"cord"}, "Even when the lamp doesn't move, the power cord keeps snaking around as if it were alive. How odd.")
 customer.insert(lamp, customer)
 shop.insert(customer, shop)

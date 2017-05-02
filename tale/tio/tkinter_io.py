@@ -108,10 +108,14 @@ class TaleWindow(Toplevel):
         if sys.platform == "darwin":
             self.fontsize_monospace += 3
             self.fontsize_normal += 5
-        self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal)
-        self.boldFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, weight=tkinter.font.BOLD)
-        self.italicFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, slant="italic")
-        self.underlinedFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'], self.fontsize_normal, underlined=True)
+        self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+                                  self.fontsize_normal)
+        self.boldFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+                                      self.fontsize_normal, weight=tkinter.font.BOLD)
+        self.italicFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+                                        self.fontsize_normal, slant="italic")
+        self.underlinedFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+                                            self.fontsize_normal, underlined=True)
         self.CreateWidgets()
         self.title(title)
         self.protocol("WM_DELETE_WINDOW", self.quit_button_clicked)
@@ -162,7 +166,8 @@ class TaleWindow(Toplevel):
         self.scrollbarView.pack(side=RIGHT, fill=Y)
         self.textView.pack(side=LEFT, expand=TRUE, fill=BOTH)
         # configure the text tags
-        self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon', spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20)
+        self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon',
+                                    spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20)
         self.textView.tag_configure('dim', foreground='brown')
         self.textView.tag_configure('bright', foreground='dark green', font=self.boldFont)
         self.textView.tag_configure('ul', font=self.underlinedFont)
@@ -258,7 +263,9 @@ class TaleWindow(Toplevel):
             self.textView.yview(END)
 
     def quit_button_clicked(self, event=None):
-        quit = tkinter.messagebox.askokcancel("Quit Confirmation", "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?", master=self)
+        quit = tkinter.messagebox.askokcancel("Quit Confirmation",
+                                              "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?",
+                                              master=self)
         if quit:
             self.gui.destroy(True)
             self.gui.window_closed()

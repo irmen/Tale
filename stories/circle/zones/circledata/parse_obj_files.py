@@ -78,7 +78,7 @@ def parse_file(objFile):
                     doneLineNum = lineNum
                     while content[doneLineNum] != '~':
                         doneLineNum += 1
-                    extendedArg.append((content[lineNum][:-1].split(), '\n'.join(content[lineNum + 1:doneLineNum])))  # keywords list, desc string
+                    extendedArg.append((content[lineNum][:-1].split(), '\n'.join(content[lineNum + 1:doneLineNum])))  # kw list, desc string
                     lineNum = doneLineNum + 1
 
                 elif content[lineNum] == 'A':
@@ -282,15 +282,17 @@ def parse_file(objFile):
                 '23': 'savebreath',
                 '24': 'savespell'}
 
-            spellNumbers = {'28': 'heal', '29': 'invisible', '26': 'fireball', '32': 'magic missile', '24': 'enchant weapon', '25': 'energy drain',
-                            '23': 'earthquake', '27': 'harm', '20': 'detect magic', '21': 'detect poison', '22': 'dispel evil', '49': 'group recall',
-                            '46': 'dispel good', '47': 'group armor', '44': 'sense life', '45': 'animate dead', '42': 'word of recall', '43': 'remove poison',
-                            '40': 'summon', '41': 'ventriloquate', '1': 'armor', '3': 'bless', '2': 'teleport', '5': 'burning hands', '4': 'blindness',
-                            '7': 'charm', '6': 'call lightning', '9': 'clone', '8': 'chill touch', '201': 'identify', '39': 'strength', '12': 'create food',
-                            '11': 'control weather', '10': 'color spray', '13': 'create water', '38': 'sleep', '15': 'cure critic', '14': 'cure blind',
-                            '17': 'curse', '16': 'cure light', '19': 'detect invis', '18': 'detect align', '31': 'locate object', '30': 'lightning bolt',
-                            '51': 'waterwalk', '36': 'sanctuary', '35': 'remove curse', '34': 'prot from evil', '33': 'poison', '37': 'shocking grasp',
-                            '48': 'group heal', '50': 'infravision'}
+            spellNumbers = {'28': 'heal', '29': 'invisible', '26': 'fireball', '32': 'magic missile', '24': 'enchant weapon',
+                            '25': 'energy drain', '23': 'earthquake', '27': 'harm', '20': 'detect magic', '21': 'detect poison',
+                            '22': 'dispel evil', '49': 'group recall', '46': 'dispel good', '47': 'group armor', '44': 'sense life',
+                            '45': 'animate dead', '42': 'word of recall', '43': 'remove poison', '40': 'summon', '41': 'ventriloquate',
+                            '1': 'armor', '3': 'bless', '2': 'teleport', '5': 'burning hands', '4': 'blindness', '7': 'charm',
+                            '6': 'call lightning', '9': 'clone', '8': 'chill touch', '201': 'identify', '39': 'strength',
+                            '12': 'create food', '11': 'control weather', '10': 'color spray', '13': 'create water', '38': 'sleep',
+                            '15': 'cure critic', '14': 'cure blind', '17': 'curse', '16': 'cure light', '19': 'detect invis',
+                            '18': 'detect align', '31': 'locate object', '30': 'lightning bolt', '51': 'waterwalk', '36': 'sanctuary',
+                            '35': 'remove curse', '34': 'prot from evil', '33': 'poison', '37': 'shocking grasp', '48': 'group heal',
+                            '50': 'infravision'}
 
             obj = Obj(
                 vnum=int(vNumArg),

@@ -339,10 +339,12 @@ def init_zones():
             if mobref.vnum in all_shopkeepers:
                 # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
                 if mob.inventory_size < len(mob.shop.forsale):
-                    raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" % (mobref.vnum, mob.shop.vnum))
+                    raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" %
+                                     (mobref.vnum, mob.shop.vnum))
                 for item in mob.shop.forsale:
                     if not any(i for i in mob.inventory if i.title == item.title):
-                        raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" % (item.vnum, item.title, mobref.vnum))
+                        raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" %
+                                         (item.vnum, item.title, mobref.vnum))
             loc = make_location(mobref.room)
             loc.insert(mob, None)
             num_mobs += 1

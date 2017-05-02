@@ -97,9 +97,11 @@ class WizardTowerEntry(Exit):
             raise ActionRefused("You can't go that way, the force-field is impenetrable.")
 
 
-lane.add_exits([WizardTowerEntry("west", "wizardtower.hall", "To the west is the wizard's tower. It seems to be protected by a force-field.")])
+lane.add_exits([WizardTowerEntry("west", "wizardtower.hall",
+                                 "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
-towncrier = TownCrier("laish", "f", title="Laish the town crier", description="The town crier is awfully quiet today. She seems rather preoccupied with something.")
+towncrier = TownCrier("laish", "f", title="Laish the town crier",
+                      description="The town crier is awfully quiet today. She seems rather preoccupied with something.")
 towncrier.aliases = {"crier", "town crier"}
 
 idiot = VillageIdiot("idiot", "m", title="blubbering idiot", description="""
@@ -135,7 +137,8 @@ alley.add_exits([
     Exit(["north", "square"], square, "You can go north which brings you back to the square."),
 ])
 
-square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south.", "It looks like a very small alley, but you can walk through it.")])
+square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south.",
+                       "It looks like a very small alley, but you can walk through it.")])
 
 
 class GameEnd(Location):
@@ -230,7 +233,8 @@ class Computer(Item):
             if "hi" in parsed.args or "hello" in parsed.args:
                 self.process_typed_command("hello", "", actor)
             else:
-                actor.tell("The computer beeps quietly. The screen shows: \"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
+                actor.tell("The computer beeps quietly. The screen shows: "
+                           "\"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
 
     def handle_verb(self, parsed, actor):
         if parsed.verb == "hack":

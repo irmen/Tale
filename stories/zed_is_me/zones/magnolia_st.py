@@ -38,12 +38,14 @@ street1.add_exits([
     Exit(["town", "east"], street2, "The street extends eastwards, towards the rest of the town.")
 ])
 
-playground_gate = Door(["north", "gate", "playground"], "rose_st.playground", "To the north there is a small gate that connects to the children's playground.", opened=False)
+playground_gate = Door(["north", "gate", "playground"], "rose_st.playground",
+                       "To the north there is a small gate that connects to the children's playground.", opened=False)
 street_gate = playground_gate.reverse_door(["gate", "south"], street2, "The gate that leads back to Magnolia Street is south.")
 street2.add_exits([
     Exit(["west"], street1, "The street extends to the west, where your house is."),
     Exit(["east", "crossing"], "rose_st.crossing", "There's a crossing to the east."),
-    Exit(["south", "house", "neighbors"], houses.neighbors_house, "You can see the house from the neighbors across the street, to the south."),
+    Exit(["south", "house", "neighbors"], houses.neighbors_house,
+         "You can see the house from the neighbors across the street, to the south."),
     playground_gate
 ])
 

@@ -52,7 +52,8 @@ attic = Location("Tower attic",
     layer of dust.
     """)
 attic.add_extradesc({"dust", "stuff", "scrolls"}, "The scrolls look ancient. One looks like a spell!")
-attic.add_extradesc({"spell"}, "The scroll looks like it contains a spell, but on closer inspection, it has become too faded to be understood anymore.")
+attic.add_extradesc({"spell"}, "The scroll looks like it contains a spell, but on closer inspection, "
+                               "it has become too faded to be understood anymore.")
 
 
 kitchen = Location("Tower kitchen",

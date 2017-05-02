@@ -77,7 +77,7 @@ class StatType(enum.Enum):
     STAMINA = "sta"
     STRENGTH = "str"
     WISDOM = "wis"
-    
+
 
 _races = {
  'amphibian': {'body': BodyType.QUADRUPED,
@@ -992,11 +992,17 @@ races = {}  # type: Dict[str, Race]
 
 
 def _create_race_defs():
-    flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin', 'insect', 'pegasus', 'vehicle', 'wraith'}
+    flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin',
+                    'insect', 'pegasus', 'vehicle', 'wraith'}
     limbless_races = {'blob', 'elemental', 'fish', 'plant', 'slug', 'snake', 'tree', 'vehicle', 'viper'}
-    nonbiting_races = {'android', 'bot', 'cow', 'dark-elf', 'deer', 'dummy', 'elemental', 'elf', 'faerie', 'god', 'golem', 'mech', 'plant', 'strider', 'vehicle', 'vulcan'}
-    swimming_races = {'amphibian', 'android', 'artrell', 'bear', 'bot', 'bugbear', 'cat', 'dark-elf', 'demi-god', 'demon', 'dragon', 'elephant', 'elf', 'fish', 'giant', 'gnoll', 'gnome', 'goblin', 'god', 'half-elf', 'halfling', 'hobbit', 'human', 'kender', 'lizard', 'nymph', 'replicant', 'rodent', 'troll', 'vehicle', 'vulcan'}
-    nonmeat_races = {'android', 'balrog', 'bot', 'dummy', 'elemental', 'god', 'golem', 'mech', 'plant', 'strider', 'tree', 'vehicle', 'wraith'}
+    nonbiting_races = {'android', 'bot', 'cow', 'dark-elf', 'deer', 'dummy', 'elemental', 'elf', 'faerie',
+                       'god', 'golem', 'mech', 'plant', 'strider', 'vehicle', 'vulcan'}
+    swimming_races = {'amphibian', 'android', 'artrell', 'bear', 'bot', 'bugbear', 'cat', 'dark-elf',
+                      'demi-god', 'demon', 'dragon', 'elephant', 'elf', 'fish', 'giant', 'gnoll', 'gnome',
+                      'goblin', 'god', 'half-elf', 'halfling', 'hobbit', 'human', 'kender', 'lizard', 'nymph',
+                      'replicant', 'rodent', 'troll', 'vehicle', 'vulcan'}
+    nonmeat_races = {'android', 'balrog', 'bot', 'dummy', 'elemental', 'god', 'golem', 'mech',
+                     'plant', 'strider', 'tree', 'vehicle', 'wraith'}
 
     global races
     for race, attrs in _races.items():
@@ -1008,7 +1014,8 @@ def _create_race_defs():
                       swimming=race in swimming_races,
                       nonmeat=race in nonmeat_races,
                       playable=race in playable_races)
-        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"], mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)
+        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],
+                           mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)
     _all_races = set(_races)
     assert len(swimming_races - _all_races) == 0
     assert len(flying_races - _all_races) == 0

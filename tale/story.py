@@ -36,7 +36,7 @@ class MoneyType(enum.Enum):
 class StoryConfig:
     """
     Story configuration settings.
-    The reason this is in a separate class, is that these settings are all simple values 
+    The reason this is in a separate class, is that these settings are all simple values
     and are serializable, so they can be saved to disk as part of a save game file.
     """
     def __init__(self):
@@ -53,7 +53,7 @@ class StoryConfig:
         self.money_type = MoneyType.NOTHING  # money type modern/fantasy/nothing
         self.server_tick_method = TickMethod.COMMAND   # command (waits for player entry) or timer (async timer driven)
         self.server_tick_time = 5.0          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
-        self.gametime_to_realtime = 1        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
+        self.gametime_to_realtime = 1        # meaning: game time is X times real time (only used with "timer" tick method) (>=0)
         self.max_wait_hours = 2              # the max. number of hours (gametime) the player is allowed to wait (>=0)
         self.display_gametime = False        # enable/disable display of the game time at certain moments
         self.epoch = None                    # type: datetime.datetime # start date/time of the game clock

@@ -142,7 +142,8 @@ class MudAccounts:
     def all_accounts(self, having_privilege=None):
         with self._sqlite_connect() as conn:
             if having_privilege:
-                result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=?", (having_privilege,)).fetchall()
+                result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=?",
+                                      (having_privilege,)).fetchall()
             else:
                 result = conn.execute("SELECT id FROM Account").fetchall()
             account_ids = [ar["id"] for ar in result]
@@ -176,7 +177,7 @@ class MudAccounts:
         if len(password) >= 6:
             if re.search("[a-zA-z]", password) and re.search("[0-9]", password):
                 return password
-        raise ValueError("Password should be minimum length 6. It should contain letters, at least one number, and optionally other characters.")
+        raise ValueError("Password should be minimum length 6, contain letters, at least one number, and optionally other characters.")
 
     @staticmethod
     def accept_name(name):
@@ -216,7 +217,8 @@ class MudAccounts:
             result = conn.execute("SELECT COUNT(*) FROM Account WHERE name=?", (name,)).fetchone()[0]
             if result > 0:
                 raise ValueError("That name is not available.")
-            result = conn.execute("INSERT INTO Account('name', 'email', 'pw_hash', 'pw_salt', 'created') VALUES (?,?,?,?,?)", (name, email, pwhash, salt, created))
+            result = conn.execute("INSERT INTO Account('name', 'email', 'pw_hash', 'pw_salt', 'created') VALUES (?,?,?,?,?)",
+                                  (name, email, pwhash, salt, created))
             for privilege in privileges:
                 conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (result.lastrowid, privilege))
             self._store_stats(conn, result.lastrowid, stats)
@@ -317,6 +319,9 @@ binladen
 chink
 cancer
 kanker
+typhus
+tering
+soa
 aids
 bitch
 motherfucker

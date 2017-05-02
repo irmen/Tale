@@ -68,7 +68,8 @@ class Driver(pubsub.Listener):
             If it doesn't, refer to the options to see how to launch it manually instead.
             """ % tale_version_str)
         parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
-        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)', default=DEFAULT_SCREEN_DELAY)
+        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)',
+                            default=DEFAULT_SCREEN_DELAY)
         parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
         parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
         parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
@@ -105,7 +106,8 @@ class Driver(pubsub.Listener):
             # There's only one mode this story runs in. Just select that one.
             story_mode = list(self.story.config.supported_modes)[0]
         if story_mode not in self.story.config.supported_modes:
-            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
+            raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" %
+                             (args.mode, list(self.story.config.supported_modes)))
         self.story.config.mud_host = self.story.config.mud_host or "localhost"
         self.story.config.mud_port = self.story.config.mud_port or 8180
         self.story.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
@@ -273,12 +275,14 @@ class Driver(pubsub.Listener):
         conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
         del self.all_players[name]
         conn.write_output()
-        self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
+        # wait a bit to allow the player's screen to display the last goodbye message before killing the connection
+        self.defer(1, conn.destroy)
 
     def __login_dialog_mud_create_admin(self, conn):
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
-        conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
+        conn.output("<bright>Welcome. There is no admin user registered. "
+                    "You'll have to create the initial admin user to be able to start the mud.</>")
         while True:
             conn.output("Creating new admin user.")
             name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
@@ -289,7 +293,8 @@ class Driver(pubsub.Listener):
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             # review the account
             conn.player.tell("<bright>Please review your new character.</>", end=True)
-            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" % (name, lang.GENDERS[gender], race, email), end=True)
+            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" %
+                             (name, lang.GENDERS[gender], race, email), end=True)
             if not (yield "input", ("You cannot change your name later. Do you want to create this admin account?", lang.yesno)):
                 continue
             else:
@@ -304,7 +309,8 @@ class Driver(pubsub.Listener):
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
-        conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
+        conn.output("<dim>If you are not yet known with us, you can simply type in a new name. "
+                    "Otherwise use the name you registered with.</>\n")
         conn.output("\n")
         while True:
             name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
@@ -766,7 +772,8 @@ class Driver(pubsub.Listener):
                 if self.story.config.server_mode == GameMode.MUD and conn.idle_time > idle_limit:
                     idle_limit_minutes = int(idle_limit / 60)
                     conn.player.tell("\n")
-                    conn.player.tell("<it><rev>Automatic logout:  You have been logged out because you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
+                    conn.player.tell("<it><rev>Automatic logout:  You have been logged out because "
+                                     "you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
                     conn.player.tell("\n")
                     conn.player.tell_others("{Title} has been idling around for too long.")
                     self._disconnect_mud_player(conn)   # remove players who stay idle too long
@@ -872,7 +879,7 @@ class Driver(pubsub.Listener):
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
-            modulename += "."+name
+            modulename += "." + name
             if hasattr(location, name):
                 location = getattr(location, name)
             else:
@@ -880,16 +887,16 @@ class Driver(pubsub.Listener):
                     module = importlib.import_module(modulename)
                     location = module
                 except ImportError:
-                    raise errors.TaleError("location not found: "+location_name)
+                    raise errors.TaleError("location not found: " + location_name)
         return location
 
     def load_zones(self, zone_names):  # XXX autoload zones, don't specify them in storyconfig
         """Pre-load the provided zones (essentially, load the named modules from the zones package"""
         for zone in zone_names:
             try:
-                module = importlib.import_module("zones."+zone)
+                module = importlib.import_module("zones." + zone)
             except ImportError:
-                raise errors.TaleError("zone not found: "+zone)
+                raise errors.TaleError("zone not found: " + zone)
             module.init(self)
 
     def __load_saved_game(self, player):

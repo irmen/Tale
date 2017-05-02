@@ -14,10 +14,13 @@ def init(driver):
 # ----------------- START House & Kitchen  -------------------------
 
 livingroom = Location("Living room", "The living room in your little home. Your big TV hangs on a wall.")
-livingroom.add_extradesc({"plasma", "tv"}, "You recently bought a bigger TV, but haven't yet found the time to actually watch anything.")
+livingroom.add_extradesc({"plasma", "tv"},
+                         "You recently bought a bigger TV, but haven't yet found the time to actually watch anything.")
 kitchen = Location("Kitchen", "A small but well supplied kitchen. Rather than ordering take-away, "
-                              "you prefer cooking your own meals -- unlike most of the other people you know in town. A window lets you look outside.")
-kitchen.add_extradesc({"window", "outside"}, "Through the kitchen window you can see your small garden and behind that, the children's playground.")
+                              "you prefer cooking your own meals -- unlike most of the other people you know in town. "
+                              "A window lets you look outside.")
+kitchen.add_extradesc({"window", "outside"},
+                      "Through the kitchen window you can see your small garden and behind that, the children's playground.")
 
 #  Exits
 
@@ -52,7 +55,8 @@ bedroom.add_extradesc({"pocket", "trousers"}, "There's something in the pocket."
 garden = Location("Neighbor's Garden", "The garden of your neighbor across the street. "
                                        "Behind some trees to the south you see what appears to be a storage building of a shop.")
 garden.add_extradesc({"ladder"}, "It leads up towards a window.")
-garden.add_extradesc({"trees", "south", "building"}, "The building behind the trees could very well be the meat storage room of the butcher shop in town.")
+garden.add_extradesc({"trees", "south", "building"},
+                     "The building behind the trees could very well be the meat storage room of the butcher shop in town.")
 garden.add_exits([
     Exit(["ladder", "up"], bedroom, "A ladder leads up towards a window in the house."),
     Exit(["fence", "street"], "magnolia_st.street2", "You can step over a low fence back onto the street if you wish."),

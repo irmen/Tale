@@ -190,7 +190,8 @@ class Shopkeeper(NPC):
         actor.tell("\"\n", end=True)
         # don't show shop.forsale, it is for the code to know what items have limitless supply
         if self.inventory_size == 0:
-            actor.tell("%s apologizes, \"I'm sorry, but our stuff is all gone for the moment. Come back later.\"" % lang.capital(self.subjective))
+            actor.tell("%s apologizes, \"I'm sorry, but our stuff is all gone for the moment. Come back later.\"" %
+                       lang.capital(self.subjective))
             self.do_socialize("shrug at " + actor.name)
         else:
             actor.tell("%s shows you a list of what is in stock at the moment:" % lang.capital(self.subjective), end=True)
@@ -327,7 +328,8 @@ class Shopkeeper(NPC):
         if self.shop.banks_money:
             # shopkeeper puts money over a limit in the bank
             if self.money > banking_money_limit:
-                self.tell_others("Swiftly, %s puts some excess money away in a secret stash somewhere. You failed to see where it went." % self.title)
+                self.tell_others("Swiftly, %s puts some excess money away in a secret stash somewhere. "
+                                 "You failed to see where it went." % self.title)
                 self.money = banking_money_limit
         return True
 

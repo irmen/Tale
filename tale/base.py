@@ -141,7 +141,9 @@ class MudObject:
         self.name = self._description = self._title = self._short_description = None
         self.init_names(name, title, description, short_description)
         self.aliases = set()
-        self.verbs = {}   # any custom verbs that need to be recognised (verb->docstring mapping. Verb handling is done via handle_verb() callbacks)
+        # any custom verbs that need to be recognised (verb->docstring mapping),
+        # verb handling is done via handle_verb() callbacks.
+        self.verbs = {}
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
@@ -687,7 +689,8 @@ class Exit(MudObject):
                     module = getattr(module, name)
                 target = getattr(module, target_object)
             except AttributeError:
-                raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" % (target_module, target_object, self.short_description))
+                raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" %
+                                     (target_module, target_object, self.short_description))
             assert isinstance(target, Location)
             self.target = target
             self.title = "Exit to " + target.title
@@ -995,7 +998,7 @@ class Living(MudObject):
         """
         try:
             if parsed.qualifier:
-                raise ParseError("That action doesn't support qualifiers.")  # for now, qualifiers are only supported on soul-verbs (emotes).
+                raise ParseError("That action doesn't support qualifiers.")  # for now, quals are only supported on soul-verbs (emotes).
             custom_verbs = set(ctx.driver.current_custom_verbs(self))
             if parsed.verb in custom_verbs:
                 if self.location.handle_verb(parsed, self):       # note: can't deal with async dialogs

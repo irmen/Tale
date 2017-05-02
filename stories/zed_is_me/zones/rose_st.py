@@ -46,7 +46,8 @@ playground = Location("Playground", "Children's playground. You see a rusty merr
                                     "To the west, a house is visible.")
 playground.add_extradesc({"west", "house"}, "You can see your house from here!")
 playground.add_exits([
-    Door("fence", _limbo, "On the north end of the playground is a sturdy looking padlocked fence.", locked=True, opened=False),  # this door is never meant to be opened
+    Door("fence", _limbo, "On the north end of the playground is a sturdy looking padlocked fence.",
+         locked=True, opened=False),  # this door is never meant to be opened
     Exit(["east", "street"], north_street, "Rose Street is back east."),
     zones.magnolia_st.street_gate
 ])
@@ -59,7 +60,9 @@ carpark.add_exits([
     Exit(["gate", "street"], north_street, "Rose street is back through the gate.")
 ])
 
-parking_gate = Door(["gate", "parking"], carpark, "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.", locked=True, opened=False)
+parking_gate = Door(["gate", "parking"], carpark,
+                    "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.",
+                    locked=True, opened=False)
 parking_gate.key_code = 111
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
@@ -83,7 +86,8 @@ south_street.add_exits([
     Exit(["south", "butcher"], butcher, "The butcher shop is to the south.")
 ])
 
-parking_key = Key("key", "rusty key", "It is what appears to be an old key, with a label on it.", "On the ground is a key, it's become quite rusty.")
+parking_key = Key("key", "rusty key", "It is what appears to be an old key, with a label on it.",
+                  "On the ground is a key, it's become quite rusty.")
 parking_key.key_for(parking_gate)
 parking_key.add_extradesc({"label"}, "The label says: 'parking area gate'.")
 

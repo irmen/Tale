@@ -12,7 +12,7 @@ from . import styleaware_wrapper, iobase
 try:
     from . import colorama_patched as colorama
     colorama.init()
-    assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (preferrably 0.3.6+)"
+    assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (0.3.6+)"
 except ImportError:
     from . import ansi_codes as colorama        # fallback
 
@@ -139,7 +139,8 @@ class ConsoleIo(iobase.IoAdapterBase):
         if not paragraphs:
             return None
         indent = " " * params["indent"]
-        wrapper = styleaware_wrapper.StyleTagsAwareTextWrapper(width=params["width"], fix_sentence_endings=True, initial_indent=indent, subsequent_indent=indent)
+        wrapper = styleaware_wrapper.StyleTagsAwareTextWrapper(width=params["width"], fix_sentence_endings=True,
+                                                               initial_indent=indent, subsequent_indent=indent)
         output = []
         for txt, formatted in paragraphs:
             if formatted:

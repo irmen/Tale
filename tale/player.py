@@ -331,7 +331,8 @@ class PlayerConnection:
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
         """
-        formatted = self.io.render_output(self.player._output.get_paragraphs(), width=self.player.screen_width, indent=self.player.screen_indent)
+        formatted = self.io.render_output(self.player._output.get_paragraphs(),
+                                          width=self.player.screen_width, indent=self.player.screen_indent)
         if formatted and self.player.transcript:
             self.player.transcript.write(formatted)
         return formatted or None

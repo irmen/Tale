@@ -61,7 +61,8 @@ def cmdfunc_signature_valid(func):
     expected_params = ["player", "parsed", "ctx"]
     if list(sig.parameters) != expected_params or sig.return_annotation not in (sig.empty, None):
         return False
-    return all(sig.parameters[p].default is sig.empty and sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
+    return all(sig.parameters[p].default is sig.empty and
+               sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
 
 
 def disable_notify_action(func):

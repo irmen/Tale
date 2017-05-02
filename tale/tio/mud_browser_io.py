@@ -50,7 +50,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver):
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
-        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app, handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
+        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app,
+                                  handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
 
     def wsgi_handle_story(self, environ, parameters, start_response):
@@ -78,7 +79,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             return self.wsgi_internal_server_error(start_response, "not logged in")
         if conn.player:
             self.driver._disconnect_mud_player(conn)
-        raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>")
+        raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>"
+                                             "Session ended. You may close this window/tab.</body></html>")
 
     def wsgi_handle_about(self, environ, parameters, start_response):
         # about page

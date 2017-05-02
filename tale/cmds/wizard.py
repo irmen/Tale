@@ -459,7 +459,8 @@ def do_events(player, parsed, ctx):
         txt.append("  " + str(hb))
     player.tell(*txt, format=False)
     num_shown = min(50, len(driver.deferreds))
-    player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" % (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
+    player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" %
+                (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
     txt = ["<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
     for d in sorted(driver.deferreds)[:50]:
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
@@ -578,7 +579,8 @@ def do_remove_priv(player, parsed, ctx):
         player.tell("Privileges of account <player>%s</> updated to: %s." % (name, new_privs))
         other = ctx.driver.search_player(name)
         if other:
-            other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. Sorry for the inconvenience." % lang.capital(player.title))
+            other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. "
+                       "Sorry for the inconvenience." % lang.capital(player.title))
             ctx.driver.defer(1, ctx.driver._disconnect_mud_player, other)
             player.tell("Player has been notified and forced to log off.")
     else:
