@@ -6,11 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import sys
+from typing import Optional
 from tale.story import *
-from tale.main import run_story
 from tale.player import Player
 from tale.driver import Driver
-from typing import Optional
 
 
 class Story(StoryBase):
@@ -80,4 +79,4 @@ class Story(StoryBase):
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
-    run_story(sys.path[0])
+    Driver().start(game=sys.path[0])

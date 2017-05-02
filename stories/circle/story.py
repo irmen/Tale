@@ -9,7 +9,6 @@ import sys
 import datetime
 from typing import Optional
 from tale.story import *
-from tale.main import run_story
 from tale.player import Player
 from tale.driver import Driver
 from zones import init_zones
@@ -74,4 +73,4 @@ class Story(StoryBase):
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
-    run_story(sys.path[0])
+    Driver().start(game=sys.path[0])

@@ -9,7 +9,7 @@ import os
 import sys
 import tale
 from tale.story import *
-from tale.main import run_story
+from tale.main import run_from_cmdline
 
 
 class Story(StoryBase):
@@ -58,8 +58,8 @@ class Story(StoryBase):
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
-    gamedir = os.path.dirname(__file__)
-    gui = len(sys.argv) > 1 and sys.argv[1] == "--gui"
-    web = len(sys.argv) > 1 and sys.argv[1] == "--web"
-    mud = len(sys.argv) > 1 and sys.argv[1] == "--mud"
-    run_story(gamedir, gui, web, mud)
+    gamedir = os.path.dirname(__file__)   # XXX won't work from zipfile deployment
+    cmdline_args = sys.argv[1:]
+    cmdline_args.insert(0, "--game")
+    cmdline_args.insert(1, gamedir)
+    run_from_cmdline(cmdline_args)

@@ -19,5 +19,4 @@ if not tale_from_lib:
         tkmsgbox.showerror("Installation error", "Cannot launch the game:\nTale is not properly installed.", master=root)
         raise SystemExit()
 
-driver = tale.driver.Driver()
-driver.start(["--game", ".", "--gui"])
+tale.driver.Driver().start(game=".", gui=True)

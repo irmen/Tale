@@ -12,12 +12,10 @@ import sys
 import time
 import os
 import heapq
-import argparse
 import pickle
 import inspect
 import threading
 import types
-import traceback
 import appdirs
 import pkgutil
 import importlib
@@ -60,57 +58,34 @@ class Driver(pubsub.Listener):
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
 
-    def start(self, command_line_args):   # XXX don't parse cmdline args here
-        """Parse the command line arguments and start the driver accordingly."""
-        parser = argparse.ArgumentParser(description="""
-            Tale framework %s game driver. Use this to launch a game and specify some settings.
-            Sometimes the game will provide its own startup script that invokes this automatically.
-            If it doesn't, refer to the options to see how to launch it manually instead.
-            """ % tale_version_str)
-        parser.add_argument('-g', '--game', type=str, help='path to the game directory', required=True)
-        parser.add_argument('-d', '--delay', type=int, help='screen output delay for IF mode (milliseconds, 0=no delay)',
-                            default=DEFAULT_SCREEN_DELAY)
-        parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
-        parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
-        parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
-        parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
-        args = parser.parse_args(command_line_args)
-        try:
-            self.__start(args)
-        except Exception:
-            if args.gui:
-                tb = traceback.format_exc()
-                from .tio import tkinter_io
-                tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
-            raise
-
-    def __start(self, args):
+    def start(self, game: str, mode: GameMode=GameMode.IF, gui: bool=False, web: bool=False,
+              wizard: bool=False, delay: int=DEFAULT_SCREEN_DELAY) -> None:
         """Start the driver from a parsed set of arguments"""
-        if os.path.isdir(args.game):
+        if os.path.isdir(game):
             # cd into the game directory (we can import it then), and load its config and zones
-            os.chdir(args.game)
+            os.chdir(game)
             sys.path.insert(0, os.curdir)
-        elif os.path.isfile(args.game):
+        elif os.path.isfile(game):
             # the game argument points to a file, assume it is a zipfile, add it to the import path
-            sys.path.insert(0, args.game)
+            sys.path.insert(0, game)
         else:
             raise IOError("Cannot find specified game")
-        assert "story" not in sys.modules
+        mode = GameMode(mode)
+        assert "story" not in sys.modules, "cannot start new story if it was already loaded before"
         import story
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()  # type: StoryBase
         self.story._verify(self)
-        story_mode = GameMode(args.mode)
-        if len(self.story.config.supported_modes) == 1 and story_mode != GameMode.MUD:
+        if len(self.story.config.supported_modes) == 1 and mode != GameMode.MUD:
             # There's only one mode this story runs in. Just select that one.
-            story_mode = list(self.story.config.supported_modes)[0]
-        if story_mode not in self.story.config.supported_modes:
+            mode = list(self.story.config.supported_modes)[0]
+        if mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" %
-                             (args.mode, list(self.story.config.supported_modes)))
+                             (mode, list(self.story.config.supported_modes)))
         self.story.config.mud_host = self.story.config.mud_host or "localhost"
         self.story.config.mud_port = self.story.config.mud_port or 8180
-        self.story.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        self.story.config.server_mode = mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         if self.story.config.server_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and some other stuff in the global context.
@@ -156,18 +131,18 @@ class Driver(pubsub.Listener):
         for x in self.unbound_exits:
             x._bind_target(self.zones)
         del self.unbound_exits
-        if args.delay < 0 or args.delay > 100:
+        if delay < 0 or delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
         sys.excepthook = util.excepthook  # install custom verbose crash reporter
         if self.story.config.server_mode == GameMode.IF:
             # create the single player mode player automatically
-            if args.gui:
+            if gui:
                 player_io = "gui"
-            elif args.web:
+            elif web:
                 player_io = "web"
             else:
                 player_io = "console"
-            connection = self._connect_if_player(player_io, args.delay, args.wizard)
+            connection = self._connect_if_player(player_io, delay, wizard)
             # create the login dialog
             topic_async_dialogs.send((connection, self.__login_dialog_if(connection)))
             # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
