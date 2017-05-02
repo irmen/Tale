@@ -578,8 +578,7 @@ class Soul:
     Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.
     """
     def __init__(self) -> None:
-        self.previously_parsed = None  # type: ParseResult
-        # XXX don't expose previously_parsed directly
+        self.__previously_parsed = None  # type: ParseResult
 
     def is_verb(self, verb: str) -> bool:
         return verb in VERBS
@@ -857,7 +856,7 @@ class Soul:
             if not message_verb and not collect_message:
                 word = word.rstrip(",")
             if word in ("them", "him", "her", "it"):
-                if self.previously_parsed:
+                if self.__previously_parsed:
                     # try to connect the pronoun to a previously parsed item/living
                     who_list = self.match_previously_parsed(player, word)
                     if who_list:
@@ -1038,6 +1037,9 @@ class Soul:
                            adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
+    def remember_previous_parse(self, parsed: ParseResult) -> None:
+        self.__previously_parsed = parsed
+
     def match_previously_parsed(self, player, pronoun: str) -> List[Tuple[Any, str]]:
         """
         Try to connect the pronoun (it, him, her, them) to a previously parsed item/living.
@@ -1047,7 +1049,7 @@ class Soul:
         """
         if pronoun == "them":
             # plural (any item/living qualifies)
-            matches = list(self.previously_parsed.who_order)
+            matches = list(self.__previously_parsed.who_order)
             for who in matches:
                 if not player.search_item(who.name) and who not in player.location.livings:
                     player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
@@ -1057,7 +1059,7 @@ class Soul:
                 return [(who, who.name) for who in matches]
             else:
                 raise ParseError("It is not clear who you're referring to.")
-        for who in self.previously_parsed.who_order:
+        for who in self.__previously_parsed.who_order:
             # first see if it is an exit
             if pronoun == "it":
                 for direction, exit in player.location.exits.items():

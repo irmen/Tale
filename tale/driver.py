@@ -407,7 +407,7 @@ class Driver(pubsub.Listener):
             if conn.player:
                 conn.write_output()   # immediately give feedback (if any) once the dialog ends
         except errors.ActionRefused as x:
-            conn.player.remember_parsed()
+            conn.player.remember_previous_parse()
             conn.player.tell(str(x))
             conn.write_output()
         except errors.ParseError as x:
@@ -626,7 +626,7 @@ class Driver(pubsub.Listener):
             try:
                 p.tell("\n")
                 self.__process_player_command(cmd, conn)
-                p.remember_parsed()
+                p.remember_previous_parse()
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
             except soul.UnknownVerbException as x:
@@ -638,7 +638,7 @@ class Driver(pubsub.Listener):
                     if x.verb[0].isupper():
                         p.tell("Just type in lowercase ('%s')." % x.verb.lower())
             except errors.ActionRefused as x:
-                p.remember_parsed()
+                p.remember_previous_parse()
                 p.tell(str(x))
             except errors.ParseError as x:
                 p.tell(str(x))

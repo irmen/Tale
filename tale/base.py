@@ -798,7 +798,7 @@ class Living(MudObject):
         self.default_verb = "examine"
         self.__inventory = set()
         self.previous_commandline = None
-        self._previous_parsed = None  # type: tale.soul.ParseResult
+        self._previous_parse = None  # type: tale.soul.ParseResult
         super().__init__(name, title, description, short_description)
 
     def init_gender(self, gender):
@@ -932,7 +932,7 @@ class Living(MudObject):
                 raise ActionRefused("Can't repeat your previous action.")
         self.previous_commandline = commandline
         parsed = self.soul.parse(self, commandline, external_verbs)
-        self._previous_parsed = parsed
+        self._previous_parse = parsed
         if external_verbs and parsed.verb in external_verbs:
             raise soul.NonSoulVerb(parsed)
         if parsed.verb not in soul.NONLIVING_OK_VERBS:
@@ -947,9 +947,9 @@ class Living(MudObject):
         if any(isinstance(w, Exit) for w in parsed.who_info):
             raise ParseError("That doesn't make much sense.")
 
-    def remember_parsed(self):
+    def remember_previous_parse(self):
         """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
-        self.soul.previously_parsed = self._previous_parsed
+        self.soul.remember_previous_parse(self._previous_parse)
 
     def do_socialize(self, cmdline, external_verbs=frozenset()):
         """perform a command line with a socialize/soul verb on the living's behalf"""
