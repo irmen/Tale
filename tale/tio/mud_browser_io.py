@@ -50,7 +50,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver):
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
-        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app,
+        wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
 
@@ -94,8 +94,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         player_table.append("</pre>")
         player_table = "\n".join(player_table)
         txt = resource.data.format(tale_version=tale_version_str,
-                                   story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
+                                   story_version=self.driver.story.config.version,
+                                   story_name=self.driver.story.config.name,
                                    uptime="%d:%02d:%02d" % self.driver.uptime,
                                    starttime=self.driver.server_started,
                                    num_players=len(self.driver.all_players),

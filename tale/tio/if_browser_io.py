@@ -228,10 +228,10 @@ class TaleWsgiAppBase:
             return self.wsgi_not_modified(start_response)
         headers.append(("ETag", etag))
         start_response("200 OK", headers)
-        txt = resource.data.format(story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
+        txt = resource.data.format(story_version=self.driver.story.config.version,
+                                   story_name=self.driver.story.config.name,
+                                   story_author=self.driver.story.config.author,
+                                   story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
     def wsgi_handle_story(self, environ, parameters, start_response):
@@ -243,10 +243,10 @@ class TaleWsgiAppBase:
             return self.wsgi_not_modified(start_response)
         headers.append(("ETag", etag))
         start_response('200 OK', headers)
-        txt = resource.data.format(story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
+        txt = resource.data.format(story_version=self.driver.story.config.version,
+                                   story_name=self.driver.story.config.name,
+                                   story_author=self.driver.story.config.author,
+                                   story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
     def wsgi_handle_text(self, environ, parameters, start_response):
@@ -304,8 +304,8 @@ class TaleWsgiAppBase:
 
     def wsgi_handle_license(self, environ, parameters, start_response):
         license = "The author hasn't provided any license information."
-        if self.driver.config.license_file:
-            license = self.driver.resources[self.driver.config.license_file].data
+        if self.driver.story.config.license_file:
+            license = self.driver.resources[self.driver.story.config.license_file].data
         resource = vfs.internal_resources["web/about_license.html"]
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         etag = self.etag(id(self), time.mktime(self.driver.server_started.timetuple()), resource.mtime, "license")
@@ -315,10 +315,10 @@ class TaleWsgiAppBase:
         headers.append(("ETag", etag))
         start_response("200 OK", headers)
         txt = resource.data.format(license=license,
-                                   story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
-                                   story_author=self.driver.config.author,
-                                   story_author_email=self.driver.config.author_address)
+                                   story_version=self.driver.story.config.version,
+                                   story_name=self.driver.story.config.name,
+                                   story_author=self.driver.story.config.author,
+                                   story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
     def wsgi_handle_static(self, environ, path, start_response):
@@ -377,7 +377,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver, player_connection):
         wsgi_app = SessionMiddleware(cls(driver, player_connection))
-        wsgi_server = make_server(driver.config.mud_host, driver.config.mud_port, app=wsgi_app,
+        wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
         return wsgi_server
@@ -395,8 +395,8 @@ class TaleWsgiApp(TaleWsgiAppBase):
         start_response("200 OK", [('Content-Type', 'text/html; charset=utf-8')])
         resource = vfs.internal_resources["web/about.html"]
         txt = resource.data.format(tale_version=tale_version_str,
-                                   story_version=self.driver.config.version,
-                                   story_name=self.driver.config.name,
+                                   story_version=self.driver.story.config.version,
+                                   story_name=self.driver.story.config.name,
                                    uptime="%d:%02d:%02d" % self.driver.uptime,
                                    starttime=self.driver.server_started)
         return [txt.encode("utf-8")]
