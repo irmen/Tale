@@ -879,7 +879,7 @@ class Driver(pubsub.Listener):
                 try:
                     module = importlib.import_module(modulename)
                     location = module
-                except (ModuleNotFoundError, ImportError):
+                except ImportError:
                     raise errors.TaleError("location not found: "+location_name)
         return location
 
@@ -888,7 +888,7 @@ class Driver(pubsub.Listener):
         for zone in zone_names:
             try:
                 module = importlib.import_module("zones."+zone)
-            except (ModuleNotFoundError, ImportError):
+            except ImportError:
                 raise errors.TaleError("zone not found: "+zone)
             module.init(self)
 
