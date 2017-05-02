@@ -50,7 +50,7 @@ class StoryConfig:
         self.player_gender = None            # type: str # m/f/n
         self.player_race = None              # type: str # default is "human" ofcourse, but you can select something else if you want
         self.player_money = 0.0              # starting money
-        self.money_type = None               # type: MoneyType # money type modern/fantasy/nothing(=None)
+        self.money_type = MoneyType.NOTHING  # money type modern/fantasy/nothing
         self.server_tick_method = TickMethod.COMMAND   # command (waits for player entry) or timer (async timer driven)
         self.server_tick_time = 5.0          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)
         self.gametime_to_realtime = 1        # meaning: game time is X times the speed of real time (only used with "timer" tick method) (>=0)
@@ -122,6 +122,12 @@ class StoryBase:
             raise StoryConfigError("Story class must have config attribute of type StoryConfig, containing the story config settings")
         if not self.config.name:
             raise StoryConfigError("Story's config must specify story name, and other config items")
+        if not (type(self.config.supported_modes) is set and all(type(m) is GameMode for m in self.config.supported_modes)):
+            raise StoryConfigError("Story's config supported_modes is of invalid type")
+        if type(self.config.money_type) is not MoneyType:
+            raise StoryConfigError("Story's config money_type is of invalid type")
+        if type(self.config.server_tick_method) is not TickMethod:
+            raise StoryConfigError("Story's config server_tick_method is of invalid type")
         from tale import __version__ as tale_version_str
         tale_version = distutils.version.LooseVersion(tale_version_str)
         tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)

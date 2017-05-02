@@ -72,7 +72,7 @@ def do_ls(player, parsed, ctx):
         module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
-        __import__(module_name)
+`        __import__(module_name)   # XXX importlib
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
@@ -110,7 +110,7 @@ def do_clone(player, parsed, ctx):
             module_name = LIBRARY_MODULE_NAME
             if len(path) > 1:
                 module_name += path
-            __import__(module_name)
+            __import__(module_name)   # XXX importlib
             module = sys.modules[module_name]
             obj = getattr(module, objectname, None)
         except (ImportError, ValueError):
@@ -231,7 +231,7 @@ def do_teleport(player, parsed, ctx):
             module_name = LIBRARY_MODULE_NAME
             if len(path) > 1:
                 module_name += path
-            __import__(module_name)
+            __import__(module_name)   # XXX importlib
             module = sys.modules[module_name]
         except (ImportError, ValueError):
             raise ActionRefused("There's no module named " + path)
@@ -322,7 +322,7 @@ def do_reload(player, parsed, ctx):
         module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
-        __import__(module_name)
+        __import__(module_name)   # XXX importlib.reload
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)

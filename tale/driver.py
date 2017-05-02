@@ -45,7 +45,6 @@ class Driver(pubsub.Listener):
         self.deferreds = []  # heapq
         self.deferreds_lock = threading.Lock()
         self.server_started = datetime.datetime.now().replace(microsecond=0)
-        self.config = None
         self.server_loop_durations = collections.deque(maxlen=10)
         self.commands = Commands()
         cmds.register_all(self.commands)
@@ -61,7 +60,7 @@ class Driver(pubsub.Listener):
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
 
-    def start(self, command_line_args):
+    def start(self, command_line_args):   # XXX don't parse cmdline args here
         """Parse the command line arguments and start the driver accordingly."""
         parser = argparse.ArgumentParser(description="""
             Tale framework %s game driver. Use this to launch a game and specify some settings.
@@ -96,13 +95,10 @@ class Driver(pubsub.Listener):
         else:
             raise IOError("Cannot find specified game")
         assert "story" not in sys.modules
-        story = __import__("story", level=0)
+        import story
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()  # type: StoryBase
-        self.story.config.supported_modes = {GameMode(mode) for mode in self.story.config.supported_modes}
-        self.story.config.money_type = MoneyType(self.story.config.money_type)
-        self.story.config.server_tick_method = TickMethod(self.story.config.server_tick_method)
         self.story._verify(self)
         story_mode = GameMode(args.mode)
         if len(self.story.config.supported_modes) == 1 and story_mode != GameMode.MUD:
@@ -110,15 +106,14 @@ class Driver(pubsub.Listener):
             story_mode = list(self.story.config.supported_modes)[0]
         if story_mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" % (args.mode, list(self.story.config.supported_modes)))
-        self.config = self.story.config   # XXX get rid of this
-        self.config.mud_host = self.config.mud_host or "localhost"
-        self.config.mud_port = self.config.mud_port or 8180
-        self.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        if self.config.server_mode != GameMode.IF and self.config.server_tick_method == TickMethod.COMMAND:
+        self.story.config.mud_host = self.story.config.mud_host or "localhost"
+        self.story.config.mud_port = self.story.config.mud_port or 8180
+        self.story.config.server_mode = story_mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
+        if self.story.config.server_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and some other stuff in the global context.
         mud_context.driver = self
-        mud_context.config = self.config
+        mud_context.config = self.story.config
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
         # check for existence of cmds package in the story root
         loader = pkgutil.get_loader("cmds")
@@ -126,12 +121,14 @@ class Driver(pubsub.Listener):
             ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
             sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
-                story_cmds = __import__("cmds", level=0)
+                import cmds as story_cmds
                 story_cmds.register_all(self.commands)
-        self.commands.adjust_available_commands(self.config.server_mode)
-        self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
-        self.moneyfmt = util.MoneyFormatter(self.config.money_type) if self.config.money_type else None
-        user_data_dir = appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.config.name), "Razorvine", roaming=True)
+        self.commands.adjust_available_commands(self.story.config.server_mode)
+        self.game_clock = util.GameDateTime(self.story.config.epoch or self.server_started, self.story.config.gametime_to_realtime)
+        self.moneyfmt = None
+        if self.story.config.money_type != MoneyType.NOTHING:
+            self.moneyfmt = util.MoneyFormatter(self.story.config.money_type)
+        user_data_dir = appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.story.config.name), "Razorvine", roaming=True)
         if not os.path.isdir(user_data_dir):
             try:
                 os.makedirs(user_data_dir, mode=0o700)
@@ -144,15 +141,15 @@ class Driver(pubsub.Listener):
             importlib.reload(sys.modules["zones"])
         import zones
         self.zones = zones
-        self.config.startlocation_player = self.__lookup_location(self.config.startlocation_player)
-        self.config.startlocation_wizard = self.__lookup_location(self.config.startlocation_wizard)
-        if self.config.server_tick_method == TickMethod.COMMAND:
+        self.story.config.startlocation_player = self.__lookup_location(self.story.config.startlocation_player)
+        self.story.config.startlocation_wizard = self.__lookup_location(self.story.config.startlocation_wizard)
+        if self.story.config.server_tick_method == TickMethod.COMMAND:
             # If the server tick is synchronized with player commands, this factor needs to be 1,
             # because at every command entered the game time simply advances 1 x server_tick_time.
-            self.config.gametime_to_realtime = 1
-        assert self.config.server_tick_time > 0
-        assert self.config.max_wait_hours >= 0
-        self.game_clock = util.GameDateTime(self.config.epoch or self.server_started, self.config.gametime_to_realtime)
+            self.story.config.gametime_to_realtime = 1
+        assert self.story.config.server_tick_time > 0
+        assert self.story.config.max_wait_hours >= 0
+        self.game_clock = util.GameDateTime(self.story.config.epoch or self.server_started, self.story.config.gametime_to_realtime)
         # convert textual exit strings to actual exit object bindings
         for x in self.unbound_exits:
             x._bind_target(self.zones)
@@ -160,7 +157,7 @@ class Driver(pubsub.Listener):
         if args.delay < 0 or args.delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
         sys.excepthook = util.excepthook  # install custom verbose crash reporter
-        if self.config.server_mode == GameMode.IF:
+        if self.story.config.server_mode == GameMode.IF:
             # create the single player mode player automatically
             if args.gui:
                 player_io = "gui"
@@ -195,7 +192,7 @@ class Driver(pubsub.Listener):
         self.__stop_mainloop = False
         while not self.__stop_mainloop:
             try:
-                if self.config.server_mode == GameMode.IF:
+                if self.story.config.server_mode == GameMode.IF:
                     # single player interactive fiction event loop
                     while not self.__stop_mainloop:
                         self.__main_loop_singleplayer(conn)
@@ -222,7 +219,7 @@ class Driver(pubsub.Listener):
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
         if player_io == "gui":
             from .tio.tkinter_io import TkinterIo
-            io = TkinterIo(self.config, connection)
+            io = TkinterIo(self.story.config, connection)
         elif player_io == "web":
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
             wsgi_server = TaleWsgiApp.create_app_server(self, connection)
@@ -279,7 +276,7 @@ class Driver(pubsub.Listener):
         self.defer(1, conn.destroy)     # wait a little to allow the player's screen to display the last goodbye message before killing the connection
 
     def __login_dialog_mud_create_admin(self, conn):
-        assert self.config.server_mode == GameMode.MUD
+        assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. There is no admin user registered. You'll have to create the initial admin user to be able to start the mud.</>")
         while True:
@@ -304,7 +301,7 @@ class Driver(pubsub.Listener):
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
 
     def __login_dialog_mud(self, conn):
-        assert self.config.server_mode == GameMode.MUD
+        assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. Otherwise use the name you registered with.</>\n")
@@ -362,7 +359,7 @@ class Driver(pubsub.Listener):
                     state["name"] = conn.player.name   # we properly rename it just below
                     existing_player_location = existing_player.location
                     self._disconnect_mud_player(existing_player)
-                    ctx = util.Context(self, self.game_clock, self.config, None)
+                    ctx = util.Context(self, self.game_clock, self.story.config, None)
                     # mr smith move: delete the other player and restore its properties in us
                     existing_player.destroy(ctx)
                     conn.player.__setstate__(state)
@@ -392,9 +389,9 @@ class Driver(pubsub.Listener):
             conn.player.privileges = account.privileges
             conn.output("\n")
             if "wizard" in conn.player.privileges:
-                conn.player.move(self.config.startlocation_wizard)
+                conn.player.move(self.story.config.startlocation_wizard)
             else:
-                conn.player.move(self.config.startlocation_player)
+                conn.player.move(self.story.config.startlocation_player)
         prompt = self.story.welcome(conn.player)
         if prompt:
             yield "input", "\n" + prompt
@@ -468,21 +465,21 @@ class Driver(pubsub.Listener):
                 o("")
                 o("")
                 o("<monospaced><bright>")
-                o(("'%s'" % self.config.name).center(DEFAULT_SCREEN_WIDTH))
-                o(("v" + self.config.version).center(DEFAULT_SCREEN_WIDTH))
+                o(("'%s'" % self.story.config.name).center(DEFAULT_SCREEN_WIDTH))
+                o(("v" + self.story.config.version).center(DEFAULT_SCREEN_WIDTH))
                 o("")
-                o(("written by " + self.config.author).center(DEFAULT_SCREEN_WIDTH))
-                if self.config.author_address:
-                    o(self.config.author_address.center(DEFAULT_SCREEN_WIDTH))
+                o(("written by " + self.story.config.author).center(DEFAULT_SCREEN_WIDTH))
+                if self.story.config.author_address:
+                    o(self.story.config.author_address.center(DEFAULT_SCREEN_WIDTH))
                 o("</></monospaced>")
                 o("")
                 o("")
         if not player_connection:
             print("\n")
             print("Tale library:", tale_version_str)
-            print("MudLib:       %s, v%s" % (self.config.name, self.config.version))
-            if self.config.author:
-                print("Written by:   %s - %s" % (self.config.author, self.config.author_address or ""))
+            print("MudLib:       %s, v%s" % (self.story.config.name, self.story.config.version))
+            if self.story.config.author:
+                print("Written by:   %s - %s" % (self.story.config.author, self.story.config.author_address or ""))
             print("Driver start:", time.ctime())
             print("\n")
 
@@ -500,8 +497,8 @@ class Driver(pubsub.Listener):
         # or let the user create a new player manually.
         # Be sure to always reference conn.player here (and not get a cached copy),
         # because it will get replaced when loading a saved game!
-        assert self.config.server_mode == GameMode.IF
-        if not self.config.savegames_enabled:
+        assert self.story.config.server_mode == GameMode.IF
+        if not self.story.config.savegames_enabled:
             load_saved_game = False
         else:
             conn.player.tell("\n")
@@ -524,13 +521,13 @@ class Driver(pubsub.Listener):
             conn.player.look(short=False)   # force a 'look' command to get our bearings
             return
 
-        if self.config.player_name:
+        if self.story.config.player_name:
             # story config provides a name etc.
             name_info = charbuilder.PlayerNaming()
-            name_info.name = self.config.player_name
-            name_info.stats.race = self.config.player_race
-            name_info.gender = self.config.player_gender
-            name_info.money = self.config.player_money or 0.0
+            name_info.name = self.story.config.player_name
+            name_info.stats.race = self.story.config.player_race
+            name_info.gender = self.story.config.player_gender
+            name_info.money = self.story.config.player_money or 0.0
             name_info.wizard = "wizard" in conn.player.privileges
             self.__login_dialog_if_2(conn, name_info)   # finish the login dialog
         else:
@@ -547,9 +544,9 @@ class Driver(pubsub.Listener):
         player.tell("\n")
         # move the player to the starting location:
         if "wizard" in player.privileges:
-            player.move(self.config.startlocation_wizard)
+            player.move(self.story.config.startlocation_wizard)
         else:
-            player.move(self.config.startlocation_player)
+            player.move(self.story.config.startlocation_player)
         player.tell("\n")
         prompt = self.story.welcome(player)
         if prompt:
@@ -571,12 +568,12 @@ class Driver(pubsub.Listener):
             pubsub.sync("driver-async-dialogs")
             if conn not in self.waiting_for_input:
                 conn.write_input_prompt()
-            if self.config.server_tick_method == TickMethod.COMMAND:
+            if self.story.config.server_tick_method == TickMethod.COMMAND:
                 conn.player.input_is_available.wait()   # blocking wait until playered entered something
                 has_input = True
-            elif self.config.server_tick_method == TickMethod.TIMER:
+            elif self.story.config.server_tick_method == TickMethod.TIMER:
                 # server tick goes on a timer, wait a limited time for player input before going on
-                input_wait_time = max(0.01, self.config.server_tick_time - loop_duration)
+                input_wait_time = max(0.01, self.story.config.server_tick_time - loop_duration)
                 has_input = conn.player.input_is_available.wait(input_wait_time)
             else:
                 raise ValueError("invalid tick method")
@@ -618,10 +615,10 @@ class Driver(pubsub.Listener):
             pubsub.sync("driver-pending-tells")
             # server TICK
             now = time.time()
-            if now - previous_server_tick >= self.config.server_tick_time:
+            if now - previous_server_tick >= self.story.config.server_tick_time:
                 self.__server_tick()
                 previous_server_tick = now
-            if self.config.server_tick_method == TickMethod.COMMAND:
+            if self.story.config.server_tick_method == TickMethod.COMMAND:
                 # Even though the server tick may be skipped, the pubsub events
                 # should be processed every player command no matter what.
                 pubsub.sync()
@@ -680,7 +677,7 @@ class Driver(pubsub.Listener):
                     conn.write_input_prompt()
 
             # server tick goes on a timer
-            wait_time = max(0.01, self.config.server_tick_time - loop_duration)
+            wait_time = max(0.01, self.story.config.server_tick_time - loop_duration)
             while wait_time > 0:
                 if any(conn.player.input_is_available.is_set() for conn in self.all_players.values()):
                     # there was player input, abort the wait loop and deal with it
@@ -725,7 +722,7 @@ class Driver(pubsub.Listener):
             pubsub.sync("driver-pending-tells")
             # server TICK
             now = time.time()
-            if now - previous_server_tick >= self.config.server_tick_time:
+            if now - previous_server_tick >= self.story.config.server_tick_time:
                 self.__server_tick()
                 previous_server_tick = now
             loop_duration = time.time() - loop_start
@@ -742,8 +739,8 @@ class Driver(pubsub.Listener):
         6) verify validity and idle state of connected players
         7) remove idle wiretaps
         """
-        self.game_clock.add_realtime(datetime.timedelta(seconds=self.config.server_tick_time))
-        ctx = util.Context(self, self.game_clock, self.config, None)
+        self.game_clock.add_realtime(datetime.timedelta(seconds=self.story.config.server_tick_time))
+        ctx = util.Context(self, self.game_clock, self.story.config, None)
         for obj in self.heartbeat_objects:
             obj.heartbeat(ctx)
         while self.deferreds:
@@ -766,7 +763,7 @@ class Driver(pubsub.Listener):
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
                 idle_limit = 3 * 60 * 60 if "wizard" in conn.player.privileges else 30 * 60
-                if self.config.server_mode == GameMode.MUD and conn.idle_time > idle_limit:
+                if self.story.config.server_mode == GameMode.MUD and conn.idle_time > idle_limit:
                     idle_limit_minutes = int(idle_limit / 60)
                     conn.player.tell("\n")
                     conn.player.tell("<it><rev>Automatic logout:  You have been logged out because you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
@@ -845,7 +842,7 @@ class Driver(pubsub.Listener):
                     elif parsed.verb in command_verbs:
                         # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                         func = command_verbs[parsed.verb]
-                        ctx = util.Context(self, self.game_clock, self.config, conn)
+                        ctx = util.Context(self, self.game_clock, self.story.config, conn)
                         if getattr(func, "is_generator", False):
                             dialog = func(player, parsed, ctx)
                             topic_async_dialogs.send((conn, dialog))    # enqueue as async, and continue
@@ -871,35 +868,36 @@ class Driver(pubsub.Listener):
         player.move(xt.target)
         player.look()
 
-    def __lookup_location(self, location_name, only_module=False):
+    def __lookup_location(self, location_name):
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
+            modulename += "."+name
             if hasattr(location, name):
                 location = getattr(location, name)
             else:
-                modulename = modulename + "." + name
                 try:
-                    imported_module = __import__(modulename)
-                    if only_module:
-                        return getattr(imported_module, name)
-                    location = getattr(location, name)
-                except (ImportError, AttributeError):
-                    raise ValueError("location not found: " + location_name)
+                    module = importlib.import_module(modulename)
+                    location = module
+                except (ModuleNotFoundError, ImportError):
+                    raise errors.TaleError("location not found: "+location_name)
         return location
 
-    def load_zones(self, zone_names):
+    def load_zones(self, zone_names):  # XXX autoload zones, don't specify them in storyconfig
         """Pre-load the provided zones (essentially, load the named modules from the zones package"""
         for zone in zone_names:
-            module = self.__lookup_location(zone, only_module=True)
+            try:
+                module = importlib.import_module("zones."+zone)
+            except (ModuleNotFoundError, ImportError):
+                raise errors.TaleError("zone not found: "+zone)
             module.init(self)
 
     def __load_saved_game(self, player):
-        assert self.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
+        assert self.story.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
         try:
-            savegame = self.user_resources[util.storyname_to_filename(self.config.name) + ".savegame"].data
+            savegame = self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"].data
             state = pickle.loads(savegame)
             del savegame
         except (pickle.PickleError, ValueError, TypeError) as x:
@@ -911,9 +909,9 @@ class Driver(pubsub.Listener):
             player.tell("No saved game data found.", end=True)
             return None
         else:
-            if state["version"] != self.config.version:
+            if state["version"] != self.story.config.version:
                 player.tell("This saved game data was from a different version of the game and cannot be used.")
-                player.tell("(Current game version: %s  Saved game data version: %s)" % (self.config.version, state["version"]))
+                player.tell("(Current game version: %s  Saved game data version: %s)" % (self.story.config.version, state["version"]))
                 player.tell("\n")
                 return None
             # Because loading a complete saved game is strictly for single player 'if' mode,
@@ -923,11 +921,11 @@ class Driver(pubsub.Listener):
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
             self.heartbeat_objects = state["heartbeats"]
-            self.config = state["config"]
+            self.story.config = state["config"]
             self.waiting_for_input = {}   # can't keep the old waiters around
             player.tell("\n")
             player.tell("Game loaded.")
-            if self.config.display_gametime:
+            if self.story.config.display_gametime:
                 player.tell("Game time:", self.game_clock)
             player.tell("\n")
             return player
@@ -982,14 +980,14 @@ class Driver(pubsub.Listener):
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times.
         # @todo be able to detect if something happened during the wait
-        assert self.config.server_mode == GameMode.IF
-        if self.config.gametime_to_realtime == 0:
+        assert self.story.config.server_mode == GameMode.IF
+        if self.story.config.gametime_to_realtime == 0:
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick
             self.game_clock.add_gametime(duration)
             self.__server_tick()
             return True, None      # uneventful
-        num_ticks = int(duration.seconds / self.config.gametime_to_realtime / self.config.server_tick_time)
+        num_ticks = int(duration.seconds / self.story.config.gametime_to_realtime / self.story.config.server_tick_time)
         if num_ticks < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_ticks):
@@ -997,21 +995,21 @@ class Driver(pubsub.Listener):
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
     def do_save(self, player):
-        if not self.config.savegames_enabled:
+        if not self.story.config.savegames_enabled:
             player.tell("It is not possible to save your progress.")
             return
         state = {
-            "version": self.config.version,
+            "version": self.story.config.version,
             "player": player,
             "deferreds": self.deferreds,
             "clock": self.game_clock,
             "heartbeats": self.heartbeat_objects,
-            "config": self.config
+            "config": self.story.config
         }
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
-        self.user_resources[util.storyname_to_filename(self.config.name) + ".savegame"] = savedata
+        self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"] = savedata
         player.tell("Game saved.")
-        if self.config.display_gametime:
+        if self.story.config.display_gametime:
             player.tell("Game time:", self.game_clock)
         player.tell("\n")
 
