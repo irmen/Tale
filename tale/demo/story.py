@@ -33,7 +33,7 @@ class Story(StoryBase):
     config.startlocation_wizard = "house.livingroom"
 
     def init(self, driver):
-        driver.load_zones(["house"])
+        return ["house"]
 
     def init_player(self, player):
         player.money = 12.65

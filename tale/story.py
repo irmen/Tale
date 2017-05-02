@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import enum
 import datetime
 import distutils.version
-from typing import Optional
+from typing import Optional, Sequence
 from tale.errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
@@ -73,10 +73,10 @@ class StoryBase:
     """base class for tale story classes."""
     config = StoryConfig()
 
-    def init(self, driver) -> None:
+    def init(self, driver) -> Sequence[str]:
         """
         Called by the game driver when it is done with its initial initialization.
-        Usually this is the place to tell the driver to (pre)load zones via driver.load_zones
+        Returns the zone names (in order) to be loaded next.
         """
         pass
 

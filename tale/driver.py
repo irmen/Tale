@@ -19,6 +19,7 @@ import types
 import appdirs
 import pkgutil
 import importlib
+from typing import Sequence
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
@@ -112,12 +113,11 @@ class Driver(pubsub.Listener):
             except os.error:
                 pass
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
-        self.story.init(self)
+        preload_zones = self.story.init(self)
+        self.zones = self.__load_zones(preload_zones)
         if "zones" in sys.modules:
             # slight hack to cope with scenario of multiple unit tests that may load different zones after each other
             importlib.reload(sys.modules["zones"])
-        import zones
-        self.zones = zones
         self.story.config.startlocation_player = self.__lookup_location(self.story.config.startlocation_player)
         self.story.config.startlocation_wizard = self.__lookup_location(self.story.config.startlocation_wizard)
         if self.story.config.server_tick_method == TickMethod.COMMAND:
@@ -865,14 +865,15 @@ class Driver(pubsub.Listener):
                     raise errors.TaleError("location not found: " + location_name)
         return location
 
-    def load_zones(self, zone_names):  # XXX autoload zones, don't specify them in storyconfig
-        """Pre-load the provided zones (essentially, load the named modules from the zones package"""
-        for zone in zone_names:
+    def __load_zones(self, zone_names: Sequence[str]) -> types.ModuleType:
+        # Pre-load the provided zones (essentially, load the named modules from the zones package)
+        for zone in zone_names or []:
             try:
                 module = importlib.import_module("zones." + zone)
             except ImportError:
                 raise errors.TaleError("zone not found: " + zone)
             module.init(self)
+        return importlib.import_module("zones")
 
     def __load_saved_game(self, player):
         assert self.story.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
