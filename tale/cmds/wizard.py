@@ -72,7 +72,7 @@ def do_ls(player, parsed, ctx):
         module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
-`        __import__(module_name)   # XXX importlib
+        __import__(module_name)   # XXX importlib
         module = sys.modules[module_name]
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
