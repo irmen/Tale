@@ -92,14 +92,14 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def clear_screen(self):
         """Clear the screen"""
-        if style_words:
-            # if we have ansi support, use that instead of an external command
-            print("\033[1;1H\033[2J", end="")
+        if os.name == "nt":
+            os.system("cls")
+        elif os.name == "posix":
+            os.system("clear")
+        elif style_words:
+            print("\033[2J", end="")
         else:
-            if os.name == "nt":
-                os.system("cls")
-            else:
-                os.system("clear")
+            print("\n"*10)
 
     def install_tab_completion(self, driver):
         """Install tab completion using readline, if available"""
