@@ -556,7 +556,7 @@ class NonSoulVerb(SoulException):
 
 
 def check_name_with_spaces(words: Sequence[str], index: int, all_livings: Dict[str, Any],
-                           all_items: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], int]:
+                           all_items: Dict[str, Any]) -> Tuple[Optional[int], Optional[str], int]:   # XXX return type
     wordcount = 1
     name = words[index]
     try:
