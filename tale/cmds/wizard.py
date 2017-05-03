@@ -61,19 +61,22 @@ def wizcmd(command, *aliases):
 
 @wizcmd("ls")
 def do_ls(player, parsed, ctx):
-    """List the contents of a module path under the library tree (try !ls .items.basic)"""
+    """List the contents of a module path under the library tree (try !ls .items.basic)
+or in the story's zone module (try !ls zones)"""
     p = player.tell
     if not parsed.args:
         raise ParseError("ls what path?")
     path = parsed.args[0]
-    if not path.startswith("."):
-        raise ActionRefused("Path must start with '.'")
-    try:
+    if path == "zones" or path.startswith("zones."):
+        module_name = path
+    elif path.startswith("."):
         module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
-        __import__(module_name)   # XXX importlib
-        module = sys.modules[module_name]
+    else:
+        raise ActionRefused("Path must start with '.' or 'zones'")
+    try:
+        module = importlib.import_module(module_name)
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
     p("<%s>" % path, end=True)
@@ -110,8 +113,7 @@ def do_clone(player, parsed, ctx):
             module_name = LIBRARY_MODULE_NAME
             if len(path) > 1:
                 module_name += path
-            __import__(module_name)   # XXX importlib
-            module = sys.modules[module_name]
+            module = importlib.import_module(module_name)
             obj = getattr(module, objectname, None)
         except (ImportError, ValueError):
             raise ActionRefused("There's no module named " + path)
@@ -215,24 +217,27 @@ def do_wiretap(player, parsed, ctx):
 @wizcmd("teleport", "teleport_to")
 def do_teleport(player, parsed, ctx):
     """Teleport to a location or creature, or teleport a creature to you.
-'teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
-'teleport[_to] playername' teleports [to] that player.
-'teleport_to @start' teleports you to the starting location for wizards."""
+'!teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
+'!teleport[_to] playername' teleports [to] that player.
+'!teleport_to zones.zonename.locationname' teleports to the given location in a zone from the story. 
+'!teleport_to @start' teleports you to the starting location for wizards."""
     if not parsed.args:
         raise ActionRefused("Teleport what to where?")
     args = parsed.args
     teleport_self = parsed.verb == "!teleport_to"
-    if args[0].startswith("."):
+    if args[0].startswith(".") or args[0] == "zones" or args[0].startswith("zones."):
         # teleport the wizard to a location somewhere in a module path
         path, objectname = args[0].rsplit(".", 1)
         if not objectname:
             raise ActionRefused("Invalid object path")
         try:
-            module_name = LIBRARY_MODULE_NAME
-            if len(path) > 1:
-                module_name += path
-            __import__(module_name)   # XXX importlib
-            module = sys.modules[module_name]
+            if path.startswith("."):
+                module_name = LIBRARY_MODULE_NAME
+                if len(path) > 1:
+                    module_name += path
+            else:
+                module_name = path
+            module = importlib.import_module(module_name)
         except (ImportError, ValueError):
             raise ActionRefused("There's no module named " + path)
         target = getattr(module, objectname, None)
@@ -312,18 +317,22 @@ def do_return(player, parsed, ctx):
 
 @wizcmd("reload")
 def do_reload(player, parsed, ctx):
-    """Reload the given module (Python)."""
+    """Reload the given python module under the library tree (try !reload .items.basic)
+or one of the story's zone module (try !reload zones.town). This is not always reliable
+and may produce weird results just like when reloading modules that are still used in python!"""
     if not parsed.args:
         raise ActionRefused("Reload what?")
     path = parsed.args[0]
-    if not path.startswith("."):
-        raise ActionRefused("Path must start with '.'")
-    try:
+    if path == "zones" or path.startswith("zones."):
+        module_name = path
+    elif path.startswith("."):
         module_name = LIBRARY_MODULE_NAME
         if len(path) > 1:
             module_name += path
-        __import__(module_name)   # XXX importlib.reload
-        module = sys.modules[module_name]
+    else:
+        raise ActionRefused("Path must start with '.' or 'zones'")
+    try:
+        module = importlib.import_module(module_name)
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
     importlib.reload(module)

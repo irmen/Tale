@@ -130,7 +130,7 @@ class Driver(pubsub.Listener):
         # convert textual exit strings to actual exit object bindings
         for x in self.unbound_exits:
             x._bind_target(self.zones)
-        del self.unbound_exits
+        self.unbound_exits = []
         if delay < 0 or delay > 100:
             raise ValueError("invalid delay, valid range is 0-100")
         sys.excepthook = util.excepthook  # install custom verbose crash reporter
