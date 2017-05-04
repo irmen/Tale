@@ -1,0 +1,2 @@
+appdirs
+smartypants>=1.8.6
