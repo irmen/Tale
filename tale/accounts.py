@@ -11,18 +11,23 @@ import time
 import datetime
 import sqlite3
 import hashlib
+from typing import Set, Tuple
 from . import mud_context
 from . import lang
 from . import base
 from . import util
+from . import player
 
 
 __all__ = ["Account", "MudAccounts"]
 
 
 class Account:
-    def __init__(self, name, email, pw_hash, pw_salt, privileges, created, logged_in, stats):
+    def __init__(self, name: str, email: str, pw_hash: str, pw_salt: str, privileges: Set[str],
+                 created: datetime.datetime, logged_in: datetime.datetime, stats: base.Stats) -> None:
         # validation on the suitability of names, emails etc is taken care of by the creating code
+        if not isinstance(stats, base.Stats):
+            raise TypeError("stats must be of type Stats")
         self.name = name
         self.email = email
         self.pw_hash = pw_hash
@@ -43,18 +48,18 @@ class MudAccounts:
         charstat(account, gender, stat1, stat2,...)
     """
 
-    def __init__(self, databasefile=None):
+    def __init__(self, databasefile: str=None) -> None:
         self.sqlite_dbpath = databasefile or mud_context.driver.user_resources.validate_path("useraccounts.sqlite")
         self._create_database()
 
-    def _sqlite_connect(self):
+    def _sqlite_connect(self) -> sqlite3.Connection:
         urimode = self.sqlite_dbpath.startswith("file:")
-        conn = sqlite3.connect(self.sqlite_dbpath, detect_types=sqlite3.PARSE_DECLTYPES, timeout=5, uri=urimode)
+        conn = sqlite3.connect(self.sqlite_dbpath, detect_types=sqlite3.PARSE_DECLTYPES, timeout=5, uri=urimode)  # type: ignore  # mypy doesn't recognise uri param
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys=ON;")
         return conn
 
-    def _create_database(self):
+    def _create_database(self) -> None:
         try:
             with self._sqlite_connect() as conn:
                 table_exists = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Account'").fetchone()
@@ -116,14 +121,14 @@ class MudAccounts:
             print("Error:", repr(x))
             raise SystemExit("Cannot launch mud mode without a user accounts database.")
 
-    def get(self, name):
+    def get(self, name: str) -> Account:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
             if not result:
                 raise KeyError(name)
             return self._fetch_account(conn, result["id"])
 
-    def _fetch_account(self, conn, account_id):
+    def _fetch_account(self, conn: sqlite3.Connection, account_id: int) -> Account:
         acc = conn.execute("SELECT * FROM Account WHERE id=?", (account_id,)).fetchone()
         priv_result = conn.execute("SELECT privilege FROM Privilege WHERE account=?", (account_id,)).fetchall()
         privileges = {pr["privilege"] for pr in priv_result}
@@ -139,7 +144,7 @@ class MudAccounts:
         stats.set_stats_from_race()   # initialize static stats from races table
         return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges, acc["created"], acc["logged_in"], stats)
 
-    def all_accounts(self, having_privilege=None):
+    def all_accounts(self, having_privilege: str=None) -> Set[Account]:
         with self._sqlite_connect() as conn:
             if having_privilege:
                 result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=?",
@@ -150,12 +155,12 @@ class MudAccounts:
             accounts = {self._fetch_account(conn, account_id) for account_id in account_ids}
             return accounts
 
-    def logged_in(self, name):
+    def logged_in(self, name: str) -> None:
         timestamp = datetime.datetime.now().replace(microsecond=0)
         with self._sqlite_connect() as conn:
             conn.execute("UPDATE Account SET logged_in=? WHERE name=?", (timestamp, name))
 
-    def valid_password(self, name, password):
+    def valid_password(self, name:str, password: str) -> None:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT pw_hash, pw_salt FROM Account WHERE name=?", (name,)).fetchone()
         if result:
@@ -166,21 +171,21 @@ class MudAccounts:
         raise ValueError("Invalid name or password.")
 
     @staticmethod
-    def _pwhash(password, salt=None):
+    def _pwhash(password: str, salt: str=None) -> Tuple[str, str]:
         if not salt:
             salt = str(random.random() * time.time() + id(password)).replace('.', '')
         pwhash = hashlib.sha1((salt + password).encode("utf-8")).hexdigest()
         return pwhash, salt
 
     @staticmethod
-    def accept_password(password):
+    def accept_password(password: str) -> str:
         if len(password) >= 6:
             if re.search("[a-zA-z]", password) and re.search("[0-9]", password):
                 return password
         raise ValueError("Password should be minimum length 6, contain letters, at least one number, and optionally other characters.")
 
     @staticmethod
-    def accept_name(name):
+    def accept_name(name: str) -> str:
         if re.match("[a-z]{3,16}$", name):
             if name in MudAccounts.blocked_names:
                 raise ValueError("That name is not available.")
@@ -188,18 +193,18 @@ class MudAccounts:
         raise ValueError("Name should be all lowercase letters [a-z] and length 3 to 16.")
 
     @staticmethod
-    def accept_email(email):
+    def accept_email(email: str) -> str:
         user, _, domain = email.partition("@")
         if user and domain and user.strip() == user and domain.strip() == domain:
             return email
         raise ValueError("Invalid email address.")
 
     @staticmethod
-    def accept_privilege(priv):
+    def accept_privilege(priv: str) -> None:
         if priv not in {"wizard"}:
             raise ValueError("Invalid privilege: " + priv)
 
-    def create(self, name, password, email, stats, privileges=set()):
+    def create(self, name: str, password: str, email: str, stats: base.Stats, privileges: Set[str]=set()) -> Account:
         name = name.strip()
         email = email.strip()
         lang.validate_gender(stats.gender)
@@ -224,7 +229,7 @@ class MudAccounts:
             self._store_stats(conn, result.lastrowid, stats)
         return Account(name, email, pwhash, salt, privileges, created, None, stats)
 
-    def _store_stats(self, conn, account_id, stats):
+    def _store_stats(self, conn: sqlite3.Connection, account_id: int, stats: base.Stats) -> None:
         columns = ["account"]
         values = [account_id]
         stat_vars = dict(vars(stats))
@@ -236,7 +241,7 @@ class MudAccounts:
         sql = "INSERT INTO CharStat(" + ",".join(columns) + ") VALUES (" + ",".join('?' * len(columns)) + ")"
         conn.execute(sql, values)
 
-    def change_password_email(self, name, old_password, new_password=None, new_email=None):
+    def change_password_email(self, name: str, old_password: str, new_password: str=None, new_email: str=None) -> None:
         self.valid_password(name, old_password)
         new_email = new_email.strip() if new_email else None
         if new_password:
@@ -255,7 +260,7 @@ class MudAccounts:
                 conn.execute("UPDATE Account SET email=? WHERE id=?", (new_email, account_id))
 
     @util.authorized("wizard")
-    def update_privileges(self, name, privileges, actor):
+    def update_privileges(self, name: str, privileges: Set[str], actor: player.Player) -> Set[str]:
         privileges = {p.strip() for p in privileges}
         for p in privileges:
             self.accept_privilege(p)

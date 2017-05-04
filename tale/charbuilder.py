@@ -33,7 +33,7 @@ class PlayerNaming:
         return self._name
 
     @name.setter
-    def name(self, value: str) -> None:
+    def name(self, value: str):
         self._name = value.lower()
 
 

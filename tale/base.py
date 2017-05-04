@@ -37,7 +37,8 @@ Use its enter/leave methods instead.
 
 from textwrap import dedent
 from collections import defaultdict
-from typing import Iterable
+from types import ModuleType
+from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
 import copy
 from . import lang
 from . import pubsub
@@ -55,26 +56,26 @@ pending_tells = pubsub.topic("driver-pending-tells")
 async_dialogs = pubsub.topic("driver-async-dialogs")
 
 
-def heartbeat(klass):
+def heartbeat(klass: Type) -> Type:
     """
     Decorator to use on a class to make it have a heartbeat.
     Use sparingly as it is less efficient than using a deferred, because the driver
     has to call all heartbeats every tick even though they do nothing yet.
     With deferreds, the driver only calls a deferred at the time it is needed.
     """
-    klass._register_heartbeat = True
+    klass._register_heartbeat = True  # type: ignore
     return klass
 
 
-def clone(obj):
+def clone(obj: Any) -> Any:
     """Create a copy of an existing (Mud)Object. Only when it has an empty inventory (to avoid problems)"""
     if isinstance(obj, MudObject):
         try:
-            if obj.inventory_size > 0:
+            if obj.inventory_size > 0:      # XXX not all MudObjects have inventory!
                 raise ValueError("can't clone something that has other stuff in it")
         except ActionRefused:
             pass
-        if obj.location:
+        if obj.location:            # XXX not all MudObjects have location!
             # avoid deepcopying the location
             location, obj.location = obj.location, None
             duplicate = copy.deepcopy(obj)
@@ -106,57 +107,58 @@ class MudObject:
     gender = "n"
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self._title
 
     @title.setter
-    def title(self, value):
+    def title(self, value: str):
         self._title = value
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         self._description = value
 
     @property
-    def short_description(self):
+    def short_description(self) -> str:
         return self._short_description
 
     @short_description.setter
-    def short_description(self, value):
+    def short_description(self, value: str):
         self._short_description = value
 
     @property
-    def extra_desc(self):
+    def extra_desc(self) -> str:
         return self._extradesc
 
     @extra_desc.setter
-    def extra_desc(self, value):
+    def extra_desc(self, value: str):
         self._extradesc = value
 
-    def __init__(self, name, title=None, description=None, short_description=None):
-        self.name = self._description = self._title = self._short_description = None
+    def __init__(self, name: str, title: str=None, description: str=None, short_description: str=None) -> None:
+        self._extradesc = None  # type: str
+        self.name = self._description = self._title = self._short_description = None  # type: str
         self.init_names(name, title, description, short_description)
-        self.aliases = set()
+        self.aliases = set()  # type: Set[str]
         # any custom verbs that need to be recognised (verb->docstring mapping),
         # verb handling is done via handle_verb() callbacks.
-        self.verbs = {}
+        self.verbs = {}   # type: Dict[str, str]
         if getattr(self, "_register_heartbeat", False):
             # one way of setting this attribute is by using the @heartbeat decorator
             self.register_heartbeat()
         self.init()
 
-    def init(self):
+    def init(self) -> None:
         """
         Secondary initialization/customization. Invoked after all required initialization has been done.
         You can easily override this in a subclass.
         """
         pass
 
-    def init_names(self, name, title, description, short_description):
+    def init_names(self, name: str, title: str, description: str, short_description: str) -> None:
         """(re)set the name and description attributes"""
         self.name = name.lower()
         if title:
@@ -167,7 +169,7 @@ class MudObject:
         self._short_description = short_description
         self._extradesc = {}   # maps keyword to description
 
-    def add_extradesc(self, keywords, description):
+    def add_extradesc(self, keywords: Sequence[str], description: str) -> None:
         """For the list of keywords, add the extra description text"""
         assert isinstance(keywords, (set, tuple, list))
         for keyword in keywords:
@@ -176,66 +178,66 @@ class MudObject:
     def __repr__(self):
         return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
 
-    def destroy(self, ctx):
+    def destroy(self, ctx: util.Context) -> None:
         """Common cleanup code that needs to be called when the object is destroyed"""
         assert isinstance(ctx, util.Context)
         self.unregister_heartbeat()
         mud_context.driver.remove_deferreds(self)
 
-    def wiz_clone(self, actor):
+    def wiz_clone(self, actor: 'Living') -> None:
         """clone the thing (performed by a wizard)"""
         raise ActionRefused("Can't clone " + lang.a(self.__class__.__name__))
 
-    def wiz_destroy(self, actor, ctx):
+    def wiz_destroy(self, actor: 'Living', ctx: util.Context) -> None:
         """destroy the thing (performed by a wizard)"""
         raise ActionRefused("Can't destroy " + lang.a(self.__class__.__name__))
 
-    def show_inventory(self, actor, ctx):
+    def show_inventory(self, actor: 'Living', ctx: util.Context) -> None:
         """show the object's inventory to the actor"""
         raise ActionRefused("You can't look inside of that.")
 
-    def register_heartbeat(self):
+    def register_heartbeat(self) -> None:
         """register this object with the driver to receive heartbeats"""
         mud_context.driver.register_heartbeat(self)
 
-    def unregister_heartbeat(self):
+    def unregister_heartbeat(self) -> None:
         """tell the driver to forget about this object for heartbeats"""
         mud_context.driver.unregister_heartbeat(self)
 
-    def heartbeat(self, ctx):
+    def heartbeat(self, ctx: util.Context) -> None:
         # not automatically called, only if your object registered with the driver
         pass
 
-    def activate(self, actor):
+    def activate(self, actor: 'Living') -> None:
         # called from the activate command, override if your object needs to act on this.
         raise ActionRefused("You can't activate that.")
 
-    def deactivate(self, actor):
+    def deactivate(self, actor: 'Living') -> None:
         # called from the deactivate command, override if your object needs to act on this.
         raise ActionRefused("You can't deactivate that.")
 
-    def manipulate(self, verb, actor):
+    def manipulate(self, verb: str, actor: 'Living') -> None:
         # called from the various manipulate commands, override if your object needs to act on this.
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
-    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
+    def move(self, target: 'MudObject', actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
-    def combine(self, other, actor):
-        # combine the other item with us
+    def combine(self, other: 'MudObject', actor: 'Living') -> None:    # XXX not here but on Item instead?
+        # combine the other thing with us
         raise ActionRefused("You can't combine these.")
 
-    def read(self, actor):
+    def read(self, actor: 'Living') -> None:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
 
-    def handle_verb(self, parsed, actor):
+    def handle_verb(self, parsed: str, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: str, actor: 'Living') -> None:
         """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
         pass
 
@@ -248,18 +250,18 @@ class Item(MudObject):
     Regular items cannot contain other things, so it makes to sense
     to check containment.
     """
-    def init(self):
-        self.contained_in = None
+    def init(self) -> None:
+        self.contained_in = None  # type: Location
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
 
-    def __contains__(self, item):
+    def __contains__(self, item: 'Item') -> bool:
         raise ActionRefused("You can't look inside of that.")
 
     @property
-    def location(self):
+    def location(self) -> Optional['Location']:
         if not self.contained_in:
             return None
         if isinstance(self.contained_in, Location):
@@ -267,27 +269,27 @@ class Item(MudObject):
         return self.contained_in.location
 
     @location.setter
-    def location(self, value):
+    def location(self, value: 'Location') -> None:
         if value is None or isinstance(value, Location):
             self.contained_in = value
         else:
             raise TypeError("can only set item's location to a Location, for other container types use item.contained_in")
 
     @property
-    def inventory(self):
+    def inventory(self) -> FrozenSet['Item']:
         raise ActionRefused("You can't look inside of that.")
 
     @property
-    def inventory_size(self):
+    def inventory_size(self) -> int:
         raise ActionRefused("You can't look inside of that.")
 
-    def insert(self, item, actor):
+    def insert(self, item: 'Item', actor: 'Living') -> None:
         raise ActionRefused("You can't put things in there.")
 
-    def remove(self, item, actor):
+    def remove(self, item: 'Item', actor: 'Living') -> None:
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
+    def move(self, target: 'Item', actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
@@ -307,28 +309,28 @@ class Item(MudObject):
             source_container.insert(self, actor)
             raise
 
-    def notify_moved(self, source_container, target_container, actor):
+    def notify_moved(self, source_container: 'Item', target_container: 'Item', actor: 'Living') -> None:
         """Called when the item has been moved from one place to another"""
         pass
 
-    def allow_item_move(self, actor, verb="move"):
+    def allow_item_move(self, actor: 'Living', verb: str="move") -> None:
         """Does the item allow to be moved by someone? (yes; no ActionRefused is raised)"""
         pass
 
-    def open(self, actor, item=None):
+    def open(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't open that.")
 
-    def close(self, actor, item=None):
+    def close(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't close that.")
 
-    def lock(self, actor, item=None):
+    def lock(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't lock that.")
 
-    def unlock(self, actor, item=None):
+    def unlock(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't unlock that.")
 
     @util.authorized("wizard")
-    def wiz_clone(self, actor):
+    def wiz_clone(self, actor: 'Living') -> 'Item':
         item = clone(self)
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item))
@@ -336,14 +338,14 @@ class Item(MudObject):
         return item
 
     @util.authorized("wizard")
-    def wiz_destroy(self, actor, ctx):
+    def wiz_destroy(self, actor: 'Living', ctx: util.Context) -> None:
         if self in actor:
             actor.remove(self, actor)
         else:
             actor.location.remove(self, actor)
         self.destroy(ctx)
 
-    def show_inventory(self, actor, ctx):
+    def show_inventory(self, actor: 'Living', ctx: util.Context) -> None:
         """show the object's contents to the actor"""
         if self.inventory:
             actor.tell("It contains:", end=True)
@@ -353,7 +355,7 @@ class Item(MudObject):
             actor.tell("It's empty.")
 
     @staticmethod
-    def search_item(name: str, collection: Iterable["Item"]) -> "Item":
+    def search_item(name: str, collection: Iterable['Item']) -> 'Item':
         """
         Searches an item (by name) in a collection of Items.
         Returns the first match. Also considers aliases and titles.
@@ -387,31 +389,31 @@ class Location(MudObject):
     Has connections ('exits') to other Locations.
     You can test for containment with 'in': item in loc, npc in loc
     """
-    def __init__(self, name, description=None):
+    def __init__(self, name: str, description: str=None) -> None:
         super().__init__(name, description=description)
         self.name = name      # make sure we preserve the case; base object stores it lowercase
-        self.livings = set()  # set of livings in this location
-        self.items = set()    # set of all items in the room
-        self.exits = {}       # dictionary of all exits: exit_direction -> Exit object with target & descr
+        self.livings = set()  # type: Set[Living] # set of livings in this location
+        self.items = set()    # type: Set[Item] # set of all items in the room
+        self.exits = {}       # type: Dict[str, Exit] # dictionary of all exits: exit_direction -> Exit object with target & descr
 
-    def __contains__(self, obj):
+    def __contains__(self, obj: Item) -> bool:    # XXX MudObject type?
         return obj in self.livings or obj in self.items
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
         state = dict(self.__dict__)
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict):
         self.__dict__ = state
 
-    def init_inventory(self, objects):
+    def init_inventory(self, objects: Iterable[Item]) -> None:   # XXX item or mudobject?
         """Set the location's initial item and livings 'inventory'"""
         if len(self.items) > 0 or len(self.livings) > 0:
             raise LocationIntegrityError("clobbering existing inventory", None, None, self)
         for obj in objects:
             self.insert(obj, self)
 
-    def destroy(self, ctx):
+    def destroy(self, ctx: util.Context) -> None:
         super().destroy(ctx)
         for living in self.livings:
             if living.location is self:
@@ -420,18 +422,19 @@ class Location(MudObject):
         self.items.clear()
         self.exits.clear()
 
-    def add_exits(self, exits):
+    def add_exits(self, exits: Iterable['Exit']) -> None:
         """Adds every exit from the sequence as an exit to this room."""
         for exit in exits:
             exit.bind(self)
             # note: we're not simply adding it to the .exits dict here, because
             # the exit may have aliases defined that it wants to be known as also.
 
-    def get_wiretap(self):
+    def get_wiretap(self) -> pubsub.Topic:
         """get a wiretap for this location"""
         return pubsub.topic(("wiretap-location", self.name))
 
-    def tell(self, room_msg, exclude_living=None, specific_targets=None, specific_target_msg=""):
+    def tell(self, room_msg: str, exclude_living: 'Living'=None,
+             specific_targets: Sequence[MudObject]=None, specific_target_msg: str="") -> None:
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
@@ -453,7 +456,7 @@ class Location(MudObject):
             tap = self.get_wiretap()
             tap.send((self.name, room_msg))
 
-    def message_nearby_locations(self, message):
+    def message_nearby_locations(self, message: str) -> None:
         """
         Tells a message to adjacent locations, where adjacent is defined by being connected via an exit.
         If the adjacent location has an obvious returning exit to the source location (via one of the
@@ -461,7 +464,7 @@ class Location(MudObject):
         the sound originated from.  This is used for loud noises such as yells!
         """
         if self.exits:
-            yelled_locations = set()
+            yelled_locations = set()  # type: Set[Location]
             for exit in self.exits.values():
                 if exit.target in yelled_locations:
                     continue   # skip double locations (possible because there can be multiple exits to the same location)
@@ -484,16 +487,16 @@ class Location(MudObject):
                     else:
                         exit.target.tell("You can't hear where the sound is coming from.")
 
-    def nearby(self, no_traps=True):
+    def nearby(self, no_traps: bool=True) -> Iterable['Location']:
         """
-        Returns an iterable of all adjacent locations, normally avoiding 'traps' (locations without a way back).
+        Returns a sequence of all adjacent locations, normally avoiding 'traps' (locations without a way back).
         (this may be expanded in the future with a way to search further than just 1 step away)
         """
         if no_traps:
             return (e.target for e in self.exits.values() if e.target.exits)
         return (e.target for e in self.exits.values())
 
-    def look(self, exclude_living=None, short=False):
+    def look(self, exclude_living: 'Living'=None, short: bool=False) -> Sequence[str]:
         """returns a list of paragraph strings describing the surroundings, possibly excluding one living from the description list"""
         paragraphs = ["<location>[" + self.name + "]</>"]
         if short:
@@ -511,15 +514,15 @@ class Location(MudObject):
         if self.description:
             paragraphs.append(self.description)
         if self.exits and mud_context.config.show_exits_in_look:
-            exits_seen = set()
-            exit_paragraph = []
+            exits_seen = set()  # type: Set[Exit]
+            exit_paragraph = []  # type: List[str]
             for exit_name in sorted(self.exits):
                 exit = self.exits[exit_name]
                 if exit not in exits_seen:
                     exits_seen.add(exit)
                     exit_paragraph.append(exit.short_description)
             paragraphs.append(" ".join(exit_paragraph))
-        items_and_livings = []
+        items_and_livings = []  # type: List[str]
         items_with_short_descr = [item for item in self.items if item.short_description]
         items_without_short_descr = [item for item in self.items if not item.short_description]
         uniq_descriptions = set()
@@ -550,7 +553,7 @@ class Location(MudObject):
             paragraphs.append(" ".join(items_and_livings))
         return paragraphs
 
-    def search_living(self, name):
+    def search_living(self, name: str) -> 'Living':
         """
         Search for a living in this location by its name (and title, if no names match).
         Is alias-aware. If there's more than one match, returns the first.
@@ -562,7 +565,7 @@ class Location(MudObject):
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
-    def insert(self, obj, actor):
+    def insert(self, obj: Union['Living', Item], actor: 'Living') -> None:
         """Add obj to the contents of the location (either a Living or an Item)"""
         if isinstance(obj, Living):
             self.livings.add(obj)
@@ -572,7 +575,7 @@ class Location(MudObject):
             raise TypeError("can only add Living or Item")
         obj.location = self
 
-    def remove(self, obj, actor):
+    def remove(self, obj: Union['Living', Item], actor: 'Living') -> None:
         """Remove obj from this location (either a Living or an Item)"""
         if obj in self.livings:
             self.livings.remove(obj)
@@ -582,7 +585,7 @@ class Location(MudObject):
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
 
-    def handle_verb(self, parsed, actor):
+    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         # this code cannot deal with yields directly but you can raise AsyncDialog exception,
         # that indicates to the driver that it should initiate the given async dialog when continuing.
@@ -593,7 +596,7 @@ class Location(MudObject):
                 handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
         return handled
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
         """Notify the room, its livings and items of an action performed by someone."""
         # Notice that this notification event is invoked by the driver after all
         # actions concerning player input have been handled, so we don't have to
@@ -605,19 +608,19 @@ class Location(MudObject):
         for exit in set(self.exits.values()):
             exit.notify_action(parsed, actor)
 
-    def notify_npc_arrived(self, npc, previous_location):
+    def notify_npc_arrived(self, npc: 'Living', previous_location: 'Location') -> None:
         """a NPC has arrived in this location."""
         pass
 
-    def notify_npc_left(self, npc, target_location):
+    def notify_npc_left(self, npc: 'Living', target_location: 'Location') -> None:
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player, previous_location):
+    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player, target_location):
+    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -629,105 +632,15 @@ _limbo = Location("Limbo",
                   """)
 
 
-class Exit(MudObject):
-    """
-    An 'exit' that connects one location to another. It is strictly one-way.
-    Directions can be a single string or a sequence of directions (all meaning the same exit).
-    You can use a Location object as target, or a string designating the location
-    (for instance "town.square" means the square location object in game.zones.town).
-    If using a string, it will be retrieved and bound at runtime.
-    Short_description will be shown when the player looks around the room.
-    Long_description is optional and will be shown instead if the player examines the exit.
-    The exit's direction is stored as its name attribute (if more than one, the rest are aliases).
-    Note that the exit's origin is not stored in the exit object.
-    """
-    def __init__(self, directions, target_location, short_description, long_description=None):
-        assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
-        if isinstance(directions, str):
-            direction = directions
-            aliases = frozenset()
-        else:
-            direction = directions[0]
-            aliases = frozenset(directions[1:])
-        self.target = target_location
-        self.bound = isinstance(target_location, Location)
-        if self.bound:
-            title = "Exit to " + self.target.title
-        else:
-            title = "Exit to <unbound:%s>" % self.target
-        long_description = long_description or short_description
-        super().__init__(direction, title=title, description=long_description, short_description=short_description)
-        self.aliases = aliases
-        # The driver needs to know about all exits,
-        # it will hook them all up once initialization is complete.
-        mud_context.driver.register_exit(self)
-
-    def __repr__(self):
-        targetname = self.target.name if self.bound else self.target
-        return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
-
-    def bind(self, location):
-        """Binds the exit to a location."""
-        assert isinstance(location, Location)
-        directions = self.aliases | {self.name}
-        for direction in directions:
-            if direction in location.exits:
-                raise LocationIntegrityError("exit already exists: '%s' in %s" % (direction, location), direction, self, location)
-            location.exits[direction] = self
-
-    def _bind_target(self, game_zones_module):
-        """
-        Binds the exit to the actual target_location object.
-        Usually called by the driver before it starts player interaction.
-        The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
-        """
-        if not self.bound:
-            target_module, target_object = self.target.rsplit(".", 1)
-            module = game_zones_module
-            try:
-                for name in target_module.split("."):
-                    module = getattr(module, name)
-                target = getattr(module, target_object)
-            except AttributeError:
-                raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" %
-                                     (target_module, target_object, self.short_description))
-            assert isinstance(target, Location)
-            self.target = target
-            self.title = "Exit to " + target.title
-            self.name = self.title.lower()
-            self.bound = True
-
-    def allow_passage(self, actor):
-        """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
-        if not self.bound:
-            raise LocationIntegrityError("exit not bound", None, self, None)
-
-    def open(self, actor, item=None):
-        raise ActionRefused("You can't open that.")
-
-    def close(self, actor, item=None):
-        raise ActionRefused("You can't close that.")
-
-    def lock(self, actor, item=None):
-        raise ActionRefused("You can't lock that.")
-
-    def unlock(self, actor, item=None):
-        raise ActionRefused("You can't unlock that.")
-
-    def manipulate(self, verb, actor):
-        # override from base to print a special error message
-        raise ActionRefused("It makes no sense to %s in that direction." % verb)
-
-
 class Stats:
-    def __init__(self):
+    def __init__(self) -> None:
         self.gender = 'n'
         self.level = 0
         self.xp = 0
         self.hp = 0
-        self.maxhp_dice = None
+        self.maxhp_dice = None  # type: str
         self.ac = 0
-        self.attack_dice = None     # damage roll when attacking without a weapon
+        self.attack_dice = None  # type: str  # damage roll when attacking without a weapon
         self.agi = 0
         self.cha = 0
         self.int = 0
@@ -736,19 +649,19 @@ class Stats:
         self.sta = 0
         self.str = 0
         self.wis = 0
-        self.stat_prios = None      # per agi/cha/etc stat, priority level of it (see races.py)
+        self.stat_prios = None    # type: Dict[int, List[races.Stats]]  # per agi/cha/etc stat, priority level of it (see races.py)
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
         self.bodytype = races.BodyType.HUMANOID
-        self.language = None
+        self.language = None   # type: str
         self.weight = 0.0
         self.size = races.BodySize.HUMAN_SIZED
-        self.race = None    # optional, can use the stats template from races
+        self.race = None  # type: str  # optional, can use the stats template from races
 
     def __repr__(self):
         return "<Stats: %s>" % vars(self)
 
     @classmethod
-    def from_race(cls, race, gender='n'):
+    def from_race(cls, race: str, gender: str='n') -> 'Stats':
         r = races.races[race]
         s = cls()
         s.gender = gender
@@ -765,7 +678,7 @@ class Stats:
         # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
 
-    def set_stats_from_race(self):
+    def set_stats_from_race(self) -> None:
         # the stats that are static are always initialized from the races table
         self.stat_prios = defaultdict(list)
         r = races.races[self.race]
@@ -784,7 +697,7 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
-    def __init__(self, name, gender, race=None, title=None, description=None, short_description=None):
+    def __init__(self, name: str, gender: str, race: str=None, title: str=None, description: str=None, short_description: str=None) -> None:
         if race:
             self.stats = Stats.from_race(race, gender=gender)
         else:
@@ -792,16 +705,16 @@ class Living(MudObject):
         self.init_gender(gender)
         self.soul = soul.Soul()
         self.location = _limbo  # set transitional location
-        self.privileges = set()  # probably only used for Players though
+        self.privileges = set()  # type: Set[str] # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
         self.default_verb = "examine"
-        self.__inventory = set()
-        self.previous_commandline = None
-        self._previous_parse = None  # type: tale.soul.ParseResult
+        self.__inventory = set()   # type: Set[Item]
+        self.previous_commandline = None   # type: str
+        self._previous_parse = None  # type: soul.ParseResult
         super().__init__(name, title, description, short_description)
 
-    def init_gender(self, gender):
+    def init_gender(self, gender: str) -> None:
         """(re)set gender attributes"""
         self.gender = gender
         self.stats.gender = gender  # notice that for completeness, gender is also present on the stats object
@@ -809,31 +722,31 @@ class Living(MudObject):
         self.possessive = lang.POSSESSIVE[self.gender]
         self.objective = lang.OBJECTIVE[self.gender]
 
-    def init_inventory(self, items):
+    def init_inventory(self, items: Iterable[Item]) -> None:
         """Set the living's initial inventory"""
         assert len(self.__inventory) == 0
         for item in items:
             self.insert(item, self)
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
         state = dict(self.__dict__)
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict) -> None:
         self.__dict__ = state
 
-    def __contains__(self, item):
+    def __contains__(self, item: Item) -> bool:
         return item in self.__inventory
 
     @property
-    def inventory_size(self):
+    def inventory_size(self) -> int:
         return len(self.__inventory)
 
     @property
-    def inventory(self):
+    def inventory(self) -> FrozenSet[Item]:
         return frozenset(self.__inventory)
 
-    def insert(self, item, actor):
+    def insert(self, item: Item, actor: 'Living') -> None:
         """Add an item to the inventory."""
         if isinstance(item, Item) and (actor is self or actor is not None and "wizard" in actor.privileges):
             self.__inventory.add(item)
@@ -841,7 +754,7 @@ class Living(MudObject):
         else:
             raise ActionRefused("You can't do that.")
 
-    def remove(self, item, actor):
+    def remove(self, item: Item, actor: 'Living') -> None:
         """remove an item from the inventory"""
         if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
@@ -849,7 +762,7 @@ class Living(MudObject):
         else:
             raise ActionRefused("You can't take %s from %s." % (item.title, self.title))
 
-    def destroy(self, ctx):
+    def destroy(self, ctx: util.Context) -> None:
         super().destroy(ctx)
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
@@ -861,7 +774,7 @@ class Living(MudObject):
         self.soul = None   # truly die ;-)
 
     @util.authorized("wizard")
-    def wiz_clone(self, actor):
+    def wiz_clone(self, actor: 'Living') -> 'Living':
         duplicate = clone(self)
         actor.tell("Cloned into: " + repr(duplicate))
         actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
@@ -870,13 +783,13 @@ class Living(MudObject):
         return duplicate
 
     @util.authorized("wizard")
-    def wiz_destroy(self, actor, ctx):
+    def wiz_destroy(self, actor: 'Living', ctx: util.Context) -> None:
         if self is actor:
             raise ActionRefused("You can't destroy yourself, are you insane?!")
         self.tell("%s creates a black hole that sucks you up. You're utterly destroyed." % lang.capital(actor.title))
         self.destroy(ctx)
 
-    def show_inventory(self, actor, ctx):
+    def show_inventory(self, actor: 'Living', ctx: util.Context) -> None:
         """show the living's inventory to the actor"""
         name = lang.capital(self.title)
         if self.inventory:
@@ -888,11 +801,11 @@ class Living(MudObject):
         if ctx.config.money_type:
             actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
 
-    def get_wiretap(self):
+    def get_wiretap(self) -> pubsub.Topic:
         """get a wiretap for this living"""
         return pubsub.topic(("wiretap-living", self.name))
 
-    def tell(self, *messages, **kwargs):
+    def tell(self, *messages: Sequence[str], **kwargs: Any) -> None:
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
@@ -905,11 +818,11 @@ class Living(MudObject):
         tap = self.get_wiretap()
         tap.send((self.name, msg))
 
-    def tell_later(self, *messages, **kwargs):
+    def tell_later(self, *messages: str, **kwargs: Any) -> None:
         """Tell something to this actor, but do it after other messages."""
         pending_tells.send(lambda: self.tell(*messages, **kwargs))
 
-    def tell_others(self, *messages):
+    def tell_others(self, *messages: str) -> None:
         """
         Message(s) sent to the other livings in the location, but not to self.
         There are a few formatting strings for easy shorthands:
@@ -921,7 +834,7 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def parse(self, commandline, external_verbs=frozenset()):
+    def parse(self, commandline: str, external_verbs: Set[str]=set()) -> soul.ParseResult:
         """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
         if commandline == "again":
             # special case, repeat previous command
@@ -942,16 +855,16 @@ class Living(MudObject):
         self.validate_socialize_targets(parsed)
         return parsed
 
-    def validate_socialize_targets(self, parsed):
+    def validate_socialize_targets(self, parsed: soul.ParseResult) -> None:
         """check if any of the targeted objects is an exit"""
         if any(isinstance(w, Exit) for w in parsed.who_info):
             raise ParseError("That doesn't make much sense.")
 
-    def remember_previous_parse(self):
+    def remember_previous_parse(self) -> None:
         """remember the previously parsed data, soul uses this to reference back to earlier items/livings"""
         self.soul.remember_previous_parse(self._previous_parse)
 
-    def do_socialize(self, cmdline, external_verbs=frozenset()):
+    def do_socialize(self, cmdline: str, external_verbs: Set[str]=set()) -> None:
         """perform a command line with a socialize/soul verb on the living's behalf"""
         try:
             parsed = self.parse(cmdline, external_verbs=external_verbs)
@@ -965,7 +878,7 @@ class Living(MudObject):
             else:
                 raise
 
-    def do_socialize_cmd(self, parsed):
+    def do_socialize_cmd(self, parsed: soul.ParseResult) -> None:
         """
         A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
         Some verbs may trigger a response or action from something or someone else.
@@ -984,7 +897,7 @@ class Living(MudObject):
                         pending_actions.send(lambda victim=self: living.start_attack(victim))
 
     @util.authorized("wizard")
-    def do_forced_cmd(self, actor, parsed, ctx):
+    def do_forced_cmd(self, actor: 'Living', parsed: soul.ParseResult, ctx: util.Context) -> None:
         """
         Perform a (pre-parsed) command because the actor forced us to do it.
 
@@ -1025,7 +938,7 @@ class Living(MudObject):
         except Exception as x:
             actor.tell("Error result from forced cmd: " + str(x))
 
-    def move(self, target, actor=None, silent=False, is_player=False, verb="move"):
+    def move(self, target: Location, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the current location, enter the new location (transactional).
         Messages are being printed to the locations if the move was successful.
@@ -1058,12 +971,14 @@ class Living(MudObject):
         else:
             pending_actions.send(lambda who=self, where=original_location: target.notify_npc_arrived(who, where))
 
-    def search_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
+    def search_item(self, name: str, include_inventory: bool=True,
+                    include_location: bool=True, include_containers_in_inventory: bool=True) -> Item:
         """The same as locate_item except it only returns the item, or None."""
         item, container = self.locate_item(name, include_inventory, include_location, include_containers_in_inventory)
         return item  # skip the container
 
-    def locate_item(self, name, include_inventory=True, include_location=True, include_containers_in_inventory=True):
+    def locate_item(self, name:str, include_inventory: bool=True, include_location: bool=True,
+                    include_containers_in_inventory: bool=True) -> Tuple[Item, MudObject]:
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -1092,16 +1007,16 @@ class Living(MudObject):
                         break
         return (found, containing_object) if found else (None, None)
 
-    def start_attack(self, living):
+    def start_attack(self, living: 'Living') -> None:
         """Starts attacking the given living until death ensues on either side."""
         # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
         pass
 
-    def allow_give_money(self, actor, amount):
+    def allow_give_money(self, actor: 'Living', amount: float) -> None:
         """Do we accept money? Raise ActionRefused if not."""
         raise ActionRefused("You can't do that.")
 
-    def _handle_verb_base(self, parsed, actor):
+    def _handle_verb_base(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
         """
         Handle a custom verb. Return True if handled, False if not handled.
         Also checks inventory items. (Don't override this in a subclass,
@@ -1111,11 +1026,11 @@ class Living(MudObject):
             return True
         return any(item.handle_verb(parsed, actor) for item in self.__inventory)
 
-    def handle_verb(self, parsed, actor):
+    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def _notify_action_base(self, parsed, actor):
+    def _notify_action_base(self, parsed: soul.ParseResult, actor: 'Living') -> None:
         """
         Notify the living of an action performed by someone.
         Also calls inventory items. Don't override this one in a subclass,
@@ -1125,11 +1040,11 @@ class Living(MudObject):
         for item in self.__inventory:
             item.notify_action(parsed, actor)
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
         """Notify the living of an action performed by someone."""
         pass
 
-    def look(self, short=None):
+    def look(self, short: bool=None) -> None:
         """look around in your surroundings. Dummy for base livings."""
         pass
 
@@ -1140,11 +1055,11 @@ class Container(Item):
     Allows insert and remove, and examine its contents, as opposed to an Item
     You can test for containment with 'in': item in bag
     """
-    def init(self):
+    def init(self) -> None:
         super().init()
-        self.__inventory = set()
+        self.__inventory = set()   # type: Set[Item]
 
-    def init_inventory(self, items):
+    def init_inventory(self, items: Iterable[Item]) -> None:
         """Set the container's initial inventory"""
         assert len(self.__inventory) == 0
         self.__inventory = set(items)
@@ -1152,56 +1067,150 @@ class Container(Item):
             item.contained_in = self
 
     @property
-    def inventory(self):
+    def inventory(self) -> FrozenSet[Item]:
         return frozenset(self.__inventory)
 
     @property
-    def inventory_size(self):
+    def inventory_size(self) -> int:
         return len(self.__inventory)
 
-    def __contains__(self, item):
+    def __contains__(self, item: Item) -> bool:
         return item in self.__inventory
 
-    def destroy(self, ctx):
+    def destroy(self, ctx: util.Context) -> None:
         super().destroy(ctx)
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
 
-    def insert(self, item, actor):
+    def insert(self, item: Item, actor: Living) -> 'Container':
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
         item.contained_in = self
         return self
 
-    def remove(self, item, actor):
+    def remove(self, item: Item, actor: Living) -> 'Container':
         self.__inventory.remove(item)
         item.contained_in = None
         return self
+
+
+class Exit(MudObject):
+    """
+    An 'exit' that connects one location to another. It is strictly one-way.
+    Directions can be a single string or a sequence of directions (all meaning the same exit).
+    You can use a Location object as target, or a string designating the location
+    (for instance "town.square" means the square location object in game.zones.town).
+    If using a string, it will be retrieved and bound at runtime.
+    Short_description will be shown when the player looks around the room.
+    Long_description is optional and will be shown instead if the player examines the exit.
+    The exit's direction is stored as its name attribute (if more than one, the rest are aliases).
+    Note that the exit's origin is not stored in the exit object.
+    """
+    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location],
+                 short_description: str, long_description: str=None) -> None:
+        assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
+        if isinstance(directions, str):
+            direction = directions
+            aliases = frozenset()  # type: FrozenSet[str]
+        else:
+            direction = directions[0]
+            aliases = frozenset(directions[1:])
+        self.target = target_location   # type: Union[str, Location]
+        self.bound = isinstance(target_location, Location)
+        if self.bound:
+            title = "Exit to " + self.target.title
+        else:
+            title = "Exit to <unbound:%s>" % self.target
+        long_description = long_description or short_description
+        super().__init__(direction, title=title, description=long_description, short_description=short_description)
+        self.aliases = aliases
+        # The driver needs to know about all exits,
+        # it will hook them all up once initialization is complete.
+        mud_context.driver.register_exit(self)
+
+    def __repr__(self):
+        targetname = self.target.name if self.bound else self.target
+        return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
+
+    def bind(self, location: Location) -> None:
+        """Binds the exit to a location."""
+        assert isinstance(location, Location)
+        directions = self.aliases | {self.name}
+        for direction in directions:
+            if direction in location.exits:
+                raise LocationIntegrityError("exit already exists: '%s' in %s" % (direction, location), direction, self, location)
+            location.exits[direction] = self
+
+    def _bind_target(self, game_zones_module: ModuleType) -> None:
+        """
+        Binds the exit to the actual target_location object.
+        Usually called by the driver before it starts player interaction.
+        The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
+        """
+        if not self.bound:
+            target_module, target_object = self.target.rsplit(".", 1)
+            module = game_zones_module
+            try:
+                for name in target_module.split("."):
+                    module = getattr(module, name)
+                target = getattr(module, target_object)
+            except AttributeError:
+                raise AttributeError("exit target error, cannot find target: '%s.%s' in exit: '%s'" %
+                                     (target_module, target_object, self.short_description))
+            assert isinstance(target, Location)
+            self.target = target
+            self.title = "Exit to " + target.title
+            self.name = self.title.lower()
+            self.bound = True
+
+    def allow_passage(self, actor: Living) -> None:
+        """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
+        if not self.bound:
+            raise LocationIntegrityError("exit not bound", None, self, None)
+
+    def open(self, actor: Living, item: Item=None) -> None:
+        raise ActionRefused("You can't open that.")
+
+    def close(self, actor: Living, item: Item=None) -> None:
+        raise ActionRefused("You can't close that.")
+
+    def lock(self, actor: Living, item: Item=None) -> None:
+        raise ActionRefused("You can't lock that.")
+
+    def unlock(self, actor: Living, item: Item=None) -> None:
+        raise ActionRefused("You can't unlock that.")
+
+    def manipulate(self, verb: str, actor: Living) -> None:
+        # override from base to print a special error message
+        raise ActionRefused("It makes no sense to %s in that direction." % verb)
 
 
 class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, directions, target_location, short_description, long_description=None, locked=False, opened=True):
+    def __init__(self, directions: Union[str, Sequence[str]], target_location: Location, short_description: str,
+                 long_description: str=None, locked: bool=False, opened: bool=True) -> None:
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_description or short_description
-        self.key_code = None   # you can optionally set this to any code that a key must match to unlock the door
+        self.key_code = None   # type: str  # you can optionally set this to any code that a key must match to unlock the door
         super().__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
-        self.linked_door = None
+        self.linked_door = None  # type: Door.DoorPairLink
 
     class DoorPairLink:
-        def __init__(self, other_door, other_open_msg=None, other_close_msg=None):
+        def __init__(self, other_door: 'Door', other_open_msg: str=None, other_close_msg: str=None) -> None:
             self.door = other_door
             self.open_msg = other_open_msg
             self.close_msg = other_close_msg
 
-    def reverse_door(self, directions, returning_location, short_description, long_description=None,
-                     reverse_open_msg=None, reverse_close_msg=None, this_open_msg=None, this_close_msg=None):
+    def reverse_door(self, directions: Union[str, Sequence[str]], returning_location: Location,
+                     short_description: str, long_description: str=None,
+                     reverse_open_msg: str=None, reverse_close_msg: str=None,
+                     this_open_msg: str=None, this_close_msg: str=None) -> 'Door':
         """
         Set up a second door in the other location that is paired with this door.
         Opening this door will also open the other door etc.    Returns the new door object.
@@ -1213,7 +1222,7 @@ class Door(Exit):
         return other_door
 
     @property
-    def description(self):
+    def description(self) -> str:
         if self.opened:
             status = "It is open "
         else:
@@ -1225,7 +1234,7 @@ class Door(Exit):
         return self.__description_prefix + " " + status
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str):
         raise TaleError("you cannot set the description of a Door because it is dynamic")
 
     def __repr__(self):
@@ -1233,14 +1242,14 @@ class Door(Exit):
         locked = "locked" if self.locked else "open"
         return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.name, target, locked, id(self))
 
-    def allow_passage(self, actor):
+    def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through this door?"""
         if not self.bound:
             raise LocationIntegrityError("door not bound", None, self, None)
         if not self.opened:
             raise ActionRefused("You can't go there; it's closed.")
 
-    def open(self, actor, item=None):
+    def open(self, actor: Living, item: Item=None) -> None:
         """Open the door with optional item. Notifies actor and room of this event."""
         if self.opened:
             raise ActionRefused("It's already open.")
@@ -1255,7 +1264,7 @@ class Door(Exit):
                 if self.linked_door.open_msg:
                     self.target.tell(self.linked_door.open_msg)
 
-    def close(self, actor, item=None):
+    def close(self, actor: Living, item: Item=None) -> None:
         """Close the door with optional item. Notifies actor and room of this event."""
         if not self.opened:
             raise ActionRefused("It's already closed.")
@@ -1267,7 +1276,7 @@ class Door(Exit):
             if self.linked_door.close_msg:
                 self.target.tell(self.linked_door.close_msg)
 
-    def lock(self, actor, item=None):
+    def lock(self, actor: Living, item: Item=None) -> None:
         """Lock the door with the proper key (optional)."""
         if self.locked:
             raise ActionRefused("It's already locked.")
@@ -1288,7 +1297,7 @@ class Door(Exit):
         if self.linked_door:
             self.linked_door.door.locked = True
 
-    def unlock(self, actor, item=None):
+    def unlock(self, actor: Living, item: Item=None) -> None:
         """Unlock the door with the proper key (optional)."""
         if not self.locked:
             raise ActionRefused("It's not locked.")
@@ -1309,7 +1318,7 @@ class Door(Exit):
         if self.linked_door:
             self.linked_door.door.locked = False
 
-    def check_key(self, item):
+    def check_key(self, item: Item) -> bool:
         """Check if the item is a proper key for this door (based on key_code)"""
         key_code = getattr(item, "key_code", None)
         if self.linked_door:
@@ -1322,14 +1331,14 @@ class Door(Exit):
                 assert self.key_code == other_code, "door key codes must match"
         return key_code and key_code == self.key_code
 
-    def search_key(self, actor):
+    def search_key(self, actor: Living) -> Optional[Item]:
         """Does the actor have a proper key? Return the item if so, otherwise return None."""
         for item in actor.inventory:
             if self.check_key(item):
                 return item
         return None
 
-    def insert(self, item, actor):
+    def insert(self, item: Item, actor: Living) -> None:
         """used when the player tries to put a key into the door, for instance."""
         if self.check_key(item):
             if self.locked:
@@ -1341,11 +1350,11 @@ class Door(Exit):
 
 class Key(Item):
     """A key which has a unique code. It can be used to open the matching Door."""
-    def init(self):
+    def init(self) -> None:
         super().init()
-        self.key_code = None
+        self.key_code = None  # type: str
 
-    def key_for(self, door=None, code=None):
+    def key_for(self, door: Door=None, code: str=None) -> None:
         """Makes this key a key for the given door. (basically just copies the door's key_code)"""
         if code:
             assert door is None

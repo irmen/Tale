@@ -15,10 +15,10 @@ import heapq
 import pickle
 import inspect
 import threading
-import types
 import appdirs
 import pkgutil
 import importlib
+from types import ModuleType
 from typing import Sequence
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
 from . import __version__ as tale_version_str
@@ -865,7 +865,7 @@ class Driver(pubsub.Listener):
                     raise errors.TaleError("location not found: " + location_name)
         return location
 
-    def __load_zones(self, zone_names: Sequence[str]) -> types.ModuleType:
+    def __load_zones(self, zone_names: Sequence[str]) -> ModuleType:
         # Pre-load the provided zones (essentially, load the named modules from the zones package)
         for zone in zone_names or []:
             try:
@@ -1074,7 +1074,7 @@ class Deferred:
         assert callable(action)
         self.due = due   # in game time
         self.owner = getattr(action, "__self__", None)
-        if isinstance(self.owner, types.ModuleType):
+        if isinstance(self.owner, ModuleType):
             # encode a module simply by its name
             self.owner = "module:" + self.owner.__name__
         if self.owner is None:

@@ -5,7 +5,7 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Generator, Tuple, Any
+from typing import Generator, Tuple, Any, Optional
 
 
 class TaleError(Exception):
@@ -56,7 +56,7 @@ class RetryParse(TaleFlowControlException):
 
 class LocationIntegrityError(TaleError):
     """When the driver notices an integrity problem with locations, exits, etc."""
-    def __init__(self, msg: str, direction: str, exit: str, location: str) -> None:
+    def __init__(self, msg: str, direction: Optional[str], exit: Any, location: Any) -> None:
         super().__init__(msg)
         self.direction = direction
         self.exit = exit
