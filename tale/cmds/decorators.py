@@ -7,12 +7,15 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import inspect
 import functools
+from typing import Callable
 from .. import util
 from .. import errors
+from .. import soul
+from .. import player
 from ..story import GameMode
 
 
-def cmd(func):
+def cmd(func: Callable) -> Callable:
     """
     Public decorator to define a normal command function.
     It checks the signature.
@@ -31,7 +34,7 @@ def cmd(func):
         raise SyntaxError("invalid cmd function signature: " + func.__name__)
 
 
-def wizcmd(func):
+def wizcmd(func: Callable) -> Callable:
     """
     Public decorator to define a wizard command function.
     It adds a privilege check wrapper and checks the signature.
@@ -43,7 +46,8 @@ def wizcmd(func):
     # NOTE: this code is VERY similar to the internal @wizcmd decorator in cmds/wizard.py
     # If changes are made, make sure to update both occurrences
     @functools.wraps(func)
-    def executewizcommand(player, parsed, ctx):
+    def executewizcommand(player: player.Player, parsed: soul.ParseResult, ctx: util.Context) \
+            -> Callable[[player.Player, soul.ParseResult, util.Context], None]:
         if "wizard" not in player.privileges:
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)
@@ -56,7 +60,7 @@ def wizcmd(func):
         raise SyntaxError("invalid wizcmd function signature: " + func.__name__)
 
 
-def cmdfunc_signature_valid(func):
+def cmdfunc_signature_valid(func: Callable) -> bool:
     # the signature of a command function must be exactly this:  def func(player, parsed, ctx) -> None
     sig = inspect.signature(func)
     expected_params = ["player", "parsed", "ctx"]
@@ -66,28 +70,28 @@ def cmdfunc_signature_valid(func):
                sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
 
 
-def disable_notify_action(func):
+def disable_notify_action(func: Callable) -> Callable:
     """decorator to prevent the command being passed to notify_action events"""
     func.enable_notify_action = False
     return func
 
 
-def disabled_in_gamemode(mode):
+def disabled_in_gamemode(mode: GameMode) -> Callable:
     """decorator to disable a command in the given game mode"""
     assert isinstance(mode, GameMode)
-    def disable(func):
+    def disable(func: Callable) -> Callable:
         func.disabled_in_mode = mode
         return func
     return disable
 
 
-def overrides_soul(func):
+def overrides_soul(func: Callable) -> Callable:
     """decorator to let the command override (hide) the corresponding soul command"""
     func.overrides_soul = True
     return func
 
 
-def no_soul_parse(func):
+def no_soul_parse(func: Callable) -> Callable:
     """decorator to tell the command processor to skip the soul parse step and just treat the whole input as plain string"""
     func.no_soul_parse = True
     return func

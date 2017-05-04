@@ -12,10 +12,11 @@ import sys
 import gc
 import platform
 import importlib
+from typing import Callable
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from ..errors import SecurityViolation, ParseError, ActionRefused
 from ..player import Player
-from ..soul import NonSoulVerb
+from ..soul import NonSoulVerb, ParseResult
 from ..story import *
 from .. import base, lang, util, pubsub, __version__
 
@@ -23,7 +24,7 @@ all_commands = {}
 LIBRARY_MODULE_NAME = "tale"
 
 
-def wizcmd(command, *aliases):
+def wizcmd(command: str, *aliases: str) -> Callable:
     """
     (Internal) decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
     Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
@@ -33,13 +34,14 @@ def wizcmd(command, *aliases):
     command = "!" + command
     aliases = ["!" + alias for alias in aliases]
 
-    def wizcmd2(func):
+    def wizcmd2(func: Callable) -> Callable:
         func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
         func.is_tale_command_func = True
         func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
 
         @functools.wraps(func)
-        def executewizcommand(player, parsed, ctx):
+        def executewizcommand(player: Player, parsed: ParseResult, ctx: util.Context) \
+                -> Callable[[Player, ParseResult, util.Context], None]:
             if "wizard" not in player.privileges:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, ctx)
@@ -60,7 +62,7 @@ def wizcmd(command, *aliases):
 
 
 @wizcmd("ls")
-def do_ls(player, parsed, ctx):
+def do_ls(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """List the contents of a module path under the library tree (try !ls .items.basic)
 or in the story's zone module (try !ls zones)"""
     p = player.tell
@@ -99,7 +101,7 @@ or in the story's zone module (try !ls zones)"""
 
 
 @wizcmd("clone")
-def do_clone(player, parsed, ctx):
+def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
     if not parsed.args:
         raise ParseError("Clone what?")
@@ -125,7 +127,7 @@ def do_clone(player, parsed, ctx):
 
 
 @wizcmd("destroy")
-def do_destroy(player, parsed, ctx):
+def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Destroys an object or creature."""
     if not parsed.who_order:
         raise ParseError("Destroy what or who?")
@@ -142,7 +144,7 @@ def do_destroy(player, parsed, ctx):
 
 
 @wizcmd("clean")
-def do_clean(player, parsed, ctx):
+def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
     p = player.tell
     if parsed.args and parsed.args[0] == '.':
@@ -178,7 +180,7 @@ def do_clean(player, parsed, ctx):
 
 @wizcmd("pdb")
 @disabled_in_gamemode(GameMode.MUD)
-def do_pdb(player, parsed, ctx):
+def do_pdb(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Starts a Python debugging session. (Only available in IF mode)"""
     ctx.conn.pause()
     print("----------Entering PDB debugger session----------")
@@ -189,7 +191,7 @@ def do_pdb(player, parsed, ctx):
 
 
 @wizcmd("wiretap")
-def do_wiretap(player, parsed, ctx):
+def do_wiretap(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Adds a wiretap to something to overhear the messages they receive.
 'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
 'wiretap -clear' gets rid of all taps."""
@@ -215,7 +217,7 @@ def do_wiretap(player, parsed, ctx):
 
 
 @wizcmd("teleport", "teleport_to")
-def do_teleport(player, parsed, ctx):
+def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Teleport to a location or creature, or teleport a creature to you.
 '!teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
 '!teleport[_to] playername' teleports [to] that player.
@@ -267,7 +269,7 @@ def do_teleport(player, parsed, ctx):
                 teleport_someone_to_player(target, player)
 
 
-def teleport_to(player, location):
+def teleport_to(player: Player, location: base.Location) -> None:
     """helper function for teleport command, to teleport the player somewhere"""
     player.tell_others("{Title} makes some gestures and a portal suddenly opens.")
     player.tell_others("%s jumps into the portal, which quickly closes behind %s." % (lang.capital(player.subjective), player.objective))
@@ -280,7 +282,7 @@ def teleport_to(player, location):
                   (lang.capital(player.title), player.objective), exclude_living=player)
 
 
-def teleport_someone_to_player(who, player):
+def teleport_someone_to_player(who: base.Living, player: Player) -> None:
     """helper function for teleport command, to teleport someone to the player"""
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
@@ -293,7 +295,7 @@ def teleport_someone_to_player(who, player):
 
 
 @wizcmd("return")
-def do_return(player, parsed, ctx):
+def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Return a player to the location where they were before a teleport."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
@@ -316,7 +318,7 @@ def do_return(player, parsed, ctx):
 
 
 @wizcmd("reload")
-def do_reload(player, parsed, ctx):
+def do_reload(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Reload the given python module under the library tree (try !reload .items.basic)
 or one of the story's zone module (try !reload zones.town). This is not always reliable
 and may produce weird results just like when reloading modules that are still used in python!"""
@@ -340,7 +342,7 @@ and may produce weird results just like when reloading modules that are still us
 
 
 @wizcmd("move")
-def do_move(player, parsed, ctx):
+def do_move(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Move something or someone to another location (.), item or creature.
 This may work around possible restrictions that could prevent stuff
 to be moved around normally. For instance you could use it to pick up
@@ -372,7 +374,7 @@ items that are normally fixed in place (move item to playername)."""
 
 
 @wizcmd("debug")
-def do_debug(player, parsed, ctx):
+def do_debug(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Dumps the internal attribute values of a location (.), item or creature."""
     if not parsed.args:
         raise ParseError("Debug what?")
@@ -392,7 +394,7 @@ def do_debug(player, parsed, ctx):
 
 
 @wizcmd("set")
-def do_set(player, parsed, ctx):
+def do_set(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Set an internal attribute of a location (.), object or creature to a new value.
 Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     if not parsed.args:
@@ -421,7 +423,7 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 
 
 @wizcmd("server")
-def do_server(player, parsed, ctx):
+def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Dump some server information."""
     driver = ctx.driver
     config = ctx.config
@@ -457,7 +459,7 @@ def do_server(player, parsed, ctx):
 
 
 @wizcmd("events")
-def do_events(player, parsed, ctx):
+def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Dump pending actions."""
     driver = ctx.driver
     config = ctx.config
@@ -478,7 +480,7 @@ def do_events(player, parsed, ctx):
 
 
 @wizcmd("pubsub")
-def do_pubsub(player, parsed, ctx):
+def do_pubsub(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Give an overview of the pubsub topics."""
     pending = pubsub.pending()
     player.tell("<bright>Pending pubsub messages overview.</>", "Active topics (from %d total):" % len(pending))
@@ -495,7 +497,7 @@ def do_pubsub(player, parsed, ctx):
 
 
 @wizcmd("force")
-def do_force(player, parsed, ctx):
+def do_force(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Force another living being into performing a given command."""
     if len(parsed.args) < 2 or not parsed.who_order:
         raise ParseError("Force whom to do what?")
@@ -534,7 +536,7 @@ def do_force(player, parsed, ctx):
 
 @wizcmd("accounts")
 @disabled_in_gamemode(GameMode.IF)
-def do_accounts(player, parsed, ctx):
+def do_accounts(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show all registered player accounts"""
     accounts = ctx.driver.mud_accounts.all_accounts()
     wizards = set()
@@ -550,7 +552,7 @@ def do_accounts(player, parsed, ctx):
 
 @wizcmd("add_priv")
 @disabled_in_gamemode(GameMode.IF)
-def do_add_priv(player, parsed, ctx):
+def do_add_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """
     Usage: add_priv <account> <privilege>. Adds a privilege to a user account. It will become active on next login.
     """
@@ -569,7 +571,7 @@ def do_add_priv(player, parsed, ctx):
 
 @wizcmd("remove_priv")
 @disabled_in_gamemode(GameMode.IF)
-def do_remove_priv(player, parsed, ctx):
+def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """
     Usage: remove_priv <account> <privilege>.
     Remove a privilege from a user account.
