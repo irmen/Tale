@@ -9,9 +9,12 @@ with certain key events and actions that the player performed earlier.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Sequence, Optional, Any, List
+from .base import Location, Living
+
 
 class Hint:
-    def __init__(self, checkpoint, location, text):
+    def __init__(self, checkpoint: str, location: Location, text: str) -> None:
         """
         Define a new hint. checkpoint=game checkpoint (string) for which the hint is active.
         location=location where the hint applies to (can be None).
@@ -21,30 +24,30 @@ class Hint:
         self.location = location
         self.text = text
 
-    def active(self, checkpoints, player):
+    def active(self, checkpoints: Sequence[str], player: Living) -> bool:
         """override and return True/False to enable/disable the hint for specific checkpoints or player state"""
         return None  # default implementation does nothing
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return vars(self) == vars(other)
 
 
 class HintSystem:
-    def __init__(self):
+    def __init__(self) -> None:
         self.init([])
 
-    def init(self, hints):
+    def init(self, hints: Sequence[Hint]) -> None:
         """Specify new hints and reset active states and hints"""
         self.all_hints = hints
-        self.active_hints = []
-        self.checkpoints = []
-        self.recap_log = []
+        self.active_hints = []  # type: List[Hint]
+        self.checkpoints = []  # type: List[str]
+        self.recap_log = []  # type: List[str]
         self.checkpoint(None)
 
-    def has_hints(self):
+    def has_hints(self) -> bool:
         return len(self.all_hints) > 0
 
-    def checkpoint(self, checkpoint, recap_message=None):
+    def checkpoint(self, checkpoint: str, recap_message: str=None) -> None:
         """
         Activate a new possible set of hints based on the newly activated checkpoint.
         Also remember optional recap message belonging to this state.
@@ -61,7 +64,7 @@ class HintSystem:
                     self.active_hints = new_hints
                     return
 
-    def hint(self, player):
+    def hint(self, player: Living) -> Optional[str]:
         """Return the hints that are active for the current checkpoints, most specific ones have priority."""
         candidates = [hint for hint in self.active_hints if hint.location and hint.location == player.location]
         if not candidates:
@@ -73,6 +76,6 @@ class HintSystem:
             return " ".join(hint.text for hint in candidates2)
         return None
 
-    def recap(self):
+    def recap(self) -> Sequence[str]:
         """Return the list of recap messages thus far."""
         return self.recap_log

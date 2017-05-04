@@ -65,6 +65,6 @@ class LocationIntegrityError(TaleError):
 
 class AsyncDialog(TaleFlowControlException):
     """Command execution needs to continue with an async dialog"""
-    def __init__(self, dialog: Generator[Tuple[str, Any], str, None], *args) -> None:
+    def __init__(self, dialog: Generator[Tuple[str, Any], str, None], *args: Any) -> None:
         self.dialog = dialog
         self.args = args

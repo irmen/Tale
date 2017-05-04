@@ -9,7 +9,7 @@ import enum
 import datetime
 import distutils.version
 from typing import Optional, Sequence
-from tale.errors import StoryConfigError
+from .errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
 
