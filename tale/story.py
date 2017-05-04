@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import enum
 import datetime
 import distutils.version
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any
 from .errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
@@ -39,7 +39,7 @@ class StoryConfig:
     The reason this is in a separate class, is that these settings are all simple values
     and are serializable, so they can be saved to disk as part of a save game file.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = None                     # type: str # the name of the story
         self.author = None                   # type: str # the story's author name
         self.author_address = None           # type: str # the author's email address
@@ -65,7 +65,7 @@ class StoryConfig:
         self.mud_host = None                 # type: str # for mud mode: hostname to bind the server on
         self.mud_port = None                 # type: str # for mud mode: port number to bind the server on
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, StoryConfig) and vars(self) == vars(other)
 
 

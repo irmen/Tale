@@ -19,11 +19,11 @@ import appdirs
 import pkgutil
 import importlib
 from types import ModuleType
-from typing import Sequence
+from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable
 from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
-from .base import Stats
+from .base import Stats, Living, Location, Exit, MudObject
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 
 
@@ -38,7 +38,7 @@ class Driver(pubsub.Listener):
     Reads story file and config, initializes game state.
     Handles main game loop, player connections, and loading/saving of game state.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.heartbeat_objects = set()
         self.unbound_exits = []
         self.deferreds = []  # heapq
@@ -163,7 +163,7 @@ class Driver(pubsub.Listener):
             print("Web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
             self.__startup_main_loop(None)
 
-    def __startup_main_loop(self, conn):
+    def __startup_main_loop(self, conn: player.PlayerConnection) -> None:
         # Kick off the appropriate driver main event loop.
         # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
@@ -190,11 +190,11 @@ class Driver(pubsub.Listener):
                 for conn in self.all_players.values():
                     conn.critical_error()
 
-    def _connect_if_player(self, player_io, line_delay, wizard_override):
+    def _connect_if_player(self, player_io: str, line_delay: int, wizard_override: bool) -> player.PlayerConnection:
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        if player_io == "gui":
+        if player_io == "gui":          # XXX enum
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.story.config, connection)
         elif player_io == "web":
@@ -217,7 +217,7 @@ class Driver(pubsub.Listener):
         self.__print_game_intro(connection)
         return connection
 
-    def _connect_mud_player(self):
+    def _connect_mud_player(self) -> player.PlayerConnection:
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
@@ -237,7 +237,7 @@ class Driver(pubsub.Listener):
         topic_async_dialogs.send((connection, self.__login_dialog_mud(connection)))
         return connection
 
-    def _disconnect_mud_player(self, conn_or_player):
+    def _disconnect_mud_player(self, conn_or_player: Union[player.PlayerConnection, player.Player]) -> None:
         if isinstance(conn_or_player, player.PlayerConnection):
             name = conn_or_player.player.name
             conn = conn_or_player
@@ -253,7 +253,7 @@ class Driver(pubsub.Listener):
         # wait a bit to allow the player's screen to display the last goodbye message before killing the connection
         self.defer(1, conn.destroy)
 
-    def __login_dialog_mud_create_admin(self, conn):
+    def __login_dialog_mud_create_admin(self, conn: player.PlayerConnection) -> None:
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. There is no admin user registered. "
@@ -280,7 +280,7 @@ class Driver(pubsub.Listener):
         conn.output("\n")
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
 
-    def __login_dialog_mud(self, conn):
+    def __login_dialog_mud(self, conn: player.PlayerConnection) -> None:   # XXX generator
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
@@ -382,7 +382,7 @@ class Driver(pubsub.Listener):
         conn.player.look(short=False)  # force a 'look' command to get our bearings
         # after this, the generator (dialog) ends and we drop down into the regular command loop
 
-    def _stop_driver(self):
+    def _stop_driver(self) -> None:
         """
         Stop the driver mainloop in an orderly fashion.
         Flushes any pending output to the players, then closes down.
@@ -394,7 +394,7 @@ class Driver(pubsub.Listener):
         self.all_players.clear()
         time.sleep(0.1)
 
-    def __continue_dialog(self, conn, dialog, message):
+    def __continue_dialog(self, conn: player.PlayerConnection, dialog: str, message: str) -> None:   # XXX dialog generator type
         # Notice that the try...except structure is very similar to
         # the one in __server_loop_process_player_input
         # That's no surprise because also in this async case, we need
@@ -430,19 +430,19 @@ class Driver(pubsub.Listener):
             else:
                 raise ValueError("invalid generator wait reason: " + why)
 
-    def __print_game_intro(self, player_connection):
+    def __print_game_intro(self, conn: player.PlayerConnection) -> None:
         try:
             # print game banner as supplied by the game
             banner = self.resources["messages/banner.txt"].data
-            if player_connection:
-                player_connection.player.tell("<bright>" + banner + "</>", format=False)
-                player_connection.player.tell("\n")
+            if conn:
+                conn.player.tell("<bright>" + banner + "</>", format=False)
+                conn.player.tell("\n")
             else:
                 print(banner)
         except IOError:
             # no banner provided by the game, print default game header
-            if player_connection:
-                o = player_connection.output
+            if conn:
+                o = conn.output
                 o("")
                 o("")
                 o("<monospaced><bright>")
@@ -455,7 +455,7 @@ class Driver(pubsub.Listener):
                 o("</></monospaced>")
                 o("")
                 o("")
-        if not player_connection:
+        if not conn:
             print("\n")
             print("Tale library:", tale_version_str)
             print("MudLib:       %s, v%s" % (self.story.config.name, self.story.config.version))
@@ -464,7 +464,7 @@ class Driver(pubsub.Listener):
             print("Driver start:", time.ctime())
             print("\n")
 
-    def __rename_player(self, player, name_info):
+    def __rename_player(self, player: player.Player, name_info: charbuilder.PlayerNaming) -> None:
         conn = self.all_players[player.name]
         del self.all_players[player.name]
         old_wiretap = player.get_wiretap()
@@ -472,7 +472,7 @@ class Driver(pubsub.Listener):
         self.all_players[name_info.name] = conn
         name_info.apply_to(player)
 
-    def __login_dialog_if(self, conn):
+    def __login_dialog_if(self, conn: player.PlayerConnection) -> None:
         # Interactive fiction (singleplayer): create a player. This is a generator function (async input).
         # Initialize it directly from the story's configuration, load a saved game,
         # or let the user create a new player manually.
@@ -517,7 +517,7 @@ class Driver(pubsub.Listener):
             builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(conn, name_info))
             topic_async_dialogs.send((conn, builder.build_async()))
 
-    def __login_dialog_if_2(self, conn, name_info):
+    def __login_dialog_if_2(self, conn: player.PlayerConnection, name_info: charbuilder.PlayerNaming) -> None:
         # Second part of the if login dialog, this has been split to be able
         # to put in the character builder dialog that continues with this one.
         player = conn.player
@@ -537,7 +537,7 @@ class Driver(pubsub.Listener):
         player.look(short=False)  # force a 'look' command to get our bearings
         conn.write_output()
 
-    def __main_loop_singleplayer(self, conn):
+    def __main_loop_singleplayer(self, conn: player.PlayerConnection) -> None:
         """
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
@@ -617,7 +617,7 @@ class Driver(pubsub.Listener):
                 else:
                     conn.write_output()
 
-    def __server_loop_process_player_input(self, conn):
+    def __server_loop_process_player_input(self, conn: player.PlayerConnection) -> None:
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -643,7 +643,7 @@ class Driver(pubsub.Listener):
             except errors.ParseError as x:
                 p.tell(str(x))
 
-    def __main_loop_multiplayer(self):
+    def __main_loop_multiplayer(self) -> None:
         """
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
@@ -709,7 +709,7 @@ class Driver(pubsub.Listener):
             loop_duration = time.time() - loop_start
             self.server_loop_durations.append(loop_duration)
 
-    def __server_tick(self):
+    def __server_tick(self) -> None:
         """
         Do everything that the server needs to do every tick (timer configurable in story)
         1) game clock
@@ -764,22 +764,22 @@ class Driver(pubsub.Listener):
                 if events == 0 and not subbers and idle_time > 30:
                     pubsub.topic(topicname).destroy()
 
-    def __report_deferred_exception(self, deferred):
+    def __report_deferred_exception(self, deferred: str) -> None:   # XXX deferred type
         print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
         print("".join(util.format_traceback()), file=sys.stderr)
         print("(Please report this problem)", file=sys.stderr)
 
-    def __process_player_command(self, cmd, conn):
+    def __process_player_command(self, cmd: str, conn: player.PlayerConnection) -> None:
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
             # insert a space to separate the first char such as ' or ?
-            cmd = cmd[0] + u" " + cmd[1:]
+            cmd = cmd[0] + " " + cmd[1:]
         # check for an abbreviation, replace it with the full verb if present
-        _verb, _sep, _rest = cmd.partition(u" ")
+        _verb, _sep, _rest = cmd.partition(" ")
         if _verb in cmds.abbreviations:
             _verb = cmds.abbreviations[_verb]
-            cmd = u"".join([_verb, _sep, _rest])
+            cmd = "".join([_verb, _sep, _rest])
 
         player = conn.player
         # We pass in all 'external verbs' (non-soul verbs) so it will do the
@@ -844,13 +844,13 @@ class Driver(pubsub.Listener):
                 # the player command ended but signaled that an async dialog should be initiated
                 topic_async_dialogs.send((conn, x.dialog))
 
-    def _go_through_exit(self, player, direction):
+    def _go_through_exit(self, player: player.Player, direction: int) -> None:   # XXX direction type
         xt = player.location.exits[direction]
         xt.allow_passage(player)
         player.move(xt.target)
         player.look()
 
-    def __lookup_location(self, location_name):
+    def __lookup_location(self, location_name: str) -> Location:
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
@@ -875,7 +875,7 @@ class Driver(pubsub.Listener):
             module.init(self)
         return importlib.import_module("zones")
 
-    def __load_saved_game(self, player):
+    def __load_saved_game(self, player: player.Player) -> player.Player:
         assert self.story.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
@@ -913,7 +913,7 @@ class Driver(pubsub.Listener):
             player.tell("\n")
             return player
 
-    def current_custom_verbs(self, player):
+    def current_custom_verbs(self, player: player.Player) -> Dict[str, str]:
         """returns dict of the currently recognised custom verbs (verb->helptext mapping)"""
         verbs = player.verbs.copy()
         verbs.update(player.location.verbs)
@@ -927,14 +927,14 @@ class Driver(pubsub.Listener):
             verbs.update(exit.verbs)
         return verbs
 
-    def current_verbs(self, player):
+    def current_verbs(self, player: player.Player) -> Dict[str, str]:
         """return a dict of all currently recognised verbs, and their help text"""
         normal_verbs = self.commands.get(player.privileges)
         verbs = {v: (f.__doc__ or "") for v, f in normal_verbs.items()}
         verbs.update(self.current_custom_verbs(player))
         return verbs
 
-    def show_motd(self, player, notify_no_motd=False):
+    def show_motd(self, player: player.Player, notify_no_motd: bool=False) -> False:
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         try:
             motd = self.resources["messages/motd.txt"]
@@ -951,7 +951,7 @@ class Driver(pubsub.Listener):
             player.tell("There's currently no message-of-the-day.", end=True)
             player.tell("\n")
 
-    def search_player(self, name):
+    def search_player(self, name: str) -> player.Player:
         """
         Look through all the logged in players for one with the given name.
         Returns None if no one is known with that name.
@@ -959,7 +959,7 @@ class Driver(pubsub.Listener):
         conn = self.all_players.get(name)
         return conn.player if conn else None
 
-    def do_wait(self, duration):
+    def do_wait(self, duration: float) -> Tuple[bool, str]:
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times.
         # @todo be able to detect if something happened during the wait
@@ -977,7 +977,7 @@ class Driver(pubsub.Listener):
             self.__server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
-    def do_save(self, player):
+    def do_save(self, player: player.Player) -> None:
         if not self.story.config.savegames_enabled:
             player.tell("It is not possible to save your progress.")
             return
@@ -996,17 +996,17 @@ class Driver(pubsub.Listener):
             player.tell("Game time:", self.game_clock)
         player.tell("\n")
 
-    def register_heartbeat(self, mudobj):
+    def register_heartbeat(self, mudobj: MudObject) -> None:
         self.heartbeat_objects.add(mudobj)
 
-    def unregister_heartbeat(self, mudobj):
+    def unregister_heartbeat(self, mudobj: MudObject) -> None:
         self.heartbeat_objects.discard(mudobj)
 
-    def register_exit(self, exit):
+    def register_exit(self, exit: Exit) -> None:
         if not exit.bound:
             self.unbound_exits.append(exit)
 
-    def defer(self, due, action, *vargs, **kwargs):
+    def defer(self, due: Union[datetime.datetime, float], action: Callable, *vargs: Any, **kwargs: Any) -> None:
         """
         Register a deferred callable action (optionally with arguments).
         The vargs and the kwargs all must be serializable.
@@ -1029,7 +1029,7 @@ class Driver(pubsub.Listener):
         with self.deferreds_lock:
             heapq.heappush(self.deferreds, deferred)
 
-    def pubsub_event(self, topicname, event):
+    def pubsub_event(self, topicname: pubsub.TopicNameType, event: Union[Callable, Tuple[player.PlayerConnection, str]]) -> None:
         if topicname == "driver-pending-actions":
             assert callable(event), "the driver-pending-actions events should be callables"
             event()
@@ -1045,13 +1045,13 @@ class Driver(pubsub.Listener):
         else:
             raise ValueError("unknown topic: " + topicname)
 
-    def remove_deferreds(self, owner):
+    def remove_deferreds(self, owner: str) -> None:  # XXX owner type
         with self.deferreds_lock:
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
 
     @property
-    def uptime(self):
+    def uptime(self) -> Tuple[int, int, int]:
         """gives the server uptime in a (hours, minutes, seconds) tuple"""
         realtime = datetime.datetime.now()
         realtime = realtime.replace(microsecond=0)
@@ -1069,7 +1069,7 @@ class Deferred:
     That means that you can't pass all types of callables, there are a few that are not
     serializable (lambda's and scoped functions). They will trigger an error if you use those.
     """
-    def __init__(self, due, action, vargs, kwargs):
+    def __init__(self, due: datetime.datetime, action: Callable, vargs: Sequence[Any], kwargs: Dict[str, Any]) -> None:
         assert due is None or isinstance(due, datetime.datetime)
         assert callable(action)
         self.due = due   # in game time
@@ -1091,14 +1091,14 @@ class Deferred:
         self.vargs = vargs
         self.kwargs = kwargs
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return self.due == other.due and type(self.owner) == type(other.owner)\
             and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         return self.due < other.due   # deferreds must be sortable
 
-    def when_due(self, game_clock, realtime=False):
+    def when_due(self, game_clock: util.GameDateTime, realtime: bool=False) -> datetime.timedelta:
         """
         In what time is this deferred due to occur? (timedelta)
         Normally it is in terms of game-time, but if you pass realtime=True,
@@ -1109,7 +1109,7 @@ class Deferred:
             secs = int(secs / game_clock.times_realtime)
         return datetime.timedelta(seconds=secs)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> None:
         self.kwargs = self.kwargs or {}
         if callable(self.action):
             func = self.action
@@ -1137,18 +1137,18 @@ class Commands:
     """
     Some utility functions to manage the registered commands.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.commands_per_priv = {None: {}}
         self.no_soul_parsing = set()
 
-    def add(self, verb, func, privilege=None):
+    def add(self, verb: str, func: Callable, privilege: str=None) -> None:
         self.validateFunc(func)
         for commands in self.commands_per_priv.values():
             if verb in commands:
                 raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
 
-    def override(self, verb, func, privilege=None):
+    def override(self, verb: str, func: Callable, privilege: str=None) -> Callable:
         self.validateFunc(func)
         if verb in self.commands_per_priv[privilege]:
             existing = self.commands_per_priv[privilege][verb]
@@ -1156,18 +1156,18 @@ class Commands:
             return existing
         raise KeyError("command not defined: " + verb)
 
-    def validateFunc(self, func):
+    def validateFunc(self, func: Callable) -> None:
         if not hasattr(func, "is_tale_command_func"):
             raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 
-    def get(self, privileges):
+    def get(self, privileges: Iterable[str]) -> Dict[str, int]:  # XXX dict tyep
         result = dict(self.commands_per_priv[None])  # always include the cmds for None
         for priv in privileges:
             if priv in self.commands_per_priv:
                 result.update(self.commands_per_priv[priv])
         return result
 
-    def adjust_available_commands(self, server_mode):
+    def adjust_available_commands(self, server_mode: GameMode) -> None:
         # disable commands flagged with the given game_mode
         # disable soul verbs flagged with override
         # mark non-soul commands
@@ -1185,7 +1185,7 @@ class Commands:
 @base.heartbeat
 class LimboReaper(npc.NPC):
     """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "reaper", "m", "elemental", "Grim Reaper",
             description="He wears black robes with a hood. Where a face should be, there is only nothingness. "
@@ -1194,13 +1194,13 @@ class LimboReaper(npc.NPC):
         self.aliases = {"figure", "death"}
         self.candidates = {}    # player --> (first_seen, texts shown)
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: soul.ParseResult, actor: Living) -> None:
         if parsed.verb == "say":
             actor.tell("%s just stares blankly at you, not saying a word." % lang.capital(self.title))
         else:
             actor.tell("%s stares blankly at you." % lang.capital(self.title))
 
-    def heartbeat(self, ctx):
+    def heartbeat(self, ctx: util.Context) -> None:
         # consider all livings currently in Limbo or having their location set to Limbo
         if self.location is not base._limbo:
             # we somehow got misplaced, teleport back to limbo

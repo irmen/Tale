@@ -991,7 +991,7 @@ Race = NamedTuple("Race", [("name", str),
 races = {}  # type: Dict[str, Race]
 
 
-def _create_race_defs():
+def _create_race_defs() -> None:
     flying_races = {'avidryl', 'bat', 'bird', 'bot', 'demon', 'dragon', 'faerie', 'gargoyle', 'griffin',
                     'insect', 'pegasus', 'vehicle', 'wraith'}
     limbless_races = {'blob', 'elemental', 'fish', 'plant', 'slug', 'snake', 'tree', 'vehicle', 'viper'}

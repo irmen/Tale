@@ -40,7 +40,7 @@ banking_money_limit = 15000.0
 
 class ShopBehavior:
     """the data describing the behavior of a particular shop"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.shopkeeper_vnum = None     # used for circle data to designate the shopkeeper belonging to this shop
         self.banks_money = False
         self.will_fight = False
@@ -60,20 +60,20 @@ class ShopBehavior:
         self.wontdealwith = set()
 
     @property
-    def buyprofit(self):
+    def buyprofit(self) -> float:
         return self._buyprofit
 
     @buyprofit.setter
-    def buyprofit(self, value):
+    def buyprofit(self, value: float) -> None:
         assert value <= 1.0
         self._buyprofit = value
 
     @property
-    def sellprofit(self):
+    def sellprofit(self) -> float:
         return self._sellprofit
 
     @sellprofit.setter
-    def sellprofit(self, value):
+    def sellprofit(self, value: float) -> None:
         assert value >= 1.0
         self._sellprofit = value
 

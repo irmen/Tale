@@ -160,7 +160,7 @@ class MudAccounts:
         with self._sqlite_connect() as conn:
             conn.execute("UPDATE Account SET logged_in=? WHERE name=?", (timestamp, name))
 
-    def valid_password(self, name:str, password: str) -> None:
+    def valid_password(self, name: str, password: str) -> None:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT pw_hash, pw_salt FROM Account WHERE name=?", (name,)).fetchone()
         if result:

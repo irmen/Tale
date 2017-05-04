@@ -9,6 +9,7 @@ import inspect
 import functools
 from .. import util
 from .. import errors
+from ..story import GameMode
 
 
 def cmd(func):
@@ -73,6 +74,7 @@ def disable_notify_action(func):
 
 def disabled_in_gamemode(mode):
     """decorator to disable a command in the given game mode"""
+    assert isinstance(mode, GameMode)
     def disable(func):
         func.disabled_in_mode = mode
         return func

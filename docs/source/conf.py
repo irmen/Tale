@@ -41,8 +41,8 @@ source_encoding = 'utf-8'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Tale'
-copyright = u'Irmen de Jong'
+project = 'Tale'
+copyright = 'Irmen de Jong'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -184,8 +184,8 @@ htmlhelp_basename = 'Talehelp'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Tale.tex', u'Tale Documentation',
-   u'Irmen de Jong', 'manual'),
+  ('index', 'Tale.tex', 'Tale Documentation',
+   'Irmen de Jong', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -217,8 +217,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'tale', u'Tale Documentation',
-     [u'Irmen de Jong'], 1)
+    ('index', 'tale', 'Tale Documentation',
+     ['Irmen de Jong'], 1)
 ]
 
 def setup(app):

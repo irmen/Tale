@@ -872,7 +872,7 @@ class Living(MudObject):
         except soul.UnknownVerbException as ex:
             if ex.verb == "say":
                 # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
-                verb, _, rest = cmdline.partition(u" ")
+                verb, _, rest = cmdline.partition(" ")
                 rest = rest.strip()
                 self.tell_others("{Title} says: " + rest)
             else:

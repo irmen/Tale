@@ -7,6 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import queue
+from threading import Event
+from typing import Any, Sequence, Tuple
 from . import base
 from . import lang
 from . import hints
@@ -14,10 +16,10 @@ from . import pubsub
 from . import mud_context
 from . import util
 from .errors import ActionRefused
-from .tio.iobase import strip_text_styles
-from threading import Event
+from .tio.iobase import strip_text_styles, IoAdapterBase
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 from .story import GameMode
+from .tio.vfs import VirtualFileSystem
 
 
 class Player(base.Living, pubsub.Listener):
@@ -25,7 +27,7 @@ class Player(base.Living, pubsub.Listener):
     Player controlled entity.
     Has a Soul for social interaction.
     """
-    def __init__(self, name, gender, race="human", description=None, short_description=None):
+    def __init__(self, name: str, gender: str, race: str="human", description: str=None, short_description: str=None) -> None:
         title = lang.capital(name)
         super().__init__(name, gender, race, title, description, short_description)
         self.turns = 0
@@ -42,7 +44,7 @@ class Player(base.Living, pubsub.Listener):
         self.last_input_time = time.time()
         self.init_nonserializables()
 
-    def init_nonserializables(self):
+    def init_nonserializables(self) -> None:
         self._input = queue.Queue()
         self.input_is_available = Event()
         self.transcript = None
@@ -51,29 +53,29 @@ class Player(base.Living, pubsub.Listener):
     def __repr__(self):
         return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
         state = super().__getstate__()
         # skip all non-serializable things (or things that need to be reinitialized)
         for name in ["_input", "_output", "input_is_available", "transcript"]:
             del state[name]
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict) -> None:
         super().__setstate__(state)
         self.init_nonserializables()
 
-    def set_screen_sizes(self, indent, width):
+    def set_screen_sizes(self, indent: int, width: int) -> None:
         self.screen_indent = indent
         self.screen_width = width
 
-    def story_completed(self):
+    def story_completed(self) -> None:
         """
         Call this when the player completed the story.
         It will trigger the game's ending/game-over sequence.
         """
         self.story_complete = True
 
-    def tell(self, *messages, **kwargs):
+    def tell(self, *messages: str, **kwargs: Any) -> 'Player':
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
@@ -87,12 +89,12 @@ class Player(base.Living, pubsub.Listener):
         if messages == ("\n",):
             self._output.p()
         else:
-            sep = u" " if kwargs.get("format", True) else u"\n"
+            sep = " " if kwargs.get("format", True) else "\n"
             msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self
 
-    def look(self, short=None):
+    def look(self, short: bool=None) -> None:
         """look around in your surroundings (it excludes the player himself from livings)"""
         if short is None:
             if self.brief == 2:
@@ -107,33 +109,33 @@ class Player(base.Living, pubsub.Listener):
         else:
             self.tell("You see nothing.")
 
-    def move(self, target, actor=None, silent=False, is_player=True, verb="move"):
+    def move(self, target: base.Location, actor: base.Living=None, silent: bool=False, is_player: bool=True, verb: str="move") -> None:
         """delegate to Living but with is_player set to True"""
-        return super().move(target, actor, silent, True, verb)
+        super().move(target, actor, silent, True, verb)
 
-    def create_wiretap(self, target):
+    def create_wiretap(self, target: base.MudObject) -> None:
         if "wizard" not in self.privileges:
             raise ActionRefused("wiretap requires wizard privilege")
-        tap = target.get_wiretap()
+        tap = target.get_wiretap()   # XXX not all mudobject have this
         tap.subscribe(self)
 
-    def pubsub_event(self, topicname, event):
+    def pubsub_event(self, topicname: pubsub.TopicNameType, event: Tuple[base.MudObject, str]) -> None:
         sender, message = event
         self.tell("[wiretapped from '%s': %s]" % (sender, message), end=True)
 
-    def clear_wiretaps(self):
+    def clear_wiretaps(self) -> None:
         # clear all wiretaps that this player has
         pubsub.unsubscribe_all(self)
 
-    def destroy(self, ctx):
+    def destroy(self, ctx: util.Context) -> None:
         self.activate_transcript(None, None)
         super().destroy(ctx)
 
-    def allow_give_money(self, actor, amount):
+    def allow_give_money(self, actor: base.Living, amount: float) -> None:
         """Do we accept money? Raise ActionRefused if not."""
         pass
 
-    def get_pending_input(self):
+    def get_pending_input(self) -> Sequence[str]:
         """return the full set of lines in the input buffer (if any)"""
         result = []
         self.input_is_available.clear()
@@ -143,17 +145,17 @@ class Player(base.Living, pubsub.Listener):
         except queue.Empty:
             return result
 
-    def store_input_line(self, cmd):
+    def store_input_line(self, cmd: str) -> None:
         """store a line of entered text in the input command buffer"""
         cmd = cmd.strip()
         self._input.put(cmd)
         if self.transcript:
-            self.transcript.write(u"\n\n>> %s\n" % cmd)
+            self.transcript.write("\n\n>> %s\n" % cmd)
         self.input_is_available.set()
         self.last_input_time = time.time()
 
     @property
-    def idle_time(self):
+    def idle_time(self) -> float:
         return time.time() - self.last_input_time
 
     def tell_object_location(self, object: base.MudObject, container: base.MudObject, print_parentheses: bool=True) -> None:
@@ -185,7 +187,7 @@ class Player(base.Living, pubsub.Listener):
             else:
                 self.tell("%s was found in %s." % (lang.capital(object.name), container.name))
 
-    def activate_transcript(self, file, vfs):
+    def activate_transcript(self, file: str, vfs: VirtualFileSystem) -> None:
         if file:
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
@@ -199,7 +201,7 @@ class Player(base.Living, pubsub.Listener):
                 self.transcript = None
                 self.tell("Transcript ended.")
 
-    def search_extradesc(self, keyword, include_inventory=True, include_containers_in_inventory=False):
+    def search_extradesc(self, keyword: str, include_inventory: bool=True, include_containers_in_inventory: bool=False) -> str:
         """
         Searches the extradesc keywords for an location/living/item within the 'visible' world around the player,
         including their inventory.  If there's more than one hit, just return the first extradesc description text.
@@ -235,7 +237,7 @@ class Player(base.Living, pubsub.Listener):
                             return desc
         return None
 
-    def test_peek_output_paragraphs(self):
+    def test_peek_output_paragraphs(self) -> Sequence[str]:
         """
         Returns a copy of the output paragraphs that sit in the buffer so far
         This is for test purposes. No text styles are included.
@@ -243,7 +245,7 @@ class Player(base.Living, pubsub.Listener):
         paragraphs = self._output.get_paragraphs(clear=False)
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
-    def test_get_output_paragraphs(self):
+    def test_get_output_paragraphs(self) -> Sequence[str]:
         """
         Gets the accumulated output paragraphs in raw form.
         This is for test purposes. No text styles are included.
@@ -259,36 +261,36 @@ class TextBuffer:
     Notice that no actual output formatting is done here, that is performed elsewhere.
     """
     class Paragraph:
-        def __init__(self, format=True):
+        def __init__(self, format: bool=True) -> None:
             self.format = format
             self.lines = []
 
-        def add(self, line):
+        def add(self, line: str) -> None:
             self.lines.append(line)
 
-        def text(self):
+        def text(self) -> str:
             return "\n".join(self.lines) + "\n"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.init()
 
-    def init(self):
+    def init(self) -> None:
         self.paragraphs = []
         self.in_paragraph = False
 
-    def p(self):
+    def p(self) -> None:
         """Paragraph terminator. Start new paragraph on next line."""
         if not self.in_paragraph:
             self.__new_paragraph(False)
         self.in_paragraph = False
 
-    def __new_paragraph(self, format):
+    def __new_paragraph(self, format: bool) -> Paragraph:
         p = TextBuffer.Paragraph(format)
         self.paragraphs.append(p)
         self.in_paragraph = True
         return p
 
-    def print(self, line, end=False, format=True):
+    def print(self, line: str, end: bool=False, format: bool=True) -> None:
         """
         Write a line of text. A single space is inserted between lines, if format=True.
         If end=True, the current paragraph is ended and a new one begins.
@@ -308,7 +310,7 @@ class TextBuffer:
         if end:
             self.in_paragraph = False
 
-    def get_paragraphs(self, clear=True):
+    def get_paragraphs(self, clear: bool=True) -> Sequence[str]:
         paragraphs = [(p.text(), p.format) for p in self.paragraphs]
         if clear:
             self.init()
@@ -321,12 +323,12 @@ class PlayerConnection:
     Provides high level i/o operations to input commands and write output for the player.
     Other code should not have to call the i/o adapter directly.
     """
-    def __init__(self, player=None, io=None):
+    def __init__(self, player: Player=None, io: IoAdapterBase=None) -> None:
         self.player = player
         self.io = io
         self.need_new_input_prompt = True
 
-    def get_output(self):
+    def get_output(self) -> Sequence[str]:
         """
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
@@ -338,14 +340,14 @@ class PlayerConnection:
         return formatted or None
 
     @property
-    def last_output_line(self):
+    def last_output_line(self) -> str:
         return self.io.last_output_line
 
     @property
-    def idle_time(self):
+    def idle_time(self) -> float:
         return self.player.idle_time
 
-    def write_output(self):
+    def write_output(self) -> None:
         """print any buffered output to the player's screen"""
         if not self.io:
             return
@@ -361,15 +363,15 @@ class PlayerConnection:
             else:
                 self.io.output(output.rstrip())
 
-    def output(self, *lines):
+    def output(self, *lines: str) -> None:
         """directly writes the given text to the player's screen, without buffering and formatting/wrapping"""
         self.io.output(*lines)
 
-    def output_no_newline(self, line):
+    def output_no_newline(self, line: str) -> None:
         """similar to output() but writes a single line, without newline at the end"""
         self.io.output_no_newline(line)
 
-    def input_direct(self, prompt=None):
+    def input_direct(self, prompt: str=None) -> str:
         """
         Writes any pending output and prompts for input directly. Returns stripped result.
         The driver does NOT use this for the regular game loop!
@@ -384,29 +386,29 @@ class PlayerConnection:
         self.need_new_input_prompt = True
         return self.player.get_pending_input()[0].strip()   # use just the first line, strip whitespace
 
-    def write_input_prompt(self):
+    def write_input_prompt(self) -> None:
         # only actually write a prompt when the flag is set.
         # this avoids writing a prompt on every server tick even when nothing is entered.
         if self.need_new_input_prompt:
             self.io.write_input_prompt()
             self.need_new_input_prompt = False
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         self.io.clear_screen()
 
-    def break_pressed(self):
+    def break_pressed(self) -> None:
         self.io.break_pressed()
 
-    def critical_error(self):
+    def critical_error(self) -> None:
         self.io.critical_error()
 
-    def singleplayer_mainloop(self):
+    def singleplayer_mainloop(self) -> int:   # XXX returntype
         return self.io.singleplayer_mainloop(self)
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         self.io.pause(unpause)
 
-    def destroy(self):
+    def destroy(self) -> None:
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
