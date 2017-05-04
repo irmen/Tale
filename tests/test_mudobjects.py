@@ -1005,16 +1005,18 @@ class TestFunctions(unittest.TestCase):
         item2.aliases.append("a3")
         self.assertNotEqual(item.aliases, item2.aliases)
         player = Player("julie", "f")
-        player.insert(item, player)
+        with self.assertRaises(TypeError):
+            clone(player)   # can only clone Items
+        class ItemWithStuff(Item):
+            @property
+            def inventory(self):
+                return ["stuff"]
+            @property
+            def inventory_size(self):
+                return len(self.inventory)
+        item2=ItemWithStuff("weird")
         with self.assertRaises(ValueError):
-            clone(player)   # can't clone something with stuff in it
-        player.remove(item, player)
-        player2 = clone(player)
-        player2.insert(item2, player2)
-        self.assertNotEqual(player.inventory_size, player2.inventory_size)
-        self.assertNotEqual(player.inventory, player2.inventory)
-        self.assertFalse(item in player)
-        self.assertFalse(item in player2)
+            clone(item2)   # can't clone something with stuff in it
 
 
 if __name__ == '__main__':

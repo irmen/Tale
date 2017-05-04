@@ -37,20 +37,20 @@ class IoAdapterBase:
     """
     I/O adapter base class
     """
-    def __init__(self, player_connection: '..player.PlayerConnection') -> None:
+    def __init__(self, player_connection) -> None:
         self.do_styles = True
         self.do_smartquotes = True
         self.supports_smartquotes = True
         self.supports_blocking_input = True
         self.player_connection = player_connection
         self.stop_main_loop = False
-        self.last_output_line = None
+        self.last_output_line = None  # type: str
 
     def destroy(self) -> None:
         """Called when the I/O adapter is shut down"""
         pass
 
-    def singleplayer_mainloop(self, player_connection: '..player.PlayerConnection') -> None:
+    def singleplayer_mainloop(self, player_connection) -> None:
         """Main event loop for this I/O adapter for single player mode"""
         raise NotImplementedError("implement this in subclass")
 
@@ -65,7 +65,7 @@ class IoAdapterBase:
         print(tb, file=sys.stderr)
         self.output("<rev><it>Please report this problem.</>\n")
 
-    def abort_all_input(self, player: '..player.Player') -> None:
+    def abort_all_input(self, player) -> None:
         """abort any blocking input, if at all possible"""
         pass
 
@@ -84,7 +84,7 @@ class IoAdapterBase:
             quoted = smartypants.smartypants(text)
             if escaped_entities:
                 return quoted
-            return html.parser.unescape(quoted)
+            return html.parser.unescape(quoted)   # type: ignore   # mypy doesn't recognise this method
         return text
 
     def output(self, *lines: str) -> None:
@@ -113,7 +113,7 @@ class IoAdapterBase:
         """pause/ unpause the input loop"""
         raise NotImplementedError("implement this in subclass")
 
-    def tab_complete(self, prefix: str, driver: '..driver.Driver') -> Iterable[str]:
+    def tab_complete(self, prefix: str, driver) -> Iterable[str]:
         if not prefix:
             return []
         prefix = prefix.lower()

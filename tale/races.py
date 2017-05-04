@@ -1006,7 +1006,7 @@ def _create_race_defs() -> None:
 
     global races
     for race, attrs in _races.items():
-        stats_kws = {StatType(s).value: value for s, value in attrs["stats"].items()}
+        stats_kws = {StatType(s).value: value for s, value in attrs["stats"].items()}  # type: ignore
         stats = Stats(**stats_kws)
         flags = Flags(flying=race in flying_races,
                       limbless=race in limbless_races,
@@ -1014,8 +1014,8 @@ def _create_race_defs() -> None:
                       swimming=race in swimming_races,
                       nonmeat=race in nonmeat_races,
                       playable=race in playable_races)
-        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],
-                           mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)
+        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],         # type: ignore
+                           mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)  # type: ignore
     _all_races = set(_races)
     assert len(swimming_races - _all_races) == 0
     assert len(flying_races - _all_races) == 0

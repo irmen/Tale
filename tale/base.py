@@ -67,23 +67,6 @@ def heartbeat(klass: Type) -> Type:
     return klass
 
 
-def clone(obj: Any) -> Any:
-    """Create a copy of an existing (Mud)Object. Only when it has an empty inventory (to avoid problems)"""
-    if isinstance(obj, MudObject):
-        try:
-            if obj.inventory_size > 0:      # XXX not all MudObjects have inventory!
-                raise ValueError("can't clone something that has other stuff in it")
-        except ActionRefused:
-            pass
-        if obj.location:            # XXX not all MudObjects have location!
-            # avoid deepcopying the location
-            location, obj.location = obj.location, None
-            duplicate = copy.deepcopy(obj)
-            obj.location = duplicate.location = location
-            return duplicate
-    return copy.deepcopy(obj)
-
-
 class MudObject:
     """
     Root class of all objects in the mud world
@@ -368,6 +351,24 @@ class Item(MudObject):
         return items[0] if items else None
 
 
+def clone(obj: Item) -> Item:
+    """Create a copy of an existing Item. Only when it has an empty inventory (to avoid problems)"""
+    if isinstance(obj, Item):
+        try:
+            if obj.inventory_size > 0:
+                raise ValueError("can't clone something that has other stuff in it")
+        except ActionRefused:
+            pass
+        if obj.location:
+            # avoid deepcopying the location
+            location, obj.location = obj.location, None
+            duplicate = copy.deepcopy(obj)
+            obj.location = duplicate.location = location
+            return duplicate
+        return copy.deepcopy(obj)
+    raise TypeError("can only clone Items")
+
+
 class Weapon(Item):
     """
     An item that can be wielded by a Living (i.e. present in a weapon itemslot),
@@ -616,11 +617,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: '.player.Player', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player: 'tale.player.Player', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: '.player.Player', target_location: 'Location') -> None:
+    def notify_player_left(self, player: 'tale.player.Player', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
