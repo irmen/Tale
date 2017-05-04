@@ -233,11 +233,11 @@ class MudObject:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
 
-    def handle_verb(self, parsed: str, actor: 'Living') -> bool:
+    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def notify_action(self, parsed: str, actor: 'Living') -> None:
+    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
         """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
         pass
 
@@ -283,10 +283,10 @@ class Item(MudObject):
     def inventory_size(self) -> int:
         raise ActionRefused("You can't look inside of that.")
 
-    def insert(self, item: 'Item', actor: 'Living') -> None:
+    def insert(self, item: 'Item', actor: Optional['Living']) -> None:
         raise ActionRefused("You can't put things in there.")
 
-    def remove(self, item: 'Item', actor: 'Living') -> None:
+    def remove(self, item: 'Item', actor: Optional['Living']) -> None:
         raise ActionRefused("You can't take things from there.")
 
     def move(self, target: 'Item', actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
@@ -565,7 +565,7 @@ class Location(MudObject):
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
-    def insert(self, obj: Union['Living', Item], actor: 'Living') -> None:
+    def insert(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
         """Add obj to the contents of the location (either a Living or an Item)"""
         if isinstance(obj, Living):
             self.livings.add(obj)
@@ -575,7 +575,7 @@ class Location(MudObject):
             raise TypeError("can only add Living or Item")
         obj.location = self
 
-    def remove(self, obj: Union['Living', Item], actor: 'Living') -> None:
+    def remove(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
         """Remove obj from this location (either a Living or an Item)"""
         if obj in self.livings:
             self.livings.remove(obj)
@@ -616,11 +616,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player: '.player.Player', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
+    def notify_player_left(self, player: '.player.Player', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -746,7 +746,7 @@ class Living(MudObject):
     def inventory(self) -> FrozenSet[Item]:
         return frozenset(self.__inventory)
 
-    def insert(self, item: Item, actor: 'Living') -> None:
+    def insert(self, item: Item, actor: Optional['Living']) -> None:
         """Add an item to the inventory."""
         if isinstance(item, Item) and (actor is self or actor is not None and "wizard" in actor.privileges):
             self.__inventory.add(item)
@@ -754,7 +754,7 @@ class Living(MudObject):
         else:
             raise ActionRefused("You can't do that.")
 
-    def remove(self, item: Item, actor: 'Living') -> None:
+    def remove(self, item: Item, actor: Optional['Living']) -> None:
         """remove an item from the inventory"""
         if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
@@ -1083,13 +1083,13 @@ class Container(Item):
             item.destroy(ctx)
         self.__inventory.clear()
 
-    def insert(self, item: Item, actor: Living) -> 'Container':
+    def insert(self, item: Item, actor: Optional[Living]) -> 'Container':
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
         item.contained_in = self
         return self
 
-    def remove(self, item: Item, actor: Living) -> 'Container':
+    def remove(self, item: Item, actor: Optional[Living]) -> 'Container':
         self.__inventory.remove(item)
         item.contained_in = None
         return self
@@ -1338,7 +1338,7 @@ class Door(Exit):
                 return item
         return None
 
-    def insert(self, item: Item, actor: Living) -> None:
+    def insert(self, item: Item, actor: Optional[Living]) -> None:
         """used when the player tries to put a key into the door, for instance."""
         if self.check_key(item):
             if self.locked:

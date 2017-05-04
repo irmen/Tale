@@ -6,13 +6,17 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from tale.base import Location, Exit, Door, Item, Key
+from tale.base import Location, Exit, Door, Item, Key, Living
 from tale.npc import NPC
 from tale import mud_context
 from tale.lang import capital
+from tale.driver import Driver
+from tale.player import Player
+from tale.util import Context
+from tale.soul import ParseResult
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 
@@ -21,10 +25,10 @@ def init(driver):
 
 
 class GameEnd(Location):
-    def init(self):
+    def init(self) -> None:
         pass
 
-    def notify_player_arrived(self, player, previous_location):
+    def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
         # player has entered!
         player.story_completed()
 
@@ -51,18 +55,18 @@ closet.add_exits([Exit("living room", livingroom, "You can see the living room."
 # define items and NPCs
 
 class Cat(NPC):
-    def init(self):
+    def init(self) -> None:
         self.aliases = {"cat"}
         mud_context.driver.defer(4, self.do_purr)
 
-    def do_purr(self, ctx):
+    def do_purr(self, ctx: Context) -> None:
         if random.random() > 0.5:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
         ctx.driver.defer(random.randint(5, 20), self.do_purr)
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):
             self.tell_others("{Title} curls up in a ball and purrs contently.")
         elif parsed.verb in ("hello", "hi", "greet"):

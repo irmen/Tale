@@ -7,15 +7,12 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import html.parser
 import smartypants
+from typing import Union, Sequence, Iterable, Any
 from ..util import format_traceback
 from .. import soul
 
+
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
-smartypants = smartypants.smartypants
-if hasattr(html.parser, "unescape"):
-    unescape_entity = html.parser.unescape  # 3.4+
-else:
-    unescape_entity = html.parser.HTMLParser().unescape
 
 ALL_STYLE_TAGS = {
     "dim", "normal", "bright", "ul", "it", "rev", "clear", "/",
@@ -23,9 +20,9 @@ ALL_STYLE_TAGS = {
 }
 
 
-def strip_text_styles(text):
+def strip_text_styles(text: Union[str, Sequence[str]]) -> Sequence[str]:
     """remove any special text styling tags from the text (you can pass a single string, and also a list of strings)"""
-    def strip(text):
+    def strip(text: str) -> str:
         if "<" not in text:
             return text
         for tag in ALL_STYLE_TAGS:
@@ -40,7 +37,7 @@ class IoAdapterBase:
     """
     I/O adapter base class
     """
-    def __init__(self, player_connection):
+    def __init__(self, player_connection: '..player.PlayerConnection') -> None:
         self.do_styles = True
         self.do_smartquotes = True
         self.supports_smartquotes = True
@@ -49,30 +46,30 @@ class IoAdapterBase:
         self.stop_main_loop = False
         self.last_output_line = None
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Called when the I/O adapter is shut down"""
         pass
 
-    def singleplayer_mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection: '..player.PlayerConnection') -> None:
         """Main event loop for this I/O adapter for single player mode"""
         raise NotImplementedError("implement this in subclass")
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         """Clear the screen"""
         pass
 
-    def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
+    def critical_error(self, message: str="A critical error occurred! See below and/or in the error log.") -> None:
         """called when the driver encountered a critical error and the session needs to shut down"""
         tb = "".join(format_traceback())
         self.output("\n<bright><rev>" + message + "</>")
         print(tb, file=sys.stderr)
         self.output("<rev><it>Please report this problem.</>\n")
 
-    def abort_all_input(self, player):
+    def abort_all_input(self, player: '..player.Player') -> None:
         """abort any blocking input, if at all possible"""
         pass
 
-    def render_output(self, paragraphs, **params):
+    def render_output(self, paragraphs: Iterable[str], **params: Any) -> None:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
@@ -81,44 +78,44 @@ class IoAdapterBase:
         """
         raise NotImplementedError("implement this in subclass")
 
-    def smartquotes(self, text, escaped_entities=False):
+    def smartquotes(self, text: str, escaped_entities: bool=False) -> str:
         """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
         if self.supports_smartquotes and self.do_smartquotes:
-            quoted = smartypants(text)
+            quoted = smartypants.smartypants(text)
             if escaped_entities:
                 return quoted
-            return unescape_entity(quoted)
+            return html.parser.unescape(quoted)
         return text
 
-    def output(self, *lines):
+    def output(self, *lines: str) -> None:
         """
         Write some text to the screen. Needs to take care of style tags that are embedded.
         Implement specific behavior in subclass (but don't forget to call base method)
         """
         self.last_output_line = lines[-1]
 
-    def output_no_newline(self, text):
+    def output_no_newline(self, text: str) -> None:
         """
         Like output, but just writes a single line, without end-of-line.
         Implement specific behavior in subclass (but don't forget to call base method)
         """
         self.last_output_line = text
 
-    def write_input_prompt(self):
+    def write_input_prompt(self) -> None:
         """write the input prompt '>>'"""
         pass
 
-    def break_pressed(self):
+    def break_pressed(self) -> None:
         """do something when the player types ctrl-C (break)"""
         pass
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         """pause/ unpause the input loop"""
         raise NotImplementedError("implement this in subclass")
 
-    def tab_complete(self, prefix, driver):
+    def tab_complete(self, prefix: str, driver: '..driver.Driver') -> Iterable[str]:
         if not prefix:
-            return
+            return []
         prefix = prefix.lower()
         player = self.player_connection.player
         verbs = [verb for verb in driver.current_verbs(player) if verb.startswith(prefix)]

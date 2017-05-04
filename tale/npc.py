@@ -22,7 +22,7 @@ class NPC(base.Living):
         super().__init__(name, gender, race, title, description, short_description)
         self.aggressive = False
 
-    def insert(self, item: base.Item, actor: base.Living) -> None:
+    def insert(self, item: base.Item, actor: Optional[base.Living]) -> None:
         """NPC have a bit nicer refuse message when giving items to them."""
         if not self.aggressive or actor is self or actor is not None and "wizard" in actor.privileges:
             super().insert(item, self)

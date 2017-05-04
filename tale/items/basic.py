@@ -6,8 +6,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import textwrap
-from typing import NamedTuple
-from ..base import Item, Container, Weapon
+from typing import NamedTuple, FrozenSet, Optional
+from ..base import Item, Container, Weapon, Living
 from ..errors import ActionRefused
 from .. import lang, mud_context
 
@@ -22,7 +22,7 @@ class Boxlike(Container):
     Only if it is open you can put stuff in it or take stuff out of it.
     You can set a couple of txt attributes that change the visual aspect of this object.
     """
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.opened = False
         self.txt_title_closed = self._title
@@ -32,18 +32,18 @@ class Boxlike(Container):
         self.txt_descr_open_filled = "It is a %s, with an open lid, and there's something in it." % self.name
         self.txt_descr_open_empty = "It is a %s, with an open lid." % self.name
 
-    def allow_item_move(self, actor, verb="move"):
+    def allow_item_move(self, actor: Living, verb: str="move") -> None:
         raise ActionRefused("You can't %s %s." % (verb, self.title))
 
     @property
-    def title(self):
+    def title(self) -> str:
         if self.opened:
             return self.txt_title_open_filled if self.inventory_size else self.txt_title_open_empty
         else:
             return self.txt_title_closed
 
     @property
-    def description(self):
+    def description(self) -> str:
         if self.opened:
             if self.inventory_size:
                 return self.txt_descr_open_filled
@@ -52,14 +52,14 @@ class Boxlike(Container):
         else:
             return self.txt_descr_closed
 
-    def open(self, actor, item=None):
+    def open(self, actor: Living, item: Item=None) -> None:
         if self.opened:
             raise ActionRefused("It's already open.")
         self.opened = True
         actor.tell("You opened the %s." % self.name)
         actor.tell_others("{Title} opened the %s." % self.name)
 
-    def close(self, actor, item=None):
+    def close(self, actor: Living, item: Item=None) -> None:
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False
@@ -67,26 +67,26 @@ class Boxlike(Container):
         actor.tell_others("{Title} closed the %s." % self.name)
 
     @property
-    def inventory(self):
+    def inventory(self) -> FrozenSet[Item]:
         if self.opened:
             return super().inventory
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
     @property
-    def inventory_size(self):
+    def inventory_size(self) -> int:
         if self.opened:
             return super().inventory_size
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
-    def insert(self, item, actor):
+    def insert(self, item: Item, actor: Optional[Living]) -> None:
         if self.opened:
             super().insert(item, actor)
         else:
             raise ActionRefused("You can't put things in the %s: you should open it first." % self.title)
 
-    def remove(self, item, actor):
+    def remove(self, item: Item, actor: Optional[Living]) -> None:
         if self.opened:
             super().remove(item, actor)
         else:
@@ -97,12 +97,12 @@ class GameClock(Item):
     """
     A clock that is able to tell you the in-game time.
     """
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.use_locale = True
 
     @property
-    def description(self):
+    def description(self) -> str:
         if mud_context.config.display_gametime:
             if self.use_locale:
                 display = mud_context.driver.game_clock.clock.strftime("%c")
@@ -112,16 +112,16 @@ class GameClock(Item):
         else:
             return "It looks broken."
 
-    def activate(self, actor):
+    def activate(self, actor: Living) -> None:
         raise ActionRefused("It's already running.")
 
-    def deactivate(self, actor):
+    def deactivate(self, actor: Living) -> None:
         raise ActionRefused("Better to keep it running as it is.")
 
-    def manipulate(self, verb, actor):
+    def manipulate(self, verb: str, actor: Living) -> None:
         actor.tell("%s the %s won't have much effect." % (lang.capital(lang.fullverb(verb)), self.title))
 
-    def read(self, actor):
+    def read(self, actor: Living) -> None:
         actor.tell(self.description)
 
 
@@ -129,42 +129,42 @@ class Note(Item):
     """
     A (paper) note with or without something written on it. You can read it.
     """
-    def init(self):
+    def init(self) -> None:
         super().init()
         self._text = "There is nothing written on it."
 
     @property
-    def text(self):
+    def text(self) -> str:
         return self._text
 
     @text.setter
-    def text(self, text):
+    def text(self, text: str) -> None:
         self._text = textwrap.dedent(text)
 
-    def read(self, actor):
+    def read(self, actor: Living) -> None:
         actor.tell("The %s reads:" % self.title, end=True)
         actor.tell(self.text)
 
 
 class Light(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.capacity = 0   # hours (-1=eternal, 0=burned out)
 
 
 class Scroll(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.spell_level = 0   # level of spells
         self.spells = set()
 
-    def read(self, actor):
+    def read(self, actor: Living) -> None:
         actor.tell("The %s reads:" % self.title, end=True)
         actor.tell(self.spells)   # @todo spell descriptions
 
 
 class MagicItem(Weapon):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.spell_level = 0
         self.capacity = 0
@@ -197,7 +197,7 @@ class Drink(Item):
                   'clearwater':   drinkeffects(0, 0, 13),
                   }
 
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.contents = "water"
         self.capacity = 1
@@ -209,37 +209,37 @@ class Drink(Item):
 
 
 class Potion(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.spell_level = 0
         self.spells = set()
 
 
 class Food(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.affect_fullness = 0
         self.poisoned = False
 
 
 class Money(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         # the amount of money is stored in item.value
 
 
 class Boat(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
 
 
 class Wearable(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
 
 
 class Fountain(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.contents = "water"
         self.capacity = 1

@@ -5,9 +5,6 @@ Package for all mud commands (non-soul)
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from ..driver import Commands
-
-
 abbreviations = {
     "n": "north",
     "e": "east",
@@ -29,7 +26,7 @@ abbreviations = {
 }
 
 
-def register_all(cmd_processor: Commands) -> None:
+def register_all(cmd_processor: '..driver.Commands') -> None:
     """
     Register all commands with the command processor.
     (Called from the game driver when it is starting up)

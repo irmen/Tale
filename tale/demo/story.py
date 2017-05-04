@@ -8,8 +8,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import os
 import sys
 import tale
+from typing import Sequence, Optional
 from tale.story import *
 from tale.main import run_from_cmdline
+from tale.driver import Driver
+from tale.player import Player
 
 
 class Story(StoryBase):
@@ -32,26 +35,26 @@ class Story(StoryBase):
     config.startlocation_player = "house.livingroom"
     config.startlocation_wizard = "house.livingroom"
 
-    def init(self, driver):
+    def init(self, driver: Driver) -> Sequence[str]:
         return ["house"]
 
-    def init_player(self, player):
+    def init_player(self, player: Player) -> None:
         player.money = 12.65
 
-    def welcome(self, player):
+    def welcome(self, player: Player) -> Optional[str]:
         player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to communicate with your pet, and exit the house to win the game.")
         player.tell("\n")
         player.tell("\n")
 
-    def welcome_savegame(self, player):
+    def welcome_savegame(self, player: Player) -> Optional[str]:
         pass  # not supported in demo
 
-    def goodbye(self, player):
+    def goodbye(self, player: Player) -> None:
         player.tell("Thanks for trying out Tale!")
 
-    def completion(self, player):
+    def completion(self, player: Player) -> None:
         """congratulation text / finale when player finished the game (story_complete event)"""
         player.tell("Congratulations on escaping the house! Someone else has to look after Garfield now though...")
 

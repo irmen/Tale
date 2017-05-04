@@ -7,15 +7,20 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import json
 import datetime
-from ..base import Item
+from typing import Tuple, Dict
+from ..base import Item, Living
+from ..soul import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
 from .. import lang, mud_context
 
 __all__ = ["BulletinBoard", "bulletinboard"]
 
 
+PostType = Dict[str, str]
+
+
 class BulletinBoard(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.posts = []
         self.max_num_posts = 20
@@ -29,11 +34,11 @@ class BulletinBoard(Item):
             "reply": "Write a reply to a message already on the board (indicate the number of the message).",
             "remove": "Remove a message that you wrote earlier (indicate the number of the message)."}
 
-    def allow_item_move(self, actor, verb="move"):
+    def allow_item_move(self, actor: Living, verb: str="move") -> None:
         raise ActionRefused("You can't %s %s." % (verb, self.title))
 
     @property
-    def description(self):
+    def description(self) -> str:
         txt = [self._description]
         if not self.posts:
             txt.append("It is empty.")
@@ -51,10 +56,10 @@ class BulletinBoard(Item):
         return "\n".join(txt)
 
     @description.setter
-    def description(self, value):
+    def description(self, value: str) -> None:
         raise TaleError("you cannot set the description of a BulletinBoard because it is dynamic")
 
-    def handle_verb(self, parsed, actor):
+    def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
         if parsed.verb == "read":
             if parsed.who_info and self in parsed.who_info:
                 self.do_list_messages(actor)
@@ -84,7 +89,7 @@ class BulletinBoard(Item):
                 return True
         return False
 
-    def do_list_messages(self, actor):
+    def do_list_messages(self, actor: Living) -> None:
         actor.tell_others("{Title} studies the %s." % self.title)
         actor.tell("You look at the %s." % self.title)
         actor.tell(self._description)
@@ -100,7 +105,7 @@ class BulletinBoard(Item):
                 txt.append("%2d.  %-35s %-15s %s" % (num, post["subject"], post["author"], post["date"]))
             actor.tell(*txt, format=False)
 
-    def _get_post(self, num):
+    def _get_post(self, num: str) -> Tuple[int, PostType]:
         if num:
             if num[0] == '#':
                 num = num[1:]
@@ -113,13 +118,13 @@ class BulletinBoard(Item):
                 raise ActionRefused("That message doesn't exist.")
         raise ActionRefused("It is unclear what number you mean.")
 
-    def do_write_message(self, actor):
+    def do_write_message(self, actor: Living) -> None:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
         raise AsyncDialog(self.dialog_write_message(actor, None))
 
-    def dialog_write_message(self, actor, in_reply_to=None):
+    def dialog_write_message(self, actor: Living, in_reply_to: PostType=None) -> None:
         if in_reply_to:
             subject = "re: {subject}".format(**in_reply_to)
             subject = subject[:50]
@@ -161,20 +166,20 @@ class BulletinBoard(Item):
                 return
         actor.tell("The message is discarded.")
 
-    def _subject_valid(self, subj):
+    def _subject_valid(self, subj: str) -> str:
         subj = subj.strip()
         if subj:
             return subj
         raise ValueError("You need to type something.")
 
-    def do_reply_message(self, arg, actor):
+    def do_reply_message(self, arg: str, actor: Living) -> None:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
         num, post = self._get_post(arg)
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
         raise AsyncDialog(self.dialog_write_message(actor, post))
 
-    def do_remove_message(self, arg, actor):
+    def do_remove_message(self, arg: str, actor: Living) -> None:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't remove messages from it.")
         num, post = self._get_post(arg)
@@ -186,14 +191,14 @@ class BulletinBoard(Item):
         else:
             raise ActionRefused("You cannot remove that message.")
 
-    def do_read_message(self, arg, actor):
+    def do_read_message(self, arg: str, actor: Living) -> None:
         num, post = self._get_post(arg)
         actor.tell_others("{Title} reads something on the %s." % self.title)
         actor.tell("<ul>Subject: '{subject}' by {author} on {date}. It reads:</>".format(**post), end=True)
         for paragraph in post["text"].split("\n\n"):
             actor.tell(paragraph, end=True)
 
-    def load(self):
+    def load(self) -> None:
         """Load persisted messages from the datafile. Note: only the posts are loaded from the datafile, not the descriptive texts"""
         if not self.storage_file:
             return
@@ -203,7 +208,7 @@ class BulletinBoard(Item):
         except IOError:
             pass
 
-    def save(self):
+    def save(self) -> None:
         """save the messages to persistent data file"""
         if not self.storage_file:
             return
