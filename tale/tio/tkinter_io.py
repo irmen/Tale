@@ -10,6 +10,7 @@ import threading
 from tkinter import *
 import tkinter.font
 import tkinter.messagebox
+from typing import Iterable, Tuple, Any
 from . import iobase
 from . import vfs
 from .. import mud_context
@@ -59,7 +60,7 @@ class TkinterIo(iobase.IoAdapterBase):
         """abort any blocking input, if at all possible"""
         player.store_input_line("")
 
-    def render_output(self, paragraphs, **params):
+    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> str:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.

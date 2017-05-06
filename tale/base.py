@@ -273,7 +273,7 @@ class Item(MudObject):
     def remove(self, item: 'Item', actor: Optional['Living']) -> None:
         raise ActionRefused("You can't take things from there.")
 
-    def move(self, target: 'Item', actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+    def move(self, target: MudObject, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
@@ -397,7 +397,7 @@ class Location(MudObject):
         self.items = set()    # type: Set[Item] # set of all items in the room
         self.exits = {}       # type: Dict[str, Exit] # dictionary of all exits: exit_direction -> Exit object with target & descr
 
-    def __contains__(self, obj: Item) -> bool:    # XXX MudObject type?
+    def __contains__(self, obj: Union['Living', Item]) -> bool:
         return obj in self.livings or obj in self.items
 
     def __getstate__(self) -> dict:
@@ -736,7 +736,7 @@ class Living(MudObject):
     def __setstate__(self, state: dict) -> None:
         self.__dict__ = state
 
-    def __contains__(self, item: Item) -> bool:
+    def __contains__(self, item: Union['Living', Item, Location]) -> bool:
         return item in self.__inventory
 
     @property
@@ -806,7 +806,7 @@ class Living(MudObject):
         """get a wiretap for this living"""
         return pubsub.topic(("wiretap-living", self.name))
 
-    def tell(self, *messages: Sequence[str], **kwargs: Any) -> None:
+    def tell(self, *messages: str, **kwargs: Any) -> 'Living':
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
@@ -814,10 +814,12 @@ class Living(MudObject):
         They could react on it but this is not advisable because you will need
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
+        The object self is returned so you can chain calls.
         """
         msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
         tap.send((self.name, msg))
+        return self
 
     def tell_later(self, *messages: str, **kwargs: Any) -> None:
         """Tell something to this actor, but do it after other messages."""
@@ -939,7 +941,7 @@ class Living(MudObject):
         except Exception as x:
             actor.tell("Error result from forced cmd: " + str(x))
 
-    def move(self, target: Location, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+    def move(self, target: MudObject, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the current location, enter the new location (transactional).
         Messages are being printed to the locations if the move was successful.
@@ -1085,16 +1087,14 @@ class Container(Item):
             item.destroy(ctx)
         self.__inventory.clear()
 
-    def insert(self, item: Item, actor: Optional[Living]) -> 'Container':
+    def insert(self, item: Item, actor: Optional[Living]) -> None:
         assert isinstance(item, MudObject)
         self.__inventory.add(item)
         item.contained_in = self
-        return self
 
-    def remove(self, item: Item, actor: Optional[Living]) -> 'Container':
+    def remove(self, item: Item, actor: Optional[Living]) -> None:
         self.__inventory.remove(item)
         item.contained_in = None
-        return self
 
 
 class Exit(MudObject):

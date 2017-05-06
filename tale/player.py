@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import time
 import queue
 from threading import Event
-from typing import Any, Sequence, Tuple
+from typing import Any, Sequence, Tuple, TextIO, Dict, Set, List, Union
 from . import base
 from . import lang
 from . import hints
@@ -31,7 +31,7 @@ class Player(base.Living, pubsub.Listener):
         title = lang.capital(name)
         super().__init__(name, gender, race, title, description, short_description)
         self.turns = 0
-        self.state = {}
+        self.state = {}  # type: Dict[Any, Any]
         self.hints = hints.HintSystem()
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT
@@ -39,15 +39,15 @@ class Player(base.Living, pubsub.Listener):
         self.smartquotes_enabled = True
         self.output_line_delay = 50   # milliseconds.
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
-        self.known_locations = set()
+        self.known_locations = set()   # type: Set[base.Location]
         self.story_complete = False
         self.last_input_time = time.time()
         self.init_nonserializables()
 
     def init_nonserializables(self) -> None:
-        self._input = queue.Queue()
+        self._input = queue.Queue()  # type: ignore
         self.input_is_available = Event()
-        self.transcript = None
+        self.transcript = None  # type: TextIO
         self._output = TextBuffer()
 
     def __repr__(self):
@@ -75,7 +75,7 @@ class Player(base.Living, pubsub.Listener):
         """
         self.story_complete = True
 
-    def tell(self, *messages: str, **kwargs: Any) -> 'Player':
+    def tell(self, *messages: str, **kwargs: Any) -> base.Living:
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
@@ -109,14 +109,14 @@ class Player(base.Living, pubsub.Listener):
         else:
             self.tell("You see nothing.")
 
-    def move(self, target: base.Location, actor: base.Living=None, silent: bool=False, is_player: bool=True, verb: str="move") -> None:
+    def move(self, target: base.MudObject, actor: base.Living=None, silent: bool=False, is_player: bool=True, verb: str="move") -> None:
         """delegate to Living but with is_player set to True"""
         super().move(target, actor, silent, True, verb)
 
-    def create_wiretap(self, target: base.MudObject) -> None:
+    def create_wiretap(self, target: Union[base.Location, base.Living]) -> None:
         if "wizard" not in self.privileges:
             raise ActionRefused("wiretap requires wizard privilege")
-        tap = target.get_wiretap()   # XXX not all mudobject have this
+        tap = target.get_wiretap()
         tap.subscribe(self)
 
     def pubsub_event(self, topicname: pubsub.TopicNameType, event: Tuple[base.MudObject, str]) -> None:
@@ -158,34 +158,35 @@ class Player(base.Living, pubsub.Listener):
     def idle_time(self) -> float:
         return time.time() - self.last_input_time
 
-    def tell_object_location(self, object: base.MudObject, container: base.MudObject, print_parentheses: bool=True) -> None:
+    def tell_object_location(self, object: base.MudObject, known_container: Union[base.Living, base.Item, base.Location],
+                             print_parentheses: bool=True) -> None:
         """Tells the player some details about the location of the given object."""
-        if not container:
+        if known_container is None:
             if print_parentheses:
                 self.tell("(It's not clear where %s is)." % object.name)
             else:
                 self.tell("It's not clear where %s is." % object.name)
             return
-        if container in self:
+        elif known_container in self:
             if print_parentheses:
-                self.tell("(%s was found in %s, in your inventory)." % (object.name, container.title))
+                self.tell("(%s was found in %s, in your inventory)." % (object.name, known_container.title))
             else:
-                self.tell("%s was found in %s, in your inventory." % (lang.capital(object.name), container.title))
-        elif container is self.location:
+                self.tell("%s was found in %s, in your inventory." % (lang.capital(object.name), known_container.title))
+        elif known_container is self.location:
             if print_parentheses:
                 self.tell("(%s was found in your current location)." % object.name)
             else:
                 self.tell("%s was found in your current location." % lang.capital(object.name))
-        elif container is self:
+        elif known_container is self:
             if print_parentheses:
                 self.tell("(%s was found in your inventory)." % object.name)
             else:
                 self.tell("%s was found in your inventory." % lang.capital(object.name))
         else:
             if print_parentheses:
-                self.tell("(%s was found in %s)." % (object.name, container.name))
+                self.tell("(%s was found in %s)." % (object.name, known_container.name))
             else:
-                self.tell("%s was found in %s." % (lang.capital(object.name), container.name))
+                self.tell("%s was found in %s." % (lang.capital(object.name), known_container.name))
 
     def activate_transcript(self, file: str, vfs: VirtualFileSystem) -> None:
         if file:
@@ -237,7 +238,7 @@ class Player(base.Living, pubsub.Listener):
                             return desc
         return None
 
-    def test_peek_output_paragraphs(self) -> Sequence[str]:
+    def test_peek_output_paragraphs(self) -> Sequence[Sequence[str]]:
         """
         Returns a copy of the output paragraphs that sit in the buffer so far
         This is for test purposes. No text styles are included.
@@ -245,7 +246,7 @@ class Player(base.Living, pubsub.Listener):
         paragraphs = self._output.get_paragraphs(clear=False)
         return [strip_text_styles(paragraph_text) for paragraph_text, formatted in paragraphs]
 
-    def test_get_output_paragraphs(self) -> Sequence[str]:
+    def test_get_output_paragraphs(self) -> Sequence[Sequence[str]]:
         """
         Gets the accumulated output paragraphs in raw form.
         This is for test purposes. No text styles are included.
@@ -263,7 +264,7 @@ class TextBuffer:
     class Paragraph:
         def __init__(self, format: bool=True) -> None:
             self.format = format
-            self.lines = []
+            self.lines = []  # type: List[str]
 
         def add(self, line: str) -> None:
             self.lines.append(line)
@@ -275,7 +276,7 @@ class TextBuffer:
         self.init()
 
     def init(self) -> None:
-        self.paragraphs = []
+        self.paragraphs = []  # type: List[TextBuffer.Paragraph]
         self.in_paragraph = False
 
     def p(self) -> None:
@@ -328,7 +329,7 @@ class PlayerConnection:
         self.io = io
         self.need_new_input_prompt = True
 
-    def get_output(self) -> Sequence[str]:
+    def get_output(self) -> str:
         """
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
@@ -402,8 +403,8 @@ class PlayerConnection:
     def critical_error(self) -> None:
         self.io.critical_error()
 
-    def singleplayer_mainloop(self) -> int:   # XXX returntype
-        return self.io.singleplayer_mainloop(self)
+    def singleplayer_mainloop(self) -> None:
+        self.io.singleplayer_mainloop(self)
 
     def pause(self, unpause: bool=False) -> None:
         self.io.pause(unpause)

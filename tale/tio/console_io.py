@@ -8,6 +8,7 @@ import sys
 import os
 import signal
 import threading
+from typing import Iterable, Tuple, Any
 from . import styleaware_wrapper, iobase
 try:
     from . import colorama_patched as colorama
@@ -129,7 +130,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         player.store_input_line("")
         os.kill(os.getpid(), signal.SIGINT)
 
-    def render_output(self, paragraphs, **params):
+    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> str:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
