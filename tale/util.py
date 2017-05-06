@@ -349,7 +349,7 @@ def authorized(*privileges: Sequence[str]) -> Callable:
     If they don't match with the privileges given in this decorator,
     an ActionRefused error is raised.
     """
-    def checked(f: Callable) -> Callable:
+    def checked(f):
         if "actor" not in inspect.signature(f).parameters:
             raise SyntaxError("callable requires 'actor' parameter: " + f.__name__)
         allowed_privs = set(privileges)

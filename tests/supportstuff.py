@@ -6,10 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-from tale import npc
-from tale import pubsub
-from tale import util
-from tale import driver
+from tale import pubsub, util, driver, base
 
 
 class Thing:
@@ -44,7 +41,7 @@ class Wiretap(pubsub.Listener):
         self.senders = []
 
 
-class MsgTraceNPC(npc.NPC):
+class MsgTraceNPC(base.Living):
     def init(self):
         self._init_called = True
         self.clearmessages()

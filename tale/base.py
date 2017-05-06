@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 object hierarchy::
 
-    MudObject
+    MudObject (abstract base class, don't use directly)
       |
       +-- Location
       |
@@ -17,7 +17,7 @@ object hierarchy::
       |     +-- Container
       |     +-- Key
       |
-      +-- Living
+      +-- Living (abstract base class, don't use directly)
       |     |
       |     +-- Player
       |     +-- NPC
@@ -36,11 +36,12 @@ Use its enter/leave methods instead.
 """
 
 import re
+import copy
+import random
 from textwrap import dedent
 from collections import defaultdict
 from types import ModuleType
 from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
-import copy
 from . import lang
 from . import pubsub
 from . import mud_context
@@ -91,6 +92,12 @@ class MudObject:
     possessive = "its"
     objective = "it"
     gender = "n"
+
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        if cls is MudObject:
+            raise TypeError("don't create MudObject directly, use one of the subclasses")
+        return super().__new__(cls)
 
     @property
     def title(self) -> str:
@@ -621,11 +628,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player, previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
+    def notify_player_left(self, player, target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -697,12 +704,13 @@ class Stats:
 
 class Living(MudObject):
     """
-    Root class of the living entities in the mud world.
+    A living entity in the mud world (also known as an NPC).
     Livings sometimes have a heart beat 'tick' that makes them interact with the world.
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
-    def __init__(self, name: str, gender: str, race: str=None, title: str=None, description: str=None, short_description: str=None) -> None:
+    def __init__(self, name: str, gender: str, race: str="human",
+                 title: str=None, description: str=None, short_description: str=None) -> None:
         if race:
             self.stats = Stats.from_race(race, gender=gender)
         else:
@@ -753,11 +761,16 @@ class Living(MudObject):
 
     def insert(self, item: Item, actor: Optional['Living']) -> None:
         """Add an item to the inventory."""
-        if isinstance(item, Item) and (actor is self or actor is not None and "wizard" in actor.privileges):
+        if not isinstance(item, Item):
+            raise ActionRefused("You can't do that.")
+        if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.add(item)
             item.contained_in = self
-        else:
-            raise ActionRefused("You can't do that.")
+            return
+        if self.aggressive:
+            raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
+        # default behavior is to refuse stuff given to us:
+        raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
     def remove(self, item: Item, actor: Optional['Living']) -> None:
         """remove an item from the inventory"""
@@ -1018,14 +1031,21 @@ class Living(MudObject):
                         break
         return (found, containing_object) if found else (None, None)
 
-    def start_attack(self, living: 'Living') -> None:
+    def start_attack(self, victim: 'Living') -> None:
         """Starts attacking the given living until death ensues on either side."""
         # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
-        pass
+        # @TODO actual fight
+        name = lang.capital(self.title)
+        room_msg = "%s starts attacking %s!" % (name, victim.title)
+        victim_msg = "%s starts attacking you!" % name
+        attacker_msg = "You start attacking %s!" % victim.title
+        victim.tell(victim_msg)
+        victim.location.tell(room_msg, exclude_living=victim, specific_targets=[self], specific_target_msg=attacker_msg)
 
     def allow_give_money(self, actor: 'Living', amount: float) -> None:
         """Do we accept money? Raise ActionRefused if not."""
-        raise ActionRefused("You can't do that.")
+        if self.stats.race not in (None, "human"):
+            raise ActionRefused("You can't do that.")
 
     def _handle_verb_base(self, parsed: ParseResult, actor: 'Living') -> bool:
         """
@@ -1058,6 +1078,25 @@ class Living(MudObject):
     def look(self, short: bool=None) -> None:
         """look around in your surroundings. Dummy for base livings."""
         pass
+
+    def select_random_move(self) -> Optional['Exit']:
+        """
+        Select a random accessible exit to move to.
+        Avoids exits to a room that have no exits (traps).
+        If no suitable exit is found in a few random attempts, return None.
+        """
+        directions_with_exits = [d for d, e in self.location.exits.items() if e.target.exits]
+        if directions_with_exits:
+            for tries in range(4):
+                direction = random.choice(directions_with_exits)
+                xt = self.location.exits[direction]
+                try:
+                    xt.allow_passage(self)
+                except ActionRefused:
+                    continue
+                else:
+                    return xt
+        return None
 
 
 class Container(Item):

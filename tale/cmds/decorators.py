@@ -15,7 +15,7 @@ from ..parseresult import ParseResult
 from ..story import GameMode
 
 
-def cmd(func: Callable) -> Callable:
+def cmd(func):
     """
     Public decorator to define a normal command function.
     It checks the signature.
@@ -34,7 +34,7 @@ def cmd(func: Callable) -> Callable:
         raise SyntaxError("invalid cmd function signature: " + func.__name__)
 
 
-def wizcmd(func: Callable) -> Callable:
+def wizcmd(func):
     """
     Public decorator to define a wizard command function.
     It adds a privilege check wrapper and checks the signature.
@@ -72,14 +72,14 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
 
 def disable_notify_action(func: Callable) -> Callable:
     """decorator to prevent the command being passed to notify_action events"""
-    func.enable_notify_action = False
+    func.enable_notify_action = False  # type: ignore
     return func
 
 
 def disabled_in_gamemode(mode: GameMode) -> Callable:
     """decorator to disable a command in the given game mode"""
     def disable(func: Callable) -> Callable:
-        func.disabled_in_mode = mode
+        func.disabled_in_mode = mode    # type: ignore
         return func
     assert isinstance(mode, GameMode)
     return disable
@@ -87,11 +87,11 @@ def disabled_in_gamemode(mode: GameMode) -> Callable:
 
 def overrides_soul(func: Callable) -> Callable:
     """decorator to let the command override (hide) the corresponding soul command"""
-    func.overrides_soul = True
+    func.overrides_soul = True   # type: ignore
     return func
 
 
 def no_soul_parse(func: Callable) -> Callable:
     """decorator to tell the command processor to skip the soul parse step and just treat the whole input as plain string"""
-    func.no_soul_parse = True
+    func.no_soul_parse = True   # type: ignore
     return func

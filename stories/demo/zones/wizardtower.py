@@ -6,8 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from tale.base import Location, Exit, Item, heartbeat
-from tale.npc import NPC
+from tale.base import Location, Exit, Item, heartbeat, Living
 import tale.lang
 
 
@@ -26,7 +25,7 @@ key = Item("key", "rusty key", "An old rusty key without a label.")
 
 
 @heartbeat
-class Drone(NPC):
+class Drone(Living):
     def heartbeat(self, ctx):
         rand = random.random()
         if rand < 0.07:

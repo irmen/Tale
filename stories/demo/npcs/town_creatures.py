@@ -6,12 +6,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import random
 from tale import lang, mud_context
-from tale.npc import NPC
-from tale.base import heartbeat
+from tale.base import heartbeat, Living
 
 
 @heartbeat
-class VillageIdiot(NPC):
+class VillageIdiot(Living):
     def init(self):
         self.beats_before_drool = 4
 
@@ -32,7 +31,7 @@ class VillageIdiot(NPC):
                                    specific_targets=[target], specific_target_msg="%s drools on you." % title)
 
 
-class TownCrier(NPC):
+class TownCrier(Living):
     def init(self):
         # note: this npc uses the deferred feature to yell stuff at certain moments.
         # This is the preferred way (it's efficient).
@@ -56,7 +55,7 @@ class TownCrier(NPC):
             self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
 
 
-class WalkingRat(NPC):
+class WalkingRat(Living):
     def init(self):
         super().init()
         mud_context.driver.defer(2, self.do_idle_action)

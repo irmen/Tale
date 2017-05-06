@@ -9,7 +9,6 @@ import unittest
 import tale
 import tale.base
 import tale.player
-import tale.npc
 import tale.errors
 import tale.verbdefs
 from tale.parseresult import ParseResult
@@ -163,9 +162,9 @@ class TestSoul(unittest.TestCase):
     def testMultiTarget(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        philip = tale.npc.NPC("philip", "m")
-        kate = tale.npc.NPC("kate", "f", title="Kate")
-        cat = tale.npc.NPC("cat", "n", title="hairy cat")
+        philip = tale.base.Living("philip", "m")
+        kate = tale.base.Living("kate", "f", title="Kate")
+        cat = tale.base.Living("cat", "n", title="hairy cat")
         targets = [philip, kate, cat]
         # peer
         parsed = ParseResult("peer", who_order=targets)
@@ -192,8 +191,8 @@ class TestSoul(unittest.TestCase):
     def testWhoInfo(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        kate = tale.npc.NPC("kate", "f", title="Kate")
-        cat = tale.npc.NPC("cat", "n", title="hairy cat")
+        kate = tale.base.Living("kate", "f", title="Kate")
+        cat = tale.base.Living("cat", "n", title="hairy cat")
         player.move(tale.base.Location("somewhere"))
         cat.move(player.location)
         kate.move(player.location)
@@ -225,7 +224,7 @@ class TestSoul(unittest.TestCase):
         player = tale.player.Player("julie", "f")
         player.title = "the great Julie, destroyer of worlds"
         player.move(tale.base.Location("somewhere"))
-        npc_max = tale.npc.NPC("max", "m")
+        npc_max = tale.base.Living("max", "m")
         player.location.livings = {npc_max, player}
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "grin")
         self.assertEqual("grin", verb)
@@ -275,7 +274,7 @@ class TestSoul(unittest.TestCase):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
         player.move(tale.base.Location("somewhere"))
-        player.location.livings = {tale.npc.NPC("max", "m"), player}
+        player.location.livings = {tale.base.Living("max", "m"), player}
         # whisper
         verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "whisper \"hello there\"")
         self.assertEqual("You whisper 'hello there'.", player_msg)
@@ -292,7 +291,7 @@ class TestSoul(unittest.TestCase):
     def testBodypart(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         parsed = ParseResult("beep", who_order=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You triumphantly beep max on the nose.", player_msg)
@@ -311,7 +310,7 @@ class TestSoul(unittest.TestCase):
     def testQualifier(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         parsed = ParseResult("tickle", qualifier="fail", who_order=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You try to tickle max, but fail miserably.", player_msg)
@@ -400,7 +399,7 @@ class TestSoul(unittest.TestCase):
     def testCheckNamesWithSpacesParsing(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        bird = tale.npc.NPC("brown bird", "f")
+        bird = tale.base.Living("brown bird", "f")
         room = tale.base.Location("somewhere")
         gate = tale.base.Exit("gate", room, "the gate")
         door1 = tale.base.Exit("door one", room, "door number one")
@@ -478,9 +477,9 @@ class TestSoul(unittest.TestCase):
         east_exit = tale.base.Exit("east", room, "a door to the east")
         room.add_exits([east_exit, south_exit])
         player.move(room)
-        max_npc = tale.npc.NPC("max", "m")
-        kate_npc = tale.npc.NPC("kate", "f")
-        dino_npc = tale.npc.NPC("dinosaur", "n")
+        max_npc = tale.base.Living("max", "m")
+        kate_npc = tale.base.Living("kate", "f")
+        dino_npc = tale.base.Living("dinosaur", "n")
         targets = [max_npc, kate_npc, dino_npc]
         targets_with_player = targets + [player]
         player.location.livings = targets
@@ -584,7 +583,7 @@ class TestSoul(unittest.TestCase):
     def testDEFA(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         # grin
         parsed = ParseResult("grin")
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -600,7 +599,7 @@ class TestSoul(unittest.TestCase):
     def testPREV(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         # peer
         parsed = ParseResult("peer", who_order=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -623,7 +622,7 @@ class TestSoul(unittest.TestCase):
     def testPHYS(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         # require person
         with self.assertRaises(tale.errors.ParseError):
             parsed = ParseResult("bonk")
@@ -658,7 +657,7 @@ class TestSoul(unittest.TestCase):
     def testPERS(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         # fear1
         parsed = ParseResult("fear")
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -675,7 +674,7 @@ class TestSoul(unittest.TestCase):
     def testSIMP(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
 
         # scream 1
         parsed = ParseResult("scream")
@@ -741,7 +740,7 @@ class TestSoul(unittest.TestCase):
     def testQUAD(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
-        targets = [tale.npc.NPC("max", "m")]
+        targets = [tale.base.Living("max", "m")]
         # watch1
         parsed = ParseResult("watch")
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -762,7 +761,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie waves her hand in front of max's face, is he there?", room_msg)
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
         # ayt
-        targets2 = [tale.npc.NPC("max", "m"), player]
+        targets2 = [tale.base.Living("max", "m"), player]
         parsed.who_order = targets2
         parsed.recalc_who_info()
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -781,9 +780,9 @@ class TestSoul(unittest.TestCase):
         room = tale.base.Location("somewhere")
         room2 = tale.base.Location("somewhere else")
         player.move(room)
-        max_npc = tale.npc.NPC("Max", "m")
-        kate_npc = tale.npc.NPC("Kate", "f")
-        dino_npc = tale.npc.NPC("dinosaur", "n")
+        max_npc = tale.base.Living("Max", "m")
+        kate_npc = tale.base.Living("Kate", "f")
+        dino_npc = tale.base.Living("dinosaur", "n")
         targets = [max_npc, kate_npc, dino_npc]
         player.location.livings = targets
         newspaper = tale.base.Item("newspaper")

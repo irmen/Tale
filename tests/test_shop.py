@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import datetime
-from tale.npc import NPC
+from tale.base import Living
 from tale.shop import Shopkeeper, ShopBehavior
 from tale.errors import ActionRefused
 
@@ -28,7 +28,7 @@ class TestShopping(unittest.TestCase):
         self.shopkeeper.validate_open_hours(current_time=datetime.time(0, 0))
         self.shopkeeper.validate_open_hours(current_time=datetime.time(0, 1))
         self.shopkeeper.validate_open_hours(current_time=datetime.time(2, 59))
-        wiz = NPC("wizard", "m")
+        wiz = Living("wizard", "m")
         wiz.privileges.add("wizard")
         self.shopkeeper.validate_open_hours(wiz, current_time=datetime.time(2, 59))
 
@@ -43,7 +43,7 @@ class TestShopping(unittest.TestCase):
             self.shopkeeper.validate_open_hours(current_time=datetime.time(21, 59))
         with self.assertRaises(ActionRefused):
             self.shopkeeper.validate_open_hours(current_time=datetime.time(3, 0))
-        wiz = NPC("wizard", "m")
+        wiz = Living("wizard", "m")
         wiz.privileges.add("wizard")
         self.shopkeeper.validate_open_hours(wiz, current_time=datetime.time(21, 59))
 

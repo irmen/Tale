@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import pickle
-from tale import mud_context, races, base, npc, player, util, hints
+from tale import mud_context, races, base, player, util, hints
 from tale.story import *
 from tests.supportstuff import TestDriver
 
@@ -29,7 +29,7 @@ class TestSerializing(unittest.TestCase):
     def test_basic(self):
         o = serializecycle(races.races)
         self.assertEqual(races.races, o)
-        o = base.MudObject("name", "title", "description")
+        o = base.Item("name", "title", "description")
         o.aliases = ["alias"]
         x = serializecycle(o)
         self.assert_base_attrs(x)
@@ -91,11 +91,8 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("east", x.name)
         self.assertEqual("somewhere It is closed and locked.", x.description)
 
-    def test_living_npc_monster(self):
+    def test_npc(self):
         o = base.Living("name", "n", title="title", description="description", race="dragon")
-        x = serializecycle(o)
-        self.assert_base_attrs(x)
-        o = npc.NPC("name", "n", title="title", description="description", race="dragon")
         x = serializecycle(o)
         self.assert_base_attrs(x)
         self.assertFalse(x.aggressive)

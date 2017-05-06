@@ -32,9 +32,9 @@ Tale API
 .. automodule:: tale.lang
     :members:
 
-:mod:`tale.npc` --- Non-player Characters
------------------------------------------
-.. automodule:: tale.npc
+:mod:`tale.parseresult` --- Command parsing support
+---------------------------------------------------
+.. automodule:: tale.parseresult
     :members:
 
 :mod:`tale.player` --- Players
@@ -45,11 +45,6 @@ Tale API
 :mod:`tale.races` --- Races and creature attributes
 ---------------------------------------------------
 .. automodule:: tale.races
-    :members:
-
-:mod:`tale.soul` --- Soul command parser
-----------------------------------------
-.. automodule:: tale.soul
     :members:
 
 :mod:`tale.pubsub` --- Simple synchronous pubsub/event mechanism
@@ -65,6 +60,11 @@ Tale API
 :mod:`tale.util` --- Generic utilities
 --------------------------------------
 .. automodule:: tale.util
+    :members:
+
+:mod:`tale.verbdefs` --- Soul command verbs definitions
+-------------------------------------------------------
+.. automodule:: tale.verbdefs
     :members:
 
 :mod:`tale.cmds` --- In-game commands

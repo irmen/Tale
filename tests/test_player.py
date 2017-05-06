@@ -13,9 +13,8 @@ import unittest
 from io import StringIO
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
-from tale.base import Location, Exit, Item, Stats
+from tale.base import Location, Exit, Item, Stats, Living
 from tale.errors import ActionRefused, ParseError, NonSoulVerb
-from tale.npc import NPC
 from tale.accounts import MudAccounts
 from tale.player import Player, TextBuffer, PlayerConnection
 from tale.parseresult import ParseResult
@@ -186,7 +185,7 @@ class TestPlayer(unittest.TestCase):
         player.move(attic, silent=True)
         player.look(short=True)
         self.assertEqual(["[Attic]\n"], player.test_get_output_paragraphs())
-        julie = NPC("julie", "f")
+        julie = Living("julie", "f")
         julie.move(attic, silent=True)
         player.look(short=True)
         self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
@@ -195,7 +194,7 @@ class TestPlayer(unittest.TestCase):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         cellar = Location("Cellar", "A gloomy cellar.")
-        julie = NPC("julie", "f")
+        julie = Living("julie", "f")
         julie.move(attic, silent=True)
         player.move(attic, silent=True)
         player.brief = 0  # default setting: always long descriptions
@@ -250,7 +249,7 @@ class TestPlayer(unittest.TestCase):
         io.supports_smartquotes = False
         pc = PlayerConnection(player, io)
         player.set_screen_sizes(0, 100)
-        julie = NPC("julie", "f")
+        julie = Living("julie", "f")
         julie.move(attic)
         player.move(attic)
         julie.tell("message for julie")
@@ -280,7 +279,7 @@ class TestPlayer(unittest.TestCase):
     def test_socialize(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
-        julie = NPC("julie", "f")
+        julie = Living("julie", "f")
         julie.move(attic)
         player.move(attic)
         parsed = player.parse("wave all")
@@ -429,11 +428,11 @@ class TestPlayer(unittest.TestCase):
                 self.npc_arrived = npc
                 self.npc_arrived_from = previous_location
 
-            def notify_player_left(self, player, target_location):
+            def notify_player_left(self, player: Player, target_location: Location) -> None:
                 self.player_left = player
                 self.player_left_target = target_location
 
-            def notify_player_arrived(self, player, previous_location):
+            def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
                 self.player_arrived = player
                 self.player_arrived_from = previous_location
 

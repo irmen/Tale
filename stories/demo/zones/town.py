@@ -5,8 +5,7 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from tale.base import Location, Exit, Door, Item, Container, Key, clone
-from tale.npc import NPC
+from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
 from tale.player import Player
 from tale.errors import ActionRefused
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
@@ -112,7 +111,7 @@ idiot = VillageIdiot("idiot", "m", title="blubbering idiot", description="""
 
 rat = WalkingRat("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
 
-ant = NPC("ant", "n", race="insect", short_description="A single ant seems to have lost its way.")
+ant = Living("ant", "n", race="insect", short_description="A single ant seems to have lost its way.")
 
 clock = clone(gameclock)
 clock.short_description = "On the pavement lies a clock, it seems to be working still."
@@ -121,7 +120,7 @@ square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonl
 
 
 class AlleyOfDoors(Location):
-    def notify_player_arrived(self, player, previous_location):
+    def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
         if previous_location is self:
             player.tell("...Weird... The door you just entered seems to go back to the same place you came from...")
 

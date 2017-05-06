@@ -6,8 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from tale.shop import ShopBehavior, Shopkeeper
-from tale.base import Item, Location, Exit, clone
-from tale.npc import NPC
+from tale.base import Item, Location, Exit, clone, Living
 from tale.pubsub import Listener
 from tale.items.basic import gameclock, diamond, gem, newspaper
 from tale import mud_context
@@ -47,7 +46,7 @@ lamp = Item("lamp", "rather small lamp")
 lamp.value = 600
 
 
-class James(NPC, Listener):
+class James(Living, Listener):
     """The customer trying to sell a Lamp, and helpful as rat deterrent."""
     def pubsub_event(self, topicname, event):
         if topicname[0] == "wiretap-location":

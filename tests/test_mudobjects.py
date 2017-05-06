@@ -8,10 +8,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import datetime
 from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
-from tale.base import Location, Exit, Item, Living, MudObject, _limbo, Container, Weapon, Door, Key, clone
+from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, clone
 from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused, LocationIntegrityError
-from tale.npc import NPC
 from tale.player import Player
 from tale.parseresult import ParseResult
 from tale.story import MoneyType
@@ -34,10 +33,10 @@ class TestLocations(unittest.TestCase):
         self.key = Item("key", "rusty key", "an old rusty key without a label", short_description="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
         self.magazine2 = Item("magazine", "university magazine")
-        self.rat = NPC("rat", "n", race="rodent")
-        self.rat2 = NPC("rat", "n", race="rodent")
-        self.fly = NPC("fly", "n", race="insect", short_description="A fly buzzes around your head.")
-        self.julie = NPC("julie", "f", title="attractive Julie", description="She's quite the looker.")
+        self.rat = Living("rat", "n", race="rodent")
+        self.rat2 = Living("rat", "n", race="rodent")
+        self.fly = Living("fly", "n", race="insect", short_description="A fly buzzes around your head.")
+        self.julie = Living("julie", "f", title="attractive Julie", description="She's quite the looker.")
         self.julie.aliases = {"chick"}
         self.player = Player("player", "m")
         self.pencil = Item("pencil", title="fountain pen")
@@ -187,9 +186,9 @@ class TestLocations(unittest.TestCase):
 
     def test_enter_leave(self):
         hall = Location("hall")
-        rat1 = NPC("rat1", "n")
-        rat2 = NPC("rat2", "n")
-        julie = NPC("julie", "f")
+        rat1 = Living("rat1", "n")
+        rat2 = Living("rat2", "n")
+        julie = Living("julie", "f")
         with self.assertRaises(TypeError):
             hall.insert(12345, julie)
         self.assertEqual(_limbo, rat1.location)
@@ -218,7 +217,7 @@ class TestLocations(unittest.TestCase):
     def test_custom_verbs(self):
         player = Player("julie", "f")
         player.verbs["xywobble"] = "p1"
-        monster = NPC("snake", "f")
+        monster = Living("snake", "f")
         monster.verbs["snakeverb"] = "s1"
         room = Location("room")
         chair1 = Item("chair1")
@@ -503,6 +502,10 @@ class PubsubCollector(pubsub.Listener):
 
 
 class TestLiving(unittest.TestCase):
+    def test_nocreateliving(self):
+        with self.assertRaises(TypeError):
+            Living("name")
+
     def test_lifecycle(self):
         orc = Living("orc", "m", race="orc")
         axe = Weapon("axe")
@@ -536,7 +539,7 @@ class TestLiving(unittest.TestCase):
         self.assertFalse(axe in orc)
 
     def test_nonitem_insert_fail(self):
-        something = MudObject("thing that is not an Item")
+        something = Location("thing that is not an Item")
         orc = Living("orc", "m", race="half-orc")
         with self.assertRaises(ActionRefused):
             orc.insert(something, orc)
@@ -631,8 +634,8 @@ class TestLiving(unittest.TestCase):
 
 class TestNPC(unittest.TestCase):
     def test_init(self):
-        rat = NPC("rat", "n", race="rodent")
-        julie = NPC("julie", "f", title="attractive Julie",
+        rat = Living("rat", "n", race="rodent")
+        julie = Living("julie", "f", title="attractive Julie",
                     description="""
                     She's quite the looker.
                     """, race="human")
@@ -649,12 +652,14 @@ class TestNPC(unittest.TestCase):
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
         self.assertTrue(1 < rat.stats.agi < 100)
-        dragon = NPC("dragon", "f", race="dragon")
+        dragon = Living("dragon", "f", race="dragon")
         self.assertFalse(dragon.aggressive)
 
     def test_init_inventory(self):
-        rat = NPC("rat", "n", race="rodent")
-        rat.insert(Item("thing"), None)
+        rat = Living("rat", "n", race="rodent")
+        with self.assertRaises(ActionRefused):
+            rat.insert(Item("thing"), None)
+        rat.insert(Item("thing"), rat)
         wizz = Player("wizard", "f")
         wizz.privileges.add("wizard")
         rat.insert(Item("thing2"), wizz)
@@ -662,29 +667,29 @@ class TestNPC(unittest.TestCase):
         stuff = [Item("thing")]
         with self.assertRaises(AssertionError):
             rat.init_inventory(stuff)
-        rat = NPC("rat", "n", race="rodent")
+        rat = Living("rat", "n", race="rodent")
         rat.init_inventory(stuff)
         self.assertEqual(1, rat.inventory_size)
 
     def test_move_notify(self):
         class LocationNotify(Location):
-            def notify_npc_left(self, npc, target_location):
+            def notify_npc_left(self, npc: Living, target_location: Location) -> None:
                 self.npc_left = npc
                 self.npc_left_target = target_location
 
-            def notify_npc_arrived(self, npc, previous_location):
+            def notify_npc_arrived(self, npc: Living, previous_location: Location) -> None:
                 self.npc_arrived = npc
                 self.npc_arrived_from = previous_location
 
-            def notify_player_left(self, player, target_location):
+            def notify_player_left(self, player: Player, target_location: Location) -> None:
                 self.player_left = player
                 self.player_left_target = target_location
 
-            def notify_player_arrived(self, player, previous_location):
+            def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
                 self.player_arrived = player
                 self.player_arrived_from = previous_location
 
-        npc = NPC("rat", "m", race="rodent")
+        npc = Living("rat", "m", race="rodent")
         room1 = LocationNotify("room1")
         room2 = LocationNotify("room2")
         room1.insert(npc, None)
@@ -699,7 +704,7 @@ class TestNPC(unittest.TestCase):
 
 class TestAggressiveNpc(unittest.TestCase):
     def test_init_inventory(self):
-        rat = NPC("rat", "n", race="rodent")
+        rat = Living("rat", "n", race="rodent")
         rat.aggressive = True
         with self.assertRaises(ActionRefused):
             rat.insert(Item("thing"), None)
@@ -711,7 +716,7 @@ class TestAggressiveNpc(unittest.TestCase):
         stuff = [Item("thing")]
         with self.assertRaises(AssertionError):
             rat.init_inventory(stuff)
-        rat = NPC("rat", "n", race="rodent")
+        rat = Living("rat", "n", race="rodent")
         rat.aggressive = True
         rat.init_inventory(stuff)
         self.assertEqual(1, rat.inventory_size)
@@ -775,7 +780,7 @@ class TestDestroy(unittest.TestCase):
 
     def test_destroy_base(self):
         ctx = Context(None, None, None, None)
-        o = MudObject("x")
+        o = Item("x")
         o.destroy(ctx)
 
     def test_destroy_loc(self):
@@ -827,7 +832,7 @@ class TestDestroy(unittest.TestCase):
         ctx = Context(driver=mud_context.driver, clock=None, config=None, player_connection=None)
         thing = Item("thing")
         player = Player("julie", "f")
-        wolf = NPC("wolf", "m")
+        wolf = Living("wolf", "m")
         loc = Location("loc")
         mud_context.driver.defer(datetime.datetime.now(), thing.move)
         mud_context.driver.defer(datetime.datetime.now(), player.move)
@@ -847,7 +852,7 @@ class TestContainer(unittest.TestCase):
         key = Item("key")
         self.assertEqual(0, len(bag.inventory))
         self.assertEqual(0, bag.inventory_size)
-        npc = NPC("julie", "f")
+        npc = Living("julie", "f")
         bag.insert(key, npc)
         self.assertTrue(key in bag)
         self.assertEqual(1, bag.inventory_size)
@@ -936,7 +941,7 @@ class TestItem(unittest.TestCase):
     def test_move(self):
         hall = Location("hall")
         person = Living("person", "m", race="human")
-        monster = NPC("dragon", "f", race="dragon")
+        monster = Living("dragon", "f", race="dragon")
         monster.aggressive = True
         key = Item("key")
         stone = Item("stone")
@@ -957,7 +962,11 @@ class TestItem(unittest.TestCase):
             key.move(monster, person)  # aggressive monster should fail
         self.assertTrue("not a good idea" in str(x.exception))
         monster.aggressive = False
-        key.move(monster, person)   # non-aggressive should be ok
+        with self.assertRaises(ActionRefused) as x:
+            key.move(monster, person)   # non-aggressive should fail but differently
+        self.assertTrue("doesn't want" in str(x.exception))
+        stone.move(monster, monster)
+        self.assertTrue(stone in monster)
 
     def test_lang(self):
         thing = Item("thing")
@@ -993,13 +1002,13 @@ class TestItem(unittest.TestCase):
 
 
 class TestMudObject(unittest.TestCase):
-    def test_mudobj(self):
+    def test_basics(self):
         try:
-            x = MudObject("name", "the title", "description")
+            x = Item("name", "the title", "description")
             self.fail("assertion error expected")
         except AssertionError:
             pass
-        x = MudObject("name", "title", "description")
+        x = Item("name", "title", "description")
         x.init()
         x.heartbeat(None)
         with self.assertRaises(ActionRefused):
@@ -1011,6 +1020,10 @@ class TestMudObject(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             x.read(None)
         x.destroy(Context(None, None, None, None))
+
+    def test_nocreate(self):
+        with self.assertRaises(TypeError):
+            MudObject("name")
 
 
 class TestFunctions(unittest.TestCase):

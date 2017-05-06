@@ -6,8 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from tale.base import Location, Exit, Door, Item, Key, Living
-from tale.npc import NPC
+from tale.base import Location, Exit, Door, Key, Living
 from tale import mud_context
 from tale.lang import capital
 from tale.driver import Driver
@@ -54,7 +53,7 @@ closet.add_exits([Exit("living room", livingroom, "You can see the living room."
 
 # define items and NPCs
 
-class Cat(NPC):
+class Cat(Living):
     def init(self) -> None:
         self.aliases = {"cat"}
         mud_context.driver.defer(4, self.do_purr)

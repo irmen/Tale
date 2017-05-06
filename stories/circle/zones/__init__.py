@@ -12,8 +12,7 @@ from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
-from tale.npc import NPC
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Living
 from tale.items.basic import *
 from tale.items.board import BulletinBoard
 from tale.shop import ShopBehavior, Shopkeeper
@@ -41,7 +40,7 @@ converted_items = set()
 converted_shops = {}  # cache for the shop data
 
 
-class CircleMob(NPC):
+class CircleMob(Living):
     """Monster NPC having tailored behavior to suit circle data"""
     def init(self):
         super().init()

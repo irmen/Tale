@@ -6,7 +6,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import collections
-from functools import total_ordering
 import datetime
 import sys
 import time
@@ -18,9 +17,10 @@ import threading
 import appdirs
 import pkgutil
 import importlib
+from functools import total_ordering
 from types import ModuleType
 from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable
-from . import mud_context, errors, util, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts, verbdefs
+from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats, Living, Location, Exit, MudObject
@@ -1184,7 +1184,7 @@ class Commands:
 
 
 @base.heartbeat
-class LimboReaper(npc.NPC):
+class LimboReaper(base.Living):
     """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
     def __init__(self) -> None:
         super().__init__(

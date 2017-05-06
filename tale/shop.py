@@ -25,7 +25,6 @@ VALUE/APPRAISE
 import random
 import datetime
 from typing import Tuple, Set
-from .npc import NPC
 from .base import Item, Living, clone
 from .items.basic import Trash
 from .errors import ActionRefused, ParseError, RetrySoulVerb
@@ -79,7 +78,7 @@ class ShopBehavior:
         self._sellprofit = value
 
 
-class Shopkeeper(NPC):
+class Shopkeeper(Living):
     def init(self) -> None:
         super().init()
         self.shop = ShopBehavior()
