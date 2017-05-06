@@ -8,6 +8,7 @@ import unittest
 import os
 import sys
 import tale
+import tale.verbdefs
 from tale import mud_context
 from tale.story import StoryConfig, StoryBase, StoryConfigError
 from tests.supportstuff import TestDriver
@@ -15,7 +16,7 @@ from tests.supportstuff import TestDriver
 
 class StoryCaseBase:
     def setUp(self):
-        self.verbs = tale.soul.VERBS.copy()
+        self.verbs = tale.verbdefs.VERBS.copy()
         sys.path.insert(0, self.directory)
         mud_context.driver = TestDriver()
         mud_context.config = StoryConfig()
@@ -24,7 +25,7 @@ class StoryCaseBase:
         # this is a bit of a hack, to "clean up" after a story test.
         # it more or less gets the job done to be able to load the next story.
         del sys.path[0]
-        tale.soul.VERBS = self.verbs
+        tale.verbdefs.VERBS = self.verbs
         for m in list(sys.modules.keys()):
             if m.startswith("zones") or m == "story":
                 del sys.modules[m]

@@ -35,6 +35,7 @@ Except Location: it separates the items and livings it contains internally.
 Use its enter/leave methods instead.
 """
 
+import re
 from textwrap import dedent
 from collections import defaultdict
 from types import ModuleType
@@ -43,14 +44,15 @@ import copy
 from . import lang
 from . import pubsub
 from . import mud_context
-from . import soul
 from . import races
 from . import util
-from .soul import ParseResult
-from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError
+from . import verbdefs
+from .parseresult import ParseResult
+from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError, UnknownVerbException, NonSoulVerb
 
 
-__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location", "Weapon", "Key", "heartbeat", "clone"]
+__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location",
+           "Weapon", "Key", "heartbeat", "clone", "Soul"]
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
@@ -706,7 +708,7 @@ class Living(MudObject):
         else:
             self.stats = Stats()
         self.init_gender(gender)
-        self.soul = soul.Soul()
+        self.soul = Soul()
         self.location = _limbo  # set transitional location
         self.privileges = set()  # type: Set[str] # probably only used for Players though
         self.aggressive = False
@@ -852,11 +854,11 @@ class Living(MudObject):
         parsed = self.soul.parse(self, commandline, external_verbs)
         self._previous_parse = parsed
         if external_verbs and parsed.verb in external_verbs:
-            raise soul.NonSoulVerb(parsed)
-        if parsed.verb not in soul.NONLIVING_OK_VERBS:
+            raise NonSoulVerb(parsed)
+        if parsed.verb not in verbdefs.NONLIVING_OK_VERBS:
             # check if any of the targeted objects is a non-living
             if not all(isinstance(who, Living) for who in parsed.who_order):
-                raise soul.NonSoulVerb(parsed)
+                raise NonSoulVerb(parsed)
         self.validate_socialize_targets(parsed)
         return parsed
 
@@ -874,7 +876,7 @@ class Living(MudObject):
         try:
             parsed = self.parse(cmdline, external_verbs=external_verbs)
             self.do_socialize_cmd(parsed)
-        except soul.UnknownVerbException as ex:
+        except UnknownVerbException as ex:
             if ex.verb == "say":
                 # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
                 verb, _, rest = cmdline.partition(" ")
@@ -892,11 +894,11 @@ class Living(MudObject):
         self.tell(actor_message)
         self.location.tell(room_message, self, who, target_message)
         pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
-        if parsed.verb in soul.AGGRESSIVE_VERBS:
+        if parsed.verb in verbdefs.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
             # We need to check the verb qualifier, it might void the actual action :)
-            if parsed.qualifier not in soul.NEGATING_QUALIFIERS:
+            if parsed.qualifier not in verbdefs.NEGATING_QUALIFIERS:
                 for living in who:
                     if getattr(living, "aggressive", False):
                         pending_actions.send(lambda victim=self: living.start_attack(victim))
@@ -1371,3 +1373,566 @@ class Key(Item):
             self.key_code = door.key_code
             if not self.key_code:
                 raise LocationIntegrityError("door has no key_code set", None, door, door.target)
+
+
+class Soul:
+    """
+    The 'soul' of a Living (most importantly, a Player).
+    Handles the high level verb actions and allows for social player interaction.
+    Verbs that actually do something in the environment (not purely social messages) are implemented elsewhere.
+    """
+
+    _quoted_message_regex = re.compile(r"('(?P<msg1>.*)')|(\"(?P<msg2>.*)\")")  # greedy single-or-doublequoted string match
+    _skip_words = {"and", "&", "at", "to", "before", "in", "into", "on", "off", "onto",
+                   "the", "with", "from", "after", "before", "under", "above", "next"}
+
+    def __init__(self) -> None:
+        self.__previously_parsed = None  # type: ParseResult
+
+    def is_verb(self, verb: str) -> bool:
+        return verb in verbdefs.VERBS
+
+    def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) \
+            -> Tuple[str, Tuple[FrozenSet[Union[Location, Living]], str, str, str]]:
+        """
+        Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
+        and another tuple containing the targets of the action and the various action messages.
+        Any action qualifier is added to the verb string if it is present ("fail kick").
+        """
+        parsed = self.parse(player, commandstring, external_verbs)
+        if parsed.verb in external_verbs:
+            raise NonSoulVerb(parsed)
+        result = self.process_verb_parsed(player, parsed)
+        if parsed.qualifier:
+            verb = parsed.qualifier + " " + parsed.verb
+        else:
+            verb = parsed.verb
+        return verb, result
+
+    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[FrozenSet[Union[Location, Living]], str, str, str]:
+        """
+        This function takes a verb and the arguments given by the user,
+        creates various display messages that can be sent to the players and room,
+        and returns a tuple: (targets-without-player, playermessage, roommessage, targetmessage)
+        """
+        if not player:
+            raise TaleError("no player in process_verb_parsed")
+        verbdata = verbdefs.VERBS.get(parsed.verb)
+        if not verbdata:
+            raise UnknownVerbException(parsed.verb, None, parsed.qualifier)
+
+        message = parsed.message
+        adverb = parsed.adverb
+
+        vtype = verbdata[0]
+        if not message and verbdata[1] and len(verbdata[1]) > 1:
+            message = verbdata[1][1]  # get the message from the verbs table
+        if message:
+            if message.startswith("'"):
+                # use the message without single quotes around it
+                msg = message = self.spacify(message[1:])
+            else:
+                msg = " '" + message + "'"
+                message = " " + message
+        else:
+            msg = message = ""
+        if not adverb:
+            if verbdata[1]:
+                adverb = verbdata[1][0]    # normal-adverb
+            else:
+                adverb = ""
+        where = ""
+        if parsed.bodypart:
+            where = " " + verbdefs.BODY_PARTS[parsed.bodypart]
+        elif not parsed.bodypart and verbdata[1] and len(verbdata[1]) > 2 and verbdata[1][2]:
+            where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
+        how = self.spacify(adverb)
+
+        def result_messages(action: str, action_room: str) -> Tuple[FrozenSet[Union[Location, Living]], str, str, str]:
+            action = action.strip()
+            action_room = action_room.strip()
+            if parsed.qualifier:
+                qual_action, qual_room, use_room_default = verbdefs.ACTION_QUALIFIERS[parsed.qualifier]
+                action_room = qual_room % action_room if use_room_default else qual_room % action
+                action = qual_action % action
+            # construct message seen by player
+            targetnames = [self.who_replacement(player, target, player) for target in parsed.who_order]
+            player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
+            player_msg = player_msg.replace(" \nYOUR", " your")
+            player_msg = player_msg.replace(" \nMY", " your")
+            # construct message seen by room
+            targetnames = [self.who_replacement(player, target, None) for target in parsed.who_order]
+            room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
+            room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
+            room_msg = room_msg.replace(" \nMY", " " + player.objective)
+            # construct message seen by targets
+            target_msg = action_room.replace(" \nWHO", " you")
+            target_msg = target_msg.replace(" \nYOUR", " " + player.possessive)
+            target_msg = target_msg.replace(" \nPOSS", " your")
+            target_msg = target_msg.replace(" \nIS", " are")
+            target_msg = target_msg.replace(" \nSUBJ", " you")
+            target_msg = target_msg.replace(" \nMY", " " + player.objective)
+            # fix up POSS, IS, SUBJ in the player and room messages
+            if len(parsed.who_order) == 1:
+                only_living = parsed.who_order[0]
+                subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
+                player_msg = player_msg.replace(" \nIS", " is")
+                player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
+                player_msg = player_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, player))
+                room_msg = room_msg.replace(" \nIS", " is")
+                room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
+                room_msg = room_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, None))
+            else:
+                targetnames_player = lang.join([Soul.poss_replacement(player, living, player) for living in parsed.who_order])
+                targetnames_room = lang.join([Soul.poss_replacement(player, living, None) for living in parsed.who_order])
+                player_msg = player_msg.replace(" \nIS", " are")
+                player_msg = player_msg.replace(" \nSUBJ", " they")
+                player_msg = player_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_player))
+                room_msg = room_msg.replace(" \nIS", " are")
+                room_msg = room_msg.replace(" \nSUBJ", " they")
+                room_msg = room_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_room))
+            # add fullstops at the end
+            player_msg = lang.fullstop("You " + player_msg)
+            room_msg = lang.capital(lang.fullstop(player.title + " " + room_msg))
+            target_msg = lang.capital(lang.fullstop(player.title + " " + target_msg))
+            if player in parsed.who_info:
+                who = set(parsed.who_info)
+                who.remove(player)  # the player should not be part of the remaining targets.
+                whof = frozenset(who)
+            else:
+                whof = frozenset(parsed.who_info)
+            return whof, player_msg, room_msg, target_msg
+
+        # construct the action string
+        action = None
+        if vtype == verbdefs.DEUX:
+            action = verbdata[2]
+            action_room = verbdata[3]
+            if not self.check_person(action, parsed.who_order):
+                raise ParseError("The verb %s needs a person." % parsed.verb)
+            action = action.replace(" \nWHERE", where)
+            action_room = action_room.replace(" \nWHERE", where)
+            action = action.replace(" \nWHAT", message)
+            action = action.replace(" \nMSG", msg)
+            action_room = action_room.replace(" \nWHAT", message)
+            action_room = action_room.replace(" \nMSG", msg)
+            action = action.replace(" \nHOW", how)
+            action_room = action_room.replace(" \nHOW", how)
+            return result_messages(action, action_room)
+        elif vtype == verbdefs.QUAD:
+            if parsed.who_info:
+                action = verbdata[4]
+                action_room = verbdata[5]
+            else:
+                action = verbdata[2]
+                action_room = verbdata[3]
+            action = action.replace(" \nWHERE", where)
+            action_room = action_room.replace(" \nWHERE", where)
+            action = action.replace(" \nWHAT", message)
+            action = action.replace(" \nMSG", msg)
+            action_room = action_room.replace(" \nWHAT", message)
+            action_room = action_room.replace(" \nMSG", msg)
+            action = action.replace(" \nHOW", how)
+            action_room = action_room.replace(" \nHOW", how)
+            return result_messages(action, action_room)
+        elif vtype == verbdefs.FULL:
+            raise TaleError("vtype verbdefs.FULL")  # doesn't matter, verbdefs.FULL is not used yet anyway
+        elif vtype == verbdefs.DEFA:
+            action = parsed.verb + "$ \nHOW \nAT"
+        elif vtype == verbdefs.PREV:
+            action = parsed.verb + "$" + self.spacify(verbdata[2]) + " \nWHO \nHOW"
+        elif vtype == verbdefs.PHYS:
+            action = parsed.verb + "$" + self.spacify(verbdata[2]) + " \nWHO \nHOW \nWHERE"
+        elif vtype == verbdefs.SHRT:
+            action = parsed.verb + "$" + self.spacify(verbdata[2]) + " \nHOW"
+        elif vtype == verbdefs.PERS:
+            action = verbdata[3] if parsed.who_order else verbdata[2]
+        elif vtype == verbdefs.SIMP:
+            action = verbdata[2]
+        else:
+            raise TaleError("invalid vtype " + vtype)
+
+        if parsed.who_info and len(verbdata) > 3:
+            action = action.replace(" \nAT", self.spacify(verbdata[3]) + " \nWHO")
+        else:
+            action = action.replace(" \nAT", "")
+
+        if not self.check_person(action, parsed.who_order):
+            raise ParseError("The verb %s needs a person." % parsed.verb)
+
+        action = action.replace(" \nHOW", how)
+        action = action.replace(" \nWHERE", where)
+        action = action.replace(" \nWHAT", message)
+        action = action.replace(" \nMSG", msg)
+        action_room = action
+        action = action.replace("$", "")
+        action_room = action_room.replace("$", "s")
+        return result_messages(action, action_room)
+
+    def parse(self, player, cmd: str, external_verbs: Set[str]=set()) -> ParseResult:
+        """Parse a command string, returns a ParseResult object."""
+        qualifier = None
+        message_verb = False  # does the verb expect a message?
+        external_verb = False  # is it a non-soul verb?
+        adverb = None   # type: Optional[str]
+        message = []  # type: List[str]
+        bodypart = None   # type: str
+        arg_words = []  # type: List[str]
+        unrecognized_words = []   # type: List[str]
+        who_info = defaultdict(ParseResult.WhoInfo)   # type: Dict[Any, ParseResult.WhoInfo]
+        who_order = []   # type: List[Any]
+        who_sequence = 0
+        unparsed = cmd
+
+        # a substring enclosed in quotes will be extracted as the message
+        m = self._quoted_message_regex.search(cmd)
+        if m:
+            message = [(m.group("msg1") or m.group("msg2")).strip()]
+            cmd = cmd[:m.start()] + cmd[m.end():]
+
+        if not cmd:
+            raise ParseError("What?")
+        words = cmd.split()
+        if words[0] in verbdefs.ACTION_QUALIFIERS:     # suddenly, fail, ...
+            qualifier = words.pop(0)
+            unparsed = unparsed[len(qualifier):].lstrip()
+            if qualifier == "dont":
+                qualifier = "don't"  # little spelling suggestion
+            # note: don't add qualifier to arg_words
+        if words and words[0] in self._skip_words:
+            skipword = words.pop(0)
+            unparsed = unparsed[len(skipword):].lstrip()
+
+        if not words:
+            raise ParseError("What?")
+        verb = None
+        if words[0] in external_verbs:    # external verbs have priority above soul verbs
+            verb = words.pop(0)
+            external_verb = True
+            # note: don't add verb to arg_words
+        elif words[0] in verbdefs.VERBS:
+            verb = words.pop(0)
+            verbdata = verbdefs.VERBS[verb][2]
+            message_verb = "\nMSG" in verbdata or "\nWHAT" in verbdata
+            # note: don't add verb to arg_words
+        elif player.location.exits:
+            # check if the words are the name of a room exit.
+            move_action = None
+            if words[0] in verbdefs.MOVEMENT_VERBS:
+                move_action = words.pop(0)
+                if not words:
+                    raise ParseError("%s where?" % lang.capital(move_action))
+            exit, exit_name, wordcount = self.check_name_with_spaces(words, 0, player.location.exits, {})
+            if exit:
+                if wordcount != len(words):
+                    raise ParseError("What do you want to do with that?")
+                unparsed = unparsed[len(exit_name):].lstrip()
+                raise NonSoulVerb(ParseResult(verb=exit_name, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
+            elif move_action:
+                raise ParseError("You can't %s there." % move_action)
+            else:
+                # can't determine verb at this point, just continue with verb=None
+                pass
+        else:
+            # can't determine verb at this point, just continue with verb=None
+            pass
+
+        if verb:
+            unparsed = unparsed[len(verb):].lstrip()
+        include_flag = True
+        collect_message = False
+        all_livings = {}  # livings in the room (including player) by name + aliases
+        all_items = {}  # all items in the room or player's inventory, by name + aliases
+        for living in player.location.livings:
+            all_livings[living.name] = living
+            for alias in living.aliases:
+                all_livings[alias] = living
+        for item in player.location.items:
+            all_items[item.name] = item
+            for alias in item.aliases:
+                all_items[alias] = item
+        for item in player.inventory:
+            all_items[item.name] = item
+            for alias in item.aliases:
+                all_items[alias] = item
+        previous_word = None
+        words_enumerator = enumerate(words)
+        for index, word in words_enumerator:
+            if collect_message:
+                message.append(word)
+                arg_words.append(word)
+                previous_word = word
+                continue
+            if not message_verb and not collect_message:
+                word = word.rstrip(",")
+            if word in ("them", "him", "her", "it"):
+                if self.__previously_parsed:
+                    # try to connect the pronoun to a previously parsed item/living
+                    who_list = self.match_previously_parsed(player, word)
+                    if who_list:
+                        for who, name in who_list:
+                            if include_flag:
+                                who_info[who].sequence = who_sequence
+                                who_info[who].previous_word = previous_word
+                                who_sequence += 1
+                                who_order.append(who)
+                            else:
+                                del who_info[who]
+                                who_order.remove(who)
+                            arg_words.append(name)  # put the replacement-name in the args instead of the pronoun
+                    previous_word = None
+                    continue
+                raise ParseError("It is not clear who you mean.")
+            if word in ("me", "myself", "self"):
+                if include_flag:
+                    who_info[player].sequence = who_sequence
+                    who_info[player].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(player)
+                elif player in who_info:
+                    del who_info[player]
+                    who_order.remove(player)
+                arg_words.append(word)
+                previous_word = None
+                continue
+            if word in verbdefs.BODY_PARTS:
+                if bodypart:
+                    raise ParseError("You can't do that both %s and %s." % (verbdefs.BODY_PARTS[bodypart], verbdefs.BODY_PARTS[word]))
+                bodypart = word
+                arg_words.append(word)
+                continue
+            if word in ("everyone", "everybody", "all"):
+                if include_flag:
+                    if not all_livings:
+                        raise ParseError("There is nobody here.")
+                    # include every *living* thing visible, don't include items, and skip the player itself
+                    for living in player.location.livings:
+                        if living is not player:
+                            who_info[living].sequence = who_sequence
+                            who_info[living].previous_word = previous_word
+                            who_sequence += 1
+                            who_order.append(living)
+                else:
+                    who_info = {}
+                    who_order = []
+                    who_sequence = 0
+                arg_words.append(word)
+                previous_word = None
+                continue
+            if word == "everything":
+                raise ParseError("You can't do something to everything around you, be more specific.")
+            if word in ("except", "but"):
+                include_flag = not include_flag
+                arg_words.append(word)
+                continue
+            if word in lang.ADVERBS:
+                if adverb:
+                    raise ParseError("You can't do that both %s and %s." % (adverb, word))
+                adverb = word
+                arg_words.append(word)
+                continue
+            if word in all_livings:
+                living = all_livings[word]
+                if include_flag:
+                    who_info[living].sequence = who_sequence
+                    who_info[living].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(living)
+                elif living in who_info:
+                    del who_info[living]
+                    who_order.remove(living)
+                arg_words.append(word)
+                previous_word = None
+                continue
+            if word in all_items:
+                item = all_items[word]
+                if include_flag:
+                    who_info[item].sequence = who_sequence
+                    who_info[item].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(item)
+                elif item in who_info:
+                    del who_info[item]
+                    who_order.remove(item)
+                arg_words.append(word)
+                previous_word = None
+                continue
+            if player.location:
+                exit, exit_name, wordcount = self.check_name_with_spaces(words, index, player.location.exits, {})
+                if exit:
+                    who_info[exit].sequence = who_sequence     # XXX exit is not a MudObject???
+                    who_info[exit].previous_word = previous_word
+                    previous_word = None
+                    who_sequence += 1
+                    who_order.append(exit)  # XXX who_order contains Livings not str!
+                    arg_words.append(exit_name)
+                    while wordcount > 1:
+                        next(words_enumerator)
+                        wordcount -= 1
+                    continue
+            item, full_name, wordcount = self.check_name_with_spaces(words, index, all_livings, all_items)
+            if item:
+                while wordcount > 1:
+                    next(words_enumerator)
+                    wordcount -= 1
+                if include_flag:
+                    who_info[item].sequence = who_sequence
+                    who_info[item].previous_word = previous_word
+                    who_sequence += 1
+                    who_order.append(item)
+                elif item in who_info:
+                    del who_info[item]
+                    who_order.remove(item)
+                arg_words.append(full_name)
+                previous_word = None
+                continue
+            if message_verb and not message:
+                collect_message = True
+                message.append(word)
+                arg_words.append(word)
+                continue
+            if word not in self._skip_words:
+                # unrecognized word, check if it could be a person's name or an item. (prefix)
+                if not who_order:
+                    for name in all_livings:
+                        if name.startswith(word):
+                            raise ParseError("Perhaps you meant %s?" % name)
+                    for name in all_items:
+                        if name.startswith(word):
+                            raise ParseError("Perhaps you meant %s?" % name)
+                if not external_verb:
+                    if not verb:
+                        raise UnknownVerbException(word, words, qualifier)
+                    # check if it is a prefix of an adverb, if so, suggest a few adverbs
+                    adverbs = lang.adverb_by_prefix(word)
+                    if len(adverbs) == 1:
+                        word = adverbs[0]
+                        if adverb:
+                            raise ParseError("You can't do that both %s and %s." % (adverb, word))
+                        adverb = word
+                        arg_words.append(word)
+                        previous_word = word
+                        continue
+                    elif len(adverbs) > 1:
+                        raise ParseError("What adverb did you mean: %s?" % lang.join(adverbs, conj="or"))
+
+                if external_verb:
+                    arg_words.append(word)
+                    unrecognized_words.append(word)
+                else:
+                    if word in verbdefs.VERBS or word in verbdefs.ACTION_QUALIFIERS or word in verbdefs.BODY_PARTS:
+                        # in case of a misplaced verb, qualifier or bodypart give a little more specific error
+                        raise ParseError("The word %s makes no sense at that location." % word)
+                    else:
+                        # no idea what the user typed, generic error
+                        errormsg = "It's not clear what you mean by '%s'." % word
+                        if word[0].isupper():
+                            errormsg += " Just type in lowercase ('%s')." % word.lower()
+                        raise ParseError(errormsg)
+            previous_word = word
+
+        message_text = " ".join(message)
+        if not verb:
+            # This is interesting: there's no verb.
+            # but maybe the thing the user typed refers to an object or creature.
+            # In that case, set the verb to that object's default verb.
+            if len(who_order) == 1:
+                try:
+                    verb = who_order[0].default_verb
+                except AttributeError:
+                    verb = "examine"   # fallback for everything that hasn't explicitly set a default_verb
+            else:
+                raise UnknownVerbException(words[0], words, qualifier)
+        return ParseResult(verb, who_info=who_info, who_order=who_order,
+                           adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
+                           args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
+
+    def remember_previous_parse(self, parsed: ParseResult) -> None:
+        self.__previously_parsed = parsed
+
+    def match_previously_parsed(self, player, pronoun: str) -> List[Tuple[Any, str]]:
+        """
+        Try to connect the pronoun (it, him, her, them) to a previously parsed item/living.
+        Returns a list of (who, replacement-name) tuples.
+        The reason we return a replacement-name is that the parser can replace the
+        pronoun by the proper name that would otherwise have been used in that place.
+        """
+        if pronoun == "them":
+            # plural (any item/living qualifies)
+            matches = list(self.__previously_parsed.who_order)
+            for who in matches:
+                if not player.search_item(who.name) and who not in player.location.livings:
+                    player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                    raise ParseError("%s is no longer around." % lang.capital(who.subjective))
+            if matches:
+                player.tell("<dim>(By '%s', it is assumed you mean: %s.)" % (pronoun, lang.join(who.title for who in matches)))
+                return [(who, who.name) for who in matches]
+            else:
+                raise ParseError("It is not clear who you're referring to.")
+        for who in self.__previously_parsed.who_order:
+            # first see if it is an exit
+            if pronoun == "it":
+                for direction, exit in player.location.exits.items():
+                    if exit is who:
+                        player.tell("<dim>(By '%s', it is assumed you mean '%s'.)</>" % (pronoun, direction))
+                        return [(who, direction)]
+            # not an exit, try an item or a living
+            if pronoun == who.objective:
+                if player.search_item(who.name) or who in player.location.livings:
+                    player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
+                    return [(who, who.name)]
+                player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                raise ParseError("%s is no longer around." % lang.capital(who.subjective))
+        raise ParseError("It is not clear who you're referring to.")
+
+    @staticmethod
+    def poss_replacement(actor: Living, target: MudObject, observer: Optional[Living]) -> str:
+        """determines what word to use for a POSS"""
+        if target is actor:
+            if actor is observer:
+                return "your own"       # your own foot
+            else:
+                return actor.possessive + " own"   # his own foot
+        else:
+            if target is observer:
+                return "your"           # your foot
+            else:
+                return lang.possessive(target.title)
+
+    def spacify(self, string: str) -> str:
+        """returns string prefixed with a space, if it has contents. If it is empty, prefix nothing"""
+        return " " + string.lstrip(" \t") if string else ""
+
+    def who_replacement(self, actor: Living, target: MudObject, observer: Optional[Living]) -> str:
+        """determines what word to use for a WHO"""
+        if target is actor:
+            if actor is observer:
+                return "yourself"       # you kick yourself
+            else:
+                return actor.objective + "self"    # ... kicks himself
+        else:
+            if target is observer:
+                return "you"            # ... kicks you
+            else:
+                return target.title      # ... kicks ...
+
+    def check_person(self, action: str, who: Sequence[str]) -> bool:
+        if not who and ("\nWHO" in action or "\nPOSS" in action):
+            return False
+        return True
+
+    def check_name_with_spaces(self, words: Sequence[str], index: int, all_livings: Dict[str, Any],
+                               all_items: Dict[str, Any]) -> Tuple[Optional[int], Optional[str], int]:   # XXX return type
+        wordcount = 1
+        name = words[index]
+        try:
+            while wordcount < 6:    # an upper bound for the number of words to concatenate to avoid long runtime
+                if name in all_livings:
+                    return all_livings[name], name, wordcount
+                if name in all_items:
+                    return all_items[name], name, wordcount
+                name = name + " " + words[index + wordcount]
+                wordcount += 1
+        except IndexError:
+            pass
+        return None, None, 0

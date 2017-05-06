@@ -10,8 +10,8 @@ import functools
 from typing import Callable
 from .. import util
 from .. import errors
-from .. import soul
 from .. import player
+from ..parseresult import ParseResult
 from ..story import GameMode
 
 
@@ -46,8 +46,8 @@ def wizcmd(func: Callable) -> Callable:
     # NOTE: this code is VERY similar to the internal @wizcmd decorator in cmds/wizard.py
     # If changes are made, make sure to update both occurrences
     @functools.wraps(func)
-    def executewizcommand(player: player.Player, parsed: soul.ParseResult, ctx: util.Context) \
-            -> Callable[[player.Player, soul.ParseResult, util.Context], None]:
+    def executewizcommand(player: player.Player, parsed: ParseResult, ctx: util.Context) \
+            -> Callable[[player.Player, ParseResult, util.Context], None]:
         if "wizard" not in player.privileges:
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)

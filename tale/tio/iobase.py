@@ -9,7 +9,7 @@ import html.parser
 import smartypants
 from typing import Union, Sequence, Iterable, Any, Tuple, Optional
 from ..util import format_traceback
-from .. import soul
+from .. import verbdefs
 
 
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
@@ -126,6 +126,6 @@ class IoAdapterBase:
         exits = [xt for xt in player.location.exits if xt.startswith(prefix)]
         inventory = [item.name for item in player.inventory if item.name.startswith(prefix)]
         inventory_aliases = [alias for item in player.inventory for alias in item.aliases if alias.startswith(prefix)]
-        emotes = [verb for verb in soul.VERBS if verb.startswith(prefix)]
+        emotes = [verb for verb in verbdefs.VERBS if verb.startswith(prefix)]
         self.candidates = sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases)
         return self.candidates

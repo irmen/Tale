@@ -11,15 +11,16 @@ import random
 import itertools
 from typing import Callable, Iterable, List
 from .. import lang
-from .. import soul
 from .. import races
 from .. import util
 from .. import base
+from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
 from ..player import Player
 from ..accounts import MudAccounts
 from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from ..story import GameMode
+from ..parseresult import ParseResult
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 
 all_commands = {}
@@ -56,7 +57,7 @@ def cmd(command: str, *aliases: str) -> Callable:
 
 @cmd("inventory")
 @disable_notify_action
-def do_inventory(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_inventory(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the items you are carrying."""
     if parsed.who_order and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
@@ -75,7 +76,7 @@ def do_inventory(player: Player, parsed: soul.ParseResult, ctx: util.Context) ->
 
 
 @cmd("locate", "search", "find")
-def do_locate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_locate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Try to locate a specific item, creature or player."""
     p = player.tell
     if not parsed.args:
@@ -119,7 +120,7 @@ def do_locate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> No
 
 
 @cmd("drop")
-def do_drop(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_drop(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Drop an item (or all items) you are carrying."""
     if not parsed.args:
         raise ParseError("Drop what?")
@@ -172,7 +173,7 @@ def do_drop(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("empty")
-def do_empty(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_empty(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Remove the contents from an object."""
     if len(parsed.args) != 1 or not parsed.who_order:
         if parsed.args[0] in ("bags", "pockets"):
@@ -209,7 +210,7 @@ def do_empty(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("put", "place")
-def do_put(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Put an item (or all items) into something else. If you're not carrying the item, you will first pick it up."""
     p = player.tell
     if len(parsed.args) < 2:
@@ -265,7 +266,7 @@ def do_put(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("combine", "attach", "apply", "install")
-def do_combine(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_combine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Combine two items you are carrying."""
     if len(parsed.who_info) != 2:
         messages = {
@@ -285,7 +286,7 @@ def do_combine(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> N
 
 
 @cmd("loot", "pilfer", "sack")
-def do_loot(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_loot(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Take all things from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
     if len(parsed.args) != 1 or not parsed.who_order:
         raise ParseError("Loot what or who?")
@@ -298,7 +299,7 @@ def do_loot(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("take", "get", "steal", "rob")
-def do_take(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_take(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Take something (or all things) from something or someone else.
     Keep in mind that stealing and robbing is frowned upon, to say the least."""
     p = player.tell
@@ -431,7 +432,7 @@ def try_pick_up_living(player: Player, living: base.Living) -> None:
 
 
 @cmd("throw")
-def do_throw(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_throw(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
     if len(parsed.who_order) != 2:
         raise ParseError("Throw what where?")
@@ -452,7 +453,7 @@ def do_throw(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("give")
-def do_give(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Give something (or all things) you are carrying to someone else."""
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
@@ -561,7 +562,7 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
 
 @cmd("help")
 @disable_notify_action
-def do_help(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_help(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Provides some helpful information about different aspects of the game. Also try 'hint' or 'recap'."""
     if parsed.args:
         do_what(player, parsed, ctx)
@@ -604,7 +605,7 @@ def do_help(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("look")
 @disable_notify_action
-def do_look(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_look(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Look around to see where you are and what's around you."""
     if parsed.args:
         arg = parsed.args[0]
@@ -628,7 +629,7 @@ def do_look(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("examine", "inspect")
 @disable_notify_action
-def do_examine(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Examine something or someone thoroughly."""
     p = player.tell
     living = None
@@ -711,7 +712,7 @@ def do_examine(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> N
 @cmd("stats")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.IF)
-def do_stats(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_stats(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
         target = player
@@ -744,7 +745,7 @@ def do_stats(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("tell")
-def do_tell(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_tell(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Pass a message to another player or creature that nobody else can hear.
     The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
@@ -772,7 +773,7 @@ def do_tell(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("emote")
 @disabled_in_gamemode(GameMode.IF)
-def do_emote(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_emote(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Emit a custom 'emote' message literally, such as: 'emote looks stupid.' -> '<player> looks stupid."""
     if not parsed.unparsed:
         raise ParseError("Emote what message?")
@@ -784,7 +785,7 @@ def do_emote(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("yell")
-def do_yell(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_yell(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Yell something. People in nearby locations will also be able to hear you."""
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
@@ -798,7 +799,7 @@ def do_yell(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("say")
 @no_soul_parse
-def do_say(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_say(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Say something to people near you."""
     if not parsed.unparsed:
         raise ActionRefused("Say what?")
@@ -820,7 +821,7 @@ def do_say(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
 @cmd("wait")
 @disabled_in_gamemode(GameMode.MUD)
 @overrides_soul
-def do_wait(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_wait(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """
     Let someone know you are waiting for them. Alternatively, you can simply Let time pass.
     For the latter use, you can optionally specify how long you want to wait (in hours, minutes, seconds).
@@ -867,7 +868,7 @@ def do_wait(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("quit", "leave")
 @disable_notify_action
-def do_quit(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_quit(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Quit the game."""
     if (yield "input", ("Are you sure you want to quit?", lang.yesno)):
         if ctx.config.server_mode != GameMode.MUD and ctx.config.savegames_enabled:
@@ -899,7 +900,7 @@ def remove_is_are_args(args: List[str]) -> None:
 
 @cmd("who")
 @disable_notify_action
-def do_who(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_who(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Search for all players, a specific player or creature, and shows some information about them."""
     if parsed.args == ["am", "i"]:
         # who am i
@@ -933,7 +934,7 @@ def do_who(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("open", "close", "lock", "unlock")
-def do_open(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_open(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Do something with a door, exit or item, possibly by using something. Example: open door,  unlock chest with key"""
     if len(parsed.args) not in (1, 2) or parsed.unrecognized:
         raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
@@ -963,7 +964,7 @@ def do_open(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("what")
 @disable_notify_action
-def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Tries to answer your question about what something is.
     The topics range from game commands to location exits to creature and items.
     For more general help, try the 'help' command first."""
@@ -992,27 +993,27 @@ def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
         else:
             p("It is a command that you can use to perform some action.")
     # is it a soul verb?
-    if name in soul.VERBS:
+    if name in VERBS:
         found = True
-        parsed = soul.ParseResult(name)
+        parsed = ParseResult(name)
         parsed.who_order = [player]
         _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It is a soul emote you can do. <dim>%s: %s</>" % (name, playermessage))
-        if name in soul.AGGRESSIVE_VERBS:
+        if name in AGGRESSIVE_VERBS:
             p("It might be regarded as offensive to certain people or beings.")
-    if name in soul.BODY_PARTS:
+    if name in BODY_PARTS:
         found = True
-        parsed = soul.ParseResult("pat", who_order=[player], bodypart=name, message="hi")
+        parsed = ParseResult("pat", who_order=[player], bodypart=name, message="hi")
         _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It denotes a body part. <dim>pat myself %s -> %s</>" % (name, playermessage))
-    if name in soul.ACTION_QUALIFIERS:
+    if name in ACTION_QUALIFIERS:
         found = True
-        parsed = soul.ParseResult("smile", qualifier=name)
+        parsed = ParseResult("smile", qualifier=name)
         _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("It is a qualifier for something. <dim>%s smile -> %s</>" % (name, playermessage))
     if name in lang.ADVERBS:
         found = True
-        parsed = soul.ParseResult("smile", adverb=name)
+        parsed = ParseResult("smile", adverb=name)
         _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
         p("That's an adverb you can use with the soul emote commands.")
         p("<dim>smile %s -> %s</>" % (name, playermessage))
@@ -1057,7 +1058,7 @@ def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
         p("An emote is a command that you can do to perform something, or tell something.")
         p("They usually are just for socialization or fun and are not normally considered")
         p("considered to be a command to actually do something or interact with things.")
-        p("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(soul.VERBS))
+        p("Your soul knows %d emotes. See them all by asking about 'emotes'." % len(VERBS))
         p("Your soul knows %d adverbs. You can use them by their full name, or make" % len(lang.ADVERBS))
         p("a selection by using prefixes (sa/sar/sarcas -> sarcastically).")
         p("\n")
@@ -1078,9 +1079,9 @@ def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
         p("All available soul verbs (emotes):")
         p("\n")
         columns = player.screen_width // 15
-        lines = [""] * (len(soul.VERBS) // columns + 1)
+        lines = [""] * (len(VERBS) // columns + 1)
         index = 0
-        for verb in sorted(soul.VERBS):
+        for verb in sorted(VERBS):
             lines[index % len(lines)] += "%-15s" % verb
             index += 1
         p(*lines, format=False)
@@ -1093,12 +1094,12 @@ def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
         found = True
         p("You can sometimes use a specific body part with certain soul emotes.")
         p("For instance, 'hit max knee' -> You hit Max on the knee.")
-        p("Recognised body parts:", ", ".join(soul.BODY_PARTS))
+        p("Recognised body parts:", ", ".join(BODY_PARTS))
     if name in ("qualifier", "qualifiers"):
         found = True
         p("You can use an action qualifier to change the meaning of a soul emote.")
         p("For instance, 'fail stand' -> You try to stand up, but fail miserably.")
-        p("Recognised qualifiers:", ", ".join(soul.ACTION_QUALIFIERS))
+        p("Recognised qualifiers:", ", ".join(ACTION_QUALIFIERS))
     if name in ("that", "this", "they", "them", "it"):
         raise ActionRefused("Be more specific.")
     if not found:
@@ -1110,7 +1111,7 @@ def do_what(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("where")
 @disable_notify_action
-def do_where(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_where(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Gives some information on your current whereabouts, or that of something else perhaps. Similar to 'locate'."""
     if not parsed.args:
         raise ParseError("Where is what or who?")
@@ -1129,7 +1130,7 @@ def do_where(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 @cmd("exits")
 @disable_notify_action
-def do_exits(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_exits(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Provides a tiny clue about possible exits from your current location."""
     if "wizard" in player.privileges:
         player.tell("The following exits are defined for your current location:", end=True)
@@ -1150,7 +1151,7 @@ def do_exits(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("use")
-def do_use(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_use(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """General object use. Most of the time, you'll need to be more specific to say exactly what you want to do with it."""
     if not parsed.who_order:
         raise ActionRefused("Use what?")
@@ -1174,7 +1175,7 @@ def do_use(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("dice", "roll")
-def do_dice(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_dice(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Roll a 6-sided die. Use the familiar '3d6' argument style if you want to roll multiple dice."""
     if not parsed.args:
         if parsed.verb == "roll":
@@ -1207,7 +1208,7 @@ def do_dice(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("coin")
-def do_coin(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_coin(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Toss a coin."""
     number, _ = util.roll_dice(sides=2)
     result = ["heads", "tails"][number - 1]
@@ -1218,13 +1219,13 @@ def do_coin(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 @cmd("motd")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.IF)
-def do_motd(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_motd(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the message-of-the-day again."""
     ctx.driver.show_motd(player, notify_no_motd=True)
 
 
 @cmd("flee")
-def do_flee(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_flee(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Flee in a random or given direction, possibly escaping a combat situation."""
     exit = None
     if len(parsed.who_order) == 1:
@@ -1259,7 +1260,7 @@ def do_flee(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 @cmd("save")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.MUD)
-def do_save(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_save(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Save your game."""
     ctx.driver.do_save(player)
 
@@ -1267,7 +1268,7 @@ def do_save(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 @cmd("load", "reload", "restore", "restart")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.MUD)
-def do_load(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_load(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Load a previously saved game."""
     if ctx.config.savegames_enabled:
         player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
@@ -1280,7 +1281,7 @@ def do_load(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 @cmd("transcript")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.MUD)
-def do_transcript(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_transcript(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if parsed.unparsed == "off" or (parsed.args and parsed.args[0] == "off"):
         player.activate_transcript(None, None)
@@ -1291,7 +1292,7 @@ def do_transcript(player: Player, parsed: soul.ParseResult, ctx: util.Context) -
 
 
 @cmd("show")
-def do_show(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_show(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Shows something to someone else."""
     if len(parsed.who_order) != 2:
         raise ParseError("Show what to whom?")
@@ -1307,7 +1308,7 @@ def do_show(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("time", "date")
 @disable_notify_action
-def do_time(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_time(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Query the current date and/or time of day."""
     if "wizard" in player.privileges:
         real_time = datetime.datetime.now()
@@ -1328,7 +1329,7 @@ def do_time(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 @cmd("brief")
 @disable_notify_action
-def do_brief(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_brief(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Configure the verbosity of location descriptions. 'brief' mode means: show short description
     for locations that you've already visited at least once.
     'brief all' means: show short descriptions for all locations even if you've not been there before.
@@ -1355,7 +1356,7 @@ def do_brief(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("activate")
-def do_activate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_activate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Activate something, turn it on, or switch it on."""
     if not parsed.who_order:
         raise ParseError("Activate what?")
@@ -1371,7 +1372,7 @@ def do_activate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> 
 
 
 @cmd("deactivate")
-def do_deactivate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_deactivate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Deactivate something, turn it of, or switch it off."""
     if not parsed.who_order:
         raise ParseError("Deactivate what?")
@@ -1387,7 +1388,7 @@ def do_deactivate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -
 
 
 @cmd("switch")
-def do_switch(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_switch(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Switch something on or off."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
@@ -1405,7 +1406,7 @@ def do_switch(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> No
 
 
 @cmd("turn")
-def do_turn(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_turn(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Turn something (rotate it), or turn something on or off."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
@@ -1424,7 +1425,7 @@ def do_turn(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("move", "shove", "swivel", "shift", "manipulate", "manip", "rotate", "press", "poke", "push")
-def do_manipulate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_manipulate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Manipulate something."""
     if parsed.verb == "manip":
         parsed.verb = "manipulate"
@@ -1443,7 +1444,7 @@ def do_manipulate(player: Player, parsed: soul.ParseResult, ctx: util.Context) -
 
 
 @cmd("read")
-def do_read(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_read(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Read something."""
     if len(parsed.who_order) == 1:
         what = parsed.who_order[0]
@@ -1453,7 +1454,7 @@ def do_read(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("license")
-def do_license(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_license(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show information about the game and about Tale, and show the software license."""
     t = player.tell
     config = ctx.config
@@ -1475,7 +1476,7 @@ def do_license(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> N
 
 
 @cmd("config")
-def do_config(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_config(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show or change player configuration parameters."""
     if parsed.args:
         if len(parsed.args) != 1:
@@ -1511,7 +1512,7 @@ def do_config(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> No
 
 
 @cmd("hint")
-def do_hint(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_hint(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Provide a clue about what to do next. Also try 'help', and 'recap'."""
     hint = player.hints.hint(player)
     if hint:
@@ -1521,7 +1522,7 @@ def do_hint(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None
 
 
 @cmd("recap")
-def do_recap(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_recap(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """
     Shows the key events or actions that have happened so that you might
     get back up to speed with the story so far.
@@ -1535,13 +1536,13 @@ def do_recap(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
 
 
 @cmd("@cls")
-def do_cls(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_cls(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Clears the screen (if the output device supports it)."""
     ctx.conn.clear_screen()
 
 
 @cmd("@teststyles")
-def do_teststyles(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_teststyles(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Test the text output styling."""
     style_tests = [
         ("normal", "This is NORMAL."),
@@ -1567,7 +1568,7 @@ def do_teststyles(player: Player, parsed: soul.ParseResult, ctx: util.Context) -
 
 @cmd("@change_password")
 @disabled_in_gamemode(GameMode.IF)
-def do_change_pw(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_change_pw(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Lets you change your account password."""
     player.tell("<it>Changing your password.</>")
     current_pw = yield "input-noecho", "Type your current password."
@@ -1581,7 +1582,7 @@ def do_change_pw(player: Player, parsed: soul.ParseResult, ctx: util.Context) ->
 
 @cmd("@change_email")
 @disabled_in_gamemode(GameMode.IF)
-def do_change_email(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_change_email(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Lets you change the email address on file for your account."""
     account = ctx.driver.mud_accounts.get(player.name)
     player.tell("<it>Changing your email. It is currently set to: %s</>" % account.email)
@@ -1596,7 +1597,7 @@ def do_change_email(player: Player, parsed: soul.ParseResult, ctx: util.Context)
 
 @cmd("@account")
 @disabled_in_gamemode(GameMode.IF)
-def do_account(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> None:
+def do_account(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Displays your player account data."""
     account = ctx.driver.mud_accounts.get(player.name)
     player.tell("<ul>Your account data.</ul>", end=True)

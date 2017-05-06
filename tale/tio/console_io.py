@@ -15,7 +15,7 @@ try:
     colorama.init()
     assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (0.3.6+)"
 except ImportError:
-    from . import ansi_codes as colorama        # fallback
+    from . import ansi_codes as colorama        # type: ignore  # fallback
 
 __all__ = ["ConsoleIo"]
 
@@ -39,7 +39,7 @@ style_words = {
 assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
 if os.name == "nt":
-    if not hasattr(colorama, "win32") or colorama.win32.windll is None:
+    if not hasattr(colorama, "win32") or colorama.win32.windll is None:    # type: ignore
         style_words.clear()  # running on windows without colorama ansi support
 
 

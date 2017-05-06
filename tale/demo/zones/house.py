@@ -13,7 +13,7 @@ from tale.lang import capital
 from tale.driver import Driver
 from tale.player import Player
 from tale.util import Context
-from tale.soul import ParseResult
+from tale.parseresult import ParseResult
 
 
 def init(driver: Driver) -> None:

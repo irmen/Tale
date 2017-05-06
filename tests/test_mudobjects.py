@@ -13,7 +13,7 @@ from tale.util import Context, MoneyFormatter
 from tale.errors import ActionRefused, LocationIntegrityError
 from tale.npc import NPC
 from tale.player import Player
-from tale.soul import ParseResult
+from tale.parseresult import ParseResult
 from tale.story import MoneyType
 from tale.tio.iobase import strip_text_styles
 from tale import pubsub, mud_context

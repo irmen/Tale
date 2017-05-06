@@ -5,7 +5,8 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Generator, Tuple, Any, Optional
+from typing import Generator, Tuple, Any, Optional, Sequence
+from .parseresult import ParseResult
 
 
 class TaleError(Exception):
@@ -68,3 +69,28 @@ class AsyncDialog(TaleFlowControlException):
     def __init__(self, dialog: Generator[Tuple[str, Any], str, None], *args: Any) -> None:
         self.dialog = dialog
         self.args = args
+
+
+class NonSoulVerb(TaleFlowControlException):
+    """
+    The soul's parser encountered a verb that cannot be handled by the soul itself.
+    However the command string has been parsed and the calling code could try
+    to handle the verb by itself instead.
+    """
+    def __init__(self, parsed: ParseResult) -> None:
+        assert isinstance(parsed, ParseResult)
+        super().__init__(parsed.verb)
+        self.parsed = parsed
+
+
+class UnknownVerbException(ParseError):
+    """
+    The soul doesn't recognise the verb that the user typed.
+    The engine can and should search for other places that define this verb first.
+    If nothing recognises it, this error should be shown to the user in a nice way.
+    """
+    def __init__(self, verb: str, words: Sequence[str], qualifier: str) -> None:
+        super().__init__(verb)
+        self.verb = verb
+        self.words = words
+        self.qualifier = qualifier

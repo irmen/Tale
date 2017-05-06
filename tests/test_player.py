@@ -14,11 +14,11 @@ from io import StringIO
 import tale
 from tests.supportstuff import TestDriver, MsgTraceNPC
 from tale.base import Location, Exit, Item, Stats
-from tale.errors import ActionRefused, ParseError
+from tale.errors import ActionRefused, ParseError, NonSoulVerb
 from tale.npc import NPC
 from tale.accounts import MudAccounts
 from tale.player import Player, TextBuffer, PlayerConnection
-from tale.soul import NonSoulVerb, ParseResult
+from tale.parseresult import ParseResult
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
 from tale.charbuilder import CharacterBuilder, valid_playable_race, PlayerNaming
@@ -289,7 +289,7 @@ class TestPlayer(unittest.TestCase):
         who, playermsg, roommsg, targetmsg = player.soul.process_verb_parsed(player, parsed)
         self.assertEqual({julie}, who)
         self.assertEqual("You wave happily at julie.", playermsg)
-        with self.assertRaises(tale.soul.UnknownVerbException):
+        with self.assertRaises(tale.errors.UnknownVerbException):
             player.parse("befrotzificate all and me")
         with self.assertRaises(NonSoulVerb) as x:
             player.parse("befrotzificate all and me", external_verbs={"befrotzificate"})

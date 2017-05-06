@@ -30,7 +30,7 @@ from .base import Item, Living, clone
 from .items.basic import Trash
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .util import sorted_by_name, Context
-from .soul import ParseResult
+from .parseresult import ParseResult
 from . import mud_context
 from . import lang
 

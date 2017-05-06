@@ -9,7 +9,7 @@ import json
 import datetime
 from typing import Tuple, Dict
 from ..base import Item, Living
-from ..soul import ParseResult
+from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
 from .. import lang, mud_context
 

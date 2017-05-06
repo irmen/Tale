@@ -20,11 +20,12 @@ import pkgutil
 import importlib
 from types import ModuleType
 from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable
-from . import mud_context, errors, util, soul, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts
+from . import mud_context, errors, util, cmds, player, base, npc, pubsub, charbuilder, lang, races, accounts, verbdefs
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
 from .base import Stats, Living, Location, Exit, MudObject
 from .story import TickMethod, GameMode, MoneyType, StoryBase
+from .parseresult import ParseResult
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -629,7 +630,7 @@ class Driver(pubsub.Listener):
                 p.remember_previous_parse()
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
-            except soul.UnknownVerbException as x:
+            except errors.UnknownVerbException as x:
                 if x.verb in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest",
                               "north east", "north west", "south east", "south west", "up", "down"}:
                     p.tell("You can't go in that direction.")
@@ -790,7 +791,7 @@ class Driver(pubsub.Listener):
             if _verb in self.commands.no_soul_parsing:
                 # don't use the soul to parse it further
                 player.turns += 1
-                raise soul.NonSoulVerb(soul.ParseResult(_verb, unparsed=_rest.strip()))
+                raise errors.NonSoulVerb(ParseResult(_verb, unparsed=_rest.strip()))
             else:
                 # Parse the command by using the soul.
                 all_verbs = set(command_verbs) | custom_verbs
@@ -798,7 +799,7 @@ class Driver(pubsub.Listener):
             # If parsing went without errors, it's a soul verb, handle it as a socialize action
             player.turns += 1
             player.do_socialize_cmd(parsed)
-        except soul.NonSoulVerb as x:
+        except errors.NonSoulVerb as x:
             parsed = x.parsed
             if parsed.qualifier:
                 # for now, qualifiers are only supported on soul-verbs (emotes).
@@ -1177,7 +1178,7 @@ class Commands:
                 if server_mode == disabled_mode:
                     del commands[cmd]
                 elif getattr(func, "overrides_soul", False):
-                    del soul.VERBS[cmd]
+                    del verbdefs.VERBS[cmd]
                 if getattr(func, "no_soul_parse", False):
                     self.no_soul_parsing.add(cmd)
 
@@ -1194,7 +1195,7 @@ class LimboReaper(npc.NPC):
         self.aliases = {"figure", "death"}
         self.candidates = {}    # player --> (first_seen, texts shown)
 
-    def notify_action(self, parsed: soul.ParseResult, actor: Living) -> None:
+    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb == "say":
             actor.tell("%s just stares blankly at you, not saying a word." % lang.capital(self.title))
         else:

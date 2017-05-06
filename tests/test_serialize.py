@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
 import pickle
-from tale import mud_context, races, base, npc, soul, player, util, hints
+from tale import mud_context, races, base, npc, player, util, hints
 from tale.story import *
 from tests.supportstuff import TestDriver
 
@@ -101,7 +101,7 @@ class TestSerializing(unittest.TestCase):
         self.assertFalse(x.aggressive)
 
     def test_player_and_soul(self):
-        o = soul.Soul()
+        o = base.Soul()
         x = serializecycle(o)
         self.assertIsNotNone(x)
         p = player.Player("name", "n", description="description")

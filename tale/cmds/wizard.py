@@ -14,9 +14,9 @@ import platform
 import importlib
 from typing import Callable
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
-from ..errors import SecurityViolation, ParseError, ActionRefused
+from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
 from ..player import Player
-from ..soul import NonSoulVerb, ParseResult
+from ..parseresult import ParseResult
 from ..story import *
 from .. import base, lang, util, pubsub, __version__
 
