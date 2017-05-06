@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import html.parser
 import smartypants
-from typing import Union, Sequence, Iterable, Any, Tuple
+from typing import Union, Sequence, Iterable, Any, Tuple, Optional
 from ..util import format_traceback
 from .. import soul
 
@@ -69,7 +69,7 @@ class IoAdapterBase:
         """abort any blocking input, if at all possible"""
         pass
 
-    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> str:
+    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.

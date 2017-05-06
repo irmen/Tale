@@ -1003,7 +1003,7 @@ class Driver(pubsub.Listener):
         self.heartbeat_objects.discard(mudobj)
 
     def register_exit(self, exit: Exit) -> None:
-        if not exit.bound:
+        if not exit.target:
             self.unbound_exits.append(exit)
 
     def defer(self, due: Union[datetime.datetime, float], action: Callable, *vargs: Any, **kwargs: Any) -> None:

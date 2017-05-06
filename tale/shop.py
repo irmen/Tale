@@ -24,7 +24,7 @@ VALUE/APPRAISE
 
 import random
 import datetime
-from typing import Tuple
+from typing import Tuple, Set
 from .npc import NPC
 from .base import Item, Living, clone
 from .items.basic import Trash
@@ -41,13 +41,13 @@ banking_money_limit = 15000.0
 class ShopBehavior:
     """the data describing the behavior of a particular shop"""
     def __init__(self) -> None:
-        self.shopkeeper_vnum = None     # used for circle data to designate the shopkeeper belonging to this shop
+        self.shopkeeper_vnum = None   # type: int   # used for circle data to designate the shopkeeper belonging to this shop
         self.banks_money = False
         self.will_fight = False
         self._buyprofit = 0.3     # price factor when shop buys item
         self._sellprofit = 1.6    # price factor when shop sells item
         self.open_hours = [(9, 17), (18, 22)]
-        self.forsale = set()     # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
+        self.forsale = set()    # type: Set[Item]  # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
         self.msg_playercantafford = "No cash, no goods!"
         self.msg_playercantbuy = "We don't sell that."
         self.msg_playercantsell = "I don't think you have that."
@@ -56,8 +56,8 @@ class ShopBehavior:
         self.msg_shopdoesnotbuy = "I don't buy that stuff.  Try another shop."
         self.msg_shopsolditem = "Here you go.  That'll be... %s."
         self.action_temper = "smoke"
-        self.willbuy = set()
-        self.wontdealwith = set()
+        self.willbuy = set()   # type: Set[str]
+        self.wontdealwith = set()   # type: Set[str]   # @todo implement
 
     @property
     def buyprofit(self) -> float:

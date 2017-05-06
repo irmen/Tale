@@ -11,7 +11,7 @@ from html import escape as html_escape
 from urllib.parse import parse_qs
 from hashlib import md5
 from email.utils import formatdate, parsedate
-from typing import Iterable, Tuple, Any
+from typing import Iterable, Tuple, Any, Optional
 from . import iobase
 from . import vfs
 from .styleaware_wrapper import tag_split_re
@@ -84,7 +84,7 @@ class HttpIo(iobase.IoAdapterBase):
     def clear_screen(self):
         self.html_special.append("clear")
 
-    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> str:
+    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
         for text, formatted in paragraphs:
             text = self.convert_to_html(text)
             if text == "\n":
@@ -93,6 +93,7 @@ class HttpIo(iobase.IoAdapterBase):
                 self.html_to_browser.append("<p>" + text + "</p>\n")
             else:
                 self.html_to_browser.append("<pre>" + text + "</pre>\n")
+        return None    # the output is pushed to the browser via a buffer, rather than printed to a screen
 
     def output(self, *lines):
         super().output(*lines)

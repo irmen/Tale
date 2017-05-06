@@ -1134,10 +1134,10 @@ def do_exits(player: Player, parsed: soul.ParseResult, ctx: util.Context) -> Non
     if "wizard" in player.privileges:
         player.tell("The following exits are defined for your current location:", end=True)
         for direction, exit in player.location.exits.items():
-            if exit.bound:
+            if exit.target:
                 player.tell(" <exit>%s</> <dim>--></> <location>%s</>" % (direction, exit.target.name), end=True)
             else:
-                player.tell(" <exit>%s</> <dim>--></> <location>%s</> (unbound)" % (direction, exit.target), end=True)
+                player.tell(" <exit>%s</> <dim>--></> (unbound)" % direction, end=True)
     else:
         player.tell("If you want to know about the possible exits from your location,")
         player.tell("look around the room. Usually the exits are easily visible.")

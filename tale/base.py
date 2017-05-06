@@ -617,11 +617,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player: 'tale.player.Player', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
+    def notify_player_left(self, player: 'tale.player.Player', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -1118,12 +1118,13 @@ class Exit(MudObject):
         else:
             direction = directions[0]
             aliases = set(directions[1:])
-        self.target = target_location   # type: Union[str, Location]
-        self.bound = isinstance(target_location, Location)
-        if self.bound:
+        self.target = None  # type: Location
+        if isinstance(target_location, Location):
+            self.target = target_location
             title = "Exit to " + self.target.title
         else:
-            title = "Exit to <unbound:%s>" % self.target
+            self._target_str = target_location
+            title = "Exit to <unbound:%s>" % target_location
         long_description = long_description or short_description
         super().__init__(direction, title=title, description=long_description, short_description=short_description)
         self.aliases = aliases
@@ -1132,7 +1133,7 @@ class Exit(MudObject):
         mud_context.driver.register_exit(self)
 
     def __repr__(self):
-        targetname = self.target.name if self.bound else self.target
+        targetname = self.target.name if self.target else self._target_str
         return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
 
     def bind(self, location: Location) -> None:
@@ -1150,8 +1151,8 @@ class Exit(MudObject):
         Usually called by the driver before it starts player interaction.
         The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
         """
-        if not self.bound:
-            target_module, target_object = self.target.rsplit(".", 1)
+        if not self.target:
+            target_module, target_object = self._target_str.rsplit(".", 1)
             module = game_zones_module
             try:
                 for name in target_module.split("."):
@@ -1164,11 +1165,11 @@ class Exit(MudObject):
             self.target = target
             self.title = "Exit to " + target.title
             self.name = self.title.lower()
-            self.bound = True
+            del self._target_str
 
     def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
-        if not self.bound:
+        if not self.target:
             raise LocationIntegrityError("exit not bound", None, self, None)
 
     def open(self, actor: Living, item: Item=None) -> None:
@@ -1192,7 +1193,7 @@ class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, directions: Union[str, Sequence[str]], target_location: Location, short_description: str,
+    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_description: str,
                  long_description: str=None, locked: bool=False, opened: bool=True) -> None:
         self.locked = locked
         self.opened = opened
@@ -1240,13 +1241,13 @@ class Door(Exit):
         raise TaleError("you cannot set the description of a Door because it is dynamic")
 
     def __repr__(self):
-        target = self.target.name if self.bound else self.target
+        target = self.target.name if self.target else self._target_str
         locked = "locked" if self.locked else "open"
         return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.name, target, locked, id(self))
 
     def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through this door?"""
-        if not self.bound:
+        if not self.target:
             raise LocationIntegrityError("door not bound", None, self, None)
         if not self.opened:
             raise ActionRefused("You can't go there; it's closed.")

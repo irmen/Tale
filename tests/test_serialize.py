@@ -79,14 +79,15 @@ class TestSerializing(unittest.TestCase):
     def test_exits_and_doors(self):
         o = base.Exit("east", "target", "somewhere")
         x = serializecycle(o)
-        self.assertFalse(x.bound)
-        self.assertEqual("target", x.target)
+        self.assertIsNone(x.target)
+        self.assertEqual("target", x._target_str)
         self.assertEqual("somewhere", x.short_description)
         self.assertEqual("east", x.name)
         o = base.Door("east", "target", "somewhere", locked=True, opened=False)
         self.assertEqual("somewhere It is closed and locked.", o.description)
         x = serializecycle(o)
-        self.assertEqual("target", x.target)
+        self.assertIsNone(x.target)
+        self.assertEqual("target", x._target_str)
         self.assertEqual("east", x.name)
         self.assertEqual("somewhere It is closed and locked.", x.description)
 
