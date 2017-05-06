@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import textwrap
-from typing import NamedTuple, FrozenSet, Optional
+from typing import NamedTuple, FrozenSet, Optional, Union
 from ..base import Item, Container, Weapon, Living
 from ..errors import ActionRefused
 from .. import lang, mud_context

@@ -168,7 +168,7 @@ class MudObject:
         self.unregister_heartbeat()
         mud_context.driver.remove_deferreds(self)
 
-    def wiz_clone(self, actor: 'Living') -> None:
+    def wiz_clone(self, actor: 'Living') -> 'MudObject':
         """clone the thing (performed by a wizard)"""
         raise ActionRefused("Can't clone " + lang.a(self.__class__.__name__))
 
@@ -205,7 +205,8 @@ class MudObject:
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
-    def move(self, target: 'MudObject', actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+    def move(self, target: Union['Location', 'Container', 'Living'], actor: 'Living'=None,
+             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
@@ -216,6 +217,12 @@ class MudObject:
     def read(self, actor: 'Living') -> None:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
+
+    def insert(self, item: Union['Living', 'Item'], actor: Optional['Living']) -> None:
+        raise ActionRefused("You can't put things in there.")
+
+    def remove(self, item: Union['Living', 'Item'], actor: Optional['Living']) -> None:
+        raise ActionRefused("You can't take things from there.")
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
@@ -267,13 +274,8 @@ class Item(MudObject):
     def inventory_size(self) -> int:
         raise ActionRefused("You can't look inside of that.")
 
-    def insert(self, item: 'Item', actor: Optional['Living']) -> None:
-        raise ActionRefused("You can't put things in there.")
-
-    def remove(self, item: 'Item', actor: Optional['Living']) -> None:
-        raise ActionRefused("You can't take things from there.")
-
-    def move(self, target: MudObject, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+    def move(self, target: Union['Location', 'Container', 'Living'], actor: 'Living'=None,
+             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
@@ -407,7 +409,7 @@ class Location(MudObject):
     def __setstate__(self, state: dict):
         self.__dict__ = state
 
-    def init_inventory(self, objects: Iterable[Item]) -> None:   # XXX item or mudobject?
+    def init_inventory(self, objects: Iterable[Union[Item, 'Living']]) -> None:
         """Set the location's initial item and livings 'inventory'"""
         if len(self.items) > 0 or len(self.livings) > 0:
             raise LocationIntegrityError("clobbering existing inventory", None, None, self)
@@ -435,21 +437,21 @@ class Location(MudObject):
         return pubsub.topic(("wiretap-location", self.name))
 
     def tell(self, room_msg: str, exclude_living: 'Living'=None,
-             specific_targets: Sequence[MudObject]=None, specific_target_msg: str="") -> None:
+             specific_targets: Sequence[Union['Location', 'Living']]=None, specific_target_msg: str="") -> None:
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
         that based on this message string. That will make it quite hard because you need to
         parse the string again to figure out what happened... Use handle_verb / notify_action instead.
         """
-        specific_targets = specific_targets or set()  # type: Set[MudObject]
-        assert isinstance(specific_targets, (frozenset, set, list, tuple))
+        targets = specific_targets or set()
+        assert isinstance(targets, (frozenset, set, list, tuple))
         if exclude_living:
             assert isinstance(exclude_living, Living)
         for living in self.livings:
             if living == exclude_living:
                 continue
-            if living in specific_targets:
+            if living in targets:
                 living.tell(specific_target_msg)
             else:
                 living.tell(room_msg)
@@ -566,15 +568,15 @@ class Location(MudObject):
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
-    def insert(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
+    def insert(self, item: Union['Living', Item], actor: Optional['Living']) -> None:
         """Add obj to the contents of the location (either a Living or an Item)"""
-        if isinstance(obj, Living):
-            self.livings.add(obj)
-        elif isinstance(obj, Item):
-            self.items.add(obj)
+        if isinstance(item, Living):
+            self.livings.add(item)
+        elif isinstance(item, Item):
+            self.items.add(item)
         else:
             raise TypeError("can only add Living or Item")
-        obj.location = self
+        item.location = self
 
     def remove(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
         """Remove obj from this location (either a Living or an Item)"""
@@ -617,11 +619,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: 'tale.player.Player', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: 'tale.player.Player', target_location: 'Location') -> None:
+    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -941,11 +943,14 @@ class Living(MudObject):
         except Exception as x:
             actor.tell("Error result from forced cmd: " + str(x))
 
-    def move(self, target: MudObject, actor: 'Living'=None, silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+    def move(self, target: Union[Location, 'Container', 'Living'], actor: 'Living'=None,
+             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the current location, enter the new location (transactional).
+        Moving a living is only supported to a Location target.
         Messages are being printed to the locations if the move was successful.
         """
+        assert isinstance(target, Location)
         actor = actor or self
         original_location = None
         if self.location:
@@ -980,7 +985,7 @@ class Living(MudObject):
         item, container = self.locate_item(name, include_inventory, include_location, include_containers_in_inventory)
         return item  # skip the container
 
-    def locate_item(self, name:str, include_inventory: bool=True, include_location: bool=True,
+    def locate_item(self, name: str, include_inventory: bool=True, include_location: bool=True,
                     include_containers_in_inventory: bool=True) -> Tuple[Item, MudObject]:
         """
         Searches an item within the 'visible' world around the living including his inventory.

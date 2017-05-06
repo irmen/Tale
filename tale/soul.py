@@ -11,7 +11,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import re
-from typing import List, Set, FrozenSet, Dict, Tuple, Sequence, Optional, Any
+from typing import List, Set, FrozenSet, Dict, Tuple, Sequence, Optional, Any, Union
 from collections import defaultdict
 from . import lang
 from .errors import ParseError
@@ -583,7 +583,8 @@ class Soul:
     def is_verb(self, verb: str) -> bool:
         return verb in VERBS
 
-    def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) -> Tuple[str, Tuple[FrozenSet, str, str, str]]:
+    def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) \
+            -> Tuple[str, Tuple[FrozenSet[Union['tale.base.Location', 'tale.base.Living']], str, str, str]]:
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
         and another tuple containing the targets of the action and the various action messages.
@@ -599,7 +600,7 @@ class Soul:
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[FrozenSet, str, str, str]:
+    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[FrozenSet[Union['tale.base.Location', 'tale.base.Living']], str, str, str]:
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,
@@ -638,7 +639,7 @@ class Soul:
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = spacify(adverb)
 
-        def result_messages(action: str, action_room: str) -> Tuple[FrozenSet, str, str, str]:
+        def result_messages(action: str, action_room: str) -> Tuple[FrozenSet[Union['tale.base.Location', 'tale.base.Living']], str, str, str]:
             action = action.strip()
             action_room = action_room.strip()
             if parsed.qualifier:

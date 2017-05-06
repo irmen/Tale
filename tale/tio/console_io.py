@@ -100,7 +100,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         elif style_words:
             print("\033[2J", end="")
         else:
-            print("\n"*10)
+            print("\n" * 10)
 
     def install_tab_completion(self, driver):
         """Install tab completion using readline, if available"""

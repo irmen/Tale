@@ -109,8 +109,12 @@ class Player(base.Living, pubsub.Listener):
         else:
             self.tell("You see nothing.")
 
-    def move(self, target: base.MudObject, actor: base.Living=None, silent: bool=False, is_player: bool=True, verb: str="move") -> None:
-        """delegate to Living but with is_player set to True"""
+    def move(self, target: Union[base.Location, base.Container, base.Living], actor: base.Living=None,
+             silent: bool=False, is_player: bool=True, verb: str="move") -> None:
+        """
+        Delegate to Living but with is_player set to True.
+        Moving the player is only supported to a target Location.
+        """
         super().move(target, actor, silent, True, verb)
 
     def create_wiretap(self, target: Union[base.Location, base.Living]) -> None:

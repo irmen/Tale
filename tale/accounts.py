@@ -54,7 +54,8 @@ class MudAccounts:
 
     def _sqlite_connect(self) -> sqlite3.Connection:
         urimode = self.sqlite_dbpath.startswith("file:")
-        conn = sqlite3.connect(self.sqlite_dbpath, detect_types=sqlite3.PARSE_DECLTYPES, timeout=5, uri=urimode)  # type: ignore  # mypy doesn't recognise uri param
+        conn = sqlite3.connect(self.sqlite_dbpath, detect_types=sqlite3.PARSE_DECLTYPES,
+                               timeout=5, uri=urimode)  # type: ignore  # mypy doesn't recognise uri param
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys=ON;")
         return conn

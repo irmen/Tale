@@ -78,10 +78,10 @@ def disable_notify_action(func: Callable) -> Callable:
 
 def disabled_in_gamemode(mode: GameMode) -> Callable:
     """decorator to disable a command in the given game mode"""
-    assert isinstance(mode, GameMode)
     def disable(func: Callable) -> Callable:
         func.disabled_in_mode = mode
         return func
+    assert isinstance(mode, GameMode)
     return disable
 
 

@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from typing import Optional
+from typing import Optional, Union
 from . import base
 from . import lang
 from .errors import ActionRefused

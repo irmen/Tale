@@ -47,7 +47,8 @@ class ShopBehavior:
         self._buyprofit = 0.3     # price factor when shop buys item
         self._sellprofit = 1.6    # price factor when shop sells item
         self.open_hours = [(9, 17), (18, 22)]
-        self.forsale = set()    # type: Set[Item]  # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!)
+        # items the shop always sells no matter how many are bought (should be in shopkeeper's inventory as well!):
+        self.forsale = set()    # type: Set[Item]
         self.msg_playercantafford = "No cash, no goods!"
         self.msg_playercantbuy = "We don't sell that."
         self.msg_playercantsell = "I don't think you have that."

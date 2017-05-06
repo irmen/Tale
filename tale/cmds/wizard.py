@@ -221,7 +221,7 @@ def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Teleport to a location or creature, or teleport a creature to you.
 '!teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
 '!teleport[_to] playername' teleports [to] that player.
-'!teleport_to zones.zonename.locationname' teleports to the given location in a zone from the story. 
+'!teleport_to zones.zonename.locationname' teleports to the given location in a zone from the story.
 '!teleport_to @start' teleports you to the starting location for wizards."""
     if not parsed.args:
         raise ActionRefused("Teleport what to where?")
