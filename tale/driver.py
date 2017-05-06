@@ -19,7 +19,7 @@ import pkgutil
 import importlib
 from functools import total_ordering
 from types import ModuleType
-from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable
+from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Generator
 from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
@@ -195,7 +195,7 @@ class Driver(pubsub.Listener):
         connection = player.PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        if player_io == "gui":          # XXX enum
+        if player_io == "gui":
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.story.config, connection)
         elif player_io == "web":
@@ -207,7 +207,7 @@ class Driver(pubsub.Listener):
             io = ConsoleIo(connection)
             io.install_tab_completion(self)
         else:
-            raise ValueError("invalid io type")
+            raise ValueError("invalid io type, must be one of: gui web console")
         if wizard_override:
             new_player.privileges.add("wizard")
         connection.player = new_player
@@ -281,7 +281,7 @@ class Driver(pubsub.Listener):
         conn.output("\n")
         topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
 
-    def __login_dialog_mud(self, conn: player.PlayerConnection) -> None:   # XXX generator
+    def __login_dialog_mud(self, conn: player.PlayerConnection) -> Generator:
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
@@ -395,7 +395,7 @@ class Driver(pubsub.Listener):
         self.all_players.clear()
         time.sleep(0.1)
 
-    def __continue_dialog(self, conn: player.PlayerConnection, dialog: str, message: str) -> None:   # XXX dialog generator type
+    def __continue_dialog(self, conn: player.PlayerConnection, dialog: Generator, message: str) -> None:
         # Notice that the try...except structure is very similar to
         # the one in __server_loop_process_player_input
         # That's no surprise because also in this async case, we need
@@ -1161,7 +1161,7 @@ class Commands:
         if not hasattr(func, "is_tale_command_func"):
             raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 
-    def get(self, privileges: Iterable[str]) -> Dict[str, int]:  # XXX dict tyep
+    def get(self, privileges: Iterable[str]) -> Dict[str, int]:  # XXX dict type
         result = dict(self.commands_per_priv[None])  # always include the cmds for None
         for priv in privileges:
             if priv in self.commands_per_priv:

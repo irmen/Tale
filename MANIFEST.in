@@ -8,10 +8,12 @@ recursive-include tests *
 recursive-include ideas *
 recursive-include stories *
 recursive-include docs *
-global-exclude */.svn/*
-global-exclude */.idea/*
+global-exclude .git
+global-exclude .tox
+global-exclude .idea
+global-exclude .cache
+global-exclude *_cache
 global-exclude */__pycache__/*
-global-exclude *.class
 global-exclude *.pyc
 global-exclude *.pyo
 global-exclude *.coverage

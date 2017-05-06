@@ -219,10 +219,6 @@ class MudObject:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
-    def combine(self, other: 'MudObject', actor: 'Living') -> None:    # XXX not here but on Item instead?
-        # combine the other thing with us
-        raise ActionRefused("You can't combine these.")
-
     def read(self, actor: 'Living') -> None:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
@@ -322,6 +318,10 @@ class Item(MudObject):
 
     def unlock(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't unlock that.")
+
+    def combine(self, other: 'Item', actor: 'Living') -> None:
+        # combine the other thing with us
+        raise ActionRefused("You can't combine these.")
 
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living') -> 'Item':
