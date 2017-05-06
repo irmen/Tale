@@ -46,6 +46,7 @@ from . import mud_context
 from . import soul
 from . import races
 from . import util
+from .soul import ParseResult
 from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError
 
 
@@ -114,15 +115,15 @@ class MudObject:
         self._short_description = value
 
     @property
-    def extra_desc(self) -> str:
+    def extra_desc(self) -> Dict[str, str]:
         return self._extradesc
 
     @extra_desc.setter
-    def extra_desc(self, value: str):
+    def extra_desc(self, value: Dict[str, str]):
         self._extradesc = value
 
     def __init__(self, name: str, title: str=None, description: str=None, short_description: str=None) -> None:
-        self._extradesc = None  # type: str
+        self._extradesc = None  # type: Dict[str,str]
         self.name = self._description = self._title = self._short_description = None  # type: str
         self.init_names(name, title, description, short_description)
         self.aliases = set()  # type: Set[str]
@@ -216,11 +217,11 @@ class MudObject:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
 
-    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
+    def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
+    def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
         """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
         pass
 
@@ -234,7 +235,7 @@ class Item(MudObject):
     to check containment.
     """
     def init(self) -> None:
-        self.contained_in = None  # type: Location
+        self.contained_in = None  # type: Union[Location, Living, Container]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
@@ -279,7 +280,6 @@ class Item(MudObject):
         The silent and is_player arguments are not used when moving items -- they're used
         for the movement of livings.
         """
-        actor = actor or self
         self.allow_item_move(actor, verb)
         source_container = self.contained_in
         if source_container:
@@ -442,7 +442,7 @@ class Location(MudObject):
         that based on this message string. That will make it quite hard because you need to
         parse the string again to figure out what happened... Use handle_verb / notify_action instead.
         """
-        specific_targets = specific_targets or set()
+        specific_targets = specific_targets or set()  # type: Set[MudObject]
         assert isinstance(specific_targets, (frozenset, set, list, tuple))
         if exclude_living:
             assert isinstance(exclude_living, Living)
@@ -586,7 +586,7 @@ class Location(MudObject):
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
 
-    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
+    def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         # this code cannot deal with yields directly but you can raise AsyncDialog exception,
         # that indicates to the driver that it should initiate the given async dialog when continuing.
@@ -597,7 +597,7 @@ class Location(MudObject):
                 handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
         return handled
 
-    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
+    def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
         """Notify the room, its livings and items of an action performed by someone."""
         # Notice that this notification event is invoked by the driver after all
         # actions concerning player input have been handled, so we don't have to
@@ -617,11 +617,11 @@ class Location(MudObject):
         """a NPC has left the location."""
         pass
 
-    def notify_player_arrived(self, player: 'tale.player.Player', previous_location: 'Location') -> None:
+    def notify_player_arrived(self, player: 'Living', previous_location: 'Location') -> None:
         """a player has arrived in this location."""
         pass
 
-    def notify_player_left(self, player: 'tale.player.Player', target_location: 'Location') -> None:
+    def notify_player_left(self, player: 'Living', target_location: 'Location') -> None:
         """a player has left this location."""
         pass
 
@@ -662,7 +662,7 @@ class Stats:
         return "<Stats: %s>" % vars(self)
 
     @classmethod
-    def from_race(cls, race: str, gender: str='n') -> 'Stats':
+    def from_race(cls, race, gender='n') -> 'Stats':
         r = races.races[race]
         s = cls()
         s.gender = gender
@@ -712,7 +712,7 @@ class Living(MudObject):
         self.default_verb = "examine"
         self.__inventory = set()   # type: Set[Item]
         self.previous_commandline = None   # type: str
-        self._previous_parse = None  # type: soul.ParseResult
+        self._previous_parse = None  # type: ParseResult
         super().__init__(name, title, description, short_description)
 
     def init_gender(self, gender: str) -> None:
@@ -776,7 +776,7 @@ class Living(MudObject):
 
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living') -> 'Living':
-        duplicate = clone(self)
+        duplicate = copy.deepcopy(self)
         actor.tell("Cloned into: " + repr(duplicate))
         actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
         actor.location.insert(duplicate, actor)
@@ -835,8 +835,8 @@ class Living(MudObject):
             msg = msg.format(**formats)
             self.location.tell(msg, exclude_living=self)
 
-    def parse(self, commandline: str, external_verbs: Set[str]=set()) -> soul.ParseResult:
-        """Parse the commandline into something that can be processed by the soul (soul.ParseResult)"""
+    def parse(self, commandline: str, external_verbs: Set[str]=set()) -> ParseResult:
+        """Parse the commandline into something that can be processed by the soul (ParseResult)"""
         if commandline == "again":
             # special case, repeat previous command
             if self.previous_commandline:
@@ -856,7 +856,7 @@ class Living(MudObject):
         self.validate_socialize_targets(parsed)
         return parsed
 
-    def validate_socialize_targets(self, parsed: soul.ParseResult) -> None:
+    def validate_socialize_targets(self, parsed: ParseResult) -> None:
         """check if any of the targeted objects is an exit"""
         if any(isinstance(w, Exit) for w in parsed.who_info):
             raise ParseError("That doesn't make much sense.")
@@ -879,7 +879,7 @@ class Living(MudObject):
             else:
                 raise
 
-    def do_socialize_cmd(self, parsed: soul.ParseResult) -> None:
+    def do_socialize_cmd(self, parsed: ParseResult) -> None:
         """
         A soul verb such as 'ponder' was entered. Socialize with the environment to handle this.
         Some verbs may trigger a response or action from something or someone else.
@@ -898,7 +898,7 @@ class Living(MudObject):
                         pending_actions.send(lambda victim=self: living.start_attack(victim))
 
     @util.authorized("wizard")
-    def do_forced_cmd(self, actor: 'Living', parsed: soul.ParseResult, ctx: util.Context) -> None:
+    def do_forced_cmd(self, actor: 'Living', parsed: ParseResult, ctx: util.Context) -> None:
         """
         Perform a (pre-parsed) command because the actor forced us to do it.
 
@@ -987,7 +987,8 @@ class Living(MudObject):
         """
         if not name:
             raise ValueError("name must be given")
-        found = containing_object = None
+        found = None  # type: Item
+        containing_object = None  # type: MudObject
         if include_inventory:
             containing_object = self
             found = Item.search_item(name, self.__inventory)
@@ -1017,7 +1018,7 @@ class Living(MudObject):
         """Do we accept money? Raise ActionRefused if not."""
         raise ActionRefused("You can't do that.")
 
-    def _handle_verb_base(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
+    def _handle_verb_base(self, parsed: ParseResult, actor: 'Living') -> bool:
         """
         Handle a custom verb. Return True if handled, False if not handled.
         Also checks inventory items. (Don't override this in a subclass,
@@ -1027,11 +1028,11 @@ class Living(MudObject):
             return True
         return any(item.handle_verb(parsed, actor) for item in self.__inventory)
 
-    def handle_verb(self, parsed: soul.ParseResult, actor: 'Living') -> bool:
+    def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
         """Handle a custom verb. Return True if handled, False if not handled."""
         return False
 
-    def _notify_action_base(self, parsed: soul.ParseResult, actor: 'Living') -> None:
+    def _notify_action_base(self, parsed: ParseResult, actor: 'Living') -> None:
         """
         Notify the living of an action performed by someone.
         Also calls inventory items. Don't override this one in a subclass,
@@ -1041,7 +1042,7 @@ class Living(MudObject):
         for item in self.__inventory:
             item.notify_action(parsed, actor)
 
-    def notify_action(self, parsed: soul.ParseResult, actor: 'Living') -> None:
+    def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
         """Notify the living of an action performed by someone."""
         pass
 
@@ -1113,10 +1114,10 @@ class Exit(MudObject):
         assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
         if isinstance(directions, str):
             direction = directions
-            aliases = frozenset()  # type: FrozenSet[str]
+            aliases = set()  # type: Set[str]
         else:
             direction = directions[0]
-            aliases = frozenset(directions[1:])
+            aliases = set(directions[1:])
         self.target = target_location   # type: Union[str, Location]
         self.bound = isinstance(target_location, Location)
         if self.bound:
@@ -1196,7 +1197,7 @@ class Door(Exit):
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_description or short_description
-        self.key_code = None   # type: str  # you can optionally set this to any code that a key must match to unlock the door
+        self.key_code = None   # type: Any  # you can optionally set this to any code that a key must match to unlock the door
         super().__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")

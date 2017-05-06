@@ -47,9 +47,10 @@ class Story(StoryBase):
         player.tell("Try to communicate with your pet, and exit the house to win the game.")
         player.tell("\n")
         player.tell("\n")
+        return None
 
     def welcome_savegame(self, player: Player) -> Optional[str]:
-        pass  # not supported in demo
+        return None  # not supported in demo
 
     def goodbye(self, player: Player) -> None:
         player.tell("Thanks for trying out Tale!")

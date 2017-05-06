@@ -7,13 +7,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import argparse
 import traceback
-from typing import Dict, Any
+from typing import Dict, Any, Sequence
 from . import __version__
 from .tio import DEFAULT_SCREEN_DELAY
 from .driver import Driver
 
 
-def parse_cmdline(command_line_args: str) -> Dict[str, Any]:
+def parse_cmdline(command_line_args: Sequence[str]) -> Dict[str, Any]:
     parser = argparse.ArgumentParser(description="""
         Tale framework %s game driver. Use this to launch a game and specify some settings.
         Sometimes the game will provide its own startup script that invokes this automatically.
@@ -29,7 +29,7 @@ def parse_cmdline(command_line_args: str) -> Dict[str, Any]:
     return vars(parser.parse_args(command_line_args))
 
 
-def run_from_cmdline(cmdline: str) -> None:
+def run_from_cmdline(cmdline: Sequence[str]) -> None:
     kwargs = parse_cmdline(cmdline)
     try:
         Driver().start(**kwargs)

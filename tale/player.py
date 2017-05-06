@@ -310,7 +310,7 @@ class TextBuffer:
         if end:
             self.in_paragraph = False
 
-    def get_paragraphs(self, clear: bool=True) -> Sequence[str]:
+    def get_paragraphs(self, clear: bool=True) -> Sequence[Tuple[str, bool]]:
         paragraphs = [(p.text(), p.format) for p in self.paragraphs]
         if clear:
             self.init()

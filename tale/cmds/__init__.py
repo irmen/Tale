@@ -26,7 +26,7 @@ abbreviations = {
 }
 
 
-def register_all(cmd_processor: '..driver.Commands') -> None:
+def register_all(cmd_processor) -> None:
     """
     Register all commands with the command processor.
     (Called from the game driver when it is starting up)

@@ -844,7 +844,7 @@ class Driver(pubsub.Listener):
                 # the player command ended but signaled that an async dialog should be initiated
                 topic_async_dialogs.send((conn, x.dialog))
 
-    def _go_through_exit(self, player: player.Player, direction: int) -> None:   # XXX direction type
+    def _go_through_exit(self, player: player.Player, direction: str) -> None:
         xt = player.location.exits[direction]
         xt.allow_passage(player)
         player.move(xt.target)
@@ -934,7 +934,7 @@ class Driver(pubsub.Listener):
         verbs.update(self.current_custom_verbs(player))
         return verbs
 
-    def show_motd(self, player: player.Player, notify_no_motd: bool=False) -> False:
+    def show_motd(self, player: player.Player, notify_no_motd: bool=False) -> None:
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         try:
             motd = self.resources["messages/motd.txt"]
