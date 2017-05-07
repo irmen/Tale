@@ -859,17 +859,20 @@ class TestContainer(unittest.TestCase):
         bag.remove(key, npc)
         self.assertEqual(0, bag.inventory_size)
         self.assertFalse(key in bag)
+        with self.assertRaises(ActionRefused):
+            bag.remove("not an item", npc)
+        separate_item = Item("key2")
         with self.assertRaises(KeyError):
-            bag.remove("not_existing", npc)
+            bag.remove(separate_item, npc)
 
     def test_allowance(self):
         bag = Container("bag")
         key = Item("key")
         player = Player("julie", "f")
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             bag.insert(None, player)
         bag.insert(key, player)
-        with self.assertRaises(KeyError):
+        with self.assertRaises(AssertionError):
             bag.remove(None, player)
         bag.remove(key, player)
         bag.allow_item_move(player)

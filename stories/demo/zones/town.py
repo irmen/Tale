@@ -5,6 +5,7 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Union, Optional
 from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
 from tale.player import Player
 from tale.errors import ActionRefused
@@ -66,12 +67,12 @@ class CursedGem(Item):
 
 
 class InsertOnlyBox(Container):
-    def remove(self, item, actor):
+    def remove(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         raise ActionRefused("The box is cursed! You can't take anything out of it!")
 
 
 class RemoveOnlyBox(Container):
-    def insert(self, item, actor):
+    def insert(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         raise ActionRefused("No matter how hard you try, you can't fit %s in the box." % item.title)
 
 
@@ -299,7 +300,8 @@ class MagicGameEnd(Item):
         super().__init__("magic orb", description="A magic orb of some sort.")
         self.aliases = "orb"
 
-    def notify_moved(self, source_container, target_container, actor):
+    def notify_moved(self, source_container: Union[Location, Container, Living],
+                     target_container: Union[Location, Container, Living], actor: Living) -> None:
         actor.tell_later("By touching it you immediately end the game!")
         actor.story_completed()
 

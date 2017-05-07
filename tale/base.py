@@ -223,10 +223,10 @@ class MudObject:
         # called from the read command, override if your object needs to act on this.
         raise ActionRefused("There's nothing to read.")
 
-    def insert(self, item: Union['Living', 'Item'], actor: Optional['Living']) -> None:
+    def insert(self, obj: Union['Living', 'Item'], actor: Optional['Living']) -> None:
         raise ActionRefused("You can't put things in there.")
 
-    def remove(self, item: Union['Living', 'Item'], actor: Optional['Living']) -> None:
+    def remove(self, obj: Union['Living', 'Item'], actor: Optional['Living']) -> None:
         raise ActionRefused("You can't take things from there.")
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
@@ -299,7 +299,8 @@ class Item(MudObject):
             source_container.insert(self, actor)
             raise
 
-    def notify_moved(self, source_container: 'Item', target_container: 'Item', actor: 'Living') -> None:
+    def notify_moved(self, source_container: Union['Location', 'Container', 'Living'],
+                     target_container: Union['Location', 'Container', 'Living'], actor: 'Living') -> None:
         """Called when the item has been moved from one place to another"""
         pass
 
@@ -423,7 +424,7 @@ class Location(MudObject):
         if len(self.items) > 0 or len(self.livings) > 0:
             raise LocationIntegrityError("clobbering existing inventory", None, None, self)
         for obj in objects:
-            self.insert(obj, self)
+            self.insert(obj, None)
 
     def destroy(self, ctx: util.Context) -> None:
         super().destroy(ctx)
@@ -446,7 +447,7 @@ class Location(MudObject):
         return pubsub.topic(("wiretap-location", self.name))
 
     def tell(self, room_msg: str, exclude_living: 'Living'=None,
-             specific_targets: Sequence[Union['Location', 'Living']]=None, specific_target_msg: str="") -> None:
+             specific_targets: Set[Union['Location', 'Living']]=None, specific_target_msg: str="") -> None:
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
@@ -455,8 +456,7 @@ class Location(MudObject):
         """
         targets = specific_targets or set()
         assert isinstance(targets, (frozenset, set, list, tuple))
-        if exclude_living:
-            assert isinstance(exclude_living, Living)
+        assert exclude_living is None or isinstance(exclude_living, Living)
         for living in self.livings:
             if living == exclude_living:
                 continue
@@ -577,22 +577,24 @@ class Location(MudObject):
             result = [living for living in self.livings if name in living.aliases or living.title.lower() == name]
         return result[0] if result else None
 
-    def insert(self, item: Union['Living', Item], actor: Optional['Living']) -> None:
-        """Add obj to the contents of the location (either a Living or an Item)"""
-        if isinstance(item, Living):
-            self.livings.add(item)
-        elif isinstance(item, Item):
-            self.items.add(item)
+    def insert(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
+        """Add item to the contents of the location (either a Living or an Item)"""
+        assert obj is not None
+        if isinstance(obj, Living):
+            self.livings.add(obj)
+        elif isinstance(obj, Item):
+            self.items.add(obj)
         else:
             raise TypeError("can only add Living or Item")
-        item.location = self
+        obj.location = self
 
     def remove(self, obj: Union['Living', Item], actor: Optional['Living']) -> None:
         """Remove obj from this location (either a Living or an Item)"""
+        assert obj is not None
         if obj in self.livings:
-            self.livings.remove(obj)
+            self.livings.remove(obj)  # type: ignore
         elif obj in self.items:
-            self.items.remove(obj)
+            self.items.remove(obj)  # type: ignore
         else:
             return   # just ignore an object that wasn't present in the first place
         obj.location = None
@@ -692,10 +694,10 @@ class Stats:
 
     def set_stats_from_race(self) -> None:
         # the stats that are static are always initialized from the races table
-        self.stat_prios = defaultdict(list)
+        self.stat_prios = defaultdict(list)   # type: Dict[int, List[races.Stats]]
         r = races.races[self.race]
         for stat, (_, prio) in r.stats._asdict().items():
-            self.stat_prios[prio].append(stat)
+            self.stat_prios[prio].append(stat)      # XXX type error
         self.bodytype = r.body
         self.language = r.language
         self.weight = r.mass
@@ -759,8 +761,9 @@ class Living(MudObject):
     def inventory(self) -> FrozenSet[Item]:
         return frozenset(self.__inventory)
 
-    def insert(self, item: Item, actor: Optional['Living']) -> None:
+    def insert(self, item: Union['Living', Item], actor: Optional['Living']) -> None:
         """Add an item to the inventory."""
+        assert item is not None
         if not isinstance(item, Item):
             raise ActionRefused("You can't do that.")
         if actor is self or actor is not None and "wizard" in actor.privileges:
@@ -772,8 +775,11 @@ class Living(MudObject):
         # default behavior is to refuse stuff given to us:
         raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
-    def remove(self, item: Item, actor: Optional['Living']) -> None:
+    def remove(self, item: Union['Living', Item], actor: Optional['Living']) -> None:
         """remove an item from the inventory"""
+        assert item is not None
+        if not isinstance(item, Item):
+            raise ActionRefused("You can't do that.")
         if actor is self or actor is not None and "wizard" in actor.privileges:
             self.__inventory.remove(item)
             item.contained_in = None
@@ -912,8 +918,8 @@ class Living(MudObject):
             # other npcs may choose to attack or to ignore it
             # We need to check the verb qualifier, it might void the actual action :)
             if parsed.qualifier not in verbdefs.NEGATING_QUALIFIERS:
-                for living in who:
-                    if getattr(living, "aggressive", False):
+                for living in who:   # XXX can 'who' really also contain Location ????
+                    if living.aggressive:
                         pending_actions.send(lambda victim=self: living.start_attack(victim))
 
     @util.authorized("wizard")
@@ -965,7 +971,7 @@ class Living(MudObject):
         Moving a living is only supported to a Location target.
         Messages are being printed to the locations if the move was successful.
         """
-        assert isinstance(target, Location)
+        assert isinstance(target, Location), "can only move to a Location"
         actor = actor or self
         original_location = None
         if self.location:
@@ -1040,7 +1046,7 @@ class Living(MudObject):
         victim_msg = "%s starts attacking you!" % name
         attacker_msg = "You start attacking %s!" % victim.title
         victim.tell(victim_msg)
-        victim.location.tell(room_msg, exclude_living=victim, specific_targets=[self], specific_target_msg=attacker_msg)
+        victim.location.tell(room_msg, exclude_living=victim, specific_targets={self}, specific_target_msg=attacker_msg)
 
     def allow_give_money(self, actor: 'Living', amount: float) -> None:
         """Do we accept money? Raise ActionRefused if not."""
@@ -1133,12 +1139,17 @@ class Container(Item):
             item.destroy(ctx)
         self.__inventory.clear()
 
-    def insert(self, item: Item, actor: Optional[Living]) -> None:
-        assert isinstance(item, MudObject)
+    def insert(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
+        assert item is not None
+        if not isinstance(item, Item):
+            raise ActionRefused("You can't do that.")
         self.__inventory.add(item)
         item.contained_in = self
 
-    def remove(self, item: Item, actor: Optional[Living]) -> None:
+    def remove(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
+        assert item is not None
+        if not isinstance(item, Item):
+            raise ActionRefused("You can't do that.")
         self.__inventory.remove(item)
         item.contained_in = None
 
@@ -1387,8 +1398,11 @@ class Door(Exit):
                 return item
         return None
 
-    def insert(self, item: Item, actor: Optional[Living]) -> None:
+    def insert(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         """used when the player tries to put a key into the door, for instance."""
+        assert item is not None
+        if not isinstance(item, Item):
+            raise ActionRefused("You can't do that.")
         if self.check_key(item):
             if self.locked:
                 raise ActionRefused("You could try to unlock the door with it instead.")
@@ -1432,7 +1446,7 @@ class Soul:
         return verb in verbdefs.VERBS
 
     def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) \
-            -> Tuple[str, Tuple[FrozenSet[Union[Location, Living]], str, str, str]]:
+            -> Tuple[str, Tuple[Set[Union[Location, Living]], str, str, str]]:
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
         and another tuple containing the targets of the action and the various action messages.
@@ -1448,7 +1462,7 @@ class Soul:
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[FrozenSet[Union[Location, Living]], str, str, str]:
+    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[Set[Union[Location, Living]], str, str, str]:
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,
@@ -1487,7 +1501,7 @@ class Soul:
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = self.spacify(adverb)
 
-        def result_messages(action: str, action_room: str) -> Tuple[FrozenSet[Union[Location, Living]], str, str, str]:
+        def result_messages(action: str, action_room: str) -> Tuple[Set[Union[Location, Living]], str, str, str]:
             action = action.strip()
             action_room = action_room.strip()
             if parsed.qualifier:
@@ -1537,9 +1551,9 @@ class Soul:
             if player in parsed.who_info:
                 who = set(parsed.who_info)
                 who.remove(player)  # the player should not be part of the remaining targets.
-                whof = frozenset(who)
+                whof = set(who)
             else:
-                whof = frozenset(parsed.who_info)
+                whof = set(parsed.who_info)
             return whof, player_msg, room_msg, target_msg
 
         # construct the action string

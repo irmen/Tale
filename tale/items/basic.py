@@ -80,13 +80,13 @@ class Boxlike(Container):
         else:
             raise ActionRefused("You can't peek inside, maybe you should open it first?")
 
-    def insert(self, item: Item, actor: Optional[Living]) -> None:
+    def insert(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         if self.opened:
             super().insert(item, actor)
         else:
             raise ActionRefused("You can't put things in the %s: you should open it first." % self.title)
 
-    def remove(self, item: Item, actor: Optional[Living]) -> None:
+    def remove(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         if self.opened:
             super().remove(item, actor)
         else:
