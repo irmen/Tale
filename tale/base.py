@@ -67,7 +67,7 @@ def heartbeat(klass: Type) -> Type:
     has to call all heartbeats every tick even though they do nothing yet.
     With deferreds, the driver only calls a deferred at the time it is needed.
     """
-    klass._register_heartbeat = True  # type: ignore
+    klass._register_heartbeat = True
     return klass
 
 
@@ -594,7 +594,7 @@ class Location(MudObject):
         if obj in self.livings:
             self.livings.remove(obj)  # type: ignore
         elif obj in self.items:
-            self.items.remove(obj)  # type: ignore
+            self.items.remove(obj)    # type: ignore
         else:
             return   # just ignore an object that wasn't present in the first place
         obj.location = None

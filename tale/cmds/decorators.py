@@ -72,14 +72,14 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
 
 def disable_notify_action(func: Callable) -> Callable:
     """decorator to prevent the command being passed to notify_action events"""
-    func.enable_notify_action = False  # type: ignore
+    func.enable_notify_action = False   # type: ignore
     return func
 
 
 def disabled_in_gamemode(mode: GameMode) -> Callable:
     """decorator to disable a command in the given game mode"""
     def disable(func: Callable) -> Callable:
-        func.disabled_in_mode = mode    # type: ignore
+        func.disabled_in_mode = mode   # type: ignore
         return func
     assert isinstance(mode, GameMode)
     return disable

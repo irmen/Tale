@@ -84,7 +84,7 @@ class IoAdapterBase:
             quoted = smartypants.smartypants(text)
             if escaped_entities:
                 return quoted
-            return html.parser.unescape(quoted)   # type: ignore   # mypy doesn't recognise this method
+            return html.parser.unescape(quoted)    # type: ignore  # mypy doesn't know about this method
         return text
 
     def output(self, *lines: str) -> None:

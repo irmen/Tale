@@ -45,7 +45,7 @@ class Player(base.Living, pubsub.Listener):
         self.init_nonserializables()
 
     def init_nonserializables(self) -> None:
-        self._input = queue.Queue()  # type: ignore
+        self._input = queue.Queue()   # type: Any
         self.input_is_available = Event()
         self.transcript = None  # type: TextIO
         self._output = TextBuffer()

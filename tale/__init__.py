@@ -4,16 +4,15 @@ The actual mudlib 'world' code
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+from typing import Any
 
-# this is intentionally left empty; don't put stuff here that other modules
-# might need, it's too easy to cause circular dependencies
 
 __version__ = "3.0.dev0"
 
 
 class _MudContext:
-    driver = None  # type: ignore
-    config = None  # type: ignore
+    driver = None  # type: Any
+    config = None  # type: Any
 
 
 # The mud_context is a global container for the following attributes,
