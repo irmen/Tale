@@ -104,7 +104,7 @@ class MudObject:
         return self._title
 
     @title.setter
-    def title(self, value: str):
+    def title(self, value: str) -> None:
         self._title = value
 
     @property
@@ -112,7 +112,7 @@ class MudObject:
         return self._description
 
     @description.setter
-    def description(self, value: str):
+    def description(self, value: str) -> None:
         self._description = value
 
     @property
@@ -120,7 +120,7 @@ class MudObject:
         return self._short_description
 
     @short_description.setter
-    def short_description(self, value: str):
+    def short_description(self, value: str) -> None:
         self._short_description = value
 
     @property
@@ -128,7 +128,7 @@ class MudObject:
         return self._extradesc
 
     @extra_desc.setter
-    def extra_desc(self, value: Dict[str, str]):
+    def extra_desc(self, value: Dict[str, str]) -> None:
         self._extradesc = value
 
     def __init__(self, name: str, title: str=None, description: str=None, short_description: str=None) -> None:

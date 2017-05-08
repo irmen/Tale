@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import re
 import random
+from typing import Dict, Set
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
@@ -34,10 +35,10 @@ zones = get_zones()
 print(len(zones), "zones loaded.")
 
 
-converted_rooms = {}   # cache for the rooms
-converted_mobs = set()
-converted_items = set()
-converted_shops = {}  # cache for the shop data
+converted_rooms = {}     # type: Dict[int, Location]  # cache for the rooms
+converted_mobs = set()   # type: Set[int]
+converted_items = set()  # type: Set[int]
+converted_shops = {}     # type: Dict[int, ShopBehavior]  # cache for the shop data
 
 
 class CircleMob(Living):
@@ -199,11 +200,12 @@ def make_item(vnum):
     elif c_obj.type == "scroll":
         item = Scroll(name, title, short_description=c_obj.longdesc)
         item.spell_level = c_obj.typespecific["level"]
-        item.spells.add(c_obj.typespecific["spell1"])
+        spells = {c_obj.typespecific["spell1"]}
         if "spell2" in c_obj.typespecific:
-            item.spells.add(c_obj.typespecific["spell2"])
+            spells.add(c_obj.typespecific["spell2"])
         if "spell3" in c_obj.typespecific:
-            item.spells.add(c_obj.typespecific["spell3"])
+            spells.add(c_obj.typespecific["spell3"])
+        item.spells = frozenset(spells)
     elif c_obj.type in ("staff", "wand"):
         item = MagicItem(name, title, short_description=c_obj.longdesc)
         item.level = c_obj.typespecific["level"]
@@ -225,11 +227,12 @@ def make_item(vnum):
     elif c_obj.type == "potion":
         item = Potion(name, title, short_description=c_obj.longdesc)
         item.spell_level = c_obj.typespecific["level"]
-        item.spells.add(c_obj.typespecific["spell1"])
+        spells = {c_obj.typespecific["spell1"]}
         if "spell2" in c_obj.typespecific:
-            item.spells.add(c_obj.typespecific["spell2"])
+            spells.add(c_obj.typespecific["spell2"])
         if "spell3" in c_obj.typespecific:
-            item.spells.add(c_obj.typespecific["spell3"])
+            spells.add(c_obj.typespecific["spell3"])
+        item.spells = frozenset(spells)
     elif c_obj.type == "money":
         item = Money(name, title, short_description=c_obj.longdesc)
         item.value = c_obj.typespecific["amount"]

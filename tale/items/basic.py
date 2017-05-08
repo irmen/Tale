@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import textwrap
 from typing import NamedTuple, FrozenSet, Optional, Union
 from ..base import Item, Container, Weapon, Living
-from ..errors import ActionRefused
+from ..errors import ActionRefused, TaleError
 from .. import lang, mud_context
 
 
@@ -42,6 +42,10 @@ class Boxlike(Container):
         else:
             return self.txt_title_closed
 
+    @title.setter
+    def title(self, value: str) -> None:
+        raise TaleError("you cannot set the title of a Boxlike because it is dynamic")
+
     @property
     def description(self) -> str:
         if self.opened:
@@ -51,6 +55,10 @@ class Boxlike(Container):
                 return self.txt_descr_open_empty
         else:
             return self.txt_descr_closed
+
+    @description.setter
+    def description(self, value: str) -> None:
+        raise TaleError("you cannot set the description of a Boxlike because it is dynamic")
 
     def open(self, actor: Living, item: Item=None) -> None:
         if self.opened:
@@ -112,6 +120,10 @@ class GameClock(Item):
         else:
             return "It looks broken."
 
+    @description.setter
+    def description(self, value: str) -> None:
+        raise TaleError("you cannot set the description of a GameClock because it is dynamic")
+
     def activate(self, actor: Living) -> None:
         raise ActionRefused("It's already running.")
 
@@ -156,11 +168,11 @@ class Scroll(Item):
     def init(self) -> None:
         super().init()
         self.spell_level = 0   # level of spells
-        self.spells = set()
+        self.spells = frozenset()   # type: FrozenSet[str]
 
     def read(self, actor: Living) -> None:
         actor.tell("The %s reads:" % self.title, end=True)
-        actor.tell(self.spells)   # @todo spell descriptions
+        actor.tell("It contains the following spells: "+str(self.spells))   # @todo spell descriptions
 
 
 class MagicItem(Weapon):
@@ -212,7 +224,7 @@ class Potion(Item):
     def init(self) -> None:
         super().init()
         self.spell_level = 0
-        self.spells = set()
+        self.spells = frozenset()   # type: FrozenSet[str]
 
 
 class Food(Item):

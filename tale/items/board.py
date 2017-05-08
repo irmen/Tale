@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import json
 import datetime
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Any, List, Generator
 from ..base import Item, Living
 from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
@@ -22,7 +22,7 @@ PostType = Dict[str, str]
 class BulletinBoard(Item):
     def init(self) -> None:
         super().init()
-        self.posts = []
+        self.posts = []   # type: List[PostType]
         self.max_num_posts = 20
         self.readonly = False
         self.storage_file = None
@@ -110,8 +110,8 @@ class BulletinBoard(Item):
             if num[0] == '#':
                 num = num[1:]
             try:
-                num = int(num)
-                return num, self.posts[num - 1]
+                nr = int(num)
+                return nr, self.posts[nr - 1]
             except ValueError:
                 pass
             except IndexError:
@@ -124,7 +124,7 @@ class BulletinBoard(Item):
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
         raise AsyncDialog(self.dialog_write_message(actor, None))
 
-    def dialog_write_message(self, actor: Living, in_reply_to: PostType=None) -> None:
+    def dialog_write_message(self, actor: Living, in_reply_to: PostType=None) -> Generator[Tuple[str, Any], str, None]:
         if in_reply_to:
             subject = "re: {subject}".format(**in_reply_to)
             subject = subject[:50]
@@ -137,7 +137,7 @@ class BulletinBoard(Item):
         actor.tell("Please type your message. It can span multiple lines, but can not be longer than 1000 characters. "
                    "Type an empty line or slash ('/') for a paragraph separator, type TWO dots ('..') to end the message.", end=True)
         actor.tell("\n")
-        text = ""
+        text = ""     # XXX type error? overwrites text from above?
         while len(text) <= 1000:
             line = yield "input", None
             if line == "..":
@@ -159,7 +159,7 @@ class BulletinBoard(Item):
                     "text": text
                 }
                 self.posts.insert(0, post)
-                self.posts = self.posts[:self.max_num_posts]
+                self.posts = self.posts[:self.max_num_posts]     # XXX deque?
                 self.save()
                 actor.tell("\n")
                 actor.tell("You've added the message on top of the list on the %s." % self.name)

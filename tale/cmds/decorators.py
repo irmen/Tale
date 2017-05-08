@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import inspect
 import functools
-from typing import Callable
+from typing import Callable, Generator
 from .. import util
 from .. import errors
 from .. import player
@@ -64,7 +64,7 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
     # the signature of a command function must be exactly this:  def func(player, parsed, ctx) -> None
     sig = inspect.signature(func)
     expected_params = ["player", "parsed", "ctx"]
-    if list(sig.parameters) != expected_params or sig.return_annotation not in (sig.empty, None):
+    if list(sig.parameters) != expected_params or sig.return_annotation not in (sig.empty, None, Generator):
         return False
     return all(sig.parameters[p].default is sig.empty and
                sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)

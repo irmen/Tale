@@ -9,7 +9,7 @@ import inspect
 import datetime
 import random
 import itertools
-from typing import Callable, Iterable, List
+from typing import Callable, Iterable, List, Tuple, Dict
 from .. import lang
 from .. import races
 from .. import util
@@ -23,9 +23,9 @@ from ..story import GameMode
 from ..parseresult import ParseResult
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 
-all_commands = {}
-cmds_aliases = {}   # commands -> tuple of aliases
-abbreviations = {}   # will be injected
+all_commands = {}   # type: Dict[str, Callable]
+cmds_aliases = {}   # type: Dict[str, Tuple[str]]  # commands -> tuple of aliases
+abbreviations = {}   # type: Dict[str, str]  # will be injected
 
 
 def cmd(command: str, *aliases: str) -> Callable:
@@ -37,12 +37,12 @@ def cmd(command: str, *aliases: str) -> Callable:
     def cmd2(func: Callable) -> Callable:
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
-        func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore # contains async yields?
         if cmdfunc_signature_valid(func):
             func.__doc__ = util.format_docstring(func.__doc__)
-            func.is_tale_command_func = True
+            func.is_tale_command_func = True   # type: ignore
             if not hasattr(func, "enable_notify_action"):
-                func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
+                func.enable_notify_action = True   # type: ignore  # by default the normal commands should be passed to notify_action
             all_commands[command] = func
             cmds_aliases[command] = aliases
             for alias in aliases:
@@ -568,7 +568,7 @@ def do_help(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         do_what(player, parsed, ctx)
     else:
         all_verbs = ctx.driver.current_verbs(player)
-        verb_help = {}   # verb -> [list of abbrs]
+        verb_help = {}   # type: Dict[str, List[str]]  # verb -> [list of abbrs]
         aliases = frozenset(itertools.chain(*cmds_aliases.values()))
         for verb in all_verbs:
             if verb not in aliases:

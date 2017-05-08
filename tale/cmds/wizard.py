@@ -12,7 +12,7 @@ import sys
 import gc
 import platform
 import importlib
-from typing import Callable
+from typing import Dict, Callable, Generator
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
 from ..player import Player
@@ -20,7 +20,7 @@ from ..parseresult import ParseResult
 from ..story import *
 from .. import base, lang, util, pubsub, __version__
 
-all_commands = {}
+all_commands = {}   # type: Dict[str, Callable]
 LIBRARY_MODULE_NAME = "tale"
 
 
@@ -31,13 +31,13 @@ def wizcmd(command: str, *aliases: str) -> Callable:
     User code should use @wizcmd from cmds.decorators.
     """
     # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
-    command = "!" + command
-    aliases = ["!" + alias for alias in aliases]
+    prefixed_command = "!" + command
+    prefixed_aliases = ["!" + alias for alias in aliases]
 
     def wizcmd2(func: Callable) -> Callable:
-        func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
-        func.is_tale_command_func = True
-        func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
+        func.enable_notify_action = False   # type: ignore  # none of the wizard commands should be used with notify_action
+        func.is_tale_command_func = True    # type: ignore
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore  # contains async yields?
 
         @functools.wraps(func)
         def executewizcommand(player: Player, parsed: ParseResult, ctx: util.Context) \
@@ -46,12 +46,12 @@ def wizcmd(command: str, *aliases: str) -> Callable:
                 raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
             return func(player, parsed, ctx)
 
-        if command in all_commands:
-            raise ValueError("Command defined more than once: " + command)
+        if prefixed_command in all_commands:
+            raise ValueError("Command defined more than once: " + prefixed_command)
         if cmdfunc_signature_valid(func):
             func.__doc__ = util.format_docstring(func.__doc__)
-            all_commands[command] = executewizcommand
-            for alias in aliases:
+            all_commands[prefixed_command] = executewizcommand
+            for alias in prefixed_aliases:
                 if alias in all_commands:
                     raise ValueError("Command defined more than once: " + alias)
                 all_commands[alias] = executewizcommand
@@ -127,7 +127,7 @@ def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("destroy")
-def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Destroys an object or creature."""
     if not parsed.who_order:
         raise ParseError("Destroy what or who?")
@@ -144,7 +144,7 @@ def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("clean")
-def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
     p = player.tell
     if parsed.args and parsed.args[0] == '.':

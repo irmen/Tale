@@ -19,7 +19,7 @@ import pkgutil
 import importlib
 from functools import total_ordering
 from types import ModuleType
-from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Generator
+from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Generator, Set, List, MutableSequence
 from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs
 from . import __version__ as tale_version_str
 from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
@@ -40,22 +40,24 @@ class Driver(pubsub.Listener):
     Handles main game loop, player connections, and loading/saving of game state.
     """
     def __init__(self) -> None:
-        self.heartbeat_objects = set()
-        self.unbound_exits = []
-        self.deferreds = []  # heapq
+        self.heartbeat_objects = set()    # type: Set[MudObject]
+        self.unbound_exits = []    # type: List[Exit]
+        self.deferreds = []   # type: List[Deferred]  # heapq
         self.deferreds_lock = threading.Lock()
         self.server_started = datetime.datetime.now().replace(microsecond=0)
-        self.server_loop_durations = collections.deque(maxlen=10)
+        self.server_loop_durations = collections.deque(maxlen=10)    # type: MutableSequence[float]
         self.commands = Commands()
         cmds.register_all(self.commands)
-        self.all_players = {}   # maps playername to player connection object
+        self.all_players = {}   # type: Dict[str, PlayerConnection]  # maps playername to player connection object
         self.zones = None
         self.moneyfmt = None
-        self.resources = self.user_resources = None
+        self.resources = None   # type: VirtualFileSystem
+        self.user_resources = None  # type: VirtualFileSystem
         self.story = None
         self.game_clock = None
         self.__stop_mainloop = True
-        self.waiting_for_input = {}   # maps playerconnection to tuple (dialog, validator, echo_input)
+        # playerconnections that wait for input; maps connection to tuple (dialog, validator, echo_input)
+        self.waiting_for_input = {}   # type: Dict[PlayerConnection, Tuple[int, int, int]]
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
@@ -1139,8 +1141,8 @@ class Commands:
     Some utility functions to manage the registered commands.
     """
     def __init__(self) -> None:
-        self.commands_per_priv = {None: {}}
-        self.no_soul_parsing = set()
+        self.commands_per_priv = {None: {}}    # type: Dict[str, Dict[str, Callable]]
+        self.no_soul_parsing = set()   # type: Set[str]
 
     def add(self, verb: str, func: Callable, privilege: str=None) -> None:
         self.validateFunc(func)
@@ -1193,7 +1195,7 @@ class LimboReaper(base.Living):
                         "He is carrying a large omnious scythe that looks very, very sharp.",
             short_description="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
-        self.candidates = {}    # player --> (first_seen, texts shown)
+        self.candidates = {}    # type: Dict[Player, Tuple[float, int]]  # player --> (first_seen, texts shown)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb == "say":
