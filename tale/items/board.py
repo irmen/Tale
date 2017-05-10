@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import json
 import datetime
 from collections import deque
-from typing import Tuple, Dict, Any, Generator, Deque
+from typing import Tuple, Dict, Any, Generator
 from ..base import Item, Living
 from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
@@ -25,7 +25,7 @@ class BulletinBoard(Item):
 
     def init(self) -> None:
         super().init()
-        self.posts = deque(maxlen=self.max_num_posts)  # type: Deque[PostType]
+        self.posts = deque(maxlen=self.max_num_posts)  # type: Any[PostType]   # typing.Deque is absent in some python 3.5 versions...
         self.readonly = False
         self.storage_file = None
         self.verbs = {
