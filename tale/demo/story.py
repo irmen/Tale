@@ -34,9 +34,10 @@ class Story(StoryBase):
     config.display_gametime = True
     config.startlocation_player = "house.livingroom"
     config.startlocation_wizard = "house.livingroom"
+    config.zones = ["house"]
 
-    def init(self, driver: Driver) -> Sequence[str]:
-        return ["house"]
+    def init(self, driver: Driver) -> None:
+        pass
 
     def init_player(self, player: Player) -> None:
         player.money = 12.65

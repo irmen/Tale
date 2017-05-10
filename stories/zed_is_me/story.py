@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import sys
-from typing import Optional, List
+from typing import Optional
 from tale.story import *
 from tale.player import Player
 from tale.driver import Driver
@@ -26,14 +26,13 @@ class Story(StoryBase):
     config.player_race = "human"
     config.startlocation_player = "houses.livingroom"
     config.startlocation_wizard = "houses.livingroom"
+    config.zones = ["houses", "magnolia_st", "rose_st"]
     # story-specific fields follow:
     driver = None     # will be set by init()
 
-    def init(self, driver: Driver) -> List[str]:
-        """Called by the game driver when it is done with its initial initialization.
-        Returns the list of zones to be loaded next (in order)."""
+    def init(self, driver: Driver) -> None:
+        """Called by the game driver when it is done with its initial initialization."""
         self.driver = driver
-        return ["houses", "magnolia_st", "rose_st"]
 
     def init_player(self, player: Player) -> None:
         """

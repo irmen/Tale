@@ -116,11 +116,8 @@ class Driver(pubsub.Listener):
             except os.error:
                 pass
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
-        preload_zones = self.story.init(self)
-        self.zones = self.__load_zones(preload_zones)
-        if "zones" in sys.modules:
-            # slight hack to cope with scenario of multiple unit tests that may load different zones after each other
-            importlib.reload(sys.modules["zones"])
+        self.story.init(self)
+        self.zones = self.__load_zones(self.story.config.zones)
         self.story.config.startlocation_player = self.__lookup_location(self.story.config.startlocation_player)
         self.story.config.startlocation_wizard = self.__lookup_location(self.story.config.startlocation_wizard)
         if self.story.config.server_tick_method == TickMethod.COMMAND:
@@ -870,6 +867,8 @@ class Driver(pubsub.Listener):
 
     def __load_zones(self, zone_names: Sequence[str]) -> ModuleType:
         # Pre-load the provided zones (essentially, load the named modules from the zones package)
+        if not zone_names and "zones" not in sys.modules:
+            raise errors.StoryConfigError("story config doesn't provide any zones to load and hasn't loaded any zones itself")
         for zone in zone_names or []:
             try:
                 module = importlib.import_module("zones." + zone)

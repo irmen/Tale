@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import enum
 import datetime
 import distutils.version
-from typing import Optional, Sequence, Any
+from typing import Optional, Any, List
 from .errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
@@ -63,7 +63,8 @@ class StoryConfig:
         self.show_exits_in_look = True       # with the look command, also show exit descriptions automatically?
         self.license_file = None             # type: str # game license file, if applicable
         self.mud_host = None                 # type: str # for mud mode: hostname to bind the server on
-        self.mud_port = None                 # type: str # for mud mode: port number to bind the server on
+        self.mud_port = None                 # type: int # for mud mode: port number to bind the server on
+        self.zones = []                      # type: List[str]  # names of zone modules to load, in this order
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, StoryConfig) and vars(self) == vars(other)
@@ -73,10 +74,9 @@ class StoryBase:
     """base class for tale story classes."""
     config = StoryConfig()
 
-    def init(self, driver) -> Sequence[str]:
+    def init(self, driver) -> None:
         """
         Called by the game driver when it is done with its initial initialization.
-        Returns the zone names (in order) to be loaded next.
         """
         pass
 
