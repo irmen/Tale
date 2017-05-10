@@ -22,7 +22,7 @@ from tale.util import roll_dice
 from tale import mud_context
 
 
-print("\nLoading circle data files.")
+print("\nPre-loading circle data files.")
 mobs = get_mobs()
 print(len(mobs), "mobs loaded.")
 objs = get_objs()

@@ -140,6 +140,11 @@ class Driver(pubsub.Listener):
                 player_io = "gui"
             elif web:
                 player_io = "web"
+                print("starting '{0}'  v {1}".format(self.story.config.name, self.story.config.version))
+                if self.story.config.author_address:
+                    print("written by {0} - {1}".format(self.story.config.author, self.story.config.author_address))
+                else:
+                    print("written by", self.story.config.author)
             else:
                 player_io = "console"
             connection = self._connect_if_player(player_io, delay, wizard)
@@ -160,7 +165,7 @@ class Driver(pubsub.Listener):
             wsgi_thread.daemon = True
             wsgi_thread.start()
             self.__print_game_intro(None)
-            print("Web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
+            print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
             self.__startup_main_loop(None)
 
     def __startup_main_loop(self, conn: player.PlayerConnection) -> None:

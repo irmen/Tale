@@ -11,7 +11,6 @@ from typing import Optional
 from tale.story import *
 from tale.player import Player
 from tale.driver import Driver
-from zones import init_zones
 
 
 class Story(StoryBase):
@@ -44,7 +43,9 @@ class Story(StoryBase):
 
     def init(self, driver: Driver) -> None:
         """Called by the game driver when it is done with its initial initialization"""
+        print("Story initialization started by driver.")
         self.driver = driver
+        from zones import init_zones
         init_zones()
 
     def init_player(self, player: Player) -> None:
