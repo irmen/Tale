@@ -7,7 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import json
 import datetime
-from typing import Tuple, Dict, Any, List, Generator
+from collections import deque
+from typing import Tuple, Dict, Any, Generator, Deque
 from ..base import Item, Living
 from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
@@ -20,10 +21,11 @@ PostType = Dict[str, str]
 
 
 class BulletinBoard(Item):
+    max_num_posts = 20
+
     def init(self) -> None:
         super().init()
-        self.posts = []   # type: List[PostType]
-        self.max_num_posts = 20
+        self.posts = deque(maxlen=self.max_num_posts)  # type: Deque[PostType]
         self.readonly = False
         self.storage_file = None
         self.verbs = {
@@ -129,15 +131,14 @@ class BulletinBoard(Item):
             subject = "re: {subject}".format(**in_reply_to)
             subject = subject[:50]
             actor.tell("You're replying to the message '{subject}' by {author}, on {date}.".format(**in_reply_to))
-            text = ["(in reply to '{subject}' by {author} on {date})".format(**in_reply_to), "\n"]
+            text = "(in reply to '{subject}' by {author} on {date})\n\n".format(**in_reply_to)
         else:
             subject = yield "input", ("Give the subject of your message (max 50 chars):", self._subject_valid)
             subject = subject[:50]
-            text = []
+            text = ""
         actor.tell("Please type your message. It can span multiple lines, but can not be longer than 1000 characters. "
                    "Type an empty line or slash ('/') for a paragraph separator, type TWO dots ('..') to end the message.", end=True)
         actor.tell("\n")
-        text = ""     # XXX type error? overwrites text from above?
         while len(text) <= 1000:
             line = yield "input", None
             if line == "..":
@@ -148,18 +149,18 @@ class BulletinBoard(Item):
         text = text.strip()
         if text:
             actor.tell("\n")
-            actor.tell("<ul>Review your message:</>", end=True)
+            actor.tell("<ul>Review your message:</>")
+            actor.tell("\n")
             for paragraph in text.split("\n\n"):
                 actor.tell(paragraph, end=True)
-            if (yield "input", ("Post this message?", lang.yesno)):
+            if (yield "input", ("\nPost this message?", lang.yesno)):
                 post = {
                     "author": actor.name,
                     "date": datetime.datetime.now().date().isoformat(),
                     "subject": subject,
                     "text": text
                 }
-                self.posts.insert(0, post)
-                self.posts = self.posts[:self.max_num_posts]     # XXX deque?
+                self.posts.appendleft(post)
                 self.save()
                 actor.tell("\n")
                 actor.tell("You've added the message on top of the list on the %s." % self.name)
@@ -204,7 +205,7 @@ class BulletinBoard(Item):
             return
         try:
             data = json.loads(mud_context.driver.user_resources[self.storage_file].data.decode("UTF-8"))
-            self.posts = data["posts"][:self.max_num_posts]
+            self.posts = deque(data["posts"], maxlen=self.max_num_posts)
         except IOError:
             pass
 
@@ -215,7 +216,7 @@ class BulletinBoard(Item):
         data = {
             "board-name": self.name,
             "board-title": self.title,
-            "posts": self.posts
+            "posts": list(self.posts)
         }
         mud_context.driver.user_resources[self.storage_file] = json.dumps(data, indent=4, sort_keys=True).encode("UTF-8")
 
