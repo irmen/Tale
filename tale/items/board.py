@@ -27,7 +27,7 @@ class BulletinBoard(Item):
         super().init()
         self.posts = deque(maxlen=self.max_num_posts)  # type: Any[PostType]   # typing.Deque is absent in some python 3.5 versions...
         self.readonly = False
-        self.storage_file = None
+        self.storage_file = None  # type: str
         self.verbs = {
             "post": "Write a new message on the board.",
             "write": "Write a new message on the board.",

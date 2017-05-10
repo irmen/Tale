@@ -682,7 +682,8 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             elif container and container in player:
                 player.tell_object_location(player, item, container)
             else:
-                p("You see <item>%s</>." % lang.a(item.title))
+                if not item.description:
+                    p("You see <item>%s</>." % lang.a(item.title))
             if item.description:
                 p(item.description)
         try:

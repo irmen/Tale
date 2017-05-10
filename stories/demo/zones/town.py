@@ -8,9 +8,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from typing import Union, Optional
 from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
 from tale.player import Player
-from tale.errors import ActionRefused
+from tale.errors import ActionRefused, TaleError
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
-from tale.items.board import bulletinboard
+from tale.items.board import bulletinboard, BulletinBoard, PostType
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
@@ -39,7 +39,7 @@ paper.aliases = {"paper"}
 paper.short_description = "Last day's newspaper lies on the floor."
 
 # add a bulletin board to the town
-board = clone(bulletinboard)
+board = clone(bulletinboard)  # type: BulletinBoard
 board.posts = [
     {
         "author": "irmen",
@@ -188,6 +188,10 @@ class Computer(Item):
                + " There's also a small keyboard to type commands. " \
                + " On the side of the screen there's a large sticker with 'say hello' written on it."
 
+    @description.setter
+    def description(self, value: str):
+        raise TaleError("you cannot set the description of Computer because it is dynamic")
+
     def screen_text(self):
         txt = ["The screen of the computer reads:  \""]
         for door in (door1, door2, door3, door4):
@@ -303,7 +307,7 @@ class MagicGameEnd(Item):
     def notify_moved(self, source_container: Union[Location, Container, Living],
                      target_container: Union[Location, Container, Living], actor: Living) -> None:
         actor.tell_later("By touching it you immediately end the game!")
-        actor.story_completed()
+        actor.story_completed()      # XXX bug: when actor is not the Player but another living
 
 
 alley.insert(MagicGameEnd(), None)

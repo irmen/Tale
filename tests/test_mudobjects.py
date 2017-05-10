@@ -752,6 +752,13 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("rusty old key", item.title)
         self.assertEqual("a very small, old key that's rusted", item.description)
 
+    def test_extradesc(self):
+        item = Item("key", "some key")
+        item.extra_desc = {"alias1": "first alias desc", "foo": "bar"}
+        item.add_extradesc({"alias2", "alias3"}, "more description text")
+        self.assertEqual("first alias desc", item.extra_desc["alias1"])
+        self.assertEqual("more description text", item.extra_desc["alias3"])
+
     def test_dynamic_description_by_using_property(self):
         import time
 

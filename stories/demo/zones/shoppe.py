@@ -26,7 +26,7 @@ shopinfo.banks_money = True
 shopkeeper = Shopkeeper("Lucy", "f", short_description="Lucy, the shop owner, is looking happily at her newly arrived customer.")
 shopkeeper.money = 14000
 shop = Location("Curiosity Shoppe", "A weird little shop. It sells odd stuff.")
-shop.insert(shopkeeper, shop)
+shop.insert(shopkeeper, None)
 shop.add_exits([Exit(["door", "out"], "town.lane", "A fancy door provides access back to the lane outside.")])
 
 
@@ -40,8 +40,8 @@ gem3 = clone(gem)
 gem3.value = 9055
 shopkeeper.init_inventory([gem2, gem3, toothpick])
 shopkeeper.set_shop(shopinfo)
-shop.insert(clock, shop)
-shop.insert(paper, shop)
+shop.insert(clock, None)
+shop.insert(paper, None)
 lamp = Item("lamp", "rather small lamp")
 lamp.value = 600
 
@@ -73,5 +73,5 @@ lamp.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather 
                              " There is something weird going on with the cord though!")
 lamp.add_extradesc({"cord"}, "Even when the lamp doesn't move, the power cord keeps snaking around as if it were alive. How odd.")
 customer.insert(lamp, customer)
-shop.insert(customer, shop)
+shop.insert(customer, None)
 shop.get_wiretap().subscribe(customer)

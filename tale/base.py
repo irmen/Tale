@@ -129,6 +129,7 @@ class MudObject:
 
     @extra_desc.setter
     def extra_desc(self, value: Dict[str, str]) -> None:
+        assert isinstance(value, dict)
         self._extradesc = value
 
     def __init__(self, name: str, title: str=None, description: str=None, short_description: str=None) -> None:
@@ -162,9 +163,8 @@ class MudObject:
         self._short_description = short_description
         self._extradesc = {}   # maps keyword to description
 
-    def add_extradesc(self, keywords: Sequence[str], description: str) -> None:
-        """For the list of keywords, add the extra description text"""
-        assert isinstance(keywords, (set, tuple, list))
+    def add_extradesc(self, keywords: Set[str], description: str) -> None:
+        """For the set of keywords, add the extra description text"""
         for keyword in keywords:
             self._extradesc[keyword] = description
 
@@ -363,7 +363,7 @@ class Item(MudObject):
         return items[0] if items else None
 
 
-def clone(obj: Item) -> Item:
+def clone(obj: Item) -> Any:
     """Create a copy of an existing Item. Only when it has an empty inventory (to avoid problems)"""
     if isinstance(obj, Item):
         try:
