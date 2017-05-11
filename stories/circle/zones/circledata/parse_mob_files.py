@@ -7,22 +7,18 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 
 import pathlib
 import re
+from types import SimpleNamespace
+from typing import Dict
+
 
 __all__ = ["get_mobs"]
 
-mobs = {}
+
+mobs = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-class Mob:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<Mob #%d: %s>" % (self.vnum, self.shortdesc)
-
-
-def parse_mobs(mobfile):
+def parse_mobs(mobfile: pathlib.Path) -> None:
     with mobfile.open() as fp:
         content = [line.strip() for line in fp]
 
@@ -152,39 +148,40 @@ def parse_mobs(mobfile):
                                                     '13': 'punch/punches',
                                                     '14': 'stab/stabs'}[extendedMobArg['BareHandAttack']]
 
-            mob = Mob(vnum=int(vNumArg),
-                      alignment=int(alignmentArg),
-                      type=typeArg,
-                      level=int(levelArg),
-                      thac0=int(thacoArg),
-                      ac=int(acArg),
-                      maxhp_dice=maxhpArg,
-                      barehanddmg_dice=bareHandDmgArg,
-                      gold=int(goldArg),
-                      xp=int(xpArg),
-                      loadposition=loadArg,
-                      defaultposition=defaultPosArg,
-                      gender=sexArg,
-                      aliases=list(aliasArg),   # ordered, the first is the best
-                      shortdesc=shortDescArg.replace("\n", " ") or None,
-                      longdesc=longDescArg.replace("\n", " ") or None,
-                      detaileddesc=detailedDescArg.replace("\n", " ") or None,
-                      actions=set(actionAttribs),
-                      affection=set(affectAttribs),
-                      extended={k.lower(): v for k, v in extendedMobArg.items()}
-                      )
+            mob = SimpleNamespace(
+                vnum=int(vNumArg),
+                alignment=int(alignmentArg),
+                type=typeArg,
+                level=int(levelArg),
+                thac0=int(thacoArg),
+                ac=int(acArg),
+                maxhp_dice=maxhpArg,
+                barehanddmg_dice=bareHandDmgArg,
+                gold=int(goldArg),
+                xp=int(xpArg),
+                loadposition=loadArg,
+                defaultposition=defaultPosArg,
+                gender=sexArg,
+                aliases=list(aliasArg),   # ordered, the first is the best
+                shortdesc=shortDescArg.replace("\n", " ") or None,
+                longdesc=longDescArg.replace("\n", " ") or None,
+                detaileddesc=detailedDescArg.replace("\n", " ") or None,
+                actions=set(actionAttribs),
+                affection=set(affectAttribs),
+                extended={k.lower(): v for k, v in extendedMobArg.items()}
+                )
             mobs[mob.vnum] = mob
             readState = 'vNum'
 
 
-def parse_all():
+def parse_all() -> None:
     # xvfs = vfs.VirtualFileSystem(root_package="zones")
     datadir = pathlib.Path(__file__).parent / "world/mob"
     for file in datadir.glob("*.mob"):
         parse_mobs(file)
 
 
-def get_mobs():
+def get_mobs() -> Dict[int, SimpleNamespace]:
     if not mobs:
         parse_all()
         assert len(mobs) == 569

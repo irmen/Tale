@@ -6,9 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from tale.cmds.decorators import wizcmd, cmd
+from tale.driver import Commands
 
 
-def register_all(cmd_processor):
+def register_all(cmd_processor: Commands) -> None:
     cmd_processor.add("demo", do_demo, "wizard")
     cmd_processor.add("demo2", do_demo2)
     cmd_processor.add("score", do_score)

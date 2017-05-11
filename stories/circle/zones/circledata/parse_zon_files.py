@@ -7,32 +7,18 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 
 import pathlib
 import re
+from types import SimpleNamespace
+from typing import Dict
 
 
 __all__ = ["get_zones"]
 
 
-class Zone:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<Zone #%d: %s>" % (self.vnum, self.name)
-
-
-class MobRef:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<MobRef to #%d>" % self.vnum
-
-
-zones = {}
+zones = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(zonfile):
+def parse_file(zonfile: pathlib.Path) -> None:
     with zonfile.open() as fp:
         content = [line.strip() for line in fp]
 
@@ -121,7 +107,7 @@ def parse_file(zonfile):
                '17': 'held'}
     resetMap = {'0': 'never', '1': 'afterdeserted', '2': 'asap'}
 
-    zone = Zone(
+    zone = SimpleNamespace(
         vnum=int(vnumArg),
         name=zonenameArg,
         startroom=int(startroomArg),
@@ -133,7 +119,7 @@ def parse_file(zonfile):
         doors=[]
     )
     for m in allmobs:
-        mob = MobRef(
+        mob = SimpleNamespace(
             vnum=int(m["vnum"]),
             globalmax=int(m["max"]),
             room=int(m["room"]),
@@ -153,10 +139,10 @@ def parse_file(zonfile):
             "vnum": int(o["vnum"]),
             "globalmax": int(o["max"]),
             "room": int(o["room"]),
-            "contains": {}
+            "contains": {}   # maps vnum to maximum number of these
         }
         for c in o['contains']:
-            obj["contains"][int(c["vnum"])] = int(c["max"])
+            obj["contains"][int(c["vnum"])] = int(c["max"])         # type: ignore
         zone.objects.append(obj)
     for d in alldoors:
         zone.doors.append({
@@ -168,13 +154,13 @@ def parse_file(zonfile):
     zones[zone.vnum] = zone
 
 
-def parse_all():
+def parse_all() -> None:
     datadir = pathlib.Path(__file__).parent / "world/zon"
     for file in datadir.glob("*.zon"):
         parse_file(file)
 
 
-def get_zones():
+def get_zones() -> Dict[int, SimpleNamespace]:
     if not zones:
         parse_all()
         assert len(zones) == 30

@@ -7,23 +7,17 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 
 import pathlib
 import re
+from types import SimpleNamespace
+from typing import Dict
 
 __all__ = ["get_shops"]
 
 
-class Shop:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<Shop #%d>" % self.vnum
-
-
 extendedMobPat = re.compile('(.*?):(.*)')
-shops = {}
+shops = {}   # type: Dict[int, SimpleNamespace]
 
 
-def parse_file(shpfile):
+def parse_file(shpfile: pathlib.Path) -> None:
     with shpfile.open() as fp:
         content = fp.readlines()
 
@@ -143,7 +137,7 @@ def parse_file(shpfile):
             wontdealwithArg -= 1
             wontdealattr.add('good')
 
-        shop = Shop(
+        shop = SimpleNamespace(
             vnum=int(vNumArg),
             sellprofit=float(profitWhenSellingArg),
             buyprofit=float(profitWhenBuyingArg),
@@ -170,13 +164,13 @@ def parse_file(shpfile):
         shops[shop.vnum] = shop
 
 
-def parse_all():
+def parse_all() -> None:
     datadir = pathlib.Path(__file__).parent / "world/shp"
     for file in datadir.glob("*.shp"):
         parse_file(file)
 
 
-def get_shops():
+def get_shops() -> Dict[int, SimpleNamespace]:
     if not shops:
         parse_all()
         assert len(shops) == 46

@@ -88,6 +88,8 @@ class MudObject:
     Using extra descriptions, players could then see additional detail by typing
     ``look at wall.``  There can be an unlimited number of Extra Descriptions.
     """
+    # @todo add vnum?   (circle provides the number itself, otherwise assign one automatically?)
+    # @todo and add the vnum commands from circle as default commands in that case.
     subjective = "it"
     possessive = "its"
     objective = "it"

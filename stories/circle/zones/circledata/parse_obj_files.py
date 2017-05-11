@@ -7,23 +7,18 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 
 import pathlib
 import re
+from types import SimpleNamespace
+from typing import Dict, Any
+
 
 __all__ = ["get_objs"]
 
 
-class Obj:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<Obj #%d: %s>" % (self.vnum, self.shortdesc)
-
-
-objs = {}
+objs = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(objfile):
+def parse_file(objfile: pathlib.Path) -> None:
     with objfile.open() as fp:
         content = [line.strip() for line in fp]
 
@@ -293,7 +288,7 @@ def parse_file(objfile):
                             '35': 'remove curse', '34': 'prot from evil', '33': 'poison', '37': 'shocking grasp', '48': 'group heal',
                             '50': 'infravision'}
 
-            obj = Obj(
+            obj = SimpleNamespace(
                 vnum=int(vNumArg),
                 aliases=list(aliasArg),  # ordered, the first is the best
                 type=typeFlagArg,
@@ -309,10 +304,10 @@ def parse_file(objfile):
 
             if valueDefs[typeFlagArg] != [None, None, None, None]:
                 # import pdb; pdb.set_trace()
-                typespecificArg = {}
+                typespecificArg = {}    # type: Dict[str, Any]
                 for i in range(4):
-                    key = valueDefs[typeFlagArg][i]
-                    value = (value0Arg, value1Arg, value2Arg, value3Arg)[i]
+                    key = valueDefs[typeFlagArg][i]     # type: ignore
+                    value = (value0Arg, value1Arg, value2Arg, value3Arg)[i]     # type: ignore
                     if key is not None:
                         if key == 'damagetype':
                             value = damagetypeMap[value]
@@ -356,7 +351,7 @@ def parse_file(objfile):
 
             obj.extradesc = []
             for arg in extendedArg:
-                desc = {}
+                desc = {}  # type: Dict[str, Any]
                 desc["keywords"] = set(arg[0])
                 desc["text"] = arg[1].replace("\n", " ")
                 obj.extradesc.append(desc)
@@ -368,13 +363,13 @@ def parse_file(objfile):
             readState = 'vNum'
 
 
-def parse_all():
+def parse_all() -> None:
     datadir = pathlib.Path(__file__).parent / "world/obj"
     for file in datadir.glob("*.obj"):
         parse_file(file)
 
 
-def get_objs():
+def get_objs() -> Dict[int, SimpleNamespace]:
     if not objs:
         parse_all()
         assert len(objs) == 678

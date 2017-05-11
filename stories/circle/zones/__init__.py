@@ -7,7 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import re
 import random
-from typing import Dict, Set
+from types import SimpleNamespace
+from typing import Dict, Set, List, Type, no_type_check
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
@@ -18,7 +19,7 @@ from tale.items.basic import *
 from tale.items.board import BulletinBoard
 from tale.shop import ShopBehavior, Shopkeeper
 from tale.errors import LocationIntegrityError
-from tale.util import roll_dice
+from tale.util import roll_dice, Context
 from tale import mud_context
 
 
@@ -43,10 +44,10 @@ converted_shops = {}     # type: Dict[int, ShopBehavior]  # cache for the shop d
 
 class CircleMob(Living):
     """Monster NPC having tailored behavior to suit circle data"""
-    def init(self):
+    def init(self) -> None:
         super().init()
 
-    def do_wander(self, ctx):
+    def do_wander(self, ctx: Context) -> None:
         # let the mob wander randomly
         direction = self.select_random_move()
         if direction:
@@ -54,7 +55,7 @@ class CircleMob(Living):
         ctx.driver.defer(random.randint(20, 60), self.do_wander)
 
 
-def make_location(vnum):
+def make_location(vnum: int) -> Location:
     """
     Get a Tale location object for the given circle room vnum.
     This performs an on-demand conversion of the circle room data to Tale.
@@ -64,7 +65,7 @@ def make_location(vnum):
     except KeyError:
         c_room = rooms[vnum]
         loc = Location(c_room.name, c_room.desc)
-        loc.vnum = vnum  # keep the circle vnum
+        loc.vnum = vnum   # type: ignore  # keep the circle vnum
         for ed in c_room.extradesc:
             loc.add_extradesc(ed["keywords"], ed["text"])
         converted_rooms[vnum] = loc
@@ -94,22 +95,24 @@ def make_location(vnum):
         return loc
 
 
-def make_exit(c_exit):
+def make_exit(c_exit: SimpleNamespace) -> Exit:
     """Create an instance of a door or exit for the given circle exit"""
     if c_exit.type in ("normal", "pickproof"):
-        xt = Door(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
+        door = Door(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
+        door.aliases |= c_exit.keywords
+        return door
     else:
-        xt = Exit(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
-    xt.aliases |= c_exit.keywords
-    return xt
+        exit = Exit(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
+        exit.aliases |= c_exit.keywords
+        return exit
 
 
-def make_mob(vnum, mob_class=CircleMob):
+def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
     """Create an instance of an item for the given vnum"""
     c_mob = mobs[vnum]
-    aliases = list(c_mob.aliases)
-    name = aliases[0]
-    aliases = set(aliases[1:])
+    aliases_list = list(c_mob.aliases)  # type: List[str]
+    name = aliases_list[0]
+    aliases = set(aliases_list[1:])   # type: Set[str]
     title = c_mob.shortdesc
     if title.startswith("the ") or title.startswith("The "):
         title = title[4:]
@@ -153,7 +156,8 @@ circle_bulletin_boards = {
 }   # the four bulletin boards  @todo board levels, readonly, etc.
 
 
-def make_item(vnum):
+@no_type_check
+def make_item(vnum: int) -> Item:
     """Create an instance of an item for the given vnum"""
     c_obj = objs[vnum]
     aliases = list(c_obj.aliases)
@@ -263,14 +267,14 @@ def make_item(vnum):
     return item
 
 
-def make_shop(vnum):
+def make_shop(vnum: int) -> ShopBehavior:
     """Create an instance of a shop given by the vnum"""
     try:
         return converted_shops[vnum]
     except KeyError:
         c_shop = shops[vnum]
         shop = ShopBehavior()
-        shop.vnum = c_shop.vnum  # keep the vnum
+        shop.vnum = c_shop.vnum  # type: ignore  # keep the vnum
         shop.shopkeeper_vnum = c_shop.shopkeeper   # keep the vnum of the shopkeeper
         shop.banks_money = c_shop.banks
         shop.will_fight = c_shop.fights
@@ -307,7 +311,7 @@ def make_shop(vnum):
         return shop
 
 
-def init_zones():
+def init_zones() -> None:
     """Populate the zones and initialize inventories and door states. Set up shops."""
     print("Initializing zones.")
     num_shops = num_mobs = num_items = 0
@@ -323,7 +327,7 @@ def init_zones():
                 assert len(shop_vnums) == 1
                 shop_vnum = shop_vnums[0]
                 shopdata = make_shop(shop_vnum)
-                mob.shop = shopdata
+                mob.shop = shopdata  # type: ignore
                 num_shops += 1
             else:
                 mob = make_mob(mobref.vnum)
@@ -340,10 +344,10 @@ def init_zones():
                 mob.init_inventory(inventory)
             if mobref.vnum in all_shopkeepers:
                 # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
-                if mob.inventory_size < len(mob.shop.forsale):
+                if mob.inventory_size < len(mob.shop.forsale):   # type: ignore
                     raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" %
-                                     (mobref.vnum, mob.shop.vnum))
-                for item in mob.shop.forsale:
+                                     (mobref.vnum, mob.shop.vnum))   # type: ignore
+                for item in mob.shop.forsale:  # type: ignore
                     if not any(i for i in mob.inventory if i.title == item.title):
                         raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" %
                                          (item.vnum, item.title, mobref.vnum))

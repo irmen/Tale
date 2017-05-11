@@ -6,33 +6,22 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 """
 
 import pathlib
+from types import SimpleNamespace
+from typing import Dict
 
 
 __all__ = ["get_rooms"]
 
 
-class Room:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def __repr__(self):
-        return "<Room #%d: %s>" % (self.vnum, self.name)
+rooms = {}  # type: Dict[int, SimpleNamespace]
 
 
-class Exit:
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-
-rooms = {}
-
-
-def parse_file(wldfile):
+def parse_file(wldfile: pathlib.Path) -> None:
     with wldfile.open() as fp:
         content = [line.strip() for line in fp]
 
     readState = 'vNum'
-    descArg = []
+    descArg = ''
     lineNum = 0
 
     while lineNum < len(content):
@@ -120,7 +109,7 @@ def parse_file(wldfile):
             if 'o' in bitVectorArg: attribs.append('olc')
             if 'p' in bitVectorArg: attribs.append('bfs_mark')
 
-            room = Room(
+            room = SimpleNamespace(
                 vnum=int(vNumArg),
                 name=nameArg,
                 type=sectorTypeArg,
@@ -131,7 +120,7 @@ def parse_file(wldfile):
                 extradesc=[]
             )
             for exitArg in exitsArg:
-                xt = Exit(
+                xt = SimpleNamespace(
                     direction=exitArg["direction"],
                     type=exitArg["type"],
                     key=int(exitArg["keynum"]) if exitArg["keynum"] else None,
@@ -145,18 +134,18 @@ def parse_file(wldfile):
                 room.extradesc.append(desc)
 
             rooms[room.vnum] = room
-            descArg = []
+            descArg = ''
             readState = 'vNum'
             lineNum += 1
 
 
-def parse_all():
+def parse_all() -> None:
     datadir = pathlib.Path(__file__).parent / "world/wld"
     for file in datadir.glob("*.wld"):
         parse_file(file)
 
 
-def get_rooms():
+def get_rooms() -> Dict[int, SimpleNamespace]:
     if not rooms:
         parse_all()
         assert len(rooms) == 1878
