@@ -7,7 +7,8 @@ rose street north, crossing, rose street south
 butcher, storage room
 """
 
-from tale.base import Location, Exit, Door, Key, _limbo
+from typing import Union, Optional
+from tale.base import Location, Exit, Door, Key, _limbo, Living, Item
 from tale.driver import Driver
 import zones.magnolia_st
 
@@ -18,16 +19,16 @@ def init(driver: Driver) -> None:
 
 
 class GameEnd(Location):
-    def init(self):
+    def init(self) -> None:
         pass
 
-    def insert(self, obj, actor):
+    def insert(self, obj: Union[Living, Item], actor: Optional[Living]) -> None:
         # Normally you would use notify_player_arrived() to trigger an action.
         # but for the game ending, we require an immediate response.
         # So instead we hook into the direct arrival of something in this location.
         super().insert(obj, actor)
         try:
-            obj.story_completed()   # player arrived! Great Success!
+            obj.story_completed()   # player arrived! Great Success!    # XXX type error: what if obj is not player at all
         except AttributeError:
             pass
 
