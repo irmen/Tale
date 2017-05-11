@@ -7,8 +7,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import sys
 import io
-from tale.tio import console_io, styleaware_wrapper, iobase, ansi_codes
+from tale.tio import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
+import tale.tio.colorama_patched as colorama
 
 
 class TestConsoleIo(unittest.TestCase):
@@ -65,12 +66,12 @@ class TestConsoleIo(unittest.TestCase):
 
 class TestAnsi(unittest.TestCase):
     def testAnsiCodesDefined(self):
-        self.assertEqual("\033[5m", ansi_codes.Style.BLINK)
-        self.assertEqual("\033[7m", ansi_codes.Style.REVERSEVID)
-        self.assertEqual("\033[22m", ansi_codes.Style.NORMAL)
-        self.assertEqual(ansi_codes.Style.NORMAL, console_io.colorama.Style.NORMAL)
-        self.assertEqual(ansi_codes.Style.REVERSEVID, console_io.colorama.Style.REVERSEVID)
-        self.assertEqual(ansi_codes.Style.BLINK, console_io.colorama.Style.BLINK)
+        self.assertEqual("\033[5m", colorama.Style.BLINK)
+        self.assertEqual("\033[7m", colorama.Style.REVERSEVID)
+        self.assertEqual("\033[22m", colorama.Style.NORMAL)
+        self.assertEqual(colorama.Style.NORMAL, console_io.colorama.Style.NORMAL)
+        self.assertEqual(colorama.Style.REVERSEVID, console_io.colorama.Style.REVERSEVID)
+        self.assertEqual(colorama.Style.BLINK, console_io.colorama.Style.BLINK)
 
 
 class TextWrapper(unittest.TestCase):
