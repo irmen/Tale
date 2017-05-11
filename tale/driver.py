@@ -5,11 +5,12 @@ Mud driver (server).
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import collections
-import datetime
 import sys
 import time
 import os
+import pathlib
+import collections
+import datetime
 import heapq
 import pickle
 import inspect
@@ -65,13 +66,14 @@ class Driver(pubsub.Listener):
     def start(self, game: str, mode: GameMode=GameMode.IF, gui: bool=False, web: bool=False,
               wizard: bool=False, delay: int=DEFAULT_SCREEN_DELAY) -> None:
         """Start the driver from a parsed set of arguments"""
-        if os.path.isdir(game):
+        gamepath = pathlib.Path(game)
+        if gamepath.is_dir():
             # cd into the game directory (we can import it then), and load its config and zones
-            os.chdir(game)
+            os.chdir(str(gamepath))
             sys.path.insert(0, os.curdir)
-        elif os.path.isfile(game):
+        elif gamepath.is_file():
             # the game argument points to a file, assume it is a zipfile, add it to the import path
-            sys.path.insert(0, game)
+            sys.path.insert(0, str(gamepath))
         else:
             raise IOError("Cannot find specified game")
         mode = GameMode(mode)
@@ -99,8 +101,8 @@ class Driver(pubsub.Listener):
         # check for existence of cmds package in the story root
         loader = pkgutil.get_loader("cmds")
         if loader:
-            ld = os.path.normcase(os.path.abspath(os.path.join(os.path.dirname(loader.get_filename()), os.pardir)))
-            sd = os.path.normcase(os.path.abspath(os.path.dirname(inspect.getabsfile(story))))
+            ld = pathlib.Path(loader.get_filename()).parent.parent.resolve()
+            sd = pathlib.Path(inspect.getabsfile(story)).parent
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                 import cmds as story_cmds
                 story_cmds.register_all(self.commands)
@@ -109,12 +111,9 @@ class Driver(pubsub.Listener):
         self.moneyfmt = None
         if self.story.config.money_type != MoneyType.NOTHING:
             self.moneyfmt = util.MoneyFormatter(self.story.config.money_type)
-        user_data_dir = appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.story.config.name), "Razorvine", roaming=True)
-        if not os.path.isdir(user_data_dir):
-            try:
-                os.makedirs(user_data_dir, mode=0o700)
-            except os.error:
-                pass
+        user_data_dir = pathlib.Path(appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.story.config.name),
+                                                           "Razorvine", roaming=True))
+        user_data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
         self.zones = self.__load_zones(self.story.config.zones)

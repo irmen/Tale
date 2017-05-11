@@ -5,9 +5,8 @@ Based on code by Al Sweigart;
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import os
+import pathlib
 import re
-import io
 
 
 __all__ = ["get_zones"]
@@ -33,8 +32,8 @@ zones = {}
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(zonFile):
-    with io.open(zonFile) as fp:
+def parse_file(zonfile):
+    with zonfile.open() as fp:
         content = [line.strip() for line in fp]
 
     lineNum = 0
@@ -170,11 +169,9 @@ def parse_file(zonFile):
 
 
 def parse_all():
-    datadir = os.path.join(os.path.dirname(__file__), "world/zon")
-    for filename in os.listdir(datadir):
-        if not filename.endswith('.zon'):
-            continue
-        parse_file(os.path.join(datadir, filename))
+    datadir = pathlib.Path(__file__).parent / "world/zon"
+    for file in datadir.glob("*.zon"):
+        parse_file(file)
 
 
 def get_zones():

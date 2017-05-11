@@ -5,8 +5,7 @@ Based on code by Al Sweigart;
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import os
-import io
+import pathlib
 
 
 __all__ = ["get_rooms"]
@@ -28,8 +27,8 @@ class Exit:
 rooms = {}
 
 
-def parse_file(wldFile):
-    with io.open(wldFile) as fp:
+def parse_file(wldfile):
+    with wldfile.open() as fp:
         content = [line.strip() for line in fp]
 
     readState = 'vNum'
@@ -152,11 +151,9 @@ def parse_file(wldFile):
 
 
 def parse_all():
-    datadir = os.path.join(os.path.dirname(__file__), "world/wld")
-    for filename in os.listdir(datadir):
-        if not filename.endswith('.wld'):
-            continue
-        parse_file(os.path.join(datadir, filename))
+    datadir = pathlib.Path(__file__).parent / "world/wld"
+    for file in datadir.glob("*.wld"):
+        parse_file(file)
 
 
 def get_rooms():

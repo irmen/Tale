@@ -4,9 +4,9 @@ Unit tests for demo story
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import unittest
-import os
 import sys
+import pathlib
+import unittest
 import tale
 import tale.verbdefs
 from tale import mud_context
@@ -17,7 +17,7 @@ from tests.supportstuff import TestDriver
 class StoryCaseBase:
     def setUp(self):
         self.verbs = tale.verbdefs.VERBS.copy()
-        sys.path.insert(0, self.directory)
+        sys.path.insert(0, str(self.directory))
         mud_context.driver = TestDriver()
         mud_context.config = StoryConfig()
 
@@ -32,7 +32,7 @@ class StoryCaseBase:
 
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
-    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/zed_is_me"))
+    directory = (pathlib.Path(tale.__file__).parent / "../stories/zed_is_me").resolve()  # XXX
 
     def test_story(self):
         import story
@@ -49,7 +49,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = os.path.abspath(os.path.join(os.path.dirname(tale.__file__), "../stories/demo"))
+    directory = (pathlib.Path(tale.__file__).parent / "../stories/demo").resolve()  # XXX
 
     def test_story(self):
         import story
@@ -64,7 +64,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = "demo-story-dummy-path"
+    directory = pathlib.Path("demo-story-dummy-path")
 
     def test_story_verify(self):
         s = StoryBase()

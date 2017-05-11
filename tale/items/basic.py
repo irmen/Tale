@@ -172,7 +172,7 @@ class Scroll(Item):
 
     def read(self, actor: Living) -> None:
         actor.tell("The %s reads:" % self.title, end=True)
-        actor.tell("It contains the following spells: "+str(self.spells))   # @todo spell descriptions
+        actor.tell("It contains the following spells: " + str(self.spells))   # @todo spell descriptions
 
 
 class MagicItem(Weapon):

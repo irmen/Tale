@@ -38,7 +38,7 @@ class Resource:
         return self.data[item]
 
 
-class VirtualFileSystem:
+class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     """
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
     If not readonly, you can write data as well. The API is loosely based on a dict.

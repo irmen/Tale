@@ -5,10 +5,10 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import os
-import tempfile
 import sys
 import time
+import pathlib
+import tempfile
 import unittest
 from io import StringIO
 import tale
@@ -703,9 +703,9 @@ class TestMudAccounts(unittest.TestCase):
             accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
 
     def test_dbcreate(self):
-        dbfile = os.path.join(tempfile.gettempdir(), "tale_test_accdb_" + str(time.time()) + ".sqlite")
+        dbfile = pathlib.Path(tempfile.gettempdir()) / "tale_test_accdb_{0:f}.sqlite".format(time.time())
         try:
-            accounts = MudAccounts(dbfile)
+            accounts = MudAccounts(str(dbfile))
             stats = Stats.from_race("elf", gender='f')
             account = accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
             self.assertEqual(60.0, account.stats.weight)
@@ -722,7 +722,7 @@ class TestMudAccounts(unittest.TestCase):
             self.assertEqual(races.BodySize.HUMAN_SIZED, account.stats.size)
             self.assertEqual("Edhellen", account.stats.language)
         finally:
-            os.remove(dbfile)
+            dbfile.unlink()
 
 
 class WrappedConsoleIO(ConsoleIo):

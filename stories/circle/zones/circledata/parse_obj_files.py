@@ -5,9 +5,8 @@ Based on code by Al Sweigart;
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import os
+import pathlib
 import re
-import io
 
 __all__ = ["get_objs"]
 
@@ -24,8 +23,8 @@ objs = {}
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(objFile):
-    with io.open(objFile) as fp:
+def parse_file(objfile):
+    with objfile.open() as fp:
         content = [line.strip() for line in fp]
 
     readState = 'vNum'
@@ -370,11 +369,9 @@ def parse_file(objFile):
 
 
 def parse_all():
-    datadir = os.path.join(os.path.dirname(__file__), "world/obj")
-    for filename in os.listdir(datadir):
-        if not filename.endswith('.obj'):
-            continue
-        parse_file(os.path.join(datadir, filename))
+    datadir = pathlib.Path(__file__).parent / "world/obj"
+    for file in datadir.glob("*.obj"):
+        parse_file(file)
 
 
 def get_objs():

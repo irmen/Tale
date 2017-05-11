@@ -5,9 +5,8 @@ Based on code by Al Sweigart;
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import os
+import pathlib
 import re
-import io
 
 __all__ = ["get_shops"]
 
@@ -24,8 +23,8 @@ extendedMobPat = re.compile('(.*?):(.*)')
 shops = {}
 
 
-def parse_file(shpFile):
-    with io.open(shpFile) as fp:
+def parse_file(shpfile):
+    with shpfile.open() as fp:
         content = fp.readlines()
 
     content = [line.strip() for line in content][1:]  # skip the first "CircleMUD v3.0 Shop File~" line
@@ -172,11 +171,9 @@ def parse_file(shpFile):
 
 
 def parse_all():
-    datadir = os.path.join(os.path.dirname(__file__), "world/shp")
-    for filename in os.listdir(datadir):
-        if not filename.endswith('.shp'):
-            continue
-        parse_file(os.path.join(datadir, filename))
+    datadir = pathlib.Path(__file__).parent / "world/shp"
+    for file in datadir.glob("*.shp"):
+        parse_file(file)
 
 
 def get_shops():

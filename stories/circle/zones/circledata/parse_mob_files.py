@@ -5,9 +5,8 @@ Based on code by Al Sweigart;
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import os
+import pathlib
 import re
-import io
 
 __all__ = ["get_mobs"]
 
@@ -23,8 +22,8 @@ class Mob:
         return "<Mob #%d: %s>" % (self.vnum, self.shortdesc)
 
 
-def parse_mobs(mobFile):
-    with io.open(mobFile) as fp:
+def parse_mobs(mobfile):
+    with mobfile.open() as fp:
         content = [line.strip() for line in fp]
 
     readState = 'vNum'
@@ -180,11 +179,9 @@ def parse_mobs(mobFile):
 
 def parse_all():
     # xvfs = vfs.VirtualFileSystem(root_package="zones")
-    datadir = os.path.join(os.path.dirname(__file__), "world/mob")
-    for mobFile in os.listdir(datadir):
-        if not mobFile.endswith('.mob'):
-            continue
-        parse_mobs(os.path.join(datadir, mobFile))
+    datadir = pathlib.Path(__file__).parent / "world/mob"
+    for file in datadir.glob("*.mob"):
+        parse_mobs(file)
 
 
 def get_mobs():

@@ -186,7 +186,7 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(IOError):
             _ = vfs["test_doesnt_exist_999.txt"]
         with self.assertRaises(VfsError):
-            _ = VirtualFileSystem(root_path="@@@does/not/exist.foo@@@")
+            _ = VirtualFileSystem(root_path="/@@@does_not_exist.foo@@@")
         with self.assertRaises(VfsError):
             _ = VirtualFileSystem(root_package="non.existing.package.name")
         with self.assertRaises(VfsError):
