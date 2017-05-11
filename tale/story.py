@@ -10,6 +10,8 @@ import datetime
 import distutils.version
 from typing import Optional, Any, List
 from .errors import StoryConfigError
+from . import __version__ as tale_version_str
+
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
 
@@ -128,7 +130,6 @@ class StoryBase:
             raise StoryConfigError("Story's config money_type is of invalid type")
         if type(self.config.server_tick_method) is not TickMethod:
             raise StoryConfigError("Story's config server_tick_method is of invalid type")
-        from tale import __version__ as tale_version_str
         tale_version = distutils.version.LooseVersion(tale_version_str)
         tale_version_required = distutils.version.LooseVersion(self.config.requires_tale)
         if tale_version < tale_version_required:

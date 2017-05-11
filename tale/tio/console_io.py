@@ -8,9 +8,11 @@ import sys
 import os
 import signal
 import threading
-from typing import Iterable, Tuple, Any, Optional
+from typing import Iterable, Tuple, Any, Optional, List, Union
 from . import styleaware_wrapper, iobase
 from . import colorama_patched as colorama
+from ..player import PlayerConnection, Player
+from ..driver import Driver
 colorama.init()
 assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (0.3.6+)"
 
@@ -44,7 +46,7 @@ class ConsoleIo(iobase.IoAdapterBase):
     """
     I/O adapter for the text-console (standard input/standard output).
     """
-    def __init__(self, player_connection):
+    def __init__(self, player_connection: PlayerConnection) -> None:
         super().__init__(player_connection)
         try:
             # try to output a unicode character such as smartypants uses for nicer formatting
@@ -59,7 +61,7 @@ class ConsoleIo(iobase.IoAdapterBase):
     def __repr__(self):
         return "<ConsoleIo @ 0x%x, local console, pid %d>" % (id(self), os.getpid())
 
-    def singleplayer_mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         """Main event loop for the console I/O adapter for single player mode"""
         while not self.stop_main_loop:
             # Input a single line of text by the player. It is stored in the internal
@@ -82,13 +84,13 @@ class ConsoleIo(iobase.IoAdapterBase):
             except EOFError:
                 pass
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         if unpause:
             self.input_not_paused.set()
         else:
             self.input_not_paused.clear()
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         """Clear the screen"""
         if os.name == "nt":
             os.system("cls")
@@ -99,7 +101,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         else:
             print("\n" * 10)
 
-    def install_tab_completion(self, driver):
+    def install_tab_completion(self, driver: Driver) -> None:
         """Install tab completion using readline, if available"""
         if os.name == "nt":
             # pyreadline on windows behaves weird and screws up the output. So disable by default.
@@ -117,7 +119,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             else:
                 readline.parse_and_bind("tab: complete")
 
-    def abort_all_input(self, player):
+    def abort_all_input(self, player: Player) -> None:
         """abort any blocking input, if at all possible"""
         # This requires some drastic measures unfortunately.
         # The main thread is stuck in a blocking input (reading from stdin)
@@ -150,25 +152,25 @@ class ConsoleIo(iobase.IoAdapterBase):
             output.append(txt)
         return self.smartquotes("".join(output))
 
-    def output(self, *lines):
+    def output(self, *lines: str) -> None:
         """Write some text to the screen. Takes care of style tags that are embedded."""
         super().output(*lines)
         for line in lines:
             print(self._apply_style(line, self.do_styles))
         sys.stdout.flush()
 
-    def output_no_newline(self, text):
+    def output_no_newline(self, text: str) -> None:
         """Like output, but just writes a single line, without end-of-line."""
         super().output_no_newline(text)
         print(self._apply_style(text, self.do_styles), end="")
         sys.stdout.flush()
 
-    def write_input_prompt(self):
+    def write_input_prompt(self) -> None:
         """write the input prompt '>>'"""
         print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
         sys.stdout.flush()
 
-    def break_pressed(self):
+    def break_pressed(self) -> None:
         """do something when the player types ctrl-C (break)"""
         if threading.current_thread().name != "MainThread":
             # ony trigger the ^C handling if we're running in the main thread,
@@ -181,7 +183,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         print(self._apply_style("\n* break: Use <quit> if you want to quit.", self.do_styles))
         sys.stdout.flush()
 
-    def _apply_style(self, line, do_styles):
+    def _apply_style(self, line: str, do_styles: bool) -> str:
         """Convert style tags to ansi escape sequences suitable for console text output"""
         if "<" not in line:
             return line
@@ -190,25 +192,25 @@ class ConsoleIo(iobase.IoAdapterBase):
                 line = line.replace("<%s>" % tag, replacement)
             return line
         else:
-            return iobase.strip_text_styles(line)
+            return iobase.strip_text_styles(line)        # XXX type error list vs single line??
 
 
 class ReadlineTabCompleter:
     """
     Class used to provide tab-completion on the command line using readline.
     """
-    def __init__(self, driver, io):
+    def __init__(self, driver: Driver, io: ConsoleIo) -> None:
         self.driver = driver
         self.io = io
-        self.candidates = []
+        self.candidates = []   # type: List[str]
         self.prefix = None
 
-    def complete(self, prefix, index=None):
+    def complete(self, prefix: str, index: int=None) -> Union[Optional[str], List[str]]:        # XXX strange return type
         if not prefix:
-            return
+            return None
         if prefix != self.prefix:
             # new prefix, recalculate candidates
-            self.candidates = self.io.tab_complete(prefix, self.driver)
+            self.candidates = list(self.io.tab_complete(prefix, self.driver))
         try:
             if index is None:
                 return self.candidates

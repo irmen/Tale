@@ -726,7 +726,7 @@ class TestMudAccounts(unittest.TestCase):
 
 
 class WrappedConsoleIO(ConsoleIo):
-    def __init__(self, connection):
+    def __init__(self, connection: PlayerConnection) -> None:
         super().__init__(connection)
 
     def __enter__(self):

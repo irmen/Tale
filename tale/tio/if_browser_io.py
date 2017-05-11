@@ -11,9 +11,11 @@ from html import escape as html_escape
 from urllib.parse import parse_qs
 from hashlib import md5
 from email.utils import formatdate, parsedate
-from typing import Iterable, Tuple, Any, Optional
+from typing import Iterable, Tuple, Any, Optional, Dict, Union, Sequence, Callable
 from . import iobase
 from . import vfs
+from ..player import PlayerConnection
+from ..driver import Driver
 from .styleaware_wrapper import tag_split_re
 from .. import __version__ as tale_version_str
 
@@ -38,7 +40,7 @@ style_tags_html = {
 }
 
 
-def singlyfy_parameters(parameters):
+def singlyfy_parameters(parameters: Dict[str, Union[str, Sequence[str]]]) -> Dict[str, Union[str, Sequence[str]]]:
     """
     Makes a cgi-parsed parameter dictionary into a dict where the values that
     are just a list of a single value, are converted to just that single value.
@@ -56,7 +58,7 @@ class HttpIo(iobase.IoAdapterBase):
     This doubles as a wsgi app and runs as a web server using wsgiref.
     This way it is a simple call for the driver, it starts everything that is needed.
     """
-    def __init__(self, player_connection, wsgi_server):
+    def __init__(self, player_connection: PlayerConnection, wsgi_server: WSGIServer) -> None:
         super().__init__(player_connection)
         self.wsgi_server = wsgi_server
         self.html_to_browser = []     # the lines that need to be displayed in the player's browser
@@ -65,7 +67,7 @@ class HttpIo(iobase.IoAdapterBase):
     def __repr__(self):
         return "<HttpIo @ 0x%x, port %d>" % (id(self), self.port)
 
-    def singleplayer_mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         """mainloop for the web browser interface for single player mode"""
         import webbrowser
         from threading import Thread
@@ -78,10 +80,10 @@ class HttpIo(iobase.IoAdapterBase):
             self.wsgi_server.handle_request()
         print("Game shutting down.")
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         pass
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         self.html_special.append("clear")
 
     def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
@@ -95,19 +97,19 @@ class HttpIo(iobase.IoAdapterBase):
                 self.html_to_browser.append("<pre>" + text + "</pre>\n")
         return None    # the output is pushed to the browser via a buffer, rather than printed to a screen
 
-    def output(self, *lines):
+    def output(self, *lines: str) -> None:
         super().output(*lines)
         for line in lines:
             self.output_no_newline(line)
 
-    def output_no_newline(self, text):
+    def output_no_newline(self, text: str) -> None:
         super().output_no_newline(text)
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
         self.html_to_browser.append("<p>" + text + "</p>\n")
 
-    def convert_to_html(self, line):
+    def convert_to_html(self, line: str) -> str:
         """Convert style tags to html"""
         chunks = tag_split_re.split(line)
         if len(chunks) == 1:
@@ -147,10 +149,10 @@ class TaleWsgiAppBase:
     Generic wsgi functionality that is not tied to a particular
     single or multiplayer web server.
     """
-    def __init__(self, driver):
+    def __init__(self, driver: Driver) -> None:
         self.driver = driver
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Dict[str, str], start_response: Callable) -> Iterable[str]:
         method = environ.get("REQUEST_METHOD")
         path = environ.get('PATH_INFO', '').lstrip('/')
         if not path:
@@ -171,7 +173,7 @@ class TaleWsgiAppBase:
                 return self.wsgi_invalid_request(start_response)
         return self.wsgi_not_found(start_response)
 
-    def wsgi_route(self, environ, path, parameters, start_response):
+    def wsgi_route(self, environ: Dict[str, str], path: str, parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         if not path or path == "start":
             return self.wsgi_handle_start(environ, parameters, start_response)
         elif path == "about":
@@ -190,37 +192,37 @@ class TaleWsgiAppBase:
             return self.wsgi_handle_quit(environ, parameters, start_response)
         return self.wsgi_not_found(start_response)
 
-    def wsgi_invalid_request(self, start_response):
+    def wsgi_invalid_request(self, start_response: Callable) -> Iterable[str]:
         """Called if invalid http method."""
         start_response('405 Method Not Allowed', [('Content-Type', 'text/plain')])
         return [b'Error 405: Method Not Allowed']
 
-    def wsgi_not_found(self, start_response):
+    def wsgi_not_found(self, start_response: Callable) -> Iterable[str]:
         """Called if Url not found."""
         start_response('404 Not Found', [('Content-Type', 'text/plain')])
         return [b'Error 404: Not Found']
 
-    def wsgi_redirect(self, start_response, target):
+    def wsgi_redirect(self, start_response: Callable, target: str) -> Iterable[str]:
         """Called to do a redirect"""
         start_response('302 Found', [('Location', target)])
         return []
 
-    def wsgi_redirect_other(self, start_response, target):
+    def wsgi_redirect_other(self, start_response: Callable, target: str) -> Iterable[str]:
         """Called to do a redirect see-other"""
         start_response('303 See Other', [('Location', target)])
         return []
 
-    def wsgi_not_modified(self, start_response):
+    def wsgi_not_modified(self, start_response: Callable) -> Iterable[str]:
         """Called to signal that a resource wasn't modified"""
         start_response('304 Not Modified', [])
         return []
 
-    def wsgi_internal_server_error(self, start_response, message=""):
+    def wsgi_internal_server_error(self, start_response: Callable, message: str="") -> Iterable[str]:
         """Called when an internal server error occurred"""
         start_response('500 Internal server error', [])
         return [message.encode("utf-8")]
 
-    def wsgi_handle_start(self, environ, parameters, start_response):
+    def wsgi_handle_start(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         # start page / titlepage
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         resource = vfs.internal_resources["web/index.html"]
@@ -236,7 +238,7 @@ class TaleWsgiAppBase:
                                    story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
-    def wsgi_handle_story(self, environ, parameters, start_response):
+    def wsgi_handle_story(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         headers = [('Content-Type', 'text/html; charset=utf-8')]
         resource = vfs.internal_resources["web/story.html"]
         etag = self.etag(id(self), time.mktime(self.driver.server_started.timetuple()), resource.mtime, "story")
@@ -251,7 +253,7 @@ class TaleWsgiAppBase:
                                    story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
-    def wsgi_handle_text(self, environ, parameters, start_response):
+    def wsgi_handle_text(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
@@ -269,7 +271,7 @@ class TaleWsgiAppBase:
             response["special"] = special
         return [json.dumps(response).encode("utf-8")]
 
-    def wsgi_handle_tabcomplete(self, environ, parameters, start_response):
+    def wsgi_handle_tabcomplete(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
@@ -280,7 +282,7 @@ class TaleWsgiAppBase:
                                   ('Expires', '0')])
         return [json.dumps(conn.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]
 
-    def wsgi_handle_input(self, environ, parameters, start_response):
+    def wsgi_handle_input(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
@@ -304,7 +306,7 @@ class TaleWsgiAppBase:
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
 
-    def wsgi_handle_license(self, environ, parameters, start_response):
+    def wsgi_handle_license(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         license = "The author hasn't provided any license information."
         if self.driver.story.config.license_file:
             license = self.driver.resources[self.driver.story.config.license_file].data
@@ -323,7 +325,7 @@ class TaleWsgiAppBase:
                                    story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
-    def wsgi_handle_static(self, environ, path, start_response):
+    def wsgi_handle_static(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         path = path[len("static/"):]
         if not self.wsgi_is_asset_allowed(path):
             return self.wsgi_not_found(start_response)
@@ -332,14 +334,14 @@ class TaleWsgiAppBase:
         except IOError:
             return self.wsgi_not_found(start_response)
 
-    def wsgi_is_asset_allowed(self, path):
+    def wsgi_is_asset_allowed(self, path: str) -> bool:
         return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
             or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
 
-    def etag(self, *components):
+    def etag(self, *components: Iterable[Any]) -> str:
         return '"' + md5("-".join(str(c) for c in components).encode("ascii")).hexdigest() + '"'
 
-    def wsgi_serve_static(self, path, environ, start_response):
+    def wsgi_serve_static(self, path: str, environ: Dict[str, str], start_response: Callable) -> Iterable[str]:
         headers = []
         resource = vfs.internal_resources[path]
         if resource.mtime:
@@ -371,26 +373,26 @@ class TaleWsgiApp(TaleWsgiAppBase):
     Note that it is deliberatly simplistic and ony able to handle a single
     player connection; it only works for 'if' single-player game mode.
     """
-    def __init__(self, driver, player_connection):
+    def __init__(self, driver: Driver, player_connection: PlayerConnection) -> None:
         super().__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
 
     @classmethod
-    def create_app_server(cls, driver, player_connection):
+    def create_app_server(cls, driver: Driver, player_connection: PlayerConnection) -> SessionMiddleware:
         wsgi_app = SessionMiddleware(cls(driver, player_connection))
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
         return wsgi_server
 
-    def wsgi_handle_quit(self, environ, parameters, start_response):
+    def wsgi_handle_quit(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         # Quit/logged out page. For single player, simply close down the whole driver.
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.driver._stop_driver()
         return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]
 
-    def wsgi_handle_about(self, environ, parameters, start_response):
+    def wsgi_handle_about(self, environ: Dict[str, str], parameters: Dict[str, str], start_response: Callable) -> Iterable[str]:
         # about page
         if "license" in parameters:
             return self.wsgi_handle_license(environ, parameters, start_response)
@@ -405,7 +407,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
 
 
 class CustomRequestHandler(WSGIRequestHandler):
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args: Any):
         pass
 
 
@@ -414,10 +416,10 @@ class CustomWsgiServer(WSGIServer):
 
 
 class SessionMiddleware:
-    def __init__(self, app):
+    def __init__(self, app: Callable) -> None:
         self.app = app
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Dict[str, str], start_response: Callable) -> None:
         environ["wsgi.session"] = {
             "id": None,
             "player_connection": self.app.player_connection
