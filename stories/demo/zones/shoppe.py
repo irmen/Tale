@@ -5,14 +5,16 @@ The Olde Shoppe in the town.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Any
 from tale.shop import ShopBehavior, Shopkeeper
 from tale.base import Item, Location, Exit, clone, Living
-from tale.pubsub import Listener
+from tale.pubsub import Listener, TopicNameType
 from tale.items.basic import gameclock, diamond, gem, newspaper
-from tale import mud_context
+from tale.driver import Driver
+from tale import mud_context, util
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 
@@ -48,16 +50,16 @@ lamp.value = 600
 
 class James(Living, Listener):
     """The customer trying to sell a Lamp, and helpful as rat deterrent."""
-    def pubsub_event(self, topicname, event):
+    def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
         if topicname[0] == "wiretap-location":
             if "Rat arrives" in event[1]:
                 mud_context.driver.defer(2, self.rat_scream, "frown")
                 mud_context.driver.defer(4, self.rat_kick)
 
-    def rat_scream(self, action, ctx):
+    def rat_scream(self, action: str, ctx: util.Context) -> None:
         shopkeeper.do_socialize(action)
 
-    def rat_kick(self, ctx):
+    def rat_kick(self, ctx: util.Context) -> None:
         rat = self.location.search_living("rat")
         if rat:
             self.do_socialize("kick rat")

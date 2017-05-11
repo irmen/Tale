@@ -7,10 +7,11 @@ magnolia st. 2, magnolia st. 3, factory
 """
 
 from tale.base import Location, Exit, Door
+from tale.driver import Driver
 from zones import houses
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 

@@ -920,8 +920,8 @@ class Living(MudObject):
             # other npcs may choose to attack or to ignore it
             # We need to check the verb qualifier, it might void the actual action :)
             if parsed.qualifier not in verbdefs.NEGATING_QUALIFIERS:
-                for living in who:   # XXX can 'who' really also contain Location ????
-                    if living.aggressive:
+                for living in who:   # XXX who can contain Living, Item, Location...?
+                    if living.aggressive:   # XXX not every 'who' has this attr
                         pending_actions.send(lambda victim=self: living.start_attack(victim))
 
     @util.authorized("wizard")
@@ -1464,7 +1464,7 @@ class Soul:
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[Set[Union[Location, Living]], str, str, str]:
+    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[Set[Union[Location, Living]], str, str, str]:   # XXX who result also Item ??
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,

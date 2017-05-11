@@ -9,15 +9,16 @@ from typing import Union, Optional
 from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
 from tale.player import Player
 from tale.errors import ActionRefused, TaleError
+from tale.driver import Driver
+from tale.parseresult import ParseResult
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
-from tale.items.board import bulletinboard, BulletinBoard, PostType
+from tale.items.board import bulletinboard, BulletinBoard
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     board.load()
-    pass
 
 
 square = Location("Town square",
@@ -60,7 +61,8 @@ lane.init_inventory([board])
 
 
 class CursedGem(Item):
-    def move(self, target, actor, silent=False, is_player=False, verb="move"):
+    def move(self, target: Union[Location, Container, Living], actor: Living=None,
+             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         if self.contained_in is actor and "wizard" not in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
         super().move(target, actor, verb=verb)
@@ -90,7 +92,7 @@ lane.add_exits([Exit(["shop", "north east", "northeast", "ne"], "shoppe.shop", "
 
 
 class WizardTowerEntry(Exit):
-    def allow_passage(self, actor):
+    def allow_passage(self, actor: Living) -> None:
         if "wizard" in actor.privileges:
             actor.tell("You pass through the force-field.")
         else:
@@ -142,16 +144,16 @@ square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south
 
 
 class GameEnd(Location):
-    def init(self):
+    def init(self) -> None:
         pass
 
-    def insert(self, obj, actor):
+    def insert(self, obj: Union[Living, Item], actor: Optional[Living]) -> None:
         # Normally you would use notify_player_arrived() to trigger an action.
         # but for the game ending, we require an immediate response.
         # So instead we hook into the direct arrival of something in this location.
         super().insert(obj, actor)
         try:
-            obj.story_completed()   # player arrived! Great Success!
+            obj.story_completed()   # player arrived! Great Success!   # XXX type error: what if obj is not player at all
         except AttributeError:
             pass
 
@@ -160,10 +162,10 @@ game_end = GameEnd("Game End", "It seems like it is game over!")
 
 
 class EndDoor(Door):
-    def unlock(self, actor, item):
+    def unlock(self, actor: Living, item: Item=None) -> None:
         super().unlock(actor, item)
         if not self.locked:
-            if "unlocked_enddoor" not in actor.hints.checkpoints:
+            if "unlocked_enddoor" not in actor.hints.checkpoints:   # XXX type error: not all Living have hints
                 actor.tell_later("<dim>(You will remember this event.)</>")
             actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!")
 
@@ -174,25 +176,25 @@ lane.add_exits([end_door])
 
 
 class Computer(Item):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.aliases = {"keyboard", "screen", "wires"}
 
-    def allow_item_move(self, actor, verb="move"):
+    def allow_item_move(self, actor: Living, verb: str="move") -> None:
         raise ActionRefused("You can't %s the computer." % verb)
 
     @property
-    def description(self):
+    def description(self) -> str:
         return "It seems to be connected to the four doors. " \
                + self.screen_text() \
                + " There's also a small keyboard to type commands. " \
                + " On the side of the screen there's a large sticker with 'say hello' written on it."
 
     @description.setter
-    def description(self, value: str):
+    def description(self, value: str) -> None:
         raise TaleError("you cannot set the description of Computer because it is dynamic")
 
-    def screen_text(self):
+    def screen_text(self) -> str:
         txt = ["The screen of the computer reads:  \""]
         for door in (door1, door2, door3, door4):
             txt.append(door.name.upper())
@@ -200,10 +202,10 @@ class Computer(Item):
         txt.append(" AWAITING COMMAND.\"")
         return "".join(txt)
 
-    def read(self, actor):
+    def read(self, actor: Living) -> None:
         actor.tell(self.screen_text())
 
-    def process_typed_command(self, command, doorname, actor):
+    def process_typed_command(self, command: str, doorname: str, actor: Living) -> None:
         if command == "help":
             message = "KNOWN COMMANDS: LOCK, UNLOCK"
         elif command in ("hi", "hello"):
@@ -215,7 +217,7 @@ class Computer(Item):
                 message = "UNKNOWN DOOR"
             else:
                 if command == "unlock":
-                    if door.locked:
+                    if door.locked:    # XXX only doors can be unlocked, what if we try it on an exit?
                         door.locked = False
                         message = doorname.upper() + " UNLOCKED"
                     else:
@@ -230,7 +232,7 @@ class Computer(Item):
             message = "INVALID COMMAND"
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
 
-    def notify_action(self, parsed, actor):
+    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb in ("hello", "hi"):
             self.process_typed_command("hello", "", actor)
         elif parsed.verb in ("say", "yell"):
@@ -240,7 +242,7 @@ class Computer(Item):
                 actor.tell("The computer beeps quietly. The screen shows: "
                            "\"I CAN'T HEAR YOU. PLEASE TYPE COMMANDS INSTEAD OF SPEAKING.\"  How odd.")
 
-    def handle_verb(self, parsed, actor):
+    def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
         if parsed.verb == "hack":
             if self in parsed.who_info:
                 actor.tell("It doesn't need to be hacked, you can just type commands on it.")
@@ -281,7 +283,8 @@ alley.insert(computer, None)
 
 
 class DoorKey(Key):
-    def notify_moved(self, source_container, target_container, actor):
+    def notify_moved(self, source_container: Union[Location, Container, Living],
+                     target_container: Union[Location, Container, Living], actor: Living) -> None:
         # check if a player picked up this key
         player = None
         if isinstance(target_container, Player):
@@ -289,7 +292,7 @@ class DoorKey(Key):
         elif isinstance(self.contained_in, Player):
             player = self.contained_in
         if player:
-            if "got_doorkey" not in actor.hints.checkpoints:
+            if "got_doorkey" not in actor.hints.checkpoints:    # XXX type error: not all Living have hints
                 actor.tell_later("<dim>(You will remember this event.)</>")
             player.hints.checkpoint("got_doorkey", "You've found something that might open the exit.")
 
@@ -300,9 +303,9 @@ alley.insert(doorkey, None)
 
 
 class MagicGameEnd(Item):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("magic orb", description="A magic orb of some sort.")
-        self.aliases = "orb"
+        self.aliases = {"orb"}
 
     def notify_moved(self, source_container: Union[Location, Container, Living],
                      target_container: Union[Location, Container, Living], actor: Living) -> None:

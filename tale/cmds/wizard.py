@@ -287,7 +287,7 @@ def teleport_someone_to_player(who: base.Living, player: Player) -> None:
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
     player.location.tell("%s makes some gestures and a portal suddenly opens." % lang.capital(player.title), exclude_living=who)
-    who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
+    who.location.tell(room_msg, specific_targets={who}, specific_target_msg="You are sucked into it!")
     who.teleported_from = who.location  # used for the 'return' command
     who.move(player.location, silent=True)
     who.tell("You tumble out of the other end of the portal, and find yourself in <location>%s</>." % player.location.name)
@@ -308,7 +308,7 @@ def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         player.tell("Returning <player>%s</> to <location>%s</>" % (who.name, previous_location.name))
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
-        who.location.tell(room_msg, specific_targets=[who], specific_target_msg="You are sucked into it!")
+        who.location.tell(room_msg, specific_targets={who}, specific_target_msg="You are sucked into it!")
         del who.teleported_from
         who.move(previous_location, silent=True)
         who.tell_others("Suddenly, a shimmering portal opens!")
@@ -513,7 +513,7 @@ def do_force(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
     target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
     player.tell("You coerce <player>%s</> into following your orders." % target.title)
-    player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
+    player.location.tell(room_msg, exclude_living=player, specific_targets={target}, specific_target_msg=target_msg)
     if isinstance(target, Player):
         target.store_input_line(cmd)   # insert the command into the target player's input buffer
         return

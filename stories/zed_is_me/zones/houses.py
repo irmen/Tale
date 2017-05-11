@@ -4,9 +4,10 @@ Also defines the Neighbor's house, where other things can be found.
 """
 
 from tale.base import Location, Exit, Door
+from tale.driver import Driver
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 

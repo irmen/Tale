@@ -554,7 +554,7 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
         player_str = lang.capital(player.title)
         room_msg = "<player>%s</> gives <item>%s</> to <living>%s</>." % (player_str, items_str, target.title)
         target_msg = "<player>%s</> gives you <item>%s</>." % (player_str, items_str)
-        player.location.tell(room_msg, exclude_living=player, specific_targets=[target], specific_target_msg=target_msg)
+        player.location.tell(room_msg, exclude_living=player, specific_targets={target}, specific_target_msg=target_msg)
         p("You give <living>%s</> <item>%s</>." % (target.title, items_str))
     else:
         p("You didn't give <living>%s</> anything." % target.title)
@@ -1304,7 +1304,7 @@ def do_show(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     player.tell("You show the <item>%s</> to <living>%s</>." % (shown.title, target.title))
     room_msg = "%s shows %s to %s." % (lang.capital(player.title), lang.a(shown.title), target.title)
     target_msg = "%s shows you %s." % (lang.capital(player.title), lang.a(shown.title))
-    player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets=[target])
+    player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets={target})
 
 
 @cmd("time", "date")

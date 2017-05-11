@@ -7,10 +7,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 from tale.base import Location, Exit, Item, heartbeat, Living
-import tale.lang
+from tale.driver import Driver
+from tale import lang, util
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 
@@ -26,14 +27,14 @@ key = Item("key", "rusty key", "An old rusty key without a label.")
 
 @heartbeat
 class Drone(Living):
-    def heartbeat(self, ctx):
+    def heartbeat(self, ctx: util.Context) -> None:
         rand = random.random()
         if rand < 0.07:
             self.do_socialize("twitch erra")
         elif rand < 0.14:
             self.do_socialize("rotate random")
         elif rand < 0.21:
-            self.location.tell("%s hums softly." % tale.lang.capital(self.title))
+            self.location.tell("%s hums softly." % lang.capital(self.title))
 
 
 drone = Drone("drone", "n", race="bot", title="mindless drone",

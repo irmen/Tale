@@ -8,10 +8,11 @@ butcher, storage room
 """
 
 from tale.base import Location, Exit, Door, Key, _limbo
+from tale.driver import Driver
 import zones.magnolia_st
 
 
-def init(driver):
+def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
 
