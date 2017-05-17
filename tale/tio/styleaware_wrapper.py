@@ -6,6 +6,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import textwrap
 import re
+from typing import List
+
 
 tag_split_re = re.compile("(<[a-z/]+?>)")
 tag_re = re.compile("<[a-z/]+?>$")
@@ -18,8 +20,8 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
     Unfortunately the line filling loop is embedded in a larger method,
     that we need to override fully (_wrap_chunks)...
     """
-    def _wrap_chunks(self, chunks):
-        lines = []
+    def _wrap_chunks(self, chunks: List[str]) -> List[str]:
+        lines = []  # type: List[str]
         if self.width <= 0:
             raise ValueError("invalid width %r (must be > 0)" % self.width)
 

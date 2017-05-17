@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import time
 import queue
 from threading import Event
-from typing import Any, Sequence, Tuple, TextIO, Dict, Set, List, Union
+from typing import Any, Sequence, Tuple, IO, Dict, Set, List, Union
 from . import base
 from . import lang
 from . import hints
@@ -47,7 +47,7 @@ class Player(base.Living, pubsub.Listener):
     def init_nonserializables(self) -> None:
         self._input = queue.Queue()   # type: Any
         self.input_is_available = Event()
-        self.transcript = None  # type: TextIO
+        self.transcript = None  # type: IO[Any]
         self._output = TextBuffer()
 
     def __repr__(self):

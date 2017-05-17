@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import html.parser
 import smartypants
-from typing import Union, Sequence, Iterable, Any, Tuple, Optional
+from typing import Union, Sequence, Iterable, Any, Tuple, Optional, List
 from ..util import format_traceback
 from .. import verbdefs
 
@@ -20,7 +20,7 @@ ALL_STYLE_TAGS = {
 }
 
 
-def strip_text_styles(text: Union[str, Sequence[str]]) -> Sequence[str]:
+def strip_text_styles(text: Union[str, Sequence[str]]) -> Union[str, Sequence[str]]:
     """remove any special text styling tags from the text (you can pass a single string, and also a list of strings)"""
     def strip(text: str) -> str:
         if "<" not in text:
@@ -113,7 +113,7 @@ class IoAdapterBase:
         """pause/ unpause the input loop"""
         raise NotImplementedError("implement this in subclass")
 
-    def tab_complete(self, prefix: str, driver) -> Iterable[str]:
+    def tab_complete(self, prefix: str, driver) -> List[str]:
         if not prefix:
             return []
         prefix = prefix.lower()
@@ -127,5 +127,4 @@ class IoAdapterBase:
         inventory = [item.name for item in player.inventory if item.name.startswith(prefix)]
         inventory_aliases = [alias for item in player.inventory for alias in item.aliases if alias.startswith(prefix)]
         emotes = [verb for verb in verbdefs.VERBS if verb.startswith(prefix)]
-        self.candidates = sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases)
-        return self.candidates
+        return list(sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases))

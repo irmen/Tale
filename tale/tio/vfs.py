@@ -11,6 +11,8 @@ import sys
 import errno
 import mimetypes
 import pkgutil
+from typing import ByteString, Union, IO, Any
+
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
@@ -22,7 +24,7 @@ class VfsError(IOError):
 
 class Resource:
     """Simple container of a resource name, its data (string or binary) and the mime type"""
-    def __init__(self, name, data, mimetype, mtime):
+    def __init__(self, name: str, data: Union[str, ByteString], mimetype: str, mtime: float) -> None:
         self.name = name
         self.data = data
         self.mimetype = mimetype
@@ -31,10 +33,10 @@ class Resource:
     def __repr__(self):
         return "<Resource %s from %s, size=%d, mtime=%s>" % (self.mimetype, self.name, len(self.data), self.mtime)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Union[str, int]:
         return self.data[item]
 
 
@@ -44,7 +46,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     If not readonly, you can write data as well. The API is loosely based on a dict.
     Can be based off an already imported module, or from a file system path somewhere else.
     """
-    def __init__(self, root_package=None, root_path=None, readonly=True):
+    def __init__(self, root_package: str=None, root_path: str=None, readonly: bool=True) -> None:
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
         if not readonly and not root_path:
@@ -61,7 +63,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             try:
                 test = pkgutil.get_data(root_package, "@dummy@")
             except IOError:
-                test = "okay"
+                test = b"okay"
             except ImportError:
                 test = None
             if test is None:
@@ -69,7 +71,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             self.root = root_package
             self.use_pkgutil = True
 
-    def validate_path(self, path):
+    def validate_path(self, path: str) -> str:
         """
         Validates the given relative path.
         If the vfs is loading from a package, the path is returned unmodified if it is valid.
@@ -87,7 +89,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
                 raise VfsError("path must not escape root folder")
             return path
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> Resource:
         """Reads the resource data (text or binary) for the given name and returns it as a Resource object"""
         phys_path = self.validate_path(name)
         mimetype = mimetypes.guess_type(name)[0] or ""
@@ -106,20 +108,20 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             parts = name.split('/')
             parts.insert(0, os.path.dirname(rootmodule.__file__))
             name = os.path.join(*parts)
-            mtime = loader.path_stats(name)["mtime"]
-            data = loader.get_data(name)
+            mtime = loader.path_stats(name)["mtime"]        # type: ignore
+            data = loader.get_data(name)                    # type: ignore
             if encoding:
-                with io.StringIO(data.decode(encoding), newline=None) as f:
-                    return Resource(name, f.read(), mimetype, mtime)
+                with io.StringIO(data.decode(encoding), newline=None) as f_s:
+                    return Resource(name, f_s.read(), mimetype, mtime)
             else:
                 return Resource(name, data, mimetype, mtime)
         else:
             # direct filesystem access
-            with io.open(phys_path, mode=mode, encoding=encoding) as f:
+            with io.open(phys_path, mode=mode, encoding=encoding) as f_b:
                 mtime = os.path.getmtime(phys_path)  # os.fstat(f.fileno()).st_mtime
-                return Resource(name, f.read(), mimetype, mtime)
+                return Resource(name, f_b.read(), mimetype, mtime)
 
-    def __setitem__(self, name, data):
+    def __setitem__(self, name: str, data: Union[Resource, str, ByteString]) -> None:
         """
         Stores the data on the given resource name.
         Overwrites an existing resource if any.
@@ -131,9 +133,9 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         if isinstance(data, Resource):
             data = data.data
         with self.open_write(name) as f:
-            f.write(data)
+            f.write(data)   # type: ignore
 
-    def __delitem__(self, name):
+    def __delitem__(self, name: str) -> None:
         """Deletes the given resource"""
         if self.readonly:
             raise VfsError("attempt to write a read-only vfs")
@@ -143,7 +145,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         except IOError:
             pass
 
-    def open_write(self, name, append=False):
+    def open_write(self, name: str, mimetype: str=None, append: bool=False) -> IO[Any]:
         """returns a writable file io stream"""
         if self.readonly:
             raise VfsError("attempt to write to a read-only vfs")
@@ -155,7 +157,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         except OSError as ex:
             if ex.errno != errno.EEXIST or not os.path.isdir(dirname):
                 raise
-        mimetype = mimetypes.guess_type(name)[0] or ""
+        mimetype = mimetype or mimetypes.guess_type(name)[0] or ""
         if mimetype.startswith("text/"):
             return io.open(phys_path, mode="at" if append else "wt", encoding="utf-8", newline="\n")
         return io.open(phys_path, mode="ab" if append else "wb")

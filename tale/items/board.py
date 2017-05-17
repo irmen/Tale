@@ -25,7 +25,7 @@ class BulletinBoard(Item):
 
     def init(self) -> None:
         super().init()
-        self.posts = deque(maxlen=self.max_num_posts)  # type: Any[PostType]   # typing.Deque is absent in some python 3.5 versions...
+        self.posts = deque(maxlen=self.max_num_posts)  # type: MutableSequence[PostType]   # some py 3.5's don't have typing.Deque
         self.readonly = False
         self.storage_file = None  # type: str
         self.verbs = {

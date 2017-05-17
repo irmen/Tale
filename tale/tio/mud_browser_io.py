@@ -12,29 +12,57 @@ from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 from socketserver import ThreadingMixIn
 from http.cookies import SimpleCookie
 from html import escape as html_escape
-from .if_browser_io import HttpIo, TaleWsgiAppBase
+from typing import Callable, Dict, Iterable, Any, List, Tuple, MutableMapping
+from .if_browser_io import HttpIo, TaleWsgiAppBase, WsgiStartResponseType
 from . import vfs
+from ..player import PlayerConnection
+from ..driver import Driver
 from .. import __version__ as tale_version_str
 
 __all__ = ["MudHttpIo", "TaleMudWsgiApp"]
+
+
+class MemorySessionFactory:
+    def __init__(self):
+        self.storage = {}
+
+    def generate_id(self) -> str:
+        string = "%d%d%f" % (random.randint(0, sys.maxsize), id(self), time.time())
+        return hashlib.sha1(string.encode("ascii")).hexdigest()
+
+    def load(self, sid: str) -> Any:
+        sid = sid or self.generate_id()
+        if sid not in self.storage:
+            session = {
+                "id": sid,
+                "created": time.time()
+            }
+            self.storage[sid] = session
+        return self.storage[sid]
+
+    def save(self, session: Any) -> str:
+        session["id"] = sid = session["id"] or self.generate_id()
+        self.storage[sid] = session
+        return sid
+
+    def delete(self, sid: str) -> None:
+        if sid in self.storage:
+            del self.storage[sid]
 
 
 class MudHttpIo(HttpIo):
     """
     I/O adapter for a http/browser based interface.
     """
-    def __init__(self, player_connection):
+    def __init__(self, player_connection: PlayerConnection) -> None:
         super().__init__(player_connection, None)
         self.supports_blocking_input = False
         self.dont_echo_next_cmd = False   # used to cloak password input
 
-    def __repr__(self):
-        return "<MudHttpIo @ 0x%x>" % id(self)
-
-    def singleplayer_mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         raise RuntimeError("this I/O adapter is for multiplayer (mud) mode")
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         # we'll never pause a mud server.
         pass
 
@@ -44,17 +72,18 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     The actual wsgi app that the player's browser connects to.
     This one is capable of dealing with multiple connected clients (multi-player).
     """
-    def __init__(self, driver):
+    def __init__(self, driver: Driver) -> None:
         super().__init__(driver)
 
     @classmethod
-    def create_app_server(cls, driver):
+    def create_app_server(cls, driver: Driver) -> Callable:
         wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
 
-    def wsgi_handle_story(self, environ, parameters, start_response):
+    def wsgi_handle_story(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                          start_response: WsgiStartResponseType) -> Iterable[str]:
         session = environ["wsgi.session"]
         if "player_connection" not in session:
             # create a new connection
@@ -62,7 +91,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             session["player_connection"] = conn
         return super().wsgi_handle_story(environ, parameters, start_response)
 
-    def wsgi_handle_text(self, environ, parameters, start_response):
+    def wsgi_handle_text(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                         start_response: WsgiStartResponseType) -> Iterable[str]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
@@ -71,7 +101,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             raise SessionMiddleware.CloseSession("{\"error\": \"no longer a valid connection\"}", "application/json")
         return super().wsgi_handle_text(environ, parameters, start_response)
 
-    def wsgi_handle_quit(self, environ, parameters, start_response):
+    def wsgi_handle_quit(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                         start_response: WsgiStartResponseType) -> Iterable[str]:
         # Quit/logged out page. For multi player, get rid of the player connection.
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
@@ -82,7 +113,8 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>"
                                              "Session ended. You may close this window/tab.</body></html>")
 
-    def wsgi_handle_about(self, environ, parameters, start_response):
+    def wsgi_handle_about(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                          start_response: WsgiStartResponseType) -> Iterable[str]:
         # about page
         if "license" in parameters:
             return self.wsgi_handle_license(environ, parameters, start_response)
@@ -92,20 +124,20 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         for name, conn in self.driver.all_players.items():
             player_table.append(html_escape("Name:  %s   connection: %s" % (name, conn.io)))
         player_table.append("</pre>")
-        player_table = "\n".join(player_table)
-        txt = resource.data.format(tale_version=tale_version_str,
+        player_table_txt = "\n".join(player_table)
+        txt = resource.data.format(tale_version=tale_version_str,           # type: ignore
                                    story_version=self.driver.story.config.version,
                                    story_name=self.driver.story.config.name,
                                    uptime="%d:%02d:%02d" % self.driver.uptime,
                                    starttime=self.driver.server_started,
                                    num_players=len(self.driver.all_players),
-                                   player_table=player_table)
-        return [txt.encode("utf-8")]
+                                   player_table=player_table_txt)
+        return [txt.encode("utf-8")]    # XXX bytes or str?
 
 
 class CustomRequestHandler(WSGIRequestHandler):
     """A wsgi request handler that doesn't spam the log."""
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args: Any):
         pass
 
 
@@ -122,21 +154,21 @@ class SessionMiddleware:
         Raise this from your wsgi function to remove the current session.
         The exception message is returned as last goodbye text to the browser.
         """
-        def __init__(self, message, content_type="text/html"):
+        def __init__(self, message: str, content_type: str="text/html") -> None:
             super().__init__(message)
             self.content_type = content_type
 
-    def __init__(self, app, factory):
+    def __init__(self, app: TaleMudWsgiApp, factory: MemorySessionFactory) -> None:
         self.app = app
         self.factory = factory
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: Dict[str, Any], start_response: WsgiStartResponseType) -> Iterable[str]:
         path = environ.get('PATH_INFO', '')
         if not path.startswith("/tale/"):
             # paths not under /tale/ won't get a session
             return self.app(environ, start_response)
 
-        cookie = SimpleCookie()
+        cookie = SimpleCookie()  # type: ignore
         if 'HTTP_COOKIE' in environ:
             cookie.load(environ['HTTP_COOKIE'])
         sid = None
@@ -151,56 +183,28 @@ class SessionMiddleware:
         forwarded_uri = environ.get("HTTP_X_FORWARDED_URI", "/tale/")
         cookie_path = "/" + forwarded_uri.split("/", 2)[1]
 
-        def wrapped_start_response(status, response_headers, exc_info=None):
+        def wrapped_start_response(status: str, response_headers: List[Tuple[str, str]], exc_info: Any=None) -> Any:
             sid = self.factory.save(environ["wsgi.session"])
-            cookies = SimpleCookie()
+            cookies = SimpleCookie()   # type: ignore
             cookies["session_id"] = sid
-            cookie = cookies["session_id"]
+            cookie = cookies["session_id"]  # type: MutableMapping
             cookie["path"] = cookie_path
-            cookie["httponly"] = 1
+            cookie["httponly"] = "1"
             response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
             return start_response(status, response_headers, exc_info)
 
         try:
-            return self.app(environ, wrapped_start_response)
+            return self.app(environ, wrapped_start_response)        # XXX ??what is app... driver class????
         except SessionMiddleware.CloseSession as x:
             self.factory.delete(sid)
             # clear the browser cookie
-            cookies = SimpleCookie()
+            cookies = SimpleCookie()  # type: ignore
             cookies["session_id"] = "deleted"
-            cookie = cookies["session_id"]
+            cookie = cookies["session_id"]  # type: MutableMapping
             cookie["path"] = cookie_path
-            cookie["httponly"] = 1
+            cookie["httponly"] = "1"
             cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
             response_headers = [('Content-Type', x.content_type)]
             response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
             start_response("200 OK", response_headers)
-            return [str(x).encode("utf-8")]
-
-
-class MemorySessionFactory:
-    def __init__(self):
-        self.storage = {}
-
-    def generate_id(self):
-        string = "%d%d%f" % (random.randint(0, sys.maxsize), id(self), time.time())
-        return hashlib.sha1(string.encode("ascii")).hexdigest()
-
-    def load(self, sid):
-        sid = sid or self.generate_id()
-        if sid not in self.storage:
-            session = {
-                "id": sid,
-                "created": time.time()
-            }
-            self.storage[sid] = session
-        return self.storage[sid]
-
-    def save(self, session):
-        session["id"] = sid = session["id"] or self.generate_id()
-        self.storage[sid] = session
-        return sid
-
-    def delete(self, sid):
-        if sid in self.storage:
-            del self.storage[sid]
+            return [str(x).encode("utf-8")]         # XXX bytes?? str??

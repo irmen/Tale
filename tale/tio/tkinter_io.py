@@ -4,15 +4,19 @@ GUI input/output using Tkinter.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+import sys
+import re
 import textwrap
 import collections
 import threading
-from tkinter import *
+import tkinter
 import tkinter.font
 import tkinter.messagebox
-from typing import Iterable, Tuple, Any, Optional
+from typing import Iterable, Tuple, Any, Optional, Sequence, MutableSequence
 from . import iobase
 from . import vfs
+from ..player import PlayerConnection, Player
+from ..story import StoryConfig
 from .. import mud_context
 from .. import __version__ as tale_version
 from ..util import format_traceback
@@ -24,39 +28,36 @@ class TkinterIo(iobase.IoAdapterBase):
     """
     Tkinter-GUI based Input/Output adapter.
     """
-    def __init__(self, config, player_connection):
+    def __init__(self, config: StoryConfig, player_connection: PlayerConnection) -> None:
         super().__init__(player_connection)
         self.gui = TaleGUI(self, config)
         self.textwrapper = textwrap.TextWrapper()
 
-    def __repr__(self):
-        return "<TkinterIo @ 0x%x>" % id(self)
-
-    def singleplayer_mainloop(self, player_connection):
+    def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         """Main event loop for this I/O adapter for single player mode"""
         self.gui.mainloop(player_connection)
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         self.gui.pause(unpause)
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         """Clear the screen"""
         self.gui.clear_screen()
 
-    def critical_error(self, message="A critical error occurred! See below and/or in the error log."):
+    def critical_error(self, message: str="A critical error occurred! See below and/or in the error log.") -> None:
         """called when the driver encountered a critical error and the session needs to shut down"""
         super().critical_error(message)
         tb = "".join(format_traceback())
         self.output("<monospaced>" + tb + "</>")
         self.output("<rev><it>Please report this problem.</>\n")
 
-    def destroy(self):
+    def destroy(self) -> None:
         self.gui.destroy()
 
-    def gui_terminated(self):
+    def gui_terminated(self) -> None:
         self.gui = None
 
-    def abort_all_input(self, player):
+    def abort_all_input(self, player: Player) -> None:
         """abort any blocking input, if at all possible"""
         player.store_input_line("")
 
@@ -81,27 +82,25 @@ class TkinterIo(iobase.IoAdapterBase):
             output.append(txt)
         return self.smartquotes("".join(output))
 
-    def output(self, *lines):
+    def output(self, *lines: str) -> None:
         """Write some text to the screen. Needs to take care of style tags that are embedded."""
         super().output(*lines)
         for line in lines:
             self.gui.write_line(line)
 
-    def output_no_newline(self, text):
+    def output_no_newline(self, text: str) -> None:
         """Like output, but just writes a single line, without end-of-line."""
         super().output_no_newline(text)
         self.gui.write_line(text)
 
 
-class TaleWindow(Toplevel):
+class TaleWindow(tkinter.Toplevel):
     """The actual gui-window, containing the output text and the input command bar."""
-    def __init__(self, gui, parent, title, text, modal=False):
-        Toplevel.__init__(self, parent)
+    def __init__(self, gui: 'TaleGUI', parent: tkinter.Tk, title: str, text: str, modal: bool=False) -> None:
+        super().__init__(parent)
         self.gui = gui
         self.configure(borderwidth=5)
-        self.geometry("=%dx%d+%d+%d" % (800, 600,
-                                        parent.winfo_rootx() + 10,
-                                        parent.winfo_rooty() + 10))
+        self.geometry("=%dx%d+%d+%d" % (800, 600, parent.winfo_rootx() + 10, parent.winfo_rooty() + 10))
         self.bg = '#f8f8f0'
         self.fg = '#080808'
         self.fontsize_monospace = 11
@@ -126,16 +125,16 @@ class TaleWindow(Toplevel):
         # self.bind('<Return>',self.Ok) #dismiss dialog
         # self.bind('<Escape>',self.Ok) #dismiss dialog
         self.textView.insert(0.0, text)
-        self.textView.config(state=DISABLED)
+        self.textView.config(state=tkinter.DISABLED)
 
         try:
-            img = PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
-        except TclError:
+            img = tkinter.PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
+        except tkinter.TclError:
             pass  # older versions of Tkinter can't create an image from data bytes, don't bother then
         else:
             self.tk.call('wm', 'iconphoto', self, img)
 
-        self.history = collections.deque(maxlen=100)
+        self.history = collections.deque(maxlen=100)    # type: MutableSequence[str]
         self.history.append("")
         self.history_idx = 0
         if modal:
@@ -144,28 +143,28 @@ class TaleWindow(Toplevel):
             self.wait_window()
         self.update_lock = threading.Lock()
 
-    def CreateWidgets(self):
-        frameText = Frame(self, relief=SUNKEN, height=700)
-        frameCommands = Frame(self, relief=SUNKEN)
-        self.scrollbarView = Scrollbar(frameText, orient=VERTICAL, takefocus=FALSE, highlightthickness=0)
-        self.textView = Text(frameText, wrap=WORD, highlightthickness=0, fg=self.fg, bg=self.bg, font=self.font, padx=8, pady=8)
+    def CreateWidgets(self) -> None:
+        frameText = tkinter.Frame(self, relief=tkinter.SUNKEN, height=700)
+        frameCommands = tkinter.Frame(self, relief=tkinter.SUNKEN)
+        self.scrollbarView = tkinter.Scrollbar(frameText, orient=tkinter.VERTICAL, takefocus=tkinter.FALSE, highlightthickness=0)
+        self.textView = tkinter.Text(frameText, wrap=tkinter.WORD, highlightthickness=0,
+                                     fg=self.fg, bg=self.bg, font=self.font, padx=8, pady=8)
         self.scrollbarView.config(command=self.textView.yview)
         self.textView.config(yscrollcommand=self.scrollbarView.set)
-
-        self.commandPrompt = Label(frameCommands, text="> ")
+        self.commandPrompt = tkinter.Label(frameCommands, text="> ")
         fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
             fixedFont = tkinter.font.nametofont('TkFixedFont').copy()
             fixedFont["size"] = self.fontsize_monospace
-        self.commandEntry = Entry(frameCommands, takefocus=TRUE, font=fixedFont)
+        self.commandEntry = tkinter.Entry(frameCommands, takefocus=tkinter.TRUE, font=fixedFont)
         self.commandEntry.bind('<Return>', self.user_cmd)
         self.commandEntry.bind('<Extended-Return>', self.user_cmd)
         self.commandEntry.bind('<KP_Enter>', self.user_cmd)
         self.commandEntry.bind('<F1>', self.f1_pressed)
         self.commandEntry.bind('<Up>', self.up_pressed)
         self.commandEntry.bind('<Down>', self.down_pressed)
-        self.scrollbarView.pack(side=RIGHT, fill=Y)
-        self.textView.pack(side=LEFT, expand=TRUE, fill=BOTH)
+        self.scrollbarView.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        self.textView.pack(side=tkinter.LEFT, expand=tkinter.TRUE, fill=tkinter.BOTH)
         # configure the text tags
         self.textView.tag_configure('userinput', font=fixedFont, foreground='maroon',
                                     spacing1=10, spacing3=4, lmargin1=20, lmargin2=20, rmargin=20)
@@ -180,90 +179,90 @@ class TaleWindow(Toplevel):
         self.textView.tag_configure('exit', font=self.boldFont)
         self.textView.tag_configure('location', foreground='navy', font=self.boldFont)
         self.textView.tag_configure('monospaced', font=fixedFont)
-
         # pack
-        self.commandPrompt.pack(side=LEFT)
-        self.commandEntry.pack(side=LEFT, expand=TRUE, fill=X, ipady=1)
-        frameText.pack(side=TOP, expand=TRUE, fill=BOTH)
-        frameCommands.pack(side=BOTTOM, fill=X)
+        self.commandPrompt.pack(side=tkinter.LEFT)
+        self.commandEntry.pack(side=tkinter.LEFT, expand=tkinter.TRUE, fill=tkinter.X, ipady=1)
+        frameText.pack(side=tkinter.TOP, expand=tkinter.TRUE, fill=tkinter.BOTH)
+        frameCommands.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         self.commandEntry.focus_set()
 
-    def FindFont(self, families, size, weight=tkinter.font.NORMAL, slant=tkinter.font.ROMAN, underlined=False):
+    def FindFont(self, families: Sequence[str], size: float, weight: str=tkinter.font.NORMAL,
+                 slant: str=tkinter.font.ROMAN, underlined: bool=False) -> Optional[tkinter.font.Font]:
         fontfamilies = tkinter.font.families()
         for family in families:
             if family in fontfamilies:
                 return tkinter.font.Font(family=family, size=size, weight=weight, slant=slant, underline=underlined)
         return None
 
-    def f1_pressed(self, e):
-        self.commandEntry.delete(0, END)
+    def f1_pressed(self, e: tkinter.Event) -> None:
+        self.commandEntry.delete(0, tkinter.END)
         self.commandEntry.insert(0, "help")
         self.commandEntry.event_generate("<Return>")
 
-    def up_pressed(self, e):
+    def up_pressed(self, e: tkinter.Event) -> None:
         self.history_idx = max(0, self.history_idx - 1)
         if self.history_idx < len(self.history):
-            self.commandEntry.delete(0, END)
+            self.commandEntry.delete(0, tkinter.END)
             self.commandEntry.insert(0, self.history[self.history_idx])
 
-    def down_pressed(self, e):
+    def down_pressed(self, e: tkinter.Event) -> None:
         self.history_idx = min(len(self.history) - 1, self.history_idx + 1)
         if self.history_idx < len(self.history):
-            self.commandEntry.delete(0, END)
+            self.commandEntry.delete(0, tkinter.END)
             self.commandEntry.insert(0, self.history[self.history_idx])
 
-    def user_cmd(self, e):
+    def user_cmd(self, e: tkinter.Event) -> None:
         cmd = self.commandEntry.get().strip()
         if cmd:
             self.write_line("", self.gui.io.do_styles)
             self.write_line("<userinput>%s</>" % cmd, True)
         self.gui.register_cmd(cmd)
-        self.commandEntry.delete(0, END)
+        self.commandEntry.delete(0, tkinter.END)
         if cmd:
             if cmd != self.history[-1]:
                 self.history.append(cmd)
             self.history_idx = len(self.history)
 
-    def clear_text(self):
+    def clear_text(self) -> None:
         with self.update_lock:
-            self.textView.config(state=NORMAL)
-            self.textView.delete(1.0, END)
-            self.textView.config(state=DISABLED)
+            self.textView.config(state=tkinter.NORMAL)
+            self.textView.delete(1.0, tkinter.END)
+            self.textView.config(state=tkinter.DISABLED)
 
-    def write_line(self, line, do_styles):
+    def write_line(self, line: str, do_styles: bool) -> None:
         with self.update_lock:
             if do_styles:
                 words = re.split(r"(<\S+?>)", line)
-                self.textView.config(state=NORMAL)
+                self.textView.config(state=tkinter.NORMAL)
                 tag = None
                 for word in words:
                     match = re.match(r"<(\S+?)>$", word)
                     if match:
                         tag = match.group(1)
                         if tag == "monospaced":
-                            self.textView.mark_set("begin_monospaced", INSERT)
-                            self.textView.mark_gravity("begin_monospaced", LEFT)
+                            self.textView.mark_set("begin_monospaced", tkinter.INSERT)
+                            self.textView.mark_gravity("begin_monospaced", tkinter.LEFT)
                         elif tag == "/monospaced":
-                            self.textView.tag_add("monospaced", "begin_monospaced", INSERT)
+                            self.textView.tag_add("monospaced", "begin_monospaced", tkinter.INSERT)
                             tag = None
                         elif tag == "/":
                             tag = None
                         elif tag == "clear":
                             self.gui.clear_screen()
                         elif tag not in iobase.ALL_STYLE_TAGS and tag != "userinput":
-                            self.textView.insert(END, word, None)
+                            self.textView.insert(tkinter.END, word, None)
                         continue
-                    self.textView.insert(END, word, tag)        # @todo this can't deal yet with combined styles
-                self.textView.insert(END, "\n")
-                self.textView.config(state=DISABLED)
+                    self.textView.insert(tkinter.END, word, tag)        # @todo this can't deal yet with combined styles
+                self.textView.insert(tkinter.END, "\n")
+                self.textView.config(state=tkinter.DISABLED)
             else:
-                line = iobase.strip_text_styles(line)
-                self.textView.config(state=NORMAL)
-                self.textView.insert(END, line + "\n")
-                self.textView.config(state=DISABLED)
-            self.textView.yview(END)
+                line2 = iobase.strip_text_styles(line)
+                self.textView.config(state=tkinter.NORMAL)
+                self.textView.insert(tkinter.END, line2 + "\n")  # type: ignore
+                self.textView.config(state=tkinter.DISABLED)
+            self.textView.yview(tkinter.END)
 
-    def quit_button_clicked(self, event=None):
+    def quit_button_clicked(self, event: tkinter.Event=None) -> None:
         quit = tkinter.messagebox.askokcancel("Quit Confirmation",
                                               "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?",
                                               master=self)
@@ -271,16 +270,16 @@ class TaleWindow(Toplevel):
             self.gui.destroy(True)
             self.gui.window_closed()
 
-    def disable_input(self):
-        self.commandEntry.config(state=DISABLED)
+    def disable_input(self) -> None:
+        self.commandEntry.config(state=tkinter.DISABLED)
 
 
 class TaleGUI:
     """Helper class to set up the gui and connect events."""
-    def __init__(self, io, config):
+    def __init__(self, io: TkinterIo, config: StoryConfig) -> None:
         self.io = io
         self.server_config = config
-        self.root = Tk()
+        self.root = tkinter.Tk()
         window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
             name=self.server_config.name,
             version=self.server_config.version,
@@ -292,14 +291,14 @@ class TaleGUI:
         self.root.update()
         self.install_tab_completion()
 
-    def install_tab_completion(self):
-        def tab_pressed(event):
+    def install_tab_completion(self) -> None:
+        def tab_pressed(event: tkinter.Event) -> Any:
             begin, _, prefix = event.widget.get().rpartition(" ")
             candidates = self.io.tab_complete(prefix, mud_context.driver)
             if candidates:
                 if len(candidates) == 1:
                     # replace text by the only possible candidate
-                    event.widget.delete(0, END)
+                    event.widget.delete(0, tkinter.END)
                     if begin:
                         event.widget.insert(0, begin + " " + candidates[0] + " ")
                     else:
@@ -310,19 +309,19 @@ class TaleGUI:
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
-    def mainloop(self, player_connection):
+    def mainloop(self, player_connection: PlayerConnection) -> None:
         self.root.mainloop()   # tkinter main loop
         self.window = None
         self.root = None
         self.io.gui_terminated()
 
-    def pause(self, unpause=False):
+    def pause(self, unpause: bool=False) -> None:
         if unpause:
             self.write_line("---- session continues ----")
         else:
             self.write_line("---- session paused ----")
 
-    def destroy(self, force=False):
+    def destroy(self, force: bool=False) -> None:
         def destroy2():
             self.window.destroy()
             self.root.destroy()
@@ -335,24 +334,24 @@ class TaleGUI:
         elif self.root:
             self.root.after(2000, destroy2)
 
-    def window_closed(self):
+    def window_closed(self) -> None:
         mud_context.driver._stop_driver()
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         if self.root:
             self.root.after_idle(lambda: self.window.clear_text())
 
-    def write_line(self, line):
+    def write_line(self, line: str) -> None:
         if self.root:
             self.root.after_idle(lambda: self.window.write_line(line, self.io.do_styles))
 
-    def register_cmd(self, cmd):
+    def register_cmd(self, cmd: str) -> None:
         self.io.player_connection.player.store_input_line(cmd)
 
 
-def show_error_dialog(title, message):
+def show_error_dialog(title: str, message: str) -> None:
     """show a modal error dialog"""
-    root = Tk()
+    root = tkinter.Tk()
     root.withdraw()
     tkinter.messagebox.showerror(title, message)
     root.destroy()

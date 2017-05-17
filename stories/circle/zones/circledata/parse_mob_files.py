@@ -169,7 +169,7 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
                 actions=set(actionAttribs),
                 affection=set(affectAttribs),
                 extended={k.lower(): v for k, v in extendedMobArg.items()}
-                )
+            )
             mobs[mob.vnum] = mob
             readState = 'vNum'
 
