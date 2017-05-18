@@ -171,7 +171,7 @@ def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generato
             for item in items:
                 victim.remove(item, player)
                 item.destroy(ctx)
-                p("destroyed", item)
+                p("destroyed %s" % item)
             if victim.inventory_size:
                 p("Some items refused to be destroyed!")
         else:
@@ -303,13 +303,13 @@ def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         who = player
     else:
         raise ActionRefused("You can only return one person at a time.")
-    previous_location = getattr(who, "teleported_from", None)
+    previous_location = who.teleported_from
     if previous_location:
         player.tell("Returning <player>%s</> to <location>%s</>" % (who.name, previous_location.name))
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
         who.location.tell(room_msg, specific_targets={who}, specific_target_msg="You are sucked into it!")
-        del who.teleported_from
+        who.teleported_from = None
         who.move(previous_location, silent=True)
         who.tell_others("Suddenly, a shimmering portal opens!")
         who.tell_others("{Title} tumbles out of it, and the portal quickly closes again.")
@@ -365,7 +365,7 @@ items that are normally fixed in place (move item to playername)."""
     if thing in player:
         thing_container = player
     elif thing in player.location:
-        thing_container = player.location
+        thing_container = player.location       # type: ignore
     else:
         raise ParseError("There seems to be no <item>%s</> here." % thing.name)
     thing.move(target, player)
@@ -406,9 +406,9 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     if name == "":
         obj = player.location
     else:
-        obj = player.search_item(name, include_inventory=True, include_location=True)
+        obj = player.search_item(name, include_inventory=True, include_location=True)   # type: ignore
     if not obj:
-        obj = player.location.search_living(name)
+        obj = player.location.search_living(name)    # type: ignore
     if not obj:
         raise ActionRefused("Can't find %s." % name)
     player.tell(repr(obj), end=True)
@@ -508,8 +508,8 @@ def do_force(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     # simple check for verb validness
     if verb not in ctx.driver.current_verbs(target) and not player.soul.is_verb(verb) and verb not in target.location.exits:
         raise ParseError("You cannot let them do '%s'; I don't know that verb." % verb)
-    cmd = parsed.unparsed.partition(verb)
-    cmd = cmd[1] + cmd[2]
+    cmd_parts = parsed.unparsed.partition(verb)
+    cmd = cmd_parts[1] + cmd_parts[2]
     room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
     target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
     player.tell("You coerce <player>%s</> into following your orders." % target.title)

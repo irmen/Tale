@@ -152,7 +152,7 @@ class MoneyFormatter:
         raise ParseError("That is not an amount of money.")
 
 
-def parse_time(args: str) -> datetime.time:
+def parse_time(args: Sequence[str]) -> datetime.time:
     """parses a time from args like: 13:44:59, or like a duration such as 1h 30m 15s"""
     try:
         duration = parse_duration(args)
@@ -180,7 +180,7 @@ def parse_time(args: str) -> datetime.time:
                     raise ParseError("It's not clear what time you mean.")
 
 
-def parse_duration(args: str) -> datetime.timedelta:
+def parse_duration(args: Sequence[str]) -> datetime.timedelta:
     """parses a duration from args like: 1 hour 20 minutes 15 seconds (hour/h, minutes/min/m, seconds/sec/s)"""
     hours = minutes = seconds = 0
     if args:
@@ -331,7 +331,7 @@ class Context:
     A new instance of this context is passed to every command function and obj.destroy.
     Note that the player object isn't in here because it is already explicitly passed to these functions.
     """
-    def __init__(self, driver: Any, clock: datetime.datetime, config: Any, player_connection: Any) -> None:
+    def __init__(self, driver: Any, clock: GameDateTime, config: Any, player_connection: Any) -> None:
         self.driver = driver
         self.clock = clock
         self.config = config

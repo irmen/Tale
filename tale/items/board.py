@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import json
 import datetime
 from collections import deque
-from typing import Tuple, Dict, Any, Generator
+from typing import Tuple, Dict, Any, Generator, MutableSequence
 from ..base import Item, Living
 from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError

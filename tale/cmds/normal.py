@@ -9,7 +9,7 @@ import inspect
 import datetime
 import random
 import itertools
-from typing import Callable, Iterable, List, Tuple, Dict
+from typing import Callable, Iterable, List, Tuple, Dict, Generator, Union
 from .. import lang
 from .. import races
 from .. import util
@@ -24,7 +24,7 @@ from ..parseresult import ParseResult
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 
 all_commands = {}   # type: Dict[str, Callable]
-cmds_aliases = {}   # type: Dict[str, Tuple[str]]  # commands -> tuple of aliases
+cmds_aliases = {}   # type: Dict[str, Tuple[str, ...]]  # commands -> tuple of one or more aliases
 abbreviations = {}   # type: Dict[str, str]  # will be injected
 
 
@@ -120,7 +120,7 @@ def do_locate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("drop")
-def do_drop(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_drop(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Drop an item (or all items) you are carrying."""
     if not parsed.args:
         raise ParseError("Drop what?")
@@ -190,7 +190,7 @@ def do_empty(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         action = "dropped"
     elif container in player:
         # move the contents to the player's inventory
-        target = player
+        target = player     # type: ignore
         action = "took"
     else:
         raise ParseError("You can't seem to empty that.")
@@ -210,7 +210,7 @@ def do_empty(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("put", "place")
-def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Put an item (or all items) into something else. If you're not carrying the item, you will first pick it up."""
     p = player.tell
     if len(parsed.args) < 2:
@@ -229,7 +229,7 @@ def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
     else:
-        what = parsed.who_order[:-1]
+        what = list(parsed.who_order)[:-1]
         where = parsed.who_order[-1]
     if isinstance(where, base.Living):
         raise ActionRefused("You can't put stuff in <living>%s</>, try giving it to %s?" % (where.name, where.objective))
@@ -420,7 +420,7 @@ def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudOb
 
 
 def try_pick_up_living(player: Player, living: base.Living) -> None:
-    if player.stats.size - living.stats.size >= 2:
+    if player.stats.size - living.stats.size >= 2:    # XXX numeric compare of BodySize is broken atm
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
         player.tell("Even though {subj}'s small enough, you can't carry {obj} with you."
                     .format(subj=living.subjective, obj=living.objective))
@@ -453,7 +453,7 @@ def do_throw(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @cmd("give")
-def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Give something (or all things) you are carrying to someone else."""
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
@@ -486,7 +486,7 @@ def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
                         player_title = lang.capital(player.title)
                         room_msg = "<player>%s</> gave <living>%s</> some money." % (player_title, recipient.title)
                         recipient_msg = "<player>%s</> gave you <item>%s</>." % (player_title, amount_formatted)
-                        player.location.tell(room_msg, player, [recipient], recipient_msg)
+                        player.location.tell(room_msg, player, {recipient}, recipient_msg)
                         player.tell("You gave <living>%s</> <item>%s</>." % (recipient.title, amount_formatted))
                         return
                     else:
@@ -519,19 +519,19 @@ def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         raise ActionRefused("It's not clear who you want to give things to.")
     if isinstance(parsed.who_order[0], base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
-        what = parsed.who_order[1:]
-        give_stuff(player, what, None, target=parsed.who_order[0])
+        things = parsed.who_order[1:]
+        give_stuff(player, things, None, target=parsed.who_order[0])
         return
     elif isinstance(parsed.who_order[-1], base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
-        what = parsed.who_order[:-1]
-        give_stuff(player, what, None, target=parsed.who_order[-1])
+        things = parsed.who_order[:-1]
+        give_stuff(player, things, None, target=parsed.who_order[-1])
         return
     else:
         raise ActionRefused("It's not clear who you want to give things to.")
 
 
-def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, target: base.MudObject=None) -> None:
+def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, target: Union[base.Location, base.Living]=None) -> None:
     p = player.tell
     if not target:
         target = player.location.search_living(target_name)
@@ -680,7 +680,7 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             if item in player:
                 p("You're carrying <item>%s</>." % lang.a(item.title))
             elif container and container in player:
-                player.tell_object_location(player, item, container)
+                player.tell_object_location(player, item, True)
             else:
                 if not item.description:
                     p("You see <item>%s</>." % lang.a(item.title))
@@ -869,7 +869,7 @@ def do_wait(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 @cmd("quit", "leave")
 @disable_notify_action
-def do_quit(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_quit(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Quit the game."""
     if (yield "input", ("Are you sure you want to quit?", lang.yesno)):
         if ctx.config.server_mode != GameMode.MUD and ctx.config.savegames_enabled:
@@ -945,6 +945,7 @@ def do_open(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     what_name = parsed.args[0]
     with_item_name = None
     with_item = None
+    what = None  # type: base.MudObject
     if len(parsed.args) == 2:
         with_item_name = parsed.args[1]
     what = player.search_item(what_name, include_inventory=True, include_location=True, include_containers_in_inventory=False)
@@ -998,24 +999,24 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         found = True
         parsed = ParseResult(name)
         parsed.who_order = [player]
-        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
+        playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It is a soul emote you can do. <dim>%s: %s</>" % (name, playermessage))
         if name in AGGRESSIVE_VERBS:
             p("It might be regarded as offensive to certain people or beings.")
     if name in BODY_PARTS:
         found = True
         parsed = ParseResult("pat", who_order=[player], bodypart=name, message="hi")
-        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
+        playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It denotes a body part. <dim>pat myself %s -> %s</>" % (name, playermessage))
     if name in ACTION_QUALIFIERS:
         found = True
         parsed = ParseResult("smile", qualifier=name)
-        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
+        playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It is a qualifier for something. <dim>%s smile -> %s</>" % (name, playermessage))
     if name in lang.ADVERBS:
         found = True
         parsed = ParseResult("smile", adverb=name)
-        _, playermessage, roommessage, _ = player.soul.process_verb_parsed(player, parsed)
+        playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("That's an adverb you can use with the soul emote commands.")
         p("<dim>smile %s -> %s</>" % (name, playermessage))
     if name in races.races:
@@ -1314,9 +1315,9 @@ def do_time(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if "wizard" in player.privileges:
         real_time = datetime.datetime.now()
         real_time = real_time.replace(microsecond=0)
-        player.tell("The game time is:", ctx.clock)
+        player.tell("The game time is: %s" % ctx.clock)
         player.tell("\n")
-        player.tell("Real time is:", real_time)
+        player.tell("Real time is: %s" % real_time)
         return
     if ctx.config.display_gametime:
         for item in player.inventory:
@@ -1486,15 +1487,15 @@ def do_config(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         if not value:
             raise ParseError("You must provide a value.")
         if param == "delay":
-            value = int(value)
-            if 0 <= value <= 100:
-                player.output_line_delay = value
+            delay = int(value)
+            if 0 <= delay <= 100:
+                player.output_line_delay = delay
             else:
                 raise ActionRefused("Invalid delay value, range is 0..100")
         elif param == "width":
-            value = int(value)
-            if 40 <= value <= 200:
-                player.screen_width = value
+            width = int(value)
+            if 40 <= width <= 200:
+                player.screen_width = width
             else:
                 raise ActionRefused("Invalid screen width, range is 40..200")
         elif param == "styles":
@@ -1569,7 +1570,7 @@ def do_teststyles(player: Player, parsed: ParseResult, ctx: util.Context) -> Non
 
 @cmd("@change_password")
 @disabled_in_gamemode(GameMode.IF)
-def do_change_pw(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_change_pw(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Lets you change your account password."""
     player.tell("<it>Changing your password.</>")
     current_pw = yield "input-noecho", "Type your current password."
@@ -1583,7 +1584,7 @@ def do_change_pw(player: Player, parsed: ParseResult, ctx: util.Context) -> None
 
 @cmd("@change_email")
 @disabled_in_gamemode(GameMode.IF)
-def do_change_email(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_change_email(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Lets you change the email address on file for your account."""
     account = ctx.driver.mud_accounts.get(player.name)
     player.tell("<it>Changing your email. It is currently set to: %s</>" % account.email)

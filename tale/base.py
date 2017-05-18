@@ -699,7 +699,7 @@ class Stats:
         self.stat_prios = defaultdict(list)   # type: Dict[int, List[races.Stats]]
         r = races.races[self.race]
         for stat, (_, prio) in r.stats._asdict().items():
-            self.stat_prios[prio].append(stat)      # XXX type error
+            self.stat_prios[prio].append(stat)      # XXX type error str/Stats
         self.bodytype = r.body
         self.language = r.language
         self.weight = r.mass
@@ -729,6 +729,7 @@ class Living(MudObject):
         self.__inventory = set()   # type: Set[Item]
         self.previous_commandline = None   # type: str
         self._previous_parse = None  # type: ParseResult
+        self.teleported_from = None   # type: Location   # used by teleport/return commands
         super().__init__(name, title, description, short_description)
 
     def init_gender(self, gender: str) -> None:
@@ -922,7 +923,7 @@ class Living(MudObject):
             if parsed.qualifier not in verbdefs.NEGATING_QUALIFIERS:
                 for living in who:   # XXX who can contain Living, Item, Location...?
                     if living.aggressive:   # XXX not every 'who' has this attr
-                        pending_actions.send(lambda victim=self: living.start_attack(victim))
+                        pending_actions.send(lambda victim=self: living.start_attack(victim))     # XXX start_attack not everywhere available
 
     @util.authorized("wizard")
     def do_forced_cmd(self, actor: 'Living', parsed: ParseResult, ctx: util.Context) -> None:
@@ -1009,7 +1010,7 @@ class Living(MudObject):
         return item  # skip the container
 
     def locate_item(self, name: str, include_inventory: bool=True, include_location: bool=True,
-                    include_containers_in_inventory: bool=True) -> Tuple[Item, MudObject]:
+                    include_containers_in_inventory: bool=True) -> Tuple[Item, Union[Location, 'Container', 'Living']]:
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -1018,7 +1019,7 @@ class Living(MudObject):
         if not name:
             raise ValueError("name must be given")
         found = None  # type: Item
-        containing_object = None  # type: MudObject
+        containing_object = None   # type: Union[Location, Container, 'Living']
         if include_inventory:
             containing_object = self
             found = Item.search_item(name, self.__inventory)
@@ -1028,7 +1029,7 @@ class Living(MudObject):
         if not found and include_containers_in_inventory:
             # check if an item in the inventory might contain it
             for container in self.__inventory:
-                containing_object = container
+                containing_object = container    # type: ignore
                 try:
                     inventory = container.inventory
                 except ActionRefused:

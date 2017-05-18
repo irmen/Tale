@@ -13,6 +13,7 @@ from functools import total_ordering
 @total_ordering
 class BodySize(enum.Enum):
     # The size of a creature's body. You can compare the sizes. They're defined in small-to-large order.
+    # XXX numeric compare of BodySize is broken atm, see try_pick_up_living command
     MICROSCOPIC = "microscopic"
     MINISCULE = "miniscule"
     TINY = "tiny"
