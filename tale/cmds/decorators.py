@@ -63,8 +63,14 @@ def wizcmd(func):
 def cmdfunc_signature_valid(func: Callable) -> bool:
     # the signature of a command function must be exactly this:  def func(player, parsed, ctx) -> None
     sig = inspect.signature(func)
+    is_generator = inspect.isgeneratorfunction(func)
+    if is_generator and sig.return_annotation is not Generator:
+        return False
+    elif not is_generator and sig.return_annotation not in [sig.empty, None]:
+        return False
     expected_params = ["player", "parsed", "ctx"]
-    if list(sig.parameters) != expected_params or sig.return_annotation not in (sig.empty, None, Generator):
+    if list(sig.parameters) != expected_params:
+        print("params err")
         return False
     return all(sig.parameters[p].default is sig.empty and
                sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
