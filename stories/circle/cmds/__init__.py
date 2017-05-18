@@ -30,7 +30,7 @@ def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         room = make_location(vnum)
     except KeyError:
         raise ActionRefused("No room with that vnum exists.")
-    player.tell("Teleporting to room", room, "...")
+    player.tell("Teleporting to room {}...".format(room))
     player.tell("\n")
     player.move(room, actor=player)
     player.look()
@@ -71,7 +71,7 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         vnum = obj.vnum
         player.tell("Vnum of %s = %d." % (obj, vnum))
     except AttributeError:
-        player.tell(obj, "has no vnum.")
+        player.tell("{} has no vnum.".format(obj))
 
 
 @wizcmd

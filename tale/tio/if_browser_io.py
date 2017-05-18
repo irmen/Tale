@@ -11,7 +11,7 @@ from html import escape as html_escape
 from urllib.parse import parse_qs
 from hashlib import md5
 from email.utils import formatdate, parsedate
-from typing import Iterable, Tuple, Any, Optional, Dict, Union, Sequence, Callable, List
+from typing import Iterable, Tuple, Any, Optional, Dict, Callable, List
 from . import iobase
 from . import vfs
 from ..player import PlayerConnection
@@ -42,7 +42,7 @@ style_tags_html = {
 }
 
 
-def singlyfy_parameters(parameters: Dict[str, Union[str, Sequence[str]]]) -> Dict[str, Union[str, Sequence[str]]]:
+def squash_parameters(parameters: Dict[str, Any]) -> Dict[str, Any]:
     """
     Makes a cgi-parsed parameter dictionary into a dict where the values that
     are just a list of a single value, are converted to just that single value.
@@ -72,7 +72,7 @@ class HttpIo(iobase.IoAdapterBase):
         from threading import Thread
         url = "http://%s:%d/tale/" % self.wsgi_server.server_address
         print("\nAccess the game on this web server url:  ", url, end="\n\n")
-        t = Thread(target=webbrowser.open, args=(url, ))
+        t = Thread(target=webbrowser.open, args=(url, ))   # type: ignore
         t.daemon = True
         t.start()
         while not self.stop_main_loop:
@@ -166,7 +166,7 @@ class TaleWsgiAppBase:
                     qs = inputstream.read(clength).decode("utf-8")
                 elif method == "GET":
                     qs = environ.get("QUERY_STRING", "")
-                parameters = singlyfy_parameters(parse_qs(qs, encoding="UTF-8"))
+                parameters = squash_parameters(parse_qs(qs, encoding="UTF-8"))
                 return self.wsgi_route(environ, path[5:], parameters, start_response)
             else:
                 return self.wsgi_invalid_request(start_response)
@@ -195,12 +195,12 @@ class TaleWsgiAppBase:
     def wsgi_invalid_request(self, start_response: WsgiStartResponseType) -> Iterable[str]:
         """Called if invalid http method."""
         start_response('405 Method Not Allowed', [('Content-Type', 'text/plain')])
-        return [b'Error 405: Method Not Allowed']
+        return [b'Error 405: Method Not Allowed']       # XXX bytes/str?
 
     def wsgi_not_found(self, start_response: WsgiStartResponseType) -> Iterable[str]:
         """Called if Url not found."""
         start_response('404 Not Found', [('Content-Type', 'text/plain')])
-        return [b'Error 404: Not Found']
+        return [b'Error 404: Not Found']          # XXX bytes/str?
 
     def wsgi_redirect(self, start_response: Callable, target: str) -> Iterable[str]:
         """Called to do a redirect"""
@@ -220,7 +220,15 @@ class TaleWsgiAppBase:
     def wsgi_internal_server_error(self, start_response: Callable, message: str="") -> Iterable[str]:
         """Called when an internal server error occurred"""
         start_response('500 Internal server error', [])
-        return [message.encode("utf-8")]
+        return [message.encode("utf-8")]          # XXX bytes/str?
+
+    def wsgi_handle_about(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                          start_response: WsgiStartResponseType) -> Iterable[str]:
+        raise NotImplementedError("implement this in subclass")   # about page
+
+    def wsgi_handle_quit(self, environ: Dict[str, Any], parameters: Dict[str, str],
+                         start_response: WsgiStartResponseType) -> Iterable[str]:
+        raise NotImplementedError("implement this in subclass")   # quit/logged out page
 
     def wsgi_handle_start(self, environ: Dict[str, Any], parameters: Dict[str, str],
                           start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -237,7 +245,7 @@ class TaleWsgiAppBase:
                                    story_name=self.driver.story.config.name,
                                    story_author=self.driver.story.config.author,
                                    story_author_email=self.driver.story.config.author_address)
-        return [txt.encode("utf-8")]
+        return [txt.encode("utf-8")]           # XXX bytes/str?
 
     def wsgi_handle_story(self, environ: Dict[str, Any], parameters: Dict[str, str],
                           start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -253,7 +261,7 @@ class TaleWsgiAppBase:
                                    story_name=self.driver.story.config.name,
                                    story_author=self.driver.story.config.author,
                                    story_author_email=self.driver.story.config.author_address)
-        return [txt.encode("utf-8")]
+        return [txt.encode("utf-8")]       # XXX bytes/str?
 
     def wsgi_handle_text(self, environ: Dict[str, Any], parameters: Dict[str, str],
                          start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -272,7 +280,7 @@ class TaleWsgiAppBase:
             response["turns"] = conn.player.turns
             response["location"] = conn.player.location.title
             response["special"] = special
-        return [json.dumps(response).encode("utf-8")]
+        return [json.dumps(response).encode("utf-8")]           # XXX bytes/str?
 
     def wsgi_handle_tabcomplete(self, environ: Dict[str, Any], parameters: Dict[str, str],
                                 start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -284,7 +292,7 @@ class TaleWsgiAppBase:
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
                                   ('Expires', '0')])
-        return [json.dumps(conn.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]
+        return [json.dumps(conn.io.tab_complete(parameters["prefix"], self.driver)).encode("utf-8")]        # XXX bytes/str?
 
     def wsgi_handle_input(self, environ: Dict[str, Any], parameters: Dict[str, str],
                           start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -329,7 +337,7 @@ class TaleWsgiAppBase:
                                    story_name=self.driver.story.config.name,
                                    story_author=self.driver.story.config.author,
                                    story_author_email=self.driver.story.config.author_address)
-        return [txt.encode("utf-8")]
+        return [txt.encode("utf-8")]          # XXX bytes/str?
 
     def wsgi_handle_static(self, environ: Dict[str, Any], path: str, start_response: WsgiStartResponseType) -> Iterable[str]:
         path = path[len("static/"):]
@@ -344,7 +352,7 @@ class TaleWsgiAppBase:
         return path.endswith(".html") or path.endswith(".js") or path.endswith(".jpg") \
             or path.endswith(".png") or path.endswith(".gif") or path.endswith(".css") or path.endswith(".ico")
 
-    def etag(self, *components: Iterable[Any]) -> str:
+    def etag(self, *components: Any) -> str:
         return '"' + md5("-".join(str(c) for c in components).encode("ascii")).hexdigest() + '"'
 
     def wsgi_serve_static(self, path: str, environ: Dict[str, Any], start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -370,7 +378,7 @@ class TaleWsgiAppBase:
             headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
             data = resource.data.encode("utf-8")
         start_response('200 OK', headers)
-        return [data]
+        return [data]           # XXX bytes/str?
 
 
 class TaleWsgiApp(TaleWsgiAppBase):
@@ -397,7 +405,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
         # Quit/logged out page. For single player, simply close down the whole driver.
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.driver._stop_driver()
-        return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]
+        return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]    # XXX bytes/str?
 
     def wsgi_handle_about(self, environ: Dict[str, Any], parameters: Dict[str, str],
                           start_response: WsgiStartResponseType) -> Iterable[str]:
@@ -411,7 +419,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
                                    story_name=self.driver.story.config.name,
                                    uptime="%d:%02d:%02d" % self.driver.uptime,
                                    starttime=self.driver.server_started)
-        return [txt.encode("utf-8")]
+        return [txt.encode("utf-8")]         # XXX bytes/str?
 
 
 class CustomRequestHandler(WSGIRequestHandler):
@@ -424,7 +432,7 @@ class CustomWsgiServer(WSGIServer):
 
 
 class SessionMiddleware:
-    def __init__(self, app: Callable) -> None:
+    def __init__(self, app):
         self.app = app
 
     def __call__(self, environ: Dict[str, Any], start_response: WsgiStartResponseType) -> None:

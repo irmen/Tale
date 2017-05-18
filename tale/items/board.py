@@ -160,7 +160,7 @@ class BulletinBoard(Item):
                     "subject": subject,
                     "text": text
                 }
-                self.posts.appendleft(post)
+                self.posts.appendleft(post)   # type: ignore
                 self.save()
                 actor.tell("\n")
                 actor.tell("You've added the message on top of the list on the %s." % self.name)

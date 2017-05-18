@@ -12,11 +12,9 @@ import threading
 import tkinter
 import tkinter.font
 import tkinter.messagebox
-from typing import Iterable, Tuple, Any, Optional, Sequence, MutableSequence
+from typing import Iterable, Tuple, Any, Optional
 from . import iobase
 from . import vfs
-from ..player import PlayerConnection, Player
-from ..story import StoryConfig
 from .. import mud_context
 from .. import __version__ as tale_version
 from ..util import format_traceback
@@ -24,16 +22,20 @@ from ..util import format_traceback
 __all__ = ["TkinterIo"]
 
 
+# note: mypy doesn't deal with tkinter very well (complains about tkinter.font not existing and lots of other things)
+# so this module doesn't contain any tkinter type hints because they're a royal pain or require lots of @no_type_check  decorations.
+
+
 class TkinterIo(iobase.IoAdapterBase):
     """
     Tkinter-GUI based Input/Output adapter.
     """
-    def __init__(self, config: StoryConfig, player_connection: PlayerConnection) -> None:
+    def __init__(self, config, player_connection) -> None:
         super().__init__(player_connection)
         self.gui = TaleGUI(self, config)
         self.textwrapper = textwrap.TextWrapper()
 
-    def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
+    def singleplayer_mainloop(self, player_connection) -> None:
         """Main event loop for this I/O adapter for single player mode"""
         self.gui.mainloop(player_connection)
 
@@ -57,7 +59,7 @@ class TkinterIo(iobase.IoAdapterBase):
     def gui_terminated(self) -> None:
         self.gui = None
 
-    def abort_all_input(self, player: Player) -> None:
+    def abort_all_input(self, player) -> None:
         """abort any blocking input, if at all possible"""
         player.store_input_line("")
 
@@ -96,7 +98,8 @@ class TkinterIo(iobase.IoAdapterBase):
 
 class TaleWindow(tkinter.Toplevel):
     """The actual gui-window, containing the output text and the input command bar."""
-    def __init__(self, gui: 'TaleGUI', parent: tkinter.Tk, title: str, text: str, modal: bool=False) -> None:
+
+    def __init__(self, gui, parent, title, text, modal=False):
         super().__init__(parent)
         self.gui = gui
         self.configure(borderwidth=5)
@@ -134,7 +137,7 @@ class TaleWindow(tkinter.Toplevel):
         else:
             self.tk.call('wm', 'iconphoto', self, img)
 
-        self.history = collections.deque(maxlen=100)    # type: MutableSequence[str]
+        self.history = collections.deque(maxlen=100)
         self.history.append("")
         self.history_idx = 0
         if modal:
@@ -143,7 +146,7 @@ class TaleWindow(tkinter.Toplevel):
             self.wait_window()
         self.update_lock = threading.Lock()
 
-    def CreateWidgets(self) -> None:
+    def CreateWidgets(self):
         frameText = tkinter.Frame(self, relief=tkinter.SUNKEN, height=700)
         frameCommands = tkinter.Frame(self, relief=tkinter.SUNKEN)
         self.scrollbarView = tkinter.Scrollbar(frameText, orient=tkinter.VERTICAL, takefocus=tkinter.FALSE, highlightthickness=0)
@@ -186,32 +189,31 @@ class TaleWindow(tkinter.Toplevel):
         frameCommands.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         self.commandEntry.focus_set()
 
-    def FindFont(self, families: Sequence[str], size: float, weight: str=tkinter.font.NORMAL,
-                 slant: str=tkinter.font.ROMAN, underlined: bool=False) -> Optional[tkinter.font.Font]:
+    def FindFont(self, families, size, weight=tkinter.font.NORMAL, slant=tkinter.font.ROMAN, underlined=False):
         fontfamilies = tkinter.font.families()
         for family in families:
             if family in fontfamilies:
                 return tkinter.font.Font(family=family, size=size, weight=weight, slant=slant, underline=underlined)
         return None
 
-    def f1_pressed(self, e: tkinter.Event) -> None:
+    def f1_pressed(self, e):
         self.commandEntry.delete(0, tkinter.END)
         self.commandEntry.insert(0, "help")
         self.commandEntry.event_generate("<Return>")
 
-    def up_pressed(self, e: tkinter.Event) -> None:
+    def up_pressed(self, e):
         self.history_idx = max(0, self.history_idx - 1)
         if self.history_idx < len(self.history):
             self.commandEntry.delete(0, tkinter.END)
             self.commandEntry.insert(0, self.history[self.history_idx])
 
-    def down_pressed(self, e: tkinter.Event) -> None:
+    def down_pressed(self, e):
         self.history_idx = min(len(self.history) - 1, self.history_idx + 1)
         if self.history_idx < len(self.history):
             self.commandEntry.delete(0, tkinter.END)
             self.commandEntry.insert(0, self.history[self.history_idx])
 
-    def user_cmd(self, e: tkinter.Event) -> None:
+    def user_cmd(self, e):
         cmd = self.commandEntry.get().strip()
         if cmd:
             self.write_line("", self.gui.io.do_styles)
@@ -223,13 +225,13 @@ class TaleWindow(tkinter.Toplevel):
                 self.history.append(cmd)
             self.history_idx = len(self.history)
 
-    def clear_text(self) -> None:
+    def clear_text(self):
         with self.update_lock:
             self.textView.config(state=tkinter.NORMAL)
             self.textView.delete(1.0, tkinter.END)
             self.textView.config(state=tkinter.DISABLED)
 
-    def write_line(self, line: str, do_styles: bool) -> None:
+    def write_line(self, line, do_styles):
         with self.update_lock:
             if do_styles:
                 words = re.split(r"(<\S+?>)", line)
@@ -262,23 +264,24 @@ class TaleWindow(tkinter.Toplevel):
                 self.textView.config(state=tkinter.DISABLED)
             self.textView.yview(tkinter.END)
 
-    def quit_button_clicked(self, event: tkinter.Event=None) -> None:
+    def quit_button_clicked(self, event=None):
         quit = tkinter.messagebox.askokcancel("Quit Confirmation",
                                               "Quitting like this will abort your game.\nYou will lose your progress. Are you sure?",
                                               master=self)
         if quit:
             self.gui.destroy(True)
-            self.gui.window_closed()
+            self.gui.window_closed()     # XXX eventually causes a crash when tell is called on a player object that is already None
 
-    def disable_input(self) -> None:
+    def disable_input(self):
         self.commandEntry.config(state=tkinter.DISABLED)
 
 
 class TaleGUI:
     """Helper class to set up the gui and connect events."""
-    def __init__(self, io: TkinterIo, config: StoryConfig) -> None:
+
+    def __init__(self, io, storyconfig):
         self.io = io
-        self.server_config = config
+        self.server_config = storyconfig
         self.root = tkinter.Tk()
         window_title = "{name}  {version}  |  Tale IF {taleversion}".format(
             name=self.server_config.name,
@@ -291,8 +294,8 @@ class TaleGUI:
         self.root.update()
         self.install_tab_completion()
 
-    def install_tab_completion(self) -> None:
-        def tab_pressed(event: tkinter.Event) -> Any:
+    def install_tab_completion(self):
+        def tab_pressed(event):
             begin, _, prefix = event.widget.get().rpartition(" ")
             candidates = self.io.tab_complete(prefix, mud_context.driver)
             if candidates:
@@ -309,7 +312,7 @@ class TaleGUI:
             return "break"  # stop event propagation
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
-    def mainloop(self, player_connection: PlayerConnection) -> None:
+    def mainloop(self, player_connection):
         self.root.mainloop()   # tkinter main loop
         self.window = None
         self.root = None
@@ -349,7 +352,7 @@ class TaleGUI:
         self.io.player_connection.player.store_input_line(cmd)
 
 
-def show_error_dialog(title: str, message: str) -> None:
+def show_error_dialog(title, message):
     """show a modal error dialog"""
     root = tkinter.Tk()
     root.withdraw()

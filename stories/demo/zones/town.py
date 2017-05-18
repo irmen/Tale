@@ -223,7 +223,7 @@ class Computer(Item):
                     else:
                         message = "COMMAND INVALID - DOOR ALREADY UNLOCKED"
                 else:
-                    if door.locked:
+                    if door.locked:    # XXX only doors can be unlocked, what if we try it on an exit?
                         message = "COMMAND INVALID - DOOR ALREADY LOCKED"
                     else:
                         door.locked = True

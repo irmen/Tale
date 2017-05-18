@@ -75,7 +75,7 @@ class Player(base.Living, pubsub.Listener):
         """
         self.story_complete = True
 
-    def tell(self, *messages: str, **kwargs: Any) -> base.Living:
+    def tell(self, *messages: str, **kwargs: Any) -> base.Living:       # XXX simplify by no longer allowing multiple messages?
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.

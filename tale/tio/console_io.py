@@ -205,7 +205,7 @@ class ReadlineTabCompleter:
         self.candidates = []   # type: List[str]
         self.prefix = None
 
-    def complete(self, prefix: str, index: int=None) -> Union[Optional[str], List[str]]:        # XXX strange return type
+    def complete(self, prefix: str, index: int=None) -> Union[Optional[str], List[str]]:        # XXX strange return type, incompatible with readline module?
         if not prefix:
             return None
         if prefix != self.prefix:

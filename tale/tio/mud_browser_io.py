@@ -200,10 +200,10 @@ class SessionMiddleware:
             # clear the browser cookie
             cookies = SimpleCookie()  # type: ignore
             cookies["session_id"] = "deleted"
-            cookie = cookies["session_id"]  # type: MutableMapping
-            cookie["path"] = cookie_path
-            cookie["httponly"] = "1"
-            cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
+            old_cookie = cookies["session_id"]  # type: MutableMapping      # XXX ehmm didn't we just set it to "deleted"?
+            old_cookie["path"] = cookie_path
+            old_cookie["httponly"] = "1"
+            old_cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
             response_headers = [('Content-Type', x.content_type)]
             response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
             start_response("200 OK", response_headers)
