@@ -18,8 +18,8 @@ class Story(StoryBase):
     config.name = "Zed is me"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.3"
-    config.requires_tale = "3.0"
+    config.version = "1.4"
+    config.requires_tale = "3.1"
     config.supported_modes = {GameMode.IF}
     config.player_name = "julie"
     config.player_gender = "f"

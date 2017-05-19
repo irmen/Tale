@@ -19,8 +19,8 @@ class Story(StoryBase):
     config.name = "Tale Demo"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.4"
-    config.requires_tale = "3.0"
+    config.version = "1.5"
+    config.requires_tale = "3.1"
     config.supported_modes = {GameMode.IF, GameMode.MUD}
     config.player_money = 15.5
     config.money_type = MoneyType.MODERN
