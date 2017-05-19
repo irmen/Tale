@@ -98,8 +98,8 @@ def fullstop(sentence: str, punct: str=".") -> str:
 
 
 # adverbs are stored in a datafile next to this module
-ADVERB_LIST = sorted(vfs.internal_resources["soul_adverbs.txt"].data.splitlines())   # keep the list for prefix search
-ADVERBS = frozenset(ADVERB_LIST)
+__ADVERB_LIST = list(sorted(vfs.internal_resources["soul_adverbs.txt"].data.splitlines()))   # type: ignore  # is used for prefix search
+ADVERBS = frozenset(__ADVERB_LIST)
 
 
 def adverb_by_prefix(prefix: str, amount: int=5) -> List[str]:
@@ -107,16 +107,16 @@ def adverb_by_prefix(prefix: str, amount: int=5) -> List[str]:
     Return a list of adverbs starting with the given prefix, up to the given amount
     Uses binary search in the sorted adverbs list, O(log n)
     """
-    i = bisect.bisect_left(ADVERB_LIST, prefix)
-    if i >= len(ADVERB_LIST):
+    i = bisect.bisect_left(__ADVERB_LIST, prefix)
+    if i >= len(__ADVERB_LIST):
         return []
-    elif ADVERB_LIST[i].startswith(prefix):
+    elif __ADVERB_LIST[i].startswith(prefix):
         j = i + 1
-        amount = min(amount, len(ADVERB_LIST) - i)   # avoid reading past the end of the list
-        while amount > 1 and ADVERB_LIST[j].startswith(prefix):
+        amount = min(amount, len(__ADVERB_LIST) - i)   # avoid reading past the end of the list
+        while amount > 1 and __ADVERB_LIST[j].startswith(prefix):
             j += 1
             amount -= 1
-        return ADVERB_LIST[i:j]
+        return __ADVERB_LIST[i:j]
     else:
         return []
 

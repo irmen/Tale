@@ -11,6 +11,7 @@ import sys
 import errno
 import mimetypes
 import pkgutil
+import pathlib
 from typing import ByteString, Union, IO, Any
 
 
@@ -46,14 +47,14 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     If not readonly, you can write data as well. The API is loosely based on a dict.
     Can be based off an already imported module, or from a file system path somewhere else.
     """
-    def __init__(self, root_package: str=None, root_path: str=None, readonly: bool=True) -> None:
+    def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None, readonly: bool=True) -> None:
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
         if not readonly and not root_path:
             raise ValueError("Read-write vfs requires path string")
         self.readonly = readonly
         if root_path:
-            self.root = os.path.abspath(os.path.normpath(root_path))
+            self.root = os.path.abspath(os.path.normpath(str(root_path)))
             self.use_pkgutil = False
             if not os.path.isdir(self.root):
                 raise VfsError("root path doesn't exist: ", self.root)

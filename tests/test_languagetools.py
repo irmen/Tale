@@ -66,7 +66,6 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("key, bike, key, and bike", lang.join(["key", "bike"] * 2, group_multi=False))
 
     def testAdverbs(self):
-        self.assertTrue(len(lang.ADVERB_LIST) > 0)
         self.assertTrue("noisily" in lang.ADVERBS)
         self.assertFalse("zzzzzzzzzz" in lang.ADVERBS)
         self.assertEqual(['nobly', 'nocturnally', 'noiselessly', 'noisily', 'nominally'], lang.adverb_by_prefix("no", 5))

@@ -258,7 +258,7 @@ def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     else:
         # target is a player (or @start - the wizard starting location)
         if args[0] == "@start":
-            teleport_to(player, ctx.config.startlocation_wizard)
+            teleport_to(player, ctx.driver._lookup_location(ctx.config.startlocation_wizard))
         else:
             target = ctx.driver.search_player(args[0])
             if not target:

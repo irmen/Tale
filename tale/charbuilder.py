@@ -19,6 +19,7 @@ class PlayerNaming:
         self._name = self.title = self.gender = self.description = None  # type: str
         self.money = mud_context.config.player_money
         self.stats = Stats()
+        self.wizard = False
 
     def apply_to(self, player: Player) -> None:
         assert self._name

@@ -450,7 +450,7 @@ def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, de
         return result
 
 
-def excepthook(ex_type: Type, ex_value: Any, ex_tb: Any) -> None:
+def excepthook(ex_type, ex_value, ex_tb):
     """An exception hook you can use for ``sys.excepthook``, to automatically print detailed tracebacks"""
     traceback = "".join(format_traceback(ex_type, ex_value, ex_tb, detailed=True, with_self=False))
     sys.stderr.write(traceback)
