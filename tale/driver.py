@@ -171,9 +171,10 @@ class Driver(pubsub.Listener):
         if self.story.config.server_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and some other stuff in the global context.
+        self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
         mud_context.driver = self
         mud_context.config = self.story.config
-        self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
+        mud_context.resources = self.resources
         # check for existence of cmds package in the story root
         loader = pkgutil.get_loader("cmds")
         if loader:
@@ -247,6 +248,8 @@ class Driver(pubsub.Listener):
         # Kick off the appropriate driver main event loop.
         # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
+        num_critical_errors = 0
+        time_of_last_critical_error = 0.0
         while not self.__stop_mainloop:
             try:
                 if self.story.config.server_mode == GameMode.IF:
@@ -266,6 +269,15 @@ class Driver(pubsub.Listener):
             except:
                 # other exceptions are logged but don't break the server loop (hopefully the game can continue)
                 # @todo only print it to the player that caused the error (if possible) + to the error log
+                num_critical_errors += 1
+                last, time_of_last_critical_error = time_of_last_critical_error, time.time()
+                if time_of_last_critical_error - last > 1.0:
+                    num_critical_errors = 1  # reset critical error count due to low frequency
+                if num_critical_errors > 10:
+                    msg = "aborting driver main loop due to excessive number of critical errors"
+                    sys.stderr.write(msg+"\n\n")
+                    self._stop_driver()
+                    raise errors.TaleError(msg)
                 print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.format_traceback()), file=sys.stderr)
                 for conn in self.all_players.values():
                     conn.critical_error()
@@ -685,22 +697,22 @@ class Driver(pubsub.Listener):
                     conn.player.tell(txt, format=False)
                     conn.player.tell("<rev><it>Please report this problem.</>")
                     del txt
-            # sync pubsub events
-            pubsub.sync("driver-pending-tells")
-            # server TICK
-            now = time.time()
-            if now - previous_server_tick >= self.story.config.server_tick_time:
-                try:
+            try:
+                # sync pubsub pending tells
+                pubsub.sync("driver-pending-tells")
+                # server TICK
+                now = time.time()
+                if now - previous_server_tick >= self.story.config.server_tick_time:
                     self.__server_tick()
-                except errors.StoryCompleted:
-                    # completing the story can also be done from a delayed action
-                    story_completed()
-                    break
-                previous_server_tick = now
-            if self.story.config.server_tick_method == TickMethod.COMMAND:
-                # Even though the server tick may be skipped, the pubsub events
-                # should be processed every player command no matter what.
-                pubsub.sync()
+                    previous_server_tick = now
+                if self.story.config.server_tick_method == TickMethod.COMMAND:
+                    # Even though the server tick may be skipped, the pubsub events
+                    # should be processed every player command no matter what.
+                    pubsub.sync()
+            except errors.StoryCompleted:
+                # completing the story can also be done from a deferred action or pubsub event
+                story_completed()
+                break
             loop_duration = time.time() - loop_start
             self.server_loop_durations.append(loop_duration)
             conn.write_output()

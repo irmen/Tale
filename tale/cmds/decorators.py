@@ -31,7 +31,7 @@ def cmd(func):
             func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
         return func
     else:
-        raise SyntaxError("invalid cmd function signature: " + func.__name__)
+        raise SyntaxError("invalid cmd function signature or missing docstring: " + func.__name__)
 
 
 def wizcmd(func):
@@ -62,6 +62,9 @@ def wizcmd(func):
 
 def cmdfunc_signature_valid(func: Callable) -> bool:
     # the signature of a command function must be exactly this:  def func(player, parsed, ctx) -> None
+    # and it must have a docstring comment.
+    if not func.__doc__:
+        return False
     sig = inspect.signature(func)
     is_generator = inspect.isgeneratorfunction(func)
     if is_generator and sig.return_annotation is not Generator:
@@ -72,6 +75,17 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
     if list(sig.parameters) != expected_params:
         print("params err")
         return False
+    # if there is type information, it should be correct
+    ann = sig.parameters["player"].annotation
+    if ann is not sig.empty and ann is not player.Player:
+        return False
+    ann = sig.parameters["parsed"].annotation
+    if ann is not sig.empty and ann is not ParseResult:
+        return False
+    ann = sig.parameters["ctx"].annotation
+    if ann is not sig.empty and ann is not util.Context:
+        return False
+    # check param types
     return all(sig.parameters[p].default is sig.empty and
                sig.parameters[p].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD for p in expected_params)
 

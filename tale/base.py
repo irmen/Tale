@@ -848,7 +848,7 @@ class Living(MudObject):
         return self
 
     def tell_later(self, *messages: str, **kwargs: Any) -> None:
-        """Tell something to this actor, but do it after other messages."""
+        """Tell something to this creature, but do it after all other messages."""
         pending_tells.send(lambda: self.tell(*messages, **kwargs))
 
     def tell_others(self, *messages: str) -> None:

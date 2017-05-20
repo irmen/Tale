@@ -162,21 +162,25 @@ class TestVarious(unittest.TestCase):
 @cmd
 @disabled_in_gamemode(GameMode.IF)
 def func1(player, parsed, ctx):
+    """docstring1"""
     pass
 
 
 @cmd
 def func2(player, parsed, ctx):
+    """docstring2"""
     pass
 
 
 @cmd
 def func3(player, parsed, ctx):
+    """docstring3"""
     pass
 
 
 @wizcmd
 def func4(player, parsed, ctx):
+    """docstring4"""
     pass
 
 

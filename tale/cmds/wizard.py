@@ -57,7 +57,7 @@ def wizcmd(command: str, *aliases: str) -> Callable:
                 all_commands[alias] = executewizcommand
             return executewizcommand
         else:
-            raise SyntaxError("invalid wizcmd function signature for: " + func.__name__)
+            raise SyntaxError("invalid wizcmd function signature or missing docstring: " + func.__name__)
     return wizcmd2
 
 

@@ -51,7 +51,7 @@ def cmd(command: str, *aliases: str) -> Callable:
                 all_commands[alias] = func
             return func
         else:
-            raise SyntaxError("invalid cmd function signature for: " + func.__name__)
+            raise SyntaxError("invalid cmd function signature or missing docstring: " + func.__name__)
     return cmd2
 
 
