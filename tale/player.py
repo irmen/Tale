@@ -92,7 +92,7 @@ class Player(base.Living, pubsub.Listener):
         """
         if not reformat:
             raise NotImplementedError("unformatted text file printing not yet supported")   # XXX add this
-        for paragraph in file_resource.data.split("\n\n"):
+        for paragraph in file_resource.data.split("\n\n"):   # type: ignore
             if paragraph.startswith("\n"):
                 self.tell("\n")
             self.tell(paragraph, end=True)
@@ -199,8 +199,7 @@ class Player(base.Living, pubsub.Listener):
         if file:
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
-            file = "transcripts/"+file
-            self.transcript = vfs.open_write(file, mimetype="text/plain", append=True)
+            self.transcript = vfs.open_write("transcripts/" + file, mimetype="text/plain", append=True)
             self.tell("Transcript is being written to", self.transcript.name)
             self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
         else:

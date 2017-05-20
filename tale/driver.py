@@ -64,12 +64,16 @@ class Deferred:
         self.vargs = vargs
         self.kwargs = kwargs
 
-    def __eq__(self, other: Any) -> bool:
-        return self.due == other.due and type(self.owner) == type(other.owner)\
-            and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return self.due == other.due and type(self.owner) == type(other.owner)\
+                and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
+        return NotImplemented
 
-    def __lt__(self, other: Any) -> bool:
-        return self.due < other.due   # deferreds must be sortable
+    def __lt__(self, other):
+        if self.__class__ == other.__class__:
+            return self.due < other.due   # deferreds must be sortable
+        return NotImplemented
 
     def when_due(self, game_clock: util.GameDateTime, realtime: bool=False) -> datetime.timedelta:
         """

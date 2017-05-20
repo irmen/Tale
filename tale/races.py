@@ -42,7 +42,7 @@ class BodySize(enum.Enum):
 
     def adjust(self, steps: int) -> 'BodySize':
         order = self.order + steps
-        for size in self.__class__.__members__.values():
+        for size in BodySize.__members__.values():      # type: ignore
             if size.order == order:
                 return size
         raise LookupError("there is no BodySize for the resulting numeric size")

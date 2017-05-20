@@ -9,7 +9,7 @@ with certain key events and actions that the player performed earlier.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Sequence, Optional, Any, List
+from typing import Sequence, Optional, Any, List, Union
 from .base import Location, Living
 
 
@@ -24,12 +24,14 @@ class Hint:
         self.location = location
         self.text = text
 
-    def active(self, checkpoints: Sequence[str], player: Living) -> bool:
+    def active(self, checkpoints: Sequence[str], player: Living) -> Union[bool, None]:
         """override and return True/False to enable/disable the hint for specific checkpoints or player state"""
         return None  # default implementation does nothing
 
     def __eq__(self, other: Any) -> bool:
-        return vars(self) == vars(other)
+        if self.__class__ == other.__class__:
+            return vars(self) == vars(other)
+        return NotImplemented
 
 
 class HintSystem:
@@ -47,22 +49,25 @@ class HintSystem:
     def has_hints(self) -> bool:
         return len(self.all_hints) > 0
 
-    def checkpoint(self, checkpoint: str, recap_message: str=None) -> None:
+    def checkpoint(self, checkpoint: str, recap_message: str=None) -> bool:
         """
         Activate a new possible set of hints based on the newly activated checkpoint.
+        It returns True if the checkpoint was newly recorded, False if it was known already.
         Also remember optional recap message belonging to this state.
         Note that checkpoints stack.
         """
-        if checkpoint not in self.checkpoints:
-            self.checkpoints.append(checkpoint)
-            if recap_message:
-                self.recap_log.append(recap_message)
-            self.active_hints = []
-            for checkpoint in reversed(self.checkpoints):
-                new_hints = [hint for hint in self.all_hints if hint.checkpoint == checkpoint]
-                if new_hints:
-                    self.active_hints = new_hints
-                    return
+        if checkpoint in self.checkpoints:
+            return False
+        self.checkpoints.append(checkpoint)
+        if recap_message:
+            self.recap_log.append(recap_message)
+        self.active_hints = []
+        for checkpoint in reversed(self.checkpoints):
+            new_hints = [hint for hint in self.all_hints if hint.checkpoint == checkpoint]
+            if new_hints:
+                self.active_hints = new_hints
+                break
+        return True
 
     def hint(self, player: Living) -> Optional[str]:
         """Return the hints that are active for the current checkpoints, most specific ones have priority."""
