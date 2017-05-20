@@ -420,7 +420,7 @@ def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudOb
 
 
 def try_pick_up_living(player: Player, living: base.Living) -> None:
-    if player.stats.size - living.stats.size >= 2:    # XXX numeric compare of BodySize is broken atm
+    if player.stats.size - living.stats.size >= 2:
         # @todo: do an agi/str/spd/luck check to see if we can pick it up
         player.tell("Even though {subj}'s small enough, you can't carry {obj} with you."
                     .format(subj=living.subjective, obj=living.objective))
@@ -1290,7 +1290,7 @@ def do_transcript(player: Player, parsed: ParseResult, ctx: util.Context) -> Non
     elif not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
     else:
-        player.activate_transcript(parsed.args[0], ctx.resources)    # XXX driver.user_resources instead??
+        player.activate_transcript(parsed.args[0], ctx.driver.user_resources)
 
 
 @cmd("show")

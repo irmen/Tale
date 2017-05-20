@@ -677,10 +677,10 @@ class Driver(pubsub.Listener):
                     story_completed()
                     break
                 except Exception:
-                    tb = "".join(util.format_traceback())
-                    txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
+                    txt = "\n<bright><rev>* internal error (please report this):</>\n" + "".join(util.format_traceback())
                     conn.player.tell(txt, format=False)
                     conn.player.tell("<rev><it>Please report this problem.</>")
+                    del txt
             # sync pubsub events
             pubsub.sync("driver-pending-tells")
             # server TICK

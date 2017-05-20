@@ -124,9 +124,11 @@ class ConsoleIo(iobase.IoAdapterBase):
         # This requires some drastic measures unfortunately.
         # The main thread is stuck in a blocking input (reading from stdin)
         # You really can't seem to interrupt that. So we terminate the process forcefully.
-        # That will kill the whole process (including server) which is not nice in multi player mode.
-        # Thankfully, the console io adapter is usually only used in single player 'if' game mode.
+        # That will kill the whole process (including server) but because this
+        # console io is only used in single player 'if' mode, nobody will notice.
         player.store_input_line("")
+        sys.stdout.flush()
+        sys.stderr.flush()
         os.kill(os.getpid(), signal.SIGINT)
 
     def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:

@@ -199,7 +199,8 @@ class Player(base.Living, pubsub.Listener):
         if file:
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
-            self.transcript = vfs.open_write(file, append=True)
+            file = "transcripts/"+file
+            self.transcript = vfs.open_write(file, mimetype="text/plain", append=True)
             self.tell("Transcript is being written to", self.transcript.name)
             self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
         else:
@@ -417,14 +418,17 @@ class PlayerConnection:
         self.io.pause(unpause)
 
     def destroy(self) -> None:
+        ctx = None
+        if self.io and self.player:
+            ctx = util.Context(mud_context.driver, mud_context.driver.game_clock, mud_context.config, self)
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
             if self.player and mud_context.config.server_mode == GameMode.IF:
+                self.player.destroy(ctx)
                 self.io.abort_all_input(self.player)
+                self.player = None
             self.io = None
         if self.player:
-            ctx = util.Context(mud_context.driver, None, mud_context.config, self)
             self.player.destroy(ctx)
-            # self.player = Player("<destroyed-%d>" % id(self.player), "n")
             self.player = None
