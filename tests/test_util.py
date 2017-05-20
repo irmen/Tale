@@ -193,6 +193,9 @@ class TestUtil(unittest.TestCase):
             _ = VirtualFileSystem(root_package="non.existing.package.name")
         with self.assertRaises(VfsError):
             _ = VirtualFileSystem(root_package="non_existing_package_name")
+        with self.assertRaises(VfsError) as x:
+            _ = vfs["foo.txt.gz"]
+        self.assertIn("compressed", str(x.exception))
 
     def test_vfs_validate_path(self):
         vfs = VirtualFileSystem(root_path=".")

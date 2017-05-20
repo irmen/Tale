@@ -27,7 +27,7 @@ class Resource:  # XXX separate textresource/binaryresource? perhaps even soundr
     """Simple container of a resource name, its data (string or binary) and the mime type"""
     def __init__(self, name: str, data: Union[str, ByteString], mimetype: str, mtime: float) -> None:
         self.name = name
-        self.data = data
+        self.data = data        # XXX 'data' for binary and 'text' for text mode resources?
         self.mimetype = mimetype
         self.mtime = mtime      # not always set
 
@@ -93,7 +93,10 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     def __getitem__(self, name: str) -> Resource:
         """Reads the resource data (text or binary) for the given name and returns it as a Resource object"""
         phys_path = self.validate_path(name)
-        mimetype = mimetypes.guess_type(name)[0] or ""
+        mimetype, compressor = mimetypes.guess_type(name, False)
+        if compressor:
+            raise VfsError("compressed files are not yet supported")  # XXX add auto decompress
+        mimetype = mimetype or "application/octet-stream"
         if mimetype.startswith("text/"):
             mode = "rt"
             encoding = "utf-8"
@@ -119,7 +122,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         else:
             # direct filesystem access
             with io.open(phys_path, mode=mode, encoding=encoding) as f_b:
-                mtime = os.path.getmtime(phys_path)  # os.fstat(f.fileno()).st_mtime
+                mtime = os.path.getmtime(phys_path)
                 return Resource(name, f_b.read(), mimetype, mtime)
 
     def __setitem__(self, name: str, data: Union[Resource, str, ByteString]) -> None:
