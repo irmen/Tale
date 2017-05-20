@@ -12,24 +12,40 @@ from functools import total_ordering
 
 @total_ordering
 class BodySize(enum.Enum):
-    # The size of a creature's body. You can compare the sizes. They're defined in small-to-large order.
-    # XXX numeric compare of BodySize is broken atm, see try_pick_up_living command
-    MICROSCOPIC = "microscopic"
-    MINISCULE = "miniscule"
-    TINY = "tiny"
-    VERY_SMALL = "very small"
-    SMALL = "small"
-    SOMEWHAT_SMALL = "somewhat small"
-    HUMAN_SIZED = "human sized"
-    SOMEWHAT_LARGE = "somewhat large"
-    LARGE = "large"
-    HUGE = "huge"
-    GIGANTIC = "gigantic"
-    VAST = "vast"
+    # The size of a creature's body. You can compare the sizes.
+    MICROSCOPIC = ("microscopic", 1)
+    MINISCULE = ("miniscule", 2)
+    TINY = ("tiny", 3)
+    VERY_SMALL = ("very small", 4)
+    SMALL = ("small", 5)
+    SOMEWHAT_SMALL = ("somewhat small", 6)
+    HUMAN_SIZED = ("human sized", 7)
+    SOMEWHAT_LARGE = ("somewhat large", 8)
+    LARGE = ("large", 9)
+    HUGE = ("huge", 10)
+    GIGANTIC = ("gigantic", 11)
+    VAST = ("vast", 12)
+
+    def __init__(self, text, order):
+        self.text = text
+        self.order = order
 
     def __lt__(self, other):
-        values = list(BodySize.__members__)
-        return values.index(self.name) < values.index(other.name)
+        if self.__class__ == other.__class__:
+            return self.order < other.order
+        return NotImplemented
+
+    def __sub__(self, other):
+        if self.__class__ == other.__class__:
+            return self.order - other.order
+        return NotImplemented
+
+    def adjust(self, steps: int) -> 'BodySize':
+        order = self.order + steps
+        for size in self.__class__.__members__.values():
+            if size.order == order:
+                return size
+        raise LookupError("there is no BodySize for the resulting numeric size")
 
 
 class BodyType(enum.Enum):

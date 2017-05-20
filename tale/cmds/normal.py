@@ -657,11 +657,11 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         else:
             p("This is <living>%s</>." % living.title)
         if living.stats.race != "human":
-            # don't print this race related info when dealing with mere humans
+            # only print this race related info when dealing with creatures other than humans
             if living.stats.bodytype and living.stats.size:
                 p("{subj}'s a {size} {btype} {race}.".format(
                     subj=lang.capital(living.subjective),
-                    size=living.stats.size.value,
+                    size=living.stats.size.text,
                     btype=living.stats.bodytype.value,
                     race=living.stats.race or "creature"
                 ))
@@ -730,7 +730,7 @@ def do_stats(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         # if the target inspected is self, show level as well
         player.tell("Level %d " % target.stats.level)
     if target.stats.size:
-        player.tell("%s %s %s." % (lang.capital(target.stats.size.value), gender, race))
+        player.tell("%s %s %s." % (lang.capital(target.stats.size.text), gender, race))
     else:
         player.tell("%s %s." % (lang.capital(gender), race))
     if target.stats.bodytype:
@@ -1022,7 +1022,7 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if name in races.races:
         found = True
         race = races.races[name]
-        size_msg = race.size.value
+        size_msg = race.size.text
         body_msg = race.body.value
         lang_msg = race.language
         p("That's a race. They're %s, their body type is %s, and they usually speak %s." % (size_msg, body_msg, lang_msg))
