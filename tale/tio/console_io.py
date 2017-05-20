@@ -205,18 +205,15 @@ class ReadlineTabCompleter:
         self.driver = driver
         self.io = io
         self.candidates = []   # type: List[str]
-        self.prefix = None
 
-    def complete(self, prefix: str, index: int=None) -> Union[Optional[str], List[str]]:        # XXX strange return type, incompatible with readline module?
+    def complete(self, prefix: str, state: int) -> str:
         if not prefix:
-            return None
-        if prefix != self.prefix:
-            # new prefix, recalculate candidates
+            return None   # we wont auto-suggest every possible command
+        if not state:
+            # first time called for this prefix, recalculate candidates
             self.candidates = list(self.io.tab_complete(prefix, self.driver))
         try:
-            if index is None:
-                return self.candidates
-            return self.candidates[index]
+            return self.candidates[state]
         except IndexError:
             return None
 
