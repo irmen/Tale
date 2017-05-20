@@ -94,6 +94,8 @@ class TestPlayer(unittest.TestCase):
         player.tell("\n")
         player.tell("\n")
         self.assertEqual(["line1\n", "\n", "line2\n", "\n", "\n"], player.test_get_output_paragraphs())
+        player.tell("one", "two", "three", format=False)
+        self.assertEqual(["one\ntwo\nthree\n"], player.test_get_output_paragraphs())
 
     def test_tell_chain(self):
         player = Player("fritz", "m")

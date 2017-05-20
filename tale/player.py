@@ -67,7 +67,7 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = indent
         self.screen_width = width
 
-    def tell(self, *messages: str, **kwargs: Any) -> base.Living:       # XXX simplify by no longer allowing multiple messages?
+    def tell(self, *messages: str, end: bool=False, format: bool=True) -> base.Living:       # XXX simplify by no longer allowing multiple messages?
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
         For efficiency, messages are gathered in a buffer and printed later.
@@ -81,9 +81,9 @@ class Player(base.Living, pubsub.Listener):
         if messages == ("\n",):
             self._output.p()
         else:
-            sep = " " if kwargs.get("format", True) else "\n"
+            sep = " " if format else "\n"
             msg = sep.join(str(msg) for msg in messages)
-            self._output.print(msg, **kwargs)
+            self._output.print(msg, end=end, format=format)
         return self
 
     def tell_text_file(self, file_resource: Resource, reformat=True) -> None:

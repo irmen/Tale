@@ -593,9 +593,10 @@ class TestLiving(unittest.TestCase):
         collector = PubsubCollector()
         tap.subscribe(collector)
         julie.tell("msg1", "msg2")
-        julie.tell("msg3", "msg4", ignored_arg=42)
+        julie.tell("msg3", "msg4", end=False)
+        julie.tell("msg5", "msg6", format=True)
         pubsub.sync()
-        self.assertEqual(["msg1 msg2", "msg3 msg4"], collector.messages)
+        self.assertEqual(["msg1 msg2", "msg3 msg4", "msg5 msg6"], collector.messages)
 
     def test_show_inventory(self):
         class Ctx:

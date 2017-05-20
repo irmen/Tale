@@ -832,7 +832,7 @@ class Living(MudObject):
         """get a wiretap for this living"""
         return pubsub.topic(("wiretap-living", self.name))
 
-    def tell(self, *messages: str, **kwargs: Any) -> 'Living':
+    def tell(self, *messages: str, end: bool=False, format: bool=True) -> 'Living':       # XXX simplify by no longer allowing multiple messages?
         """
         Every living thing in the mud can receive one or more action messages.
         For players this is usually printed to their screen, but for all other
@@ -841,15 +841,17 @@ class Living(MudObject):
         to parse the string again to figure out what happened...
         kwargs is ignored for Livings.
         The object self is returned so you can chain calls.
+        Note: end and format parameters are ignored for Livings but may be
+        useful when this function is called on a subclass such as Player.
         """
         msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
         tap.send((self.name, msg))
         return self
 
-    def tell_later(self, *messages: str, **kwargs: Any) -> None:
+    def tell_later(self, *messages: str) -> None:
         """Tell something to this creature, but do it after all other messages."""
-        pending_tells.send(lambda: self.tell(*messages, **kwargs))
+        pending_tells.send(lambda: self.tell(*messages))
 
     def tell_others(self, *messages: str) -> None:
         """
