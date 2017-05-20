@@ -67,22 +67,19 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = indent
         self.screen_width = width
 
-    def tell(self, *messages: str, end: bool=False, format: bool=True) -> base.Living:       # XXX simplify by no longer allowing multiple messages?
+    def tell(self, message: Any, *, end: bool=False, format: bool=True) -> base.Living:
         """
-        A message sent to a player (or multiple messages). They are meant to be printed on the screen.
-        For efficiency, messages are gathered in a buffer and printed later.
+        Sends a message to a player, meant to be printed on the screen. Will be converted to str.
         If you want to output a paragraph separator, either set end=True or tell a single newline.
         If you provide format=False, this paragraph of text won't be formatted when it is outputted,
         and whitespace is untouched. Empty strings aren't outputted at all.
-        Multiple messages are separated by a space (or newline, if format=False).
         The player object is returned so you can chain calls.
         """
-        super().tell(*messages)
-        if messages == ("\n",):
+        msg = str(message)
+        super().tell(msg)
+        if msg == "\n":
             self._output.p()
         else:
-            sep = " " if format else "\n"
-            msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, end=end, format=format)
         return self
 
@@ -200,7 +197,7 @@ class Player(base.Living, pubsub.Listener):
             if self.transcript:
                 raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
             self.transcript = vfs.open_write("transcripts/" + file, mimetype="text/plain", append=True)
-            self.tell("Transcript is being written to", self.transcript.name)
+            self.tell("Transcript is being written to " + self.transcript.name)
             self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
         else:
             if self.transcript:

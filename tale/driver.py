@@ -275,7 +275,7 @@ class Driver(pubsub.Listener):
                     num_critical_errors = 1  # reset critical error count due to low frequency
                 if num_critical_errors > 10:
                     msg = "aborting driver main loop due to excessive number of critical errors"
-                    sys.stderr.write(msg+"\n\n")
+                    sys.stderr.write(msg + "\n\n")
                     self._stop_driver()
                     raise errors.TaleError(msg)
                 print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.format_traceback()), file=sys.stderr)
@@ -384,7 +384,7 @@ class Driver(pubsub.Listener):
             name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
             existing_player = self.search_player(name)
             if existing_player:
-                conn.player.tell("That player is already logged in elsewhere. Their current location is", existing_player.location.name)
+                conn.player.tell("That player is already logged in elsewhere. Their current location is " + existing_player.location.name)
                 conn.player.tell("and their idle time is %d seconds." % existing_player.idle_time)
                 if existing_player.idle_time < 30:
                     conn.player.tell("They are still active.")
@@ -405,7 +405,7 @@ class Driver(pubsub.Listener):
                 password = yield "input-noecho", ("Please type in the desired password.", accounts.MudAccounts.accept_password)
                 email = yield "input", ("Please type in your email address.", accounts.MudAccounts.accept_email)
                 gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
-                conn.player.tell("You can choose one of the following races: ", lang.join(races.playable_races))
+                conn.player.tell("You can choose one of the following races: " + lang.join(races.playable_races))
                 race = yield "input", ("What should be the race of your player character?", charbuilder.valid_playable_race)
                 # review the account
                 conn.player.tell("<bright>Please review your new character.</>", end=True)

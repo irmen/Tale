@@ -182,11 +182,11 @@ class Shopkeeper(Living):
 
     def shop_list(self, parsed: ParseResult, actor: Living) -> bool:
         open_hrs = lang.join(["%d to %d" % hours for hours in self.shop.open_hours])
-        actor.tell("%s says: \"Welcome. Our opening hours are:" % lang.capital(self.title), open_hrs)
+        actor.tell("%s says: \"Welcome. Our opening hours are: %s" % (lang.capital(self.title), open_hrs))
         if "wizard" in actor.privileges:
             actor.tell(" (but for wizards, we're always open)")
         if self.shop.willbuy:
-            actor.tell(", and we specialize in", lang.join(lang.pluralize(word) for word in self.shop.willbuy))
+            actor.tell(", and we specialize in " + lang.join(lang.pluralize(word) for word in self.shop.willbuy))
         actor.tell("\"\n", end=True)
         # don't show shop.forsale, it is for the code to know what items have limitless supply
         if self.inventory_size == 0:

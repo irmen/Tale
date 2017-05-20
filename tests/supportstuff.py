@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
+from typing import Any
 from tale import pubsub, util, driver, base
 
 
@@ -49,5 +50,6 @@ class MsgTraceNPC(base.Living):
     def clearmessages(self):
         self.messages = []
 
-    def tell(self, *messages):
-        self.messages.extend(messages)
+    def tell(self, message: Any, *, end: bool=False, format: bool=True) -> base.Living:
+        self.messages.append(message)
+        return self

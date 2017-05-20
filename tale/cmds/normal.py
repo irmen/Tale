@@ -793,7 +793,7 @@ def do_yell(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     message = parsed.unparsed
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
-    player.tell("You yell:", message)
+    player.tell("You yell: " + message)
     player.tell_others("{Title} yells: %s" % message)
     player.location.message_nearby_locations("Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
 
@@ -1086,7 +1086,7 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         for verb in sorted(VERBS):
             lines[index % len(lines)] += "%-15s" % verb
             index += 1
-        p(*lines, format=False)
+        p("\n".join(lines), format=False)
     if name in ("adverb", "adverbs"):
         found = True
         p("You can use adverbs such as 'happily', 'zen', 'aggressively' with soul emotes.")
@@ -1096,12 +1096,12 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         found = True
         p("You can sometimes use a specific body part with certain soul emotes.")
         p("For instance, 'hit max knee' -> You hit Max on the knee.")
-        p("Recognised body parts:", ", ".join(BODY_PARTS))
+        p("Recognised body parts: " + ", ".join(BODY_PARTS))
     if name in ("qualifier", "qualifiers"):
         found = True
         p("You can use an action qualifier to change the meaning of a soul emote.")
         p("For instance, 'fail stand' -> You try to stand up, but fail miserably.")
-        p("Recognised qualifiers:", ", ".join(ACTION_QUALIFIERS))
+        p("Recognised qualifiers: " + ", ".join(ACTION_QUALIFIERS))
     if name in ("that", "this", "they", "them", "it"):
         raise ActionRefused("Be more specific.")
     if not found:
@@ -1273,8 +1273,8 @@ def do_save(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 def do_load(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Load a previously saved game."""
     if ctx.config.savegames_enabled:
-        player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!)",
-                    "and start it again. During startup, select the appropriate option to start from a saved game,",
+        player.tell("If you want to restart or reload a previously saved game, please quit the game (without saving!) "
+                    "and start it again. During startup, select the appropriate option to start from a saved game, "
                     "or start a new game.")
     else:
         player.tell("It is not possible to save or restore your progress.")

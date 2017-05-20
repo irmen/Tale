@@ -49,7 +49,7 @@ function poll_text() {
 
 function smoothscroll(div, previousTop) {
     if(div.scrollTop < div.scrollHeight) {
-        div.scrollTop += 3;
+        div.scrollTop += 5;
         if(div.scrollTop > previousTop) {
             setTimeout(function(){smoothscroll(div, div.scrollTop);}, 10);
         }

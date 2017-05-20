@@ -342,7 +342,7 @@ and may produce weird results just like when reloading modules that are still us
     except (ImportError, ValueError):
         raise ActionRefused("There's no module named " + path)
     importlib.reload(module)
-    player.tell("Module has been reloaded:", module.__name__)
+    player.tell("Module has been reloaded: " + module.__name__)
 
 
 @wizcmd("move")
@@ -394,7 +394,7 @@ def do_debug(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
     if obj in ctx.driver.heartbeat_objects:
         txt.append("%s receives heartbeats." % obj.name)
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("set")
@@ -459,7 +459,7 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         txt.append("Loop duration:  %.2f sec. (avg)" % avg_loop_duration)
     elif config.server_tick_method == TickMethod.COMMAND:
         txt.append("Loop duration:  n/a (command driven)")
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("events")
@@ -472,7 +472,7 @@ def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     txt = []
     for hb in driver.heartbeat_objects:
         txt.append("  " + str(hb))
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
     num_shown = min(50, len(driver.deferreds))
     player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" %
                 (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
@@ -480,14 +480,14 @@ def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     for d in sorted(driver.deferreds)[:50]:
         txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
     txt.append("")
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("pubsub")
 def do_pubsub(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Give an overview of the pubsub topics."""
     pending = pubsub.pending()
-    player.tell("<bright>Pending pubsub messages overview.</>", "Active topics (from %d total):" % len(pending))
+    player.tell("<bright>Pending pubsub messages overview.</> Active topics (from %d total):" % len(pending))
     total_pending = 0
     txt = ["<ul>  topic                                            <dim>|</><ul>#pending<dim>|</><ul>idle sec.<dim>|</><ul>subs</>"]
     for topic in sorted(pending, key=lambda t: str(t)):
@@ -497,7 +497,7 @@ def do_pubsub(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             txt.append("%-50.50s <dim>|</>  %3d   <dim>|</>  %4d   <dim>|</> %d" % (topic, num_pending, int(idle_time), subbers))
     txt.append(("total pending:  " + str(total_pending)).rjust(56))
     txt.append("")
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("force")
@@ -551,7 +551,7 @@ def do_accounts(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
                    (account.name, account.logged_in, account.email, lang.join(account.privileges, None)))
     txt.append("\nWizards: " + lang.join(wizards))
-    player.tell(*txt, format=False)
+    player.tell("\n".join(txt), format=False)
 
 
 @wizcmd("add_priv")

@@ -49,7 +49,7 @@ class CharacterBuilder:
         naming.name = yield "input", ("Name?", MudAccounts.accept_name)
         naming.gender = yield "input", ("Gender (m)ale/(f)emale/(n)euter ?", lang.validate_gender)
         naming.gender = naming.gender[0]
-        self.conn.player.tell("You can choose one of the following races: ", lang.join(races.playable_races))
+        self.conn.player.tell("You can choose one of the following races: " + lang.join(races.playable_races))
         race = yield "input", ("Player race?", valid_playable_race)
         naming.stats = Stats.from_race(race, gender=naming.gender)
         naming.description = "A regular person." if naming.stats.race == "human" else "A weird creature."

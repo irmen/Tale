@@ -592,11 +592,12 @@ class TestLiving(unittest.TestCase):
         tap = julie.get_wiretap()
         collector = PubsubCollector()
         tap.subscribe(collector)
-        julie.tell("msg1", "msg2")
-        julie.tell("msg3", "msg4", end=False)
-        julie.tell("msg5", "msg6", format=True)
+        julie.tell("msg1 msg2")
+        julie.tell("msg3 msg4", end=False)
+        julie.tell("msg5 msg6", format=True)
+        julie.tell("msg7 msg8", format=False)
         pubsub.sync()
-        self.assertEqual(["msg1 msg2", "msg3 msg4", "msg5 msg6"], collector.messages)
+        self.assertEqual(["msg1 msg2", "msg3 msg4", "msg5 msg6", "msg7 msg8"], collector.messages)
 
     def test_show_inventory(self):
         class Ctx:

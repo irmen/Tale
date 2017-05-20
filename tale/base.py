@@ -820,11 +820,11 @@ class Living(MudObject):
         """show the living's inventory to the actor"""
         name = lang.capital(self.title)
         if self.inventory:
-            actor.tell(name, "is carrying:", end=True)
+            actor.tell(name + " is carrying:", end=True)
             for item in self.inventory:
                 actor.tell("  " + item.title, format=False)
         else:
-            actor.tell(name, "is carrying nothing.")
+            actor.tell(name + " is carrying nothing.")
         if ctx.config.money_type:
             actor.tell("Money in possession: %s." % ctx.driver.moneyfmt.display(self.money))
 
@@ -832,38 +832,36 @@ class Living(MudObject):
         """get a wiretap for this living"""
         return pubsub.topic(("wiretap-living", self.name))
 
-    def tell(self, *messages: str, end: bool=False, format: bool=True) -> 'Living':       # XXX simplify by no longer allowing multiple messages?
+    def tell(self, message: Any, *, end: bool=False, format: bool=True) -> 'Living':
         """
-        Every living thing in the mud can receive one or more action messages.
+        Every living thing in the mud can receive an action message (will be converted to str).
         For players this is usually printed to their screen, but for all other
-        livings the default is to do nothing.
-        They could react on it but this is not advisable because you will need
-        to parse the string again to figure out what happened...
-        kwargs is ignored for Livings.
-        The object self is returned so you can chain calls.
+        livings the default is to do nothing -- except for making sure
+        that the message is sent to any wiretaps that may be present.
+        The Living could react on the message, but this is not advisable because
+        you'll have to parse the string again to figure out what happened...
+        (there are better ways to react on stuff that happened).
+        The Living itself is returned so you can easily chain calls.
         Note: end and format parameters are ignored for Livings but may be
         useful when this function is called on a subclass such as Player.
         """
-        msg = " ".join(str(msg) for msg in messages)
         tap = self.get_wiretap()
-        tap.send((self.name, msg))
+        tap.send((self.name, str(message)))
         return self
 
-    def tell_later(self, *messages: str) -> None:
+    def tell_later(self, message: str) -> None:
         """Tell something to this creature, but do it after all other messages."""
-        pending_tells.send(lambda: self.tell(*messages))
+        pending_tells.send(lambda: self.tell(message))
 
-    def tell_others(self, *messages: str) -> None:
+    def tell_others(self, message: str) -> None:
         """
-        Message(s) sent to the other livings in the location, but not to self.
+        Send a message to the other livings in the location, but not to self.
         There are a few formatting strings for easy shorthands:
         {title}/{Title} = the living's title, and the title with a capital letter.
         If you need even more tweaks with telling stuff, use living.location.tell directly.
         """
         formats = {"title": self.title, "Title": lang.capital(self.title)}
-        for msg in messages:
-            msg = msg.format(**formats)
-            self.location.tell(msg, exclude_living=self)
+        self.location.tell(message.format(**formats), exclude_living=self)
 
     def parse(self, commandline: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse the commandline into something that can be processed by the soul (ParseResult)"""
