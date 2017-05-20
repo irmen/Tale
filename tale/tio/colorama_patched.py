@@ -36,6 +36,10 @@ def monkeypatch_extra_styles():
 monkeypatch_extra_styles()
 del monkeypatch_extra_styles
 from colorama import init, Style, Fore, Back, Cursor
+try:
+    from colorama import win32, ansitowin32
+except ImportError:
+    pass
 
 
 if __name__ == "__main__":

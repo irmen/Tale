@@ -7,9 +7,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import unittest
 import sys
 import io
+import tale.tio.colorama_patched as colorama
 from tale.tio import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
-import tale.tio.colorama_patched as colorama
 
 
 class TestConsoleIo(unittest.TestCase):
@@ -62,6 +62,19 @@ class TestConsoleIo(unittest.TestCase):
         self.assertEqual("&#8216;txt&#8217;", iobase.smartypants.smartypants("'txt'"))
         self.assertEqual("&#8220;txt&#8221;", iobase.smartypants.smartypants('"txt"'))
         self.assertEqual(r"slashes\\slashes", iobase.smartypants.smartypants(r"slashes\\slashes"))
+
+    def testApplyStyles(self):
+        io = console_io.ConsoleIo(None)
+        self.assertEqual("text", io._apply_style("text", True))
+        self.assertEqual("text", io._apply_style("text", False))
+        self.assertEqual("brighttext", io._apply_style("<bright>bright</>text", False))
+        if console_io.style_words:
+            self.assertIn("bright", console_io.style_words)
+            self.assertIn("/", console_io.style_words)
+            bx = console_io.style_words["bright"]
+            rs = console_io.style_words["/"]
+            expected = bx + "bright" + rs + "text"
+            self.assertEqual(expected, io._apply_style("<bright>bright</>text", True))
 
 
 class TestAnsi(unittest.TestCase):
