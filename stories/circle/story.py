@@ -64,13 +64,6 @@ class Story(StoryBase):
         player.tell("--", end=True)
         return None
 
-    def display_text_file(self, player: Player, filename: str) -> None:
-        text = self.driver.resources[filename].data
-        for paragraph in text.split("\n\n"):
-            if paragraph.startswith("\n"):
-                player.tell("\n")
-            player.tell(paragraph, end=True)
-
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.

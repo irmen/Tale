@@ -115,10 +115,6 @@ class StoryBase:
         player.tell("Goodbye! We hope you enjoyed playing.")
         player.tell("\n")
 
-    def completion(self, player) -> None:
-        """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("<bright>Congratulations! You've finished the game!</>")
-
     def _verify(self, driver) -> None:
         """verify correctness and compatibility of the story configuration"""
         if not isinstance(self.config, StoryConfig):

@@ -32,7 +32,7 @@ class StoryCaseBase:
 
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
-    directory = (pathlib.Path(tale.__file__).parent / "../stories/zed_is_me").resolve()  # XXX
+    directory = (pathlib.Path(tale.__file__).parent / "../stories/zed_is_me").resolve()
 
     def test_story(self):
         import story
@@ -49,7 +49,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = (pathlib.Path(tale.__file__).parent / "../stories/demo").resolve()  # XXX
+    directory = (pathlib.Path(tale.__file__).parent / "../stories/demo").resolve()
 
     def test_story(self):
         import story

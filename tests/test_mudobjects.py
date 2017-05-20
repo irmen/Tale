@@ -764,12 +764,20 @@ class TestDescriptions(unittest.TestCase):
 
         class DynamicThing(Item):
             @property
-            def description(self):
+            def description(self) -> str:
                 return "The watch shows %f" % time.time()
 
+            @description.setter
+            def description(self, value: str) -> None:
+                raise RuntimeError("read-only property")
+
             @property
-            def title(self):
+            def title(self) -> str:
                 return "a watch showing %f" % time.time()
+
+            @title.setter
+            def title(self, value: str) -> None:
+                raise RuntimeError("read-only property")
 
         watch = DynamicThing("watch")
         title1 = watch.title

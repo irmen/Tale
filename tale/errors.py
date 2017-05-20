@@ -94,3 +94,10 @@ class UnknownVerbException(ParseError):
         self.verb = verb
         self.words = words
         self.qualifier = qualifier
+
+
+class StoryCompleted(TaleFlowControlException):
+    """
+    This is raised as soon as the (IF) story has been completed by the player!
+    """
+    pass

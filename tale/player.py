@@ -19,7 +19,7 @@ from .errors import ActionRefused
 from .tio.iobase import strip_text_styles, IoAdapterBase
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 from .story import GameMode
-from .tio.vfs import VirtualFileSystem
+from .tio.vfs import VirtualFileSystem, Resource
 
 
 class Player(base.Living, pubsub.Listener):
@@ -40,7 +40,6 @@ class Player(base.Living, pubsub.Listener):
         self.output_line_delay = 50   # milliseconds.
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()   # type: Set[base.Location]
-        self.story_complete = False
         self.last_input_time = time.time()
         self.init_nonserializables()
 
@@ -68,13 +67,6 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = indent
         self.screen_width = width
 
-    def story_completed(self) -> None:
-        """
-        Call this when the player completed the story.
-        It will trigger the game's ending/game-over sequence.
-        """
-        self.story_complete = True
-
     def tell(self, *messages: str, **kwargs: Any) -> base.Living:       # XXX simplify by no longer allowing multiple messages?
         """
         A message sent to a player (or multiple messages). They are meant to be printed on the screen.
@@ -93,6 +85,17 @@ class Player(base.Living, pubsub.Listener):
             msg = sep.join(str(msg) for msg in messages)
             self._output.print(msg, **kwargs)
         return self
+
+    def tell_text_file(self, file_resource: Resource, reformat=True) -> None:
+        """
+        Show the contents of the given text file resource to the player.
+        """
+        if not reformat:
+            raise NotImplementedError("unformatted text file printing not yet supported")   # XXX add this
+        for paragraph in file_resource.data.split("\n\n"):
+            if paragraph.startswith("\n"):
+                self.tell("\n")
+            self.tell(paragraph, end=True)
 
     def look(self, short: bool=None) -> None:
         """look around in your surroundings (it excludes the player himself from livings)"""

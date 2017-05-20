@@ -56,10 +56,6 @@ class Story(StoryBase):
     def goodbye(self, player: Player) -> None:
         player.tell("Thanks for trying out Tale!")
 
-    def completion(self, player: Player) -> None:
-        """congratulation text / finale when player finished the game (story_complete event)"""
-        player.tell("Congratulations on escaping the house! Someone else has to look after Garfield now though...")
-
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.

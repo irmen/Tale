@@ -7,9 +7,10 @@ rose street north, crossing, rose street south
 butcher, storage room
 """
 
-from typing import Union, Optional
-from tale.base import Location, Exit, Door, Key, _limbo, Living, Item
+from tale.base import Location, Exit, Door, Key, _limbo
 from tale.driver import Driver
+from tale.errors import StoryCompleted
+from tale import mud_context
 import zones.magnolia_st
 
 
@@ -18,19 +19,13 @@ def init(driver: Driver) -> None:
     pass
 
 
-class GameEnd(Location):
-    def init(self) -> None:
-        pass
-
-    def insert(self, obj: Union[Living, Item], actor: Optional[Living]) -> None:
-        # Normally you would use notify_player_arrived() to trigger an action.
-        # but for the game ending, we require an immediate response.
-        # So instead we hook into the direct arrival of something in this location.
-        super().insert(obj, actor)
-        try:
-            obj.story_completed()   # player arrived! Great Success!    # XXX type error: what if obj is not player at all
-        except AttributeError:
-            pass
+class GameEnd(Location):  # XXX connect this somewhere
+    def notify_player_arrived(self, player, previous_location: Location) -> None:
+        # player has entered, and thus the story ends
+        player.tell("\n")
+        player.tell("\n")
+        player.tell_text_file(mud_context.driver.resources["messages/completion_success.txt"])    # XXX resources directly on mud_context?
+        raise StoryCompleted
 
 
 north_street = Location("Rose Street", "The northern part of Rose Street.")

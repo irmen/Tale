@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from typing import Union, Optional
 from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
 from tale.player import Player
-from tale.errors import ActionRefused, TaleError
+from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.driver import Driver
 from tale.parseresult import ParseResult
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
@@ -144,18 +144,12 @@ square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south
 
 
 class GameEnd(Location):
-    def init(self) -> None:
-        pass
-
-    def insert(self, obj: Union[Living, Item], actor: Optional[Living]) -> None:
-        # Normally you would use notify_player_arrived() to trigger an action.
-        # but for the game ending, we require an immediate response.
-        # So instead we hook into the direct arrival of something in this location.
-        super().insert(obj, actor)
-        try:
-            obj.story_completed()   # player arrived! Great Success!   # XXX type error: what if obj is not player at all
-        except AttributeError:
-            pass
+    def notify_player_arrived(self, player, previous_location: Location) -> None:
+        # player has entered, and thus the story ends
+        player.tell("\n")
+        player.tell("\n")
+        player.tell("<bright>Congratulations! You've finished the game!</>")
+        raise StoryCompleted
 
 
 game_end = GameEnd("Game End", "It seems like it is game over!")
@@ -310,7 +304,8 @@ class MagicGameEnd(Item):
     def notify_moved(self, source_container: Union[Location, Container, Living],
                      target_container: Union[Location, Container, Living], actor: Living) -> None:
         actor.tell_later("By touching it you immediately end the game!")
-        actor.story_completed()      # XXX bug: when actor is not the Player but another living
+        # XXX this crashes the driver atm
+        raise StoryCompleted    # XXX what if actor is not the Player but another living
 
 
 alley.insert(MagicGameEnd(), None)

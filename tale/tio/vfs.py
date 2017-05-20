@@ -23,7 +23,7 @@ class VfsError(IOError):
     pass
 
 
-class Resource:
+class Resource:  # XXX separate textresource/binaryresource? perhaps even soundresource/imageresource?
     """Simple container of a resource name, its data (string or binary) and the mime type"""
     def __init__(self, name: str, data: Union[str, ByteString], mimetype: str, mtime: float) -> None:
         self.name = name

@@ -13,6 +13,7 @@ from tale.driver import Driver
 from tale.player import Player
 from tale.util import Context
 from tale.parseresult import ParseResult
+from tale.errors import StoryCompleted
 
 
 def init(driver: Driver) -> None:
@@ -24,12 +25,12 @@ def init(driver: Driver) -> None:
 
 
 class GameEnd(Location):
-    def init(self) -> None:
-        pass
-
     def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
-        # player has entered!
-        player.story_completed()
+        # player has entered, and thus the story ends
+        player.tell("\n")
+        player.tell("\n")
+        player.tell("<bright>Congratulations on escaping the house!</> Someone else has to look after Garfield now though...")
+        raise StoryCompleted
 
 
 livingroom = Location("Living room", "The living room in your home in the outskirts of the city.")

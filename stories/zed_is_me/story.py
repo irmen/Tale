@@ -48,7 +48,7 @@ class Story(StoryBase):
         """
         player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
-        self.display_text_file(player, "messages/welcome.txt")
+        player.tell_text_file(self.driver.resources["messages/welcome.txt"])
         player.tell("\n")
         return "Press enter to continue."
 
@@ -59,22 +59,9 @@ class Story(StoryBase):
         """
         player.tell("<bright>Welcome back to '%s'.</>" % self.config.name, end=True)
         player.tell("\n")
-        self.display_text_file(player, "messages/welcome.txt")
+        player.tell_text_file(self.driver.resources["messages/welcome.txt"])
         player.tell("\n")
         return "Press enter to continue where you were before."
-
-    def completion(self, player: Player) -> None:
-        """congratulation text / finale when player finished the game (story_complete event)"""
-        # @TODO: determine fail/success
-        self.display_text_file(player, "messages/completion_success.txt")
-        # self.display_text_file(player, "messages/completion_failed.txt")
-
-    def display_text_file(self, player: Player, filename: str) -> None:
-        text = self.driver.resources[filename].data
-        for paragraph in text.split("\n\n"):
-            if paragraph.startswith("\n"):
-                player.tell("\n")
-            player.tell(paragraph, end=True)
 
 
 if __name__ == "__main__":

@@ -313,12 +313,6 @@ class TestPlayer(unittest.TestCase):
         del player.verbs["smurf"]
         self.assertFalse("smurf" in player.verbs)
 
-    def test_story_complete(self):
-        player = Player("fritz", "m")
-        self.assertFalse(player.story_complete)
-        player.story_completed()
-        self.assertTrue(player.story_complete)
-
     def test_handle_and_notify_action(self):
         class SpecialPlayer(Player):
             def init(self):
