@@ -8,6 +8,8 @@ magnolia st. 2, magnolia st. 3, factory
 
 from tale.base import Location, Exit, Door
 from tale.driver import Driver
+from tale.errors import StoryCompleted
+from tale import mud_context
 from zones import houses
 
 
@@ -54,3 +56,19 @@ street3.add_exits([
     Exit(["factory", "east"], factory, "Eastwards you'll enter the ArtiGrow factory area."),
     Exit(["west", "crossing"], "rose_st.crossing", "There's a crossing to the west.")
 ])
+
+
+# @todo A (temporary) location that exits the game, should be implemented later as part of the puzzle.
+# For now, it is accessed via a hatch in the neighbors_house.  #
+class TemporaryGameEnd(Location):
+    def notify_player_arrived(self, player, previous_location: Location) -> None:
+        # player has entered, and thus the story ends
+        player.tell("\n")
+        player.tell("\n")
+        player.tell_text_file(mud_context.resources["messages/completion_success.txt"])
+        raise StoryCompleted
+
+temp_game_end = TemporaryGameEnd("Temporary Game Ending", "That is weird, you seem to fall trough the world...")
+end_exit = Exit(["hatch"], temp_game_end, "There's an ominous looking open hatch here.",
+                "The hatch is open, and you can easily go through. However there seems to be only endless darkness behind it.")
+houses.neighbors_house.add_exits([end_exit])

@@ -9,23 +9,12 @@ butcher, storage room
 
 from tale.base import Location, Exit, Door, Key, _limbo
 from tale.driver import Driver
-from tale.errors import StoryCompleted
-from tale import mud_context
 import zones.magnolia_st
 
 
 def init(driver: Driver) -> None:
     # called when zone is first loaded
     pass
-
-
-class GameEnd(Location):  # XXX connect this somewhere
-    def notify_player_arrived(self, player, previous_location: Location) -> None:
-        # player has entered, and thus the story ends
-        player.tell("\n")
-        player.tell("\n")
-        player.tell_text_file(mud_context.resources["messages/completion_success.txt"])
-        raise StoryCompleted
 
 
 north_street = Location("Rose Street", "The northern part of Rose Street.")

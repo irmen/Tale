@@ -45,10 +45,10 @@ als je zelf yellt dan moeten mensen in de buurt daar op reageren, en wanderers o
 |          |                           |          1-way^          |            |                  |           |
 +----------+                           |               ^          |            |                  |           |
                                  +-----v----+     +----+-+        +---+---+----+                  +-----------+
-                                 |          |     |      |            |   |
-                                 | House    +----->      |            |   |
-                                 |          |     | Gar  |            |   |
-                                 +------+---+     | den  |            |   |
+                 +-----+         | Neighbor |     |      |            |   |
+                 |TEMP <---hatch-| House    +----->      |            |   |
+                 |EXIT |         |          |     | Gar  |            |   |
+                 +-----+         +------+---+     | den  |            |   |
                                         |         |      |            Rose street
                                  +------v---+     |      |            |   |
                                  |          +----->      |            |   |
