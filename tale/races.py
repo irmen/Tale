@@ -26,6 +26,7 @@ class BodySize(enum.Enum):
     GIGANTIC = ("gigantic", 11)
     VAST = ("vast", 12)
 
+    # noinspection PyInitNewSignature
     def __init__(self, text, order):
         self.text = text
         self.order = order

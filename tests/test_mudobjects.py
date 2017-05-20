@@ -504,10 +504,6 @@ class PubsubCollector(pubsub.Listener):
 
 
 class TestLiving(unittest.TestCase):
-    def test_nocreateliving(self):
-        with self.assertRaises(TypeError):
-            Living("name")
-
     def test_lifecycle(self):
         orc = Living("orc", "m", race="orc")
         axe = Weapon("axe")
@@ -901,7 +897,7 @@ class TestContainer(unittest.TestCase):
             key.remove(bag, player)
         self.assertFalse(key in bag)
         with self.assertRaises(ActionRefused):
-            bag in key
+            _ = bag in key
 
     def test_inventory(self):
         bag = Container("bag")
@@ -909,7 +905,7 @@ class TestContainer(unittest.TestCase):
         thing = Item("gizmo")
         player = Player("julie", "f")
         with self.assertRaises(ActionRefused):
-            thing in key  # can't check for containment in an Item
+            _ = thing in key  # can't check for containment in an Item
         self.assertFalse(thing in bag)
         with self.assertRaises(ActionRefused):
             key.insert(thing, player)  # can't add stuf to an Item
@@ -956,9 +952,9 @@ class TestItem(unittest.TestCase):
             key.insert(thing, player)
         key.allow_item_move(player)
         with self.assertRaises(ActionRefused):
-            key.inventory
+            _ = key.inventory
         with self.assertRaises(ActionRefused):
-            key.inventory_size
+            _ = key.inventory_size
 
     def test_move(self):
         hall = Location("hall")

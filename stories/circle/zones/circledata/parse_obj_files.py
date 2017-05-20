@@ -22,24 +22,24 @@ def parse_file(objfile: pathlib.Path) -> None:
     with objfile.open() as fp:
         content = [line.strip() for line in fp]
 
-    readState = 'vNum'
-    lineNum = 0
+    reasdstate = 'vNum'
+    linenum = 0
 
-    while lineNum < len(content):
-        line = content[lineNum]
+    while linenum < len(content):
+        line = content[linenum]
 
-        if readState == 'vNum':
+        if reasdstate == 'vNum':
             if line == '$':
                 break  # reached end of file
             vNumArg = line[1:]
-            aliasArg = content[lineNum + 1][:-1].split()
-            shortDescArg = content[lineNum + 2][:-1]
+            aliasArg = content[linenum + 1][:-1].split()
+            shortDescArg = content[linenum + 2][:-1]
             # if shortDescArg == 'a scroll of recall':
             #     pass#import pdb; pdb.set_trace()
-            longDescArg = content[lineNum + 3][:-1]
-            actionDescArg = content[lineNum + 4][:-1]
-            readState = 'bitVector'
-            lineNum += 5
+            longDescArg = content[linenum + 3][:-1]
+            actionDescArg = content[linenum + 4][:-1]
+            reasdstate = 'bitVector'
+            linenum += 5
         # elif readState == 'longdesc':
         #     doneLineNum = lineNum
         #     while content[doneLineNum] != '~':
@@ -55,31 +55,31 @@ def parse_file(objfile: pathlib.Path) -> None:
         #     lineNum = doneLineNum + 1
         #     readState = 'bitVector'
 
-        elif readState == 'bitVector':
-            typeFlagArg, effectsBitVectorArg, wearBitVectorArg = content[lineNum].split()
-            value0Arg, value1Arg, value2Arg, value3Arg = content[lineNum + 1].split()
-            weightArg, costArg, rentArg = content[lineNum + 2].split()
-            lineNum += 3
-            readState = 'extradesc'
-        elif readState == 'extradesc':
+        elif reasdstate == 'bitVector':
+            typeFlagArg, effectsBitVectorArg, wearBitVectorArg = content[linenum].split()
+            value0Arg, value1Arg, value2Arg, value3Arg = content[linenum + 1].split()
+            weightArg, costArg, rentArg = content[linenum + 2].split()
+            linenum += 3
+            reasdstate = 'extradesc'
+        elif reasdstate == 'extradesc':
             extendedArg = []
             affectArg = {}
-            while not content[lineNum].startswith('#') and not content[lineNum].startswith('$'):
+            while not content[linenum].startswith('#') and not content[linenum].startswith('$'):
                 # this is the extended mob format.
-                if content[lineNum] == 'E':
-                    lineNum += 1
+                if content[linenum] == 'E':
+                    linenum += 1
                     # import pdb; pdb.set_trace()
-                    doneLineNum = lineNum
+                    doneLineNum = linenum
                     while content[doneLineNum] != '~':
                         doneLineNum += 1
-                    extendedArg.append((content[lineNum][:-1].split(), '\n'.join(content[lineNum + 1:doneLineNum])))  # kw list, desc string
-                    lineNum = doneLineNum + 1
+                    extendedArg.append((content[linenum][:-1].split(), '\n'.join(content[linenum + 1:doneLineNum])))  # kw list, desc string
+                    linenum = doneLineNum + 1
 
-                elif content[lineNum] == 'A':
-                    lineNum += 1
-                    affectline = content[lineNum].split()
+                elif content[linenum] == 'A':
+                    linenum += 1
+                    affectline = content[linenum].split()
                     affectArg[affectline[0]] = affectline[1]
-                    lineNum += 1
+                    linenum += 1
 
             # process this obj
             typeFlagArg = {'1': 'light',
@@ -360,7 +360,7 @@ def parse_file(objfile: pathlib.Path) -> None:
                 obj.affects[affectTypes[k]] = int(v)
 
             objs[obj.vnum] = obj
-            readState = 'vNum'
+            reasdstate = 'vNum'
 
 
 def parse_all() -> None:

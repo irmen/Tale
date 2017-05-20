@@ -23,53 +23,53 @@ def parse_file(shpfile: pathlib.Path) -> None:
 
     content = [line.strip() for line in content][1:]  # skip the first "CircleMUD v3.0 Shop File~" line
 
-    lineNum = 0
+    linenum = 0
 
-    while lineNum < len(content):
-        line = content[lineNum]
+    while linenum < len(content):
+        line = content[linenum]
 
         if line == '$~':
             break  # reached end of file
         vNumArg = line[1:-1]
-        lineNum += 1
+        linenum += 1
 
         forSaleVNumArg = []
         # read in the items for sale
-        while content[lineNum] != '-1':
-            forSaleVNumArg.append(content[lineNum])
-            lineNum += 1
-        lineNum += 1  # skip "-1" line
+        while content[linenum] != '-1':
+            forSaleVNumArg.append(content[linenum])
+            linenum += 1
+        linenum += 1  # skip "-1" line
 
-        profitWhenSellingArg = content[lineNum]
-        lineNum += 1
-        profitWhenBuyingArg = content[lineNum]
-        lineNum += 1
+        profitWhenSellingArg = content[linenum]
+        linenum += 1
+        profitWhenBuyingArg = content[linenum]
+        linenum += 1
 
         buyTypeArg = []
-        while content[lineNum] != '-1':
-            if content[lineNum] == 'LIQ CONTAINER':
+        while content[linenum] != '-1':
+            if content[linenum] == 'LIQ CONTAINER':
                 buyTypeArg.append('drinkcontainer')
             else:
-                buyTypeArg.append(content[lineNum].lower())
-            lineNum += 1
-        lineNum += 1  # skip "-1" line
+                buyTypeArg.append(content[linenum].lower())
+            linenum += 1
+        linenum += 1  # skip "-1" line
 
-        playertobuydoesnotexistArg = content[lineNum][3:-1]
-        lineNum += 1
-        playertoselldoesnotexistArg = content[lineNum][3:-1]
-        lineNum += 1
-        shopdoesnotbuyArg = content[lineNum][3:-1]
-        lineNum += 1
-        shopcannotaffordArg = content[lineNum][3:-1]
-        lineNum += 1
-        playercannotaffordArg = content[lineNum][3:-1]
-        lineNum += 1
-        shopsolditemArg = content[lineNum][3:-1]
-        lineNum += 1
-        shopboughtitemArg = content[lineNum][3:-1]
-        lineNum += 1
-        temperArg = content[lineNum]
-        lineNum += 1
+        playertobuydoesnotexistArg = content[linenum][3:-1]
+        linenum += 1
+        playertoselldoesnotexistArg = content[linenum][3:-1]
+        linenum += 1
+        shopdoesnotbuyArg = content[linenum][3:-1]
+        linenum += 1
+        shopcannotaffordArg = content[linenum][3:-1]
+        linenum += 1
+        playercannotaffordArg = content[linenum][3:-1]
+        linenum += 1
+        shopsolditemArg = content[linenum][3:-1]
+        linenum += 1
+        shopboughtitemArg = content[linenum][3:-1]
+        linenum += 1
+        temperArg = content[linenum]
+        linenum += 1
 
         if shopboughtitemArg == 'Oops - %d a minor bug - please report!':
             shopboughtitemArg = ''
@@ -83,30 +83,30 @@ def parse_file(shpfile: pathlib.Path) -> None:
         else:
             temperArg = None
 
-        bitvector = content[lineNum]
-        lineNum += 1
+        bitvector = content[linenum]
+        linenum += 1
         willFightArg = bitvector in ('1', '3')
         willBankArg = bitvector in ('2', '3')
 
-        shopkeeperMobArg = content[lineNum]
-        lineNum += 1
-        wontdealwithArg = content[lineNum]
-        lineNum += 1
+        shopkeeperMobArg = content[linenum]
+        linenum += 1
+        wontdealwithArg = content[linenum]
+        linenum += 1
 
         shopRoomsArg = []
-        while content[lineNum] != '-1':
-            shopRoomsArg.append(content[lineNum])
-            lineNum += 1
-        lineNum += 1  # skip "-1" line
+        while content[linenum] != '-1':
+            shopRoomsArg.append(content[linenum])
+            linenum += 1
+        linenum += 1  # skip "-1" line
 
-        open1Arg = content[lineNum]
-        lineNum += 1
-        close1Arg = content[lineNum]
-        lineNum += 1
-        open2Arg = content[lineNum]
-        lineNum += 1
-        close2Arg = content[lineNum]
-        lineNum += 1
+        open1Arg = content[linenum]
+        linenum += 1
+        close1Arg = content[linenum]
+        linenum += 1
+        open2Arg = content[linenum]
+        linenum += 1
+        close2Arg = content[linenum]
+        linenum += 1
 
         # don't show open2 and close2 if they are both 0
         if open2Arg == '0' and close2Arg == '0':

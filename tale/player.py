@@ -91,7 +91,7 @@ class Player(base.Living, pubsub.Listener):
         Show the contents of the given text file resource to the player.
         """
         if not reformat:
-            raise NotImplementedError("unformatted text file printing not yet supported")   # XXX add this
+            raise NotImplementedError("unformatted text file printing not yet supported")   # @todo add this
         for paragraph in file_resource.data.split("\n\n"):   # type: ignore
             if paragraph.startswith("\n"):
                 self.tell("\n")
@@ -165,35 +165,35 @@ class Player(base.Living, pubsub.Listener):
     def idle_time(self) -> float:
         return time.time() - self.last_input_time
 
-    def tell_object_location(self, object: base.MudObject, known_container: Union[base.Living, base.Item, base.Location],
+    def tell_object_location(self, obj: base.MudObject, known_container: Union[base.Living, base.Item, base.Location],
                              print_parentheses: bool=True) -> None:
         """Tells the player some details about the location of the given object."""
         if known_container is None:
             if print_parentheses:
-                self.tell("(It's not clear where %s is)." % object.name)
+                self.tell("(It's not clear where %s is)." % obj.name)
             else:
-                self.tell("It's not clear where %s is." % object.name)
+                self.tell("It's not clear where %s is." % obj.name)
             return
         elif known_container in self:
             if print_parentheses:
-                self.tell("(%s was found in %s, in your inventory)." % (object.name, known_container.title))
+                self.tell("(%s was found in %s, in your inventory)." % (obj.name, known_container.title))
             else:
-                self.tell("%s was found in %s, in your inventory." % (lang.capital(object.name), known_container.title))
+                self.tell("%s was found in %s, in your inventory." % (lang.capital(obj.name), known_container.title))
         elif known_container is self.location:
             if print_parentheses:
-                self.tell("(%s was found in your current location)." % object.name)
+                self.tell("(%s was found in your current location)." % obj.name)
             else:
-                self.tell("%s was found in your current location." % lang.capital(object.name))
+                self.tell("%s was found in your current location." % lang.capital(obj.name))
         elif known_container is self:
             if print_parentheses:
-                self.tell("(%s was found in your inventory)." % object.name)
+                self.tell("(%s was found in your inventory)." % obj.name)
             else:
-                self.tell("%s was found in your inventory." % lang.capital(object.name))
+                self.tell("%s was found in your inventory." % lang.capital(obj.name))
         else:
             if print_parentheses:
-                self.tell("(%s was found in %s)." % (object.name, known_container.name))
+                self.tell("(%s was found in %s)." % (obj.name, known_container.name))
             else:
-                self.tell("%s was found in %s." % (lang.capital(object.name), known_container.name))
+                self.tell("%s was found in %s." % (lang.capital(obj.name), known_container.name))
 
     def activate_transcript(self, file: str, vfs: VirtualFileSystem) -> None:
         if file:

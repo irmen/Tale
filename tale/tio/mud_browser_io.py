@@ -12,7 +12,7 @@ from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 from socketserver import ThreadingMixIn
 from http.cookies import SimpleCookie
 from html import escape as html_escape
-from typing import Callable, Dict, Iterable, Any, List, Tuple, MutableMapping
+from typing import Dict, Iterable, Any, List, Tuple, MutableMapping
 from .if_browser_io import HttpIo, TaleWsgiAppBase, WsgiStartResponseType
 from . import vfs
 from ..player import PlayerConnection

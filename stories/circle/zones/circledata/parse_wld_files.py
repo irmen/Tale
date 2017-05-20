@@ -20,28 +20,28 @@ def parse_file(wldfile: pathlib.Path) -> None:
     with wldfile.open() as fp:
         content = [line.strip() for line in fp]
 
-    readState = 'vNum'
-    descArg = ''
-    lineNum = 0
+    readstate = 'vNum'
+    descarg = ''
+    linenum = 0
 
-    while lineNum < len(content):
-        line = content[lineNum]
+    while linenum < len(content):
+        line = content[linenum]
 
-        if readState == 'vNum':
+        if readstate == 'vNum':
             if line == '$':
                 break  # reached end of file
             vNumArg = line[1:]
-            nameArg = content[lineNum + 1][:-1]
-            readState = 'desc'
-            lineNum += 2
-        elif readState == 'desc':
-            doneLineNum = lineNum
+            nameArg = content[linenum + 1][:-1]
+            readstate = 'desc'
+            linenum += 2
+        elif readstate == 'desc':
+            doneLineNum = linenum
             while content[doneLineNum] != '~':
                 doneLineNum += 1
-            descArg = '\n'.join(content[lineNum:doneLineNum])
-            lineNum = doneLineNum + 1
-            readState = 'bitVector'
-        elif readState == 'bitVector':
+            descarg = '\n'.join(content[linenum:doneLineNum])
+            linenum = doneLineNum + 1
+            readstate = 'bitVector'
+        elif readstate == 'bitVector':
             zoneArg, bitVectorArg, sectorTypeArg = line.split()
             sectorTypeArg = {'0': 'inside',
                              '1': 'city',
@@ -53,30 +53,30 @@ def parse_file(wldfile: pathlib.Path) -> None:
                              '7': 'water_noswim',
                              '8': 'underwater',
                              '9': 'flying'}[sectorTypeArg]
-            lineNum += 1
-            readState = 'exitAndDesc'
-        elif readState == 'exitAndDesc':
+            linenum += 1
+            readstate = 'exitAndDesc'
+        elif readstate == 'exitAndDesc':
             extraDescsArg = []
             exitsArg = []
-            while content[lineNum] != 'S':
-                if content[lineNum] == 'E':
-                    doneLineNum = lineNum + 1
+            while content[linenum] != 'S':
+                if content[linenum] == 'E':
+                    doneLineNum = linenum + 1
                     while content[doneLineNum] != '~':
                         doneLineNum += 1
-                    extraDescsArg.append({'keywords': content[lineNum + 1][:-1],
-                                          'desc': '\n'.join(content[lineNum + 2:doneLineNum])})
-                    lineNum = doneLineNum + 1
-                elif content[lineNum].startswith('D'):
+                    extraDescsArg.append({'keywords': content[linenum + 1][:-1],
+                                          'desc': '\n'.join(content[linenum + 2:doneLineNum])})
+                    linenum = doneLineNum + 1
+                elif content[linenum].startswith('D'):
                     exitDirection = {'0': 'north',
                                      '1': 'east',
                                      '2': 'south',
                                      '3': 'west',
                                      '4': 'up',
-                                     '5': 'down'}[content[lineNum][1:2]]
-                    doneLineNum = lineNum + 1
+                                     '5': 'down'}[content[linenum][1:2]]
+                    doneLineNum = linenum + 1
                     while content[doneLineNum] != '~':
                         doneLineNum += 1
-                    exitDesc = '\n'.join(content[lineNum + 1:doneLineNum])
+                    exitDesc = '\n'.join(content[linenum + 1:doneLineNum])
                     exitKeywords = content[doneLineNum + 1][:-1].split()
                     exitDoorFlag, exitKeyNumber, exitRoomLinked = content[doneLineNum + 2].split()
                     exitDoorFlag = {'0': 'nodoor',
@@ -88,7 +88,7 @@ def parse_file(wldfile: pathlib.Path) -> None:
                                      'type': exitDoorFlag,
                                      'keynum': exitKeyNumber,
                                      'roomlinked': exitRoomLinked})
-                    lineNum = doneLineNum + 3
+                    linenum = doneLineNum + 3
 
             # process this room
             attribs = []
@@ -115,7 +115,7 @@ def parse_file(wldfile: pathlib.Path) -> None:
                 type=sectorTypeArg,
                 zone=int(zoneArg),
                 attributes=set(attribs),
-                desc=descArg.replace("\n", " ") or None,
+                desc=descarg.replace("\n", " ") or None,
                 exits={},
                 extradesc=[]
             )
@@ -134,9 +134,9 @@ def parse_file(wldfile: pathlib.Path) -> None:
                 room.extradesc.append(desc)
 
             rooms[room.vnum] = room
-            descArg = ''
-            readState = 'vNum'
-            lineNum += 1
+            descarg = ''
+            readstate = 'vNum'
+            linenum += 1
 
 
 def parse_all() -> None:

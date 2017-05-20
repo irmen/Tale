@@ -436,7 +436,7 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     up_hours, up_minutes, up_seconds = driver.uptime
     realtime = datetime.datetime.now()
     realtime = realtime.replace(microsecond=0)
-    pyversion = "%d.%d.%d" % sys.version_info[:3]
+    pyversion = "{0.major}.{0.minor}.{0.micro}".format(sys.version_info)
     sixtyfour = "(%d bits)" % (sys.maxsize.bit_length() + 1)
     implementation = platform.python_implementation()
     txt.append("Python version: %s %s %s on %s" % (implementation, pyversion, sixtyfour, sys.platform))

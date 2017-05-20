@@ -111,15 +111,15 @@ class TaleWindow(tkinter.Toplevel):
         if sys.platform == "darwin":
             self.fontsize_monospace += 3
             self.fontsize_normal += 5
-        self.font = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+        self.font = self.findfont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
                                   self.fontsize_normal)
-        self.boldFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+        self.boldFont = self.findfont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
                                       self.fontsize_normal, weight=tkinter.font.BOLD)
-        self.italicFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+        self.italicFont = self.findfont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
                                         self.fontsize_normal, slant="italic")
-        self.underlinedFont = self.FindFont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
+        self.underlinedFont = self.findfont(['Georgia', 'DejaVu Serif', 'Droid Serif', 'Times New Roman', 'Times', 'Serif'],
                                             self.fontsize_normal, underlined=True)
-        self.CreateWidgets()
+        self.createwidgets()
         self.title(title)
         self.protocol("WM_DELETE_WINDOW", self.quit_button_clicked)
         self.parent = parent
@@ -146,7 +146,7 @@ class TaleWindow(tkinter.Toplevel):
             self.wait_window()
         self.update_lock = threading.Lock()
 
-    def CreateWidgets(self):
+    def createwidgets(self):
         frameText = tkinter.Frame(self, relief=tkinter.SUNKEN, height=700)
         frameCommands = tkinter.Frame(self, relief=tkinter.SUNKEN)
         self.scrollbarView = tkinter.Scrollbar(frameText, orient=tkinter.VERTICAL, takefocus=tkinter.FALSE, highlightthickness=0)
@@ -155,7 +155,7 @@ class TaleWindow(tkinter.Toplevel):
         self.scrollbarView.config(command=self.textView.yview)
         self.textView.config(yscrollcommand=self.scrollbarView.set)
         self.commandPrompt = tkinter.Label(frameCommands, text="> ")
-        fixedFont = self.FindFont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
+        fixedFont = self.findfont(["Consolas", "Lucida Console", "DejaVu Sans Mono"], self.fontsize_monospace)
         if not fixedFont:
             fixedFont = tkinter.font.nametofont('TkFixedFont').copy()
             fixedFont["size"] = self.fontsize_monospace
@@ -189,7 +189,7 @@ class TaleWindow(tkinter.Toplevel):
         frameCommands.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         self.commandEntry.focus_set()
 
-    def FindFont(self, families, size, weight=tkinter.font.NORMAL, slant=tkinter.font.ROMAN, underlined=False):
+    def findfont(self, families, size, weight=tkinter.font.NORMAL, slant=tkinter.font.ROMAN, underlined=False):
         fontfamilies = tkinter.font.families()
         for family in families:
             if family in fontfamilies:

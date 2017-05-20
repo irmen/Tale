@@ -22,56 +22,56 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
     with mobfile.open() as fp:
         content = [line.strip() for line in fp]
 
-    readState = 'vNum'
-    lineNum = 0
+    readstate = 'vNum'
+    linenum = 0
 
-    while lineNum < len(content):
-        line = content[lineNum]
+    while linenum < len(content):
+        line = content[linenum]
 
-        if readState == 'vNum':
+        if readstate == 'vNum':
             if line == '$':
                 break  # reached end of file
             vNumArg = line[1:]
-            aliasArg = content[lineNum + 1][:-1].split()
-            shortDescArg = content[lineNum + 2][:-1]
-            readState = 'longdesc'
-            lineNum += 3
-        elif readState == 'longdesc':
-            doneLineNum = lineNum
+            aliasArg = content[linenum + 1][:-1].split()
+            shortDescArg = content[linenum + 2][:-1]
+            readstate = 'longdesc'
+            linenum += 3
+        elif readstate == 'longdesc':
+            doneLineNum = linenum
             while content[doneLineNum] != '~':
                 doneLineNum += 1
-            longDescArg = '\n'.join(content[lineNum:doneLineNum])
-            lineNum = doneLineNum + 1
-            readState = 'detaileddesc'
-        elif readState == 'detaileddesc':
-            doneLineNum = lineNum
+            longDescArg = '\n'.join(content[linenum:doneLineNum])
+            linenum = doneLineNum + 1
+            readstate = 'detaileddesc'
+        elif readstate == 'detaileddesc':
+            doneLineNum = linenum
             while content[doneLineNum] != '~':
                 doneLineNum += 1
-            detailedDescArg = '\n'.join(content[lineNum:doneLineNum])
-            lineNum = doneLineNum + 1
-            readState = 'bitVector'
+            detailedDescArg = '\n'.join(content[linenum:doneLineNum])
+            linenum = doneLineNum + 1
+            readstate = 'bitVector'
 
-        elif readState == 'bitVector':
-            actionBitVectorArg, affectBitVectorArg, alignmentArg, typeArg = content[lineNum].split()
+        elif readstate == 'bitVector':
+            actionBitVectorArg, affectBitVectorArg, alignmentArg, typeArg = content[linenum].split()
 
-            lineNum += 1
-            readState = 'level'
-        elif readState == 'level':
-            levelArg, thacoArg, acArg, maxhpArg, bareHandDmgArg = content[lineNum].split()
-            goldArg, xpArg = content[lineNum + 1].split()
-            loadArg, defaultPosArg, sexArg = content[lineNum + 2].split()
-            lineNum += 3
+            linenum += 1
+            readstate = 'level'
+        elif readstate == 'level':
+            levelArg, thacoArg, acArg, maxhpArg, bareHandDmgArg = content[linenum].split()
+            goldArg, xpArg = content[linenum + 1].split()
+            loadArg, defaultPosArg, sexArg = content[linenum + 2].split()
+            linenum += 3
 
             extendedMobArg = {}
-            if not content[lineNum].startswith('#'):
+            if not content[linenum].startswith('#'):
                 # this is the extended mob format.
 
-                while content[lineNum] not in ('E', '$'):
-                    mo = extendedMobPat.match(content[lineNum])
+                while content[linenum] not in ('E', '$'):
+                    mo = extendedMobPat.match(content[linenum])
                     extendedMobArg[mo.group(1).strip()] = mo.group(2).strip()
-                    lineNum += 1
-                if content[lineNum] != '$':
-                    lineNum += 1
+                    linenum += 1
+                if content[linenum] != '$':
+                    linenum += 1
 
             # process this mob
             actionAttribs = []
@@ -171,7 +171,7 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
                 extended={k.lower(): v for k, v in extendedMobArg.items()}
             )
             mobs[mob.vnum] = mob
-            readState = 'vNum'
+            readstate = 'vNum'
 
 
 def parse_all() -> None:

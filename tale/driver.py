@@ -266,7 +266,7 @@ class Driver(pubsub.Listener):
                 if self.all_players:
                     print("  %d players are connected: %s" % (len(self.all_players), "; ".join(self.all_players)))
                 self.__stop_mainloop = lang.yesno(input("Are you sure you want to exit the Tale driver? "))
-            except:
+            except Exception:
                 # other exceptions are logged but don't break the server loop (hopefully the game can continue)
                 # @todo only print it to the player that caused the error (if possible) + to the error log
                 num_critical_errors += 1
@@ -1172,21 +1172,21 @@ class Commands:
         self.no_soul_parsing = set()   # type: Set[str]
 
     def add(self, verb: str, func: Callable, privilege: str=None) -> None:
-        self.validateFunc(func)
+        self.validatefunc(func)
         for commands in self.commands_per_priv.values():
             if verb in commands:
                 raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
 
     def override(self, verb: str, func: Callable, privilege: str=None) -> Callable:
-        self.validateFunc(func)
+        self.validatefunc(func)
         if verb in self.commands_per_priv[privilege]:
             existing = self.commands_per_priv[privilege][verb]
             self.commands_per_priv[privilege][verb] = func
             return existing
         raise KeyError("command not defined: " + verb)
 
-    def validateFunc(self, func: Callable) -> None:
+    def validatefunc(self, func: Callable) -> None:
         if not hasattr(func, "is_tale_command_func"):
             raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 

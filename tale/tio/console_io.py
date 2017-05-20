@@ -8,7 +8,7 @@ import sys
 import os
 import signal
 import threading
-from typing import Iterable, Tuple, Any, Optional, List, Union
+from typing import Iterable, Tuple, Any, Optional, List
 from . import styleaware_wrapper, iobase
 from . import colorama_patched as colorama
 from ..player import PlayerConnection, Player
@@ -107,6 +107,7 @@ class ConsoleIo(iobase.IoAdapterBase):
             # pyreadline on windows behaves weird and screws up the output. So disable by default.
             return
         try:
+            # noinspection PyUnresolvedReferences
             import readline
         except ImportError:
             return
@@ -194,7 +195,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 line = line.replace("<%s>" % tag, replacement)
             return line
         else:
-            return iobase.strip_text_styles(line)        # XXX type error list vs single line??
+            return iobase.strip_text_styles(line)      # type: ignore
 
 
 class ReadlineTabCompleter:
@@ -206,7 +207,7 @@ class ReadlineTabCompleter:
         self.io = io
         self.candidates = []   # type: List[str]
 
-    def complete(self, prefix: str, state: int) -> str:
+    def complete(self, prefix: str, state: int) -> Optional[str]:
         if not prefix:
             return None   # we wont auto-suggest every possible command
         if not state:
@@ -219,8 +220,10 @@ class ReadlineTabCompleter:
 
 
 if __name__ == "__main__":
-    co = ConsoleIo(None)
-    lines = ["test Tale Console output", "'singlequotes'", '"double quotes"', "ellipsis...", "<bright>BRIGHT <rev>REVERSE </>NORMAL"]
-    paragraphs = [(text, False) for text in lines]
-    output = co.render_output(paragraphs, indent=2, width=50)
-    co.output(output)
+    def _main():
+        co = ConsoleIo(PlayerConnection())
+        lines = ["test Tale Console output", "'singlequotes'", '"double quotes"', "ellipsis...", "<bright>BRIGHT <rev>REVERSE </>NORMAL"]
+        paragraphs = [(text, False) for text in lines]
+        output = co.render_output(paragraphs, indent=2, width=50)
+        co.output(output)
+    _main()

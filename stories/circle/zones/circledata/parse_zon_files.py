@@ -22,32 +22,32 @@ def parse_file(zonfile: pathlib.Path) -> None:
     with zonfile.open() as fp:
         content = [line.strip() for line in fp]
 
-    lineNum = 0
+    linenum = 0
     allmobs = []
     alldoors = []
     allobjects = []
     allremove = []
 
     # import pdb; pdb.set_trace()
-    vnumArg = content[lineNum][1:]
-    lineNum += 1
-    while content[lineNum].startswith('*'): lineNum += 1
-    zonenameArg = content[lineNum][:-1]
-    lineNum += 1
-    while content[lineNum].startswith('*'): lineNum += 1
-    startroomArg, endroomArg, lifespanArg, resetArg = content[lineNum].split()
-    lineNum += 1
+    vnumArg = content[linenum][1:]
+    linenum += 1
+    while content[linenum].startswith('*'): linenum += 1
+    zonenameArg = content[linenum][:-1]
+    linenum += 1
+    while content[linenum].startswith('*'): linenum += 1
+    startroomArg, endroomArg, lifespanArg, resetArg = content[linenum].split()
+    linenum += 1
 
-    while lineNum < len(content):  # read in commands
-        line = content[lineNum]
+    while linenum < len(content):  # read in commands
+        line = content[linenum]
         if line.startswith('*'):
-            lineNum += 1
+            linenum += 1
             continue
 
         if line == 'S':
             break  # reached end of file
 
-        line = content[lineNum].split()
+        line = content[linenum].split()
 
         command = line[0]
 
@@ -78,7 +78,7 @@ def parse_file(zonfile: pathlib.Path) -> None:
         elif command == 'R':
             # output.write('r %s' % lineNum)
             allremove.append({'room': line[2], 'vnum': line[3]})
-        lineNum += 1
+        linenum += 1
 
     exitMap = {'0': 'north',
                '1': 'east',

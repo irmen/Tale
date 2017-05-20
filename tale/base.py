@@ -1298,7 +1298,7 @@ class Door(Exit):
         return self.__description_prefix + " " + status
 
     @description.setter
-    def description(self, value: str):
+    def description(self, value: str) -> None:
         raise TaleError("you cannot set the description of a Door because it is dynamic")
 
     def __repr__(self):
