@@ -12,12 +12,15 @@ import tale.player
 import tale.errors
 import tale.verbdefs
 from tale.parseresult import ParseResult
+from tale.story import StoryConfig
 from tests.supportstuff import TestDriver
 
 
 class TestSoul(unittest.TestCase):
     def setUp(self):
         tale.mud_context.driver = TestDriver()
+        tale.mud_context.config = StoryConfig()
+        tale.mud_context.resources = tale.mud_context.driver.resources
 
     def testSpacify(self):
         soul = tale.base.Soul()

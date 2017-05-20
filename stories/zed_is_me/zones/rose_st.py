@@ -24,7 +24,7 @@ class GameEnd(Location):  # XXX connect this somewhere
         # player has entered, and thus the story ends
         player.tell("\n")
         player.tell("\n")
-        player.tell_text_file(mud_context.driver.resources["messages/completion_success.txt"])    # XXX resources directly on mud_context?
+        player.tell_text_file(mud_context.resources["messages/completion_success.txt"])
         raise StoryCompleted
 
 

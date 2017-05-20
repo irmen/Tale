@@ -20,6 +20,7 @@ class StoryCaseBase:
         sys.path.insert(0, str(self.directory))
         mud_context.driver = TestDriver()
         mud_context.config = StoryConfig()
+        mud_context.resources = mud_context.driver.resources
 
     def tearDown(self):
         # this is a bit of a hack, to "clean up" after a story test.

@@ -10,7 +10,7 @@ from tale import util, mud_context
 from tale.errors import ParseError, ActionRefused
 from tale.base import Item, Container, Location
 from tale.player import Player
-from tale.story import MoneyType
+from tale.story import MoneyType, StoryConfig
 from tale.tio.vfs import VirtualFileSystem, VfsError
 from tests.supportstuff import TestDriver
 
@@ -18,6 +18,8 @@ from tests.supportstuff import TestDriver
 class TestUtil(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
+        mud_context.resources = mud_context.driver.resources
+        mud_context.config = StoryConfig()
 
     def test_print_location(self):
         p = Player("julie", "f")
@@ -312,10 +314,10 @@ class TestUtil(unittest.TestCase):
             util.parse_time(["some_weird_occasion"])
 
     def test_context(self):
-        ctx = util.Context(driver=1, clock=2, config=None, player_connection=None)
-        self.assertEqual(1, ctx.driver)
-        self.assertEqual(2, ctx.clock)
-        self.assertIsNone(ctx.config)
+        ctx = util.Context(driver=mud_context.driver, clock=mud_context.driver.game_clock, config=mud_context.config, player_connection=42)
+        self.assertIs(mud_context.driver, ctx.driver)
+        self.assertIs(mud_context.driver.game_clock, ctx.clock)
+        self.assertIs(mud_context.config, ctx.config)
         with self.assertRaises(AttributeError):
             _ = ctx.doesnotexist
         ctx.x = 99

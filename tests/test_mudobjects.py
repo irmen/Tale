@@ -23,6 +23,7 @@ class TestLocations(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
         mud_context.config = DemoStory().config
+        mud_context.resources = mud_context.driver.resources
         self.hall = Location("Main hall", "A very large hall.")
         self.attic = Location("Attic", "A dark attic.")
         self.street = Location("Street", "An endless street.")
@@ -254,6 +255,7 @@ class TestDoorsExits(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
         mud_context.config = DemoStory().config
+        mud_context.resources = mud_context.driver.resources
 
     def test_state(self):
         Door("out", "xyz", "short desc", locked=False, opened=False)
@@ -792,14 +794,16 @@ class TestDescriptions(unittest.TestCase):
 class TestDestroy(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
+        mud_context.config = DemoStory().config
+        mud_context.resources = mud_context.driver.resources
 
     def test_destroy_base(self):
-        ctx = Context(None, None, None, None)
+        ctx = Context(mud_context.driver, None, None, None)
         o = Item("x")
         o.destroy(ctx)
 
     def test_destroy_loc(self):
-        ctx = Context(None, None, None, None)
+        ctx = Context(mud_context.driver, None, None, None)
         loc = Location("loc")
         i = Item("item")
         liv = Living("rat", "n", race="rodent")
@@ -821,7 +825,7 @@ class TestDestroy(unittest.TestCase):
         self.assertEqual(_limbo, liv.location)
 
     def test_destroy_player(self):
-        ctx = Context(None, None, None, None)
+        ctx = Context(mud_context.driver, None, None, None)
         loc = Location("loc")
         player = Player("julie", "f")
         player.privileges = {"wizard"}
@@ -1037,7 +1041,7 @@ class TestMudObject(unittest.TestCase):
             x.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             x.read(None)
-        x.destroy(Context(None, None, None, None))
+        x.destroy(Context(mud_context.driver, None, None, None))
 
     def test_nocreate(self):
         with self.assertRaises(TypeError):

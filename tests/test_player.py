@@ -31,6 +31,7 @@ class TestPlayer(unittest.TestCase):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
+        tale.mud_context.resources = tale.mud_context.driver.resources
 
     def test_init(self):
         player = Player("fritz", "m")
@@ -448,6 +449,7 @@ class TestPlayerConnection(unittest.TestCase):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
+        tale.mud_context.resources = tale.mud_context.driver.resources
 
     def test_input(self):
         player = Player("julie", "f")
@@ -539,6 +541,7 @@ class TestCharacterBuilder(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
         mud_context.config = DemoStory().config
+        mud_context.resources = mud_context.driver.resources
 
     def test_build(self):
         conn = PlayerConnection()
@@ -625,6 +628,7 @@ class TestMudAccounts(unittest.TestCase):
         tale.mud_context.driver = TestDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
+        tale.mud_context.resources = tale.mud_context.driver.resources
 
     def test_accept_name(self):
         self.assertEqual("irm", MudAccounts.accept_name("irm"))

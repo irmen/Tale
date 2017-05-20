@@ -9,7 +9,6 @@ import unittest
 import heapq
 import datetime
 import os
-import inspect
 import pickle
 import tale.driver as the_driver
 import tale.cmds.normal
@@ -18,7 +17,7 @@ import tale.base
 import tale.util
 import tale.demo
 from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
-from tests.supportstuff import Thing
+from tests.supportstuff import Thing, TestDriver
 from tale.story import GameMode
 
 
@@ -92,7 +91,7 @@ class TestDeferreds(unittest.TestCase):
             pass
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
-        ctx = tale.util.Context(driver="driver", clock=None, config=None, player_connection=None)
+        ctx = tale.util.Context(driver=TestDriver(), clock=None, config=None, player_connection=None)
         d(ctx=ctx)
         self.assertEqual([42], t.x)
         d = the_driver.Deferred(None, module_level_func, [], None)

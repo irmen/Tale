@@ -19,6 +19,8 @@ def serializecycle(obj):
 class TestSerializing(unittest.TestCase):
     def setUp(self):
         mud_context.driver = TestDriver()
+        mud_context.config = StoryConfig()
+        mud_context.resources = mud_context.driver.resources
 
     def assert_base_attrs(self, obj):
         self.assertEqual("name", obj.name)
@@ -119,10 +121,10 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual(s.config, x)
 
     def test_Context(self):
-        c = util.Context(driver=1, clock=2, config=3, player_connection=4)
-        x = serializecycle(c)
-        self.assertEqual(c, x)
-        self.assertEqual(vars(c), vars(x))
+        c = util.Context(driver=mud_context.driver, clock=mud_context.driver.game_clock, config=mud_context.config, player_connection=42)
+        with self.assertRaises(RuntimeError) as x:
+            serializecycle(c)
+        self.assertEqual("cannot serialize context", str(x.exception))
 
     def test_Hints(self):
         h = hints.HintSystem()

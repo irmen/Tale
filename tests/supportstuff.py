@@ -14,7 +14,7 @@ class Thing:
         self.x = []
 
     def append(self, value, ctx):
-        assert ctx.driver == "driver"
+        assert ctx.driver is not None and isinstance(ctx.driver, TestDriver)
         self.x.append(value)
 
 

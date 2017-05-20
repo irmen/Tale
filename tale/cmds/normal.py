@@ -1290,7 +1290,7 @@ def do_transcript(player: Player, parsed: ParseResult, ctx: util.Context) -> Non
     elif not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
     else:
-        player.activate_transcript(parsed.args[0], ctx.driver.resources)
+        player.activate_transcript(parsed.args[0], ctx.resources)    # XXX driver.user_resources instead??
 
 
 @cmd("show")
@@ -1466,7 +1466,8 @@ def do_license(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     t("\n")
     # print optional game specific license info
     if ctx.config.license_file:
-        t(ctx.driver.resources[ctx.config.license_file].data, end=True)
+        t("\n")
+        t(ctx.resources[ctx.config.license_file].data, end=True)
         t("\n")
     # print GPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)

@@ -336,9 +336,13 @@ class Context:
         self.clock = clock
         self.config = config
         self.conn = player_connection
+        self.resources = driver.resources
 
     def __eq__(self, other: Any) -> bool:
         return vars(self) == vars(other)
+
+    def __getstate__(self):
+        raise RuntimeError("cannot serialize context")
 
 
 def authorized(*privileges: Sequence[str]) -> Callable:

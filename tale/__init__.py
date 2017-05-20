@@ -13,10 +13,12 @@ __version__ = "3.1.dev0"
 class _MudContext:
     driver = None  # type: Any
     config = None  # type: Any
+    resources = None   # type: Any
 
 
 # The mud_context is a global container for the following attributes,
 # that will be set (by the driver) to the correct initialized instances:
 #  - driver   (driver)
 #  - config   (story config)
+#  - resources  (story's file resources, just a shortcut to driver.resources)
 mud_context = _MudContext()
