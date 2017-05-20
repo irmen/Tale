@@ -211,18 +211,21 @@ class Computer(Item):
             except KeyError:
                 message = "UNKNOWN DOOR"
             else:
-                if command == "unlock":
-                    if door.locked:    # XXX only doors can be unlocked, what if we try it on an exit?
-                        door.locked = False
-                        message = doorname.upper() + " UNLOCKED"
-                    else:
-                        message = "COMMAND INVALID - DOOR ALREADY UNLOCKED"
+                if not isinstance(door, Door):
+                    message = "THAT IS NOT THE NAME OF A DOOR"
                 else:
-                    if door.locked:    # XXX only doors can be unlocked, what if we try it on an exit?
-                        message = "COMMAND INVALID - DOOR ALREADY LOCKED"
+                    if command == "unlock":
+                        if door.locked:
+                            door.locked = False
+                            message = doorname.upper() + " UNLOCKED"
+                        else:
+                            message = "COMMAND INVALID - DOOR ALREADY UNLOCKED"
                     else:
-                        door.locked = True
-                        message = doorname.upper() + " LOCKED"
+                        if door.locked:
+                            message = "COMMAND INVALID - DOOR ALREADY LOCKED"
+                        else:
+                            door.locked = True
+                            message = doorname.upper() + " LOCKED"
         else:
             message = "INVALID COMMAND"
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
