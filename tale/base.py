@@ -921,9 +921,9 @@ class Living(MudObject):
             # other npcs may choose to attack or to ignore it
             # We need to check the verb qualifier, it might void the actual action :)
             if parsed.qualifier not in verbdefs.NEGATING_QUALIFIERS:
-                for living in who:   # XXX who can contain Living, Item, Location...?
-                    if living.aggressive:   # XXX not every 'who' has this attr
-                        pending_actions.send(lambda victim=self: living.start_attack(victim))     # XXX start_attack not everywhere available
+                for thing in who:
+                    if isinstance(thing, Living) and thing.aggressive:
+                        pending_actions.send(lambda victim=self: thing.start_attack(victim))
 
     @util.authorized("wizard")
     def do_forced_cmd(self, actor: 'Living', parsed: ParseResult, ctx: util.Context) -> None:
@@ -965,7 +965,8 @@ class Living(MudObject):
                 return
             raise ParseError("Command not understood.")
         except Exception as x:
-            actor.tell("Error result from forced cmd: " + str(x))
+            actor.tell("The forced command failed due to something technical.")
+            actor.tell("The reason was: {0!r} {0!s}".format(x))
 
     def move(self, target: Union[Location, 'Container', 'Living'], actor: 'Living'=None,
              silent: bool=False, is_player: bool=False, verb: str="move") -> None:

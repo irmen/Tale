@@ -303,9 +303,9 @@ class MagicGameEnd(Item):
 
     def notify_moved(self, source_container: Union[Location, Container, Living],
                      target_container: Union[Location, Container, Living], actor: Living) -> None:
-        actor.tell_later("By touching it you immediately end the game!")
-        # XXX this crashes the driver atm
-        raise StoryCompleted    # XXX what if actor is not the Player but another living
+        if isinstance(actor, Player):
+            actor.tell("You try to pick up the orb, but as soon as you touch it it ends this game!")
+            raise StoryCompleted
 
 
 alley.insert(MagicGameEnd(), None)

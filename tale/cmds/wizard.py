@@ -103,11 +103,14 @@ or in the story's zone module (try !ls zones)"""
 @wizcmd("clone")
 def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
+    # XXX missing actor bug
+    # XXX support 'zones' path element just like ls
     if not parsed.args:
         raise ParseError("Clone what?")
     path = parsed.args[0]
     if path.startswith("."):
         # find an item somewhere in a module path
+        # XXX don't duplicat this from ls command
         path, objectname = path.rsplit(".", 1)
         if not objectname:
             raise ActionRefused("Invalid object path")
@@ -229,6 +232,7 @@ def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     teleport_self = parsed.verb == "!teleport_to"
     if args[0].startswith(".") or args[0] == "zones" or args[0].startswith("zones."):
         # teleport the wizard to a location somewhere in a module path
+        # XXX don't copy this from ls command?
         path, objectname = args[0].rsplit(".", 1)
         if not objectname:
             raise ActionRefused("Invalid object path")
@@ -325,7 +329,7 @@ and may produce weird results just like when reloading modules that are still us
     if not parsed.args:
         raise ActionRefused("Reload what?")
     path = parsed.args[0]
-    if path == "zones" or path.startswith("zones."):
+    if path == "zones" or path.startswith("zones."):  # XXX don't copy this from ls command
         module_name = path
     elif path.startswith("."):
         module_name = LIBRARY_MODULE_NAME

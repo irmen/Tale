@@ -622,75 +622,84 @@ class Driver(pubsub.Listener):
         conn.write_output()
         loop_duration = 0.0
         previous_server_tick = 0.0
-        try:
-            while not self.__stop_mainloop:
-                pubsub.sync("driver-async-dialogs")
-                if conn not in self.waiting_for_input:
-                    conn.write_input_prompt()
-                if self.story.config.server_tick_method == TickMethod.COMMAND:
-                    conn.player.input_is_available.wait()   # blocking wait until playered entered something
-                    has_input = True
-                elif self.story.config.server_tick_method == TickMethod.TIMER:
-                    # server tick goes on a timer, wait a limited time for player input before going on
-                    input_wait_time = max(0.01, self.story.config.server_tick_time - loop_duration)
-                    has_input = conn.player.input_is_available.wait(input_wait_time)
-                else:
-                    raise ValueError("invalid tick method")
 
-                loop_start = time.time()
-                if has_input:
-                    conn.need_new_input_prompt = True
-                    try:
-                        if conn in self.waiting_for_input:
-                            # this connection is processing direct input, rather than regular commands
-                            dialog, validator, echo_input = self.waiting_for_input.pop(conn)
-                            response = conn.player.get_pending_input()[0]
-                            if validator:
-                                try:
-                                    response = validator(response)
-                                except ValueError as x:
-                                    prompt = conn.last_output_line
-                                    conn.io.dont_echo_next_cmd = not echo_input
-                                    conn.output(str(x) or "That is not a valid answer.")
-                                    conn.output_no_newline(prompt)   # print the input prompt again
-                                    self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
-                                    continue
-                            self.__continue_dialog(conn, dialog, response)
-                        else:
-                            # normal command processing
-                            self.__server_loop_process_player_input(conn)
-                    except (KeyboardInterrupt, EOFError):
-                        continue
-                    except errors.SessionExit:
-                        self.story.goodbye(conn.player)
-                        self._stop_driver()
-                        break
-                    except Exception:
-                        tb = "".join(util.format_traceback())
-                        txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
-                        conn.player.tell(txt, format=False)
-                        conn.player.tell("<rev><it>Please report this problem.</>")
-                # sync pubsub events
-                pubsub.sync("driver-pending-tells")
-                # server TICK
-                now = time.time()
-                if now - previous_server_tick >= self.story.config.server_tick_time:
-                    self.__server_tick()
-                    previous_server_tick = now
-                if self.story.config.server_tick_method == TickMethod.COMMAND:
-                    # Even though the server tick may be skipped, the pubsub events
-                    # should be processed every player command no matter what.
-                    pubsub.sync()
-                loop_duration = time.time() - loop_start
-                self.server_loop_durations.append(loop_duration)
-                conn.write_output()
-        except errors.StoryCompleted:
-            # player reached the end of the story, print completion message and exit the game
+        def story_completed():
             self.__stop_mainloop = True
             conn.player.tell("\n")
             conn.input_direct("\n\nPress enter to exit. ")  # blocking
             conn.player.tell("\n")
             self._stop_driver()
+
+        while not self.__stop_mainloop:
+            pubsub.sync("driver-async-dialogs")
+            if conn not in self.waiting_for_input:
+                conn.write_input_prompt()
+            if self.story.config.server_tick_method == TickMethod.COMMAND:
+                conn.player.input_is_available.wait()   # blocking wait until playered entered something
+                has_input = True
+            elif self.story.config.server_tick_method == TickMethod.TIMER:
+                # server tick goes on a timer, wait a limited time for player input before going on
+                input_wait_time = max(0.01, self.story.config.server_tick_time - loop_duration)
+                has_input = conn.player.input_is_available.wait(input_wait_time)
+            else:
+                raise ValueError("invalid tick method")
+
+            loop_start = time.time()
+            if has_input:
+                conn.need_new_input_prompt = True
+                try:
+                    if conn in self.waiting_for_input:
+                        # this connection is processing direct input, rather than regular commands
+                        dialog, validator, echo_input = self.waiting_for_input.pop(conn)
+                        response = conn.player.get_pending_input()[0]
+                        if validator:
+                            try:
+                                response = validator(response)
+                            except ValueError as x:
+                                prompt = conn.last_output_line
+                                conn.io.dont_echo_next_cmd = not echo_input
+                                conn.output(str(x) or "That is not a valid answer.")
+                                conn.output_no_newline(prompt)   # print the input prompt again
+                                self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
+                                continue
+                        self.__continue_dialog(conn, dialog, response)
+                    else:
+                        # normal command processing
+                        self.__server_loop_process_player_input(conn)
+                except (KeyboardInterrupt, EOFError):
+                    continue
+                except errors.SessionExit:
+                    self.__stop_mainloop = True
+                    self.story.goodbye(conn.player)
+                    self._stop_driver()
+                    break
+                except errors.StoryCompleted:
+                    story_completed()
+                    break
+                except Exception:
+                    tb = "".join(util.format_traceback())
+                    txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
+                    conn.player.tell(txt, format=False)
+                    conn.player.tell("<rev><it>Please report this problem.</>")
+            # sync pubsub events
+            pubsub.sync("driver-pending-tells")
+            # server TICK
+            now = time.time()
+            if now - previous_server_tick >= self.story.config.server_tick_time:
+                try:
+                    self.__server_tick()
+                except errors.StoryCompleted:
+                    # completing the story can also be done from a delayed action
+                    story_completed()
+                    break
+                previous_server_tick = now
+            if self.story.config.server_tick_method == TickMethod.COMMAND:
+                # Even though the server tick may be skipped, the pubsub events
+                # should be processed every player command no matter what.
+                pubsub.sync()
+            loop_duration = time.time() - loop_start
+            self.server_loop_durations.append(loop_duration)
+            conn.write_output()
 
     def __server_loop_process_player_input(self, conn: player.PlayerConnection) -> None:
         p = conn.player
