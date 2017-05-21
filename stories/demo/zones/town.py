@@ -19,6 +19,7 @@ from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 def init(driver: Driver) -> None:
     # called when zone is first loaded
     board.load()
+    board.save()  # make sure the storage file exists
 
 
 square = Location("Town square",
@@ -39,8 +40,9 @@ paper = clone(newspaper)
 paper.aliases = {"paper"}
 paper.short_description = "Last day's newspaper lies on the floor."
 
-# add a bulletin board to the town
+# add a bulletin board to the town, with some initial messages
 board = clone(bulletinboard)  # type: BulletinBoard
+board.storage_file = "boards/board.json"
 board.posts = [
     {
         "author": "irmen",
@@ -55,8 +57,6 @@ board.posts = [
         "text": "Please behave responsibly.\n\nSigned, Irmen"
     },
 ]
-# try to load the persisted board messages:
-board.storage_file = "boards/board.json"
 lane.init_inventory([board])
 
 

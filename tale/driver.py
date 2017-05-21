@@ -528,7 +528,7 @@ class Driver(pubsub.Listener):
     def __print_game_intro(self, conn: player.PlayerConnection) -> None:
         try:
             # print game banner as supplied by the game
-            banner = self.resources["messages/banner.txt"].data
+            banner = self.resources["messages/banner.txt"].text
             if conn:
                 conn.player.tell("<bright>%s</>" % banner, format=False)
                 conn.player.tell("\n")
@@ -986,7 +986,7 @@ class Driver(pubsub.Listener):
             module.init(self)   # type: ignore
         return importlib.import_module("zones")
 
-    def __load_saved_game(self, player: player.Player) -> player.Player:
+    def __load_saved_game(self, player: player.Player) -> Optional[player.Player]:
         assert self.story.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
@@ -1048,8 +1048,7 @@ class Driver(pubsub.Listener):
     def show_motd(self, player: player.Player, notify_no_motd: bool=False) -> None:
         """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
         try:
-            motd = self.resources["messages/motd.txt"]
-            message = motd.data.rstrip()    # type: ignore
+            message = self.resources["messages/motd.txt"].text.rstrip()
         except IOError:
             message = None
         if message:

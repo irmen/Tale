@@ -51,9 +51,9 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("f", player.stats.gender)
         self.assertEqual("she", player.subjective)
 
-    def test_tell(self):
+    def test_tell(self) -> None:
         player = Player("fritz", "m")
-        player.tell(5)
+        player.tell(5)  # type: ignore
         self.assertEqual(["5\n"], player.test_get_output_paragraphs())
         player.tell("")
         self.assertEqual([], player.test_get_output_paragraphs())
@@ -78,8 +78,8 @@ class TestPlayer(unittest.TestCase):
         player.tell("hello\nnewline")
         player.tell("\n")
         player.tell("ints")
-        player.tell(42)
-        player.tell(999)
+        player.tell(42)  # type: ignore
+        player.tell(999)  # type: ignore
         self.assertEqual(["line1\nline2\nhello\nnewline\n", "ints\n42\n999\n"], player.test_get_output_paragraphs())
         self.assertEqual([], player.test_get_output_paragraphs())
         player.tell("para1", end=False)

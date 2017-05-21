@@ -125,7 +125,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
             player_table.append(html_escape("Name:  %s   connection: %s" % (name, conn.io)))
         player_table.append("</pre>")
         player_table_txt = "\n".join(player_table)
-        txt = resource.data.format(tale_version=tale_version_str,           # type: ignore
+        txt = resource.text.format(tale_version=tale_version_str,
                                    story_version=self.driver.story.config.version,
                                    story_name=self.driver.story.config.name,
                                    uptime="%d:%02d:%02d" % self.driver.uptime,
@@ -204,7 +204,7 @@ class SessionMiddleware:
             response_headers = [('Content-Type', x.content_type)]
             response_headers.extend(cookies.get_http_headers())
             start_response("200 OK", response_headers)
-            return [str(x).encode("utf-8")]         # XXX bytes?? str??
+            return [str(x).encode("utf-8")]
 
 
 class Cookies(http.cookies.SimpleCookie):

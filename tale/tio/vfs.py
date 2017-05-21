@@ -17,28 +17,62 @@ from typing import ByteString, Union, IO, Any
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
+if ".7z" not in mimetypes.encodings_map:
+    mimetypes.encodings_map[".7z"] = "7zip"
+if ".rar" not in mimetypes.encodings_map:
+    mimetypes.encodings_map[".7z"] = "rar"
+if ".json" not in mimetypes.types_map:
+    mimetypes.types_map[".json"] = "application/json"
+if ".ini" not in mimetypes.types_map:
+    mimetypes.types_map[".ini"] = "text/plain"
+
 
 class VfsError(IOError):
     """Something went wrong while using the virtual file system"""
     pass
 
 
-class Resource:  # XXX separate textresource/binaryresource? perhaps even soundresource/imageresource?
+def is_text(mimetype: str) -> bool:
+    return bool(mimetype) and (mimetype.startswith("text/")
+                               or mimetype in {"application/json", "application/xml"})
+
+
+class Resource:
     """Simple container of a resource name, its data (string or binary) and the mime type"""
-    def __init__(self, name: str, data: Union[str, ByteString], mimetype: str, mtime: float) -> None:
+    def __init__(self, name: str, data: Union[str, ByteString], mimetype: str="application/octet-stream", mtime: float=0.0) -> None:
+        if is_text(mimetype):
+            if not isinstance(data, str):
+                raise TypeError("text data required for this mimetype")
+        else:
+            if not isinstance(data, (bytes, bytearray)):
+                raise TypeError("bytes or bytearray data requires for this mimetype")
         self.name = name
-        self.data = data        # XXX 'data' for binary and 'text' for text mode resources?
         self.mimetype = mimetype
-        self.mtime = mtime      # not always set
+        self.mtime = mtime
+        self.__data = data
+
+    @property
+    def data(self) -> bytes:
+        """the (binary) data of this resource"""
+        if is_text(self.mimetype):
+            raise VfsError("this is a text resource, not binary")
+        return self.__data      # type: ignore
+
+    @property
+    def text(self) -> str:
+        """the (text) data of this resource"""
+        if is_text(self.mimetype):
+            return self.__data   # type: ignore
+        raise VfsError("this is a binary resource, not text")
 
     def __repr__(self):
-        return "<Resource %s from %s, size=%d, mtime=%s>" % (self.mimetype, self.name, len(self.data), self.mtime)
+        return "<Resource %s from %s, size=%d, mtime=%s>" % (self.mimetype, self.name, len(self.__data), self.mtime)
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.__data)
 
     def __getitem__(self, item: int) -> Union[str, int]:
-        return self.data[item]
+        return self.__data[item]
 
 
 class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
@@ -97,7 +131,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         if compressor:
             raise VfsError("compressed files are not yet supported")  # XXX add auto decompress
         mimetype = mimetype or "application/octet-stream"
-        if mimetype.startswith("text/"):
+        if is_text(mimetype):
             mode = "rt"
             encoding = "utf-8"
         else:
@@ -162,7 +196,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             if ex.errno != errno.EEXIST or not os.path.isdir(dirname):
                 raise
         mimetype = mimetype or mimetypes.guess_type(name)[0] or ""
-        if mimetype.startswith("text/"):
+        if is_text(mimetype):
             return io.open(phys_path, mode="at" if append else "wt", encoding="utf-8", newline="\n")
         return io.open(phys_path, mode="ab" if append else "wb")
 

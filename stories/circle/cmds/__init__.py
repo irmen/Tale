@@ -65,7 +65,7 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             objects.append(make_mob(vnum))
         except KeyError:
             pass
-        player.tell("Objects with vnum %d:" % vnum, lang.join(str(o) for o in objects))
+        player.tell("Objects with vnum %d:" % vnum + " " + lang.join(str(o) for o in objects))
         return
     try:
         vnum = obj.vnum
@@ -90,5 +90,5 @@ def spawn_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     except KeyError:
         pass
     for obj in spawned:
-        player.tell("Spawned", obj)
+        player.tell("Spawned " + obj + " (into your current location)")
         obj.move(player.location, actor=player)

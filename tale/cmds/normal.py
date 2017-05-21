@@ -1467,7 +1467,7 @@ def do_license(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     # print optional game specific license info
     if ctx.config.license_file:
         t("\n")
-        t(ctx.resources[ctx.config.license_file].data, end=True)
+        t(ctx.resources[ctx.config.license_file].text, end=True)
         t("\n")
     # print GPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)

@@ -67,9 +67,10 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = indent
         self.screen_width = width
 
-    def tell(self, message: Any, *, end: bool=False, format: bool=True) -> base.Living:
+    def tell(self, message: str, *, end: bool=False, format: bool=True) -> base.Living:
         """
-        Sends a message to a player, meant to be printed on the screen. Will be converted to str.
+        Sends a message to a player, meant to be printed on the screen.
+        Message will be converted to str if required.
         If you want to output a paragraph separator, either set end=True or tell a single newline.
         If you provide format=False, this paragraph of text won't be formatted when it is outputted,
         and whitespace is untouched. Empty strings aren't outputted at all.
@@ -89,7 +90,7 @@ class Player(base.Living, pubsub.Listener):
         """
         if not reformat:
             raise NotImplementedError("unformatted text file printing not yet supported")   # @todo add this
-        for paragraph in file_resource.data.split("\n\n"):   # type: ignore
+        for paragraph in file_resource.text.split("\n\n"):
             if paragraph.startswith("\n"):
                 self.tell("\n")
             self.tell(paragraph, end=True)

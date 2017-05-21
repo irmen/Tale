@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import json
 import datetime
 from collections import deque
-from typing import Tuple, Dict, Any, Generator, MutableSequence
+from typing import Tuple, Dict, Any, Generator, MutableSequence, List, Sequence
 from ..base import Item, Living
 from ..parseresult import ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
@@ -25,7 +25,7 @@ class BulletinBoard(Item):
 
     def init(self) -> None:
         super().init()
-        self.posts = deque(maxlen=self.max_num_posts)  # type: MutableSequence[PostType]   # some py 3.5's don't have typing.Deque
+        self.__posts = deque(maxlen=self.max_num_posts)  # type: MutableSequence[PostType]   # some py 3.5's don't have typing.Deque
         self.readonly = False
         self.storage_file = None  # type: str
         self.verbs = {
@@ -36,16 +36,24 @@ class BulletinBoard(Item):
             "reply": "Write a reply to a message already on the board (indicate the number of the message).",
             "remove": "Remove a message that you wrote earlier (indicate the number of the message)."}
 
+    @property
+    def posts(self) -> List[PostType]:
+        return list(self.__posts)
+
+    @posts.setter
+    def posts(self, value: Sequence[PostType]):
+        self.__posts = deque(value, maxlen=self.max_num_posts)
+
     def allow_item_move(self, actor: Living, verb: str="move") -> None:
         raise ActionRefused("You can't %s %s." % (verb, self.title))
 
     @property
     def description(self) -> str:
         txt = [self._description]
-        if not self.posts:
+        if not self.__posts:
             txt.append("It is empty.")
         else:
-            if len(self.posts) == 1:
+            if len(self.__posts) == 1:
                 txt.append("There's a message on it.")
             else:
                 txt.append("There are several messages on it.")
@@ -95,17 +103,17 @@ class BulletinBoard(Item):
         actor.tell_others("{Title} studies the %s." % self.title)
         actor.tell("You look at the %s." % self.title)
         actor.tell(self._description)
-        if not self.posts:
+        if not self.__posts:
             actor.tell("It is empty.")
         else:
-            if len(self.posts) == 1:
+            if len(self.__posts) == 1:
                 actor.tell("There's a message on it:", end=True)
             else:
                 actor.tell("There are several messages on it:", end=True)
             txt = ["<ul> # <dim>|</><ul> subject                           <dim>|</><ul> author         <dim>|</><ul> date     </>"]
-            for num, post in enumerate(self.posts, start=1):
+            for num, post in enumerate(self.__posts, start=1):
                 txt.append("%2d.  %-35s %-15s %s" % (num, post["subject"], post["author"], post["date"]))
-            actor.tell(*txt, format=False)
+            actor.tell("\n".join(txt), format=False)
 
     def _get_post(self, num: str) -> Tuple[int, PostType]:
         if num:
@@ -113,7 +121,7 @@ class BulletinBoard(Item):
                 num = num[1:]
             try:
                 nr = int(num)
-                return nr, self.posts[nr - 1]
+                return nr, self.__posts[nr - 1]
             except ValueError:
                 pass
             except IndexError:
@@ -160,7 +168,7 @@ class BulletinBoard(Item):
                     "subject": subject,
                     "text": text
                 }
-                self.posts.appendleft(post)   # type: ignore
+                self.__posts.appendleft(post)   # type: ignore
                 self.save()
                 actor.tell("\n")
                 actor.tell("You've added the message on top of the list on the %s." % self.name)
@@ -185,7 +193,7 @@ class BulletinBoard(Item):
             raise ActionRefused("You can't remove messages from it.")
         num, post = self._get_post(arg)
         if "wizard" in actor.privileges or actor.name == post["author"]:
-            del self.posts[num - 1]
+            del self.__posts[num - 1]
             actor.tell("You've removed message #%d ('%s') from the board." % (num, post["subject"]))
             actor.tell_others("{Title} took a message off the %s." % self.title)
             self.save()
@@ -204,10 +212,12 @@ class BulletinBoard(Item):
         if not self.storage_file:
             return
         try:
-            data = json.loads(mud_context.driver.user_resources[self.storage_file].data.decode("UTF-8"))
-            self.posts = deque(data["posts"], maxlen=self.max_num_posts)
-        except IOError:
+            data = json.loads(mud_context.driver.user_resources[self.storage_file].text)
+            self.posts = data["posts"]
+        except FileNotFoundError:
             pass
+        except (ValueError, IOError) as x:
+            print("Bulletin board '%s' load error: %s" % (self.name, x))
 
     def save(self) -> None:
         """save the messages to persistent data file"""
@@ -216,9 +226,12 @@ class BulletinBoard(Item):
         data = {
             "board-name": self.name,
             "board-title": self.title,
-            "posts": list(self.posts)
+            "posts": self.posts
         }
-        mud_context.driver.user_resources[self.storage_file] = json.dumps(data, indent=4, sort_keys=True).encode("UTF-8")
+        try:
+            mud_context.driver.user_resources[self.storage_file] = json.dumps(data, indent=4, sort_keys=True)
+        except IOError as x:
+            print("Bulletin board '%s' save error: %s" % (self.name, x))
 
 
 bulletinboard = BulletinBoard("board", "wooden bulletin board", "The board contains a little plaque: \"important announcements\".",

@@ -199,7 +199,7 @@ class Shopkeeper(Living):
             for i, item in enumerate(sorted_by_name(self.inventory), start=1):
                 price = item.value * self.shop.sellprofit
                 txt.append("%3d. %-30s  %s" % (i, item.title, mud_context.driver.moneyfmt.display(price)))
-            actor.tell(*txt, format=False)
+            actor.tell("\n".join(txt), format=False)
         return True
 
     def shop_inquire(self, parsed: ParseResult, actor: Living) -> bool:

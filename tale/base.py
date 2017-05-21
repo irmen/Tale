@@ -832,9 +832,10 @@ class Living(MudObject):
         """get a wiretap for this living"""
         return pubsub.topic(("wiretap-living", self.name))
 
-    def tell(self, message: Any, *, end: bool=False, format: bool=True) -> 'Living':
+    def tell(self, message: str, *, end: bool=False, format: bool=True) -> 'Living':
         """
-        Every living thing in the mud can receive an action message (will be converted to str).
+        Every living thing in the mud can receive an action message.
+        Message will be converted to str if required.
         For players this is usually printed to their screen, but for all other
         livings the default is to do nothing -- except for making sure
         that the message is sent to any wiretaps that may be present.

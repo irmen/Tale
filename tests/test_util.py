@@ -11,7 +11,7 @@ from tale.errors import ParseError, ActionRefused
 from tale.base import Item, Container, Location
 from tale.player import Player
 from tale.story import MoneyType, StoryConfig
-from tale.tio.vfs import VirtualFileSystem, VfsError
+from tale.tio.vfs import VirtualFileSystem, VfsError, Resource, is_text
 from tests.supportstuff import TestDriver
 
 
@@ -174,87 +174,6 @@ class TestUtil(unittest.TestCase):
         """
         self.assertEqual("first\n  second\n    third", util.format_docstring(d))
 
-    def test_vfs_load_and_names(self):
-        vfs = VirtualFileSystem(root_package="os")
-        with self.assertRaises(VfsError):
-            _ = vfs["a\\b"]
-        with self.assertRaises(VfsError):
-            _ = vfs["/abs/path"]
-        with self.assertRaises(IOError):
-            _ = vfs["normal/text"]
-        with self.assertRaises(IOError):
-            _ = vfs["normal/image"]
-        vfs = VirtualFileSystem(root_path=".")
-        with self.assertRaises(IOError):
-            _ = vfs["test_doesnt_exist_999.txt"]
-        with self.assertRaises(VfsError):
-            _ = VirtualFileSystem(root_path="/@@@does_not_exist.foo@@@")
-        with self.assertRaises(VfsError):
-            _ = VirtualFileSystem(root_package="non.existing.package.name")
-        with self.assertRaises(VfsError):
-            _ = VirtualFileSystem(root_package="non_existing_package_name")
-        with self.assertRaises(VfsError) as x:
-            _ = vfs["foo.txt.gz"]
-        self.assertIn("compressed", str(x.exception))
-
-    def test_vfs_validate_path(self):
-        vfs = VirtualFileSystem(root_path=".")
-        vfs.validate_path(".")
-        vfs.validate_path("./foo")
-        vfs.validate_path("./foo/bar")
-        vfs.validate_path(".")
-        with self.assertRaises(VfsError):
-            vfs.validate_path(r".\wrong\slash")
-        with self.assertRaises(VfsError):
-            vfs.validate_path(r"/absolute/not/allowed")
-        with self.assertRaises(VfsError):
-            vfs.validate_path(r"./foo/../../../../../rootescape/notallowed")
-
-    def test_vfs_storage(self):
-        with self.assertRaises(ValueError):
-            _ = VirtualFileSystem(root_package="os", readonly=False)
-        vfs = VirtualFileSystem(root_path=".", readonly=False)
-        with self.assertRaises(IOError):
-            _ = vfs["test_doesnt_exist_999.txt"]
-        vfs["unittest.txt"] = "Test1\nTest2\n"
-        rsc = vfs["unittest.txt"]
-        self.assertEqual("Test1\nTest2\n", rsc.data)
-        self.assertEqual("text/plain", rsc.mimetype)
-        self.assertEqual(12, len(rsc))
-        self.assertEqual("unittest.txt", rsc.name)
-        vfs["unittest.txt"] = "Test1\nTest2\n"
-        rsc = vfs["unittest.txt"]
-        self.assertEqual("Test1\nTest2\n", rsc.data)
-        vfs["unittest.jpg"] = b"imagedata\nblob"
-        rsc = vfs["unittest.jpg"]
-        self.assertEqual(b"imagedata\nblob", rsc.data)
-        self.assertTrue(rsc.mimetype in ("image/jpeg", "image/pjpeg"))
-        self.assertEqual(14, len(rsc))
-        self.assertEqual("unittest.jpg", rsc.name)
-        vfs["unittest.jpg"] = rsc
-        del vfs["unittest.txt"]
-        del vfs["unittest.jpg"]
-
-    def test_vfs_readonly(self):
-        vfs = VirtualFileSystem(root_path=".")
-        with self.assertRaises(VfsError):
-            vfs.open_write("test.txt")
-        with self.assertRaises(VfsError):
-            vfs["test.txt"] = "data"
-
-    def test_vfs_write_stream(self):
-        vfs = VirtualFileSystem(root_path=".", readonly=False)
-        with vfs.open_write("unittest.txt") as f:
-            f.write("test write")
-        self.assertEqual("test write", vfs["unittest.txt"].data)
-        with vfs.open_write("unittest.txt", append=False) as f:
-            f.write("overwritten")
-        self.assertEqual("overwritten", vfs["unittest.txt"].data)
-        with vfs.open_write("unittest.txt", append=True) as f:
-            f.write("appended")
-        self.assertEqual("overwrittenappended", vfs["unittest.txt"].data)
-        del vfs["unittest.txt"]
-
     def test_gametime_realtime(self):
         epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)
         gt = util.GameDateTime(epoch)  # realtime=1
@@ -356,6 +275,118 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             func(42, actor=actor2)
         func(42, actor=actor3)
+
+
+class TestVfs(unittest.TestCase):
+    def test_resource_text(self):
+        r = Resource("test", "hello", "text/plain")
+        self.assertEqual("hello", r.text)
+        self.assertEqual(5, len(r))
+        self.assertEqual('o', r[4])
+        with self.assertRaises(VfsError):
+            _ = r.data
+        with self.assertRaises(TypeError):
+            Resource("test", b"hello", "text/plain")
+
+    def test_resource_binary(self):
+        r = Resource("test", b"hello", "image/jpeg")
+        self.assertEqual(b"hello", r.data)
+        self.assertEqual(5, len(r))
+        self.assertEqual(111, r[4])
+        with self.assertRaises(VfsError):
+            _ = r.text
+        with self.assertRaises(TypeError):
+            Resource("test", "hello", "image/jpeg")
+
+    def test_is_text(self):
+        self.assertTrue(is_text("text/plain"))
+        self.assertTrue(is_text("text/xml"))
+        self.assertTrue(is_text("application/xml"))
+        self.assertTrue(is_text("application/json"))
+        self.assertFalse(is_text(""))
+        self.assertFalse(is_text("application/octet-stream"))
+        self.assertFalse(is_text("image/jpeg"))
+
+    def test_vfs_load_and_names(self):
+        vfs = VirtualFileSystem(root_package="os")
+        with self.assertRaises(VfsError):
+            _ = vfs["a\\b"]
+        with self.assertRaises(VfsError):
+            _ = vfs["/abs/path"]
+        with self.assertRaises(IOError):
+            _ = vfs["normal/text"]
+        with self.assertRaises(IOError):
+            _ = vfs["normal/image"]
+        vfs = VirtualFileSystem(root_path=".")
+        with self.assertRaises(IOError):
+            _ = vfs["test_doesnt_exist_999.txt"]
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_path="/@@@does_not_exist.foo@@@")
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_package="non.existing.package.name")
+        with self.assertRaises(VfsError):
+            _ = VirtualFileSystem(root_package="non_existing_package_name")
+        with self.assertRaises(VfsError) as x:
+            _ = vfs["foo.txt.gz"]
+        self.assertIn("compressed", str(x.exception))
+
+    def test_vfs_validate_path(self):
+        vfs = VirtualFileSystem(root_path=".")
+        vfs.validate_path(".")
+        vfs.validate_path("./foo")
+        vfs.validate_path("./foo/bar")
+        vfs.validate_path(".")
+        with self.assertRaises(VfsError):
+            vfs.validate_path(r".\wrong\slash")
+        with self.assertRaises(VfsError):
+            vfs.validate_path(r"/absolute/not/allowed")
+        with self.assertRaises(VfsError):
+            vfs.validate_path(r"./foo/../../../../../rootescape/notallowed")
+
+    def test_vfs_storage(self):
+        with self.assertRaises(ValueError):
+            _ = VirtualFileSystem(root_package="os", readonly=False)
+        vfs = VirtualFileSystem(root_path=".", readonly=False)
+        with self.assertRaises(IOError):
+            _ = vfs["test_doesnt_exist_999.txt"]
+        vfs["unittest.txt"] = "Test1\nTest2\n"
+        rsc = vfs["unittest.txt"]
+        self.assertEqual("Test1\nTest2\n", rsc.text)
+        self.assertEqual("text/plain", rsc.mimetype)
+        self.assertEqual(12, len(rsc))
+        self.assertEqual("unittest.txt", rsc.name)
+        vfs["unittest.txt"] = "Test1\nTest2\n"
+        rsc = vfs["unittest.txt"]
+        self.assertEqual("Test1\nTest2\n", rsc.text)
+        vfs["unittest.jpg"] = b"imagedata\nblob"
+        rsc = vfs["unittest.jpg"]
+        self.assertEqual(b"imagedata\nblob", rsc.data)
+        self.assertTrue(rsc.mimetype in ("image/jpeg", "image/pjpeg"))
+        self.assertEqual(14, len(rsc))
+        self.assertEqual("unittest.jpg", rsc.name)
+        vfs["unittest.jpg"] = rsc
+        del vfs["unittest.txt"]
+        del vfs["unittest.jpg"]
+
+    def test_vfs_readonly(self):
+        vfs = VirtualFileSystem(root_path=".")
+        with self.assertRaises(VfsError):
+            vfs.open_write("test.txt")
+        with self.assertRaises(VfsError):
+            vfs["test.txt"] = "data"
+
+    def test_vfs_write_stream(self):
+        vfs = VirtualFileSystem(root_path=".", readonly=False)
+        with vfs.open_write("unittest.txt") as f:
+            f.write("test write")
+        self.assertEqual("test write", vfs["unittest.txt"].text)
+        with vfs.open_write("unittest.txt", append=False) as f:
+            f.write("overwritten")
+        self.assertEqual("overwritten", vfs["unittest.txt"].text)
+        with vfs.open_write("unittest.txt", append=True) as f:
+            f.write("appended")
+        self.assertEqual("overwrittenappended", vfs["unittest.txt"].text)
+        del vfs["unittest.txt"]
 
 
 if __name__ == '__main__':

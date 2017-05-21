@@ -98,7 +98,7 @@ def fullstop(sentence: str, punct: str=".") -> str:
 
 
 # adverbs are stored in a datafile next to this module
-__ADVERB_LIST = list(sorted(vfs.internal_resources["soul_adverbs.txt"].data.splitlines()))   # type: ignore  # is used for prefix search
+__ADVERB_LIST = list(sorted(vfs.internal_resources["soul_adverbs.txt"].text.splitlines()))   # is used for prefix search
 ADVERBS = frozenset(__ADVERB_LIST)
 
 
