@@ -270,7 +270,7 @@ class TaleWindow(tkinter.Toplevel):
                                               master=self)
         if quit:
             self.gui.destroy(True)
-            self.gui.window_closed()     # XXX eventually causes a crash when tell is called on a player object that is already None
+            self.gui.window_closed()
 
     def disable_input(self):
         self.commandEntry.config(state=tkinter.DISABLED)
