@@ -391,7 +391,7 @@ class Driver(pubsub.Listener):
                 if existing_player.idle_time < 30:
                     conn.player.tell("They are still active.")
                     continue
-                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
+                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):   # XXX this seems to leave the player's name set to 'connected_121212'
                     conn.player.tell("Okay, leaving them in peace.")
                     continue
             try:

@@ -5,7 +5,7 @@ function setup()
     var but=document.getElementById("button-autocomplete");
     if(but.accessKeyLabel) { but.value += ' ('+but.accessKeyLabel+')'; }
 
-    document.text_refresher = setInterval(poll_text, 450);
+    document.text_refresher = setTimeout(poll_text, 450);
     window.onbeforeunload = function(e) { return "Are you sure you want to abort the session and close the window?"; }
 }
 
@@ -14,14 +14,18 @@ function poll_text() {
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;
+        clearTimeout(document.text_refresher);
         if (this.readyState === DONE) {
-            if(this.status>=300) {
-                txtdiv.innerHTML += "<p class='server-error'>Server error: "+this.responseText+"<br>Perhaps refreshing the page might help. If it doesn't, quit or close your browser and try with a new window.</p>";
+            if(this.responseType=="json")
+                var json = this.response;
+            else
+                var json = JSON.parse(this.responseText);
+            if(this.status>=300 || json["error"]) {
+                txtdiv.innerHTML += "<p class='server-error'>Server error: "+JSON.stringify(json)+"<br>Perhaps refreshing the page might help. If it doesn't, quit or close your browser and try with a new window.</p>";
                 txtdiv.scrollTop = txtdiv.scrollHeight;
-                clearInterval(document.text_refresher);
                 return;
             }
-            var json = JSON.parse(this.responseText);
+            document.text_refresher = setTimeout(poll_text, 450);   // queue next poll
             var special = json["special"];
             if(special) {
                 if(special.indexOf("clear")>=0) {
@@ -39,19 +43,20 @@ function poll_text() {
     }
     ajax.onerror = function(error) {
         txtdiv.innerHTML="<p class='server-error'>Connection error.<br><br>Close the browser or refresh the page.</p>";
-        clearInterval(document.text_refresher);
+        clearTimeout(document.text_refresher);
         var cmd_input = document.getElementById("input-cmd");
         cmd_input.disabled=true;
     }
     ajax.open("GET", "text", true);
+    ajax.responseType="json";
     ajax.send(null);
 }
 
 function smoothscroll(div, previousTop) {
     if(div.scrollTop < div.scrollHeight) {
-        div.scrollTop += 5;
+        div.scrollTop += 2;
         if(div.scrollTop > previousTop) {
-            setTimeout(function(){smoothscroll(div, div.scrollTop);}, 10);
+            setTimeout(function(){smoothscroll(div, div.scrollTop);}, 4);
         }
     }
 }
@@ -63,7 +68,8 @@ function submit_cmd() {
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if(this.readyState==DONE) {
-            setTimeout(poll_text, 100);
+            clearTimeout(document.text_refresher);
+            document.text_refresher = setTimeout(poll_text, 40);
         }
     }
     ajax.open("POST", "input", true);
@@ -82,7 +88,8 @@ function autocomplete_cmd() {
         ajax.onreadystatechange = function() {
             var DONE = this.DONE || 4;
             if(this.readyState==DONE) {
-                setTimeout(poll_text, 100);
+                clearTimeout(document.text_refresher);
+                document.text_refresher = setTimeout(poll_text, 40);
             }
         }
         ajax.open("POST", "input", true);

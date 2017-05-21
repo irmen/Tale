@@ -10,9 +10,9 @@ import sys
 import hashlib
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 from socketserver import ThreadingMixIn
-from http.cookies import SimpleCookie
+import http.cookies
 from html import escape as html_escape
-from typing import Dict, Iterable, Any, List, Tuple, MutableMapping
+from typing import Dict, Iterable, Any, List, Tuple
 from .if_browser_io import HttpIo, TaleWsgiAppBase, WsgiStartResponseType
 from . import vfs
 from ..player import PlayerConnection
@@ -83,7 +83,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         return wsgi_server
 
     def wsgi_handle_story(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                          start_response: WsgiStartResponseType) -> Iterable[str]:
+                          start_response: WsgiStartResponseType) -> Iterable[bytes]:
         session = environ["wsgi.session"]
         if "player_connection" not in session:
             # create a new connection
@@ -92,29 +92,29 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         return super().wsgi_handle_story(environ, parameters, start_response)
 
     def wsgi_handle_text(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                         start_response: WsgiStartResponseType) -> Iterable[str]:
+                         start_response: WsgiStartResponseType) -> Iterable[bytes]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
-            return self.wsgi_internal_server_error(start_response, "not logged in")
+            return self.wsgi_internal_server_error_json(start_response, "not logged in")
         if not conn or not conn.player or not conn.io:
             raise SessionMiddleware.CloseSession("{\"error\": \"no longer a valid connection\"}", "application/json")
         return super().wsgi_handle_text(environ, parameters, start_response)
 
     def wsgi_handle_quit(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                         start_response: WsgiStartResponseType) -> Iterable[str]:
+                         start_response: WsgiStartResponseType) -> Iterable[bytes]:
         # Quit/logged out page. For multi player, get rid of the player connection.
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
-            return self.wsgi_internal_server_error(start_response, "not logged in")
+            return self.wsgi_internal_server_error_json(start_response, "not logged in")
         if conn.player:
             self.driver._disconnect_mud_player(conn)
         raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>"
                                              "Session ended. You may close this window/tab.</body></html>")
 
     def wsgi_handle_about(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                          start_response: WsgiStartResponseType) -> Iterable[str]:
+                          start_response: WsgiStartResponseType) -> Iterable[bytes]:
         # about page
         if "license" in parameters:
             return self.wsgi_handle_license(environ, parameters, start_response)
@@ -132,7 +132,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
                                    starttime=self.driver.server_started,
                                    num_players=len(self.driver.all_players),
                                    player_table=player_table_txt)
-        return [txt.encode("utf-8")]    # XXX bytes or str?
+        return [txt.encode("utf-8")]
 
 
 class CustomRequestHandler(WSGIRequestHandler):
@@ -149,6 +149,8 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
 class SessionMiddleware:
     """Wsgi middleware that injects session cookie logic."""
 
+    session_cookie_name = "tale_session_id"
+
     class CloseSession(Exception):
         """
         Raise this from your wsgi function to remove the current session.
@@ -158,22 +160,22 @@ class SessionMiddleware:
             super().__init__(message)
             self.content_type = content_type
 
-    def __init__(self, app: TaleMudWsgiApp, factory: MemorySessionFactory) -> None:
+    def __init__(self, app: TaleWsgiAppBase, factory: MemorySessionFactory) -> None:
         self.app = app
         self.factory = factory
 
-    def __call__(self, environ: Dict[str, Any], start_response: WsgiStartResponseType) -> Iterable[str]:
+    def __call__(self, environ: Dict[str, Any], start_response: WsgiStartResponseType) -> Iterable[bytes]:
         path = environ.get('PATH_INFO', '')
         if not path.startswith("/tale/"):
             # paths not under /tale/ won't get a session
             return self.app(environ, start_response)
 
-        cookie = SimpleCookie()  # type: ignore
-        if 'HTTP_COOKIE' in environ:
-            cookie.load(environ['HTTP_COOKIE'])
+        cookies = Cookies.from_env(environ)
         sid = None
-        if "session_id" in cookie:
-            sid = cookie["session_id"].value
+        session_is_new = True
+        if self.session_cookie_name in cookies:
+            sid = cookies[self.session_cookie_name].value
+            session_is_new = False
         environ["wsgi.session"] = self.factory.load(sid)
 
         # If the server runs behind a reverse proxy, you can configure the proxy
@@ -185,26 +187,48 @@ class SessionMiddleware:
 
         def wrapped_start_response(status: str, response_headers: List[Tuple[str, str]], exc_info: Any=None) -> Any:
             sid = self.factory.save(environ["wsgi.session"])
-            cookies = SimpleCookie()   # type: ignore
-            cookies["session_id"] = sid
-            cookie = cookies["session_id"]  # type: MutableMapping
-            cookie["path"] = cookie_path
-            cookie["httponly"] = "1"
-            response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
+            if session_is_new:
+                # add the new session cookie to response
+                cookies = Cookies()  # type: ignore
+                cookies.add_cookie(self.session_cookie_name, sid, cookie_path)
+                response_headers.extend(cookies.get_http_headers())
             return start_response(status, response_headers, exc_info)
 
         try:
-            return self.app(environ, wrapped_start_response)        # XXX ??what is app... driver class????
+            return self.app(environ, wrapped_start_response)
         except SessionMiddleware.CloseSession as x:
             self.factory.delete(sid)
             # clear the browser cookie
-            cookies = SimpleCookie()  # type: ignore
-            cookies["session_id"] = "deleted"
-            old_cookie = cookies["session_id"]  # type: MutableMapping      # XXX ehmm didn't we just set it to "deleted"?
-            old_cookie["path"] = cookie_path
-            old_cookie["httponly"] = "1"
-            old_cookie["expires"] = "Thu, 01-Jan-1970 00:00:00 GMT"
+            cookies = Cookies()  # type: ignore
+            cookies.delete_cookie(self.session_cookie_name, cookie_path)
             response_headers = [('Content-Type', x.content_type)]
-            response_headers.extend(("set-cookie", morsel.OutputString()) for morsel in cookies.values())
+            response_headers.extend(cookies.get_http_headers())
             start_response("200 OK", response_headers)
             return [str(x).encode("utf-8")]         # XXX bytes?? str??
+
+
+class Cookies(http.cookies.SimpleCookie):
+    @staticmethod
+    def from_env(environ: Dict[str, Any]) -> 'Cookies':
+        cookies = Cookies()  # type: ignore
+        if 'HTTP_COOKIE' in environ:
+            cookies.load(environ['HTTP_COOKIE'])
+        return cookies
+
+    def add_cookie(self, name: str, value: str, path: str) -> None:
+        self[name] = value
+        morsel = self[name]
+        morsel["path"] = path
+        morsel["httponly"] = "1"
+
+    def delete_cookie(self, name: str, path: str=None) -> None:
+        self[name] = "deleted"
+        morsel = self[name]
+        if path:
+            morsel["path"] = path
+        morsel["httponly"] = "1"
+        morsel["max-age"] = "0"
+        morsel["expires"] = "Thu, 01 Jan 1970 00:00:00 GMT"   # for IE
+
+    def get_http_headers(self):
+        return [("Set-Cookie", morsel.OutputString()) for morsel in self.values()]
