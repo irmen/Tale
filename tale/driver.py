@@ -331,7 +331,7 @@ class Driver(pubsub.Listener):
         return connection
 
     def _disconnect_mud_player(self, conn_or_player: Union[player.PlayerConnection, player.Player]) -> None:
-        # note: conn is corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
+        # note: conn can be corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
         if isinstance(conn_or_player, player.PlayerConnection):
             name = conn_or_player.player.name
             conn = conn_or_player
@@ -341,7 +341,6 @@ class Driver(pubsub.Listener):
         else:
             raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
-        print("DISCONNECTING PLAYER", conn.player, " IO=", conn.io, "  LOC=", conn.player.location)  # XXX
         if conn.player.location:
             conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
         del self.all_players[name]
@@ -1229,7 +1228,7 @@ class LimboReaper(base.Living):
         super().__init__(
             "reaper", "m", "elemental", "Grim Reaper",
             description="He wears black robes with a hood. Where a face should be, there is only nothingness. "
-                        "He is carrying a large omnious scythe that looks very, very sharp.",
+                        "He is carrying a large ominous scythe that looks very, very sharp.",
             short_description="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
@@ -1261,6 +1260,10 @@ class LimboReaper(base.Living):
             duration = now - first_seen
             # Depending on how long the candidate is being observed, show increasingly threateningly warnings,
             # and eventually killing the candidate (and closing their connection).
+            # For wizard players, this is not done and only a short notification is printed.
+            if "wizard" in candidate.privileges and duration >= 2 and shown < 1:
+                candidate.tell(self.title + " whispers: \"Hello there wizard. Please don't stay for too long.\"")
+                shown = 99999
             if duration >= 30 and shown < 1:
                 candidate.tell(self.title + " whispers: \"Greetings. Be aware that you must not linger here... Decide swiftly...\"")
                 shown = 1
@@ -1273,7 +1276,7 @@ class LimboReaper(base.Living):
             elif duration >= 62 and shown < 4:
                 candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
                 shown = 4
-            elif duration >= 63:
+            elif duration >= 63 and "wizard" not in candidate.privileges:
                 try:
                     conn = ctx.driver.all_players[candidate.name]
                 except KeyError:

@@ -137,7 +137,10 @@ def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> Genera
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
     for victim in parsed.who_info:
-        if not (yield "input", ("Are you sure you want to destroy %s?" % victim.title, lang.yesno)):
+        confirm_msg = "Are you sure you want to destroy %s?" % victim.title
+        if isinstance(victim, Player):
+            confirm_msg += " (it is a player, they will be very upset!)"
+        if not (yield "input", (confirm_msg, lang.yesno)):
             player.tell("You leave %s be." % victim.subjective)
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it

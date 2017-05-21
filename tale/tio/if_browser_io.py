@@ -278,7 +278,7 @@ class TaleWsgiAppBase:
         response = {"text": "\n".join(html)}
         if html and conn.player:
             response["turns"] = conn.player.turns
-            response["location"] = conn.player.location.title
+            response["location"] = conn.player.location.title if conn.player.location else "???"
             response["special"] = special
         return [json.dumps(response).encode("utf-8")]           # XXX bytes/str?
 
