@@ -330,7 +330,7 @@ class Item(MudObject):
     def wiz_clone(self, actor: 'Living') -> 'Item':
         item = clone(self)
         actor.insert(item, actor)
-        actor.tell("Cloned into: " + repr(item))
+        actor.tell("Cloned into: " + repr(item) + " (spawned in your inventory)")
         actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
         return item
 
@@ -803,7 +803,7 @@ class Living(MudObject):
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living') -> 'Living':
         duplicate = copy.deepcopy(self)
-        actor.tell("Cloned into: " + repr(duplicate))
+        actor.tell("Cloned into: " + repr(duplicate) + " (spawned in current location)")
         actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
         actor.location.insert(duplicate, actor)
         actor.location.tell("%s appears." % lang.capital(duplicate.title))

@@ -21,16 +21,19 @@ def register_all(cmd_processor: Commands) -> None:
 
 @wizcmd
 def do_demo(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """demo wizard command"""
     player.tell("DEMO WIZARD COMMAND")
 
 
 @cmd
 def do_demo2(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """demo command"""
     player.tell("DEMO COMMAND")
 
 
 @cmd
 def do_coin(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """coin override"""
     player.tell("COIN OVERRIDE")
 
 

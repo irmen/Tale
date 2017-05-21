@@ -12,6 +12,7 @@ import sys
 import gc
 import platform
 import importlib
+from types import ModuleType
 from typing import Dict, Callable, Generator
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
@@ -21,7 +22,6 @@ from ..story import *
 from .. import base, lang, util, pubsub, __version__
 
 all_commands = {}   # type: Dict[str, Callable]
-LIBRARY_MODULE_NAME = "tale"
 
 
 def wizcmd(command: str, *aliases: str) -> Callable:
@@ -61,6 +61,22 @@ def wizcmd(command: str, *aliases: str) -> Callable:
     return wizcmd2
 
 
+def lookup_module_path(path: str) -> ModuleType:
+    """Gives the module loaded at the given path such as '.items.basic' or 'zones.town.houses'"""
+    if path == "zones" or path.startswith("zones."):
+        module_name = path
+    elif path.startswith("."):
+        module_name = "tale"    # the tale library itself
+        if len(path) > 1:
+            module_name += path
+    else:
+        raise ActionRefused("Path must start with '.' or 'zones'")
+    try:
+        return importlib.import_module(module_name)
+    except (ImportError, ValueError):
+        raise ActionRefused("There's no module named " + path)
+
+
 @wizcmd("ls")
 def do_ls(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """List the contents of a module path under the library tree (try !ls .items.basic)
@@ -69,18 +85,7 @@ or in the story's zone module (try !ls zones)"""
     if not parsed.args:
         raise ParseError("ls what path?")
     path = parsed.args[0]
-    if path == "zones" or path.startswith("zones."):
-        module_name = path
-    elif path.startswith("."):
-        module_name = LIBRARY_MODULE_NAME
-        if len(path) > 1:
-            module_name += path
-    else:
-        raise ActionRefused("Path must start with '.' or 'zones'")
-    try:
-        module = importlib.import_module(module_name)
-    except (ImportError, ValueError):
-        raise ActionRefused("There's no module named " + path)
+    module = lookup_module_path(path)
     p("<%s>" % path, end=True)
     m_items = vars(module).items()
     modules = [x[0] for x in m_items if inspect.ismodule(x[1])]
@@ -103,29 +108,24 @@ or in the story's zone module (try !ls zones)"""
 @wizcmd("clone")
 def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
-    # XXX missing actor bug
-    # XXX support 'zones' path element just like ls
     if not parsed.args:
         raise ParseError("Clone what?")
     path = parsed.args[0]
-    if path.startswith("."):
+    if path.startswith(".") or path.startswith("zones.") or path == "zones":
         # find an item somewhere in a module path
-        # XXX don't duplicat this from ls command
         path, objectname = path.rsplit(".", 1)
         if not objectname:
-            raise ActionRefused("Invalid object path")
-        try:
-            module_name = LIBRARY_MODULE_NAME
-            if len(path) > 1:
-                module_name += path
-            module = importlib.import_module(module_name)
-            obj = getattr(module, objectname, None)
-        except (ImportError, ValueError):
-            raise ActionRefused("There's no module named " + path)
+            raise ActionRefused("Missing object in path")
+        module = lookup_module_path(path)
+        obj = getattr(module, objectname, None)
+        if not obj:
+            raise ActionRefused("Object not found")
     elif parsed.who_order:
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Object not found")
+    if not isinstance(obj, base.MudObject):
+        raise ActionRefused("Cannot clone that, it's not a MudObject")
     obj.wiz_clone(player)  # actually clone it
 
 
@@ -222,30 +222,22 @@ def do_wiretap(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 @wizcmd("teleport", "teleport_to")
 def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Teleport to a location or creature, or teleport a creature to you.
-'!teleport[_to] .module.path.to.object' teleports [to] that object (location or creature).
-'!teleport[_to] playername' teleports [to] that player.
-'!teleport_to zones.zonename.locationname' teleports to the given location in a zone from the story.
+'!teleport .module.path.to.creature' teleports that creature to your location.
+'!teleport_to .module.path.to.object' teleports you to that location or creature's location.
+'!teleport_to zones.zonename.locationname' teleports you to the given location in a zone from the story.
+'!teleport playername' teleports that player to your location.
+'!teleport_to playername' teleports you to the location of that player.
 '!teleport_to @start' teleports you to the starting location for wizards."""
     if not parsed.args:
         raise ActionRefused("Teleport what to where?")
     args = parsed.args
     teleport_self = parsed.verb == "!teleport_to"
-    if args[0].startswith(".") or args[0] == "zones" or args[0].startswith("zones."):
+    if args[0].startswith(".") or args[0].startswith("zones."):
         # teleport the wizard to a location somewhere in a module path
-        # XXX don't copy this from ls command?
         path, objectname = args[0].rsplit(".", 1)
         if not objectname:
-            raise ActionRefused("Invalid object path")
-        try:
-            if path.startswith("."):
-                module_name = LIBRARY_MODULE_NAME
-                if len(path) > 1:
-                    module_name += path
-            else:
-                module_name = path
-            module = importlib.import_module(module_name)
-        except (ImportError, ValueError):
-            raise ActionRefused("There's no module named " + path)
+            raise ActionRefused("Missing target object name in path")
+        module = lookup_module_path(path)
         target = getattr(module, objectname, None)
         if not target:
             raise ActionRefused("Object not found")
@@ -253,11 +245,17 @@ def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             if isinstance(target, base.Living):
                 target = target.location  # teleport to target living's location
             if not isinstance(target, base.Location):
-                raise ActionRefused("Can't determine location to teleport to.")
+                raise ActionRefused("Can't determine location or person to teleport to.")
             teleport_to(player, target)
         else:
+            if isinstance(target, ModuleType):
+                raise ActionRefused("That's a module, you have to select an object in it")
+            if not isinstance(target, base.MudObject):
+                raise ActionRefused("Cannot clone that, it's not a MudObject")
             if isinstance(target, base.Location):
-                raise ActionRefused("Can't teleport a room here, maybe you wanted to teleport TO somewhere?")
+                raise ActionRefused("Can't move a location, maybe you wanted to teleport_to it?")
+            if not isinstance(target, base.Living):
+                raise ActionRefused("You can only teleport to locations or living creatures.")
             teleport_someone_to_player(target, player)
     else:
         # target is a player (or @start - the wizard starting location)
@@ -288,6 +286,7 @@ def teleport_to(player: Player, location: base.Location) -> None:
 
 def teleport_someone_to_player(who: base.Living, player: Player) -> None:
     """helper function for teleport command, to teleport someone to the player"""
+    assert isinstance(who, base.Living) and isinstance(player, Player)
     who.location.tell("Suddenly, a shimmering portal opens!")
     room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
     player.location.tell("%s makes some gestures and a portal suddenly opens." % lang.capital(player.title), exclude_living=who)
@@ -329,18 +328,7 @@ and may produce weird results just like when reloading modules that are still us
     if not parsed.args:
         raise ActionRefused("Reload what?")
     path = parsed.args[0]
-    if path == "zones" or path.startswith("zones."):  # XXX don't copy this from ls command
-        module_name = path
-    elif path.startswith("."):
-        module_name = LIBRARY_MODULE_NAME
-        if len(path) > 1:
-            module_name += path
-    else:
-        raise ActionRefused("Path must start with '.' or 'zones'")
-    try:
-        module = importlib.import_module(module_name)
-    except (ImportError, ValueError):
-        raise ActionRefused("There's no module named " + path)
+    module = lookup_module_path(path)
     importlib.reload(module)
     player.tell("Module has been reloaded: " + module.__name__)
 

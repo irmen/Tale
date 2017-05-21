@@ -331,6 +331,7 @@ class Driver(pubsub.Listener):
         return connection
 
     def _disconnect_mud_player(self, conn_or_player: Union[player.PlayerConnection, player.Player]) -> None:
+        # note: conn is corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
         if isinstance(conn_or_player, player.PlayerConnection):
             name = conn_or_player.player.name
             conn = conn_or_player
@@ -340,7 +341,9 @@ class Driver(pubsub.Listener):
         else:
             raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
-        conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
+        print("DISCONNECTING PLAYER", conn.player, " IO=", conn.io, "  LOC=", conn.player.location)  # XXX
+        if conn.player.location:
+            conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
         del self.all_players[name]
         conn.write_output()
         # wait a bit to allow the player's screen to display the last goodbye message before killing the connection
@@ -924,6 +927,7 @@ class Driver(pubsub.Listener):
                     elif parsed.verb in command_verbs:
                         # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                         func = command_verbs[parsed.verb]
+                        del command_verbs  # no longer needed
                         ctx = util.Context(self, self.game_clock, self.story.config, conn)
                         if getattr(func, "is_generator", False):
                             dialog = func(player, parsed, ctx)
@@ -1053,13 +1057,19 @@ class Driver(pubsub.Listener):
             player.tell("There's currently no message-of-the-day.", end=True)
             player.tell("\n")
 
-    def search_player(self, name: str) -> player.Player:
+    def search_player(self, name: str) -> Optional[player.Player]:
         """
         Look through all the logged in players for one with the given name.
         Returns None if no one is known with that name.
         """
+        name = name.lower()
         conn = self.all_players.get(name)
-        return conn.player if conn else None
+        if not conn:
+            for pname, conn in self.all_players.items():
+                if name == pname.lower():
+                    break
+            return None
+        return conn.player
 
     def do_wait(self, duration: datetime.timedelta) -> Tuple[bool, Optional[str]]:
         # let time pass, duration is in game time (not real time).
