@@ -33,7 +33,7 @@ class StoryCaseBase:
 
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
-    directory = (pathlib.Path(tale.__file__).parent / "../stories/zed_is_me").resolve()
+    directory = pathlib.Path("../stories/zed_is_me").resolve()
 
     def test_story(self):
         import story
@@ -50,7 +50,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = (pathlib.Path(tale.__file__).parent / "../stories/demo").resolve()
+    directory = pathlib.Path("../stories/demo").resolve()
 
     def test_story(self):
         import story
@@ -62,6 +62,19 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
         import zones.wizardtower
         self.assertEqual("Alley of doors", zones.town.alley.name)
         self.assertEqual("Tower kitchen", zones.wizardtower.kitchen.name)
+
+
+class TestCircleStory(StoryCaseBase, unittest.TestCase):
+    directory = pathlib.Path("../stories/circle").resolve()
+
+    def test_story(self):
+        import story
+        s = story.Story()
+        self.assertEqual("Circle", s.config.name)
+
+    def test_zones(self):
+        import zones.midgaard_city
+        self.assertEqual("The Temple Of Midgaard", zones.midgaard_city.temple.name)
 
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):

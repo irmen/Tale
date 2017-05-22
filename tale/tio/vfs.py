@@ -33,8 +33,7 @@ class VfsError(IOError):
 
 
 def is_text(mimetype: str) -> bool:
-    return bool(mimetype) and (mimetype.startswith("text/")
-                               or mimetype in {"application/json", "application/xml"})
+    return bool(mimetype) and (mimetype.startswith("text/") or mimetype in {"application/json", "application/xml"})
 
 
 class Resource:
@@ -80,7 +79,10 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
     If not readonly, you can write data as well. The API is loosely based on a dict.
     Can be based off an already imported module, or from a file system path somewhere else.
+    If dealing with text files, the encoding is always UTF-8.
+    It supports automatic decompression of .gz, .xz and .bz2 compressed files (as long as they have that extension).
     """
+    # @todo add directory content listing
     def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None, readonly: bool=True) -> None:
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
@@ -128,15 +130,12 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         """Reads the resource data (text or binary) for the given name and returns it as a Resource object"""
         phys_path = self.validate_path(name)
         mimetype, compressor = mimetypes.guess_type(name, False)
-        if compressor:
-            raise VfsError("compressed files are not yet supported")  # XXX add auto decompress
         mimetype = mimetype or "application/octet-stream"
-        if is_text(mimetype):
-            mode = "rt"
+        encoding = None
+        mode = "rb"
+        if not compressor and is_text(mimetype):
+            mode = "rt"     # normalized line endings
             encoding = "utf-8"
-        else:
-            mode = "rb"
-            encoding = None
         if self.use_pkgutil:
             # package resource access
             # we can't use pkgutil.get_data directly, because we also need the mtime
@@ -152,12 +151,18 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
                 with io.StringIO(data.decode(encoding), newline=None) as f_s:
                     return Resource(name, f_s.read(), mimetype, mtime)
             else:
+                if compressor:
+                    data = self.__uncompress(compressor, data, is_text(mimetype))
                 return Resource(name, data, mimetype, mtime)
         else:
             # direct filesystem access
             with io.open(phys_path, mode=mode, encoding=encoding) as f_b:
                 mtime = os.path.getmtime(phys_path)
-                return Resource(name, f_b.read(), mimetype, mtime)
+                data = f_b.read()
+                if compressor:
+                    assert not encoding, "compressed data should not have encoding"
+                    data = self.__uncompress(compressor, data, is_text(mimetype))
+                return Resource(name, data, mimetype, mtime)
 
     def __setitem__(self, name: str, data: Union[Resource, str, ByteString]) -> None:
         """
@@ -199,6 +204,28 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         if is_text(mimetype):
             return io.open(phys_path, mode="at" if append else "wt", encoding="utf-8", newline="\n")
         return io.open(phys_path, mode="ab" if append else "wb")
+
+    def __uncompress(self, compressor: str, data: bytes, expect_text: bool) -> Union[bytes, str]:
+        if compressor == "bzip2":
+            import bz2
+            data = bz2.decompress(data)
+        elif compressor == "xz":
+            import lzma
+            data = lzma.decompress(data)
+        elif compressor == "gzip":
+            import gzip
+            data = gzip.decompress(data)
+        else:
+            raise VfsError("unsupported compressor: " + compressor)
+        if expect_text:
+            # convert to utf-8 text with normalized line endings
+            text = data.decode("utf-8")
+            last_lf = text.endswith(('\r', '\n'))
+            text = "\n".join(text.splitlines())
+            if last_lf:
+                text += "\n"
+            return text
+        return data
 
 
 # create a readonly resource loader for Tale's own internal resources:

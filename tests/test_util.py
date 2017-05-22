@@ -4,6 +4,7 @@ Unit tests for util functions
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+import os
 import datetime
 import unittest
 from tale import util, mud_context
@@ -326,9 +327,6 @@ class TestVfs(unittest.TestCase):
             _ = VirtualFileSystem(root_package="non.existing.package.name")
         with self.assertRaises(VfsError):
             _ = VirtualFileSystem(root_package="non_existing_package_name")
-        with self.assertRaises(VfsError) as x:
-            _ = vfs["foo.txt.gz"]
-        self.assertIn("compressed", str(x.exception))
 
     def test_vfs_validate_path(self):
         vfs = VirtualFileSystem(root_path=".")
@@ -387,6 +385,43 @@ class TestVfs(unittest.TestCase):
             f.write("appended")
         self.assertEqual("overwrittenappended", vfs["unittest.txt"].text)
         del vfs["unittest.txt"]
+
+    def test_vfs_read_files(self):
+        vfs = VirtualFileSystem(root_path=".", readonly=True)
+        # text file
+        resource = vfs["files/test.txt"]
+        mtime = os.path.getmtime("files/test.txt")
+        self.assertEqual(mtime, resource.mtime)
+        self.assertEqual("text/plain", resource.mimetype)
+        self.assertEqual("€ This is a test text file. This is line 1.\n€ This is a test text file. This is line 2.\n", resource.text[:88])
+        lines = resource.text.splitlines()
+        self.assertEqual(10, len(lines))
+        self.assertEqual(441, len(resource))
+        self.assertEqual(441, len(resource.text))
+        self.assertEqual("T", resource[2])
+        # binary file
+        resource = vfs["files/image.png"]
+        self.assertEqual("image/png", resource.mimetype)
+        self.assertEqual(487, len(resource))
+        self.assertEqual(487, len(resource.data))
+        self.assertEqual(78, resource[2])
+        self.assertEqual(b"\x89PNG", resource.data[0:4])
+
+    def test_vfs_read_compressed(self):
+        vfs = VirtualFileSystem(root_path=".", readonly=True)
+        uncompressed = vfs["files/test.txt"].text
+        resource = vfs["files/test.txt.bz2"]
+        self.assertEqual(uncompressed, resource.text)
+        resource = vfs["files/test.txt.gz"]
+        self.assertEqual(uncompressed, resource.text)
+        resource = vfs["files/test.txt.xz"]
+        self.assertEqual(uncompressed, resource.text)
+        with self.assertRaises(VfsError) as x:
+            resource = vfs["files/test.txt.Z"]
+        self.assertTrue(str(x.exception).startswith("unsupported compressor"))
+        uncompressed = vfs["files/image.png"].data
+        resource = vfs["files/image.png.gz"]
+        self.assertEqual(uncompressed, resource.data)
 
 
 if __name__ == '__main__':

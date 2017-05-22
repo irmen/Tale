@@ -342,7 +342,8 @@ class Driver(pubsub.Listener):
             raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
         if conn.player.location:
-            conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game." % lang.capital(conn.player.subjective))
+            conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game."
+                                    % lang.capital(conn.player.subjective))
         del self.all_players[name]
         conn.write_output()
         # wait a bit to allow the player's screen to display the last goodbye message before killing the connection
