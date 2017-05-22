@@ -392,7 +392,7 @@ class Driver(pubsub.Listener):
                 if existing_player.idle_time < 30:
                     conn.player.tell("They are still active.")
                     continue
-                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):   # XXX this seems to leave the player's name set to 'connected_121212'
+                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
                     conn.player.tell("Okay, leaving them in peace.")
                     continue
             try:
@@ -428,16 +428,18 @@ class Driver(pubsub.Listener):
                 conn.output("<it>%s</it>" % x)
                 continue
             else:
+                account = self.mud_accounts.get(name)
                 if existing_player:
+                    # take the place of already logged in player (that was disconnected perhaps?)
                     existing_player.tell("\n")
                     existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
                     existing_player.tell("\n")
                     state = existing_player.__getstate__()
-                    state["name"] = conn.player.name   # we properly rename it just below
+                    state["name"] = conn.player.name    # we can only take the real name after existing player has been kicked out
                     existing_player_location = existing_player.location
                     self._disconnect_mud_player(existing_player)
                     ctx = util.Context(self, self.game_clock, self.story.config, None)
-                    # mr smith move: delete the other player and restore its properties in us
+                    # mr. Smith move: delete the other player and restore its properties in us
                     existing_player.destroy(ctx)
                     conn.player.__setstate__(state)
                     name_info = charbuilder.PlayerNaming()
@@ -445,15 +447,19 @@ class Driver(pubsub.Listener):
                     name_info.name = state["name"]
                     name_info.gender = state["gender"]
                     name_info.stats = state["stats"]
+                    name_info.name = account.name   # assume the real name now
                     self.__rename_player(conn.player, name_info)
                     conn.output("\n")
-                    conn.player.move(existing_player_location)
-                    break
-                # get the account and log in
-                account = self.mud_accounts.get(name)
-                self.mud_accounts.logged_in(name)
-                if account.logged_in:
-                    conn.output("Last login: " + str(account.logged_in))
+                    same_location = conn.player.location is existing_player_location
+                    conn.player.move(existing_player_location, silent=same_location)
+                    if same_location:
+                        conn.player.location.tell("%s appears again. Is %s a different person, you wonder?" %
+                                                  (lang.capital(conn.player.title), conn.player.subjective), exclude_living=conn.player)
+                else:
+                    # log in normally
+                    self.mud_accounts.logged_in(name)
+                    if account.logged_in:
+                        conn.output("Last login: " + str(account.logged_in))
                 break
         if not existing_player:
             # for a new login, we need to rename the transitional player object
