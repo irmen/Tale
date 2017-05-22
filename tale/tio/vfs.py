@@ -39,7 +39,8 @@ def is_text(mimetype: str) -> bool:
 class Resource:
     """Simple container of a resource name, its data (string or binary) and the mime type"""
     def __init__(self, name: str, data: Union[str, ByteString], mimetype: str="application/octet-stream", mtime: float=0.0) -> None:
-        if is_text(mimetype):
+        self.is_text = is_text(mimetype)
+        if self.is_text:
             if not isinstance(data, str):
                 raise TypeError("text data required for this mimetype")
         else:
@@ -53,19 +54,19 @@ class Resource:
     @property
     def data(self) -> bytes:
         """the (binary) data of this resource"""
-        if is_text(self.mimetype):
+        if self.is_text:
             raise VfsError("this is a text resource, not binary")
         return self.__data      # type: ignore
 
     @property
     def text(self) -> str:
         """the (text) data of this resource"""
-        if is_text(self.mimetype):
+        if self.is_text:
             return self.__data   # type: ignore
         raise VfsError("this is a binary resource, not text")
 
     def __repr__(self):
-        return "<Resource %s from %s, size=%d, mtime=%s>" % (self.mimetype, self.name, len(self.__data), self.mtime)
+        return "<Resource %s from %s, size=%d, mtime=%s, is_text=%s>" % (self.mimetype, self.name, len(self.__data), self.mtime, self.is_text)
 
     def __len__(self) -> int:
         return len(self.__data)

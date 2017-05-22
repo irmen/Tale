@@ -378,12 +378,14 @@ class TaleWsgiAppBase:
                 return self.wsgi_not_modified(start_response)
             headers.append(("ETag", etag))
             headers.append(("Last-Modified", formatdate(resource.mtime)))
-        if isinstance(resource.data, bytes):
+        if resource.is_text:
+            # text
+            headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
+            data = resource.text.encode("utf-8")
+        else:
+            # binary
             headers.append(('Content-Type', resource.mimetype))
             data = resource.data
-        else:
-            headers.append(('Content-Type', resource.mimetype + "; charset=utf-8"))
-            data = resource.data.encode("utf-8")
         start_response('200 OK', headers)
         return [data]
 

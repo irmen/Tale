@@ -392,6 +392,7 @@ class TestVfs(unittest.TestCase):
         resource = vfs["files/test.txt"]
         mtime = os.path.getmtime("files/test.txt")
         self.assertEqual(mtime, resource.mtime)
+        self.assertTrue(resource.is_text)
         self.assertEqual("text/plain", resource.mimetype)
         self.assertEqual("€ This is a test text file. This is line 1.\n€ This is a test text file. This is line 2.\n", resource.text[:88])
         lines = resource.text.splitlines()
@@ -402,6 +403,7 @@ class TestVfs(unittest.TestCase):
         # binary file
         resource = vfs["files/image.png"]
         self.assertEqual("image/png", resource.mimetype)
+        self.assertFalse(resource.is_text)
         self.assertEqual(487, len(resource))
         self.assertEqual(487, len(resource.data))
         self.assertEqual(78, resource[2])
