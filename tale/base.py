@@ -665,7 +665,7 @@ class Stats:
         self.sta = 0
         self.str = 0
         self.wis = 0
-        self.stat_prios = None    # type: Dict[int, List[races.Stats]]  # per agi/cha/etc stat, priority level of it (see races.py)
+        self.stat_prios = None    # type: Dict[int, List[races.StatType]]  # per priority level, the stat(s) with that level (see races.py)
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
         self.bodytype = races.BodyType.HUMANOID
         self.language = None   # type: str
@@ -696,10 +696,11 @@ class Stats:
 
     def set_stats_from_race(self) -> None:
         # the stats that are static are always initialized from the races table
-        self.stat_prios = defaultdict(list)   # type: Dict[int, List[races.Stats]]
+        self.stat_prios = defaultdict(list)   # maps prio level to list of stat(s) with that level
         r = races.races[self.race]
         for stat, (_, prio) in r.stats._asdict().items():
-            self.stat_prios[prio].append(stat)      # XXX type error str/Stats
+            st = races.StatType(stat)
+            self.stat_prios[prio].append(st)
         self.bodytype = r.body
         self.language = r.language
         self.weight = r.mass
@@ -1477,7 +1478,7 @@ class Soul:
             raise TaleError("no player in process_verb_parsed")
         verbdata = verbdefs.VERBS.get(parsed.verb)
         if not verbdata:
-            raise UnknownVerbException(parsed.verb, None, parsed.qualifier)
+            raise UnknownVerbException(parsed.verb, [], parsed.qualifier)
 
         message = parsed.message
         adverb = parsed.adverb

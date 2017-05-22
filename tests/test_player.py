@@ -714,7 +714,7 @@ class TestMudAccounts(unittest.TestCase):
             self.assertEqual("testname", account.name)
             self.assertEqual({"wizard"}, account.privileges)
             self.assertEqual("f", account.stats.gender)
-            self.assertTrue("agi" in account.stats.stat_prios[3])
+            self.assertTrue(races.StatType.AGILITY in account.stats.stat_prios[3])
             self.assertEqual(40, account.stats.agi)
             self.assertEqual(races.BodyType.HUMANOID, account.stats.bodytype)
             self.assertEqual(60.0, account.stats.weight)
