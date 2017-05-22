@@ -66,7 +66,8 @@ class Resource:
         raise VfsError("this is a binary resource, not text")
 
     def __repr__(self):
-        return "<Resource %s from %s, size=%d, mtime=%s, is_text=%s>" % (self.mimetype, self.name, len(self.__data), self.mtime, self.is_text)
+        return "<Resource %s from %s, size=%d, mtime=%s, is_text=%s>" \
+               % (self.mimetype, self.name, len(self.__data), self.mtime, self.is_text)
 
     def __len__(self) -> int:
         return len(self.__data)

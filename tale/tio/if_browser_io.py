@@ -10,6 +10,7 @@ import time
 from html import escape as html_escape
 from urllib.parse import parse_qs
 from hashlib import md5
+from threading import Lock
 from email.utils import formatdate, parsedate
 from typing import Iterable, Tuple, Any, Optional, Dict, Callable, List
 from . import iobase
@@ -63,9 +64,27 @@ class HttpIo(iobase.IoAdapterBase):
     def __init__(self, player_connection: PlayerConnection, wsgi_server: WSGIServer) -> None:
         super().__init__(player_connection)
         self.wsgi_server = wsgi_server
-        # XXX the text buffers are not thread-safe
-        self.html_to_browser = []    # type: List[str]   # the lines that need to be displayed in the player's browser
-        self.html_special = []       # type: List[str]   # special out of band commands (such as 'clear')
+        self.__html_to_browser = []    # type: List[str]   # the lines that need to be displayed in the player's browser
+        self.__html_special = []       # type: List[str]   # special out of band commands (such as 'clear')
+        self.__html_to_browser_lock = Lock()
+
+    def append_html_to_browser(self, text: str) -> None:
+        with self.__html_to_browser_lock:
+            self.__html_to_browser.append(text)
+
+    def append_html_special(self, text: str) -> None:
+        with self.__html_to_browser_lock:
+            self.__html_special.append(text)
+
+    def get_html_to_browser(self) -> List[str]:
+        with self.__html_to_browser_lock:
+            html, self.__html_to_browser = self.__html_to_browser, []
+            return html
+
+    def get_html_special(self) -> List[str]:
+        with self.__html_to_browser_lock:
+            special, self.__html_special = self.__html_special, []
+            return special
 
     def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         """mainloop for the web browser interface for single player mode"""
@@ -84,7 +103,7 @@ class HttpIo(iobase.IoAdapterBase):
         pass
 
     def clear_screen(self) -> None:
-        self.html_special.append("clear")
+        self.append_html_special("clear")
 
     def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
         for text, formatted in paragraphs:
@@ -92,9 +111,9 @@ class HttpIo(iobase.IoAdapterBase):
             if text == "\n":
                 text = "<br>"
             if formatted:
-                self.html_to_browser.append("<p>" + text + "</p>\n")
+                self.__html_to_browser.append("<p>" + text + "</p>\n")
             else:
-                self.html_to_browser.append("<pre>" + text + "</pre>\n")
+                self.__html_to_browser.append("<pre>" + text + "</pre>\n")
         return None    # the output is pushed to the browser via a buffer, rather than printed to a screen
 
     def output(self, *lines: str) -> None:
@@ -107,7 +126,7 @@ class HttpIo(iobase.IoAdapterBase):
         text = self.convert_to_html(text)
         if text == "\n":
             text = "<br>"
-        self.html_to_browser.append("<p>" + text + "</p>\n")
+        self.__html_to_browser.append("<p>" + text + "</p>\n")
 
     def convert_to_html(self, line: str) -> str:
         """Convert style tags to html"""
@@ -128,7 +147,7 @@ class HttpIo(iobase.IoAdapterBase):
                     result.append(close_tags_stack.pop())
                 continue
             elif chunk == "<clear>":
-                self.html_special.append("clear")
+                self.append_html_special("clear")
             elif chunk:
                 if chunk.startswith("</"):
                     chunk = "<" + chunk[2:]
@@ -276,8 +295,8 @@ class TaleWsgiAppBase:
         conn = session.get("player_connection")
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
-        html, conn.io.html_to_browser = conn.io.html_to_browser, []     # XXX not thread-safe
-        special, conn.io.html_special = conn.io.html_special, []     # XXX not thread-safe
+        html = conn.io.get_html_to_browser()
+        special = conn.io.get_html_special()
         start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
                                   ('Cache-Control', 'no-cache, no-store, must-revalidate'),
                                   ('Pragma', 'no-cache'),
@@ -311,17 +330,17 @@ class TaleWsgiAppBase:
         if cmd and "autocomplete" in parameters:
             suggestions = conn.io.tab_complete(cmd, self.driver)
             if suggestions:
-                conn.io.html_to_browser.append("<br><p><em>Suggestions:</em></p>")
-                conn.io.html_to_browser.append("<p class='txt-monospaced'>" + " &nbsp; ".join(suggestions) + "</p>")
+                conn.io.append_html_to_browser("<br><p><em>Suggestions:</em></p>")
+                conn.io.append_html_to_browser("<p class='txt-monospaced'>" + " &nbsp; ".join(suggestions) + "</p>")
             else:
-                conn.io.html_to_browser.append("<p>No matching commands.</p>")
+                conn.io.append_html_to_browser("<p>No matching commands.</p>")
         else:
             cmd = html_escape(cmd, False)
             if cmd:
                 if conn.io.dont_echo_next_cmd:
                     conn.io.dont_echo_next_cmd = False
                 else:
-                    conn.io.html_to_browser.append("<span class='txt-userinput'>%s</span>" % cmd)
+                    conn.io.append_html_to_browser("<span class='txt-userinput'>%s</span>" % cmd)
             conn.player.store_input_line(cmd)
         start_response('200 OK', [('Content-Type', 'text/plain')])
         return []
