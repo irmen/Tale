@@ -1161,7 +1161,7 @@ class Driver(pubsub.Listener):
         else:
             raise ValueError("unknown topic: " + str(topicname))
 
-    def remove_deferreds(self, owner: str) -> None:  # XXX owner type
+    def remove_deferreds(self, owner: str) -> None:
         with self.deferreds_lock:
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)

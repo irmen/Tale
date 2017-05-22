@@ -39,7 +39,7 @@ class TestSoul(unittest.TestCase):
             soul.process_verb_parsed(player, parsed)
         self.assertEqual("_unknown_verb_", str(ex.exception))
         self.assertEqual("_unknown_verb_", ex.exception.verb)
-        self.assertEqual(None, ex.exception.words)
+        self.assertEqual([], ex.exception.words)
         self.assertEqual(None, ex.exception.qualifier)
         with self.assertRaises(tale.errors.UnknownVerbException) as ex:
             soul.process_verb(player, "fail _unknown_verb_ herp derp")
@@ -259,6 +259,29 @@ class TestSoul(unittest.TestCase):
         self.assertEqual({npc_max}, who, "player should no longer be part of the remaining targets")
         self.assertTrue("yourself" in player_msg and "max" in player_msg)
 
+    def testVerbTargetTypes(self):
+        soul = tale.base.Soul()
+        player = tale.player.Player("julie", "f")
+        player.title = "the great Julie, destroyer of worlds"
+        loc = tale.base.Location("somewhere")
+        player.move(loc)
+        npc_max = tale.base.Living("max", "m")
+        loc.livings = {npc_max, player}
+        rock = tale.base.Item("rock")
+        loc.items = {rock}
+        exit_east = tale.base.Exit(["east"], "somewhere", "east")
+        loc.add_exits([exit_east])
+        # target who type can be: Living, Item or Exit.
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "smile julie")
+        self.assertEqual("smile", verb)
+        self.assertEqual(set(), who, "player must not be part of the result targets")
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "smile max")
+        self.assertEqual({npc_max}, who, "living max")
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "smile rock")
+        self.assertEqual({rock}, who, "item rock")
+        verb, (who, player_msg, room_msg, target_msg) = soul.process_verb(player, "smile east")
+        self.assertEqual({exit_east}, who, "exit east")
+
     def testMessageQuote(self):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
@@ -380,24 +403,32 @@ class TestSoul(unittest.TestCase):
         with self.assertRaises(tale.errors.ParseError):
             soul.process_verb(player, "cough hubbabubba")
 
-    def testCheckNameWithSpaces(self):
-        livings = {"rat": "RAT", "brown bird": "BROWN BIRD"}
-        items = {"paper": "PAPER", "blue gem": "BLUE GEM", "dark red crystal": "DARK RED CRYSTAL"}
+    def testCheckNameWithSpaces(self) -> None:
+        blue_gem = tale.base.Item("BLUE GEM")
+        dark_crystal = tale.base.Item("DARK RED CRYSTAL")
+        brown_bird = tale.base.Living("BROWN BIRD", "n")
+        exit_north = tale.base.Exit(["n"], "north", "exit north")
+        exit_south = tale.base.Exit(["s"], "south", "exit south")
+        livings = {"rat": tale.base.Living("RAT", "n"), "brown bird": brown_bird}
+        items = {"paper": tale.base.Item("PAPER"), "blue gem": blue_gem, "dark red crystal": dark_crystal}
+        exits = {"north bound somewhere": exit_north, "south bound somewhere": exit_south}
         soul = tale.base.Soul()
-        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 0, livings, items)
+        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 0, livings, items, {})
         self.assertEqual((None, None, 0), result)
-        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 1, livings, items)
+        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 1, livings, items, {})
         self.assertEqual((None, None, 0), result)
-        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 4, livings, items)
+        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 4, livings, items, {})
         self.assertEqual((None, None, 0), result)
-        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 2, livings, items)
-        self.assertEqual(("BLUE GEM", "blue gem", 2), result)
-        result = soul.check_name_with_spaces(["give", "the", "dark", "red", "crystal", "to", "rat"], 2, livings, items)
-        self.assertEqual(("DARK RED CRYSTAL", "dark red crystal", 3), result)
-        result = soul.check_name_with_spaces(["give", "the", "dark", "red", "paper", "to", "rat"], 2, livings, items)
+        result = soul.check_name_with_spaces(["give", "the", "blue", "gem", "to", "rat"], 2, livings, items, {})
+        self.assertEqual((blue_gem, "blue gem", 2), result)
+        result = soul.check_name_with_spaces(["give", "the", "dark", "red", "crystal", "to", "rat"], 2, livings, items, {})
+        self.assertEqual((dark_crystal, "dark red crystal", 3), result)
+        result = soul.check_name_with_spaces(["give", "the", "dark", "red", "paper", "to", "rat"], 2, livings, items, {})
         self.assertEqual((None, None, 0), result)
-        result = soul.check_name_with_spaces(["give", "paper", "to", "brown", "bird"], 3, livings, items)
-        self.assertEqual(("BROWN BIRD", "brown bird", 2), result)
+        result = soul.check_name_with_spaces(["give", "paper", "to", "brown", "bird"], 3, livings, items, {})
+        self.assertEqual((brown_bird, "brown bird", 2), result)
+        result = soul.check_name_with_spaces(["go", "south", "bound", "somewhere", "yes"], 1, livings, items, exits)
+        self.assertEqual((exit_south, "south bound somewhere", 3), result)
 
     def testCheckNamesWithSpacesParsing(self):
         soul = tale.base.Soul()

@@ -448,8 +448,8 @@ class Location(MudObject):
         """get a wiretap for this location"""
         return pubsub.topic(("wiretap-location", self.name))
 
-    def tell(self, room_msg: str, exclude_living: 'Living'=None,
-             specific_targets: Set[Union['Location', 'Living']]=None, specific_target_msg: str="") -> None:
+    def tell(self, room_msg: str, exclude_living: 'Living'=None, specific_targets: Set[Union['Living', Item, 'Exit']]=None,
+             specific_target_msg: str="") -> None:
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
         This is just the message string! If you want to react on events, consider not doing
@@ -1451,11 +1451,11 @@ class Soul:
     def is_verb(self, verb: str) -> bool:
         return verb in verbdefs.VERBS
 
-    def process_verb(self, player, commandstring: str, external_verbs: Set[str]=set()) \
-            -> Tuple[str, Tuple[Set[Union[Location, Living]], str, str, str]]:
+    def process_verb(self, player: Living, commandstring: str, external_verbs: Set[str]=set()) \
+            -> Tuple[str, Tuple[Set[Union[Living, Item, Exit]], str, str, str]]:
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
-        and another tuple containing the targets of the action and the various action messages.
+        and another tuple containing the targets of the action (excluding the player) and the various action messages.
         Any action qualifier is added to the verb string if it is present ("fail kick").
         """
         parsed = self.parse(player, commandstring, external_verbs)
@@ -1468,11 +1468,12 @@ class Soul:
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player, parsed: ParseResult) -> Tuple[Set[Union[Location, Living]], str, str, str]:   # XXX who result also Item ??
+    def process_verb_parsed(self, player: Living, parsed: ParseResult) -> Tuple[Set[Union[Living, Item, Exit]], str, str, str]:
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,
         and returns a tuple: (targets-without-player, playermessage, roommessage, targetmessage)
+        Target can be a Living, an Item or an Exit.
         """
         if not player:
             raise TaleError("no player in process_verb_parsed")
@@ -1507,7 +1508,7 @@ class Soul:
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = self.spacify(adverb)
 
-        def result_messages(action: str, action_room: str) -> Tuple[Set[Union[Location, Living]], str, str, str]:
+        def result_messages(action: str, action_room: str) -> Tuple[Set[Union[Living, Item, Exit]], str, str, str]:
             action = action.strip()
             action_room = action_room.strip()
             if parsed.qualifier:
@@ -1628,7 +1629,7 @@ class Soul:
         action_room = action_room.replace("$", "s")
         return result_messages(action, action_room)
 
-    def parse(self, player, cmd: str, external_verbs: Set[str]=set()) -> ParseResult:
+    def parse(self, player: Living, cmd: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse a command string, returns a ParseResult object."""
         qualifier = None
         message_verb = False  # does the verb expect a message?
@@ -1638,8 +1639,8 @@ class Soul:
         bodypart = None   # type: str
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
-        who_info = defaultdict(ParseResult.WhoInfo)   # type: Dict[Any, ParseResult.WhoInfo]
-        who_order = []   # type: List[Any]
+        who_info = defaultdict(ParseResult.WhoInfo)   # type: Dict[Union[Living, Item, Exit], ParseResult.WhoInfo]
+        who_order = []   # type: List[Union[Living, Item, Exit]]
         who_sequence = 0
         unparsed = cmd
 
@@ -1681,7 +1682,7 @@ class Soul:
                 move_action = words.pop(0)
                 if not words:
                     raise ParseError("%s where?" % lang.capital(move_action))
-            exit, exit_name, wordcount = self.check_name_with_spaces(words, 0, player.location.exits, {})
+            exit, exit_name, wordcount = self.check_name_with_spaces(words, 0, {}, {}, player.location.exits)
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
@@ -1817,31 +1818,31 @@ class Soul:
                 previous_word = None
                 continue
             if player.location:
-                exit, exit_name, wordcount = self.check_name_with_spaces(words, index, player.location.exits, {})
+                exit, exit_name, wordcount = self.check_name_with_spaces(words, index, {}, {}, player.location.exits)
                 if exit:
-                    who_info[exit].sequence = who_sequence     # XXX exit is not a MudObject???
+                    who_info[exit].sequence = who_sequence
                     who_info[exit].previous_word = previous_word
                     previous_word = None
                     who_sequence += 1
-                    who_order.append(exit)  # XXX who_order contains Livings not str!
+                    who_order.append(exit)
                     arg_words.append(exit_name)
                     while wordcount > 1:
                         next(words_enumerator)
                         wordcount -= 1
                     continue
-            item, full_name, wordcount = self.check_name_with_spaces(words, index, all_livings, all_items)
-            if item:
+            item_or_living, full_name, wordcount = self.check_name_with_spaces(words, index, all_livings, all_items, {})
+            if item_or_living:
                 while wordcount > 1:
                     next(words_enumerator)
                     wordcount -= 1
                 if include_flag:
-                    who_info[item].sequence = who_sequence
-                    who_info[item].previous_word = previous_word
+                    who_info[item_or_living].sequence = who_sequence
+                    who_info[item_or_living].previous_word = previous_word
                     who_sequence += 1
-                    who_order.append(item)
-                elif item in who_info:
-                    del who_info[item]
-                    who_order.remove(item)
+                    who_order.append(item_or_living)
+                elif item_or_living in who_info:
+                    del who_info[item_or_living]
+                    who_order.remove(item_or_living)
                 arg_words.append(full_name)
                 previous_word = None
                 continue
@@ -1896,10 +1897,7 @@ class Soul:
             # but maybe the thing the user typed refers to an object or creature.
             # In that case, set the verb to that object's default verb.
             if len(who_order) == 1:
-                try:
-                    verb = who_order[0].default_verb
-                except AttributeError:
-                    verb = "examine"   # fallback for everything that hasn't explicitly set a default_verb
+                verb = getattr(who_order[1], "default_verb", "examine")
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResult(verb, who_info=who_info, who_order=who_order,
@@ -1909,7 +1907,7 @@ class Soul:
     def remember_previous_parse(self, parsed: ParseResult) -> None:
         self.__previously_parsed = parsed
 
-    def match_previously_parsed(self, player, pronoun: str) -> List[Tuple[Any, str]]:
+    def match_previously_parsed(self, player: Living, pronoun: str) -> List[Tuple[Any, str]]:
         """
         Try to connect the pronoun (it, him, her, them) to a previously parsed item/living.
         Returns a list of (who, replacement-name) tuples.
@@ -1980,17 +1978,29 @@ class Soul:
             return False
         return True
 
-    def check_name_with_spaces(self, words: Sequence[str], index: int, all_livings: Dict[str, Any],
-                               all_items: Dict[str, Any]) -> Tuple[Optional[int], Optional[str], int]:   # XXX return type
+    def check_name_with_spaces(self, words: Sequence[str], startindex: int, all_livings: Dict[str, Living],
+                               all_items: Dict[str, Item], all_exits: Dict[str, Exit]) \
+            -> Tuple[Optional[Union[Living, Item, Exit]], Optional[str], int]:
+        """
+        Searches for a name used in sentence where the name consists of multiple words (separated by space).
+        You provide the sequence of words that forms the sentence and the startindex of the first word
+        to start searching.
+        Searching is done in the livings, items, and exits dictionaries, in that order.
+        The name being searched for is gradually extended with more words until a match is found.
+        The return tuple is (matched_object, matched_name, number of words used in match).
+        If nothing is found, a tuple (None, None, 0) is returned.
+        """
         wordcount = 1
-        name = words[index]
+        name = words[startindex]
         try:
             while wordcount < 6:    # an upper bound for the number of words to concatenate to avoid long runtime
                 if name in all_livings:
                     return all_livings[name], name, wordcount
                 if name in all_items:
                     return all_items[name], name, wordcount
-                name = name + " " + words[index + wordcount]
+                if name in all_exits:
+                    return all_exits[name], name, wordcount
+                name = name + " " + words[startindex + wordcount]
                 wordcount += 1
         except IndexError:
             pass

@@ -531,7 +531,7 @@ def do_give(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator
         raise ActionRefused("It's not clear who you want to give things to.")
 
 
-def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, target: Union[base.Location, base.Living]=None) -> None:
+def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, target: Union[base.Living, base.Item, base.Exit]=None) -> None:
     p = player.tell
     if not target:
         target = player.location.search_living(target_name)
@@ -539,6 +539,8 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
         raise ActionRefused("%s isn't here." % target_name)
     if target is player:
         raise ActionRefused("There's no reason to give things to yourself.")
+    if not isinstance(target, (base.Location, base.Container, base.Living)):
+        raise ActionRefused("You cannot do that.")
     items = list(items)
     refused = []
     for item in items:
