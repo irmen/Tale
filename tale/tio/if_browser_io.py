@@ -15,7 +15,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 
 from . import iobase
-from . import vfs
+from .. import vfs
 from .styleaware_wrapper import tag_split_re
 from .. import __version__ as tale_version_str
 from ..driver import Driver

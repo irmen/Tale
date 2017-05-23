@@ -20,7 +20,7 @@ from .errors import ActionRefused
 from .story import GameMode
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 from .tio.iobase import strip_text_styles, IoAdapterBase
-from .tio.vfs import VirtualFileSystem, Resource
+from .vfs import VirtualFileSystem, Resource
 
 
 class Player(base.Living, pubsub.Listener):

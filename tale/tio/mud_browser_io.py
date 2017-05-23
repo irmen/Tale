@@ -14,7 +14,7 @@ from socketserver import ThreadingMixIn
 from typing import Dict, Iterable, Any, List, Tuple
 from wsgiref.simple_server import make_server, WSGIServer, WSGIRequestHandler
 
-from . import vfs
+from .. import vfs
 from .if_browser_io import HttpIo, TaleWsgiAppBase, WsgiStartResponseType
 from .. import __version__ as tale_version_str
 from ..driver import Driver

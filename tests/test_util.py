@@ -13,7 +13,7 @@ from tale.base import Item, Container, Location
 from tale.errors import ParseError, ActionRefused
 from tale.player import Player
 from tale.story import MoneyType, StoryConfig
-from tale.tio.vfs import VirtualFileSystem, VfsError, Resource, is_text
+from tale.vfs import VirtualFileSystem, VfsError, Resource, is_text
 from tests.supportstuff import TestDriver
 
 

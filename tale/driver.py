@@ -24,11 +24,11 @@ from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Genera
 import appdirs
 
 from . import __version__ as tale_version_str
-from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs
+from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs, vfs
 from .base import Stats, Living, Location, Exit, MudObject
 from .parseresult import ParseResult
 from .story import TickMethod, GameMode, MoneyType, StoryBase
-from .tio import vfs, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY, iobase
+from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY, iobase
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
 topic_pending_tells = pubsub.topic("driver-pending-tells")

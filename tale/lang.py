@@ -10,7 +10,7 @@ import collections
 import re
 from typing import List, Iterable
 
-from .tio import vfs
+from . import vfs
 
 # genders are m,f,n
 SUBJECTIVE = {"m": "he", "f": "she", "n": "it"}

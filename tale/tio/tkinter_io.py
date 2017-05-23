@@ -15,7 +15,7 @@ import tkinter.messagebox
 from typing import Iterable, Tuple, Any, Optional
 
 from . import iobase
-from . import vfs
+from .. import vfs
 from .. import __version__ as tale_version
 from .. import mud_context
 from ..util import format_traceback
