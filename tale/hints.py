@@ -10,6 +10,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from typing import Sequence, Optional, Any, List, Union
+
 from .base import Location, Living
 
 

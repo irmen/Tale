@@ -4,13 +4,14 @@ Main startup class
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import sys
 import argparse
+import sys
 import traceback
 from typing import Dict, Any, Sequence
+
 from . import __version__
-from .tio import DEFAULT_SCREEN_DELAY
 from .driver import Driver
+from .tio import DEFAULT_SCREEN_DELAY
 
 
 def parse_cmdline(command_line_args: Sequence[str]) -> Dict[str, Any]:

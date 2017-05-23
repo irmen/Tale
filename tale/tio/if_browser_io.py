@@ -4,21 +4,22 @@ Webbrowser based I/O for a single player ('if') story.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 import json
 import time
-from html import escape as html_escape
-from urllib.parse import parse_qs
-from hashlib import md5
-from threading import Lock
 from email.utils import formatdate, parsedate
+from hashlib import md5
+from html import escape as html_escape
+from threading import Lock
 from typing import Iterable, Tuple, Any, Optional, Dict, Callable, List
+from urllib.parse import parse_qs
+from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
+
 from . import iobase
 from . import vfs
-from ..player import PlayerConnection
-from ..driver import Driver
 from .styleaware_wrapper import tag_split_re
 from .. import __version__ as tale_version_str
+from ..driver import Driver
+from ..player import PlayerConnection
 
 __all__ = ["HttpIo", "TaleWsgiApp", "TaleWsgiAppBase", "WsgiStartResponseType"]
 

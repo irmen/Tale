@@ -9,7 +9,7 @@ import datetime
 import inspect
 import itertools
 import random
-from typing import Callable, Iterable, List, Dict, Tuple, Generator, Union
+from typing import Callable, Iterable, List, Dict, Generator, Tuple, Union
 
 from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
 from .. import base

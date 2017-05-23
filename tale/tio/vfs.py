@@ -5,15 +5,14 @@ Virtual file system.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import os
-import io
-import sys
 import errno
+import io
 import mimetypes
-import pkgutil
+import os
 import pathlib
+import pkgutil
+import sys
 from typing import ByteString, Union, IO, Any
-
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 

@@ -4,15 +4,17 @@ Console-based input/output.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import sys
 import os
 import signal
+import sys
 import threading
 from typing import Iterable, Tuple, Any, Optional, List
-from . import styleaware_wrapper, iobase
+
 from . import colorama_patched as colorama
-from ..player import PlayerConnection, Player
+from . import styleaware_wrapper, iobase
 from ..driver import Driver
+from ..player import PlayerConnection, Player
+
 colorama.init()
 assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (0.3.6+)"
 

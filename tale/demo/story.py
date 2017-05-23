@@ -7,12 +7,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import pathlib
 import sys
-import tale
 from typing import Optional
-from tale.story import *
-from tale.main import run_from_cmdline
+
+import tale
 from tale.driver import Driver
+from tale.main import run_from_cmdline
 from tale.player import Player
+from tale.story import *
 
 
 class Story(StoryBase):

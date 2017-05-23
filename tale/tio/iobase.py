@@ -4,13 +4,14 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import sys
 import html.parser
-import smartypants
+import sys
 from typing import Union, Sequence, Iterable, Any, Tuple, Optional, List
-from ..util import format_traceback
-from .. import verbdefs
 
+import smartypants
+
+from .. import verbdefs
+from ..util import format_traceback
 
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
 

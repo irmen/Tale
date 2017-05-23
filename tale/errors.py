@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from typing import Generator, Tuple, Any, Optional, Sequence
+
 from .parseresult import ParseResult
 
 

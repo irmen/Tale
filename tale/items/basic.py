@@ -7,10 +7,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import textwrap
 from typing import NamedTuple, FrozenSet, Optional, Union
+
+from .. import lang, mud_context
 from ..base import Item, Container, Weapon, Living
 from ..errors import ActionRefused, TaleError
-from .. import lang, mud_context
-
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
            "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain"]

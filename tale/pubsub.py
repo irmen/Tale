@@ -31,9 +31,9 @@ Currently defined pubsub topics used by the Tale driver:
 
 """
 
-import weakref
 import threading
 import time
+import weakref
 from typing import Dict, List, Tuple, Union, Optional, Set, Any
 
 TopicNameType = Union[str, Tuple]

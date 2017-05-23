@@ -4,19 +4,20 @@ GUI input/output using Tkinter.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import sys
-import re
-import textwrap
 import collections
+import re
+import sys
+import textwrap
 import threading
 import tkinter
 import tkinter.font
 import tkinter.messagebox
 from typing import Iterable, Tuple, Any, Optional
+
 from . import iobase
 from . import vfs
-from .. import mud_context
 from .. import __version__ as tale_version
+from .. import mud_context
 from ..util import format_traceback
 
 __all__ = ["TkinterIo"]

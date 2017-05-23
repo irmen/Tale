@@ -5,10 +5,11 @@ Language processing related operations.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import re
 import bisect
 import collections
+import re
 from typing import List, Iterable
+
 from .tio import vfs
 
 # genders are m,f,n

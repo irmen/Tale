@@ -5,13 +5,13 @@ Story configuration and base classes to create your own story with.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import enum
 import datetime
 import distutils.version
+import enum
 from typing import Optional, Any, List
-from .errors import StoryConfigError
-from . import __version__ as tale_version_str
 
+from . import __version__ as tale_version_str
+from .errors import StoryConfigError
 
 __all__ = ["TickMethod", "GameMode", "MoneyType", "StoryBase", "StoryConfig"]
 

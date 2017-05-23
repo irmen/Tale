@@ -5,14 +5,15 @@ Bulletin boards.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import json
 import datetime
+import json
 from collections import deque
-from typing import Tuple, Dict, Any, Generator, MutableSequence, List, Sequence
-from ..base import Item, Living
-from ..parseresult import ParseResult
-from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
+from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence
+
 from .. import lang, mud_context
+from ..base import Item, Living
+from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
+from ..parseresult import ParseResult
 
 __all__ = ["BulletinBoard", "bulletinboard"]
 

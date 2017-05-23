@@ -6,11 +6,12 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from typing import Callable, Generator
-from . import races
+
 from . import lang
 from . import mud_context
-from .base import Stats
+from . import races
 from .accounts import MudAccounts
+from .base import Stats
 from .player import Player, PlayerConnection
 
 

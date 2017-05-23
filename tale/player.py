@@ -5,20 +5,21 @@ Player code
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import time
 import queue
+import time
 from threading import Event
 from typing import Any, Sequence, Tuple, IO, Dict, Set, List, Union
+
 from . import base
-from . import lang
 from . import hints
-from . import pubsub
+from . import lang
 from . import mud_context
+from . import pubsub
 from . import util
 from .errors import ActionRefused
-from .tio.iobase import strip_text_styles, IoAdapterBase
-from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
 from .story import GameMode
+from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_INDENT
+from .tio.iobase import strip_text_styles, IoAdapterBase
 from .tio.vfs import VirtualFileSystem, Resource
 
 

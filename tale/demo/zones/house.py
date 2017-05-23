@@ -6,14 +6,15 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
-from tale.base import Location, Exit, Door, Key, Living
+
 from tale import mud_context
-from tale.lang import capital
+from tale.base import Location, Exit, Door, Key, Living
 from tale.driver import Driver
+from tale.errors import StoryCompleted
+from tale.lang import capital
+from tale.parseresult import ParseResult
 from tale.player import Player
 from tale.util import Context
-from tale.parseresult import ParseResult
-from tale.errors import StoryCompleted
 
 
 def init(driver: Driver) -> None:

@@ -6,8 +6,8 @@ Races adapted from Dead Souls 2 mudlib (a superset of the races from Nightmare m
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import enum
-from typing import NamedTuple, Tuple, Dict
 from functools import total_ordering
+from typing import NamedTuple, Tuple, Dict
 
 
 @total_ordering

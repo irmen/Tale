@@ -6,15 +6,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-import random
-import sys
 import functools
 import inspect
+import random
+import sys
 import traceback
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
+
 from . import lang
-from .story import MoneyType
 from .errors import ParseError, ActionRefused
+from .story import MoneyType
 
 
 def roll_dice(number: int=1, sides: int=6) -> Tuple[int, List[int]]:
