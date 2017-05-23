@@ -6,7 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-from typing import Any
+
 from tale import pubsub, util, driver, base
 
 

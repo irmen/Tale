@@ -5,18 +5,19 @@ Unittests for Mud base objects
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import unittest
 import datetime
-from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
+import unittest
+
+from tale import pubsub, mud_context
 from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, clone
-from tale.util import Context, MoneyFormatter
+from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, LocationIntegrityError
-from tale.player import Player
 from tale.parseresult import ParseResult
+from tale.player import Player
 from tale.story import MoneyType
 from tale.tio.iobase import strip_text_styles
-from tale import pubsub, mud_context
-from tale.demo.story import Story as DemoStory
+from tale.util import Context, MoneyFormatter
+from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
 
 
 class TestLocations(unittest.TestCase):

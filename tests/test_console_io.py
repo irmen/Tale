@@ -4,12 +4,13 @@ Unit tests for console I/O adapter
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import unittest
-import sys
 import io
+import sys
+import unittest
+
 import tale.tio.colorama_patched as colorama
-from tale.tio import console_io, styleaware_wrapper, iobase
 from tale.player import TextBuffer
+from tale.tio import console_io, styleaware_wrapper, iobase
 
 
 class TestConsoleIo(unittest.TestCase):

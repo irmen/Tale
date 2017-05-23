@@ -5,13 +5,14 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from tale.cmds.decorators import wizcmd
-from tale.errors import ActionRefused, ParseError
 from zones import make_location, make_item, make_mob
+
 from tale import lang, util
+from tale.cmds.decorators import wizcmd
 from tale.driver import Commands
-from tale.player import Player
+from tale.errors import ActionRefused, ParseError
 from tale.parseresult import ParseResult
+from tale.player import Player
 
 
 def register_all(cmd_processor: Commands) -> None:

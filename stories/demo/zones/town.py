@@ -6,14 +6,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from typing import Union, Optional
+
+from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
+
 from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
-from tale.player import Player
-from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.driver import Driver
-from tale.parseresult import ParseResult
+from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.items.board import bulletinboard, BulletinBoard
-from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
+from tale.parseresult import ParseResult
+from tale.player import Player
 
 
 def init(driver: Driver) -> None:

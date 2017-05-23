@@ -6,12 +6,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import unittest
-from tale.errors import ActionRefused
-from tale.items import basic
+
 from tale import mud_context
 from tale import util, player, base
-from tests.supportstuff import TestDriver
+from tale.errors import ActionRefused
+from tale.items import basic
 from tale.story import StoryConfig
+from tests.supportstuff import TestDriver
 
 
 class TestItems(unittest.TestCase):

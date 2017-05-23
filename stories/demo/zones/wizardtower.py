@@ -6,9 +6,10 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import random
+
+from tale import lang, util
 from tale.base import Location, Exit, Item, heartbeat, Living
 from tale.driver import Driver
-from tale import lang, util
 
 
 def init(driver: Driver) -> None:

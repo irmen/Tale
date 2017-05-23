@@ -7,10 +7,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import sys
 from typing import Optional
-from tale.hints import Hint
-from tale.story import *
-from tale.player import Player
+
 from tale.driver import Driver
+from tale.hints import Hint
+from tale.player import Player
+from tale.story import *
 
 
 class Story(StoryBase):

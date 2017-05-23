@@ -4,12 +4,13 @@ Unit tests for util functions
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import os
 import datetime
+import os
 import unittest
+
 from tale import util, mud_context
-from tale.errors import ParseError, ActionRefused
 from tale.base import Item, Container, Location
+from tale.errors import ParseError, ActionRefused
 from tale.player import Player
 from tale.story import MoneyType, StoryConfig
 from tale.tio.vfs import VirtualFileSystem, VfsError, Resource, is_text

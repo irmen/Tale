@@ -4,11 +4,12 @@ Unit tests for the shop system
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import unittest
 import datetime
+import unittest
+
 from tale.base import Living
-from tale.shop import Shopkeeper, ShopBehavior
 from tale.errors import ActionRefused
+from tale.shop import Shopkeeper, ShopBehavior
 
 
 class TestShopping(unittest.TestCase):

@@ -6,11 +6,12 @@ magnolia st. 1, pharmacy
 magnolia st. 2, magnolia st. 3, factory
 """
 
+from zones import houses
+
+from tale import mud_context
 from tale.base import Location, Exit, Door
 from tale.driver import Driver
 from tale.errors import StoryCompleted
-from tale import mud_context
-from zones import houses
 
 
 def init(driver: Driver) -> None:

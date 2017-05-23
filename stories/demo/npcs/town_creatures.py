@@ -5,6 +5,7 @@ Creatures living in the central town.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import random
+
 from tale import lang, mud_context, util
 from tale.base import heartbeat, Living
 from tale.parseresult import ParseResult

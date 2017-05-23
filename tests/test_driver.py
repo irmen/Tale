@@ -5,20 +5,21 @@ Unittests for the driver
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import unittest
-import heapq
 import datetime
+import heapq
 import os
 import pickle
-import tale.driver as the_driver
+import unittest
+
+import tale.base
 import tale.cmds.normal
 import tale.cmds.wizard
-import tale.base
-import tale.util
 import tale.demo
+import tale.driver as the_driver
+import tale.util
 from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
-from tests.supportstuff import Thing, TestDriver
 from tale.story import GameMode
+from tests.supportstuff import Thing, TestDriver
 
 
 def module_level_func(ctx):

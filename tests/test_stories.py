@@ -4,9 +4,10 @@ Unit tests for demo story
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import sys
 import pathlib
+import sys
 import unittest
+
 import tale
 import tale.verbdefs
 from tale import mud_context

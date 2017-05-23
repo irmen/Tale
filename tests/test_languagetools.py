@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
+
 import tale.lang as lang
 
 

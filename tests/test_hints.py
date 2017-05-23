@@ -5,6 +5,7 @@ Unit tests for the hint system
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import unittest
+
 from tale.hints import Hint, HintSystem
 from tale.player import Player
 

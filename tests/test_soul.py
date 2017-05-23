@@ -6,10 +6,11 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
+
 import tale
 import tale.base
-import tale.player
 import tale.errors
+import tale.player
 import tale.verbdefs
 from tale.parseresult import ParseResult
 from tale.story import StoryConfig

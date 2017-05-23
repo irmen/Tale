@@ -4,8 +4,9 @@ Unit tests for serialization
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import unittest
 import pickle
+import unittest
+
 from tale import mud_context, races, base, player, util, hints
 from tale.story import *
 from tests.supportstuff import TestDriver

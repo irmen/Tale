@@ -5,23 +5,23 @@ Package containing the zones of the game.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import re
 import random
+import re
 from types import SimpleNamespace
-from typing import Dict, Set, List, Type, no_type_check
+from typing import Set, List, Type, Dict, no_type_check
+
+from tale import mud_context
+from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Living
+from tale.errors import LocationIntegrityError
+from tale.items.basic import *
+from tale.items.board import BulletinBoard
+from tale.shop import ShopBehavior, Shopkeeper
+from tale.util import roll_dice, Context
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Living
-from tale.items.basic import *
-from tale.items.board import BulletinBoard
-from tale.shop import ShopBehavior, Shopkeeper
-from tale.errors import LocationIntegrityError
-from tale.util import roll_dice, Context
-from tale import mud_context
-
 
 print("\nPre-loading circle data files.")
 mobs = get_mobs()

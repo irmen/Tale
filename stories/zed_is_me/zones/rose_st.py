@@ -7,9 +7,10 @@ rose street north, crossing, rose street south
 butcher, storage room
 """
 
+import zones.magnolia_st
+
 from tale.base import Location, Exit, Door, Key, _limbo
 from tale.driver import Driver
-import zones.magnolia_st
 
 
 def init(driver: Driver) -> None:

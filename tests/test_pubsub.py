@@ -5,9 +5,10 @@ Unittests for Pubsub
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import unittest
 import gc
 import time
+import unittest
+
 from tale.pubsub import topic, unsubscribe_all, Listener, sync, pending
 
 

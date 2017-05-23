@@ -5,9 +5,9 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from tale import util
 from tale.cmds.decorators import wizcmd, cmd
 from tale.driver import Commands
-from tale import util
 from tale.parseresult import ParseResult
 from tale.player import Player
 

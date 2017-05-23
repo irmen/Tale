@@ -6,12 +6,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from typing import Any
-from tale.shop import ShopBehavior, Shopkeeper
-from tale.base import Item, Location, Exit, clone, Living
-from tale.pubsub import Listener, TopicNameType
-from tale.items.basic import gameclock, diamond, gem, newspaper
-from tale.driver import Driver
+
 from tale import mud_context, util
+from tale.base import Item, Location, Exit, clone, Living
+from tale.driver import Driver
+from tale.items.basic import gameclock, diamond, gem, newspaper
+from tale.pubsub import Listener, TopicNameType
+from tale.shop import ShopBehavior, Shopkeeper
 
 
 def init(driver: Driver) -> None:
