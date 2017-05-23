@@ -12,7 +12,7 @@ import os
 import pathlib
 import pkgutil
 import sys
-from typing import ByteString, Union, IO, Any
+from typing import ByteString, Union, IO, Any, Iterable
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
@@ -82,6 +82,8 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     Can be based off an already imported module, or from a file system path somewhere else.
     If dealing with text files, the encoding is always UTF-8.
     It supports automatic decompression of .gz, .xz and .bz2 compressed files (as long as they have that extension).
+    It automatically returns the contents of a compressed version of a requested file if the file
+    itself doesn't exist but there is a compressed version of it available.
     """
     # @todo add directory content listing
     def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None, readonly: bool=True) -> None:
@@ -129,6 +131,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
 
     def __getitem__(self, name: str) -> Resource:
         """Reads the resource data (text or binary) for the given name and returns it as a Resource object"""
+        original_name = name
         phys_path = self.validate_path(name)
         mimetype, compressor = mimetypes.guess_type(name, False)
         mimetype = mimetype or "application/octet-stream"
@@ -146,8 +149,22 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             parts = name.split('/')
             parts.insert(0, os.path.dirname(rootmodule.__file__))
             name = os.path.join(*parts)
-            mtime = loader.path_stats(name)["mtime"]        # type: ignore
-            data = loader.get_data(name)                    # type: ignore
+            try:
+                mtime = loader.path_stats(name)["mtime"]        # type: ignore
+            except FileNotFoundError as x:
+                # if the file cannot be found directly, attempt to read a compressed version of it
+                for suffix in mimetypes.encodings_map:
+                    try:
+                        _ = loader.path_stats(name + suffix)    # type: ignore
+                    except FileNotFoundError:
+                        pass
+                    else:
+                        return self[original_name + suffix]
+                raise x
+            else:
+                data = loader.get_data(name)   # type: ignore
+                if not data:
+                    raise FileNotFoundError(errno.ENOENT, name)
             if encoding:
                 with io.StringIO(data.decode(encoding), newline=None) as f_s:
                     return Resource(name, f_s.read(), mimetype, mtime)
@@ -157,6 +174,11 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
                 return Resource(name, data, mimetype, mtime)
         else:
             # direct filesystem access
+            if not os.path.isfile(phys_path):
+                # if the file cannot be found directly, attempt to read a compressed version of it
+                for suffix in mimetypes.encodings_map:
+                    if os.path.exists(phys_path + suffix):
+                        return self[original_name + suffix]
             with io.open(phys_path, mode=mode, encoding=encoding) as f_b:
                 mtime = os.path.getmtime(phys_path)
                 data = f_b.read()
@@ -205,6 +227,13 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         if is_text(mimetype):
             return io.open(phys_path, mode="at" if append else "wt", encoding="utf-8", newline="\n")
         return io.open(phys_path, mode="ab" if append else "wb")
+
+    def contents(self, path: str=".") -> Iterable[str]:
+        """Returns the files in the given path. Only works on path based vfs, not for package based vfs."""
+        if self.use_pkgutil:
+            raise VfsError("cannot list the contents of a package based vfs")
+        phys_path = self.validate_path(path)
+        return [name for name in os.listdir(phys_path) if os.path.isfile(os.path.join(phys_path, name))]
 
     def __uncompress(self, compressor: str, data: bytes, expect_text: bool) -> Union[bytes, str]:
         if compressor == "bzip2":

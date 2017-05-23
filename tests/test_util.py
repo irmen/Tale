@@ -426,6 +426,22 @@ class TestVfs(unittest.TestCase):
         resource = vfs["files/image.png.gz"]
         self.assertEqual(uncompressed, resource.data)
 
+    def test_vfs_read_autoselectcompressed(self):
+        vfs = VirtualFileSystem(root_path=".", readonly=True)
+        resource = vfs["files/compressed.png"]
+        self.assertEqual(487, len(resource))
+        self.assertEqual("files/compressed.png.gz", resource.name)
+
+    def test_vfs_contents(self):
+        vfs = VirtualFileSystem(root_package="os")
+        with self.assertRaises(VfsError):
+            vfs.contents()
+        vfs = VirtualFileSystem(root_path=".")
+        self.assertIn("test_util.py", vfs.contents())
+        self.assertIn("test.txt.gz", vfs.contents("files"))
+        with self.assertRaises(FileNotFoundError):
+            vfs.contents("@dummy@")
+
 
 if __name__ == '__main__':
     unittest.main()
