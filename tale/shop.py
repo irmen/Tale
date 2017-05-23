@@ -4,21 +4,21 @@ Shopping and shopkeepers.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 
-Shopping related commands will be roughly:
+Shopping related commands will be roughly::
 
-SHOP/LIST [item type]
-    list what the shop has for sale
-INFO/INQUIRE/ASK about [item/number]
-    same as "ask [shopkeeper] about [item/number]"
-    It will display info about the item on sale, as if you examined it.
-BUY
-  > buy sword        (buy the first sword on the list)
-  > buy #3           (buy the third item on the list)
-SELL
-  > sell sword       (sell the first sword in your inventory)
-VALUE/APPRAISE
-    ask shop keeper how much he is willing to pay for an item:
-  > value sword      (appraise the first sword in your inventory)
+    SHOP/LIST [item type]
+        list what the shop has for sale
+    INFO/INQUIRE/ASK about [item/number]
+        same as "ask [shopkeeper] about [item/number]"
+        It will display info about the item on sale, as if you examined it.
+    BUY
+      > buy sword        (buy the first sword on the list)
+      > buy #3           (buy the third item on the list)
+    SELL
+      > sell sword       (sell the first sword in your inventory)
+    VALUE/APPRAISE
+        ask shop keeper how much he is willing to pay for an item:
+      > value sword      (appraise the first sword in your inventory)
 
 """
 
