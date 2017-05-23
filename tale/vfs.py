@@ -85,7 +85,6 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     It automatically returns the contents of a compressed version of a requested file if the file
     itself doesn't exist but there is a compressed version of it available.
     """
-    # @todo add directory content listing
     def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None, readonly: bool=True) -> None:
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
