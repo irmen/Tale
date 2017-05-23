@@ -5,12 +5,13 @@ Decorator functions to help with defining commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import inspect
 import functools
+import inspect
 from typing import Callable, Generator
-from .. import util
+
 from .. import errors
 from .. import player
+from .. import util
 from ..parseresult import ParseResult
 from ..story import GameMode
 

@@ -5,23 +5,24 @@ Normal player commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import inspect
 import datetime
-import random
+import inspect
 import itertools
-from typing import Callable, Iterable, List, Tuple, Dict, Generator, Union
+import random
+from typing import Callable, Iterable, List, Dict, Tuple, Generator, Union
+
+from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
+from .. import base
 from .. import lang
 from .. import races
 from .. import util
-from .. import base
-from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
-from ..player import Player
 from ..accounts import MudAccounts
-from ..items.basic import GameClock
 from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
-from ..story import GameMode
+from ..items.basic import GameClock
 from ..parseresult import ParseResult
-from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
+from ..player import Player
+from ..story import GameMode
+from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
 
 all_commands = {}   # type: Dict[str, Callable]
 cmds_aliases = {}   # type: Dict[str, Tuple[str, ...]]  # commands -> tuple of one or more aliases

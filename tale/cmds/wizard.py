@@ -6,20 +6,21 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-import inspect
 import functools
-import sys
 import gc
-import platform
 import importlib
+import inspect
+import platform
+import sys
 from types import ModuleType
 from typing import Dict, Callable, Generator
+
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
-from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
-from ..player import Player
-from ..parseresult import ParseResult
-from ..story import *
 from .. import base, lang, util, pubsub, __version__
+from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
+from ..parseresult import ParseResult
+from ..player import Player
+from ..story import *
 
 all_commands = {}   # type: Dict[str, Callable]
 
