@@ -67,6 +67,11 @@ Tale API
 .. automodule:: tale.verbdefs
     :members:
 
+:mod:`tale.vfs` --- Virtual File System to load Resources
+---------------------------------------------------------
+.. automodule:: tale.vfs
+    :members:
+
 :mod:`tale.cmds` --- In-game commands
 -------------------------------------
 .. automodule:: tale.cmds
@@ -110,11 +115,6 @@ Tale API
 :mod:`tale.tio.styleaware_wrapper` --- Text wrapping
 ----------------------------------------------------
 .. automodule:: tale.tio.styleaware_wrapper
-    :members:
-
-:mod:`tale.tio.vfs` --- Virtual File System to load Resources
--------------------------------------------------------------
-.. automodule:: tale.tio.vfs
     :members:
 
 :mod:`tale.items.basic` --- Item definitions
