@@ -22,6 +22,7 @@ PostType = Dict[str, str]
 
 
 class BulletinBoard(Item):
+    """A bulletin board that stores messages. You can read, post, and remove messages, and reply to them."""
     max_num_posts = 20
 
     def init(self) -> None:

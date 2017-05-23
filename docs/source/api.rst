@@ -7,6 +7,11 @@ Tale API
 .. automodule:: tale.base
     :members:
 
+:mod:`tale.accounts` --- Player account logic
+---------------------------------------------
+.. automodule:: tale.accounts
+    :members:
+
 :mod:`tale.charbuilder` --- Character builder
 ---------------------------------------------
 .. automodule:: tale.charbuilder
@@ -55,6 +60,11 @@ Tale API
 :mod:`tale.story` --- Story configuration
 -----------------------------------------
 .. automodule:: tale.story
+    :members:
+
+:mod:`tale.shop` --- Shops
+--------------------------
+.. automodule:: tale.shop
     :members:
 
 :mod:`tale.util` --- Generic utilities
@@ -112,6 +122,11 @@ Tale API
 .. automodule:: tale.tio.if_browser_io
     :members:
 
+:mod:`tale.tio.mud_browser_io` --- Web browser GUI I/O (MUD, multi-user)
+------------------------------------------------------------------------
+.. automodule:: tale.tio.mud_browser_io
+    :members:
+
 :mod:`tale.tio.styleaware_wrapper` --- Text wrapping
 ----------------------------------------------------
 .. automodule:: tale.tio.styleaware_wrapper
@@ -121,4 +136,10 @@ Tale API
 --------------------------------------------
 .. automodule:: tale.items.basic
     :members:
+
+:mod:`tale.items.board` --- Bulletin board
+------------------------------------------
+.. automodule:: tale.items.board
+    :members:
+
 
