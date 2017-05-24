@@ -14,12 +14,12 @@ import tale.player
 import tale.verbdefs
 from tale.parseresult import ParseResult
 from tale.story import StoryConfig
-from tests.supportstuff import TestDriver
+from tests.supportstuff import FakeDriver
 
 
 class TestSoul(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = TestDriver()
+        tale.mud_context.driver = FakeDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.resources = tale.mud_context.driver.resources
 

@@ -15,11 +15,11 @@ class Thing:
         self.x = []
 
     def append(self, value, ctx):
-        assert ctx.driver is not None and isinstance(ctx.driver, TestDriver)
+        assert ctx.driver is not None and isinstance(ctx.driver, FakeDriver)
         self.x.append(value)
 
 
-class TestDriver(driver.Driver):
+class FakeDriver(driver.Driver):
     def __init__(self):
         super().__init__()
         # fix up some essential attributes on the driver that are normally only present after loading a story file

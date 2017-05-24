@@ -12,12 +12,12 @@ from tale import util, player, base
 from tale.errors import ActionRefused
 from tale.items import basic
 from tale.story import StoryConfig
-from tests.supportstuff import TestDriver
+from tests.supportstuff import FakeDriver
 
 
 class TestItems(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = StoryConfig()
         mud_context.resources = mud_context.driver.resources
         self.actor = player.Player("julie", "f")

@@ -24,12 +24,12 @@ from tale.player import Player, TextBuffer, PlayerConnection
 from tale.story import *
 from tale.tio.console_io import ConsoleIo
 from tale.tio.iobase import IoAdapterBase
-from tests.supportstuff import TestDriver, MsgTraceNPC
+from tests.supportstuff import FakeDriver, MsgTraceNPC
 
 
 class TestPlayer(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = TestDriver()
+        tale.mud_context.driver = FakeDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
         tale.mud_context.resources = tale.mud_context.driver.resources
@@ -448,7 +448,7 @@ class TestPlayer(unittest.TestCase):
 
 class TestPlayerConnection(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = TestDriver()
+        tale.mud_context.driver = FakeDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
         tale.mud_context.resources = tale.mud_context.driver.resources
@@ -541,7 +541,7 @@ class TestTextbuffer(unittest.TestCase):
 
 class TestCharacterBuilder(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = DemoStory().config
         mud_context.resources = mud_context.driver.resources
 
@@ -604,7 +604,7 @@ class TestCharacterBuilder(unittest.TestCase):
 class TestTabCompletion(unittest.TestCase):
     def test_complete_c(self):
         player = Player("fritz", "m")
-        driver = TestDriver()
+        driver = FakeDriver()
         conn = PlayerConnection(player)
         io = IoAdapterBase(conn)
         conn.io = io
@@ -618,7 +618,7 @@ class TestTabCompletion(unittest.TestCase):
 
     def test_complete_one(self):
         player = Player("fritz", "m")
-        driver = TestDriver()
+        driver = FakeDriver()
         conn = PlayerConnection(player)
         io = IoAdapterBase(conn)
         conn.io = io
@@ -627,7 +627,7 @@ class TestTabCompletion(unittest.TestCase):
 
 class TestMudAccounts(unittest.TestCase):
     def setUp(self):
-        tale.mud_context.driver = TestDriver()
+        tale.mud_context.driver = FakeDriver()
         tale.mud_context.config = StoryConfig()
         tale.mud_context.config.server_mode = GameMode.IF
         tale.mud_context.resources = tale.mud_context.driver.resources

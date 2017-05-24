@@ -9,7 +9,7 @@ import unittest
 
 from tale import mud_context, races, base, player, util, hints
 from tale.story import *
-from tests.supportstuff import TestDriver
+from tests.supportstuff import FakeDriver
 
 
 def serializecycle(obj):
@@ -19,7 +19,7 @@ def serializecycle(obj):
 
 class TestSerializing(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = StoryConfig()
         mud_context.resources = mud_context.driver.resources
 

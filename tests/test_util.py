@@ -14,12 +14,12 @@ from tale.errors import ParseError, ActionRefused
 from tale.player import Player
 from tale.story import MoneyType, StoryConfig
 from tale.vfs import VirtualFileSystem, VfsError, Resource, is_text
-from tests.supportstuff import TestDriver
+from tests.supportstuff import FakeDriver
 
 
 class TestUtil(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.resources = mud_context.driver.resources
         mud_context.config = StoryConfig()
 
@@ -390,8 +390,8 @@ class TestVfs(unittest.TestCase):
     def test_vfs_read_files(self):
         vfs = VirtualFileSystem(root_path=".", readonly=True)
         # text file
-        resource = vfs["files/test.txt"]
-        mtime = os.path.getmtime("files/test.txt")
+        resource = vfs["tests/files/test.txt"]
+        mtime = os.path.getmtime("tests/files/test.txt")
         self.assertEqual(mtime, resource.mtime)
         self.assertTrue(resource.is_text)
         self.assertEqual("text/plain", resource.mimetype)
@@ -402,7 +402,7 @@ class TestVfs(unittest.TestCase):
         self.assertEqual(441, len(resource.text))
         self.assertEqual("T", resource[2])
         # binary file
-        resource = vfs["files/image.png"]
+        resource = vfs["tests/files/image.png"]
         self.assertEqual("image/png", resource.mimetype)
         self.assertFalse(resource.is_text)
         self.assertEqual(487, len(resource))
@@ -412,33 +412,33 @@ class TestVfs(unittest.TestCase):
 
     def test_vfs_read_compressed(self):
         vfs = VirtualFileSystem(root_path=".", readonly=True)
-        uncompressed = vfs["files/test.txt"].text
-        resource = vfs["files/test.txt.bz2"]
+        uncompressed = vfs["tests/files/test.txt"].text
+        resource = vfs["tests/files/test.txt.bz2"]
         self.assertEqual(uncompressed, resource.text)
-        resource = vfs["files/test.txt.gz"]
+        resource = vfs["tests/files/test.txt.gz"]
         self.assertEqual(uncompressed, resource.text)
-        resource = vfs["files/test.txt.xz"]
+        resource = vfs["tests/files/test.txt.xz"]
         self.assertEqual(uncompressed, resource.text)
         with self.assertRaises(VfsError) as x:
-            resource = vfs["files/test.txt.Z"]
+            resource = vfs["tests/files/test.txt.Z"]
         self.assertTrue(str(x.exception).startswith("unsupported compressor"))
-        uncompressed = vfs["files/image.png"].data
-        resource = vfs["files/image.png.gz"]
+        uncompressed = vfs["tests/files/image.png"].data
+        resource = vfs["tests/files/image.png.gz"]
         self.assertEqual(uncompressed, resource.data)
 
     def test_vfs_read_autoselectcompressed(self):
         vfs = VirtualFileSystem(root_path=".", readonly=True)
-        resource = vfs["files/compressed.png"]
+        resource = vfs["tests/files/compressed.png"]
         self.assertEqual(487, len(resource))
-        self.assertEqual("files/compressed.png.gz", resource.name)
+        self.assertEqual("tests/files/compressed.png.gz", resource.name)
 
     def test_vfs_contents(self):
         vfs = VirtualFileSystem(root_package="os")
         with self.assertRaises(VfsError):
             vfs.contents()
         vfs = VirtualFileSystem(root_path=".")
-        self.assertIn("test_util.py", vfs.contents())
-        self.assertIn("test.txt.gz", vfs.contents("files"))
+        self.assertIn("MANIFEST.in", vfs.contents())
+        self.assertIn("make.bat", vfs.contents("docs"))
         with self.assertRaises(FileNotFoundError):
             vfs.contents("@dummy@")
 

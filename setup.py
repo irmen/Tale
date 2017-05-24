@@ -67,6 +67,8 @@ The source code repository is on Github: https://github.com/irmen/Tale
         "Topic :: Games/Entertainment :: Multi-User Dungeons (MUD)"
     ],
     install_requires=["appdirs", "colorama>=0.3.6", "smartypants>=1.8.6"],
+    setup_requires=["pytest-runner"],
+    tests_requires=["pytest"],
     options={"install": {"optimize": 0}},
     test_suite="tests"
 )

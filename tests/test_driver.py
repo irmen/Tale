@@ -19,7 +19,7 @@ import tale.driver as the_driver
 import tale.util
 from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
 from tale.story import GameMode
-from tests.supportstuff import Thing, TestDriver
+from tests.supportstuff import Thing, FakeDriver
 
 
 def module_level_func(ctx):
@@ -92,7 +92,7 @@ class TestDeferreds(unittest.TestCase):
             pass
         t = Thing()
         d = the_driver.Deferred(None, t.append, [42], None)
-        ctx = tale.util.Context(driver=TestDriver(), clock=None, config=None, player_connection=None)
+        ctx = tale.util.Context(driver=FakeDriver(), clock=None, config=None, player_connection=None)
         d(ctx=ctx)
         self.assertEqual([42], t.x)
         d = the_driver.Deferred(None, module_level_func, [], None)

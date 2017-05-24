@@ -12,14 +12,14 @@ import tale
 import tale.verbdefs
 from tale import mud_context
 from tale.story import StoryConfig, StoryBase, StoryConfigError
-from tests.supportstuff import TestDriver
+from tests.supportstuff import FakeDriver
 
 
 class StoryCaseBase:
     def setUp(self):
         self.verbs = tale.verbdefs.VERBS.copy()
         sys.path.insert(0, str(self.directory))
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = StoryConfig()
         mud_context.resources = mud_context.driver.resources
 
@@ -34,7 +34,7 @@ class StoryCaseBase:
 
 
 class TestZedStory(StoryCaseBase, unittest.TestCase):
-    directory = pathlib.Path("../stories/zed_is_me").resolve()
+    directory = pathlib.Path("./stories/zed_is_me").resolve()
 
     def test_story(self):
         import story
@@ -51,7 +51,7 @@ class TestZedStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestDemoStory(StoryCaseBase, unittest.TestCase):
-    directory = pathlib.Path("../stories/demo").resolve()
+    directory = pathlib.Path("./stories/demo").resolve()
 
     def test_story(self):
         import story
@@ -66,7 +66,7 @@ class TestDemoStory(StoryCaseBase, unittest.TestCase):
 
 
 class TestCircleStory(StoryCaseBase, unittest.TestCase):
-    directory = pathlib.Path("../stories/circle").resolve()
+    directory = pathlib.Path("./stories/circle").resolve()
 
     def test_story(self):
         import story
@@ -84,12 +84,12 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story_verify(self):
         s = StoryBase()
         with self.assertRaises(StoryConfigError):
-            s._verify(TestDriver())
+            s._verify(FakeDriver())
         s.config.name = "dummy"
-        s._verify(TestDriver())
+        s._verify(FakeDriver())
         s.config = 1234
         with self.assertRaises(StoryConfigError):
-            s._verify(TestDriver())
+            s._verify(FakeDriver())
 
     def test_storyconfig(self):
         c1 = StoryConfig()
@@ -102,7 +102,7 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_story(self):
         import tale.demo.story
         s = tale.demo.story.Story()
-        s._verify(TestDriver())
+        s._verify(FakeDriver())
         self.assertEqual("Tale demo story", s.config.name)
 
     def test_zones(self):

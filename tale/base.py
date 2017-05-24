@@ -94,12 +94,17 @@ class MudObject:
     possessive = "its"
     objective = "it"
     gender = "n"
+    __seq = 1
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
         if cls is MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
-        return super().__new__(cls)
+        instance = super().__new__(cls)
+        instance.vnum = MudObject.__seq
+        MudObject.__seq += 1
+        print("new mudobject #{0}: {1}".format(instance.vnum, cls))   # XXX
+        return instance
 
     @property
     def title(self) -> str:

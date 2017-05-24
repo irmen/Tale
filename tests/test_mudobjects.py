@@ -17,12 +17,12 @@ from tale.player import Player
 from tale.story import MoneyType
 from tale.tio.iobase import strip_text_styles
 from tale.util import Context, MoneyFormatter
-from tests.supportstuff import TestDriver, MsgTraceNPC, Wiretap
+from tests.supportstuff import FakeDriver, MsgTraceNPC, Wiretap
 
 
 class TestLocations(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = DemoStory().config
         mud_context.resources = mud_context.driver.resources
         self.hall = Location("Main hall", "A very large hall.")
@@ -254,7 +254,7 @@ class TestLocations(unittest.TestCase):
 
 class TestDoorsExits(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = DemoStory().config
         mud_context.resources = mud_context.driver.resources
 
@@ -512,7 +512,7 @@ class TestLiving(unittest.TestCase):
         self.assertIsNotNone(orc.soul)
         self.assertIsNotNone(orc.location)
         self.assertGreater(orc.inventory_size, 0)
-        orc.destroy(Context(TestDriver(), None, None, None))
+        orc.destroy(Context(FakeDriver(), None, None, None))
         self.assertIsNone(orc.soul)
         self.assertIsNone(orc.location)
         self.assertEqual(orc.inventory_size, 0)
@@ -792,7 +792,7 @@ class TestDescriptions(unittest.TestCase):
 
 class TestDestroy(unittest.TestCase):
     def setUp(self):
-        mud_context.driver = TestDriver()
+        mud_context.driver = FakeDriver()
         mud_context.config = DemoStory().config
         mud_context.resources = mud_context.driver.resources
 

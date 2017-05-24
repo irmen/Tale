@@ -7,6 +7,7 @@ python:
 sudo: false
 
 # Installation installs dependencies
-install: "pip install -r requirements.txt"
+install:
+  - pip install -r requirements.txt
 
-script: "PYTHONPATH=. python -bb -m tests.run_tox -c tests"
+script: py.test tests
