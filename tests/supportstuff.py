@@ -6,15 +6,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
+from typing import Any, List
 
 from tale import pubsub, util, driver, base
 
 
 class Thing:
-    def __init__(self):
-        self.x = []
+    def __init__(self) -> None:
+        self.x = []  # type: List[Any]
 
-    def append(self, value, ctx):
+    def append(self, value: Any, ctx: util.Context) -> None:
         assert ctx.driver is not None and isinstance(ctx.driver, FakeDriver)
         self.x.append(value)
 
@@ -27,27 +28,28 @@ class FakeDriver(driver.Driver):
 
 
 class Wiretap(pubsub.Listener):
-    def __init__(self, target):
-        self.clear()
+    def __init__(self, target: base.Living) -> None:
+        self.msgs = []  # type: List[Any]
+        self.senders = []   # type: List[Any]
         tap = target.get_wiretap()
         tap.subscribe(self)
 
-    def pubsub_event(self, topicname, event):
+    def pubsub_event(self, topicname: pubsub.TopicNameType, event: Any) -> None:
         sender, message = event
         self.msgs.append((sender, message))
         self.senders.append(sender)
 
-    def clear(self):
+    def clear(self) -> None:
         self.msgs = []
         self.senders = []
 
 
 class MsgTraceNPC(base.Living):
-    def init(self):
+    def init(self) -> None:
         self._init_called = True
-        self.clearmessages()
+        self.messages = []  # type: List[str]
 
-    def clearmessages(self):
+    def clearmessages(self) -> None:
         self.messages = []
 
     def tell(self, message: str, *, end: bool=False, format: bool=True) -> base.Living:

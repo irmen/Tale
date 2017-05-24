@@ -1,6 +1,6 @@
 *.py[cod]
 *.class
-*.egg
+/.eggs/
 *.egg-info
 /MANIFEST
 /.idea/
