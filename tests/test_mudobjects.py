@@ -9,7 +9,7 @@ import datetime
 import unittest
 
 from tale import pubsub, mud_context
-from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, clone
+from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, LocationIntegrityError
 from tale.parseresult import ParseResult
@@ -1021,6 +1021,25 @@ class TestItem(unittest.TestCase):
         self.assertEqual(backpack, key.contained_in)
         self.assertEqual(hall, key.location)
 
+    def test_clone(self):
+        item = Item("thing", "description")
+        item.aliases = ["a1", "a2"]
+        item2 = item.clone()
+        self.assertNotEqual(item, item2)
+        item2.aliases.append("a3")
+        self.assertNotEqual(item.aliases, item2.aliases)
+        player = Player("julie", "f")
+        class ItemWithStuff(Item):
+            @property
+            def inventory(self):
+                return ["stuff"]
+            @property
+            def inventory_size(self):
+                return len(self.inventory)
+        item2=ItemWithStuff("weird")
+        with self.assertRaises(ValueError):
+            item2.clone()   # can't clone something with stuff in it
+
 
 class TestMudObject(unittest.TestCase):
     def test_basics(self):
@@ -1068,29 +1087,6 @@ class TestMudObject(unittest.TestCase):
         self.assertIs(l1, MudObject.all_locations[l1.vnum])
         self.assertIs(e1, MudObject.all_exits[e1.vnum])
         self.assertIs(n1, MudObject.all_livings[n1.vnum])
-
-
-class TestFunctions(unittest.TestCase):
-    def test_clone(self):
-        item = Item("thing", "description")
-        item.aliases = ["a1", "a2"]
-        item2 = clone(item)
-        self.assertNotEqual(item, item2)
-        item2.aliases.append("a3")
-        self.assertNotEqual(item.aliases, item2.aliases)
-        player = Player("julie", "f")
-        with self.assertRaises(TypeError):
-            clone(player)   # can only clone Items
-        class ItemWithStuff(Item):
-            @property
-            def inventory(self):
-                return ["stuff"]
-            @property
-            def inventory_size(self):
-                return len(self.inventory)
-        item2=ItemWithStuff("weird")
-        with self.assertRaises(ValueError):
-            clone(item2)   # can't clone something with stuff in it
 
 
 if __name__ == '__main__':

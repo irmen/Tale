@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from typing import Any
 
 from tale import mud_context, util
-from tale.base import Item, Location, Exit, clone, Living
+from tale.base import Item, Location, Exit, Living
 from tale.driver import Driver
 from tale.items.basic import gameclock, diamond, gem, newspaper
 from tale.pubsub import Listener, TopicNameType
@@ -34,12 +34,12 @@ shop.add_exits([Exit(["door", "out"], "town.lane", "A fancy door provides access
 
 
 # provide some items in the shop
-clock = clone(gameclock)
+clock = gameclock.clone()
 clock.value = 500
-paper = clone(newspaper)
-gem2 = clone(diamond)
+paper = newspaper.clone()
+gem2 = diamond.clone()
 gem2.value = 80000
-gem3 = clone(gem)
+gem3 = gem.clone()
 gem3.value = 9055
 shopkeeper.init_inventory([gem2, gem3, toothpick])
 shopkeeper.set_shop(shopinfo)

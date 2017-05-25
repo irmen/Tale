@@ -9,7 +9,7 @@ from typing import Union, Optional
 
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
-from tale.base import Location, Exit, Door, Item, Container, Key, clone, Living
+from tale.base import Location, Exit, Door, Item, Container, Key, Living
 from tale.driver import Driver
 from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
@@ -38,12 +38,12 @@ lane = Location("Lane of Magicks",
 
 square.add_exits([Exit(["north", "lane"], lane, "A long straight lane leads north towards the horizon.")])
 
-paper = clone(newspaper)
+paper = newspaper.clone()
 paper.aliases = {"paper"}
 paper.short_description = "Last day's newspaper lies on the floor."
 
 # add a bulletin board to the town, with some initial messages
-board = clone(bulletinboard)  # type: BulletinBoard
+board = bulletinboard.clone()
 board.storage_file = "boards/board.json"
 board.posts = [
     {
@@ -82,7 +82,7 @@ class RemoveOnlyBox(Container):
 
 insertonly_box = InsertOnlyBox("box1", "box1 (a black box)")
 removeonly_box = RemoveOnlyBox("box2", "box2 (a white box)")
-normal_gem = clone(gem)
+normal_gem = gem.clone()
 removeonly_box.init_inventory([normal_gem])
 
 cursed_gem = CursedGem("black gem")
@@ -118,7 +118,7 @@ rat = WalkingRat("rat", "n", race="rodent", description="A filthy looking rat. I
 
 ant = Living("ant", "n", race="insect", short_description="A single ant seems to have lost its way.")
 
-clock = clone(gameclock)
+clock = gameclock.clone()
 clock.short_description = "On the pavement lies a clock, it seems to be working still."
 
 square.init_inventory([cursed_gem, normal_gem, paper, trashcan, pouch, insertonly_box, removeonly_box, clock, towncrier, idiot, rat, ant])

@@ -28,7 +28,7 @@ from typing import Tuple, Set
 
 from . import lang
 from . import mud_context
-from .base import Item, Living, clone
+from .base import Item, Living
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .items.basic import Trash
 from .parseresult import ParseResult
@@ -286,7 +286,7 @@ class Shopkeeper(Living):
                     raise ValueError("num needs to be 1 or higher")
                 item = list(sorted_by_name(self.inventory))[num - 1]
                 if Item.search_item(item.title, self.shop.forsale):
-                    item = clone(item)  # make a clone and sell that, the forsale items should never run out
+                    item = item.clone()  # make a clone and sell that, the forsale items should never run out
             except ValueError:
                 raise ParseError("What number on the list do you mean?")
             except IndexError:
@@ -294,7 +294,7 @@ class Shopkeeper(Living):
         if not item:
             item = Item.search_item(name, self.shop.forsale)
             if item:
-                item = clone(item)  # make a clone and sell that, the forsale items should never run out
+                item = item.clone()  # make a clone and sell that, the forsale items should never run out
             else:
                 # search inventory
                 item = self.search_item(name, include_inventory=True, include_location=False, include_containers_in_inventory=False)

@@ -54,7 +54,7 @@ from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError
 from .parseresult import ParseResult
 
 __all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location",
-           "Weapon", "Key", "heartbeat", "clone", "Soul"]
+           "Weapon", "Key", "heartbeat", "Soul"]
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
@@ -268,12 +268,17 @@ class Item(MudObject):
     Regular items cannot contain other things, so it makes to sense
     to check containment.
     """
-    def init(self) -> None:
+
+    def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
+        super().__init__(name, title, description, short_description)
         self.contained_in = None   # type: Union[Location, Living, Container]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
+
+    def init(self) -> None:
+        pass
 
     def __contains__(self, item: 'Item') -> bool:
         raise ActionRefused("You can't look inside of that.")
@@ -351,7 +356,7 @@ class Item(MudObject):
 
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living') -> 'Item':
-        item = clone(self)
+        item = self.clone()
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item) + " (spawned in your inventory)")
         actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
@@ -387,23 +392,20 @@ class Item(MudObject):
             items = [i for i in collection if name in i.aliases or i.title.lower() == name]
         return items[0] if items else None
 
-
-def clone(obj: Item) -> Any:
-    """Create a copy of an existing Item. Only when it has an empty inventory (to avoid problems)"""
-    if isinstance(obj, Item):
+    def clone(self) -> Any:
+        """Create a copy of an existing Item. Only when it has an empty inventory (to avoid problems)"""
         try:
-            if obj.inventory_size > 0:
+            if self.inventory_size > 0:
                 raise ValueError("can't clone something that has other stuff in it")
         except ActionRefused:
             pass
-        if obj.location:
+        if self.location:
             # avoid deepcopying the location
-            location, obj.location = obj.location, None
-            duplicate = copy.deepcopy(obj)
-            obj.location = duplicate.location = location
+            location, self.location = self.location, None
+            duplicate = copy.deepcopy(self)
+            self.location = duplicate.location = location
             return duplicate
-        return copy.deepcopy(obj)
-    raise TypeError("can only clone Items")
+        return copy.deepcopy(self)
 
 
 class Weapon(Item):
