@@ -9,6 +9,7 @@ from zones import make_location, make_item, make_mob
 
 from tale import lang, util
 from tale.cmds.decorators import wizcmd
+from tale.cmds.wizard import teleport_to
 from tale.driver import Commands
 from tale.errors import ActionRefused, ParseError
 from tale.parseresult import ParseResult
@@ -31,10 +32,7 @@ def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         room = make_location(vnum)
     except KeyError:
         raise ActionRefused("No room with that vnum exists.")
-    player.tell("Teleporting to room {}...".format(room))
-    player.tell("\n")
-    player.move(room, actor=player)
-    player.look()
+    teleport_to(player, room)
 
 
 @wizcmd
@@ -66,13 +64,13 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             objects.append(make_mob(vnum))
         except KeyError:
             pass
-        player.tell("Objects with vnum %d:" % vnum + " " + lang.join(str(o) for o in objects))
+        player.tell("Objects with vnum %d:" % vnum + " " + (lang.join(str(o) for o in objects) or "none"))
         return
     try:
         vnum = obj.circle_vnum   # type: ignore
         player.tell("Vnum of %s = %d." % (obj, vnum))
     except AttributeError:
-        player.tell("{} has no vnum.".format(obj))
+        player.tell(str(obj) + " has no vnum.")
 
 
 @wizcmd
@@ -81,15 +79,17 @@ def spawn_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if len(parsed.args) != 1:
         raise ParseError("You have to give the rooms' vnum.")
     vnum = int(parsed.args[0])
-    spawned = []
     try:
-        spawned.append(make_item(vnum))
+        item = make_item(vnum)
     except KeyError:
-        pass
+        player.tell("There's no item with that vnum.")
+    else:
+        player.tell("Spawned " + repr(item) + " (into your inventory)")
+        item.move(player, actor=player)
     try:
-        spawned.append(make_mob(vnum))
+        mob = make_mob(vnum)
     except KeyError:
-        pass
-    for obj in spawned:
-        player.tell("Spawned " + obj + " (into your current location)")
-        obj.move(player.location, actor=player)
+        player.tell("There's no mob with that vnum.")
+    else:
+        player.tell("Spawned " + repr(mob) + " (into your current location)")
+        mob.move(player.location, actor=player)
