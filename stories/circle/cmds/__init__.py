@@ -69,7 +69,7 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         player.tell("Objects with vnum %d:" % vnum + " " + lang.join(str(o) for o in objects))
         return
     try:
-        vnum = obj.vnum
+        vnum = obj.vnum   # type: ignore
         player.tell("Vnum of %s = %d." % (obj, vnum))
     except AttributeError:
         player.tell("{} has no vnum.".format(obj))

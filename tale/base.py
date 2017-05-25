@@ -88,8 +88,7 @@ class MudObject:
     Using extra descriptions, players could then see additional detail by typing
     ``look at wall.``  There can be an unlimited number of Extra Descriptions.
     """
-    # @todo add vnum?   (circle provides the number itself, otherwise assign one automatically?)
-    # @todo and add the vnum commands from circle as default commands in that case.
+    # @todo add the vnum commands from circle as default commands in that case.
     subjective = "it"
     possessive = "its"
     objective = "it"
@@ -101,10 +100,31 @@ class MudObject:
         if cls is MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
         instance = super().__new__(cls)
-        instance.vnum = MudObject.__seq
+        # create and store a new unique vnum for this mudobject
+        instance._vnum = MudObject.__seq    # @todo vnum but conflicts with circle atm
         MudObject.__seq += 1
-        print("new mudobject #{0}: {1}".format(instance.vnum, cls))   # XXX
         return instance
+
+    def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
+        self._extradesc = None  # type: Dict[str,str]
+        self.name = self._description = self._title = self._short_description = None  # type: str
+        self.init_names(name, title, description, short_description)
+        self.aliases = set()  # type: Set[str]
+        # any custom verbs that need to be recognised (verb->docstring mapping),
+        # verb handling is done via handle_verb() callbacks.
+        self.verbs = {}  # type: Dict[str, str]
+        if getattr(self, "_register_heartbeat", False):
+            # one way of setting this attribute is by using the @heartbeat decorator
+            # @todo make this register heartbeat mechanism somewhat nicer (without the magic attribute?)
+            self.register_heartbeat()
+        self.init()
+
+    def init(self) -> None:
+        """
+        Secondary initialization/customization. Invoked after all required initialization has been done.
+        You can easily override this in a subclass.
+        """
+        pass
 
     @property
     def title(self) -> str:
@@ -138,26 +158,6 @@ class MudObject:
     def extra_desc(self, value: Dict[str, str]) -> None:
         assert isinstance(value, dict)
         self._extradesc = value
-
-    def __init__(self, name: str, title: str=None, description: str=None, short_description: str=None) -> None:
-        self._extradesc = None  # type: Dict[str,str]
-        self.name = self._description = self._title = self._short_description = None  # type: str
-        self.init_names(name, title, description, short_description)
-        self.aliases = set()  # type: Set[str]
-        # any custom verbs that need to be recognised (verb->docstring mapping),
-        # verb handling is done via handle_verb() callbacks.
-        self.verbs = {}   # type: Dict[str, str]
-        if getattr(self, "_register_heartbeat", False):
-            # one way of setting this attribute is by using the @heartbeat decorator
-            self.register_heartbeat()
-        self.init()
-
-    def init(self) -> None:
-        """
-        Secondary initialization/customization. Invoked after all required initialization has been done.
-        You can easily override this in a subclass.
-        """
-        pass
 
     def init_names(self, name: str, title: str, description: str, short_description: str) -> None:
         """(re)set the name and description attributes"""
