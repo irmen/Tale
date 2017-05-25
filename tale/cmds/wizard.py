@@ -635,4 +635,4 @@ def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     player.tell("Vnum of %s = %d." % (obj, vn))
 
 
-# @todo add the vnum commands from circle as default commands in that case.
+# @todo add !vgo and !vspawn (see circle)

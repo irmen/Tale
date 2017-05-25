@@ -1061,8 +1061,8 @@ class Living(MudObject):
 
     def start_attack(self, victim: 'Living') -> None:
         """Starts attacking the given living until death ensues on either side."""
-        # @todo: I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
-        # @TODO actual fight
+        # @todo I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
+        # @todo actual fight
         name = lang.capital(self.title)
         room_msg = "%s starts attacking %s!" % (name, victim.title)
         victim_msg = "%s starts attacking you!" % name
