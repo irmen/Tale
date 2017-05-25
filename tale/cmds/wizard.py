@@ -51,6 +51,7 @@ def wizcmd(command: str, *aliases: str) -> Callable:
             raise ValueError("Command defined more than once: " + prefixed_command)
         if cmdfunc_signature_valid(func):
             func.__doc__ = util.format_docstring(func.__doc__)
+            executewizcommand.__doc__ = func.__doc__
             all_commands[prefixed_command] = executewizcommand
             for alias in prefixed_aliases:
                 if alias in all_commands:
@@ -441,7 +442,6 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         txt.append("Game time:      %s  (%dx real time)" % (ctx.clock, ctx.clock.times_realtime))
     else:
         txt.append("Game time:      %s" % ctx.clock)
-    txt.append("Python objects: %s" % len(gc.get_objects()))
     txt.append("Players:        %d" % len(ctx.driver.all_players))
     txt.append("Heartbeats:     %d" % len(driver.heartbeat_objects))
     txt.append("Deferreds:      %d" % len(driver.deferreds))
@@ -451,6 +451,12 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         txt.append("Loop duration:  %.2f sec. (avg)" % avg_loop_duration)
     elif config.server_tick_method == TickMethod.COMMAND:
         txt.append("Loop duration:  n/a (command driven)")
+    txt.append("Number of objects:")
+    txt.append("  locations: %d" % len(list(base.MudObject.all_locations.keys())))
+    txt.append("  livings:   %d" % len(list(base.MudObject.all_livings.keys())))
+    txt.append("  items:     %d" % len(list(base.MudObject.all_items.keys())))
+    txt.append("  exits:     %d" % len(list(base.MudObject.all_exits.keys())))
+    txt.append("  python:    %d" % len(gc.get_objects()))
     player.tell("\n".join(txt), format=False)
 
 
@@ -592,3 +598,39 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
             player.tell("Player has been notified and forced to log off.")
     else:
         player.tell("No changes.")
+
+
+@wizcmd("vnum")
+def vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Show the vnum of a location (.) or an object/living,
+    or when you provide a vnum as arg, show the object(s) with that vnum."""
+    if not parsed.args:
+        raise ParseError("From what should I show the vnum?")
+    name = parsed.args[0]
+    if name == ".":
+        obj = player.location
+    elif parsed.who_order:
+        obj = parsed.who_order[0]
+    else:
+        try:
+            vnum = int(parsed.args[0])
+        except ValueError as x:
+            raise ActionRefused(str(x))
+        if vnum in base.MudObject.all_items:
+            item = base.MudObject.all_items[vnum]
+            player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, item.location))
+        elif vnum in base.MudObject.all_livings:
+            living = base.MudObject.all_livings[vnum]
+            player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, living.location))
+        elif vnum in base.MudObject.all_locations:
+            player.tell("Location with vnum %d: %r" % (vnum, base.MudObject.all_locations[vnum]))
+        elif vnum in base.MudObject.all_exits:
+            player.tell("Exit with vnum %d: %r" % (vnum, base.MudObject.all_exits[vnum]))
+        else:
+            player.tell("There is nothing with that vnum.")
+        return
+    vn = obj.vnum  # type: ignore
+    player.tell("Vnum of %s = %d." % (obj, vn))
+
+
+# @todo add the vnum commands from circle as default commands in that case.

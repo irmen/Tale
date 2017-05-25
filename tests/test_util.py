@@ -175,6 +175,10 @@ class TestUtil(unittest.TestCase):
             third
         """
         self.assertEqual("first\n  second\n    third", util.format_docstring(d))
+        d = """
+                    hello
+        """
+        self.assertEqual("hello", util.format_docstring(d))
 
     def test_gametime_realtime(self):
         epoch = datetime.datetime(2012, 4, 19, 14, 0, 0)

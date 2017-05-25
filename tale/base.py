@@ -38,10 +38,11 @@ Use its enter/leave methods instead.
 import copy
 import random
 import re
+from weakref import WeakValueDictionary
 from collections import defaultdict
 from textwrap import dedent
 from types import ModuleType
-from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
+from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, MutableMapping
 
 from . import lang
 from . import mud_context
@@ -88,12 +89,16 @@ class MudObject:
     Using extra descriptions, players could then see additional detail by typing
     ``look at wall.``  There can be an unlimited number of Extra Descriptions.
     """
-    # @todo add the vnum commands from circle as default commands in that case.
     subjective = "it"
     possessive = "its"
     objective = "it"
     gender = "n"
+    # the vnum machinery for all created MudObjects:
     __seq = 1
+    all_items = WeakValueDictionary()       # type: WeakValueDictionary[int, Item]
+    all_livings = WeakValueDictionary()     # type: WeakValueDictionary[int, Living]
+    all_locations = WeakValueDictionary()   # type: WeakValueDictionary[int, Location]
+    all_exits = WeakValueDictionary()       # type: WeakValueDictionary[int, Exit]
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
@@ -103,6 +108,16 @@ class MudObject:
         # create and store a new unique vnum for this mudobject
         instance.vnum = MudObject.__seq
         MudObject.__seq += 1
+        if issubclass(cls, Item):
+            MudObject.all_items[instance.vnum] = instance
+        elif issubclass(cls, Living):
+            MudObject.all_livings[instance.vnum] = instance
+        elif issubclass(cls, Exit):
+            MudObject.all_exits[instance.vnum] = instance
+        elif issubclass(cls, Location):
+            MudObject.all_locations[instance.vnum] = instance
+        else:
+            raise TypeError("weird MudObj subtype: " + str(cls))
         return instance
 
     def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
@@ -254,7 +269,7 @@ class Item(MudObject):
     to check containment.
     """
     def init(self) -> None:
-        self.contained_in = None  # type: Union[Location, Living, Container]
+        self.contained_in = None   # type: Union[Location, Living, Container]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
@@ -269,7 +284,10 @@ class Item(MudObject):
             return None
         if isinstance(self.contained_in, Location):
             return self.contained_in
-        return self.contained_in.location
+        elif isinstance(self.contained_in, (Living, Container)):
+            return self.contained_in.location
+        else:
+            raise TaleError("inconsistent contained_in type")
 
     @location.setter
     def location(self, value: 'Location') -> None:
@@ -646,13 +664,6 @@ class Location(MudObject):
         pass
 
 
-_limbo = Location("Limbo",
-                  """
-                  The intermediate or transitional place or state. There's only nothingness.
-                  Living beings end up here if they're not in a proper location yet.
-                  """)
-
-
 class Stats:
     def __init__(self) -> None:
         self.gender = 'n'
@@ -727,7 +738,7 @@ class Living(MudObject):
             self.stats = Stats()
         self.init_gender(gender)
         self.soul = Soul()
-        self.location = _limbo  # set transitional location
+        self.location = _limbo  # type: Location  # set transitional location
         self.privileges = set()  # type: Set[str] # probably only used for Players though
         self.aggressive = False
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
@@ -2010,3 +2021,10 @@ class Soul:
         except IndexError:
             pass
         return None, None, 0
+
+
+_limbo = Location("Limbo",
+                  """
+                  The intermediate or transitional place or state. There's only nothingness.
+                  Living beings end up here if they're not in a proper location yet.
+                  """)

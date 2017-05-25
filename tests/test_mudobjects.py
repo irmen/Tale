@@ -1030,9 +1030,6 @@ class TestMudObject(unittest.TestCase):
         except AssertionError:
             pass
         x = Item("name", "title", "description")
-        self.assertGreater(x.vnum, 0)
-        x2 = Item("name2", "another item")
-        self.assertEqual(x.vnum+1, x2.vnum)
         x.init()
         x.heartbeat(None)
         with self.assertRaises(ActionRefused):
@@ -1048,6 +1045,29 @@ class TestMudObject(unittest.TestCase):
     def test_nocreate(self):
         with self.assertRaises(TypeError):
             MudObject("name")
+
+    def test_vnum(self):
+        i1 = Item("name", "title", "description")
+        self.assertGreater(i1.vnum, 0)
+        i2 = Item("name2", "another item")
+        self.assertEqual(i1.vnum + 1, i2.vnum)
+        l1 = Location("name")
+        self.assertGreater(l1.vnum, 0)
+        e1 = Exit("up", l1, "A ladder leads up.")
+        self.assertGreater(e1.vnum, 0)
+        n1 = Living("fox", "f")
+        self.assertGreater(n1.vnum, 0)
+        self.assertIn(i1.vnum, MudObject.all_items)
+        self.assertIn(i2.vnum, MudObject.all_items)
+        self.assertNotIn(i1.vnum, MudObject.all_locations)
+        self.assertIn(l1.vnum, MudObject.all_locations)
+        self.assertIn(e1.vnum, MudObject.all_exits)
+        self.assertIn(n1.vnum, MudObject.all_livings)
+        self.assertIs(i1, MudObject.all_items[i1.vnum])
+        self.assertIs(i2, MudObject.all_items[i2.vnum])
+        self.assertIs(l1, MudObject.all_locations[l1.vnum])
+        self.assertIs(e1, MudObject.all_exits[e1.vnum])
+        self.assertIs(n1, MudObject.all_livings[n1.vnum])
 
 
 class TestFunctions(unittest.TestCase):
