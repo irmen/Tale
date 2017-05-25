@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from typing import Any
 
 
-__version__ = "3.1"
+__version__ = "3.2.dev0"
 
 
 class _MudContext:

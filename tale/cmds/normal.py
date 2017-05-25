@@ -17,7 +17,7 @@ from .. import lang
 from .. import races
 from .. import util
 from ..accounts import MudAccounts
-from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse, TaleError
 from ..items.basic import GameClock
 from ..parseresult import ParseResult
 from ..player import Player
@@ -36,6 +36,9 @@ def cmd(command: str, *aliases: str) -> Callable:
     """
     # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
     # @todo merge both decorators to avoid code duplication
+    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+        raise TypeError("command name and aliases should be strings")
+
     def cmd2(func: Callable) -> Callable:
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
@@ -53,7 +56,7 @@ def cmd(command: str, *aliases: str) -> Callable:
                 all_commands[alias] = func
             return func
         else:
-            raise SyntaxError("invalid cmd function signature or missing docstring: " + func.__name__)
+            raise TaleError("invalid cmd function signature or missing docstring: " + func.__name__)
     return cmd2
 
 

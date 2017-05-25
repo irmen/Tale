@@ -45,8 +45,8 @@ class StoryConfig:
         self.name = None                     # type: str # the name of the story
         self.author = None                   # type: str # the story's author name
         self.author_address = None           # type: str # the author's email address
-        self.version = "1.3"                 # arbitrary but is used to check savegames for compatibility
-        self.requires_tale = "3.1"           # tale library required to run the game
+        self.version = "1.4"                 # arbitrary but is used to check savegames for compatibility
+        self.requires_tale = "3.2"           # tale library required to run the game
         self.supported_modes = {GameMode.IF}    # what driver modes (if/mud) are supported by this story
         self.player_name = None              # type: str # set a name to create a prebuilt player, None to use the character builder
         self.player_gender = None            # type: str # m/f/n

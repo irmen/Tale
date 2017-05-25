@@ -14,7 +14,7 @@ import traceback
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
 from . import lang
-from .errors import ParseError, ActionRefused
+from .errors import ParseError, ActionRefused, TaleError
 from .story import MoneyType
 
 
@@ -356,7 +356,7 @@ def authorized(*privileges: Sequence[str]) -> Callable:
     """
     def checked(f):
         if "actor" not in inspect.signature(f).parameters:
-            raise SyntaxError("callable requires 'actor' parameter: " + f.__name__)
+            raise TaleError("callable requires 'actor' parameter: " + f.__name__)
         allowed_privs = set(privileges)
 
         @functools.wraps(f)

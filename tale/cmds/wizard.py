@@ -17,7 +17,7 @@ from typing import Dict, Callable, Generator
 
 from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
 from .. import base, lang, util, pubsub, __version__
-from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb
+from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb, TaleError
 from ..parseresult import ParseResult
 from ..player import Player
 from ..story import *
@@ -32,6 +32,8 @@ def wizcmd(command: str, *aliases: str) -> Callable:
     User code should use @wizcmd from cmds.decorators.
     """
     # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
+    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+        raise TypeError("command name and aliases should be strings")
     prefixed_command = "!" + command
     prefixed_aliases = ["!" + alias for alias in aliases]
 
@@ -59,7 +61,7 @@ def wizcmd(command: str, *aliases: str) -> Callable:
                 all_commands[alias] = executewizcommand
             return executewizcommand
         else:
-            raise SyntaxError("invalid wizcmd function signature or missing docstring: " + func.__name__)
+            raise TaleError("invalid wizcmd function signature or missing docstring: " + func.__name__)
     return wizcmd2
 
 

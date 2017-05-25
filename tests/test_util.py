@@ -10,7 +10,7 @@ import unittest
 
 from tale import util, mud_context
 from tale.base import Item, Container, Location
-from tale.errors import ParseError, ActionRefused
+from tale.errors import ParseError, ActionRefused, TaleError
 from tale.player import Player
 from tale.story import MoneyType, StoryConfig
 from tale.vfs import VirtualFileSystem, VfsError, Resource, is_text
@@ -258,7 +258,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("name", util.storyname_to_filename("name'\""))
 
     def test_authorized(self):
-        with self.assertRaises(SyntaxError):
+        with self.assertRaises(TaleError):
             @util.authorized("wizard", "god")
             def func_no_actor(args):
                 pass

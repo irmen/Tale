@@ -16,6 +16,10 @@ from ..parseresult import ParseResult
 from ..story import GameMode
 
 
+__all__ = ["cmd", "wizcmd", "cmdfunc_signature_valid", "disable_notify_action",
+           "disabled_in_gamemode", "overrides_soul", "no_soul_parse"]
+
+
 def cmd(func):
     """
     Public decorator to define a normal command function.
@@ -24,6 +28,8 @@ def cmd(func):
     """
     # NOTE: this code is VERY similar to the internal @cmd decorator in cmds/normal.py
     # If changes are made, make sure to update both occurrences
+    if not inspect.isfunction(func):
+        raise TypeError("use this only without arguments on a function")
     func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
     if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
@@ -32,7 +38,7 @@ def cmd(func):
             func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
         return func
     else:
-        raise SyntaxError("invalid cmd function signature or missing docstring: " + func.__name__)
+        raise errors.TaleError("invalid cmd function signature or missing docstring: " + func.__name__)
 
 
 def wizcmd(func):
@@ -41,6 +47,8 @@ def wizcmd(func):
     It adds a privilege check wrapper and checks the signature.
     Can be used by the user that is writing story code.
     """
+    if not inspect.isfunction(func):
+        raise TypeError("use this only without arguments on a function")
     func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
     func.is_tale_command_func = True
 
@@ -54,13 +62,14 @@ def wizcmd(func):
             raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
         return func(player, parsed, ctx)
 
-    func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
     if cmdfunc_signature_valid(func):
+        func.is_generator = inspect.isgeneratorfunction(func)  # contains async yields?
+        executewizcommand.is_generator = func.is_generator
         func.__doc__ = util.format_docstring(func.__doc__)
         executewizcommand.__doc__ = func.__doc__
         return executewizcommand
     else:
-        raise SyntaxError("invalid wizcmd function signature: " + func.__name__)
+        raise errors.TaleError("invalid wizcmd function signature: " + func.__name__)
 
 
 def cmdfunc_signature_valid(func: Callable) -> bool:
