@@ -110,7 +110,7 @@ def parse_file(wldfile: pathlib.Path) -> None:
             if 'p' in bitVectorArg: attribs.append('bfs_mark')
 
             room = SimpleNamespace(
-                vnum=int(vNumArg),
+                circle_vnum=int(vNumArg),
                 name=nameArg,
                 type=sectorTypeArg,
                 zone=int(zoneArg),
@@ -133,7 +133,7 @@ def parse_file(wldfile: pathlib.Path) -> None:
                 desc = {"keywords": set(arg["keywords"].split()), "text": arg["desc"].replace("\n", " ")}
                 room.extradesc.append(desc)
 
-            rooms[room.vnum] = room
+            rooms[room.circle_vnum] = room
             descarg = ''
             readstate = 'vNum'
             linenum += 1

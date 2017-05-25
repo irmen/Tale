@@ -108,7 +108,7 @@ def parse_file(zonfile: pathlib.Path) -> None:
     resetMap = {'0': 'never', '1': 'afterdeserted', '2': 'asap'}
 
     zone = SimpleNamespace(
-        vnum=int(vnumArg),
+        circle_vnum=int(vnumArg),
         name=zonenameArg,
         startroom=int(startroomArg),
         endroom=int(endroomArg),
@@ -120,7 +120,7 @@ def parse_file(zonfile: pathlib.Path) -> None:
     )
     for m in allmobs:
         mob = SimpleNamespace(
-            vnum=int(m["vnum"]),
+            circle_vnum=int(m["vnum"]),
             globalmax=int(m["max"]),
             room=int(m["room"]),
             inventory={},
@@ -151,7 +151,7 @@ def parse_file(zonfile: pathlib.Path) -> None:
             "state": doorstateMap[d["state"]]
         })
 
-    zones[zone.vnum] = zone
+    zones[zone.circle_vnum] = zone
 
 
 def parse_all() -> None:

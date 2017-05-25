@@ -101,7 +101,7 @@ class MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
         instance = super().__new__(cls)
         # create and store a new unique vnum for this mudobject
-        instance._vnum = MudObject.__seq    # @todo vnum but conflicts with circle atm
+        instance.vnum = MudObject.__seq
         MudObject.__seq += 1
         return instance
 

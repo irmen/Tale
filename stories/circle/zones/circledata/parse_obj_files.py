@@ -289,7 +289,7 @@ def parse_file(objfile: pathlib.Path) -> None:
                             '50': 'infravision'}
 
             obj = SimpleNamespace(
-                vnum=int(vNumArg),
+                circle_vnum=int(vNumArg),
                 aliases=list(aliasArg),  # ordered, the first is the best
                 type=typeFlagArg,
                 weight=int(weightArg),
@@ -359,7 +359,7 @@ def parse_file(objfile: pathlib.Path) -> None:
             for k, v in affectArg.items():
                 obj.affects[affectTypes[k]] = int(v)
 
-            objs[obj.vnum] = obj
+            objs[obj.circle_vnum] = obj
             reasdstate = 'vNum'
 
 

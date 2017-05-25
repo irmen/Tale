@@ -77,6 +77,22 @@ class TestCircleStory(StoryCaseBase, unittest.TestCase):
         import zones.midgaard_city
         self.assertEqual("The Temple Of Midgaard", zones.midgaard_city.temple.name)
 
+    def test_vnums(self):
+        from zones import make_location, make_item, make_mob, make_shop
+        o = make_mob(5017)
+        self.assertEqual("camel", o.name)
+        self.assertEqual(5017, o.circle_vnum)
+        o = make_location(901)
+        self.assertEqual("The Riverbank", o.name)
+        self.assertEqual(901, o.circle_vnum)
+        o = make_item(3308)
+        self.assertEqual("apple", o.name)
+        self.assertEqual(3308, o.circle_vnum)
+        o = make_shop(5411)
+        self.assertEqual("puke", o.action_temper)
+        self.assertEqual({"trash", "light", "treasure", "container", "food"}, o.willbuy)
+        self.assertEqual(5411, o.circle_vnum)
+
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     directory = pathlib.Path("demo-story-dummy-path")

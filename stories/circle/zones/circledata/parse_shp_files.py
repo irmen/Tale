@@ -138,7 +138,7 @@ def parse_file(shpfile: pathlib.Path) -> None:
             wontdealattr.add('good')
 
         shop = SimpleNamespace(
-            vnum=int(vNumArg),
+            circle_vnum=int(vNumArg),
             sellprofit=float(profitWhenSellingArg),
             buyprofit=float(profitWhenBuyingArg),
             shopkeeper=int(shopkeeperMobArg),
@@ -161,7 +161,7 @@ def parse_file(shpfile: pathlib.Path) -> None:
             rooms={int(vnum) for vnum in shopRoomsArg},
             wontdealwith=wontdealattr
         )
-        shops[shop.vnum] = shop
+        shops[shop.circle_vnum] = shop
 
 
 def parse_all() -> None:

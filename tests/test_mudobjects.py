@@ -1030,6 +1030,9 @@ class TestMudObject(unittest.TestCase):
         except AssertionError:
             pass
         x = Item("name", "title", "description")
+        self.assertGreater(x.vnum, 0)
+        x2 = Item("name2", "another item")
+        self.assertEqual(x.vnum+1, x2.vnum)
         x.init()
         x.heartbeat(None)
         with self.assertRaises(ActionRefused):

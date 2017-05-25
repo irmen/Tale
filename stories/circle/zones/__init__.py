@@ -65,7 +65,7 @@ def make_location(vnum: int) -> Location:
     except KeyError:
         c_room = rooms[vnum]
         loc = Location(c_room.name, c_room.desc)
-        loc.vnum = vnum   # type: ignore  # keep the circle vnum
+        loc.circle_vnum = vnum   # type: ignore  # keep the circle vnum
         for ed in c_room.extradesc:
             loc.add_extradesc(ed["keywords"], ed["text"])
         converted_rooms[vnum] = loc
@@ -120,7 +120,7 @@ def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
         title = title[2:]
     # we take the stats from the 'human' race because the circle data lacks race and stats
     mob = mob_class(name, c_mob.gender, "human", title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
-    mob.vnum = vnum  # keep the vnum
+    mob.circle_vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:
             mob.add_extradesc(ed["keywords"], ed["text"])
@@ -257,7 +257,7 @@ def make_item(vnum: int) -> Item:
         raise ValueError("invalid obj type: " + c_obj.type)
     for ed in c_obj.extradesc:
         item.add_extradesc(ed["keywords"], ed["text"])
-    item.vnum = vnum  # keep the vnum
+    item.circle_vnum = vnum  # keep the vnum
     item.aliases = aliases
     item.value = c_obj.cost
     item.rent = c_obj.rent
@@ -274,7 +274,7 @@ def make_shop(vnum: int) -> ShopBehavior:
     except KeyError:
         c_shop = shops[vnum]
         shop = ShopBehavior()
-        shop.vnum = c_shop.vnum  # type: ignore  # keep the vnum
+        shop.circle_vnum = c_shop.circle_vnum  # type: ignore  # keep the vnum
         shop.shopkeeper_vnum = c_shop.shopkeeper   # keep the vnum of the shopkeeper
         shop.banks_money = c_shop.banks
         shop.will_fight = c_shop.fights
@@ -319,18 +319,18 @@ def init_zones() -> None:
     for vnum in sorted(zones):
         zone = zones[vnum]
         for mobref in zone.mobs:
-            if mobref.vnum in all_shopkeepers:
+            if mobref.circle_vnum in all_shopkeepers:
                 # mob is a shopkeeper, we need to make a shop+shopkeeper rather than a regular mob
-                mob = make_mob(mobref.vnum, mob_class=Shopkeeper)
+                mob = make_mob(mobref.circle_vnum, mob_class=Shopkeeper)
                 # find the shop it works for
-                shop_vnums = [vnum for vnum, shop in shops.items() if shop.shopkeeper == mobref.vnum]
+                shop_vnums = [vnum for vnum, shop in shops.items() if shop.shopkeeper == mobref.circle_vnum]
                 assert len(shop_vnums) == 1
                 shop_vnum = shop_vnums[0]
                 shopdata = make_shop(shop_vnum)
                 mob.shop = shopdata  # type: ignore
                 num_shops += 1
             else:
-                mob = make_mob(mobref.vnum)
+                mob = make_mob(mobref.circle_vnum)
             for vnum, details in mobref.equipped.items():
                 obj = make_item(vnum)
                 # @todo actually wield the item
@@ -342,15 +342,15 @@ def init_zones() -> None:
                 num_items += 1
             if inventory:
                 mob.init_inventory(inventory)
-            if mobref.vnum in all_shopkeepers:
+            if mobref.circle_vnum in all_shopkeepers:
                 # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
                 if mob.inventory_size < len(mob.shop.forsale):   # type: ignore
                     raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" %
-                                     (mobref.vnum, mob.shop.vnum))   # type: ignore
+                                     (mobref.circle_vnum, mob.shop.circle_vnum))   # type: ignore
                 for item in mob.shop.forsale:  # type: ignore
                     if not any(i for i in mob.inventory if i.title == item.title):
                         raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" %
-                                         (item.vnum, item.title, mobref.vnum))
+                                         (item.circle_vnum, item.title, mobref.circle_vnum))
             loc = make_location(mobref.room)
             loc.insert(mob, None)
             num_mobs += 1

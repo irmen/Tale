@@ -149,7 +149,7 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
                                                     '14': 'stab/stabs'}[extendedMobArg['BareHandAttack']]
 
             mob = SimpleNamespace(
-                vnum=int(vNumArg),
+                circle_vnum=int(vNumArg),
                 alignment=int(alignmentArg),
                 type=typeArg,
                 level=int(levelArg),
@@ -170,7 +170,7 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
                 affection=set(affectAttribs),
                 extended={k.lower(): v for k, v in extendedMobArg.items()}
             )
-            mobs[mob.vnum] = mob
+            mobs[mob.circle_vnum] = mob
             readstate = 'vNum'
 
 
