@@ -601,7 +601,7 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
 
 
 @wizcmd("vnum")
-def vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the vnum of a location (.) or an object/living,
     or when you provide a vnum as arg, show the object(s) with that vnum."""
     if not parsed.args:

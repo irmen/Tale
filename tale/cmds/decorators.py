@@ -46,6 +46,7 @@ def wizcmd(func):
 
     # NOTE: this code is VERY similar to the internal @wizcmd decorator in cmds/wizard.py
     # If changes are made, make sure to update both occurrences
+    # @todo merge both decorators to avoid code duplication
     @functools.wraps(func)
     def executewizcommand(player: player.Player, parsed: ParseResult, ctx: util.Context) \
             -> Callable[[player.Player, ParseResult, util.Context], None]:
@@ -56,6 +57,7 @@ def wizcmd(func):
     func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
     if cmdfunc_signature_valid(func):
         func.__doc__ = util.format_docstring(func.__doc__)
+        executewizcommand.__doc__ = func.__doc__
         return executewizcommand
     else:
         raise SyntaxError("invalid wizcmd function signature: " + func.__name__)

@@ -35,6 +35,7 @@ def cmd(command: str, *aliases: str) -> Callable:
     User code should use @cmd from cmds.decorators.
     """
     # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
+    # @todo merge both decorators to avoid code duplication
     def cmd2(func: Callable) -> Callable:
         if command in all_commands:
             raise ValueError("command defined more than once: " + command)
