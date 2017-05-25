@@ -393,7 +393,11 @@ class Item(MudObject):
         return items[0] if items else None
 
     def clone(self) -> Any:
-        """Create a copy of an existing Item. Only when it has an empty inventory (to avoid problems)"""
+        """
+        Create a copy of an existing Item.
+        Only allowed when it has an empty inventory (to avoid problems).
+        Caller has to make sure the resulting copy is moved to its proper destination location.
+        """
         try:
             if self.inventory_size > 0:
                 raise ValueError("can't clone something that has other stuff in it")

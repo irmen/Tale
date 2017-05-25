@@ -603,9 +603,11 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
 
 
 @wizcmd("vnum")
-def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the vnum of a location (.) or an object/living,
-    or when you provide a vnum as arg, show the object(s) with that vnum."""
+    or when you provide a vnum as arg, show the object(s) with that vnum.
+    Special arguments: items/livings/locations/exits to show the known vnums of that class of objects.
+    """
     if not parsed.args:
         raise ParseError("From what should I show the vnum?")
     name = parsed.args[0]
@@ -613,6 +615,30 @@ def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         obj = player.location
     elif parsed.who_order:
         obj = parsed.who_order[0]
+    elif name in {"items", "livings", "locations", "exits"}:
+        player.tell("All known " + name + ":", end=True)
+        count = 0
+        if name == "items":
+            for vnum, item in base.MudObject.all_items.items():
+                location = item.location.name if item.location else ""
+                player.tell("%d - %s  (%s)" % (vnum, item.name, location), end=True)
+                count += 1
+        elif name == "livings":
+            for vnum, living in base.MudObject.all_livings.items():
+                location = living.location.name if living.location else ""
+                is_player = "[player]" if isinstance(living, Player) else ""
+                player.tell("%d - %s  %s (%s)" % (vnum, living.name, is_player, location), end=True)
+                count += 1
+        elif name == "locations":
+            for vnum, loc in base.MudObject.all_locations.items():
+                player.tell("%d - %s" % (vnum, loc.name), end=True)
+                count += 1
+        elif name == "exits":
+            for vnum, exit in base.MudObject.all_exits.items():
+                player.tell("%d - %s, target: %s" % (vnum, exit.name, exit.target.name), end=True)
+                count += 1
+        player.tell("Count: %d" % count)
+        return
     else:
         try:
             vnum = int(parsed.args[0])
@@ -620,10 +646,12 @@ def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             raise ActionRefused(str(x))
         if vnum in base.MudObject.all_items:
             item = base.MudObject.all_items[vnum]
-            player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, item.location))
+            location = item.location.name if item.location else "<none>"
+            player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, location))
         elif vnum in base.MudObject.all_livings:
             living = base.MudObject.all_livings[vnum]
-            player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, living.location))
+            location = living.location.name if living.location else "<none>"
+            player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, location))
         elif vnum in base.MudObject.all_locations:
             player.tell("Location with vnum %d: %r" % (vnum, base.MudObject.all_locations[vnum]))
         elif vnum in base.MudObject.all_exits:
@@ -635,4 +663,36 @@ def do_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     player.tell("Vnum of %s = %d." % (obj, vn))
 
 
-# @todo add !vgo and !vspawn (see circle)
+@wizcmd("vgo")
+def do_go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Teleport to a specific location given by its vnum."""
+    if len(parsed.args) != 1:
+        raise ParseError("You have to give the rooms' vnum.")
+    try:
+        vnum = int(parsed.args[0])
+    except ValueError as x:
+        raise ActionRefused(str(x))
+    if vnum in base.MudObject.all_locations:
+        teleport_to(player, base.MudObject.all_locations[vnum])
+    else:
+        raise ActionRefused("No room with that circle-vnum exists.")
+
+
+@wizcmd("vclone")
+def do_clone_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Clone an existing item or monster with the given vnum."""
+    if len(parsed.args) != 1:
+        raise ParseError("You have to give the item or monster's vnum.")
+    try:
+        vnum = int(parsed.args[0])
+    except ValueError as x:
+        raise ActionRefused(str(x))
+    if vnum in base.MudObject.all_items:
+        base.MudObject.all_items[vnum].wiz_clone(player)
+    elif vnum in base.MudObject.all_livings:
+        living = base.MudObject.all_livings[vnum]
+        if isinstance(living, Player):
+            raise ActionRefused("You cannot clone %s." % living.objective)
+        living.wiz_clone(player)
+    else:
+        raise ActionRefused("Cloning objects other than items or livings, is not supported.")

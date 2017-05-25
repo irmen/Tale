@@ -995,6 +995,7 @@ class Driver(pubsub.Listener):
         return importlib.import_module("zones")
 
     def __load_saved_game(self, player: player.Player) -> Optional[player.Player]:
+        # @todo fix that all mudobjects are duplicated when loading a pickle save game.
         assert self.story.config.server_mode == GameMode.IF, "games can only be loaded in single player 'if' mode"
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
