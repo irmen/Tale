@@ -6,10 +6,12 @@ function setup()
     if(but.accessKeyLabel) { but.value += ' ('+but.accessKeyLabel+')'; }
 
     document.text_refresher = setTimeout(poll_text, 450);
+    document.smoothscrolling_busy = false;
     window.onbeforeunload = function(e) { return "Are you sure you want to abort the session and close the window?"; }
 }
 
-function poll_text() {
+function poll_text()
+{
     var txtdiv = document.getElementById("textframe");
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
@@ -37,7 +39,7 @@ function poll_text() {
                 document.getElementById("player-location").innerHTML = json["location"];
                 // document.getElementById("player-turns").innerHTML = json["turns"];
                 txtdiv.innerHTML += json["text"];
-                smoothscroll(txtdiv, 0);
+                if(!document.smoothscrolling_busy) smoothscroll(txtdiv, 0);
             }
         }
     }
@@ -52,24 +54,30 @@ function poll_text() {
     ajax.send(null);
 }
 
-function smoothscroll(div, previousTop) {
+function smoothscroll(div, previousTop)
+{
+    document.smoothscrolling_busy = true;
     if(div.scrollTop < div.scrollHeight) {
-        div.scrollTop += 2;
+        div.scrollTop += 6;
         if(div.scrollTop > previousTop) {
-            setTimeout(function(){smoothscroll(div, div.scrollTop);}, 4);
+            window.requestAnimationFrame(function(){smoothscroll(div, div.scrollTop);});
+            // setTimeout(function(){smoothscroll(div, div.scrollTop);}, 10);
+            return;
         }
     }
+    document.smoothscrolling_busy = false;
 }
 
 
-function submit_cmd() {
+function submit_cmd()
+{
     var cmd_input = document.getElementById("input-cmd");
     var ajax = new XMLHttpRequest();
     ajax.onreadystatechange = function() {
         var DONE = this.DONE || 4;
         if(this.readyState==DONE) {
             clearTimeout(document.text_refresher);
-            document.text_refresher = setTimeout(poll_text, 40);
+            document.text_refresher = setTimeout(poll_text, 80);
         }
     }
     ajax.open("POST", "input", true);
@@ -81,7 +89,8 @@ function submit_cmd() {
     return false;
 }
 
-function autocomplete_cmd() {
+function autocomplete_cmd()
+{
     var cmd_input = document.getElementById("input-cmd");
     if(cmd_input.value) {
         var ajax = new XMLHttpRequest();
@@ -89,7 +98,7 @@ function autocomplete_cmd() {
             var DONE = this.DONE || 4;
             if(this.readyState==DONE) {
                 clearTimeout(document.text_refresher);
-                document.text_refresher = setTimeout(poll_text, 40);
+                document.text_refresher = setTimeout(poll_text, 80);
             }
         }
         ajax.open("POST", "input", true);
@@ -100,7 +109,8 @@ function autocomplete_cmd() {
     return false;
 }
 
-function quit_clicked() {
+function quit_clicked()
+{
     if(confirm("Quitting like this will abort your game.\nYou will lose your progress. Are you sure?")) {
         window.onbeforeunload = null;
         document.location="quit";

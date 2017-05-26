@@ -60,6 +60,11 @@ def all_registered_commands() -> Iterable[Tuple[str, Callable, Optional[str]]]:
         yield command, func, None
 
 
+def clear_registered_commands():
+    _all_commands.clear()
+    _all_wizard_commands.clear()
+
+
 def cmd(command: str, *aliases: str) -> Callable:
     """
     Decorator to define a parser command function and its verb(s).

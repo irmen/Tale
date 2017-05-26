@@ -127,6 +127,7 @@ class Driver(pubsub.Listener):
         self.commands = Commands()
         for verb, func, privilege in cmds.all_registered_commands():
             self.commands.add(verb, func, privilege)
+        cmds.clear_registered_commands()
         self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
         self.zones = None       # type: ModuleType
         self.moneyfmt = None    # type: util.MoneyFormatter
@@ -183,8 +184,14 @@ class Driver(pubsub.Listener):
             ld = pathlib.Path(loader.get_filename()).parent.parent.resolve()        # type: ignore
             sd = pathlib.Path(inspect.getabsfile(story)).parent       # type: ignore   # mypy doesn't recognise getabsfile?
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
-                import cmds as story_cmds
-                story_cmds.register_all(self.commands)  # XXX
+                cmds.clear_registered_commands()   # making room for the story's commands
+                import cmds as story_cmds      # import the cmd package from the story
+                for verb, func, privilege in cmds.all_registered_commands():
+                    try:
+                        self.commands.add(verb, func, privilege)
+                    except ValueError:
+                        self.commands.override(verb, func, privilege)
+                cmds.clear_registered_commands()
         self.commands.adjust_available_commands(self.story.config.server_mode)
         self.game_clock = util.GameDateTime(self.story.config.epoch or self.server_started, self.story.config.gametime_to_realtime)
         self.moneyfmt = None

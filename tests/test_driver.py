@@ -144,20 +144,6 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual(datetime.timedelta(seconds=58), result)
 
 
-class TestVarious(unittest.TestCase):
-    def testCommandsLoaded(self):
-        self.assertGreater(len(tale.cmds._all_commands), 1)
-        self.assertGreater(len(tale.cmds._all_wizard_commands), 1)
-
-    def testEnableNotifyActionSetAndDocstring(self):
-        for cmd in tale.cmds._all_commands.values():
-            self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
-            self.assertTrue(cmd.enable_notify_action in (True, False))
-        for cmd in tale.cmds._all_wizard_commands.values():
-            self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
-            self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
-
-
 @cmd("test1")
 @disabled_in_gamemode(GameMode.IF)
 def func1(player, parsed, ctx):
