@@ -413,6 +413,25 @@ class TestVfs(unittest.TestCase):
         self.assertEqual(487, len(resource.data))
         self.assertEqual(78, resource[2])
         self.assertEqual(b"\x89PNG", resource.data[0:4])
+        # text file but without proper suffix, so read as binary
+        resource = vfs["tests/files/readme"]
+        self.assertEqual("application/octet-stream", resource.mimetype)
+        self.assertFalse(resource.is_text)
+        self.assertEqual(471, len(resource.data))
+
+    def test_vfs_everythingtext(self):
+        vfs = VirtualFileSystem(root_path=".", everythingtext=True)
+        # text file
+        resource = vfs["tests/files/test.txt"]
+        self.assertEqual(441, len(resource.text))
+        # text file without proper suffix
+        resource2 = vfs["tests/files/readme"]
+        self.assertEqual("text/plain", resource2.mimetype)
+        self.assertEqual(441, len(resource2.text))
+        self.assertEqual(resource.text, resource2.text)
+        # binary file, but is read as text
+        with self.assertRaises(UnicodeError):
+            resource = vfs["tests/files/image.png"]
 
     def test_vfs_read_compressed(self):
         vfs = VirtualFileSystem(root_path=".", readonly=True)

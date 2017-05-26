@@ -175,11 +175,11 @@ def parse_file(content: List[str]) -> None:
 
 
 def parse_all() -> None:
-    vfs = VirtualFileSystem(root_package="zones.circledata")
-    for filename in vfs["world/mob/index"].data.decode("ascii").splitlines():
+    vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+    for filename in vfs["world/mob/index"].text.splitlines():
         if filename == "$":
             break
-        data = vfs["world/mob/"+filename].data.decode("utf-8").splitlines()
+        data = vfs["world/mob/"+filename].text.splitlines()
         parse_file(data)
 
 

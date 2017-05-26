@@ -85,12 +85,14 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
     It automatically returns the contents of a compressed version of a requested file if the file
     itself doesn't exist but there is a compressed version of it available.
     """
-    def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None, readonly: bool=True) -> None:
+    def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None,
+                 readonly: bool=True, everythingtext: bool=False) -> None:
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
         if not readonly and not root_path:
             raise ValueError("Read-write vfs requires path string")
         self.readonly = readonly
+        self.everythingtext = everythingtext
         if root_path:
             self.root = os.path.abspath(os.path.normpath(str(root_path)))
             self.use_pkgutil = False
@@ -134,6 +136,8 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         phys_path = self.validate_path(name)
         mimetype, compressor = mimetypes.guess_type(name, False)
         mimetype = mimetype or "application/octet-stream"
+        if self.everythingtext:
+            mimetype = "text/plain"
         encoding = None
         mode = "rb"
         if not compressor and is_text(mimetype):
