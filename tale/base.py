@@ -42,7 +42,7 @@ from weakref import WeakValueDictionary
 from collections import defaultdict
 from textwrap import dedent
 from types import ModuleType
-from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
+from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
 
 from . import lang
 from . import mud_context
@@ -53,23 +53,11 @@ from . import verbdefs
 from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError, UnknownVerbException, NonSoulVerb
 from .parseresult import ParseResult
 
-__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location",
-           "Weapon", "Key", "heartbeat", "Soul"]
+__all__ = ["MudObject", "Armour", 'Container', "Door", "Exit", "Item", "Living", "Stats", "Location", "Weapon", "Key", "Soul"]
 
 pending_actions = pubsub.topic("driver-pending-actions")
 pending_tells = pubsub.topic("driver-pending-tells")
 async_dialogs = pubsub.topic("driver-async-dialogs")
-
-
-def heartbeat(klass: Type) -> Type:
-    """
-    Decorator to use on a class to make it have a heartbeat.
-    Use sparingly as it is less efficient than using a deferred, because the driver
-    has to call all heartbeats every tick even though they do nothing yet.
-    With deferreds, the driver only calls a deferred at the time it is needed.
-    """
-    klass._register_heartbeat = True
-    return klass
 
 
 class MudObject:
@@ -128,16 +116,12 @@ class MudObject:
         # any custom verbs that need to be recognised (verb->docstring mapping),
         # verb handling is done via handle_verb() callbacks.
         self.verbs = {}  # type: Dict[str, str]
-        if getattr(self, "_register_heartbeat", False):
-            # one way of setting this attribute is by using the @heartbeat decorator
-            # @todo make this register heartbeat mechanism somewhat nicer (without the magic attribute?)
-            self.register_heartbeat()
         self.init()
 
     def init(self) -> None:
         """
         Secondary initialization/customization. Invoked after all required initialization has been done.
-        You can easily override this in a subclass.
+        You can easily override this in a subclass. It is not needed to call the MudObject super class init().
         """
         pass
 
@@ -196,7 +180,6 @@ class MudObject:
     def destroy(self, ctx: util.Context) -> None:
         """Common cleanup code that needs to be called when the object is destroyed"""
         assert isinstance(ctx, util.Context)
-        self.unregister_heartbeat()
         mud_context.driver.remove_deferreds(self)
 
     def wiz_clone(self, actor: 'Living') -> 'MudObject':
@@ -210,18 +193,6 @@ class MudObject:
     def show_inventory(self, actor: 'Living', ctx: util.Context) -> None:
         """show the object's inventory to the actor"""
         raise ActionRefused("You can't look inside of that.")
-
-    def register_heartbeat(self) -> None:
-        """register this object with the driver to receive heartbeats"""
-        mud_context.driver.register_heartbeat(self)
-
-    def unregister_heartbeat(self) -> None:
-        """tell the driver to forget about this object for heartbeats"""
-        mud_context.driver.unregister_heartbeat(self)
-
-    def heartbeat(self, ctx: util.Context) -> None:
-        # not automatically called, only if your object registered with the driver
-        pass
 
     def activate(self, actor: 'Living') -> None:
         # called from the activate command, override if your object needs to act on this.
@@ -278,6 +249,10 @@ class Item(MudObject):
         self.weight = 0.0  # some abstract unit
 
     def init(self) -> None:
+        """
+        Secondary initialization/customization. Invoked after all required initialization has been done.
+        You can easily override this in a subclass. It is not needed to call the Item super class init().
+        """
         pass
 
     def __contains__(self, item: 'Item') -> bool:
@@ -1140,7 +1115,6 @@ class Container(Item):
     You can test for containment with 'in': item in bag
     """
     def init(self) -> None:
-        super().init()
         self.__inventory = set()   # type: Set[Item]
 
     def init_inventory(self, items: Iterable[Item]) -> None:
@@ -1442,7 +1416,6 @@ class Door(Exit):
 class Key(Item):
     """A key which has a unique code. It can be used to open the matching Door."""
     def init(self) -> None:
-        super().init()
         self.key_code = None  # type: str
 
     def key_for(self, door: Door=None, code: str=None) -> None:

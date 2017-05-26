@@ -344,8 +344,6 @@ def do_debug(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
     for varname, value in sorted(vars(obj).items()):
         txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
-    if obj in ctx.driver.heartbeat_objects:
-        txt.append("%s receives heartbeats." % obj.name)
     player.tell("\n".join(txt), format=False)
 
 
@@ -402,7 +400,6 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     else:
         txt.append("Game time:      %s" % ctx.clock)
     txt.append("Players:        %d" % len(ctx.driver.all_players))
-    txt.append("Heartbeats:     %d" % len(driver.heartbeat_objects))
     txt.append("Deferreds:      %d" % len(driver.deferreds))
     txt.append("Loop tick:      %.1f sec" % config.server_tick_time)
     if config.server_tick_method == TickMethod.TIMER:
@@ -425,11 +422,6 @@ def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     driver = ctx.driver
     config = ctx.config
     player.tell("<bright>Pending actions overview.</>", end=True)
-    player.tell("Heartbeat objects (%d):" % len(driver.heartbeat_objects))
-    txt = []
-    for hb in driver.heartbeat_objects:
-        txt.append("  " + str(hb))
-    player.tell("\n".join(txt), format=False)
     num_shown = min(50, len(driver.deferreds))
     player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" %
                 (len(driver.deferreds), num_shown, config.server_tick_time), end=True)

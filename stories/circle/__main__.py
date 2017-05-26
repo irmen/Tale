@@ -3,7 +3,7 @@ This __main__.py file is used to make it very easy to launch stories as a zip fi
 If you zip up the story's directory as "story.zip", you can then simply:
 
     $ python story.zip
-    
+
 to launch the game. (as long as you have Tale installed)
 """
 import os
@@ -14,6 +14,7 @@ except ImportError as x:
     print("Error loading Tale: ", x, file=sys.stderr)
     print("To run this game you have to install the Tale library.\nUsually 'pip install tale' should be enough.\n", file=sys.stderr)
     raise SystemExit
+
 
 # insert path to this game and any necessary command line options (edit these if needed)
 gamelocation = sys.path[0] or os.path.dirname(__file__)

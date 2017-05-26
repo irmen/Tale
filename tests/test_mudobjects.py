@@ -1050,7 +1050,6 @@ class TestMudObject(unittest.TestCase):
             pass
         x = Item("name", "title", "description")
         x.init()
-        x.heartbeat(None)
         with self.assertRaises(ActionRefused):
             x.activate(None)
         with self.assertRaises(ActionRefused):

@@ -153,7 +153,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             parts.insert(0, os.path.dirname(rootmodule.__file__))
             name = os.path.join(*parts)
             try:
-                data = loader.get_data(name)
+                data = loader.get_data(name)    # type: ignore
                 if not data:
                     raise FileNotFoundError(errno.ENOENT, name)
             except FileNotFoundError as x:
@@ -171,7 +171,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
                 if not data:
                     raise FileNotFoundError(errno.ENOENT, name)
             try:
-                mtime = loader.path_stats(name)["mtime"]
+                mtime = loader.path_stats(name)["mtime"]        # type: ignore
             except AttributeError:
                 mtime = 0.0   # not all loaders support getting the modification time...
             if encoding:

@@ -11,7 +11,6 @@ Currently defined pubsub topics used by the Tale driver:
 
   "driver-pending-actions"
       Events are callables to be executed in the server tick loop.
-      (don't confuse this with object heartbeats).
       You can subscribe but only the driver may execute the events.
 
   "driver-pending-tells"

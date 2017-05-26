@@ -158,7 +158,7 @@ def parse_all() -> None:
     for filename in vfs["world/zon/index"].text.splitlines():
         if filename == "$":
             break
-        data = vfs["world/zon/"+filename].text.splitlines()
+        data = vfs["world/zon/" + filename].text.splitlines()
         parse_file(data)
 
 

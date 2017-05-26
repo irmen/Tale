@@ -11,8 +11,8 @@ __version__ = "3.2.dev0"
 
 
 class _MudContext:
-    driver = None  # type: Any
-    config = None  # type: Any
+    driver = None      # type: Any
+    config = None      # type: Any
     resources = None   # type: Any
 
 

@@ -25,7 +25,7 @@ import appdirs
 
 from . import __version__ as tale_version_str
 from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs, vfs
-from .base import Stats, Living, Location, Exit, MudObject
+from .base import Stats, Living, Location, Exit
 from .parseresult import ParseResult
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY, iobase
@@ -118,7 +118,6 @@ class Driver(pubsub.Listener):
     Handles main game loop, player connections, and loading/saving of game state.
     """
     def __init__(self) -> None:
-        self.heartbeat_objects = set()    # type: Set[MudObject]
         self.unbound_exits = []    # type: List[Exit]
         self.deferreds = []   # type: List[Deferred]  # heapq
         self.deferreds_lock = threading.Lock()
@@ -182,6 +181,7 @@ class Driver(pubsub.Listener):
             sd = pathlib.Path(inspect.getabsfile(story)).parent       # type: ignore   # mypy doesn't recognise getabsfile?
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                 cmds.clear_registered_commands()   # making room for the story's commands
+                # noinspection PyUnresolvedReferences
                 import cmds as story_cmds      # import the cmd package from the story
                 for verb, func, privilege in cmds.all_registered_commands():
                     try:
@@ -834,17 +834,14 @@ class Driver(pubsub.Listener):
         """
         Do everything that the server needs to do every tick (timer configurable in story)
         1) game clock
-        2) heartbeats
-        3) deferreds
-        4) pending pubsub events
-        5) write buffered output
-        6) verify validity and idle state of connected players
-        7) remove idle wiretaps
+        2) deferreds
+        3) pending pubsub events
+        4) write buffered output
+        5) verify validity and idle state of connected players
+        6) remove idle wiretaps
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.story.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.story.config, None)
-        for obj in self.heartbeat_objects:
-            obj.heartbeat(ctx)
         while self.deferreds:
             deferred = None
             with self.deferreds_lock:
@@ -1028,7 +1025,6 @@ class Driver(pubsub.Listener):
             self.all_players = {player.name: conn}
             self.deferreds = state["deferreds"]
             self.game_clock = state["clock"]
-            self.heartbeat_objects = state["heartbeats"]
             self.story.config = state["config"]
             self.waiting_for_input = {}   # can't keep the old waiters around
             player.tell("\n")
@@ -1116,7 +1112,6 @@ class Driver(pubsub.Listener):
             "player": player,
             "deferreds": self.deferreds,
             "clock": self.game_clock,
-            "heartbeats": self.heartbeat_objects,
             "config": self.story.config
         }
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
@@ -1125,12 +1120,6 @@ class Driver(pubsub.Listener):
         if self.story.config.display_gametime:
             player.tell("Game time: %s" % self.game_clock)
         player.tell("\n")
-
-    def register_heartbeat(self, mudobj: MudObject) -> None:
-        self.heartbeat_objects.add(mudobj)
-
-    def unregister_heartbeat(self, mudobj: MudObject) -> None:
-        self.heartbeat_objects.discard(mudobj)
 
     def register_exit(self, exit: Exit) -> None:
         if not exit.target:
@@ -1141,12 +1130,13 @@ class Driver(pubsub.Listener):
         Register a deferred callable action (optionally with arguments).
         The vargs and the kwargs all must be serializable.
         Note that the due time is datetime.datetime *in game time* (not real time!)
-        when the deferred should trigger. It can also be a number, meaning the number
+        when the deferred should trigger. It can also be a floating point number, meaning the number
         of real-time seconds after the current time.
         Also note that the deferred gets a kwarg 'ctx' set to a Context object, if it has
         a 'ctx' argument in its signature. (If not, that's okay too)
         Receiving the context is often useful, for instance you can register a new
         deferred on the ctx.driver without having to access a global driver object.
+        Triggering a deferred can not occur sooner than the server tick period!
         """
         assert callable(action)
         if isinstance(due, datetime.datetime):
@@ -1240,7 +1230,6 @@ class Commands:
                     self.no_soul_parsing.add(cmd)
 
 
-@base.heartbeat
 class LimboReaper(base.Living):
     """The Grim Reaper hangs about in Limbo, and makes sure no one stays there for too long."""
     def __init__(self) -> None:
@@ -1251,6 +1240,7 @@ class LimboReaper(base.Living):
             short_description="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
+        mud_context.driver.defer(0.5, self.do_reap_souls)  # @todo deferred bootstrapping decorator?
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb == "say":
@@ -1258,7 +1248,7 @@ class LimboReaper(base.Living):
         else:
             actor.tell("%s stares blankly at you." % lang.capital(self.title))
 
-    def heartbeat(self, ctx: util.Context) -> None:
+    def do_reap_souls(self, ctx: util.Context) -> None:
         # consider all livings currently in Limbo or having their location set to Limbo
         if self.location is not base._limbo:
             # we somehow got misplaced, teleport back to limbo
@@ -1292,10 +1282,10 @@ class LimboReaper(base.Living):
             elif duration >= 60 and shown < 3:
                 candidate.tell(self.title + " menacingly raises his scythe!")
                 shown = 3
-            elif duration >= 62 and shown < 4:
+            elif duration >= 63 and shown < 4:
                 candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
                 shown = 4
-            elif duration >= 63 and "wizard" not in candidate.privileges:
+            elif duration >= 64 and "wizard" not in candidate.privileges:
                 try:
                     conn = ctx.driver.all_players[candidate.name]
                 except KeyError:
@@ -1303,6 +1293,7 @@ class LimboReaper(base.Living):
                 else:
                     ctx.driver._disconnect_mud_player(conn)
             self.candidates[candidate] = (first_seen, shown)
+        ctx.driver.defer(3, self.do_reap_souls)  # keep on doing this about every 3 seconds
 
 
 if __name__ == "__main__":

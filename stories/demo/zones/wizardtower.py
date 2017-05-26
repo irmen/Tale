@@ -7,8 +7,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 
-from tale import lang, util
-from tale.base import Location, Exit, Item, heartbeat, Living
+from tale import lang, util, mud_context
+from tale.base import Location, Exit, Item, Living
 from tale.driver import Driver
 
 
@@ -26,16 +26,19 @@ table = Item("table", "oak table", "A large dark table with a lot of cracks in i
 key = Item("key", "rusty key", "An old rusty key without a label.")
 
 
-@heartbeat
 class Drone(Living):
-    def heartbeat(self, ctx: util.Context) -> None:
+    def init(self):
+        mud_context.driver.defer(1, self.do_whizz)    # @todo deferred bootstrapping decorator?
+
+    def do_whizz(self, ctx: util.Context) -> None:
         rand = random.random()
-        if rand < 0.07:
+        if rand < 0.14:
             self.do_socialize("twitch erra")
-        elif rand < 0.14:
+        elif rand < 0.28:
             self.do_socialize("rotate random")
-        elif rand < 0.21:
+        elif rand < 0.40:
             self.location.tell("%s hums softly." % lang.capital(self.title))
+        ctx.driver.defer(2, self.do_whizz)
 
 
 drone = Drone("drone", "n", race="bot", title="mindless drone",

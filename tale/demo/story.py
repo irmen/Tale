@@ -30,7 +30,7 @@ class Story(StoryBase):
     config.player_money = 15.5
     config.money_type = MoneyType.MODERN
     config.server_tick_method = TickMethod.TIMER
-    config.server_tick_time = 1.0
+    config.server_tick_time = 0.5
     config.gametime_to_realtime = 5
     config.display_gametime = True
     config.startlocation_player = "house.livingroom"

@@ -367,7 +367,7 @@ def parse_all() -> None:
     for filename in vfs["world/obj/index"].text.splitlines():
         if filename == "$":
             break
-        data = vfs["world/obj/"+filename].text.splitlines()
+        data = vfs["world/obj/" + filename].text.splitlines()
         parse_file(data)
 
 
