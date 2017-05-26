@@ -10,8 +10,7 @@ import itertools
 import random
 from typing import Iterable, List, Dict, Generator, Union
 
-from . import abbreviations
-from .decorators import cmd, disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
+from . import abbreviations, cmd, disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
 from .. import base
 from .. import lang
 from .. import races

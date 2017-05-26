@@ -14,7 +14,7 @@ import sys
 from types import ModuleType
 from typing import Generator
 
-from .decorators import wizcmd, disabled_in_gamemode
+from . import wizcmd, disabled_in_gamemode
 from .. import base, lang, util, pubsub, __version__
 from ..errors import ParseError, ActionRefused, NonSoulVerb
 from ..parseresult import ParseResult

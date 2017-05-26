@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 from zones import make_location, make_item, make_mob
 
 from tale import lang, util
-from tale.cmds.decorators import wizcmd
+from tale.cmds import wizcmd
 from tale.cmds.wizard import teleport_to
 from tale.errors import ActionRefused, ParseError
 from tale.parseresult import ParseResult

@@ -15,7 +15,7 @@ import tale.base
 import tale.demo
 import tale.driver as the_driver
 import tale.util
-from tale.cmds.decorators import cmd, wizcmd, disabled_in_gamemode
+from tale.cmds import cmd, wizcmd, disabled_in_gamemode
 from tale.story import GameMode
 from tests.supportstuff import Thing, FakeDriver
 

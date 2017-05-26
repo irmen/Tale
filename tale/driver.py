@@ -125,7 +125,8 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.server_loop_durations = collections.deque(maxlen=10)    # type: MutableSequence[float]
         self.commands = Commands()
-        cmds.register_all(self.commands)
+        for verb, func, privilege in cmds.all_registered_commands():
+            self.commands.add(verb, func, privilege)
         self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
         self.zones = None       # type: ModuleType
         self.moneyfmt = None    # type: util.MoneyFormatter
@@ -183,7 +184,7 @@ class Driver(pubsub.Listener):
             sd = pathlib.Path(inspect.getabsfile(story)).parent       # type: ignore   # mypy doesn't recognise getabsfile?
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                 import cmds as story_cmds
-                story_cmds.register_all(self.commands)
+                story_cmds.register_all(self.commands)  # XXX
         self.commands.adjust_available_commands(self.story.config.server_mode)
         self.game_clock = util.GameDateTime(self.story.config.epoch or self.server_started, self.story.config.gametime_to_realtime)
         self.moneyfmt = None
