@@ -149,21 +149,27 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
             parts.insert(0, os.path.dirname(rootmodule.__file__))
             name = os.path.join(*parts)
             try:
-                mtime = loader.path_stats(name)["mtime"]        # type: ignore
+                data = loader.get_data(name)
+                if not data:
+                    raise FileNotFoundError(errno.ENOENT, name)
             except FileNotFoundError as x:
                 # if the file cannot be found directly, attempt to read a compressed version of it
                 for suffix in mimetypes.encodings_map:
                     try:
-                        _ = loader.path_stats(name + suffix)    # type: ignore
+                        data = loader.get_data(name + suffix)    # type: ignore
+                        if data:
+                            return self[original_name + suffix]
                     except FileNotFoundError:
                         pass
-                    else:
-                        return self[original_name + suffix]
                 raise x
             else:
                 data = loader.get_data(name)   # type: ignore
                 if not data:
                     raise FileNotFoundError(errno.ENOENT, name)
+            try:
+                mtime = loader.path_stats(name)["mtime"]
+            except AttributeError:
+                mtime = 0.0   # not all loaders support getting the modification time...
             if encoding:
                 with io.StringIO(data.decode(encoding), newline=None) as f_s:
                     return Resource(name, f_s.read(), mimetype, mtime)

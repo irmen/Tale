@@ -181,7 +181,7 @@ class Driver(pubsub.Listener):
         # check for existence of cmds package in the story root
         loader = pkgutil.get_loader("cmds")
         if loader:
-            ld = pathlib.Path(loader.get_filename()).parent.parent.resolve()        # type: ignore
+            ld = pathlib.Path(loader.get_filename("cmds")).parent.parent.resolve()        # type: ignore
             sd = pathlib.Path(inspect.getabsfile(story)).parent       # type: ignore   # mypy doesn't recognise getabsfile?
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                 cmds.clear_registered_commands()   # making room for the story's commands
