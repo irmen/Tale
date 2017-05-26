@@ -5,39 +5,31 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from tale import util
-from tale.cmds.decorators import wizcmd, cmd
-from tale.driver import Commands
 from tale.parseresult import ParseResult
 from tale.player import Player
+from tale.util import Context
+from tale.cmds.decorators import wizcmd, cmd
 
 
-def register_all(cmd_processor: Commands) -> None:
-    cmd_processor.add("demo", do_demo, "wizard")
-    cmd_processor.add("demo2", do_demo2)
-    cmd_processor.add("score", do_score)
-    cmd_processor.override("coin", do_coin)
-
-
-@wizcmd
-def do_demo(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+@wizcmd("demo")
+def do_demo(player: Player, parsed: ParseResult, ctx: Context) -> None:
     """demo wizard command"""
     player.tell("DEMO WIZARD COMMAND")
 
 
-@cmd
-def do_demo2(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+@cmd("demo2")
+def do_demo2(player: Player, parsed: ParseResult, ctx: Context) -> None:
     """demo command"""
     player.tell("DEMO COMMAND")
 
 
-@cmd
-def do_coin(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
-    """coin override"""
+@cmd("coin")
+def do_coin(player: Player, parsed: ParseResult, ctx: Context) -> None:
+    """coin command that overwrites the default version"""
     player.tell("COIN OVERRIDE")
 
 
-@cmd
-def do_score(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+@cmd("score")
+def do_score(player: Player, parsed: ParseResult, ctx: Context) -> None:
     """Show your current score in the game."""
     player.tell("You have taken %d turns so far." % player.turns)

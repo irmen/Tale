@@ -5,10 +5,11 @@ Unit tests for commands definitions and decorators
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import pytest
+import inspect
 from typing import Generator
+import tale.cmds
 from tale.cmds.decorators import *
-from tale.cmds.normal import cmd as builtin_cmd
-from tale.cmds.wizard import wizcmd as builtin_wizcmd
+from tale.cmds.decorators import cmdfunc_signature_valid
 from tale.story import GameMode
 from tale.player import Player
 from tale.parseresult import ParseResult
@@ -57,27 +58,27 @@ class TestCommandDecorators:
 
     def test_decorators_arg_check(self):
         with pytest.raises(TypeError):
-            cmd("foo")
+            cmd()
         with pytest.raises(TypeError):
-            wizcmd("foo")
+            wizcmd()
         with pytest.raises(TypeError):
-            builtin_cmd()
+            cmd(44)
         with pytest.raises(TypeError):
-            builtin_wizcmd()
+            wizcmd(44)
         with pytest.raises(TypeError):
-            builtin_cmd(44)
+            cmd("name", "alias1", 42)
         with pytest.raises(TypeError):
-            builtin_cmd("name", "alias1", 44)
-        with pytest.raises(TypeError):
-            builtin_wizcmd(44)
-        with pytest.raises(TypeError):
-            builtin_wizcmd("name", "alias1", 44)
+            wizcmd("name", "alias1", 42)
 
     def test_cmd_decorator(self):
+        x = cmd("something")
+        assert inspect.isfunction(x)
+        x = cmd("something", "alias1", "alias2")
+        assert inspect.isfunction(x)
         with pytest.raises(TaleError):
             def wrongfunc():
                 pass
-            cmd(wrongfunc)
+            cmd("wrongfunc")(wrongfunc)
 
         def cmdfunc(player: Player, parsed: ParseResult, ctx: Context) -> None:
             """some docstring"""
@@ -87,16 +88,22 @@ class TestCommandDecorators:
             """some docstring"""
             yield 42
 
-        result = cmd(cmdfunc)
+        result = cmd("cmdfunc")(cmdfunc)
         assert not result.is_generator
-        result = cmd(cmdgenerator)
+        result = cmd("cmdgenerator")(cmdgenerator)
         assert result.is_generator
+        assert "cmdfunc" in tale.cmds._all_commands
+        assert "cmdfunc" not in tale.cmds._all_wizard_commands
 
     def test_wizcmd_decorator(self):
+        x = wizcmd("something")
+        assert inspect.isfunction(x)
+        x = wizcmd("something", "alias1", "alias2")
+        assert inspect.isfunction(x)
         with pytest.raises(TaleError):
             def wrongfunc():
                 pass
-            wizcmd(wrongfunc)
+            wizcmd("wrongfunc")(wrongfunc)
 
         def wizfunc(player: Player, parsed: ParseResult, ctx: Context) -> None:
             """some docstring"""
@@ -106,7 +113,22 @@ class TestCommandDecorators:
             """some docstring"""
             yield 42
 
-        result = wizcmd(wizfunc)
+        result = wizcmd("wizfunc")(wizfunc)
         assert not result.is_generator
-        result = wizcmd(wizgenerator)
+        result = wizcmd("wizgenerator")(wizgenerator)
         assert result.is_generator
+        assert "!wizfunc" in tale.cmds._all_wizard_commands
+        assert "wizfunc" not in tale.cmds._all_wizard_commands
+        assert "!wizfunc" not in tale.cmds._all_commands
+        assert "wizfunc" not in tale.cmds._all_commands
+
+    def test_no_duplicates(self):
+        def testfunc(player: Player, parsed: ParseResult, ctx: Context) -> None:
+            """some docstring"""
+            pass
+        cmd("name1")(testfunc)
+        with pytest.raises(ValueError) as x:
+            cmd("name1")(testfunc)
+        assert str(x.value) == "command defined more than once: name1"
+        wizcmd("name1")(testfunc)
+        wizcmd("name1")(testfunc)

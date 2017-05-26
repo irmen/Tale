@@ -10,19 +10,12 @@ from zones import make_location, make_item, make_mob
 from tale import lang, util
 from tale.cmds.decorators import wizcmd
 from tale.cmds.wizard import teleport_to
-from tale.driver import Commands
 from tale.errors import ActionRefused, ParseError
 from tale.parseresult import ParseResult
 from tale.player import Player
 
 
-def register_all(cmd_processor: Commands) -> None:
-    cmd_processor.add("!cvgo", go_vnum, "wizard")
-    cmd_processor.add("!cvnum", show_vnum, "wizard")
-    cmd_processor.add("!cvspawn", spawn_vnum, "wizard")
-
-
-@wizcmd
+@wizcmd("cvgo")
 def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Go to a specific circlemud room, given by its circle-vnum."""
     if len(parsed.args) != 1:
@@ -35,7 +28,7 @@ def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     teleport_to(player, room)
 
 
-@wizcmd
+@wizcmd("cvnum")
 def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the circle-vnum of a location (.) or an object/living,
     or when you provide a circle-vnum as arg, show the object(s) with that circle-vnum."""
@@ -73,7 +66,7 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         player.tell(str(obj) + " has no circle-vnum.")
 
 
-@wizcmd
+@wizcmd("cvspawn")
 def spawn_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Spawn an item or monster with the given circle-vnum (or both if the circle-vnum is the same)."""
     if len(parsed.args) != 1:

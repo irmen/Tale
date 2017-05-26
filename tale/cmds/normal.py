@@ -6,58 +6,24 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-import inspect
 import itertools
 import random
-from typing import Callable, Iterable, List, Dict, Generator, Tuple, Union
+from typing import Iterable, List, Dict, Generator, Union
 
-from .decorators import disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse, cmdfunc_signature_valid
+from . import abbreviations
+from .decorators import cmd, disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
 from .. import base
 from .. import lang
 from .. import races
 from .. import util
+from .. import cmds
 from ..accounts import MudAccounts
-from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse, TaleError
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
 from ..items.basic import GameClock
 from ..parseresult import ParseResult
 from ..player import Player
 from ..story import GameMode
 from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
-
-all_commands = {}   # type: Dict[str, Callable]
-cmds_aliases = {}   # type: Dict[str, Tuple[str, ...]]  # commands -> tuple of one or more aliases
-abbreviations = {}   # type: Dict[str, str]  # will be injected
-
-
-def cmd(command: str, *aliases: str) -> Callable:
-    """
-    (Internal) decorator to add the command to the global dictionary of commands.
-    User code should use @cmd from cmds.decorators.
-    """
-    # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
-    # @todo merge both decorators to avoid code duplication
-    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
-        raise TypeError("command name and aliases should be strings")
-
-    def cmd2(func: Callable) -> Callable:
-        if command in all_commands:
-            raise ValueError("command defined more than once: " + command)
-        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore # contains async yields?
-        if cmdfunc_signature_valid(func):
-            func.__doc__ = util.format_docstring(func.__doc__)
-            func.is_tale_command_func = True   # type: ignore
-            if not hasattr(func, "enable_notify_action"):
-                func.enable_notify_action = True   # type: ignore  # by default the normal commands should be passed to notify_action
-            all_commands[command] = func
-            cmds_aliases[command] = aliases
-            for alias in aliases:
-                if alias in all_commands:
-                    raise ValueError("command defined more than once: " + alias)
-                all_commands[alias] = func
-            return func
-        else:
-            raise TaleError("invalid cmd function signature or missing docstring: " + func.__name__)
-    return cmd2
 
 
 @cmd("inventory")
@@ -576,7 +542,7 @@ def do_help(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     else:
         all_verbs = ctx.driver.current_verbs(player)
         verb_help = {}   # type: Dict[str, List[str]]  # verb -> [list of abbrs]
-        aliases = frozenset(itertools.chain(*cmds_aliases.values()))
+        aliases = frozenset(itertools.chain(*cmds.cmds_aliases.values()))
         for verb in all_verbs:
             if verb not in aliases:
                 verb_help[verb] = []

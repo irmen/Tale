@@ -69,6 +69,7 @@ class TemporaryGameEnd(Location):
         player.tell_text_file(mud_context.resources["messages/completion_success.txt"])
         raise StoryCompleted
 
+
 temp_game_end = TemporaryGameEnd("Temporary Game Ending", "That is weird, you seem to fall trough the world...")
 end_exit = Exit(["hatch"], temp_game_end, "There's an ominous looking open hatch here.",
                 "The hatch is open, and you can easily go through. However there seems to be only endless darkness behind it.")

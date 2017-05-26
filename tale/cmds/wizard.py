@@ -6,63 +6,20 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import datetime
-import functools
 import gc
 import importlib
 import inspect
 import platform
 import sys
 from types import ModuleType
-from typing import Dict, Callable, Generator
+from typing import Generator
 
-from .decorators import disabled_in_gamemode, cmdfunc_signature_valid
+from .decorators import wizcmd, disabled_in_gamemode
 from .. import base, lang, util, pubsub, __version__
-from ..errors import SecurityViolation, ParseError, ActionRefused, NonSoulVerb, TaleError
+from ..errors import ParseError, ActionRefused, NonSoulVerb
 from ..parseresult import ParseResult
 from ..player import Player
 from ..story import *
-
-all_commands = {}   # type: Dict[str, Callable]
-
-
-def wizcmd(command: str, *aliases: str) -> Callable:
-    """
-    (Internal) decorator to add the command to the global dictionary of commands, with a privilege check wrapper.
-    Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
-    User code should use @wizcmd from cmds.decorators.
-    """
-    # NOTE: this shares quite some lines of code with cmds.decorators, be sure to keep them in sync
-    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
-        raise TypeError("command name and aliases should be strings")
-    prefixed_command = "!" + command
-    prefixed_aliases = ["!" + alias for alias in aliases]
-
-    def wizcmd2(func: Callable) -> Callable:
-        func.enable_notify_action = False   # type: ignore  # none of the wizard commands should be used with notify_action
-        func.is_tale_command_func = True    # type: ignore
-        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore  # contains async yields?
-
-        @functools.wraps(func)
-        def executewizcommand(player: Player, parsed: ParseResult, ctx: util.Context) \
-                -> Callable[[Player, ParseResult, util.Context], None]:
-            if "wizard" not in player.privileges:
-                raise SecurityViolation("Wizard privilege required for verb " + parsed.verb)
-            return func(player, parsed, ctx)
-
-        if prefixed_command in all_commands:
-            raise ValueError("Command defined more than once: " + prefixed_command)
-        if cmdfunc_signature_valid(func):
-            func.__doc__ = util.format_docstring(func.__doc__)
-            executewizcommand.__doc__ = func.__doc__
-            all_commands[prefixed_command] = executewizcommand
-            for alias in prefixed_aliases:
-                if alias in all_commands:
-                    raise ValueError("Command defined more than once: " + alias)
-                all_commands[alias] = executewizcommand
-            return executewizcommand
-        else:
-            raise TaleError("invalid wizcmd function signature or missing docstring: " + func.__name__)
-    return wizcmd2
 
 
 def lookup_module_path(path: str) -> ModuleType:

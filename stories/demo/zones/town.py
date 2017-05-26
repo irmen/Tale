@@ -13,7 +13,7 @@ from tale.base import Location, Exit, Door, Item, Container, Key, Living
 from tale.driver import Driver
 from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
-from tale.items.board import bulletinboard, BulletinBoard
+from tale.items.board import bulletinboard
 from tale.parseresult import ParseResult
 from tale.player import Player
 

@@ -71,6 +71,7 @@ class James(Living, Listener):
                 rat.move(direction.target, self)
             mud_context.driver.defer(2, self.rat_scream, "smile at " + self.name)
 
+
 customer = James("James", "m", title="Sir James", description="Sir James is trying to sell something, it looks like a lamp.")
 lamp.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather unremarkable."
                              " There is something weird going on with the cord though!")

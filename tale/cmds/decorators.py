@@ -10,66 +10,81 @@ import inspect
 from typing import Callable, Generator
 
 from .. import errors
-from .. import player
 from .. import util
+from . import _all_commands, _all_wizard_commands, cmds_aliases
 from ..parseresult import ParseResult
 from ..story import GameMode
+from ..player import Player
 
 
-__all__ = ["cmd", "wizcmd", "cmdfunc_signature_valid", "disable_notify_action",
-           "disabled_in_gamemode", "overrides_soul", "no_soul_parse"]
+__all__ = ["cmd", "wizcmd", "disable_notify_action", "disabled_in_gamemode", "overrides_soul", "no_soul_parse"]
 
 
-def cmd(func):
+def cmd(command: str, *aliases: str) -> Callable:
     """
-    Public decorator to define a normal command function.
-    It checks the signature.
-    Can be used by the user that is writing story code.
+    Decorator to define a parser command function and its verb(s).
     """
-    # NOTE: this code is VERY similar to the internal @cmd decorator in cmds/normal.py
-    # If changes are made, make sure to update both occurrences
-    if not inspect.isfunction(func):
-        raise TypeError("use this only without arguments on a function")
-    func.is_generator = inspect.isgeneratorfunction(func)   # contains async yields?
-    if cmdfunc_signature_valid(func):
-        func.__doc__ = util.format_docstring(func.__doc__)
-        func.is_tale_command_func = True
-        if not hasattr(func, "enable_notify_action"):
-            func.enable_notify_action = True   # by default the normal commands should be passed to notify_action
-        return func
-    else:
-        raise errors.TaleError("invalid cmd function signature or missing docstring: " + func.__name__)
+    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+        raise TypeError("command name and aliases should be provided as string arguments")
+
+    def cmd2(func: Callable) -> Callable:
+        if command in _all_commands:
+            raise ValueError("command defined more than once: " + command)
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore # contains async yields?
+        if cmdfunc_signature_valid(func):
+            func.__doc__ = util.format_docstring(func.__doc__)
+            func.is_tale_command_func = True   # type: ignore
+            if not hasattr(func, "enable_notify_action"):
+                func.enable_notify_action = True   # type: ignore  # by default the normal commands should be passed to notify_action
+            _all_commands[command] = func
+            cmds_aliases[command] = aliases
+            for alias in aliases:
+                if alias in _all_commands:
+                    raise ValueError("command defined more than once: " + alias)
+                _all_commands[alias] = func
+            return func
+        else:
+            raise errors.TaleError("invalid cmd function signature or missing docstring: " + func.__name__)
+    return cmd2
 
 
-def wizcmd(func):
+def wizcmd(command: str, *aliases: str) -> Callable:
     """
-    Public decorator to define a wizard command function.
-    It adds a privilege check wrapper and checks the signature.
-    Can be used by the user that is writing story code.
+    Decorator to define a 'wizard' command function and verb.
+    It will add a privilege check wrapper.
+    Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
     """
-    if not inspect.isfunction(func):
-        raise TypeError("use this only without arguments on a function")
-    func.enable_notify_action = False   # none of the wizard commands should be used with notify_action
-    func.is_tale_command_func = True
+    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+        raise TypeError("command name and aliases should be provided as string arguments")
+    prefixed_command = "!" + command
+    prefixed_aliases = ["!" + alias for alias in aliases]
 
-    # NOTE: this code is VERY similar to the internal @wizcmd decorator in cmds/wizard.py
-    # If changes are made, make sure to update both occurrences
-    # @todo merge both decorators to avoid code duplication
-    @functools.wraps(func)
-    def executewizcommand(player: player.Player, parsed: ParseResult, ctx: util.Context) \
-            -> Callable[[player.Player, ParseResult, util.Context], None]:
-        if "wizard" not in player.privileges:
-            raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
-        return func(player, parsed, ctx)
+    def wizcmd2(func: Callable) -> Callable:
+        func.enable_notify_action = False   # type: ignore  # none of the wizard commands should be used with notify_action
+        func.is_tale_command_func = True    # type: ignore
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore  # contains async yields?
 
-    if cmdfunc_signature_valid(func):
-        func.is_generator = inspect.isgeneratorfunction(func)  # contains async yields?
-        executewizcommand.is_generator = func.is_generator
-        func.__doc__ = util.format_docstring(func.__doc__)
-        executewizcommand.__doc__ = func.__doc__
-        return executewizcommand
-    else:
-        raise errors.TaleError("invalid wizcmd function signature: " + func.__name__)
+        @functools.wraps(func)
+        def executewizcommand(player: Player, parsed: ParseResult, ctx: util.Context) \
+                -> Callable[[Player, ParseResult, util.Context], None]:
+            if "wizard" not in player.privileges:
+                raise errors.SecurityViolation("Wizard privilege required for verb " + parsed.verb)
+            return func(player, parsed, ctx)
+
+        if prefixed_command in _all_commands:
+            raise ValueError("Command defined more than once: " + prefixed_command)
+        if cmdfunc_signature_valid(func):
+            func.__doc__ = util.format_docstring(func.__doc__)
+            executewizcommand.__doc__ = func.__doc__
+            _all_wizard_commands[prefixed_command] = executewizcommand
+            for alias in prefixed_aliases:
+                if alias in _all_wizard_commands:
+                    raise ValueError("Command defined more than once: " + alias)
+                _all_wizard_commands[alias] = executewizcommand
+            return executewizcommand
+        else:
+            raise errors.TaleError("invalid wizcmd function signature or missing docstring: " + func.__name__)
+    return wizcmd2
 
 
 def cmdfunc_signature_valid(func: Callable) -> bool:
@@ -89,7 +104,7 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
         return False
     # if there is type information, it should be correct
     ann = sig.parameters["player"].annotation
-    if ann is not sig.empty and ann is not player.Player:
+    if ann is not sig.empty and ann is not Player:
         return False
     ann = sig.parameters["parsed"].annotation
     if ann is not sig.empty and ann is not ParseResult:

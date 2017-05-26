@@ -12,8 +12,6 @@ import pickle
 import unittest
 
 import tale.base
-import tale.cmds.normal
-import tale.cmds.wizard
 import tale.demo
 import tale.driver as the_driver
 import tale.util
@@ -148,38 +146,38 @@ class TestDeferreds(unittest.TestCase):
 
 class TestVarious(unittest.TestCase):
     def testCommandsLoaded(self):
-        self.assertGreater(len(tale.cmds.normal.all_commands), 1)
-        self.assertGreater(len(tale.cmds.wizard.all_commands), 1)
+        self.assertGreater(len(tale.cmds._all_commands), 1)
+        self.assertGreater(len(tale.cmds._all_wizard_commands), 1)
 
     def testEnableNotifyActionSetAndDocstring(self):
-        for cmd in tale.cmds.normal.all_commands.values():
+        for cmd in tale.cmds._all_commands.values():
             self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
             self.assertTrue(cmd.enable_notify_action in (True, False))
-        for cmd in tale.cmds.wizard.all_commands.values():
+        for cmd in tale.cmds._all_wizard_commands.values():
             self.assertIsNotNone(cmd.__doc__, "all commands must have docstring")
             self.assertFalse(cmd.enable_notify_action, "all wizard commands must have enable_notify_action set to False")
 
 
-@cmd
+@cmd("test1")
 @disabled_in_gamemode(GameMode.IF)
 def func1(player, parsed, ctx):
     """docstring1"""
     pass
 
 
-@cmd
+@cmd("test2")
 def func2(player, parsed, ctx):
     """docstring2"""
     pass
 
 
-@cmd
+@cmd("test3")
 def func3(player, parsed, ctx):
     """docstring3"""
     pass
 
 
-@wizcmd
+@wizcmd("test1w")
 def func4(player, parsed, ctx):
     """docstring4"""
     pass

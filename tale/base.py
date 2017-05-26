@@ -42,7 +42,7 @@ from weakref import WeakValueDictionary
 from collections import defaultdict
 from textwrap import dedent
 from types import ModuleType
-from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, MutableMapping
+from typing import Iterable, Any, Type, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
 
 from . import lang
 from . import mud_context
