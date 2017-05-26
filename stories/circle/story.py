@@ -68,4 +68,4 @@ class Story(StoryBase):
 
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
-    Driver().start(game=sys.path[0])
+    Driver().start(game=sys.path[0], mode=GameMode.MUD)

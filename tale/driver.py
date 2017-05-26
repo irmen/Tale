@@ -162,9 +162,6 @@ class Driver(pubsub.Listener):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()
         self.story._verify(self)
-        if len(self.story.config.supported_modes) == 1 and mode != GameMode.MUD:
-            # There's only one mode this story runs in. Just select that one.
-            mode = list(self.story.config.supported_modes)[0]
         if mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" %
                              (mode, list(self.story.config.supported_modes)))
