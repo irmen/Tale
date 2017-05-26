@@ -2,7 +2,7 @@ html, body {
     height: 100%;
 }
 body {
-    font-family: Georgia, 'DejaVu Serif', 'Droid Serif', serif;
+    font-family: Georgia, 'Droid Serif', 'DejaVu Serif', serif;
     font-size: 12pt;
     color: black;
     background: #f8f8f0;
@@ -10,7 +10,8 @@ body {
 }
 h1, h2, h3, h4, h5 {
     font-weight: normal;
-    padding-bottom: 0.5ex;
+    margin-top: 1em;
+    margin-bottom: 1ex;
 }
 h1 { font-size: 160%; }
 h2 { font-size: 140%; }
@@ -18,12 +19,19 @@ h3 { font-size: 120%; }
 h4 { font-size: 100%; }
 h5 { font-size: 100%; }
 
-pre, #input-cmd {
-    font-family: Consolas, Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
-    white-space: pre;
+
+.txt-monospaced, .txt-userinput, pre, #input-cmd {
+    font-family: Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", Consolas, "Courier New", monospace;
+    line-height: 1.2;
+    font-size: 11pt;
 }
+
 p {
-    line-height: 1.5;
+    line-height: 1.4;
+}
+pre {
+    white-space: pre;
+    font-size: 11pt;
 }
 
 #input-cmd {
@@ -32,12 +40,14 @@ p {
 }
 .location {
     text-align: right;
-    margin-bottom: 2pt;
+    margin-bottom: 4pt;
+    font-style: italic;
 }
 .location > span {
     color: green;
 }
 .story {
+    margin-top: -2ex;
     width: 100%;
     max-width: 51em;
 }
@@ -50,6 +60,7 @@ p {
 }
 
 p, pre {
+    margin-top: 1ex;
     margin-bottom: 1ex;
 }
 
@@ -81,10 +92,6 @@ p, pre {
 .txt-location {
     color: navy;
     font-weight: bold;
-}
-
-.txt-monospaced, .txt-userinput {
-    font-family: Consolas, Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
 }
 
 .txt-userinput {
