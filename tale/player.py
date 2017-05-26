@@ -90,10 +90,8 @@ class Player(base.Living, pubsub.Listener):
         Show the contents of the given text file resource to the player.
         """
         if reformat:
-            # @todo trim any indentation away as well to avoid large blanks in the output
             for paragraph in file_resource.text.split("\n\n"):
-                if paragraph.startswith("\n"):
-                    self.tell("\n")
+                paragraph = "\n".join(line.strip() for line in paragraph.splitlines())
                 self.tell(paragraph, end=True)
         else:
             self.tell(file_resource.text, format=False)
