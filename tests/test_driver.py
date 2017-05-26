@@ -179,7 +179,7 @@ class TestCommands(unittest.TestCase):
 
     def testCommandsOverrideFail(self):
         with self.assertRaises(KeyError):
-            self.cmds.override("verbXXX", func2)
+            self.cmds.override("verbXYZ", func2)
 
     def testCommandsOverride(self):
         self.cmds.override("verb4", func2, "noob")

@@ -124,9 +124,6 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.server_loop_durations = collections.deque(maxlen=10)    # type: MutableSequence[float]
         self.commands = Commands()
-        for verb, func, privilege in cmds.all_registered_commands():
-            self.commands.add(verb, func, privilege)
-        cmds.clear_registered_commands()
         self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
         self.zones = None       # type: ModuleType
         self.moneyfmt = None    # type: util.MoneyFormatter
@@ -137,6 +134,10 @@ class Driver(pubsub.Listener):
         self.__stop_mainloop = True
         # playerconnections that wait for input; maps connection to tuple (dialog, validator, echo_input)
         self.waiting_for_input = {}   # type: Dict[player.PlayerConnection, Tuple[Generator, Any, Any]]
+        mud_context.driver = self
+        for verb, func, privilege in cmds.all_registered_commands():
+            self.commands.add(verb, func, privilege)
+        cmds.clear_registered_commands()
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
@@ -169,9 +170,8 @@ class Driver(pubsub.Listener):
         self.story.config.server_mode = mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
         if self.story.config.server_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
-        # Register the driver and some other stuff in the global context.
+        # Register the driver and add some more stuff in the global context.
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
-        mud_context.driver = self
         mud_context.config = self.story.config
         mud_context.resources = self.resources
         # check for existence of cmds package in the story root
