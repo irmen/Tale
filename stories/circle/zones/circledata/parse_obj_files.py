@@ -1,14 +1,14 @@
 """
 Parse CircleMUD obj files.
 
-Based on code by Al Sweigart;
+Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import pathlib
 import re
 from types import SimpleNamespace
-from typing import Dict, Any
+from typing import Dict, Any, List
+from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_objs"]
@@ -18,10 +18,9 @@ objs = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(objfile: pathlib.Path) -> None:
-    with objfile.open() as fp:
-        content = [line.strip() for line in fp]
+def parse_file(content: List[str]) -> None:
 
+    content = [line.strip() for line in content]
     reasdstate = 'vNum'
     linenum = 0
 
@@ -364,15 +363,18 @@ def parse_file(objfile: pathlib.Path) -> None:
 
 
 def parse_all() -> None:
-    datadir = pathlib.Path(__file__).parent / "world/obj"
-    for file in datadir.glob("*.obj"):
-        parse_file(file)
+    vfs = VirtualFileSystem(root_package="zones.circledata")
+    for filename in vfs["world/obj/index"].data.decode("ascii").splitlines():
+        if filename == "$":
+            break
+        data = vfs["world/obj/"+filename].data.decode("utf-8").splitlines()
+        parse_file(data)
 
 
 def get_objs() -> Dict[int, SimpleNamespace]:
     if not objs:
         parse_all()
-        assert len(objs) == 678
+        assert len(objs) == 678, "all objs must be loaded"
     return objs
 
 

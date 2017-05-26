@@ -1,14 +1,14 @@
 """
 Parse CircleMUD mob files.
 
-Based on code by Al Sweigart;
+Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import pathlib
 import re
 from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, List
+from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_mobs"]
@@ -18,9 +18,9 @@ mobs = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_mobs(mobfile: pathlib.Path) -> None:
-    with mobfile.open() as fp:
-        content = [line.strip() for line in fp]
+def parse_file(content: List[str]) -> None:
+
+    content = [line.strip() for line in content]
 
     readstate = 'vNum'
     linenum = 0
@@ -175,16 +175,18 @@ def parse_mobs(mobfile: pathlib.Path) -> None:
 
 
 def parse_all() -> None:
-    # xvfs = vfs.VirtualFileSystem(root_package="zones")
-    datadir = pathlib.Path(__file__).parent / "world/mob"
-    for file in datadir.glob("*.mob"):
-        parse_mobs(file)
+    vfs = VirtualFileSystem(root_package="zones.circledata")
+    for filename in vfs["world/mob/index"].data.decode("ascii").splitlines():
+        if filename == "$":
+            break
+        data = vfs["world/mob/"+filename].data.decode("utf-8").splitlines()
+        parse_file(data)
 
 
 def get_mobs() -> Dict[int, SimpleNamespace]:
     if not mobs:
         parse_all()
-        assert len(mobs) == 569
+        assert len(mobs) == 569, "all mobs must be loaded"
     return mobs
 
 

@@ -1,14 +1,15 @@
 """
 Parse CirleMUD shop files.
 
-Based on code by Al Sweigart;
+Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import pathlib
 import re
 from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, List
+from tale.vfs import VirtualFileSystem
+
 
 __all__ = ["get_shops"]
 
@@ -17,12 +18,8 @@ extendedMobPat = re.compile('(.*?):(.*)')
 shops = {}   # type: Dict[int, SimpleNamespace]
 
 
-def parse_file(shpfile: pathlib.Path) -> None:
-    with shpfile.open() as fp:
-        content = fp.readlines()
-
+def parse_file(content: List[str]) -> None:
     content = [line.strip() for line in content][1:]  # skip the first "CircleMUD v3.0 Shop File~" line
-
     linenum = 0
 
     while linenum < len(content):
@@ -165,15 +162,18 @@ def parse_file(shpfile: pathlib.Path) -> None:
 
 
 def parse_all() -> None:
-    datadir = pathlib.Path(__file__).parent / "world/shp"
-    for file in datadir.glob("*.shp"):
-        parse_file(file)
+    vfs = VirtualFileSystem(root_package="zones.circledata")
+    for filename in vfs["world/shp/index"].data.decode("ascii").splitlines():
+        if filename == "$":
+            break
+        data = vfs["world/shp/"+filename].data.decode("utf-8").splitlines()
+        parse_file(data)
 
 
 def get_shops() -> Dict[int, SimpleNamespace]:
     if not shops:
         parse_all()
-        assert len(shops) == 46
+        assert len(shops) == 46, "all shops must be loaded"
     return shops
 
 

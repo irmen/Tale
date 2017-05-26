@@ -1,14 +1,14 @@
 """
 Parse CircleMUD zone files.
 
-Based on code by Al Sweigart;
+Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import pathlib
 import re
 from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, List
+from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_zones"]
@@ -18,9 +18,8 @@ zones = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(zonfile: pathlib.Path) -> None:
-    with zonfile.open() as fp:
-        content = [line.strip() for line in fp]
+def parse_file(content: List[str]) -> None:
+    content = [line.strip() for line in content]
 
     linenum = 0
     allmobs = []
@@ -155,15 +154,18 @@ def parse_file(zonfile: pathlib.Path) -> None:
 
 
 def parse_all() -> None:
-    datadir = pathlib.Path(__file__).parent / "world/zon"
-    for file in datadir.glob("*.zon"):
-        parse_file(file)
+    vfs = VirtualFileSystem(root_package="zones.circledata")
+    for filename in vfs["world/zon/index"].data.decode("ascii").splitlines():
+        if filename == "$":
+            break
+        data = vfs["world/zon/"+filename].data.decode("utf-8").splitlines()
+        parse_file(data)
 
 
 def get_zones() -> Dict[int, SimpleNamespace]:
     if not zones:
         parse_all()
-        assert len(zones) == 30
+        assert len(zones) == 30, "all zones must be loaded"
     return zones
 
 

@@ -1,13 +1,13 @@
 """
 Parse CircleMUD world files.
 
-Based on code by Al Sweigart;
+Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import pathlib
 from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, List
+from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_rooms"]
@@ -16,9 +16,8 @@ __all__ = ["get_rooms"]
 rooms = {}  # type: Dict[int, SimpleNamespace]
 
 
-def parse_file(wldfile: pathlib.Path) -> None:
-    with wldfile.open() as fp:
-        content = [line.strip() for line in fp]
+def parse_file(content: List[str]) -> None:
+    content = [line.strip() for line in content]
 
     readstate = 'vNum'
     descarg = ''
@@ -140,15 +139,18 @@ def parse_file(wldfile: pathlib.Path) -> None:
 
 
 def parse_all() -> None:
-    datadir = pathlib.Path(__file__).parent / "world/wld"
-    for file in datadir.glob("*.wld"):
-        parse_file(file)
+    vfs = VirtualFileSystem(root_package="zones.circledata")
+    for filename in vfs["world/wld/index"].data.decode("ascii").splitlines():
+        if filename == "$":
+            break
+        data = vfs["world/wld/"+filename].data.decode("utf-8").splitlines()
+        parse_file(data)
 
 
 def get_rooms() -> Dict[int, SimpleNamespace]:
     if not rooms:
         parse_all()
-        assert len(rooms) == 1878
+        assert len(rooms) == 1878, "all rooms must be loaded"
     return rooms
 
 
