@@ -1,3 +1,5 @@
 <bright>CIRCLE ADMINS:</> A few custom commands have been provided for admins.
-They are <monospaced>!vnum</monospaced>, <monospaced>!vgo</monospaced>
-and <monospaced>!vspawn</monospaced>.
+They are <monospaced>!cvnum</monospaced>, <monospaced>!cvgo</monospaced>
+and <monospaced>!cvspawn</monospaced>.
+They're similar to the built-in !vnum/!vgo/!vspawn commands but instead take
+the circle-vnums instead as specified in the mud data files.

@@ -9,6 +9,7 @@ import datetime
 import gc
 import importlib
 import inspect
+import os
 import platform
 import sys
 from types import ModuleType
@@ -393,6 +394,13 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     txt.append("Tale library:   %s" % __version__)
     txt.append("Game version:   %s %s" % (config.name, config.version))
     txt.append("Uptime:         %d:%02d:%02d  (since %s)" % (up_hours, up_minutes, up_seconds, driver.server_started))
+    loadavg = "unavailable"
+    if hasattr(os, "getloadavg"):
+        try:
+            loadavg = "{:.2f}, {:.2f}, {:.2f}".format(*os.getloadavg())
+        except OSError:
+            pass
+    txt.append("Svr load avg.:  %s" % loadavg)
     txt.append("Server mode:    %s" % config.server_mode)
     txt.append("Real time:      %s" % realtime)
     if config.server_tick_method == TickMethod.TIMER:
