@@ -18,7 +18,7 @@ zones = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
-def parse_file(content: List[str]) -> None:
+def parse_file(content):
     content = [line.strip() for line in content]
 
     linenum = 0

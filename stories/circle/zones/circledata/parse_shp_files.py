@@ -18,7 +18,7 @@ extendedMobPat = re.compile('(.*?):(.*)')
 shops = {}   # type: Dict[int, SimpleNamespace]
 
 
-def parse_file(content: List[str]) -> None:
+def parse_file(content):
     content = [line.strip() for line in content][1:]  # skip the first "CircleMUD v3.0 Shop File~" line
     linenum = 0
 

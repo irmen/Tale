@@ -102,7 +102,8 @@ class Shopkeeper(Living):
             self.money = min(self.money, banking_money_limit)   # make sure we don't have surplus cash
 
     def do_wander(self, ctx: Context) -> None:
-        # let the shopkeeper wander randomly
+        # Let the shopkeeper wander randomly. Note: not all shopkeepers do this!
+        # (the behavior is activated -or not- where this shopkeeper is created)
         direction = self.select_random_move()
         if direction:
             self.move(direction.target, self)

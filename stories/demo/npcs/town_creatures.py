@@ -6,15 +6,14 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import random
 
-from tale import lang, mud_context, util
+from tale import lang, util
 from tale.base import Living
 from tale.parseresult import ParseResult
+from tale.util import call_periodically
 
 
 class VillageIdiot(Living):
-    def init(self) -> None:
-        mud_context.driver.defer(4, self.do_drool)   # @todo deferred bootstrapping decorator?
-
+    @call_periodically(5, 20)
     def do_drool(self, ctx: util.Context) -> None:
         if random.random() < 0.3:
             self.location.tell("%s drools. Yuck." % lang.capital(self.title))
@@ -26,19 +25,13 @@ class VillageIdiot(Living):
                 title = lang.capital(self.title)
                 self.location.tell("%s drools on %s." % (title, target.title),
                                    specific_targets={target}, specific_target_msg="%s drools on you." % title)
-        ctx.driver.defer(random.randint(5, 20), self.do_drool)
 
 
 class TownCrier(Living):
-    def init(self) -> None:
-        # note: this npc uses the deferred feature to yell stuff at certain moments.
-        mud_context.driver.defer(2, self.do_cry)
-
+    @call_periodically(20, 40)
     def do_cry(self, ctx: util.Context) -> None:
-        # @todo maybe add a decodrator to bootstrap and wire up the defer calling
         self.tell_others("{Title} yells: welcome everyone!")
         self.location.message_nearby_locations("Someone nearby is yelling: welcome everyone!")
-        ctx.driver.defer(random.randint(20, 40), self.do_cry)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         greet = False
@@ -56,19 +49,17 @@ class TownCrier(Living):
 class WalkingRat(Living):
     def init(self) -> None:
         super().init()
-        mud_context.driver.defer(2, self.do_idle_action)
-        mud_context.driver.defer(4, self.do_random_move)
         self.aggressive = True
 
+    @call_periodically(5, 15)
     def do_idle_action(self, ctx: util.Context) -> None:
         if random.random() < 0.5:
             self.tell_others("{Title} wiggles %s tail." % self.possessive)
         else:
             self.tell_others("{Title} sniffs around and moves %s whiskers." % self.possessive)
-        ctx.driver.defer(random.randint(5, 15), self.do_idle_action)
 
+    @call_periodically(10, 20)
     def do_random_move(self, ctx: util.Context) -> None:
         direction = self.select_random_move()
         if direction:
             self.move(direction.target, self)
-        ctx.driver.defer(random.randint(10, 20), self.do_random_move)

@@ -179,7 +179,7 @@ class MudObject:
             self._extradesc[keyword] = description
 
     def __repr__(self):
-        return "<%s '%s' @ 0x%x>" % (self.__class__.__name__, self.name, id(self))
+        return "<%s '%s' #%d @ 0x%x>" % (self.__class__.__name__, self.name, self.vnum, id(self))
 
     def destroy(self, ctx: util.Context) -> None:
         """Common cleanup code that needs to be called when the object is destroyed"""
@@ -1197,7 +1197,7 @@ class Exit(MudObject):
 
     def __repr__(self):
         targetname = self.target.name if self.target else self._target_str
-        return "<base.Exit to '%s' @ 0x%x>" % (targetname, id(self))
+        return "<base.Exit to '%s' #%d @ 0x%x>" % (targetname, self.vnum, id(self))
 
     def bind(self, location: Location) -> None:
         """Binds the exit to a location."""
@@ -1306,7 +1306,7 @@ class Door(Exit):
     def __repr__(self):
         target = self.target.name if self.target else self._target_str
         locked = "locked" if self.locked else "open"
-        return "<base.Door '%s'->'%s' (%s) @ 0x%x>" % (self.name, target, locked, id(self))
+        return "<base.Door '%s'->'%s' (%s) #%d @ 0x%x>" % (self.name, target, locked, self.vnum, id(self))
 
     def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through this door?"""

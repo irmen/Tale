@@ -16,7 +16,7 @@ __all__ = ["get_rooms"]
 rooms = {}  # type: Dict[int, SimpleNamespace]
 
 
-def parse_file(content: List[str]) -> None:
+def parse_file(content):
     content = [line.strip() for line in content]
 
     readstate = 'vNum'

@@ -51,7 +51,8 @@ class Player(base.Living, pubsub.Listener):
         self._output = TextBuffer()
 
     def __repr__(self):
-        return "<%s '%s' @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, id(self), ",".join(self.privileges) or "-")
+        return "<%s '%s' #%d @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, self.vnum,
+                                                   id(self), ",".join(self.privileges) or "-")
 
     def __getstate__(self) -> dict:
         state = super().__getstate__()

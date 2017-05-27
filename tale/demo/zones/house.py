@@ -7,14 +7,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 
-from tale import mud_context
 from tale.base import Location, Exit, Door, Key, Living
 from tale.driver import Driver
 from tale.errors import StoryCompleted
 from tale.lang import capital
 from tale.parseresult import ParseResult
 from tale.player import Player
-from tale.util import Context
+from tale.util import Context, call_periodically
 
 
 def init(driver: Driver) -> None:
@@ -58,14 +57,13 @@ closet.add_exits([Exit("living room", livingroom, "You can see the living room."
 class Cat(Living):
     def init(self) -> None:
         self.aliases = {"cat"}
-        mud_context.driver.defer(4, self.do_purr)
 
+    @call_periodically(5, 20)
     def do_purr(self, ctx: Context) -> None:
         if random.random() > 0.5:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
-        ctx.driver.defer(random.randint(5, 20), self.do_purr)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):

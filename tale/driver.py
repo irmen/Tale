@@ -44,7 +44,7 @@ class Deferred:
     That means that you can't pass all types of callables, there are a few that are not
     serializable (lambda's and scoped functions). They will trigger an error if you use those.
     If you set a (low_seconds, high_seconds) periodical tuple, the deferred will be called periodically
-    where the next trigger time is randomized within the given interval. 
+    where the next trigger time is randomized within the given interval.
     The due time is given in Game Time, not in real/wall time!
     """
     def __init__(self, due_gametime: datetime.datetime, action: Callable, vargs: Sequence[Any], kwargs: Dict[str, Any],
@@ -1275,7 +1275,6 @@ class LimboReaper(base.Living):
             short_description="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
-        mud_context.driver.defer(0.5, self.do_reap_souls)  # @todo deferred bootstrapping decorator?
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb == "say":
@@ -1283,7 +1282,9 @@ class LimboReaper(base.Living):
         else:
             actor.tell("%s stares blankly at you." % lang.capital(self.title))
 
+    @util.call_periodically(3)
     def do_reap_souls(self, ctx: util.Context) -> None:
+        print("REAP SOULS!!", self)   # XXX
         # consider all livings currently in Limbo or having their location set to Limbo
         if self.location is not base._limbo:
             # we somehow got misplaced, teleport back to limbo
@@ -1328,7 +1329,6 @@ class LimboReaper(base.Living):
                 else:
                     ctx.driver._disconnect_mud_player(conn)
             self.candidates[candidate] = (first_seen, shown)
-        ctx.driver.defer(3, self.do_reap_souls)  # keep on doing this about every 3 seconds
 
 
 if __name__ == "__main__":

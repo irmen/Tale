@@ -13,7 +13,7 @@ import sys
 import traceback
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
-from . import lang, mud_context
+from . import lang
 from .errors import ParseError, ActionRefused, TaleError
 from .story import MoneyType
 
@@ -471,7 +471,7 @@ def call_periodically(period: float, max_period: float=None):
     return mark
 
 
-def get_periodicals(obj) -> Dict[Callable, Union[float, Tuple[float, float]]]:
+def get_periodicals(obj) -> Dict[Callable, Tuple[float, float, float]]:
     members = inspect.getmembers(type(obj), predicate=lambda x: inspect.ismethod(x) or inspect.isfunction(x))
     periodicals = {}
     for name, member in members:

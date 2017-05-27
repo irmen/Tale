@@ -48,7 +48,7 @@ class CircleMob(Living):
         super().init()
 
     def do_wander(self, ctx: Context) -> None:
-        # let the mob wander randomly
+        # Let the mob wander randomly. Note: not all mobs do this!
         direction = self.select_random_move()
         if direction:
             self.move(direction.target, self)

@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 
-from tale import lang, util, mud_context
+from tale import lang, util
 from tale.base import Location, Exit, Item, Living
 from tale.driver import Driver
 
@@ -27,9 +27,7 @@ key = Item("key", "rusty key", "An old rusty key without a label.")
 
 
 class Drone(Living):
-    def init(self):
-        mud_context.driver.defer(1, self.do_whizz)    # @todo deferred bootstrapping decorator?
-
+    @util.call_periodically(2)
     def do_whizz(self, ctx: util.Context) -> None:
         rand = random.random()
         if rand < 0.14:
@@ -38,7 +36,6 @@ class Drone(Living):
             self.do_socialize("rotate random")
         elif rand < 0.40:
             self.location.tell("%s hums softly." % lang.capital(self.title))
-        ctx.driver.defer(2, self.do_whizz)
 
 
 drone = Drone("drone", "n", race="bot", title="mindless drone",
