@@ -61,7 +61,18 @@ class Story(StoryBase):
 if __name__ == "__main__":
     # story is invoked as a script, start it in the Tale Driver.
     gamedir = pathlib.Path(__file__).parent
-    cmdline_args = sys.argv[1:]
-    cmdline_args.insert(0, "--game")
-    cmdline_args.insert(1, str(gamedir))
-    run_from_cmdline(cmdline_args)
+    if gamedir.is_dir() or gamedir.is_file():
+        cmdline_args = sys.argv[1:]
+        cmdline_args.insert(0, "--game")
+        cmdline_args.insert(1, str(gamedir))
+        run_from_cmdline(cmdline_args)
+    else:
+        # @todo make it possible to load the built-in demo story from zip file as well
+        print("Cannot load the story files from:", gamedir, file=sys.stderr)
+        print("\nIt looks like you tried running the built-in demo story, "
+              "but the tale library has been installed as an 'egg' or zip-file "
+              "rather than normal files in your packages directory.\n"
+              "This is not yet supported, sorry. "
+              "Either re-install tale as normal files or just try any of the separate demo stories that come with it!\n",
+              file=sys.stderr)
+        raise SystemExit

@@ -47,6 +47,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-run.cmd", "scripts/tale-run"],
     platforms="any",
+    zip_safe=True,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
@@ -68,7 +69,7 @@ The source code repository is on Github: https://github.com/irmen/Tale
     ],
     install_requires=["appdirs", "colorama>=0.3.6", "smartypants>=1.8.6"],
     setup_requires=["pytest-runner"],
-    tests_requires=["pytest"],
+    tests_require=["pytest"],
     options={"install": {"optimize": 0}},
     test_suite="tests"
 )

@@ -173,7 +173,7 @@ class Driver(pubsub.Listener):
             # the game argument points to a file, assume it is a zipfile, add it to the import path
             sys.path.insert(0, str(gamepath))
         else:
-            raise IOError("Cannot find specified game")
+            raise FileNotFoundError("Cannot find specified game")
         mode = GameMode(mode)
         assert "story" not in sys.modules, "cannot start new story if it was already loaded before"
         import story
