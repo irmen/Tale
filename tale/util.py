@@ -11,6 +11,7 @@ import inspect
 import random
 import sys
 import traceback
+from types import MemberDescriptorType
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
 from . import lang
@@ -471,12 +472,17 @@ def call_periodically(period: float, max_period: float=None):
     return mark
 
 
-def get_periodicals(obj) -> Dict[Callable, Tuple[float, float, float]]:
-    members = inspect.getmembers(type(obj), predicate=lambda x: inspect.ismethod(x) or inspect.isfunction(x))
+@functools.lru_cache()
+def _periodicals_from_class(klass: type) -> Dict[MemberDescriptorType, Tuple[float, float, float]]:
+    members = inspect.getmembers(klass, predicate=lambda x: inspect.ismethod(x) or inspect.isfunction(x))
     periodicals = {}
     for name, member in members:
         period = getattr(member, "_tale_periodically", 0.0)
         if period:
-            bound_method = member.__get__(obj)
-            periodicals[bound_method] = period
+            periodicals[member] = period
     return periodicals
+
+
+def get_periodicals(obj: Any) -> Dict[Callable, Tuple[float, float, float]]:
+    """Get the (bound) member functions that are declared periodical via the @call_periodically decorator"""
+    return {unbound.__get__(obj): period for unbound, period in _periodicals_from_class(type(obj)).items()}
