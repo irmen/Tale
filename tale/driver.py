@@ -1284,7 +1284,6 @@ class LimboReaper(base.Living):
 
     @util.call_periodically(3)
     def do_reap_souls(self, ctx: util.Context) -> None:
-        print("REAP SOULS!!", self)   # XXX
         # consider all livings currently in Limbo or having their location set to Limbo
         if self.location is not base._limbo:
             # we somehow got misplaced, teleport back to limbo

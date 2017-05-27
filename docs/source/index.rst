@@ -147,7 +147,8 @@ A random list of the features of the current codebase:
 - supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
 - game clock is independent of real-time wall clock, configurable speed and start time
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.
-- objects and creatures can use a 'deferred call' mechanism to receive calls at certain moments so they can act asynchronously
+- there is a simple decorator that makes that a method gets invoked periodically, for asynchronous actions
+- for more control you can make a 'deferred call' to schedule something to be called at a later time
 - you can also quite easily schedule calls to be executed at a defined later moment in time
 - using generators (yield statements) instead of regular input() calls,
   it is easy to create sequential dialogs (question-response) that will be handled without blocking the driver
