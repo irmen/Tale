@@ -439,24 +439,13 @@ class Driver(pubsub.Listener):
                 if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
                     continue
                 # self-service account creation
-                # @todo use the CharacterBuilder
                 conn.player.tell("\n")
-                conn.player.tell("<ul><bright>New character creation: '%s'.</>" % name, end=True)
-                password = yield "input-noecho", ("Please type in the desired password.", accounts.MudAccounts.accept_password)
-                email = yield "input", ("Please type in your email address.", accounts.MudAccounts.accept_email)
-                gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
-                conn.player.tell("You can choose one of the following races: " + lang.join(races.playable_races))
-                race = yield "input", ("What should be the race of your player character?", charbuilder.valid_playable_race)
-                # review the account
-                conn.player.tell("<bright>Please review your new character.</>", end=True)
-                conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s" % (name, lang.GENDERS[gender], race), end=True)
-                conn.player.tell("<dim> email:</> " + email, end=True)
-                if not (yield "input", ("You cannot change your name later. Do you want to create this character?", lang.yesno)):
-                    # abort
-                    conn.player.tell("Ok, let's get back to the beginning then.", end=True)
+                builder = charbuilder.MudCharacterBuilder(conn, name)
+                result = yield from builder.build_character()
+                if not result:
                     continue
-                stats = Stats.from_race(race, gender=gender[0])
-                account = self.mud_accounts.create(name, password, email, stats)
+                name, password = result.name, result.password
+                self.mud_accounts.create(name, password, result.email, result.stats)
                 conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
                 conn.player.tell("\n")
             try:
@@ -652,8 +641,10 @@ class Driver(pubsub.Listener):
         else:
             # No story player config: create a character with the builder
             # This is unusual though, normally any 'if' story should provide a player config
-            builder = charbuilder.CharacterBuilder(conn)
-            name_info = yield from builder.build_async()
+            builder = charbuilder.IFCharacterBuilder(conn)
+            name_info = yield from builder.build_character()
+            if not name_info:
+                raise errors.TaleError("should have a name now")
 
         player = conn.player
         self.__rename_player(player, name_info)

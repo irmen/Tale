@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import json
 from collections import deque
-from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence, Optional
+from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence
 
 from .. import lang, mud_context
 from ..base import Item, Living

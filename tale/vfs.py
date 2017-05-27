@@ -75,7 +75,7 @@ class Resource:
         return self.__data[item]
 
 
-class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
+class VirtualFileSystem:
     """
     Simple filesystem abstraction. Loads resource files embedded inside a package directory.
     If not readonly, you can write data as well. The API is loosely based on a dict.
@@ -90,7 +90,7 @@ class VirtualFileSystem:  # @todo convert to using pathlib instead of os.path
         if root_package is not None and root_path is not None:
             raise ValueError("specify only one root argument")
         if not readonly and not root_path:
-            raise ValueError("Read-write vfs requires path string")
+            raise ValueError("Read-write vfs requires root_path argument")
         self.readonly = readonly
         self.everythingtext = everythingtext
         if root_path:

@@ -16,7 +16,7 @@ import tale
 from tale import races, pubsub, mud_context
 from tale.accounts import MudAccounts
 from tale.base import Location, Exit, Item, Stats, Living
-from tale.charbuilder import CharacterBuilder, valid_playable_race, PlayerNaming
+from tale.charbuilder import IFCharacterBuilder, MudCharacterBuilder, valid_playable_race, PlayerNaming
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, ParseError, NonSoulVerb
 from tale.parseresult import ParseResult
@@ -539,20 +539,32 @@ class TestTextbuffer(unittest.TestCase):
         self.assertEqual([("   1   \n", False)], output.get_paragraphs())
 
 
-class TestCharacterBuilder(unittest.TestCase):
+class TestCharacterBuilders(unittest.TestCase):
     def setUp(self):
         mud_context.driver = FakeDriver()
         mud_context.config = DemoStory().config
         mud_context.resources = mud_context.driver.resources
 
-    def test_build(self):
+    def test_if_build(self):
         conn = PlayerConnection()
         with WrappedConsoleIO(conn) as io:
             conn.io = io
-            b = CharacterBuilder(conn)
-            builder = b.build_async()
+            b = IFCharacterBuilder(conn)
+            builder = b.build_character()
             why, what = next(builder)
             self.assertEqual("input", why)
+            self.assertEqual("What shall you be known as?", what[0])
+
+    def test_mud_build(self):
+        conn = PlayerConnection()
+        with WrappedConsoleIO(conn) as io:
+            conn.io = io
+            b = MudCharacterBuilder(conn, "PETER")
+            self.assertEqual("peter", b.naming.name)
+            builder = b.build_character()
+            why, what = next(builder)
+            self.assertEqual("input-noecho", why)
+            self.assertEqual("Please type in the desired password.", what[0])
 
     def test_validate_race(self):
         self.assertEqual("human", valid_playable_race("human"))
