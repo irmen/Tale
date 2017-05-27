@@ -374,7 +374,7 @@ def parse_all() -> None:
 def get_objs() -> Dict[int, SimpleNamespace]:
     if not objs:
         parse_all()
-        assert len(objs) == 678, "all objs must be loaded"
+        assert len(objs) == 679, "all objs must be loaded"
     return objs
 
 
