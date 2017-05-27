@@ -5,6 +5,7 @@ Exception classes
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+import inspect
 from typing import Generator, Tuple, Any, Optional, Sequence
 
 from .parseresult import ParseResult
@@ -67,9 +68,11 @@ class LocationIntegrityError(TaleError):
 
 class AsyncDialog(TaleFlowControlException):
     """Command execution needs to continue with an async dialog"""
-    def __init__(self, dialog: Generator[Tuple[str, Any], str, None], *args: Any) -> None:
+    # @todo replace by proper generator and yield from ?
+    def __init__(self, dialog: Generator[Tuple[str, Any], str, None]) -> None:
+        if not inspect.isgenerator(dialog):
+            raise TypeError("async dialogs only work with generators")
         self.dialog = dialog
-        self.args = args
 
 
 class NonSoulVerb(TaleFlowControlException):

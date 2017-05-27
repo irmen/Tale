@@ -5,7 +5,7 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Callable, Generator
+from typing import Generator
 
 from . import lang
 from . import mud_context
@@ -41,9 +41,8 @@ class PlayerNaming:
 
 class CharacterBuilder:
     """Create a new player character interactively."""
-    def __init__(self, conn: PlayerConnection, continue_dialog: Callable[[PlayerNaming], None]) -> None:
+    def __init__(self, conn: PlayerConnection) -> None:
         self.conn = conn
-        self.continue_dialog = continue_dialog
 
     def build_async(self) -> Generator:
         self.conn.output("Creating a player character.\n")
@@ -55,7 +54,7 @@ class CharacterBuilder:
         race = yield "input", ("Player race?", valid_playable_race)
         naming.stats = Stats.from_race(race, gender=naming.gender)
         naming.description = "A regular person." if naming.stats.race == "human" else "A weird creature."
-        self.continue_dialog(naming)
+        return naming
 
 
 def valid_playable_race(value: str) -> str:

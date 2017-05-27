@@ -406,7 +406,7 @@ class Driver(pubsub.Listener):
         self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
-        topic_async_dialogs.send((conn, self.__login_dialog_mud(conn)))   # continue with the normal login dialog
+        yield from self.__login_dialog_mud(conn)  # continue with the normal login dialog
 
     def __login_dialog_mud(self, conn: player.PlayerConnection) -> Generator:
         assert self.story.config.server_mode == GameMode.MUD
@@ -649,16 +649,12 @@ class Driver(pubsub.Listener):
             name_info.gender = self.story.config.player_gender
             name_info.money = self.story.config.player_money or 0.0
             name_info.wizard = "wizard" in conn.player.privileges
-            self.__login_dialog_if_2(conn, name_info)   # finish the login dialog
         else:
             # No story player config: create a character with the builder
             # This is unusual though, normally any 'if' story should provide a player config
-            builder = charbuilder.CharacterBuilder(conn, lambda name_info: self.__login_dialog_if_2(conn, name_info))
-            topic_async_dialogs.send((conn, builder.build_async()))
+            builder = charbuilder.CharacterBuilder(conn)
+            name_info = yield from builder.build_async()
 
-    def __login_dialog_if_2(self, conn: player.PlayerConnection, name_info: charbuilder.PlayerNaming) -> None:
-        # Second part of the if login dialog, this has been split to be able
-        # to put in the character builder dialog that continues with this one.
         player = conn.player
         self.__rename_player(player, name_info)
         player.tell("\n")

@@ -549,7 +549,7 @@ class TestCharacterBuilder(unittest.TestCase):
         conn = PlayerConnection()
         with WrappedConsoleIO(conn) as io:
             conn.io = io
-            b = CharacterBuilder(conn, None)
+            b = CharacterBuilder(conn)
             builder = b.build_async()
             why, what = next(builder)
             self.assertEqual("input", why)
