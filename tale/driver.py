@@ -51,6 +51,7 @@ class Deferred:
                  *, periodical: Tuple[float, float]=None) -> None:
         assert isinstance(due_gametime, datetime.datetime)
         assert callable(action)
+        assert kwargs is None or "ctx" not in kwargs, "ctx will be provided by the driver when calling this"
         if periodical:
             if not len(periodical) == 2:
                 raise ValueError("periodical arg must be None or a tuple(float,float)")
@@ -120,6 +121,8 @@ class Deferred:
             assert self.periodical[0] > 0 and self.periodical[1] > 0
             due = random.uniform(self.periodical[0], self.periodical[1])
             self.due_gametime = mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=due))
+            if "ctx" in self.kwargs:
+                del self.kwargs["ctx"]    # will be passed in again next call by driver, and required to remove because not serializable
             mud_context.driver._enqueue_deferred(self)  # reschedule!
             # note: when owner is deleted/destroyed, it must make sure that any deferreds from it are removed from the queue!
         else:
@@ -1190,6 +1193,8 @@ class Driver(pubsub.Listener):
         return deferred
 
     def _enqueue_deferred(self, deferred: Deferred) -> None:
+        if "ctx" in deferred.kwargs:
+            raise errors.TaleError("you cannot enqueue a Deferred that already has a 'ctx' kwarg (serialization issues)")
         with self.deferreds_lock:
             heapq.heappush(self.deferreds, deferred)
 

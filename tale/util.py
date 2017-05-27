@@ -344,7 +344,7 @@ class Context:
         return vars(self) == vars(other)
 
     def __getstate__(self):
-        raise RuntimeError("cannot serialize context")
+        raise RuntimeError("cannot serialize context - if you see this, some other object likely has a ref to us")
 
 
 def authorized(*privileges: Sequence[str]) -> Callable:

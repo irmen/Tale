@@ -125,7 +125,7 @@ class TestSerializing(unittest.TestCase):
         c = util.Context(driver=mud_context.driver, clock=mud_context.driver.game_clock, config=mud_context.config, player_connection=42)
         with self.assertRaises(RuntimeError) as x:
             serializecycle(c)
-        self.assertEqual("cannot serialize context", str(x.exception))
+        self.assertTrue(str(x.exception).startswith("cannot serialize context"))
 
     def test_Hints(self):
         h = hints.HintSystem()
