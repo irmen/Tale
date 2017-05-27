@@ -35,6 +35,7 @@ Except Location: it separates the items and livings it contains internally.
 Use its enter/leave methods instead.
 """
 
+import builtins
 import copy
 import random
 import re
@@ -672,13 +673,13 @@ class Stats:
         self.language = None   # type: str
         self.weight = 0.0
         self.size = races.BodySize.HUMAN_SIZED
-        self.race = None  # type: str  # optional, can use the stats template from races   # @todo use Race class?
+        self.race = None  # type: str   # the name of the race of this creature
 
     def __repr__(self):
         return "<Stats: %s>" % vars(self)
 
     @classmethod
-    def from_race(cls, race, gender='n') -> 'Stats':
+    def from_race(cls: type, race: builtins.str, gender: builtins.str='n') -> 'Stats':
         r = races.races[race]
         s = cls()
         s.gender = gender
@@ -697,6 +698,7 @@ class Stats:
 
     def set_stats_from_race(self) -> None:
         # the stats that are static are always initialized from the races table
+        # we look it up via the name, not needed to store the actual Race object here
         self.stat_prios = defaultdict(list)   # maps prio level to list of stat(s) with that level
         r = races.races[self.race]
         for stat, (_, prio) in r.stats._asdict().items():

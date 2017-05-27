@@ -981,14 +981,14 @@ _races = {
 
 playable_races = {'dwarf', 'elf', 'half-elf', 'half-orc', 'halfling', 'human', 'orc'}  # races that can be chosen by players
 
-Stats = NamedTuple("Stats", [("agi", Tuple[int, int]),
-                             ("cha", Tuple[int, int]),
-                             ("int", Tuple[int, int]),
-                             ("lck", Tuple[int, int]),
-                             ("spd", Tuple[int, int]),
-                             ("sta", Tuple[int, int]),
-                             ("str", Tuple[int, int]),
-                             ("wis", Tuple[int, int])])
+RStats = NamedTuple("RStats", [("agi", Tuple[int, int]),
+                               ("cha", Tuple[int, int]),
+                               ("int", Tuple[int, int]),
+                               ("lck", Tuple[int, int]),
+                               ("spd", Tuple[int, int]),
+                               ("sta", Tuple[int, int]),
+                               ("str", Tuple[int, int]),
+                               ("wis", Tuple[int, int])])
 
 Flags = NamedTuple("Flags", [("flying", bool),
                              ("limbless", bool),
@@ -1002,7 +1002,7 @@ Race = NamedTuple("Race", [("name", str),
                            ("language", str),
                            ("mass", float),
                            ("size", BodySize),
-                           ("stats", Stats),
+                           ("stats", RStats),
                            ("flags", Flags)])
 
 
@@ -1025,7 +1025,7 @@ def _create_race_defs() -> None:
     global races
     for race, attrs in _races.items():
         stats_kws = {StatType(s).value: value for s, value in attrs["stats"].items()}   # type: ignore
-        stats = Stats(**stats_kws)
+        rstats = RStats(**stats_kws)
         flags = Flags(flying=race in flying_races,
                       limbless=race in limbless_races,
                       nonbiting=race in nonbiting_races,
@@ -1033,7 +1033,7 @@ def _create_race_defs() -> None:
                       nonmeat=race in nonmeat_races,
                       playable=race in playable_races)
         races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],           # type: ignore
-                           mass=attrs["mass"], size=attrs["size"], stats=stats, flags=flags)
+                           mass=attrs["mass"], size=attrs["size"], stats=rstats, flags=flags)
     _all_races = set(_races)
     assert len(swimming_races - _all_races) == 0
     assert len(flying_races - _all_races) == 0
