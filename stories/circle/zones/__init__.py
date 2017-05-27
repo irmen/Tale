@@ -398,3 +398,6 @@ def init_zones() -> None:
     print("Spawned: %d mobs, %d items, %d shops" % (num_mobs, num_items, num_shops))
     missing = set(objs) - set(converted_items)
     print(len(missing), "unused item types.")
+    # for vnum in sorted(missing):
+    #     item = make_item(vnum)
+    #     print("  cvnum %d: %s" % (item.circle_vnum, item))

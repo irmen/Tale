@@ -566,25 +566,25 @@ def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None
     elif parsed.who_order:
         obj = parsed.who_order[0]
     elif name in {"items", "livings", "locations", "exits"}:
-        player.tell("All known " + name + ":", end=True)
+        player.tell("All known " + name + ": (limiting to 100)", end=True)
         count = 0
         if name == "items":
-            for vnum, item in base.MudObject.all_items.items():
-                location = item.location.name if item.location else ""
+            for vnum, item in list(base.MudObject.all_items.items())[:100]:
+                location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else ""  # type: ignore
                 player.tell("%d - %s  (%s)" % (vnum, item.name, location), end=True)
                 count += 1
         elif name == "livings":
-            for vnum, living in base.MudObject.all_livings.items():
-                location = living.location.name if living.location else ""
+            for vnum, living in list(base.MudObject.all_livings.items())[:100]:
+                location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else ""  # type: ignore
                 is_player = "[player]" if isinstance(living, Player) else ""
                 player.tell("%d - %s  %s (%s)" % (vnum, living.name, is_player, location), end=True)
                 count += 1
         elif name == "locations":
-            for vnum, loc in base.MudObject.all_locations.items():
+            for vnum, loc in list(base.MudObject.all_locations.items())[:100]:
                 player.tell("%d - %s" % (vnum, loc.name), end=True)
                 count += 1
         elif name == "exits":
-            for vnum, exit in base.MudObject.all_exits.items():
+            for vnum, exit in list(base.MudObject.all_exits.items())[:100]:
                 player.tell("%d - %s, target: %s" % (vnum, exit.name, exit.target.name), end=True)
                 count += 1
         player.tell("Count: %d" % count)
@@ -596,11 +596,11 @@ def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None
             raise ActionRefused(str(x))
         if vnum in base.MudObject.all_items:
             item = base.MudObject.all_items[vnum]
-            location = item.location.name if item.location else "<none>"
+            location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else "<none>"  # type: ignore
             player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, location))
         elif vnum in base.MudObject.all_livings:
             living = base.MudObject.all_livings[vnum]
-            location = living.location.name if living.location else "<none>"
+            location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
             player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, location))
         elif vnum in base.MudObject.all_locations:
             player.tell("Location with vnum %d: %r" % (vnum, base.MudObject.all_locations[vnum]))
@@ -615,7 +615,7 @@ def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None
 
 @wizcmd("vgo")
 def do_go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
-    """Teleport to a specific location given by its vnum."""
+    """Teleport to a specific location or creature, given by its vnum."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the rooms' vnum.")
     try:
@@ -624,8 +624,16 @@ def do_go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         raise ActionRefused(str(x))
     if vnum in base.MudObject.all_locations:
         teleport_to(player, base.MudObject.all_locations[vnum])
+    elif vnum in base.MudObject.all_livings:
+        living = base.MudObject.all_livings[vnum]
+        location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
+        player.tell("(creature: %s, location: %s)" % (living, location))
+        if living.location:
+            teleport_to(player, living.location)
+        else:
+            raise ActionRefused("Somehow that creature is not located anywhere you can teleport to.")
     else:
-        raise ActionRefused("No room with that circle-vnum exists.")
+        raise ActionRefused("No room or creature with that vnum exists.")
 
 
 @wizcmd("vclone")
