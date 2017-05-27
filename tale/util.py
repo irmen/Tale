@@ -13,7 +13,7 @@ import sys
 import traceback
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
-from . import lang
+from . import lang, mud_context
 from .errors import ParseError, ActionRefused, TaleError
 from .story import MoneyType
 
@@ -459,3 +459,24 @@ def excepthook(ex_type, ex_value, ex_tb):
     """An exception hook you can use for ``sys.excepthook``, to automatically print detailed tracebacks"""
     traceback = "".join(format_traceback(ex_type, ex_value, ex_tb, detailed=True, with_self=False))
     sys.stderr.write(traceback)
+
+
+def call_periodically(period: float, max_period: float=None):
+    initial = random.uniform(0.1, period)   # scatter initial calls
+
+    def mark(func):
+        func._tale_periodically = (initial, period, max_period or period)
+        return func
+
+    return mark
+
+
+def get_periodicals(obj) -> Dict[Callable, Union[float, Tuple[float, float]]]:
+    members = inspect.getmembers(type(obj), predicate=lambda x: inspect.ismethod(x) or inspect.isfunction(x))
+    periodicals = {}
+    for name, member in members:
+        period = getattr(member, "_tale_periodically", 0.0)
+        if period:
+            bound_method = member.__get__(obj)
+            periodicals[bound_method] = period
+    return periodicals

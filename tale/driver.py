@@ -14,6 +14,7 @@ import os
 import pathlib
 import pickle
 import pkgutil
+import random
 import sys
 import threading
 import time
@@ -42,11 +43,20 @@ class Deferred:
     This object captures the action that must be invoked in a way that is serializable.
     That means that you can't pass all types of callables, there are a few that are not
     serializable (lambda's and scoped functions). They will trigger an error if you use those.
+    If you set a (low_seconds, high_seconds) periodical tuple, the deferred will be called periodically
+    where the next trigger time is randomized within the given interval. 
+    The due time is given in Game Time, not in real/wall time!
     """
-    def __init__(self, due: datetime.datetime, action: Callable, vargs: Sequence[Any], kwargs: Dict[str, Any]) -> None:
-        assert due is None or isinstance(due, datetime.datetime)
+    def __init__(self, due_gametime: datetime.datetime, action: Callable, vargs: Sequence[Any], kwargs: Dict[str, Any],
+                 *, periodical: Tuple[float, float]=None) -> None:
+        assert isinstance(due_gametime, datetime.datetime)
         assert callable(action)
-        self.due = due   # in game time
+        if periodical:
+            if not len(periodical) == 2:
+                raise ValueError("periodical arg must be None or a tuple(float,float)")
+            if periodical[0] < 0.1 or periodical[1] < 0.1:
+                raise ValueError("periodial interval values must be > 0.1")
+        self.due_gametime = due_gametime   # in game time
         self.owner = getattr(action, "__self__", None)
         if isinstance(self.owner, ModuleType):
             # encode a module simply by its name
@@ -64,16 +74,17 @@ class Deferred:
         self.action = action.__name__    # store name instead of object, to make this serializable
         self.vargs = vargs
         self.kwargs = kwargs
+        self.periodical = periodical
 
     def __eq__(self, other):
         if self.__class__ == other.__class__:
-            return self.due == other.due and type(self.owner) == type(other.owner)\
+            return self.due_gametime == other.due_gametime and type(self.owner) == type(other.owner)\
                 and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
         return NotImplemented
 
     def __lt__(self, other):
         if self.__class__ == other.__class__:
-            return self.due < other.due   # deferreds must be sortable
+            return self.due_gametime < other.due_gametime   # deferreds must be sortable
         return NotImplemented
 
     def when_due(self, game_clock: util.GameDateTime, realtime: bool=False) -> datetime.timedelta:
@@ -82,7 +93,7 @@ class Deferred:
         Normally it is in terms of game-time, but if you pass realtime=True,
         you will get the real-time timedelta.
         """
-        secs = (self.due - game_clock.clock).total_seconds()
+        secs = (self.due_gametime - game_clock.clock).total_seconds()
         if realtime:
             secs = int(secs / game_clock.times_realtime)
         return datetime.timedelta(seconds=secs)
@@ -104,11 +115,19 @@ class Deferred:
         if "ctx" in inspect.signature(func).parameters:
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
         func(*self.vargs, **self.kwargs)
-        # our lifetime has ended, remove references:
-        del self.owner
-        del self.action
-        del self.kwargs
-        del self.vargs
+        if self.periodical:
+            # reschedule the same call!
+            assert self.periodical[0] > 0 and self.periodical[1] > 0
+            due = random.uniform(self.periodical[0], self.periodical[1])
+            self.due_gametime = mud_context.driver.game_clock.plus_realtime(datetime.timedelta(seconds=due))
+            mud_context.driver._enqueue_deferred(self)  # reschedule!
+            # note: when owner is deleted/destroyed, it must make sure that any deferreds from it are removed from the queue!
+        else:
+            # our lifetime has ended, remove references asap:
+            del self.owner
+            del self.action
+            del self.kwargs
+            del self.vargs
 
 
 class Driver(pubsub.Listener):
@@ -847,7 +866,7 @@ class Driver(pubsub.Listener):
             with self.deferreds_lock:
                 if self.deferreds:
                     deferred = self.deferreds[0]
-                    if deferred.due <= self.game_clock.clock:
+                    if deferred.due_gametime <= self.game_clock.clock:
                         deferred = heapq.heappop(self.deferreds)
                     else:
                         deferred = None
@@ -1125,14 +1144,17 @@ class Driver(pubsub.Listener):
         if not exit.target:
             self.unbound_exits.append(exit)
 
-    def defer(self, due: Union[datetime.datetime, float], action: Callable, *vargs: Any, **kwargs: Any) -> None:
+    DeferDueType = Union[datetime.datetime, float, Tuple[float, float, float]]
+
+    def defer(self, due: DeferDueType, action: Callable, *vargs: Any, **kwargs: Any) -> Deferred:
         """
         Register a deferred callable action (optionally with arguments).
         The vargs and the kwargs all must be serializable.
-        Note that the due time is datetime.datetime *in game time* (not real time!)
-        when the deferred should trigger. It can also be a floating point number, meaning the number
-        of real-time seconds after the current time.
-        Also note that the deferred gets a kwarg 'ctx' set to a Context object, if it has
+        Note that the due time can be one of:
+        -  datetime.datetime *in game time* (not real time!) when the deferred should trigger.
+        -  float, meaning the number of real-time seconds after the current time (minimum: 0.1 sec)
+        -  tuple(initial_secs, low_secs, high_secs), meaning it is periodical within the given time interval.
+        The deferred gets a kwarg 'ctx' set to a Context object, if it has
         a 'ctx' argument in its signature. (If not, that's okay too)
         Receiving the context is often useful, for instance you can register a new
         deferred on the ctx.driver without having to access a global driver object.
@@ -1141,11 +1163,24 @@ class Driver(pubsub.Listener):
         assert callable(action)
         if isinstance(due, datetime.datetime):
             assert due >= self.game_clock.clock
+            deferred = Deferred(due, action, vargs, kwargs)
+        elif isinstance(due, tuple):
+            due, periodical_low, periodical_high = due
+            if due < 0.1 or periodical_low < 0.1 or periodical_high < 0.1:
+                raise ValueError("due time and periodical times must be >= 0.1  action: %s" % action)
+            assert periodical_high >= periodical_low
+            due = self.game_clock.plus_realtime(datetime.timedelta(seconds=due))
+            deferred = Deferred(due, action, vargs, kwargs, periodical=(periodical_low, periodical_high))
         else:
             due = float(due)
-            assert due >= 0.0
+            if due < 0.1:
+                raise ValueError("due time must be >= 0.1  action: %s" % action)
             due = self.game_clock.plus_realtime(datetime.timedelta(seconds=due))
-        deferred = Deferred(due, action, vargs, kwargs)
+            deferred = Deferred(due, action, vargs, kwargs)
+        self._enqueue_deferred(deferred)
+        return deferred
+
+    def _enqueue_deferred(self, deferred: Deferred) -> None:
         with self.deferreds_lock:
             heapq.heappush(self.deferreds, deferred)
 

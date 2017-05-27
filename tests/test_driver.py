@@ -41,7 +41,7 @@ class TestDeferreds(unittest.TestCase):
         d4 = the_driver.Deferred(t1, os.getcwd, None, None)
         d5 = the_driver.Deferred(t3, os.getcwd, None, None)
         deferreds = sorted([d1, d2, d3, d4, d5])
-        dues = [d.due for d in deferreds]
+        dues = [d.due_gametime for d in deferreds]
         self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def test_numeric_deferreds(self):
@@ -53,7 +53,7 @@ class TestDeferreds(unittest.TestCase):
             driver.defer("blerp", thing.move)
         driver.defer(3601, thing.move)
         deferred = driver.deferreds[0]
-        after = deferred.due - now
+        after = deferred.due_gametime - now
         self.assertEqual(3601, after.seconds)
 
     def test_datetime_deferreds(self):
@@ -64,7 +64,7 @@ class TestDeferreds(unittest.TestCase):
         due = driver.game_clock.plus_realtime(datetime.timedelta(seconds=3601))
         driver.defer(due, thing.move)
         deferred = driver.deferreds[0]
-        after = deferred.due - now
+        after = deferred.due_gametime - now
         self.assertEqual(3601, after.seconds)
 
     def testHeapq(self):
@@ -82,25 +82,26 @@ class TestDeferreds(unittest.TestCase):
         heapq.heapify(heap)
         dues = []
         while heap:
-            dues.append(heapq.heappop(heap).due)
+            dues.append(heapq.heappop(heap).due_gametime)
         self.assertEqual([t1, t2, t3, t4, t5], dues)
 
     def testCallable(self):
         def scoped_function():
             pass
         t = Thing()
-        d = the_driver.Deferred(None, t.append, [42], None)
+        due = datetime.datetime.now()
+        d = the_driver.Deferred(due, t.append, [42], None)
         ctx = tale.util.Context(driver=FakeDriver(), clock=None, config=None, player_connection=None)
         d(ctx=ctx)
         self.assertEqual([42], t.x)
-        d = the_driver.Deferred(None, module_level_func, [], None)
+        d = the_driver.Deferred(due, module_level_func, [], None)
         d(ctx=ctx)
-        d = the_driver.Deferred(None, module_level_func_without_ctx, [], None)
+        d = the_driver.Deferred(due, module_level_func_without_ctx, [], None)
         d(ctx=ctx)
         with self.assertRaises(ValueError):
-            the_driver.Deferred(None, scoped_function, [], None)
+            the_driver.Deferred(due, scoped_function, [], None)
         with self.assertRaises(ValueError):
-            d = the_driver.Deferred(None, lambda a, ctx=None: 1, [42], None)
+            d = the_driver.Deferred(due, lambda a, ctx=None: 1, [42], None)
 
     def testSerializable(self):
         target = Thing()
@@ -142,6 +143,28 @@ class TestDeferreds(unittest.TestCase):
         self.assertEqual(datetime.timedelta(seconds=580), result)
         result = d.when_due(game_clock, True)   # realtime
         self.assertEqual(datetime.timedelta(seconds=58), result)
+
+    def testTimevalueRanges(self):
+        with self.assertRaises(AssertionError):
+            the_driver.Deferred(1, os.getcwd, None, None)
+        the_driver.Deferred(datetime.datetime.now(), os.getcwd, None, None)
+        with self.assertRaises(ValueError):
+            the_driver.Deferred(datetime.datetime.now(), os.getcwd, None, None, periodical=(0.09, 0.09))
+        driver = the_driver.Driver()
+        driver.game_clock = tale.util.GameDateTime(datetime.datetime.now())
+        driver.defer(0.9, os.getcwd)
+        driver.defer(1.0, os.getcwd)
+        driver.defer(datetime.datetime.now(), os.getcwd)
+        with self.assertRaises(ValueError):
+            driver.defer((0.09, 0.01, 0.09), os.getcwd)
+        with self.assertRaises(ValueError):
+            driver.defer((0.01, 1, 2), os.getcwd)
+        with self.assertRaises(ValueError):
+            driver.defer((1, 0.02, 0.03), os.getcwd)
+        d = driver.defer((1, 2, 3), os.getcwd)
+        self.assertEqual("getcwd", d.action)
+        self.assertTrue(d.owner.startswith("module:"))
+        self.assertEqual((2, 3), d.periodical)
 
 
 @cmd("test1")

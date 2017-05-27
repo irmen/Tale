@@ -423,11 +423,12 @@ def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     config = ctx.config
     player.tell("<bright>Pending actions overview.</>", end=True)
     num_shown = min(50, len(driver.deferreds))
-    player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)" %
+    player.tell("Deferreds (%d, showing %d):   (server tick: %.1f sec)  P = periodical" %
                 (len(driver.deferreds), num_shown, config.server_tick_time), end=True)
-    txt = ["<ul>  due   <dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
+    txt = ["<ul>  due   <dim>|</><ul>P<dim>|</><ul> function            <dim>|</><ul> owner                       </>"]
     for d in sorted(driver.deferreds)[:50]:
-        txt.append("%-7s <dim>|</> %-20s<dim>|</> %s" % (d.when_due(ctx.clock, realtime=True), d.action, d.owner))
+        txt.append("%-7s <dim>|</>%s<dim>|</> %-20s<dim>|</> %s"
+                   % (d.when_due(ctx.clock, realtime=True), "*" if d.periodical else " ", d.action, d.owner))
     txt.append("")
     player.tell("\n".join(txt), format=False)
 

@@ -282,6 +282,32 @@ class TestUtil(unittest.TestCase):
             func(42, actor=actor2)
         func(42, actor=actor3)
 
+    def test_periodical(self):
+        def func(): pass
+        util.call_periodically(42)(func)
+        initial, low, high = func._tale_periodically
+        self.assertEqual(42, low)
+        self.assertEqual(42, high)
+        self.assertGreater(initial, 0)
+        self.assertLess(initial, low)
+        util.call_periodically(3, 66)(func)
+        initial, low, high = func._tale_periodically
+        self.assertEqual(3, low)
+        self.assertEqual(66, high)
+        self.assertGreater(initial, 0)
+        self.assertLess(initial, low)
+        class X:
+            @util.call_periodically(9,99)
+            def method(self): pass
+        x = X()
+        periodicals = util.get_periodicals(x)
+        self.assertEqual(1, len(periodicals))
+        periodical = periodicals.popitem()
+        self.assertEqual(x.method, periodical[0])
+        self.assertEqual(9, periodical[1][1])
+        self.assertEqual(99, periodical[1][2])
+        self.assertEqual({}, util.get_periodicals(self))
+
 
 class TestVfs(unittest.TestCase):
     def test_resource_text(self):

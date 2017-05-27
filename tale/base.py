@@ -116,7 +116,11 @@ class MudObject:
         # any custom verbs that need to be recognised (verb->docstring mapping),
         # verb handling is done via handle_verb() callbacks.
         self.verbs = {}  # type: Dict[str, str]
+        # register all periodical tagged methods
         self.init()
+        for func, period in util.get_periodicals(self).items():
+            assert len(period) == 3
+            mud_context.driver.defer(period, func)
 
     def init(self) -> None:
         """
