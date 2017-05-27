@@ -957,7 +957,7 @@ class Driver(pubsub.Listener):
                 parse_error = "That doesn't make much sense."
                 handled = False
                 if parsed.verb in custom_verbs:
-                    # note: can't deal with yields directly, use errors.AsyncDialog in handle_verb to initiate a dialog
+                    # @todo note: can't deal with yields directly, use errors.AsyncDialog in handle_verb to initiate a dialog
                     handled = player.location.handle_verb(parsed, player)
                     if handled:
                         topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))

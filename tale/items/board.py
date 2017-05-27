@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import json
 from collections import deque
-from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence
+from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence, Optional
 
 from .. import lang, mud_context
 from ..base import Item, Living
@@ -72,34 +72,43 @@ class BulletinBoard(Item):
         raise TaleError("you cannot set the description of a BulletinBoard because it is dynamic")
 
     def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
+        async_dialog = None
         if parsed.verb == "read":
             if parsed.who_info and self in parsed.who_info:
                 self.do_list_messages(actor)
-                return True
             if parsed.args:
                 self.do_read_message(parsed.args[0], actor)
-                return True
+            else:
+                return False
         elif parsed.verb == "reply":
             if parsed.who_info and self in parsed.who_info:
                 raise ParseError("Reply to which message?")
             if parsed.args:
-                self.do_reply_message(parsed.args[0], actor)
-                return True
+                async_dialog = self.do_reply_message(parsed.args[0], actor)
+            else:
+                return False
         elif parsed.verb == "remove":
             if parsed.who_info and self in parsed.who_info:
                 raise ParseError("Remove which message?")
             if parsed.args:
                 self.do_remove_message(parsed.args[0], actor)
-                return True
+            else:
+                return False
         elif parsed.verb in ("post", "write"):
             if not parsed.who_info or self in parsed.who_info:
-                self.do_write_message(actor)
-                return True
+                async_dialog = self.do_write_message(actor)
+            else:
+                return False
         elif parsed.verb == "list":
             if not parsed.who_info or self in parsed.who_info:
                 self.do_list_messages(actor)
-                return True
-        return False
+            else:
+                return False
+        else:
+            return False
+        if async_dialog:
+            raise AsyncDialog(async_dialog)   # @todo yield from not yet possible here
+        return True
 
     def do_list_messages(self, actor: Living) -> None:
         actor.tell_others("{Title} studies the %s." % self.title)
@@ -130,11 +139,11 @@ class BulletinBoard(Item):
                 raise ActionRefused("That message doesn't exist.")
         raise ActionRefused("It is unclear what number you mean.")
 
-    def do_write_message(self, actor: Living) -> None:
+    def do_write_message(self, actor: Living) -> Generator:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
-        raise AsyncDialog(self.dialog_write_message(actor, None))
+        yield from self.dialog_write_message(actor, None)
 
     def dialog_write_message(self, actor: Living, in_reply_to: PostType=None) -> Generator[Tuple[str, Any], str, None]:
         if in_reply_to:
@@ -183,12 +192,12 @@ class BulletinBoard(Item):
             return subj
         raise ValueError("You need to type something.")
 
-    def do_reply_message(self, arg: str, actor: Living) -> None:
+    def do_reply_message(self, arg: str, actor: Living) -> Generator:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
         num, post = self._get_post(arg)
         actor.tell_others("{Title} is writing a message on the %s." % self.title)
-        raise AsyncDialog(self.dialog_write_message(actor, post))
+        yield from self.dialog_write_message(actor, post)
 
     def do_remove_message(self, arg: str, actor: Living) -> None:
         if self.readonly and "wizard" not in actor.privileges:
@@ -208,6 +217,7 @@ class BulletinBoard(Item):
         actor.tell("<ul>Subject: '{subject}' by {author} on {date}. It reads:</>".format(**post), end=True)
         for paragraph in post["text"].split("\n\n"):
             actor.tell(paragraph, end=True)
+        return None
 
     def load(self) -> None:
         """Load persisted messages from the datafile. Note: only the posts are loaded from the datafile, not the descriptive texts"""

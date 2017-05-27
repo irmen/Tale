@@ -67,7 +67,7 @@ class LocationIntegrityError(TaleError):
 
 
 class AsyncDialog(TaleFlowControlException):
-    """Command execution needs to continue with an async dialog"""
+    """Command execution needs to continue with the async dialog generator given as argument."""
     # @todo replace by proper generator and yield from ?
     def __init__(self, dialog: Generator[Tuple[str, Any], str, None]) -> None:
         if not inspect.isgenerator(dialog):
