@@ -87,11 +87,6 @@ Tale API
 .. automodule:: tale.cmds
     :members:
 
-:mod:`tale.cmds.decorators` --- Command definition utilities
-------------------------------------------------------------
-.. automodule:: tale.cmds.decorators
-    :members:
-
 :mod:`tale.cmds.normal` --- Normal player commands
 --------------------------------------------------
 .. automodule:: tale.cmds.normal
