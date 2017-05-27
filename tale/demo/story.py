@@ -67,7 +67,6 @@ if __name__ == "__main__":
         cmdline_args.insert(1, str(gamedir))
         run_from_cmdline(cmdline_args)
     else:
-        # @todo make it possible to load the built-in demo story from zip file as well
         print("Cannot load the story files from:", gamedir, file=sys.stderr)
         print("\nIt looks like you tried running the built-in demo story, "
               "but the tale library has been installed as an 'egg' or zip-file "

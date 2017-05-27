@@ -149,6 +149,7 @@ class Driver(pubsub.Listener):
         self.resources = None   # type: vfs.VirtualFileSystem
         self.user_resources = None  # type: vfs.VirtualFileSystem
         self.story = None   # type: StoryBase
+        self.restricted = False   # restricted mud mode? (no new players allowed)
         self.game_clock = None    # type: util.GameDateTime
         self.__stop_mainloop = True
         # playerconnections that wait for input; maps connection to tuple (dialog, validator, echo_input)
@@ -162,7 +163,7 @@ class Driver(pubsub.Listener):
         topic_async_dialogs.subscribe(self)
 
     def start(self, game: str, mode: GameMode=GameMode.IF, gui: bool=False, web: bool=False,
-              wizard: bool=False, delay: int=DEFAULT_SCREEN_DELAY) -> None:
+              wizard: bool=False, delay: int=DEFAULT_SCREEN_DELAY, restricted: bool=False) -> None:
         """Start the driver from a parsed set of arguments"""
         gamepath = pathlib.Path(game)
         if gamepath.is_dir():
@@ -179,6 +180,7 @@ class Driver(pubsub.Listener):
         import story
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
+        self.restricted = restricted
         self.story = story.Story()
         self.story._verify(self)
         if mode not in self.story.config.supported_modes:
@@ -266,6 +268,8 @@ class Driver(pubsub.Listener):
             wsgi_thread.daemon = True
             wsgi_thread.start()
             self.__print_game_intro(None)
+            if self.restricted:
+                print("\n* Restricted mode: no new players allowed *\n")
             print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")   # type: ignore
             self.__startup_main_loop(None)
 
@@ -424,10 +428,15 @@ class Driver(pubsub.Listener):
                 self.mud_accounts.get(name)
                 password = yield "input-noecho", "Please type in your password."
             except KeyError:
+                if self.restricted:
+                    conn.player.tell("<bright>We're sorry, the mud is running in restricted mode at the moment. "
+                                     "It is not allowed to create new characters right now. Please try again later.</bright>")
+                    continue
                 conn.player.tell("'<player>%s</>' is the name of a new character." % name)
                 if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
                     continue
                 # self-service account creation
+                # @todo use the CharacterBuilder
                 conn.player.tell("\n")
                 conn.player.tell("<ul><bright>New character creation: '%s'.</>" % name, end=True)
                 password = yield "input-noecho", ("Please type in the desired password.", accounts.MudAccounts.accept_password)

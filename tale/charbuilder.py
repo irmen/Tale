@@ -40,6 +40,7 @@ class PlayerNaming:
 
 
 class CharacterBuilder:
+    """Create a new player character interactively."""
     def __init__(self, conn: PlayerConnection, continue_dialog: Callable[[PlayerNaming], None]) -> None:
         self.conn = conn
         self.continue_dialog = continue_dialog

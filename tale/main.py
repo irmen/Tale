@@ -26,6 +26,7 @@ def parse_cmdline(command_line_args: Sequence[str]) -> Dict[str, Any]:
     parser.add_argument('-m', '--mode', type=str, help='game mode, default=if', default="if", choices=["if", "mud"])
     parser.add_argument('-i', '--gui', help='gui interface', action='store_true')
     parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
+    parser.add_argument('-r', '--restricted', help='restricted mud mode; do not allow new players', action='store_true')
     parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
     return vars(parser.parse_args(command_line_args))
 
