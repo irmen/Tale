@@ -88,7 +88,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         session = environ["wsgi.session"]
         if "player_connection" not in session:
             # create a new connection
-            conn = self.driver._connect_mud_player()   # type: ignore
+            conn = self.driver._connect_player("web", 0)
             session["player_connection"] = conn
         return super().wsgi_handle_story(environ, parameters, start_response)
 

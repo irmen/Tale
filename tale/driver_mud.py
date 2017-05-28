@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import threading
-from typing import Union, Generator, Dict, Tuple
+from typing import Union, Generator
 from .parseresult import ParseResult
 from .story import GameMode
 from . import accounts
@@ -34,16 +34,10 @@ class MudDriver(driver.Driver):
         self.restricted = restricted   # restricted mud mode? (no new players allowed)
         self.mud_accounts = None   # type: accounts.MudAccounts
 
-    def start(self, game: str, mode: GameMode=GameMode.IF, gui: bool=False, web: bool=False,
-              wizard: bool=False, delay: int=0, restricted: bool=False) -> None:
-        if restricted != self.restricted:
-            raise errors.TaleError("restricted mode mismatch in driver start")
-        super().start(game, mode, gui, web, wizard, delay, restricted)
-        accounts_db_file = self.user_resources.validate_path("useraccounts.sqlite")
-        self.mud_accounts = accounts.MudAccounts(accounts_db_file)
-
     def start_mud_webserver(self):
         # Driver runs as main thread, wsgi webserver runs in background thread
+        accounts_db_file = self.user_resources.validate_path("useraccounts.sqlite")
+        self.mud_accounts = accounts.MudAccounts(accounts_db_file)
         base._limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
         wsgi_server = TaleMudWsgiApp.create_app_server(self)
         wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)  # type: ignore
@@ -73,7 +67,9 @@ class MudDriver(driver.Driver):
     def do_save(self, player: Player) -> None:
         raise errors.ActionRefused("Currently, saving is not supported in MUD mode.")
 
-    def _connect_mud_player(self) -> PlayerConnection:
+    def _connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
+        if player_io_type != "web":
+            raise ValueError("mud connections can only be done via web interface")
         connection = PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
@@ -248,7 +244,7 @@ class MudDriver(driver.Driver):
         """
         loop_duration = 0.0
         previous_server_tick = 0.0
-        while not self.must_stop_mainloop:
+        while not self._stop_mainloop:
             pubsub.sync("driver-async-dialogs")
             for conn in self.all_players.values():
                 conn.write_output()

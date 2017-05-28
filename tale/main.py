@@ -17,7 +17,8 @@ from .story import GameMode
 
 def get_driver(game_mode: GameMode, restricted: bool=False) -> Driver:
     if game_mode == GameMode.IF:
-        return Driver()
+        from .driver_if import IFDriver
+        return IFDriver()
     elif game_mode == GameMode.MUD:
         from .driver_mud import MudDriver
         return MudDriver(restricted)
@@ -41,7 +42,10 @@ def run_from_cmdline(cmdline: Sequence[str]) -> None:
     args = parser.parse_args(cmdline)
     try:
         game_mode = GameMode(args.mode)
-        get_driver(game_mode, args.restricted).start(**vars(args))
+        restricted = args.restricted
+        kwargs = vars(args)
+        del kwargs["restricted"]
+        get_driver(game_mode, restricted).start(**kwargs)
     except:
         if args.gui:
             tb = traceback.format_exc()
