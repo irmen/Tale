@@ -2,15 +2,11 @@ import os
 import sys
 
 try:
-    import tale.driver
-    tale_from_lib = True
+    import tale.main
 except ImportError:
-    tale_from_lib = False
-
-if not tale_from_lib:
     if os.path.exists("../../tale/__init__.py"):
         sys.path.insert(0, os.path.abspath("../.."))
-        import tale.driver
+        import tale.main
     else:
         import tkinter
         import tkinter.messagebox as tkmsgbox
@@ -19,4 +15,4 @@ if not tale_from_lib:
         tkmsgbox.showerror("Installation error", "Cannot launch the game:\nTale is not properly installed.", master=root)
         raise SystemExit()
 
-tale.driver.Driver().start(game=".", gui=True)
+tale.main.run_from_cmdline(["--gui", "--game", "."])

@@ -7,14 +7,23 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import argparse
 import sys
 import traceback
-from typing import Dict, Any, Sequence
+from typing import Sequence
 
 from . import __version__
 from .driver import Driver
 from .tio import DEFAULT_SCREEN_DELAY
+from .story import GameMode
 
 
-def parse_cmdline(command_line_args: Sequence[str]) -> Dict[str, Any]:
+def get_driver(game_mode: GameMode, restricted: bool=False) -> Driver:
+    if game_mode == GameMode.IF:
+        return Driver()
+    elif game_mode == GameMode.MUD:
+        from .driver_mud import MudDriver
+        return MudDriver(restricted)
+
+
+def run_from_cmdline(cmdline: Sequence[str]) -> None:
     parser = argparse.ArgumentParser(description="""
         Tale framework %s game driver. Use this to launch a game and specify some settings.
         Sometimes the game will provide its own startup script that invokes this automatically.
@@ -28,15 +37,12 @@ def parse_cmdline(command_line_args: Sequence[str]) -> Dict[str, Any]:
     parser.add_argument('-w', '--web', help='web browser interface', action='store_true')
     parser.add_argument('-r', '--restricted', help='restricted mud mode; do not allow new players', action='store_true')
     parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
-    return vars(parser.parse_args(command_line_args))
-
-
-def run_from_cmdline(cmdline: Sequence[str]) -> None:
-    kwargs = parse_cmdline(cmdline)
+    args = parser.parse_args(cmdline)
     try:
-        Driver().start(**kwargs)
+        game_mode = GameMode(args.mode)
+        get_driver(game_mode, args.restricted).start(**vars(args))
     except:
-        if kwargs["gui"]:
+        if args.gui:
             tb = traceback.format_exc()
             from .tio import tkinter_io
             tkinter_io.show_error_dialog("Exception during start", "An error occurred while starting up the game:\n\n" + tb)
