@@ -51,9 +51,9 @@ class IFDriver(driver.Driver):
         if self.wizard_override:
             connection.player.privileges.add("wizard")
         # create the login dialog
-        driver.topic_async_dialogs.send((connection, self.login_dialog_if(connection)))
+        driver.topic_async_dialogs.send((connection, self._login_dialog_if(connection)))
         # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
-        driver_thread = threading.Thread(name="driver", target=self._game_loop, args=(connection,))
+        driver_thread = threading.Thread(name="driver", target=self._main_loop_wrapper, args=(connection,))
         driver_thread.daemon = True
         driver_thread.start()
         connection.singleplayer_mainloop()     # this doesn't return!
@@ -105,13 +105,12 @@ class IFDriver(driver.Driver):
         self.print_game_intro(connection)
         return connection
 
-    def login_dialog_if(self, conn: PlayerConnection) -> Generator:
+    def _login_dialog_if(self, conn: PlayerConnection) -> Generator:
         # Interactive fiction (singleplayer): create a player. This is a generator function (async input).
         # Initialize it directly from the story's configuration, load a saved game,
         # or let the user create a new player manually.
         # Be sure to always reference conn.player here (and not get a cached copy),
         # because it will get replaced when loading a saved game!
-        assert self.story.config.server_mode == GameMode.IF
         if not self.story.config.savegames_enabled:
             load_saved_game = False
         else:
@@ -119,7 +118,7 @@ class IFDriver(driver.Driver):
             load_saved_game = yield "input", ("Do you want to load a saved game ('<bright>n</>' will start a new game)?", lang.yesno)
         conn.player.tell("\n")
         if load_saved_game:
-            loaded_player = self.load_saved_game(conn.player)
+            loaded_player = self._load_saved_game(conn.player)
             if loaded_player:
                 conn.player = loaded_player
                 conn.player.tell("\n")
@@ -168,7 +167,13 @@ class IFDriver(driver.Driver):
         player.look(short=False)  # force a 'look' command to get our bearings
         conn.write_output()
 
-    def main_loop_singleplayer(self, conn: PlayerConnection) -> None:
+    def disconnect_idling(self, conn: PlayerConnection):
+        pass
+
+    def disconnect_player(self, conn: PlayerConnection):
+        raise errors.TaleError("Disconnecting a player should not happen in single player IF mode. Please report this bug.")
+
+    def main_loop(self, conn: PlayerConnection) -> None:
         """
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
@@ -261,7 +266,7 @@ class IFDriver(driver.Driver):
             self.server_loop_durations.append(loop_duration)
             conn.write_output()
 
-    def load_saved_game(self, player: Player) -> Optional[Player]:
+    def _load_saved_game(self, player: Player) -> Optional[Player]:
         # @todo fix that all mudobjects are duplicated when loading a pickle save game.
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]

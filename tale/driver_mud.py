@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import threading
-from typing import Union, Generator, Dict, Tuple
+from typing import Union, Generator, Dict, Tuple, Optional
 from .parseresult import ParseResult
 from .story import GameMode
 from . import accounts
@@ -35,10 +35,6 @@ class MudDriver(driver.Driver):
         self.mud_accounts = None   # type: accounts.MudAccounts
 
     def start_main_loop(self):
-        self.start_mud_webserver()
-        self._game_loop(None)   # this doesn't return!
-
-    def start_mud_webserver(self):
         # Driver runs as main thread, wsgi webserver runs in background thread
         accounts_db_file = self.user_resources.validate_path("useraccounts.sqlite")
         self.mud_accounts = accounts.MudAccounts(accounts_db_file)
@@ -51,6 +47,7 @@ class MudDriver(driver.Driver):
         if self.restricted:
             print("\n* Restricted mode: no new players allowed *\n")
         print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")  # type: ignore
+        self._main_loop_wrapper(None)   # this doesn't return!
 
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:
         """Prints the Message-Of-The-Day file, if present."""
@@ -90,10 +87,21 @@ class MudDriver(driver.Driver):
             driver.topic_async_dialogs.send((connection, self._login_dialog_mud_create_admin(connection)))
             return connection
         # create the login dialog
-        driver.topic_async_dialogs.send((connection, self.login_dialog_mud(connection)))
+        driver.topic_async_dialogs.send((connection, self._login_dialog_mud(connection)))
         return connection
 
-    def disconnect_mud_player(self, conn_or_player: Union[PlayerConnection, Player]) -> None:
+    def disconnect_idling(self, conn: PlayerConnection) -> None:
+        idle_limit = 3 * 60 * 60 if "wizard" in conn.player.privileges else 30 * 60
+        if conn.idle_time > idle_limit:
+            idle_limit_minutes = int(idle_limit / 60)
+            conn.player.tell("\n")
+            conn.player.tell("<it><rev>Automatic logout:  You have been logged out because "
+                             "you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
+            conn.player.tell("\n")
+            conn.player.tell_others("{Title} has been idling around for too long.")
+            self.disconnect_player(conn)  # remove players who stay idle too long
+
+    def disconnect_player(self, conn_or_player: Union[PlayerConnection, Player]) -> None:
         # note: conn can be corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
         if isinstance(conn_or_player, PlayerConnection):
             name = conn_or_player.player.name
@@ -113,7 +121,6 @@ class MudDriver(driver.Driver):
         self.defer(1, conn.destroy)
 
     def _login_dialog_mud_create_admin(self, conn: PlayerConnection) -> Generator:
-        assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. There is no admin user registered. "
                     "You'll have to create the initial admin user to be able to start the mud.</>")
@@ -137,10 +144,9 @@ class MudDriver(driver.Driver):
         self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
-        yield from self.login_dialog_mud(conn)  # continue with the normal login dialog
+        yield from self._login_dialog_mud(conn)  # continue with the normal login dialog
 
-    def login_dialog_mud(self, conn: PlayerConnection) -> Generator:
-        assert self.story.config.server_mode == GameMode.MUD
+    def _login_dialog_mud(self, conn: PlayerConnection) -> Generator:
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. "
@@ -194,7 +200,7 @@ class MudDriver(driver.Driver):
                     state = existing_player.__getstate__()
                     state["name"] = conn.player.name    # we can only take the real name after existing player has been kicked out
                     existing_player_location = existing_player.location
-                    self.disconnect_mud_player(existing_player)
+                    self.disconnect_player(existing_player)
                     ctx = util.Context(self, self.game_clock, self.story.config, None)
                     # mr. Smith move: delete the other player and restore its properties in us
                     existing_player.destroy(ctx)
@@ -241,7 +247,7 @@ class MudDriver(driver.Driver):
         conn.player.look(short=False)  # force a 'look' command to get our bearings
         # after this, the generator (dialog) ends and we drop down into the regular command loop
 
-    def main_loop_multiplayer(self) -> None:
+    def main_loop(self, conn: Optional[PlayerConnection]) -> None:
         """
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
@@ -292,7 +298,7 @@ class MudDriver(driver.Driver):
                         continue
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
-                        driver.topic_pending_tells.send(lambda conn=conn: self.disconnect_mud_player(conn))
+                        driver.topic_pending_tells.send(lambda conn=conn: self.disconnect_player(conn))
                     except Exception:
                         tb = "".join(util.format_traceback())
                         txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
@@ -369,5 +375,5 @@ class LimboReaper(base.Living):
                 except KeyError:
                     pass   # already gone
                 else:
-                    ctx.driver.disconnect_mud_player(conn)
+                    ctx.driver.disconnect_player(conn)
             self.candidates[candidate] = (first_seen, shown)

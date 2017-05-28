@@ -36,6 +36,55 @@ topic_pending_tells = pubsub.topic("driver-pending-tells")
 topic_async_dialogs = pubsub.topic("driver-async-dialogs")
 
 
+class Commands:
+    """
+    Some utility functions to manage the registered commands.
+    """
+    def __init__(self) -> None:
+        self.commands_per_priv = {None: {}}    # type: Dict[str, Dict[str, Callable]]
+        self.no_soul_parsing = set()   # type: Set[str]
+
+    def add(self, verb: str, func: Callable, privilege: str=None) -> None:
+        self.validatefunc(func)
+        for commands in self.commands_per_priv.values():
+            if verb in commands:
+                raise ValueError("command defined more than once: " + verb)
+        self.commands_per_priv.setdefault(privilege, {})[verb] = func
+
+    def override(self, verb: str, func: Callable, privilege: str=None) -> Callable:
+        self.validatefunc(func)
+        if verb in self.commands_per_priv[privilege]:
+            existing = self.commands_per_priv[privilege][verb]
+            self.commands_per_priv[privilege][verb] = func
+            return existing
+        raise KeyError("command not defined: " + verb)
+
+    def validatefunc(self, func: Callable) -> None:
+        if not hasattr(func, "is_tale_command_func"):
+            raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
+
+    def get(self, privileges: Iterable[str]) -> Dict[str, Callable]:
+        result = dict(self.commands_per_priv[None])  # always include the cmds for None
+        for priv in privileges:
+            if priv in self.commands_per_priv:
+                result.update(self.commands_per_priv[priv])
+        return result
+
+    def adjust_available_commands(self, server_mode: GameMode) -> None:
+        # disable commands flagged with the given game_mode
+        # disable soul verbs flagged with override
+        # mark non-soul commands
+        for commands in self.commands_per_priv.values():
+            for cmd, func in list(commands.items()):
+                disabled_mode = getattr(func, "disabled_in_mode", None)
+                if server_mode == disabled_mode:
+                    del commands[cmd]
+                elif getattr(func, "overrides_soul", False):
+                    del verbdefs.VERBS[cmd]
+                if getattr(func, "no_soul_parse", False):
+                    self.no_soul_parsing.add(cmd)
+
+
 @total_ordering
 class Deferred:
     """
@@ -146,7 +195,7 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.server_loop_durations = collections.deque(maxlen=10)    # type: MutableSequence[float]
         self.commands = Commands()
-        self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object # @todo move to mud drvier
+        self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
         self.zones = None       # type: ModuleType
         self.moneyfmt = None    # type: util.MoneyFormatter
         self.resources = None   # type: vfs.VirtualFileSystem
@@ -243,22 +292,16 @@ class Driver(pubsub.Listener):
     def connect_player(self, player_io_type: str, line_delay: int) -> player.PlayerConnection:
         raise NotImplementedError
 
-    def _game_loop(self, conn: Optional[player.PlayerConnection]) -> None:
-        # This is the main game loop that the driver runs
+    def _main_loop_wrapper(self, conn: Optional[player.PlayerConnection]) -> None:
+        # This is a wrapper around the main game loop that the driver runs
         # (it may or may not run in a background thread depending on the driver mode)
+        # The wrapper is for error handling only.
         self._stop_mainloop = False
         num_critical_errors = 0
         time_of_last_critical_error = 0.0
         while not self._stop_mainloop:
             try:
-                if self.story.config.server_mode == GameMode.IF:
-                    # single player interactive fiction event loop
-                    while not self._stop_mainloop:
-                        self.main_loop_singleplayer(conn)
-                else:
-                    # multi player mud event loop
-                    while not self._stop_mainloop:
-                        self.main_loop_multiplayer()
+                self.main_loop(conn)
             except KeyboardInterrupt:
                 # a ctrl-c will exit the server
                 print("* break - stopping server loop")
@@ -280,6 +323,9 @@ class Driver(pubsub.Listener):
                 print("ERROR IN DRIVER MAINLOOP:\n", "".join(util.format_traceback()), file=sys.stderr)
                 for conn in self.all_players.values():
                     conn.critical_error()
+
+    def main_loop(self, conn: Optional[player.PlayerConnection]):
+        raise NotImplementedError
 
     def _stop_driver(self) -> None:
         """
@@ -430,19 +476,11 @@ class Driver(pubsub.Listener):
         pubsub.sync()
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
-                idle_limit = 3 * 60 * 60 if "wizard" in conn.player.privileges else 30 * 60
-                if self.story.config.server_mode == GameMode.MUD and conn.idle_time > idle_limit:
-                    idle_limit_minutes = int(idle_limit / 60)
-                    conn.player.tell("\n")
-                    conn.player.tell("<it><rev>Automatic logout:  You have been logged out because "
-                                     "you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
-                    conn.player.tell("\n")
-                    conn.player.tell_others("{Title} has been idling around for too long.")
-                    self._disconnect_mud_player(conn)   # remove players who stay idle too long
+                self.disconnect_idling(conn)
                 conn.write_output()
             else:
                 # disconnect corrupt player connection
-                self._disconnect_mud_player(conn)
+                self.disconnect_player(conn)
         # clean up idle wiretap topics
         topicinfo = pubsub.pending()
         for topicname in topicinfo:
@@ -450,6 +488,12 @@ class Driver(pubsub.Listener):
                 events, idle_time, subbers = topicinfo[topicname]
                 if events == 0 and not subbers and idle_time > 30:
                     pubsub.topic(topicname).destroy()
+
+    def disconnect_idling(self, conn: player.PlayerConnection) -> None:
+        raise NotImplementedError
+
+    def disconnect_player(self, conn: player.PlayerConnection) -> None:
+        raise NotImplementedError
 
     def _process_player_command(self, cmd: str, conn: player.PlayerConnection) -> None:
         if not cmd:
@@ -696,52 +740,3 @@ class Driver(pubsub.Listener):
         hours, seconds = divmod(uptime.total_seconds(), 3600)
         minutes, seconds = divmod(seconds, 60)
         return int(hours), int(minutes), int(seconds)
-
-
-class Commands:
-    """
-    Some utility functions to manage the registered commands.
-    """
-    def __init__(self) -> None:
-        self.commands_per_priv = {None: {}}    # type: Dict[str, Dict[str, Callable]]
-        self.no_soul_parsing = set()   # type: Set[str]
-
-    def add(self, verb: str, func: Callable, privilege: str=None) -> None:
-        self.validatefunc(func)
-        for commands in self.commands_per_priv.values():
-            if verb in commands:
-                raise ValueError("command defined more than once: " + verb)
-        self.commands_per_priv.setdefault(privilege, {})[verb] = func
-
-    def override(self, verb: str, func: Callable, privilege: str=None) -> Callable:
-        self.validatefunc(func)
-        if verb in self.commands_per_priv[privilege]:
-            existing = self.commands_per_priv[privilege][verb]
-            self.commands_per_priv[privilege][verb] = func
-            return existing
-        raise KeyError("command not defined: " + verb)
-
-    def validatefunc(self, func: Callable) -> None:
-        if not hasattr(func, "is_tale_command_func"):
-            raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
-
-    def get(self, privileges: Iterable[str]) -> Dict[str, Callable]:
-        result = dict(self.commands_per_priv[None])  # always include the cmds for None
-        for priv in privileges:
-            if priv in self.commands_per_priv:
-                result.update(self.commands_per_priv[priv])
-        return result
-
-    def adjust_available_commands(self, server_mode: GameMode) -> None:
-        # disable commands flagged with the given game_mode
-        # disable soul verbs flagged with override
-        # mark non-soul commands
-        for commands in self.commands_per_priv.values():
-            for cmd, func in list(commands.items()):
-                disabled_mode = getattr(func, "disabled_in_mode", None)
-                if server_mode == disabled_mode:
-                    del commands[cmd]
-                elif getattr(func, "overrides_soul", False):
-                    del verbdefs.VERBS[cmd]
-                if getattr(func, "no_soul_parse", False):
-                    self.no_soul_parsing.add(cmd)

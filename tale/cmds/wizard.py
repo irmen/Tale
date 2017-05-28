@@ -554,7 +554,7 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
         if other:
             other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. "
                        "Sorry for the inconvenience." % lang.capital(player.title))
-            ctx.driver.defer(1, ctx.driver.disconnect_mud_player, other)
+            ctx.driver.defer(1, ctx.driver.disconnect_player, other)
             player.tell("Player has been notified and forced to log off.")
     else:
         player.tell("No changes.")
