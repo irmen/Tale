@@ -110,7 +110,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         if conn.player:
-            self.driver.disconnect_player(conn)   # type: ignore
+            self.driver.disconnect_player(conn)
         raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>"
                                              "Session ended. You may close this window/tab.</body></html>")
 

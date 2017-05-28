@@ -261,7 +261,7 @@ class TaleWindow(tkinter.Toplevel):
             else:
                 line2 = iobase.strip_text_styles(line)
                 self.textView.config(state=tkinter.NORMAL)
-                self.textView.insert(tkinter.END, line2 + "\n")  # type: ignore
+                self.textView.insert(tkinter.END, line2 + "\n")
                 self.textView.config(state=tkinter.DISABLED)
             self.textView.yview(tkinter.END)
 

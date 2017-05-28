@@ -40,7 +40,7 @@ style_words = {
 assert len(set(style_words.keys()) ^ iobase.ALL_STYLE_TAGS) == 0, "mismatch in list of style tags"
 
 if os.name == "nt":
-    if not hasattr(colorama, "win32") or colorama.win32.windll is None:     # type: ignore
+    if not hasattr(colorama, "win32") or colorama.win32.windll is None:
         style_words.clear()  # running on windows without colorama ansi support
 
 

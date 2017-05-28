@@ -40,13 +40,13 @@ class MudDriver(driver.Driver):
         self.mud_accounts = accounts.MudAccounts(accounts_db_file)
         base._limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
         wsgi_server = TaleMudWsgiApp.create_app_server(self)
-        wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)  # type: ignore
+        wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)
         wsgi_thread.daemon = True
         wsgi_thread.start()
         self.print_game_intro(None)
         if self.restricted:
             print("\n* Restricted mode: no new players allowed *\n")
-        print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")  # type: ignore
+        print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")
         self._main_loop_wrapper(None)   # this doesn't return!
 
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:

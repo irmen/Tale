@@ -272,7 +272,7 @@ class IFDriver(driver.Driver):
         conn = list(self.all_players.values())[0]
         try:
             savegame = self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"].data
-            state = pickle.loads(savegame)   # type: ignore
+            state = pickle.loads(savegame)
             del savegame
         except (pickle.PickleError, ValueError, TypeError) as x:
             print("There was a problem loading the saved game data:")

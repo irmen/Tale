@@ -141,7 +141,7 @@ def parse_file(content):
             "contains": {}   # maps vnum to maximum number of these
         }
         for c in o['contains']:
-            obj["contains"][int(c["vnum"])] = int(c["max"])         # type: ignore
+            obj["contains"][int(c["vnum"])] = int(c["max"])
         zone.objects.append(obj)
     for d in alldoors:
         zone.doors.append({

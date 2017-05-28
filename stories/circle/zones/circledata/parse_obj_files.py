@@ -305,8 +305,8 @@ def parse_file(content):
                 # import pdb; pdb.set_trace()
                 typespecificArg = {}    # type: Dict[str, Any]
                 for i in range(4):
-                    key = valueDefs[typeFlagArg][i]     # type: ignore
-                    value = (value0Arg, value1Arg, value2Arg, value3Arg)[i]     # type: ignore
+                    key = valueDefs[typeFlagArg][i]
+                    value = (value0Arg, value1Arg, value2Arg, value3Arg)[i]
                     if key is not None:
                         if key == 'damagetype':
                             value = damagetypeMap[value]

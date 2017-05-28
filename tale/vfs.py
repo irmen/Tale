@@ -208,7 +208,7 @@ class VirtualFileSystem:
         if isinstance(data, Resource):
             data = data.data
         with self.open_write(name) as f:
-            f.write(data)   # type: ignore
+            f.write(data)
 
     def __delitem__(self, name: str) -> None:
         """Deletes the given resource"""
