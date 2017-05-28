@@ -88,7 +88,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         session = environ["wsgi.session"]
         if "player_connection" not in session:
             # create a new connection
-            conn = self.driver._connect_mud_player()
+            conn = self.driver._connect_mud_player()   # type: ignore
             session["player_connection"] = conn
         return super().wsgi_handle_story(environ, parameters, start_response)
 
@@ -110,7 +110,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         if conn.player:
-            self.driver._disconnect_mud_player(conn)
+            self.driver._disconnect_mud_player(conn)   # type: ignore
         raise SessionMiddleware.CloseSession("<html><body><script>window.close();</script>"
                                              "Session ended. You may close this window/tab.</body></html>")
 

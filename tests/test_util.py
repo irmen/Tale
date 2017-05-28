@@ -111,7 +111,7 @@ class TestUtil(unittest.TestCase):
         with self.assertRaises(ParseError):
             mf.parse(["44"])
         with self.assertRaises(ParseError):
-            mf.parse(["$xxx"])
+            mf.parse(["$xyz"])
         with self.assertRaises(ParseError):
             mf.parse(["dollar"])
         self.assertAlmostEqual(46.15, mf.parse(["44", "dollar", "215", "cent"]), places=4)

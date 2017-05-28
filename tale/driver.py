@@ -25,8 +25,8 @@ from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Genera
 import appdirs
 
 from . import __version__ as tale_version_str
-from . import mud_context, errors, util, cmds, player, base, pubsub, charbuilder, lang, races, accounts, verbdefs, vfs
-from .base import Stats, Location, Exit
+from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs
+from .base import Location, Exit
 from .parseresult import ParseResult
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY, iobase
@@ -146,7 +146,7 @@ class Driver(pubsub.Listener):
         self.server_started = datetime.datetime.now().replace(microsecond=0)
         self.server_loop_durations = collections.deque(maxlen=10)    # type: MutableSequence[float]
         self.commands = Commands()
-        self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
+        self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object # @todo move to mud drvier
         self.zones = None       # type: ModuleType
         self.moneyfmt = None    # type: util.MoneyFormatter
         self.resources = None   # type: vfs.VirtualFileSystem
@@ -260,22 +260,10 @@ class Driver(pubsub.Listener):
             driver_thread.start()
             connection.singleplayer_mainloop()
         else:
-            # mud mode: driver runs as main thread, wsgi webserver runs in background thread
-            from .driver_mud import LimboReaper  # XXX
-            base._limbo.init_inventory([LimboReaper()])  # add the grim reaper to Limbo
-            self.mud_accounts = accounts.MudAccounts()
-            from .tio.mud_browser_io import TaleMudWsgiApp
-            wsgi_server = TaleMudWsgiApp.create_app_server(self)
-            wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)       # type: ignore
-            wsgi_thread.daemon = True
-            wsgi_thread.start()
-            self.__print_game_intro(None)
-            if self.restricted:
-                print("\n* Restricted mode: no new players allowed *\n")
-            print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")   # type: ignore
+            self.start_mud_webserver()
             self.__startup_main_loop(None)
 
-    def __startup_main_loop(self, conn: player.PlayerConnection) -> None:
+    def __startup_main_loop(self, conn: Optional[player.PlayerConnection]) -> None:
         # Kick off the appropriate driver main event loop.
         # This may or may not run in a background thread depending on the driver mode.
         self.__stop_mainloop = False
@@ -286,11 +274,11 @@ class Driver(pubsub.Listener):
                 if self.story.config.server_mode == GameMode.IF:
                     # single player interactive fiction event loop
                     while not self.__stop_mainloop:
-                        self.__main_loop_singleplayer(conn)
+                        self._main_loop_singleplayer(conn)
                 else:
                     # multi player mud event loop
                     while not self.__stop_mainloop:
-                        self.__main_loop_multiplayer()
+                        self._main_loop_multiplayer()
             except KeyboardInterrupt:
                 # a ctrl-c will exit the server
                 print("* break - stopping server loop")
@@ -338,176 +326,8 @@ class Driver(pubsub.Listener):
         self.all_players[new_player.name] = connection
         new_player.output_line_delay = line_delay
         connection.clear_screen()
-        self.__print_game_intro(connection)
+        self._print_game_intro(connection)
         return connection
-
-    def _connect_mud_player(self) -> player.PlayerConnection:
-        connection = player.PlayerConnection()
-        connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
-        new_player = player.Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
-        connection.player = new_player
-        from .tio.mud_browser_io import MudHttpIo
-        connection.io = MudHttpIo(connection)
-        self.all_players[new_player.name] = connection
-        connection.clear_screen()
-        self.__print_game_intro(connection)
-        connection.output("\n")
-        # check if we have at least 1 admin user
-        if len(self.mud_accounts.all_accounts(having_privilege="wizard")) == 0:
-            # there is no wizard, create a dialog to construct the initial admin user
-            topic_async_dialogs.send((connection, self.__login_dialog_mud_create_admin(connection)))
-            return connection
-        # create the login dialog
-        topic_async_dialogs.send((connection, self.__login_dialog_mud(connection)))
-        return connection
-
-    def _disconnect_mud_player(self, conn_or_player: Union[player.PlayerConnection, player.Player]) -> None:
-        # note: conn can be corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
-        if isinstance(conn_or_player, player.PlayerConnection):
-            name = conn_or_player.player.name
-            conn = conn_or_player
-        elif isinstance(conn_or_player, player.Player):
-            name = conn_or_player.name
-            conn = self.all_players[name]
-        else:
-            raise TypeError("connection or player object expected")
-        assert self.all_players[name] is conn
-        if conn.player.location:
-            conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game."
-                                    % lang.capital(conn.player.subjective))
-        del self.all_players[name]
-        conn.write_output()
-        # wait a bit to allow the player's screen to display the last goodbye message before killing the connection
-        self.defer(1, conn.destroy)
-
-    def __login_dialog_mud_create_admin(self, conn: player.PlayerConnection) -> Generator:
-        assert self.story.config.server_mode == GameMode.MUD
-        conn.write_output()
-        conn.output("<bright>Welcome. There is no admin user registered. "
-                    "You'll have to create the initial admin user to be able to start the mud.</>")
-        while True:
-            conn.output("Creating new admin user.")
-            name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
-            password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
-            email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
-            conn.output("You can choose one of the following races: ", lang.join(races.playable_races))
-            race = yield "input", ("Player race?", charbuilder.valid_playable_race)
-            gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
-            # review the account
-            conn.player.tell("<bright>Please review your new character.</>", end=True)
-            conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" %
-                             (name, lang.GENDERS[gender], race, email), end=True)
-            if not (yield "input", ("You cannot change your name later. Do you want to create this admin account?", lang.yesno)):
-                continue
-            else:
-                break
-        stats = Stats.from_race(race, gender=gender[0])
-        self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
-        conn.output("\n")
-        conn.output("\n")
-        yield from self.__login_dialog_mud(conn)  # continue with the normal login dialog
-
-    def __login_dialog_mud(self, conn: player.PlayerConnection) -> Generator:
-        assert self.story.config.server_mode == GameMode.MUD
-        conn.write_output()
-        conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
-        conn.output("<dim>If you are not yet known with us, you can simply type in a new name. "
-                    "Otherwise use the name you registered with.</>\n")
-        conn.output("\n")
-        while True:
-            name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
-            existing_player = self.search_player(name)
-            if existing_player:
-                conn.player.tell("That player is already logged in elsewhere. Their current location is " + existing_player.location.name)
-                conn.player.tell("and their idle time is %d seconds." % existing_player.idle_time)
-                if existing_player.idle_time < 30:
-                    conn.player.tell("They are still active.")
-                    continue
-                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
-                    conn.player.tell("Okay, leaving them in peace.")
-                    continue
-            try:
-                self.mud_accounts.get(name)
-                password = yield "input-noecho", "Please type in your password."
-            except KeyError:
-                if self.restricted:
-                    conn.player.tell("<bright>We're sorry, the mud is running in restricted mode at the moment. "
-                                     "It is not allowed to create new characters right now. Please try again later.</bright>")
-                    continue
-                conn.player.tell("'<player>%s</>' is the name of a new character." % name)
-                if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
-                    continue
-                # self-service account creation
-                conn.player.tell("\n")
-                builder = charbuilder.MudCharacterBuilder(conn, name)
-                result = yield from builder.build_character()
-                if not result:
-                    continue
-                name, password = result.name, result.password
-                self.mud_accounts.create(name, password, result.email, result.stats)
-                conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
-                conn.player.tell("\n")
-            try:
-                self.mud_accounts.valid_password(name, password)
-            except ValueError as x:
-                conn.output("<it>%s</it>" % x)
-                continue
-            else:
-                account = self.mud_accounts.get(name)
-                if existing_player:
-                    # take the place of already logged in player (that was disconnected perhaps?)
-                    existing_player.tell("\n")
-                    existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
-                    existing_player.tell("\n")
-                    state = existing_player.__getstate__()
-                    state["name"] = conn.player.name    # we can only take the real name after existing player has been kicked out
-                    existing_player_location = existing_player.location
-                    self._disconnect_mud_player(existing_player)
-                    ctx = util.Context(self, self.game_clock, self.story.config, None)
-                    # mr. Smith move: delete the other player and restore its properties in us
-                    existing_player.destroy(ctx)
-                    conn.player.__setstate__(state)
-                    name_info = charbuilder.PlayerNaming()
-                    name_info.money = state["money"]
-                    name_info.name = state["name"]
-                    name_info.gender = state["gender"]
-                    name_info.stats = state["stats"]
-                    name_info.name = account.name   # assume the real name now
-                    self.__rename_player(conn.player, name_info)
-                    conn.output("\n")
-                    same_location = conn.player.location is existing_player_location
-                    conn.player.move(existing_player_location, silent=same_location)
-                    if same_location:
-                        conn.player.location.tell("%s appears again. Is %s a different person, you wonder?" %
-                                                  (lang.capital(conn.player.title), conn.player.subjective), exclude_living=conn.player)
-                else:
-                    # log in normally
-                    self.mud_accounts.logged_in(name)
-                    if account.logged_in:
-                        conn.output("Last login: " + str(account.logged_in))
-                break
-        if not existing_player:
-            # for a new login, we need to rename the transitional player object
-            # to the proper account name, and move the player to the starting location.
-            name_info = charbuilder.PlayerNaming()
-            name_info.name = account.name
-            name_info.gender = account.stats.gender
-            name_info.stats = account.stats
-            self.__rename_player(conn.player, name_info)
-            conn.player.privileges = account.privileges
-            conn.output("\n")
-            if "wizard" in conn.player.privileges:
-                conn.player.move(self._lookup_location(self.story.config.startlocation_wizard))
-            else:
-                conn.player.move(self._lookup_location(self.story.config.startlocation_player))
-        prompt = self.story.welcome(conn.player)
-        if prompt:
-            yield "input", "\n" + prompt
-        self.story.init_player(conn.player)
-        conn.output("\n")
-        self.show_motd(conn.player, True)
-        conn.player.look(short=False)  # force a 'look' command to get our bearings
-        # after this, the generator (dialog) ends and we drop down into the regular command loop
 
     def _stop_driver(self) -> None:
         """
@@ -521,9 +341,9 @@ class Driver(pubsub.Listener):
         self.all_players.clear()
         time.sleep(0.1)
 
-    def __continue_dialog(self, conn: player.PlayerConnection, dialog: Generator, message: str) -> None:
+    def _continue_dialog(self, conn: player.PlayerConnection, dialog: Generator, message: str) -> None:
         # Notice that the try...except structure is very similar to
-        # the one in __server_loop_process_player_input
+        # the one in _server_loop_process_player_input
         # That's no surprise because also in this async case, we need
         # to handle any parse errors and such that may be thrown from the
         # generator. The reguar player input function has to deal with
@@ -557,7 +377,7 @@ class Driver(pubsub.Listener):
             else:
                 raise ValueError("invalid generator wait reason: " + why)
 
-    def __print_game_intro(self, conn: player.PlayerConnection) -> None:
+    def _print_game_intro(self, conn: Optional[player.PlayerConnection]) -> None:
         try:
             # print game banner as supplied by the game
             banner = self.resources["messages/banner.txt"].text
@@ -591,7 +411,7 @@ class Driver(pubsub.Listener):
             print("Driver start:", time.ctime())
             print("\n")
 
-    def __rename_player(self, player: player.Player, name_info: charbuilder.PlayerNaming) -> None:
+    def _rename_player(self, player: player.Player, name_info: charbuilder.PlayerNaming) -> None:
         conn = self.all_players[player.name]
         del self.all_players[player.name]
         old_wiretap = player.get_wiretap()
@@ -646,7 +466,7 @@ class Driver(pubsub.Listener):
                 raise errors.TaleError("should have a name now")
 
         player = conn.player
-        self.__rename_player(player, name_info)
+        self._rename_player(player, name_info)
         player.tell("\n")
         # move the player to the starting location:
         if "wizard" in player.privileges:
@@ -662,7 +482,7 @@ class Driver(pubsub.Listener):
         player.look(short=False)  # force a 'look' command to get our bearings
         conn.write_output()
 
-    def __main_loop_singleplayer(self, conn: player.PlayerConnection) -> None:
+    def _main_loop_singleplayer(self, conn: player.PlayerConnection) -> None:
         """
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
@@ -712,10 +532,10 @@ class Driver(pubsub.Listener):
                                 conn.output_no_newline(prompt)   # print the input prompt again
                                 self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
                                 continue
-                        self.__continue_dialog(conn, dialog, response)
+                        self._continue_dialog(conn, dialog, response)
                     else:
                         # normal command processing
-                        self.__server_loop_process_player_input(conn)
+                        self._server_loop_process_player_input(conn)
                 except (KeyboardInterrupt, EOFError):
                     continue
                 except errors.SessionExit:
@@ -741,7 +561,7 @@ class Driver(pubsub.Listener):
                 # server TICK
                 now = time.time()
                 if now - previous_server_tick >= self.story.config.server_tick_time:
-                    self.__server_tick()
+                    self._server_tick()
                     previous_server_tick = now
                 if self.story.config.server_tick_method == TickMethod.COMMAND:
                     # Even though the server tick may be skipped, the pubsub events
@@ -755,7 +575,7 @@ class Driver(pubsub.Listener):
             self.server_loop_durations.append(loop_duration)
             conn.write_output()
 
-    def __server_loop_process_player_input(self, conn: player.PlayerConnection) -> None:
+    def _server_loop_process_player_input(self, conn: player.PlayerConnection) -> None:
         p = conn.player
         assert p.input_is_available.is_set()
         for cmd in p.get_pending_input():
@@ -781,73 +601,7 @@ class Driver(pubsub.Listener):
             except errors.ParseError as x:
                 p.tell(str(x))
 
-    def __main_loop_multiplayer(self) -> None:
-        """
-        The game loop, for the multiplayer MUD mode.
-        Until the server is shut down, it processes player input, and prints the resulting output.
-        """
-        loop_duration = 0.0
-        previous_server_tick = 0.0
-        while not self.__stop_mainloop:
-            pubsub.sync("driver-async-dialogs")
-            for conn in self.all_players.values():
-                conn.write_output()
-                if conn not in self.waiting_for_input:
-                    conn.write_input_prompt()
-
-            # server tick goes on a timer
-            wait_time = max(0.01, self.story.config.server_tick_time - loop_duration)
-            while wait_time > 0:
-                if any(conn.player.input_is_available.is_set() for conn in self.all_players.values()):
-                    # there was player input, abort the wait loop and deal with it
-                    break
-                sub_wait = min(0.1, wait_time)  # keep things responsive
-                time.sleep(sub_wait)
-                wait_time -= sub_wait
-
-            loop_start = time.time()
-            for conn in list(self.all_players.values()):
-                if conn.player.input_is_available.is_set():
-                    conn.need_new_input_prompt = True
-                    try:
-                        if conn in self.waiting_for_input:
-                            # this connection is processing direct input, rather than regular commands
-                            dialog, validator, echo_input = self.waiting_for_input.pop(conn)
-                            response = conn.player.get_pending_input()[0]
-                            if validator:
-                                try:
-                                    response = validator(response)
-                                except ValueError as x:
-                                    prompt = conn.last_output_line
-                                    conn.io.dont_echo_next_cmd = not echo_input
-                                    conn.output(str(x) or "That is not a valid answer.")
-                                    conn.output_no_newline(prompt)   # print the input prompt again
-                                    self.waiting_for_input[conn] = (dialog, validator, echo_input)   # reschedule
-                                    continue
-                            self.__continue_dialog(conn, dialog, response)
-                        else:
-                            # normal command processing
-                            self.__server_loop_process_player_input(conn)
-                    except (KeyboardInterrupt, EOFError):
-                        continue
-                    except errors.SessionExit:
-                        self.story.goodbye(conn.player)
-                        topic_pending_tells.send(lambda conn=conn: self._disconnect_mud_player(conn))
-                    except Exception:
-                        tb = "".join(util.format_traceback())
-                        txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
-                        conn.player.tell(txt, format=False)
-                        conn.player.tell("<rev><it>Please report this problem.</>")
-            pubsub.sync("driver-pending-tells")
-            # server TICK
-            now = time.time()
-            if now - previous_server_tick >= self.story.config.server_tick_time:
-                self.__server_tick()
-                previous_server_tick = now
-            loop_duration = time.time() - loop_start
-            self.server_loop_durations.append(loop_duration)
-
-    def __server_tick(self) -> None:
+    def _server_tick(self) -> None:
         """
         Do everything that the server needs to do every tick (timer configurable in story)
         1) game clock
@@ -1073,26 +827,14 @@ class Driver(pubsub.Listener):
         return verbs
 
     def show_motd(self, player: player.Player, notify_no_motd: bool=False) -> None:
-        """Prints the Message-Of-The-Day file, if present. Does nothing in IF mode."""
-        try:
-            message = self.resources["messages/motd.txt"].text.rstrip()
-        except IOError:
-            message = None
-        if message:
-            player.tell("<bright>Message-of-the-day:</>", end=True)
-            player.tell("\n")
-            player.tell(message, end=True, format=True)  # for now, the motd is displayed *with* formatting
-            player.tell("\n")
-            player.tell("\n")
-        elif notify_no_motd:
-            player.tell("There's currently no message-of-the-day.", end=True)
-            player.tell("\n")
+        pass   # no motd in IF mode
 
     def search_player(self, name: str) -> Optional[player.Player]:
         """
         Look through all the logged in players for one with the given name.
         Returns None if no one is known with that name.
         """
+        # @todo move to mud driver
         name = name.lower()
         conn = self.all_players.get(name)
         if not conn:
@@ -1111,13 +853,13 @@ class Driver(pubsub.Listener):
             # game is running with a 'frozen' clock
             # simply advance the clock, and perform a single server_tick
             self.game_clock.add_gametime(duration)
-            self.__server_tick()
+            self._server_tick()
             return True, None      # uneventful
         num_ticks = int(duration.seconds / self.story.config.gametime_to_realtime / self.story.config.server_tick_time)
         if num_ticks < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_ticks):
-            self.__server_tick()
+            self._server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
     def do_save(self, player: player.Player) -> None:
@@ -1196,7 +938,7 @@ class Driver(pubsub.Listener):
             conn, dialog = event  # type: ignore
             assert type(conn) is player.PlayerConnection
             assert inspect.isgenerator(dialog)
-            self.__continue_dialog(conn, dialog, None)
+            self._continue_dialog(conn, dialog, None)
         else:
             raise ValueError("unknown topic: " + str(topicname))
 
@@ -1214,6 +956,10 @@ class Driver(pubsub.Listener):
         hours, seconds = divmod(uptime.total_seconds(), 3600)
         minutes, seconds = divmod(seconds, 60)
         return int(hours), int(minutes), int(seconds)
+
+    @property
+    def must_stop_mainloop(self) -> bool:
+        return self.__stop_mainloop
 
 
 class Commands:

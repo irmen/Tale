@@ -21,6 +21,7 @@ def get_driver(game_mode: GameMode, restricted: bool=False) -> Driver:
     elif game_mode == GameMode.MUD:
         from .driver_mud import MudDriver
         return MudDriver(restricted)
+    raise ValueError("invalid game mode")
 
 
 def run_from_cmdline(cmdline: Sequence[str]) -> None:

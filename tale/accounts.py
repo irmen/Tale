@@ -48,8 +48,8 @@ class MudAccounts:
         charstat(account, gender, stat1, stat2,...)
     """
 
-    def __init__(self, databasefile: str=None) -> None:
-        self.sqlite_dbpath = databasefile or mud_context.driver.user_resources.validate_path("useraccounts.sqlite")
+    def __init__(self, databasefile: str) -> None:
+        self.sqlite_dbpath = databasefile
         self._create_database()
 
     def _sqlite_connect(self) -> sqlite3.Connection:
