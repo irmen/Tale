@@ -66,7 +66,7 @@ class IFCharacterBuilder:
         self.conn.player.tell("You can choose one of the following races: " + lang.join(races.playable_races))
         race = yield "input", ("What should be the race of your player character?", valid_playable_race)
         self.naming.stats = Stats.from_race(race, gender=self.naming.gender)
-        self.naming.description = "A regular person." if self.naming.stats.race == "human" else "A weird creature."    # @todo Race class?
+        self.naming.description = "A regular person." if self.naming.stats.race == "human" else "A weird creature."
         okay = yield from self.ask_confirm()
         return self.naming if okay else None
 

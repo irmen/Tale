@@ -633,7 +633,6 @@ class Driver(pubsub.Listener):
         Look through all the logged in players for one with the given name.
         Returns None if no one is known with that name.
         """
-        # @todo move to mud driver
         name = name.lower()
         conn = self.all_players.get(name)
         if not conn:

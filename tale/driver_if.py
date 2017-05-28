@@ -267,6 +267,7 @@ class IFDriver(driver.Driver):
             conn.write_output()
 
     def _load_saved_game(self, player: Player) -> Optional[Player]:
+        # at this time, game loading/saving is only supported in single player IF mode.
         # @todo fix that all mudobjects are duplicated when loading a pickle save game.
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
