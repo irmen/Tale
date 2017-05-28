@@ -10,19 +10,8 @@ import traceback
 from typing import Sequence
 
 from . import __version__
-from .driver import Driver
 from .tio import DEFAULT_SCREEN_DELAY
 from .story import GameMode
-
-
-def get_driver(game_mode: GameMode, restricted: bool=False) -> Driver:
-    if game_mode == GameMode.IF:
-        from .driver_if import IFDriver
-        return IFDriver()
-    elif game_mode == GameMode.MUD:
-        from .driver_mud import MudDriver
-        return MudDriver(restricted)
-    raise ValueError("invalid game mode")
 
 
 def run_from_cmdline(cmdline: Sequence[str]) -> None:
@@ -41,11 +30,17 @@ def run_from_cmdline(cmdline: Sequence[str]) -> None:
     parser.add_argument('-z', '--wizard', help='force wizard mode on if story character (for debug purposes)', action='store_true')
     args = parser.parse_args(cmdline)
     try:
+        # select the correct driver type, configure it, and start the story.
         game_mode = GameMode(args.mode)
-        restricted = args.restricted
-        kwargs = vars(args)
-        del kwargs["restricted"]
-        get_driver(game_mode, restricted).start(**kwargs)
+        if game_mode == GameMode.IF:
+            from .driver_if import IFDriver
+            driver = IFDriver(screen_delay=args.delay, gui=args.gui, web=args.web, wizard_override=args.wizard)
+        elif game_mode == GameMode.MUD:
+            from .driver_mud import MudDriver
+            driver = MudDriver(args.restricted)  # type: ignore
+        else:
+            raise ValueError("invalid game mode")
+        driver.start(args.game)
     except:
         if args.gui:
             tb = traceback.format_exc()

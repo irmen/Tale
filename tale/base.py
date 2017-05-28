@@ -954,7 +954,7 @@ class Living(MudObject):
                 else:
                     raise ParseError("That custom verb is not understood by the environment.")
             if parsed.verb in self.location.exits:
-                ctx.driver._go_through_exit(self, parsed.verb)
+                ctx.driver.go_through_exit(self, parsed.verb)
                 return
             command_verbs = set(ctx.driver.current_verbs(self))
             if parsed.verb in command_verbs:

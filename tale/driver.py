@@ -28,7 +28,8 @@ from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang
 from .base import Location, Exit
 from .parseresult import ParseResult
 from .story import TickMethod, GameMode, MoneyType, StoryBase
-from .tio import DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_DELAY
+from .tio import DEFAULT_SCREEN_WIDTH
+
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
 topic_pending_tells = pubsub.topic("driver-pending-tells")
@@ -152,6 +153,7 @@ class Driver(pubsub.Listener):
         self.user_resources = None  # type: vfs.VirtualFileSystem
         self.story = None   # type: StoryBase
         self.game_clock = None    # type: util.GameDateTime
+        self.game_mode = None     # type: GameMode
         self._stop_mainloop = True
         # playerconnections that wait for input; maps connection to tuple (dialog, validator, echo_input)
         self.waiting_for_input = {}   # type: Dict[player.PlayerConnection, Tuple[Generator, Any, Any]]
@@ -163,10 +165,9 @@ class Driver(pubsub.Listener):
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
 
-    def start(self, *, game: str, mode: str= "if", gui: bool=False, web: bool=False,
-              wizard: bool=False, delay: int=DEFAULT_SCREEN_DELAY) -> None:
+    def start(self, game_file_or_path: str) -> None:
         """Start the driver from a parsed set of arguments"""
-        gamepath = pathlib.Path(game)
+        gamepath = pathlib.Path(game_file_or_path)
         if gamepath.is_dir():
             # cd into the game directory (we can import it then), and load its config and zones
             os.chdir(str(gamepath))
@@ -176,20 +177,19 @@ class Driver(pubsub.Listener):
             sys.path.insert(0, str(gamepath))
         else:
             raise FileNotFoundError("Cannot find specified game")
-        mode = GameMode(mode)
         assert "story" not in sys.modules, "cannot start new story if it was already loaded before"
         import story
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")
         self.story = story.Story()
         self.story._verify(self)
-        if mode not in self.story.config.supported_modes:
+        if self.game_mode not in self.story.config.supported_modes:
             raise ValueError("driver mode '%s' not supported by this story. Valid modes: %s" %
-                             (mode, list(self.story.config.supported_modes)))
+                             (self.game_mode, list(self.story.config.supported_modes)))
         self.story.config.mud_host = self.story.config.mud_host or "localhost"
         self.story.config.mud_port = self.story.config.mud_port or 8180
-        self.story.config.server_mode = mode  # if/mud driver mode ('if' = single player interactive fiction, 'mud'=multiplayer)
-        if self.story.config.server_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
+        self.story.config.server_mode = self.game_mode
+        if self.game_mode != GameMode.IF and self.story.config.server_tick_method == TickMethod.COMMAND:
             raise ValueError("'command' tick method can only be used in 'if' game mode")
         # Register the driver and add some more stuff in the global context.
         self.resources = vfs.VirtualFileSystem(root_package="story")   # read-only story resources
@@ -220,9 +220,9 @@ class Driver(pubsub.Listener):
         user_data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
-        self.zones = self.__load_zones(self.story.config.zones)
-        self._lookup_location(self.story.config.startlocation_player)
-        self._lookup_location(self.story.config.startlocation_wizard)
+        self.zones = self._load_zones(self.story.config.zones)
+        self.lookup_location(self.story.config.startlocation_player)
+        self.lookup_location(self.story.config.startlocation_wizard)
         if self.story.config.server_tick_method == TickMethod.COMMAND:
             # If the server tick is synchronized with player commands, this factor needs to be 1,
             # because at every command entered the game time simply advances 1 x server_tick_time.
@@ -234,45 +234,18 @@ class Driver(pubsub.Listener):
         for x in self.unbound_exits:
             x._bind_target(self.zones)
         self.unbound_exits = []
-        if delay < 0 or delay > 100:
-            raise ValueError("invalid delay, valid range is 0-100")
-        self.start_mainloop(gui, web, delay, wizard)
-
-    def start_mainloop(self, gui: bool, web: bool, delay: int, wizard: bool):  # XXX
         sys.excepthook = util.excepthook  # install custom verbose crash reporter
-        if self.story.config.server_mode == GameMode.IF:
-            # create the single player mode player automatically
-            if gui:
-                player_io = "gui"
-            elif web:
-                player_io = "web"
-                print("starting '{0}'  v {1}".format(self.story.config.name, self.story.config.version))
-                if self.story.config.author_address:
-                    print("written by {0} - {1}".format(self.story.config.author, self.story.config.author_address))
-                else:
-                    print("written by", self.story.config.author)
-            else:
-                player_io = "console"
-            connection = self._connect_player(player_io, delay)
-            if wizard:
-                connection.player.privileges.add("wizard")
-            # create the login dialog
-            topic_async_dialogs.send((connection, self._login_dialog_if(connection)))
-            # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
-            driver_thread = threading.Thread(name="driver", target=self.__startup_main_loop, args=(connection,))
-            driver_thread.daemon = True
-            driver_thread.start()
-            connection.singleplayer_mainloop()
-        else:
-            self.start_mud_webserver()
-            self.__startup_main_loop(None)
+        self.start_main_loop()   # doesn't exit!
 
-    def _connect_player(self, player_io_type: str, line_delay: int) -> player.PlayerConnection:
+    def start_main_loop(self):
         raise NotImplementedError
 
-    def __startup_main_loop(self, conn: Optional[player.PlayerConnection]) -> None:
-        # Kick off the appropriate driver main event loop.
-        # This may or may not run in a background thread depending on the driver mode.
+    def connect_player(self, player_io_type: str, line_delay: int) -> player.PlayerConnection:
+        raise NotImplementedError
+
+    def _game_loop(self, conn: Optional[player.PlayerConnection]) -> None:
+        # This is the main game loop that the driver runs
+        # (it may or may not run in a background thread depending on the driver mode)
         self._stop_mainloop = False
         num_critical_errors = 0
         time_of_last_critical_error = 0.0
@@ -281,11 +254,11 @@ class Driver(pubsub.Listener):
                 if self.story.config.server_mode == GameMode.IF:
                     # single player interactive fiction event loop
                     while not self._stop_mainloop:
-                        self._main_loop_singleplayer(conn)
+                        self.main_loop_singleplayer(conn)
                 else:
                     # multi player mud event loop
                     while not self._stop_mainloop:
-                        self._main_loop_multiplayer()
+                        self.main_loop_multiplayer()
             except KeyboardInterrupt:
                 # a ctrl-c will exit the server
                 print("* break - stopping server loop")
@@ -356,7 +329,7 @@ class Driver(pubsub.Listener):
             else:
                 raise ValueError("invalid generator wait reason: " + why)
 
-    def _print_game_intro(self, conn: Optional[player.PlayerConnection]) -> None:
+    def print_game_intro(self, conn: Optional[player.PlayerConnection]) -> None:
         try:
             # print game banner as supplied by the game
             banner = self.resources["messages/banner.txt"].text
@@ -406,7 +379,7 @@ class Driver(pubsub.Listener):
                 continue
             try:
                 p.tell("\n")
-                self.__process_player_command(cmd, conn)
+                self._process_player_command(cmd, conn)
                 p.remember_previous_parse()
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
@@ -451,7 +424,9 @@ class Driver(pubsub.Listener):
                 try:
                     deferred(ctx=ctx)  # call the deferred and provide a context object
                 except Exception:
-                    self.__report_deferred_exception(deferred)
+                    print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
+                    print("".join(util.format_traceback()), file=sys.stderr)
+                    print("(Please report this problem)", file=sys.stderr)
         pubsub.sync()
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
@@ -476,12 +451,7 @@ class Driver(pubsub.Listener):
                 if events == 0 and not subbers and idle_time > 30:
                     pubsub.topic(topicname).destroy()
 
-    def __report_deferred_exception(self, deferred: Deferred) -> None:
-        print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
-        print("".join(util.format_traceback()), file=sys.stderr)
-        print("(Please report this problem)", file=sys.stderr)
-
-    def __process_player_command(self, cmd: str, conn: player.PlayerConnection) -> None:
+    def _process_player_command(self, cmd: str, conn: player.PlayerConnection) -> None:
         if not cmd:
             return
         if cmd and cmd[0] in cmds.abbreviations and not cmd[0].isalpha():
@@ -532,7 +502,7 @@ class Driver(pubsub.Listener):
                         parse_error = "Please be more specific."
                 if not handled:
                     if parsed.verb in player.location.exits:
-                        self._go_through_exit(player, parsed.verb)
+                        self.go_through_exit(player, parsed.verb)
                     elif parsed.verb in command_verbs:
                         # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                         func = command_verbs[parsed.verb]
@@ -552,18 +522,18 @@ class Driver(pubsub.Listener):
                 player.validate_socialize_targets(parsed)
                 player.do_socialize_cmd(parsed)
             except errors.RetryParse as x:
-                return self.__process_player_command(x.command, conn)   # try again but with new command string
+                return self._process_player_command(x.command, conn)   # try again but with new command string
             except errors.AsyncDialog as x:
                 # the player command ended but signaled that an async dialog should be initiated
                 topic_async_dialogs.send((conn, x.dialog))
 
-    def _go_through_exit(self, player: player.Player, direction: str) -> None:
+    def go_through_exit(self, player: player.Player, direction: str) -> None:
         xt = player.location.exits[direction]
         xt.allow_passage(player)
         player.move(xt.target)
         player.look()
 
-    def _lookup_location(self, location_name: str) -> Location:
+    def lookup_location(self, location_name: str) -> Location:
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
@@ -578,7 +548,7 @@ class Driver(pubsub.Listener):
                     raise errors.TaleError("location not found: " + location_name)
         return location   # type: ignore
 
-    def __load_zones(self, zone_names: Sequence[str]) -> ModuleType:
+    def _load_zones(self, zone_names: Sequence[str]) -> ModuleType:
         # Pre-load the provided zones (essentially, load the named modules from the zones package)
         if not zone_names and "zones" not in sys.modules:
             raise errors.StoryConfigError("story config doesn't provide any zones to load and hasn't loaded any zones itself")

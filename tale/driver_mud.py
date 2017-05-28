@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import threading
-from typing import Union, Generator
+from typing import Union, Generator, Dict, Tuple
 from .parseresult import ParseResult
 from .story import GameMode
 from . import accounts
@@ -34,6 +34,10 @@ class MudDriver(driver.Driver):
         self.restricted = restricted   # restricted mud mode? (no new players allowed)
         self.mud_accounts = None   # type: accounts.MudAccounts
 
+    def start_main_loop(self):
+        self.start_mud_webserver()
+        self._game_loop(None)   # this doesn't return!
+
     def start_mud_webserver(self):
         # Driver runs as main thread, wsgi webserver runs in background thread
         accounts_db_file = self.user_resources.validate_path("useraccounts.sqlite")
@@ -43,7 +47,7 @@ class MudDriver(driver.Driver):
         wsgi_thread = threading.Thread(name="wsgi", target=wsgi_server.serve_forever)  # type: ignore
         wsgi_thread.daemon = True
         wsgi_thread.start()
-        self._print_game_intro(None)
+        self.print_game_intro(None)
         if self.restricted:
             print("\n* Restricted mode: no new players allowed *\n")
         print("Access the game on this web server url:   http://%s:%d/tale/" % wsgi_server.server_address, end="\n\n")  # type: ignore
@@ -67,7 +71,7 @@ class MudDriver(driver.Driver):
     def do_save(self, player: Player) -> None:
         raise errors.ActionRefused("Currently, saving is not supported in MUD mode.")
 
-    def _connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
+    def connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
         if player_io_type != "web":
             raise ValueError("mud connections can only be done via web interface")
         connection = PlayerConnection()
@@ -78,7 +82,7 @@ class MudDriver(driver.Driver):
         connection.io = MudHttpIo(connection)
         self.all_players[new_player.name] = connection
         connection.clear_screen()
-        self._print_game_intro(connection)
+        self.print_game_intro(connection)
         connection.output("\n")
         # check if we have at least 1 admin user
         if len(self.mud_accounts.all_accounts(having_privilege="wizard")) == 0:
@@ -86,10 +90,10 @@ class MudDriver(driver.Driver):
             driver.topic_async_dialogs.send((connection, self._login_dialog_mud_create_admin(connection)))
             return connection
         # create the login dialog
-        driver.topic_async_dialogs.send((connection, self._login_dialog_mud(connection)))
+        driver.topic_async_dialogs.send((connection, self.login_dialog_mud(connection)))
         return connection
 
-    def _disconnect_mud_player(self, conn_or_player: Union[PlayerConnection, Player]) -> None:
+    def disconnect_mud_player(self, conn_or_player: Union[PlayerConnection, Player]) -> None:
         # note: conn can be corrupt/disconnected. conn.player, conn.io or conn.player.location can be None.
         if isinstance(conn_or_player, PlayerConnection):
             name = conn_or_player.player.name
@@ -133,9 +137,9 @@ class MudDriver(driver.Driver):
         self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
         conn.output("\n")
         conn.output("\n")
-        yield from self._login_dialog_mud(conn)  # continue with the normal login dialog
+        yield from self.login_dialog_mud(conn)  # continue with the normal login dialog
 
-    def _login_dialog_mud(self, conn: PlayerConnection) -> Generator:
+    def login_dialog_mud(self, conn: PlayerConnection) -> Generator:
         assert self.story.config.server_mode == GameMode.MUD
         conn.write_output()
         conn.output("<bright>Welcome. We would like to know your player name before you can continue.</>")
@@ -190,7 +194,7 @@ class MudDriver(driver.Driver):
                     state = existing_player.__getstate__()
                     state["name"] = conn.player.name    # we can only take the real name after existing player has been kicked out
                     existing_player_location = existing_player.location
-                    self._disconnect_mud_player(existing_player)
+                    self.disconnect_mud_player(existing_player)
                     ctx = util.Context(self, self.game_clock, self.story.config, None)
                     # mr. Smith move: delete the other player and restore its properties in us
                     existing_player.destroy(ctx)
@@ -225,9 +229,9 @@ class MudDriver(driver.Driver):
             conn.player.privileges = account.privileges
             conn.output("\n")
             if "wizard" in conn.player.privileges:
-                conn.player.move(self._lookup_location(self.story.config.startlocation_wizard))
+                conn.player.move(self.lookup_location(self.story.config.startlocation_wizard))
             else:
-                conn.player.move(self._lookup_location(self.story.config.startlocation_player))
+                conn.player.move(self.lookup_location(self.story.config.startlocation_player))
         prompt = self.story.welcome(conn.player)
         if prompt:
             yield "input", "\n" + prompt
@@ -237,7 +241,7 @@ class MudDriver(driver.Driver):
         conn.player.look(short=False)  # force a 'look' command to get our bearings
         # after this, the generator (dialog) ends and we drop down into the regular command loop
 
-    def _main_loop_multiplayer(self) -> None:
+    def main_loop_multiplayer(self) -> None:
         """
         The game loop, for the multiplayer MUD mode.
         Until the server is shut down, it processes player input, and prints the resulting output.
@@ -288,7 +292,7 @@ class MudDriver(driver.Driver):
                         continue
                     except errors.SessionExit:
                         self.story.goodbye(conn.player)
-                        driver.topic_pending_tells.send(lambda conn=conn: self._disconnect_mud_player(conn))
+                        driver.topic_pending_tells.send(lambda conn=conn: self.disconnect_mud_player(conn))
                     except Exception:
                         tb = "".join(util.format_traceback())
                         txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
@@ -365,5 +369,5 @@ class LimboReaper(base.Living):
                 except KeyError:
                     pass   # already gone
                 else:
-                    ctx.driver._disconnect_mud_player(conn)
+                    ctx.driver.disconnect_mud_player(conn)
             self.candidates[candidate] = (first_seen, shown)

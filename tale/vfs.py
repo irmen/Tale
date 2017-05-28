@@ -179,7 +179,7 @@ class VirtualFileSystem:
                     return Resource(name, f_s.read(), mimetype, mtime)
             else:
                 if compressor:
-                    data = self.__uncompress(compressor, data, is_text(mimetype))
+                    data = self._uncompress(compressor, data, is_text(mimetype))
                 return Resource(name, data, mimetype, mtime)
         else:
             # direct filesystem access
@@ -193,7 +193,7 @@ class VirtualFileSystem:
                 data = f_b.read()
                 if compressor:
                     assert not encoding, "compressed data should not have encoding"
-                    data = self.__uncompress(compressor, data, is_text(mimetype))
+                    data = self._uncompress(compressor, data, is_text(mimetype))
                 return Resource(name, data, mimetype, mtime)
 
     def __setitem__(self, name: str, data: Union[Resource, str, ByteString]) -> None:
@@ -244,7 +244,7 @@ class VirtualFileSystem:
         phys_path = self.validate_path(path)
         return [name for name in os.listdir(phys_path) if os.path.isfile(os.path.join(phys_path, name))]
 
-    def __uncompress(self, compressor: str, data: bytes, expect_text: bool) -> Union[bytes, str]:
+    def _uncompress(self, compressor: str, data: bytes, expect_text: bool) -> Union[bytes, str]:
         if compressor == "bzip2":
             import bz2
             data = bz2.decompress(data)

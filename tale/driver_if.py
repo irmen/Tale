@@ -7,6 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import sys
 import time
+import threading
 import pickle
 from typing import Generator, Optional
 from .story import GameMode, TickMethod
@@ -17,6 +18,8 @@ from . import lang
 from . import pubsub
 from . import util
 from .player import PlayerConnection, Player
+from .tio import DEFAULT_SCREEN_DELAY
+from .tio import iobase
 
 
 class IFDriver(driver.Driver):
@@ -24,9 +27,36 @@ class IFDriver(driver.Driver):
     The Single user 'driver'.
     Used to control interactive fiction where there's only one 'player'.
     """
-    def __init__(self) -> None:
+    def __init__(self, *, screen_delay: int=DEFAULT_SCREEN_DELAY, gui: bool=False, web: bool=False, wizard_override: bool=False) -> None:
         super().__init__()
-        self.game_mode = GameMode.MUD
+        self.game_mode = GameMode.IF
+        if screen_delay < 0 or screen_delay > 100:
+            raise ValueError("invalid delay, valid range is 0-100")
+        self.screen_delay = screen_delay
+        self.io_type = "console"
+        if gui:
+            self.io_type = "gui"
+        if web:
+            self.io_type = "web"
+        self.wizard_override = wizard_override
+
+    def start_main_loop(self):
+        if self.io_type == "web":
+            print("starting '{0}'  v {1}".format(self.story.config.name, self.story.config.version))
+            if self.story.config.author_address:
+                print("written by {0} - {1}".format(self.story.config.author, self.story.config.author_address))
+            else:
+                print("written by", self.story.config.author)
+        connection = self.connect_player(self.io_type, self.screen_delay)
+        if self.wizard_override:
+            connection.player.privileges.add("wizard")
+        # create the login dialog
+        driver.topic_async_dialogs.send((connection, self.login_dialog_if(connection)))
+        # the driver mainloop runs in a background thread, the io-loop/gui-event-loop runs in the main thread
+        driver_thread = threading.Thread(name="driver", target=self._game_loop, args=(connection,))
+        driver_thread.daemon = True
+        driver_thread.start()
+        connection.singleplayer_mainloop()     # this doesn't return!
 
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:
         pass   # no motd in IF mode
@@ -49,10 +79,11 @@ class IFDriver(driver.Driver):
             player.tell("Game time: %s" % self.game_clock)
         player.tell("\n")
 
-    def _connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
+    def connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
         connection = PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        io = None  # type: iobase.IoAdapterBase
         if player_io_type == "gui":
             from .tio.tkinter_io import TkinterIo
             io = TkinterIo(self.story.config, connection)
@@ -71,10 +102,10 @@ class IFDriver(driver.Driver):
         self.all_players[new_player.name] = connection
         new_player.output_line_delay = line_delay
         connection.clear_screen()
-        self._print_game_intro(connection)
+        self.print_game_intro(connection)
         return connection
 
-    def _login_dialog_if(self, conn: PlayerConnection) -> Generator:
+    def login_dialog_if(self, conn: PlayerConnection) -> Generator:
         # Interactive fiction (singleplayer): create a player. This is a generator function (async input).
         # Initialize it directly from the story's configuration, load a saved game,
         # or let the user create a new player manually.
@@ -88,7 +119,7 @@ class IFDriver(driver.Driver):
             load_saved_game = yield "input", ("Do you want to load a saved game ('<bright>n</>' will start a new game)?", lang.yesno)
         conn.player.tell("\n")
         if load_saved_game:
-            loaded_player = self.__load_saved_game(conn.player)
+            loaded_player = self.load_saved_game(conn.player)
             if loaded_player:
                 conn.player = loaded_player
                 conn.player.tell("\n")
@@ -125,9 +156,9 @@ class IFDriver(driver.Driver):
         player.tell("\n")
         # move the player to the starting location:
         if "wizard" in player.privileges:
-            player.move(self._lookup_location(self.story.config.startlocation_wizard))
+            player.move(self.lookup_location(self.story.config.startlocation_wizard))
         else:
-            player.move(self._lookup_location(self.story.config.startlocation_player))
+            player.move(self.lookup_location(self.story.config.startlocation_player))
         player.tell("\n")
         prompt = self.story.welcome(player)
         if prompt:
@@ -137,7 +168,7 @@ class IFDriver(driver.Driver):
         player.look(short=False)  # force a 'look' command to get our bearings
         conn.write_output()
 
-    def _main_loop_singleplayer(self, conn: PlayerConnection) -> None:
+    def main_loop_singleplayer(self, conn: PlayerConnection) -> None:
         """
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
@@ -230,7 +261,7 @@ class IFDriver(driver.Driver):
             self.server_loop_durations.append(loop_duration)
             conn.write_output()
 
-    def __load_saved_game(self, player: Player) -> Optional[Player]:
+    def load_saved_game(self, player: Player) -> Optional[Player]:
         # @todo fix that all mudobjects are duplicated when loading a pickle save game.
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
