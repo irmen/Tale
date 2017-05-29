@@ -138,6 +138,7 @@ A random list of the features of the current codebase:
 - you can refer to earlier used items and persons by using a pronoun ("examine box / drop it", "examine idiot / slap him").
 - yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
   someone is yelling something, and if possible, where the sound is coming from.
+- it's possible to have items that you can combine into new items.
 - text is nicely formatted when outputted (dynamically wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
 - uses smartypants to automatically render quotes, dashes, ellipsis in a nicer way.

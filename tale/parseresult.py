@@ -4,7 +4,7 @@ Helper stuff for command parsing.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from typing import Sequence, Dict, Optional, List
+from typing import Dict, Optional, List
 
 
 class ParseResult:
@@ -17,8 +17,8 @@ class ParseResult:
             return "[seq=%d, prev_word=%s]" % (self.sequence, self.previous_word)
 
     def __init__(self, verb: str, adverb: str=None, message: str=None, bodypart: str=None, qualifier: str=None,
-                 args: List[str]=None, who_info: Dict=None, who_order: Sequence=None,
-                 unrecognized: Sequence=None, unparsed: str="") -> None:
+                 args: List[str]=None, who_info: Dict=None, who_order: List=None,
+                 unrecognized: List=None, unparsed: str="") -> None:
         self.verb = verb
         self.adverb = adverb
         self.message = message

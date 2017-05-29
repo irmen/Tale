@@ -235,10 +235,23 @@ def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
+def replace_items(player: Player, existing: List[base.Item], replacement: base.Item, message: str, others_message: str) -> None:
+    # removes all existing items from player's inventory and replaces them with the given replacement item
+    if not all(item in player for item in existing):
+        raise ParseError("can only replace items that are in player's inventory")
+    for item in existing:
+        player.remove(item, player)
+    player.insert(replacement, player)
+    if message:
+        player.tell(message)
+    if others_message:
+        player.tell_others(others_message)
+
+
 @cmd("attach", "apply", "install")
 def do_combine_two(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Combine two items you are carrying by attaching them, applying them or installing them together.
-    If successful this can perhaps result in a new item!"""
+    If successful, this can perhaps result in a new item!"""
     if len(parsed.who_info) != 2:
         if parsed.verb == "attach":
             raise ParseError("Attach what to what?")
@@ -251,14 +264,23 @@ def do_combine_two(player: Player, parsed: ParseResult, ctx: util.Context) -> No
     if item1 not in player or item2 not in player:
         raise ActionRefused("You are not carrying both, try to pick them up first.")
     try:
-        item2.combine([item1], player)
+        result = item2.combine([item1], player)
+        if result:
+            replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
+                          "{Title} tinkers with some things %s carries." % player.subjective)
+            return
     except ActionRefused:
-        item1.combine([item2], player)
+        pass
+    result = item1.combine([item2], player)
+    if not result:
+        raise ActionRefused("You can't combine those.")
+    replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
+                  "{Title} tinkers with some things %s carries." % player.subjective)
 
 
 @cmd("combine")
 def do_combine_many(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
-    """Combine two or more items you are carrying. If succesful this can perhaps result in a new item!"""
+    """Combine two or more items you are carrying. If successful, this can perhaps result in a new item!"""
     if len(parsed.who_info) == 1:
         raise ParseError("Combine %s with what?" % parsed.who_order[0].title)
     if len(parsed.who_info) < 2:
@@ -268,13 +290,23 @@ def do_combine_many(player: Player, parsed: ParseResult, ctx: util.Context) -> N
     # 'combine W and X and Y and Z' -> first try (w,x,y) on Z, then (x,y,z) on W as second option
     item, others = parsed.who_order[-1], parsed.who_order[:-1]
     try:
-        item.combine(others, player)
+        result = item.combine(others, player)
+        if result is not None:
+            replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
+                          "{Title} tinkers with some things %s carries." % player.subjective)
+            return
     except ActionRefused:
-        item, others = parsed.who_order[0], parsed.who_order[1:]
-        try:
-            item.combine(others, player)
-        except ActionRefused:
-            raise ActionRefused("That didn't work. Perhaps if you try it in a different order, or try it with other things?")
+        pass
+    item, others = parsed.who_order[0], parsed.who_order[1:]
+    try:
+        result = item.combine(others, player)
+        if result is not None:
+            replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
+                          "{Title} tinkers with some things %s carries." % player.subjective)
+            return
+    except ActionRefused:
+        pass
+    raise ActionRefused("That didn't work. Perhaps if you try it in a different order, or try it with other things?")
 
 
 @cmd("loot", "pilfer", "sack")
@@ -1157,7 +1189,7 @@ def do_use(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             item1, item2 = tuple(parsed.who_info)
             if item1 in player and item2 in player:
                 player.tell("<dim>(It is assumed that you want to combine them.)</>")
-                return do_combine(player, parsed, ctx)
+                return do_combine_two(player, parsed, ctx)
         subj = "them"
     else:
         who = parsed.who_order[0]

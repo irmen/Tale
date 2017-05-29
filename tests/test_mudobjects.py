@@ -1040,6 +1040,13 @@ class TestItem(unittest.TestCase):
         with self.assertRaises(ValueError):
             item2.clone()   # can't clone something with stuff in it
 
+    def test_combine_default(self):
+        actor = Living("person", "m", race="human")
+        thing = Item("thing")
+        other = Item("other")
+        with self.assertRaises(ActionRefused):
+            thing.combine([other], actor)
+
 
 class TestMudObject(unittest.TestCase):
     def test_basics(self):

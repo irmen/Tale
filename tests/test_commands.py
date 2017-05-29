@@ -131,3 +131,18 @@ class TestCommandDecorators:
         assert str(x.value) == "command defined more than once: name1"
         wizcmd("name1")(testfunc)
         wizcmd("name1")(testfunc)
+
+
+class TestNormalCommandFunctions():
+    # @todo tests for normal command functions
+    #     normal.replace_items()
+    #     normal.take_stuff()
+    #     normal.give_stuff()
+    #     normal.print_item_removal()
+    #     normal.remove_is_are_args()
+    pass
+
+
+class TestWizardCommandFunctions():
+    # @todo tests for wizard command functions
+    pass

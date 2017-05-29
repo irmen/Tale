@@ -1,5 +1,5 @@
 """
-The house, where the player starts the game
+The house, where the player starts the demo game
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
@@ -14,6 +14,8 @@ from tale.lang import capital
 from tale.parseresult import ParseResult
 from tale.player import Player
 from tale.util import Context, call_periodically
+from tale.items.basic import elastic_band, woodenYstick
+from tale.verbdefs import AGGRESSIVE_VERBS
 
 
 def init(driver: Driver) -> None:
@@ -60,20 +62,23 @@ class Cat(Living):
 
     @call_periodically(5, 20)
     def do_purr(self, ctx: Context) -> None:
-        if random.random() > 0.5:
+        if random.random() > 0.7:
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
-        if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug"):
+        if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug", "caress", "rub"):
             self.tell_others("{Title} curls up in a ball and purrs contently.")
-        elif parsed.verb in ("hello", "hi", "greet"):
+        elif parsed.verb in AGGRESSIVE_VERBS:
+            if self in parsed.who_info:   # only give aggressive response when directed at the cat.
+                self.tell_others("{Title} hisses! I wouldn't make %s angry if I were you!" % self.objective)
+        elif parsed.verb in ("hello", "hi", "greet", "meow"):
             self.tell_others("{Title} stares at you incomprehensibly.")
         else:
-            message = (parsed.message or parsed.unparsed).lower()
-            if self.name in message:
-                self.tell_others("{Title} looks up at you.")
+            message = (parsed.message or parsed.unparsed).lower().split()
+            if self.name in message or "cat" in message:
+                self.tell_others("{Title} looks up at you and wiggles %s tail." % self.possessive)
 
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")
@@ -81,3 +86,6 @@ livingroom.insert(cat, None)
 key = Key("key", "small rusty key", "This key is small and rusty. It has a label attached, reading \"garden door\".")
 key.key_for(door)
 closet.insert(key, None)
+
+closet.insert(woodenYstick, None)
+livingroom.insert(elastic_band, None)

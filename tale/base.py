@@ -330,10 +330,14 @@ class Item(MudObject):
     def unlock(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't unlock that.")
 
-    def combine(self, other: Sequence['Item'], actor: 'Living') -> None:
-        # combine the other thing(s) with us
+    def combine(self, other: List['Item'], actor: 'Living') -> Optional['Item']:
+        """Combine the other thing(s) with us.
+        If successful, return the new Item to replace us + all other items with.
+        (so 'other' must NOT contain any item not used in combining the things, or it will be silently lost!)
+        If stuff cannot be combined, return None (or raise an ActionRefused with a particular message).
+        """
         if other:
-            raise ActionRefused("You can't combine these.")
+            raise ActionRefused("You can't combine those.")
         raise ActionRefused("That makes no sense.")
 
     @util.authorized("wizard")

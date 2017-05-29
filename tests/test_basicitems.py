@@ -1,5 +1,5 @@
 """
-Unit tests for items
+Unit tests for basic items
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
@@ -15,7 +15,7 @@ from tale.story import StoryConfig
 from tests.supportstuff import FakeDriver
 
 
-class TestItems(unittest.TestCase):
+class TestBasicItems(unittest.TestCase):
     def setUp(self):
         mud_context.driver = FakeDriver()
         mud_context.config = StoryConfig()
@@ -65,6 +65,15 @@ class TestItems(unittest.TestCase):
         t.open(self.actor)
         t.remove(thing, self.actor)
         self.assertFalse(thing in t)
+
+    def test_make_catapult(self):
+        stick = basic.woodenYstick
+        elastic = basic.elastic_band
+        thing = base.Item("thing")
+        self.assertIsNone(stick.combine([thing], self.actor))
+        self.assertIsNone(stick.combine([elastic, thing], self.actor))
+        catapult = stick.combine([elastic], self.actor)
+        self.assertIsInstance(catapult, basic.Catapult)
 
 
 if __name__ == '__main__':

@@ -25,7 +25,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
 [feature] More commands should recognise object aliases (touch, take) like examine already does. -> one way to find an object by name?
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object

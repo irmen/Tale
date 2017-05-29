@@ -6,11 +6,13 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import textwrap
-from typing import NamedTuple, FrozenSet, Optional, Union
+from typing import NamedTuple, FrozenSet, Optional, Union, List
 
 from .. import lang, mud_context
 from ..base import Item, Container, Weapon, Living
 from ..errors import ActionRefused, TaleError
+from ..parseresult import ParseResult
+
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",
            "Note", "Potion", "Scroll", "Trash", "Boat", "Wearable", "Fountain"]
@@ -277,3 +279,47 @@ diamond = Item("diamond", "large blinking diamond", "This is the biggest diamond
 pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
 trashcan = Boxlike("trashcan", "dented steel trashcan")
 gameclock = GameClock("clock", title="ticking clock", short_description="The clock makes ticking noises.")
+
+
+class WoodenYstick(Item):
+    # this Y-stick is part of a catapult .
+    def combine(self, other: List[Item], actor: Living) -> Optional[Item]:
+        if len(other) == 1:
+            thing = other[0]
+            if isinstance(thing, ElasticBand):
+                # combine elastic band and Y-stick into .... the catapult
+                catapult = Catapult("catapult", "flimsy catapult", "A flimsy looking catapult. It looks like it might just work though!")
+                catapult.aliases.add("flimsy catapult")
+                return catapult
+        return None
+
+
+class ElasticBand(Item):
+    # the band is part of a catapult.
+    # This is a class to be able to identify items of this type easily when combining stuff.
+    pass
+
+
+class Catapult(Weapon):
+    # you can create this directly but it is more fun if it is created by combining a Y-stick and an elastic band.
+    def init(self):
+        super().init()
+        self.verbs = {"shoot": "Fire the weapon!"}
+
+    def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
+        if parsed.verb == "shoot":
+            if self in actor:
+                actor.tell("While the weapon is fine, you don't have munition. Shooting is not happening.")
+                actor.tell_others("{Title} fiddles a bit with %s %s." % (actor.possessive, self.title))
+            else:
+                actor.tell("You see the weapon lying there. To use it, you'll have to pick it up first though.")
+            return True
+        return False
+
+
+woodenYstick = WoodenYstick("stick", "wooden y-shaped stick", "A firm, Y-shaped wooden stick. You can hold it pretty comfortably.")
+elastic_band = ElasticBand("band", "large elastic band", "It is a pretty strong and large elastic band. "
+                                                         "It's not the type used to hold small packages but rather looks "
+                                                         "like it came off a catapult of some sort.")
+elastic_band.aliases.add("elastic")
+elastic_band.aliases.add("elastic band")
