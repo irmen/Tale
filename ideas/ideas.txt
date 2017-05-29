@@ -25,21 +25,23 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
+[feature] More commands should recognise object aliases (touch, take) like examine already does. -> one way to find an object by name?
+[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
+[feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
 [code] Use prompt_toolkit for a nicer command line interface?
+[feature] option to NOT show the items in a room by default, only when explicitly looking/examining by the player.
+
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
-[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
-[feature] More commands should recognise object aliases (touch, take) like examine already does.
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
 [feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
 [code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
     (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
-[feature] when X.combine(Y [,Z,...]) -> make it possible to 'produce' a new object that replaces both X and Y [, and Z,..]
-[feature] make detach/remove work (X.detach(Y)) where you get Y and possibly replace X with a new object
 [publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[feature] show a list of duplicates if dealing with multiple things with the same name
-[code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly). Much like the circle importers
+[feature] show a list of duplicates if dealing with multiple things with the same name?
+[code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly). Much like the circle importers.
 [feature] Hunger/thirst/fatigue?
 
 
@@ -47,6 +49,5 @@ General ideas/TODO:
 --------------------
 light level in rooms: dark/light? or three states?  (0=pitch black, 0.5=dark/dusk, 1=normal daylight)
 darkness in locations -> can't see location/exits/items/players (unless they're fluorescent, or unless you explicitly examine <direction>?)
-if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit.
-Inside/outside rooms.... inside rooms are always lit
-
+if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit. (thus: determine light state dynamically)
+Dynamic Day/night cycle?  Note that some rooms should always be lit (inside a building perhaps) so a flag for that is needed.

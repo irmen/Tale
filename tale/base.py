@@ -330,9 +330,11 @@ class Item(MudObject):
     def unlock(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't unlock that.")
 
-    def combine(self, other: 'Item', actor: 'Living') -> None:
-        # combine the other thing with us
-        raise ActionRefused("You can't combine these.")
+    def combine(self, other: Sequence['Item'], actor: 'Living') -> None:
+        # combine the other thing(s) with us
+        if other:
+            raise ActionRefused("You can't combine these.")
+        raise ActionRefused("That makes no sense.")
 
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living') -> 'Item':

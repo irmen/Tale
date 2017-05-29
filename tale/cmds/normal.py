@@ -235,24 +235,46 @@ def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
-@cmd("combine", "attach", "apply", "install")
-def do_combine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
-    """Combine two items you are carrying."""
+@cmd("attach", "apply", "install")
+def do_combine_two(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Combine two items you are carrying by attaching them, applying them or installing them together.
+    If successful this can perhaps result in a new item!"""
     if len(parsed.who_info) != 2:
-        messages = {
-            "combine": "Combine what with what?",
-            "attach": "Attach what to what?",
-            "apply": "Apply what to what?",
-            "install": "Install what on what?"
-        }
-        raise ParseError(messages[parsed.verb])
+        if parsed.verb == "attach":
+            raise ParseError("Attach what to what?")
+        if parsed.verb == "apply":
+            raise ParseError("Apply what to what?")
+        if parsed.verb == "install":
+            raise ParseError("Install what on what?")
+        return
     item1, item2 = tuple(parsed.who_info)
     if item1 not in player or item2 not in player:
         raise ActionRefused("You are not carrying both, try to pick them up first.")
     try:
-        item2.combine(item1, player)
+        item2.combine([item1], player)
     except ActionRefused:
-        item1.combine(item2, player)
+        item1.combine([item2], player)
+
+
+@cmd("combine")
+def do_combine_many(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Combine two or more items you are carrying. If succesful this can perhaps result in a new item!"""
+    if len(parsed.who_info) == 1:
+        raise ParseError("Combine %s with what?" % parsed.who_order[0].title)
+    if len(parsed.who_info) < 2:
+        raise ParseError("Combine which things?")
+    if not all(item in player for item in parsed.who_info):
+        raise ActionRefused("You should pick all of those up first if you want to combine them.")
+    # 'combine W and X and Y and Z' -> first try (w,x,y) on Z, then (x,y,z) on W as second option
+    item, others = parsed.who_order[-1], parsed.who_order[:-1]
+    try:
+        item.combine(others, player)
+    except ActionRefused:
+        item, others = parsed.who_order[0], parsed.who_order[1:]
+        try:
+            item.combine(others, player)
+        except ActionRefused:
+            raise ActionRefused("That didn't work. Perhaps if you try it in a different order, or try it with other things?")
 
 
 @cmd("loot", "pilfer", "sack")
