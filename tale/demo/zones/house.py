@@ -40,7 +40,7 @@ door = Door(
     ["garden", "door"], outside,
     "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.",
     locked=True, opened=False)
-door.key_code = 1
+door.key_code = "1"
 # use an exit with an unbound target (string), the driver will link this up:
 closet_exit = Exit("closet", "house.closet", "There's a small closet in your house.")
 livingroom.add_exits([door, closet_exit])

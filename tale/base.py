@@ -1269,7 +1269,7 @@ class Door(Exit):
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_description or short_description
-        self.key_code = None   # type: Any  # you can optionally set this to any code that a key must match to unlock the door
+        self.key_code = ""   # you can optionally set this to any code that a key must match to unlock the door
         super().__init__(directions, target_location, short_description, long_description)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
@@ -1399,10 +1399,10 @@ class Door(Exit):
             # if this door has a linked door, it could be that the key_code was set on the other door.
             # in that case, copy the key code from the other door.
             other_code = self.linked_door.door.key_code
-            if self.key_code is None:
-                self.key_code = other_code
+            if self.key_code and self.key_code != other_code:
+                raise TaleError("door key codes must match")
             else:
-                assert self.key_code == other_code, "door key codes must match"
+                self.key_code = other_code
         return key_code and key_code == self.key_code
 
     def search_key(self, actor: Living) -> Optional[Item]:
@@ -1428,7 +1428,7 @@ class Door(Exit):
 class Key(Item):
     """A key which has a unique code. It can be used to open the matching Door."""
     def init(self) -> None:
-        self.key_code = None  # type: str
+        self.key_code = ""
 
     def key_for(self, door: Door=None, code: str=None) -> None:
         """Makes this key a key for the given door. (basically just copies the door's key_code)"""

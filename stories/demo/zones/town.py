@@ -168,7 +168,7 @@ class EndDoor(Door):
 
 
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
-end_door.key_code = 999
+end_door.key_code = "999"
 lane.add_exits([end_door])
 
 

@@ -44,7 +44,7 @@ carpark.add_exits([
 parking_gate = Door(["gate", "parking"], carpark,
                     "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.",
                     locked=True, opened=False)
-parking_gate.key_code = 111
+parking_gate.key_code = "111"
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
 storage_room = Location("Storage Cell", "The butcher's meat storage cell. Brrrrr, it is cold here!")

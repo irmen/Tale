@@ -16,7 +16,7 @@ from types import ModuleType
 from typing import Generator
 
 from . import wizcmd, disabled_in_gamemode
-from .. import base, lang, util, pubsub, __version__
+from .. import base, lang, util, pubsub, races, __version__
 from ..errors import ParseError, ActionRefused, NonSoulVerb
 from ..parseresult import ParseResult
 from ..player import Player
@@ -68,7 +68,7 @@ or in the story's zone module (try !ls zones)"""
 
 
 @wizcmd("clone")
-def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
     if not parsed.args:
         raise ParseError("Clone what?")
@@ -86,6 +86,37 @@ def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         obj = parsed.who_order[0]
     else:
         raise ActionRefused("Object not found")
+
+    def string_entered(value: str) -> str:
+        value = value.strip()
+        if value:
+            return value
+        raise ValueError("You need to type something.")
+
+    def validate_race(value: str) -> str:
+        value = value.strip()
+        if value in races.races:
+            return value
+        raise ValueError("That race does not exist. Choose from: " + str(races.races.keys()))
+
+    if issubclass(obj, base.Item):
+        # create a new Item instance
+        name = yield "input", ("object Name?", string_entered)
+        title = yield "input", "object Title (optional, don't start with 'the')?"
+        description = yield "input", "object description (optional)?"
+        short_desc = yield "input", "object short description (optional)?"
+        if (yield "input", ("Okay with this?", lang.yesno)):
+            obj = obj(name, title, description, short_desc)
+    elif issubclass(obj, base.Living):
+        # create a new Living instance
+        name = yield "input", ("living Name?", string_entered)
+        race = yield "input", ("living Race?", validate_race)
+        gender = yield "input", ("living Gender (m/f/n)?", lang.validate_gender)
+        title = yield "input", "living Title (optional, don't start with 'the')?"
+        description = yield "input", "living description (optional)?"
+        short_desc = yield "input", "living short description (optional)?"
+        if (yield "input", ("Okay with this?", lang.yesno)):
+            obj = obj(name, gender, race, title, description, short_desc)
     if not isinstance(obj, base.MudObject):
         raise ActionRefused("Cannot clone that, it's not a MudObject")
     obj.wiz_clone(player)  # actually clone it
@@ -368,13 +399,22 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
         raise ActionRefused("Can't find %s." % name)
     player.tell(repr(obj), end=True)
     import ast
-    value = ast.literal_eval(args[1])
+    try:
+        value = ast.literal_eval(args[1])
+    except ValueError:
+        # could be that a string is meant to be the value, in this case, use quotes around it
+        value = ast.literal_eval("'%s'" % args[1])
     expected_type = type(getattr(obj, field))
     if expected_type is type(value):
         setattr(obj, field, value)
         player.tell("Field set: %s.%s = %r" % (name, field, value))
     else:
-        raise ActionRefused("Data type mismatch, expected %s." % expected_type)
+        if expected_type is str:
+            value = str(value)
+            setattr(obj, field, value)
+            player.tell("Field set: %s.%s = %r" % (name, field, value))
+        else:
+            raise ActionRefused("Data type mismatch, expected %s." % expected_type)
 
 
 @wizcmd("server")

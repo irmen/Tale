@@ -340,8 +340,8 @@ class TestDoorsExits(unittest.TestCase):
             door.unlock(player)
         with self.assertRaises(ActionRefused):
             door.unlock(player, key)
-        door.key_code = 12345
-        door2.key_code = 9999
+        door.key_code = "12345"
+        door2.key_code = "9999"
         key.key_for(door)
         self.assertTrue(door.locked)
         door.unlock(player, key)
@@ -360,7 +360,7 @@ class TestDoorsExits(unittest.TestCase):
         player.remove(key, player)
         with self.assertRaises(ActionRefused):
             door.lock(player)
-        door.key_code = None
+        door.key_code = ""
         with self.assertRaises(LocationIntegrityError):
             key.key_for(door)
 
@@ -464,7 +464,7 @@ class TestDoorsExits(unittest.TestCase):
                                                  this_open_msg="door two open", this_close_msg="door two close")
         loc1.add_exits([door_one_two])
         loc2.add_exits([door_two_one])
-        door_one_two.key_code = 555
+        door_one_two.key_code = "555"
         key.key_for(door_one_two)
         pubsub1 = PubsubCollector()
         pubsub2 = PubsubCollector()
