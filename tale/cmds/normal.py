@@ -61,8 +61,6 @@ def do_locate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         if thing is player:
             p("You are here, in <location>%s</>." % player.location.name)
             return
-        if thing.name.lower() != name.lower() and name.lower() in thing.aliases:
-            p("<dim>(By %s you probably mean %s.)</>" % (name, thing.name))
         if thing in player.location:
             if isinstance(thing, base.Living):
                 p("<living>%s</> is here next to you." % lang.capital(thing.title))
@@ -77,8 +75,6 @@ def do_locate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         # Check inside containers in the player's inventory instead.
         item, container = player.locate_item(name, include_inventory=False, include_location=False, include_containers_in_inventory=True)
         if item:
-            if item.name.lower() != name.lower() and name.lower() in item.aliases:
-                p("<dim>(By %s you probably mean %s.)</>" % (name, item.name))
             player.tell_object_location(item, container, False)
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
@@ -676,8 +672,6 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             return
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
-        if living.name.lower() != name.lower() and name.lower() in living.aliases:
-            p("<dim>(By %s you probably meant %s.)</>" % (name, living.name), end=True)
         if living.description:
             p(living.description)
         else:
@@ -698,15 +692,13 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         return
     item, container = player.locate_item(name)
     if item:
-        if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
         if name in item.extra_desc:
             p(item.extra_desc[name])   # print the extra description, rather than a generic message
         else:
             if item in player:
                 p("You're carrying <item>%s</>." % lang.a(item.title))
             elif container and container in player:
-                player.tell_object_location(player, item, True)
+                player.tell_object_location(item, container, True)
             else:
                 if not item.description:
                     p("You see <item>%s</>." % lang.a(item.title))
@@ -1058,8 +1050,6 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         p("It's a possible way to leave your current location: <exit>%s</>" % player.location.exits[name].short_description)
     # is it a npc here?
     living = player.location.search_living(name)
-    if living and living.name.lower() != name.lower() and name.lower() in living.aliases:
-        p("<dim>(By %s you probably meant %s.)</>" % (name, living.name))
     if living:
         found = True
         if living is player:
@@ -1076,9 +1066,7 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:
         found = True
-        if item.name.lower() != name.lower() and name.lower() in item.aliases:
-            p("<dim>(By %s you probably meant %s.)</>" % (name, item.name))
-        p("It's an item in your vicinity. You should perhaps try to examine it.")
+        p("It's an item in your vicinity or perhaps even in your pockets. You should maybe try to examine it.")
     if name == "soul":
         # if player is asking about the soul, give some general info
         found = True

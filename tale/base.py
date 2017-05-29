@@ -1929,7 +1929,7 @@ class Soul:
                     player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
                     raise ParseError("%s is no longer around." % lang.capital(who.subjective))
             if matches:
-                player.tell("<dim>(By '%s', it is assumed you mean: %s.)" % (pronoun, lang.join(who.title for who in matches)))
+                player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, lang.join(who.title for who in matches)))
                 return [(who, who.name) for who in matches]
             else:
                 raise ParseError("It is not clear who you're referring to.")
@@ -1938,12 +1938,12 @@ class Soul:
             if pronoun == "it":
                 for direction, exit in player.location.exits.items():
                     if exit is who:
-                        player.tell("<dim>(By '%s', it is assumed you mean '%s'.)</>" % (pronoun, direction))
+                        player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, direction))
                         return [(who, direction)]
             # not an exit, try an item or a living
             if pronoun == who.objective:
                 if player.search_item(who.name) or who in player.location.livings:
-                    player.tell("<dim>(By '%s', it is assumed you mean %s.)</>" % (pronoun, who.title))
+                    player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
                     return [(who, who.name)]
                 player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
                 raise ParseError("%s is no longer around." % lang.capital(who.subjective))
