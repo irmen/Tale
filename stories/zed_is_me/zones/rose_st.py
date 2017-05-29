@@ -10,12 +10,6 @@ butcher, storage room
 import zones.magnolia_st
 
 from tale.base import Location, Exit, Door, Key, _limbo
-from tale.driver import Driver
-
-
-def init(driver: Driver) -> None:
-    # called when zone is first loaded
-    pass
 
 
 north_street = Location("Rose Street", "The northern part of Rose Street.")

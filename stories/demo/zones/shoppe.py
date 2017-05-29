@@ -9,15 +9,9 @@ from typing import Any
 
 from tale import mud_context, util
 from tale.base import Item, Location, Exit, Living
-from tale.driver import Driver
 from tale.items.basic import gameclock, diamond, gem, newspaper
 from tale.pubsub import Listener, TopicNameType
 from tale.shop import ShopBehavior, Shopkeeper
-
-
-def init(driver: Driver) -> None:
-    # called when zone is first loaded
-    pass
 
 
 # create the Olde Shoppe and its owner

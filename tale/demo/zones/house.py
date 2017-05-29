@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import random
 
 from tale.base import Location, Exit, Door, Key, Living
-from tale.driver import Driver
 from tale.errors import StoryCompleted
 from tale.lang import capital
 from tale.parseresult import ParseResult
@@ -16,11 +15,6 @@ from tale.player import Player
 from tale.util import Context, call_periodically
 from tale.items.basic import elastic_band, woodenYstick
 from tale.verbdefs import AGGRESSIVE_VERBS
-
-
-def init(driver: Driver) -> None:
-    # called when zone is first loaded
-    pass
 
 
 # define the various locations

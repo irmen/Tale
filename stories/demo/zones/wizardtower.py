@@ -9,12 +9,6 @@ import random
 
 from tale import lang, util
 from tale.base import Location, Exit, Item, Living
-from tale.driver import Driver
-
-
-def init(driver: Driver) -> None:
-    # called when zone is first loaded
-    pass
 
 
 hall = Location("Main hall of the Tower of Magic",

@@ -601,7 +601,9 @@ class Driver(pubsub.Listener):
                 module = importlib.import_module("zones." + zone)
             except ImportError:
                 raise errors.TaleError("zone not found: " + zone)
-            module.init(self)   # type: ignore
+            if hasattr(module, "init"):
+                # call the zone module initialization function
+                module.init(self)   # type: ignore
         return importlib.import_module("zones")
 
     def current_custom_verbs(self, player: player.Player) -> Dict[str, str]:

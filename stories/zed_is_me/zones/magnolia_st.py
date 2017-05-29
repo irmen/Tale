@@ -10,13 +10,7 @@ from zones import houses
 
 from tale import mud_context
 from tale.base import Location, Exit, Door
-from tale.driver import Driver
 from tale.errors import StoryCompleted
-
-
-def init(driver: Driver) -> None:
-    # called when zone is first loaded
-    pass
 
 
 street1 = Location("Magnolia Street", "Your house is on Magnolia Street, one of the larger streets in town. "
