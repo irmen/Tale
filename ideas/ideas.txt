@@ -25,8 +25,8 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[wizard] clone a class -> create instance of it (ask for init param values)
 [feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
-[feature] option to NOT show the items in a room by default, only when explicitly looking/examining by the player.
 [code] Use prompt_toolkit for a nicer command line interface?
 
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
