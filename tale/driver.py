@@ -57,7 +57,7 @@ class Commands:
             existing = self.commands_per_priv[privilege][verb]
             self.commands_per_priv[privilege][verb] = func
             return existing
-        raise KeyError("command not defined: " + verb)
+        raise LookupError("command not defined: " + verb)
 
     def validatefunc(self, func: Callable) -> None:
         if not hasattr(func, "is_tale_command_func"):

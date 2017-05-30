@@ -11,7 +11,7 @@ import random
 import re
 import sqlite3
 import time
-from typing import Set, Tuple
+from typing import Set, Tuple, List
 
 from . import base
 from . import lang
@@ -24,7 +24,7 @@ __all__ = ["Account", "MudAccounts"]
 
 class Account:
     def __init__(self, name: str, email: str, pw_hash: str, pw_salt: str, privileges: Set[str],
-                 created: datetime.datetime, logged_in: datetime.datetime, stats: base.Stats) -> None:
+                 created: datetime.datetime, logged_in: datetime.datetime, banned: bool, stats: base.Stats) -> None:
         # validation on the suitability of names, emails etc is taken care of by the creating code
         if not isinstance(stats, base.Stats):
             raise TypeError("stats must be of type Stats")
@@ -36,6 +36,7 @@ class Account:
         self.created = created
         self.logged_in = logged_in
         self.stats = stats
+        self.banned = banned
 
 
 class MudAccounts:
@@ -75,7 +76,8 @@ class MudAccounts:
                             pw_hash varchar NOT NULL,
                             pw_salt varchar NOT NULL,
                             created timestamp NOT NULL,
-                            logged_in timestamp NULL
+                            logged_in timestamp NULL,
+                            banned integer NOT NULL
                         );""")
                     conn.execute("CREATE INDEX idx_account_name ON Account(name)")
                     conn.execute("""
@@ -125,7 +127,7 @@ class MudAccounts:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
             if not result:
-                raise KeyError(name)
+                raise LookupError(name)
             return self._fetch_account(conn, result["id"])
 
     def _fetch_account(self, conn: sqlite3.Connection, account_id: int) -> Account:
@@ -142,17 +144,18 @@ class MudAccounts:
             else:
                 raise AttributeError("stats doesn't have attribute: " + key)
         stats.set_stats_from_race()   # initialize static stats from races table
-        return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges, acc["created"], acc["logged_in"], stats)
+        return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges,
+                       acc["created"], acc["logged_in"], bool(acc["banned"]), stats)
 
-    def all_accounts(self, having_privilege: str=None) -> Set[Account]:
+    def all_accounts(self, having_privilege: str=None) -> List[Account]:
         with self._sqlite_connect() as conn:
             if having_privilege:
-                result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=?",
-                                      (having_privilege,)).fetchall()
+                result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=? "
+                                      "ORDER BY a.name",  (having_privilege,)).fetchall()
             else:
-                result = conn.execute("SELECT id FROM Account").fetchall()
+                result = conn.execute("SELECT id FROM Account ORDER BY name").fetchall()
             account_ids = [ar["id"] for ar in result]
-            accounts = {self._fetch_account(conn, account_id) for account_id in account_ids}
+            accounts = [self._fetch_account(conn, account_id) for account_id in account_ids]
             return accounts
 
     def logged_in(self, name: str) -> None:
@@ -222,12 +225,12 @@ class MudAccounts:
             result = conn.execute("SELECT COUNT(*) FROM Account WHERE name=?", (name,)).fetchone()[0]
             if result > 0:
                 raise ValueError("That name is not available.")
-            result = conn.execute("INSERT INTO Account('name', 'email', 'pw_hash', 'pw_salt', 'created') VALUES (?,?,?,?,?)",
-                                  (name, email, pwhash, salt, created))
+            result = conn.execute("INSERT INTO Account('name', 'email', 'pw_hash', 'pw_salt', 'created', 'banned') VALUES (?,?,?,?,?,?)",
+                                  (name, email, pwhash, salt, created, 0))
             for privilege in privileges:
                 conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (result.lastrowid, privilege))
             self._store_stats(conn, result.lastrowid, stats)
-        return Account(name, email, pwhash, salt, privileges, created, None, stats)
+        return Account(name, email, pwhash, salt, privileges, created, None, False, stats)
 
     def _store_stats(self, conn: sqlite3.Connection, account_id: int, stats: base.Stats) -> None:
         columns = ["account"]
@@ -251,7 +254,7 @@ class MudAccounts:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
             if not result:
-                raise KeyError("Unknown name.")
+                raise LookupError("Unknown name.")
             account_id = result["id"]
             if new_password:
                 pwhash, salt = self._pwhash(new_password)
@@ -267,12 +270,26 @@ class MudAccounts:
         with self._sqlite_connect() as conn:
             result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
             if not result:
-                raise KeyError("Unknown name.")
+                raise LookupError("Unknown name.")
             account_id = result["id"]
             conn.execute("DELETE FROM Privilege WHERE account=?", (account_id,))
             for privilege in privileges:
                 conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (account_id, privilege))
         return privileges
+
+    @util.authorized("wizard")
+    def ban(self, name: str, actor: player.Player) -> None:
+        with self._sqlite_connect() as conn:
+            updated = conn.execute("UPDATE Account SET banned=1 WHERE name=?", (name,)).rowcount
+            if updated == 0:
+                raise LookupError("Unknown name.")
+
+    @util.authorized("wizard")
+    def unban(self, name: str, actor: player.Player) -> None:
+        with self._sqlite_connect() as conn:
+            updated = conn.execute("UPDATE Account SET banned=0 WHERE name=?", (name,)).rowcount
+            if updated == 0:
+                raise LookupError("Unknown name.")
 
     blocked_names = """irmen
 me

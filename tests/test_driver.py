@@ -236,7 +236,7 @@ class TestCommands(unittest.TestCase):
         self.cmds.add("verb4", func3, "noob")
 
     def testCommandsOverrideFail(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(LookupError):
             self.cmds.override("verbXYZ", func2)
 
     def testCommandsOverride(self):

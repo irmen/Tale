@@ -129,9 +129,9 @@ class MudDriver(driver.Driver):
             name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
             password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
             email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
+            gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             conn.output("You can choose one of the following races: ", lang.join(races.playable_races))
             race = yield "input", ("Player race?", charbuilder.valid_playable_race)
-            gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             # review the account
             conn.player.tell("<bright>Please review your new character.</>", end=True)
             conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" %
@@ -142,7 +142,7 @@ class MudDriver(driver.Driver):
                 break
         stats = base.Stats.from_race(race, gender=gender[0])
         self.mud_accounts.create(name, password, email, stats, privileges={"wizard"})
-        conn.output("\n")
+        conn.output("<it>Okay, your admin account is ready. You can try logging in.</it>\n")
         conn.output("\n")
         yield from self._login_dialog_mud(conn)  # continue with the normal login dialog
 
@@ -152,22 +152,16 @@ class MudDriver(driver.Driver):
         conn.output("<dim>If you are not yet known with us, you can simply type in a new name. "
                     "Otherwise use the name you registered with.</>\n")
         conn.output("\n")
-        while True:
+        successful_login = False
+        while not successful_login:
+            existing_player = None
+            account = None
             name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
-            existing_player = self.search_player(name)
-            if existing_player:
-                conn.player.tell("That player is already logged in elsewhere. Their current location is " + existing_player.location.name)
-                conn.player.tell("and their idle time is %d seconds." % existing_player.idle_time)
-                if existing_player.idle_time < 30:
-                    conn.player.tell("They are still active.")
-                    continue
-                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
-                    conn.player.tell("Okay, leaving them in peace.")
-                    continue
+
+            # see if it is a new player or a name we already know.
             try:
-                self.mud_accounts.get(name)
-                password = yield "input-noecho", "Please type in your password."
-            except KeyError:
+                account = self.mud_accounts.get(name)
+            except LookupError:
                 if self.restricted:
                     conn.player.tell("<bright>We're sorry, the mud is running in restricted mode at the moment. "
                                      "It is not allowed to create new characters right now. Please try again later.</bright>")
@@ -181,52 +175,82 @@ class MudDriver(driver.Driver):
                 result = yield from builder.build_character()
                 if not result:
                     continue
-                name, password = result.name, result.password
-                self.mud_accounts.create(name, password, result.email, result.stats)
-                conn.player.tell("\n<bright>Your new account has been created!</>  It will now be used to log in.", end=True)
+                self.mud_accounts.create(result.name, result.password, result.email, result.stats)
+                del result
+                conn.player.tell("\n<bright>Your new account has been created!</>  Go ahead and log in with it.", end=True)
                 conn.player.tell("\n")
+                continue
+
+            # ask and validate the password.
             try:
+                password = yield "input-noecho", "Please type in your password."
                 self.mud_accounts.valid_password(name, password)
+                del password
             except ValueError as x:
                 conn.output("<it>%s</it>" % x)
                 continue
-            else:
-                account = self.mud_accounts.get(name)
-                if existing_player:
-                    # take the place of already logged in player (that was disconnected perhaps?)
-                    existing_player.tell("\n")
-                    existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
-                    existing_player.tell("\n")
-                    state = existing_player.__getstate__()
-                    state["name"] = conn.player.name    # we can only take the real name after existing player has been kicked out
-                    existing_player_location = existing_player.location
-                    self.disconnect_player(existing_player)
-                    ctx = util.Context(self, self.game_clock, self.story.config, None)
-                    # mr. Smith move: delete the other player and restore its properties in us
-                    existing_player.destroy(ctx)
-                    conn.player.__setstate__(state)
-                    name_info = charbuilder.PlayerNaming()
-                    name_info.money = state["money"]
-                    name_info.name = state["name"]
-                    name_info.gender = state["gender"]
-                    name_info.stats = state["stats"]
-                    name_info.name = account.name   # assume the real name now
-                    self._rename_player(conn.player, name_info)
-                    conn.output("\n")
-                    same_location = conn.player.location is existing_player_location
-                    conn.player.move(existing_player_location, silent=same_location)
-                    if same_location:
-                        conn.player.location.tell("%s appears again. Is %s a different person, you wonder?" %
-                                                  (lang.capital(conn.player.title), conn.player.subjective), exclude_living=conn.player)
+
+            # try to get the account and see if it is banned or not.
+            account = self.mud_accounts.get(name)
+            if account.banned:
+                conn.player.tell("\n<bright>You have been banned by an admin!</>  Try logging in later or get in touch.", end=True)
+                conn.player.tell("\n")
+                del account
+                continue
+
+            # check if player is already logged in from somewhere else.
+            existing_player = self.search_player(account.name)
+            if existing_player:
+                conn.player.tell("That player is already logged in elsewhere. Their current location is " + existing_player.location.name)
+                conn.player.tell("and their idle time is %d seconds." % existing_player.idle_time)
+                if existing_player.idle_time < 30:
+                    conn.player.tell("They are still active.")
+                    del account
+                    continue
+                if not (yield "input", ("Do you want to kick them out and take over?", lang.yesno)):
+                    conn.player.tell("Okay, leaving them in peace.")
+                    del account
+                    continue
                 else:
-                    # log in normally
-                    self.mud_accounts.logged_in(name)
-                    if account.logged_in:
-                        conn.output("Last login: " + str(account.logged_in))
+                    successful_login = True     # login ok, replacing the existing player
+                    break
+            else:
+                successful_login = True    # login ok, regular login
                 break
-        if not existing_player:
-            # for a new login, we need to rename the transitional player object
-            # to the proper account name, and move the player to the starting location.
+
+        if not successful_login or not account or account.banned:  # safeguard
+            raise errors.SecurityViolation("unsuccessful login should have been handled")
+
+        # login was succesful!!!
+
+        if existing_player:
+            # take the place of already logged in player (that was disconnected perhaps?)
+            existing_player.tell("\n")
+            existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
+            existing_player.tell("\n")
+            state = existing_player.__getstate__()
+            state["name"] = conn.player.name  # we can only take the real name after existing player has been kicked out
+            existing_player_location = existing_player.location
+            self.disconnect_player(existing_player)
+            ctx = util.Context(self, self.game_clock, self.story.config, None)
+            # mr. Smith move: delete the other player and restore its properties in us
+            existing_player.destroy(ctx)
+            conn.player.__setstate__(state)
+            name_info = charbuilder.PlayerNaming()
+            name_info.money = state["money"]
+            name_info.name = state["name"]
+            name_info.gender = state["gender"]
+            name_info.stats = state["stats"]
+            name_info.name = account.name  # assume the real name now
+            self._rename_player(conn.player, name_info)
+            conn.output("\n")
+            same_location = conn.player.location is existing_player_location
+            conn.player.move(existing_player_location, silent=same_location)
+            if same_location:
+                conn.player.location.tell("%s appears again. Is %s a different person, you wonder?" %
+                                          (lang.capital(conn.player.title), conn.player.subjective), exclude_living=conn.player)
+        else:
+            # for a normal log in, set the connecting player to the proper account name, and move them to the starting location.
             name_info = charbuilder.PlayerNaming()
             name_info.name = account.name
             name_info.gender = account.stats.gender
@@ -238,6 +262,7 @@ class MudDriver(driver.Driver):
                 conn.player.move(self.lookup_location(self.story.config.startlocation_wizard))
             else:
                 conn.player.move(self.lookup_location(self.story.config.startlocation_player))
+
         prompt = self.story.welcome(conn.player)
         if prompt:
             yield "input", "\n" + prompt

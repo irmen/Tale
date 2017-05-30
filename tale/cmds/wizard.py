@@ -542,12 +542,13 @@ def do_accounts(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show all registered player accounts"""
     accounts = ctx.driver.mud_accounts.all_accounts()
     wizards = set()
-    txt = ["<ul> account      <dim>|</><ul> logged in           <dim>|</><ul> email                <dim>|</><ul> privileges </>"]
+    txt = ["<ul> account      <dim>|</><ul> logged in           <dim>|</><ul> email                <dim>|</>"
+           "<ul>Ban<dim>|</><ul> privileges </>"]
     for account in accounts:
         if "wizard" in account.privileges:
             wizards.add(account.name)
-        txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s" %
-                   (account.name, account.logged_in, account.email, lang.join(account.privileges, None)))
+        txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s <dim>|</> %s" %
+                   (account.name, account.logged_in, account.email, "*" if account.banned else " ", lang.join(account.privileges, None)))
     txt.append("\nWizards: " + lang.join(wizards))
     player.tell("\n".join(txt), format=False)
 
@@ -563,7 +564,7 @@ def do_add_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     name, priv = parsed.args
     try:
         account = ctx.driver.mud_accounts.get(name)
-    except KeyError:
+    except LookupError:
         raise ActionRefused("No such account.")
     account.privileges.add(priv)
     new_privs = ctx.driver.mud_accounts.update_privileges(name, account.privileges, player)
@@ -584,7 +585,7 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
     name, priv = parsed.args
     try:
         account = ctx.driver.mud_accounts.get(name)
-    except KeyError:
+    except LookupError:
         raise ActionRefused("No such account.")
     if priv in account.privileges:
         account.privileges.remove(priv)
@@ -598,6 +599,27 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
             player.tell("Player has been notified and forced to log off.")
     else:
         player.tell("No changes.")
+
+
+@wizcmd("ban", "unban")
+@disabled_in_gamemode(GameMode.IF)
+def do_ban_unban_player(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+    """Bans/unbans a player from logging into the game."""
+    if len(parsed.args) != 1:
+        raise ParseError("Ban/unban what account?")
+    try:
+        account = ctx.driver.mud_accounts.get(parsed.args[0])
+    except LookupError:
+        raise ActionRefused("No such account.")
+    if parsed.verb == "!ban":
+        ctx.driver.mud_accounts.ban(account.name, player)
+        player.tell("Account <player>%s</> has been banned." % account.name)
+        player.tell("They will not be able to log in until unbanned. "
+                    "If they're in the game already, you'll have to kick them manually if desired.")
+    elif parsed.verb == "!unban":
+        ctx.driver.mud_accounts.unban(account.name, player)
+        player.tell("Account <player>%s</> has been unbanned." % account.name)
+        player.tell("They will be able to log in again.")
 
 
 @wizcmd("vnum")

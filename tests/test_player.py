@@ -709,10 +709,36 @@ class TestMudAccounts(unittest.TestCase):
         self.assertEqual(salt, salt2)
 
     def test_accountcreate_fail(self):
-        stats = Stats()
+        stats = Stats()  # uninitialized stats
         accounts = MudAccounts(":memory:")
         with self.assertRaises(ValueError):
             accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+
+    def test_ban(self):
+        dbfile = pathlib.Path(tempfile.gettempdir()) / "tale_test_accdb_{0:f}.sqlite".format(time.time())
+        actor = Living("normal", gender="f")
+        wizard = Living("wizz", gender="f")
+        wizard.privileges.add("wizard")
+        try:
+            accounts = MudAccounts(str(dbfile))
+            stats = Stats.from_race("elf", gender='f')
+            accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+            account = accounts.get("testname")
+            self.assertFalse(account.banned)
+            with self.assertRaises(ActionRefused):
+                accounts.ban("testname", actor)
+            with self.assertRaises(LookupError):
+                accounts.ban("zerp", wizard)
+            accounts.ban("testname", wizard)
+            account = accounts.get("testname")
+            self.assertTrue(account.banned)
+            with self.assertRaises(LookupError):
+                accounts.unban("zerp", wizard)
+            accounts.unban("testname", wizard)
+            account = accounts.get("testname")
+            self.assertFalse(account.banned)
+        finally:
+            dbfile.unlink()
 
     def test_dbcreate(self):
         dbfile = pathlib.Path(tempfile.gettempdir()) / "tale_test_accdb_{0:f}.sqlite".format(time.time())
