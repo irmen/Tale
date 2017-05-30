@@ -162,10 +162,12 @@ class Deferred:
                 else:
                     raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
+        if self.periodical and hasattr(func, "_tale_periodically") and not func._tale_periodically:
+            return  # no longer marked as periodical
         if "ctx" in inspect.signature(func).parameters:
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
         func(*self.vargs, **self.kwargs)
-        if self.periodical:
+        if self.periodical and (not hasattr(func, "_tale_periodically") or func._tale_periodically):
             # reschedule the same call!
             assert self.periodical[0] > 0 and self.periodical[1] > 0
             due = random.uniform(self.periodical[0], self.periodical[1])

@@ -463,10 +463,18 @@ def excepthook(ex_type, ex_value, ex_tb):
 
 
 def call_periodically(period: float, max_period: float=None):
-    initial = random.uniform(0.1, period)   # scatter initial calls
-
+    """
+    Decorator to mark a method of a MudObject class to be invoked periodically by the driver.
+    You can set a fixed period (in real-time seconds) or a period interval in which a random
+    next occurrence is then chosen for every call.
+    Setting the period to 0 or None will stop the periodical calls.
+    """
     def mark(func):
-        func._tale_periodically = (initial, period, max_period or period)
+        if not period:
+            func._tale_periodically = None
+        else:
+            initial = random.uniform(0.1, period)  # scatter initial calls
+            func._tale_periodically = (initial, period, max_period or period)
         return func
 
     return mark

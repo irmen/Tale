@@ -60,6 +60,7 @@ class Cat(Living):
             self.location.tell("%s purrs happily." % capital(self.title))
         else:
             self.location.tell("%s yawns sleepily." % capital(self.title))
+        # it's possible to stop the periodical calling by setting:  call_periodically(0)(Cat.do_purr)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug", "caress", "rub"):

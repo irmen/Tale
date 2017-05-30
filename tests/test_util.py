@@ -307,6 +307,9 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(9, periodical[1][1])
         self.assertEqual(99, periodical[1][2])
         self.assertEqual({}, util.get_periodicals(self))
+        # test cancelation
+        util.call_periodically(0)(func)
+        self.assertIsNone(func._tale_periodically)
 
 
 class TestVfs(unittest.TestCase):
