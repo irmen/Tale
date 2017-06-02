@@ -39,7 +39,7 @@ class Player(base.Living, pubsub.Listener):
         self.screen_styles_enabled = True
         self.smartquotes_enabled = True
         self.output_line_delay = 50   # milliseconds.
-        self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations       # @todo enum
+        self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()   # type: Set[base.Location]
         self.last_input_time = time.time()
         self.init_nonserializables()

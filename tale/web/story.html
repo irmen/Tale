@@ -8,22 +8,24 @@
     <script type="application/javascript" src="static/script.js"></script>
 </head>
 <body onload="setup()">
-    <h1 title="version: {story_version} -- author: {story_author} -- {story_author_email}"><img src="static/logo.gif" id="img-logo"> {story_name}</h1>
-    <noscript>
-        <h2>Your browser doesn't have Javascript or it is disabled. You can't use this web interface without it.</h2>
-    </noscript>
-    <div class="story">
-        <div class="location">
-            Location: &nbsp;<span id="player-location">...</span> <!-- &nbsp;&nbsp; turns: &nbsp;<span id="player-turns">...</span> -->
+    <div id="tale-page">
+        <h1 title="version: {story_version} -- author: {story_author} -- {story_author_email}"><img src="static/logo.gif" id="img-logo"> {story_name}</h1>
+        <noscript>
+            <h2>Your browser doesn't have Javascript or it is disabled. You can't use this web interface without it.</h2>
+        </noscript>
+        <div class="story">
+            <div class="location">
+                Location: &nbsp;<span id="player-location">...</span> <!-- &nbsp;&nbsp; turns: &nbsp;<span id="player-turns">...</span> -->
+            </div>
+            <div class="textframe" id="textframe">
+            </div>
+            <form method="POST" accept-charset="UTF-8" action="input" id="cmd-form">
+                <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
+                <input type="submit" value="Cmd (enter)" onclick="submit_cmd(); return false;" />
+                <input type="submit" value="Suggest" name="autocomplete" id="button-autocomplete" accesskey="s" onclick="autocomplete_cmd(); return false;" />
+                <input type="submit" value="Quit" name="quit" id="button-quit" onclick="quit_clicked(); return false;" />
+            </form>
         </div>
-        <div class="textframe" id="textframe">
-        </div>
-        <form method="POST" accept-charset="UTF-8" action="input" id="cmd-form">
-            <input type="text" name="cmd" id="input-cmd" autofocus autocomplete="off" />
-            <input type="submit" value="Cmd (enter)" onclick="submit_cmd(); return false;" />
-            <input type="submit" value="Suggest" name="autocomplete" id="button-autocomplete" accesskey="s" onclick="autocomplete_cmd(); return false;" />
-            <input type="submit" value="Quit" name="quit" id="button-quit" onclick="quit_clicked(); return false;" />
-        </form>
     </div>
 </body>
 </html>

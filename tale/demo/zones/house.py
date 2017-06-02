@@ -68,7 +68,7 @@ class Cat(Living):
         elif parsed.verb in AGGRESSIVE_VERBS:
             if self in parsed.who_info:   # only give aggressive response when directed at the cat.
                 self.tell_others("{Actor} hisses! I wouldn't make %s angry if I were you!" % self.objective)
-        elif parsed.verb in ("hello", "hi", "greet", "meow"):
+        elif parsed.verb in ("hello", "hi", "greet", "meow", "purr"):
             self.tell_others("{Actor} stares at {target} incomprehensibly.", target=actor)
         else:
             message = (parsed.message or parsed.unparsed).lower().split()

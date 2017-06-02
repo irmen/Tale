@@ -8,6 +8,10 @@ body {
     background: #f8f8f0;
     margin: 1em;
 }
+#tale-page {
+    max-width: 52em;
+    margin: 0 auto;
+}
 h1, h2, h3, h4, h5 {
     font-weight: normal;
     margin-top: 1em;
@@ -19,6 +23,9 @@ h3 { font-size: 120%; }
 h4 { font-size: 100%; }
 h5 { font-size: 100%; }
 
+h1 {
+    text-shadow: 2px 2px 4px rgba(150, 150, 150, 1);
+}
 
 .txt-monospaced, .txt-userinput, pre, #input-cmd {
     font-family: Monaco, "DejaVu Sans Mono", "Bitstream Vera Sans Mono", Consolas, "Courier New", monospace;
@@ -37,11 +44,13 @@ pre {
 #input-cmd {
     padding: 3px;
     width: 28em;
+    border: 1px inset cadetblue;
 }
 .location {
     text-align: right;
     margin-bottom: 4pt;
     font-style: italic;
+    text-shadow: 2px 2px 4px rgba(150, 150, 150, 1);
 }
 .location > span {
     color: green;
@@ -49,14 +58,19 @@ pre {
 .story {
     margin-top: -2ex;
     width: 100%;
-    max-width: 51em;
 }
-.textframe {
+#textframe {
     border: 1px solid cadetblue;
     overflow: auto;
     height: 34em;
     margin-bottom: 1em;
     padding: 1em;
+    box-shadow: 3px 3px 8px 1px rgba(150,150,150,1);
+}
+
+#cmd-form {
+    padding: 1ex;
+    box-shadow: 3px 3px 8px 1px rgba(150,150,150,1);
 }
 
 p, pre {
@@ -110,4 +124,9 @@ p, pre {
 
 #img-logo {
     vertical-align: top;
+}
+
+.start-story-link {
+    font-size: 200%;
+    text-shadow: 2px 2px 4px rgba(150, 150, 150, 1);
 }
