@@ -871,8 +871,22 @@ class Living(MudObject):
         {title}/{Title} = the living's title, and the title with a capital letter.
         If you need even more tweaks with telling stuff, use living.location.tell directly.
         """
-        formats = {"title": self.title, "Title": lang.capital(self.title)}
+        formats = {"title": self.title, "Title": lang.capital(self.title)}      # XXX replace title by actor??
         self.location.tell(message.format(**formats), exclude_living=self)
+
+    def tell_others_target(self, message: str, target: 'Living') -> None:
+        # XXX doc this!
+        # XXX integrate into tell_others (optional target)
+        room_msg = message.format(actor=self.title, Actor=lang.capital(self.title),
+                                  target=target.title, Target=lang.capital(target.title))
+        for living in self.location.livings:
+            if living is target:
+                target_msg = message.format(actor=self.title, Actor=lang.capital(self.title), target="you", Target="You")
+                target.tell(target_msg)
+            else:
+                living.tell(room_msg)
+        tap = self.location.get_wiretap()
+        tap.send((self.name, room_msg))
 
     def parse(self, commandline: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse the commandline into something that can be processed by the soul (ParseResult)"""

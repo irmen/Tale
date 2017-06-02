@@ -69,17 +69,11 @@ class Cat(Living):
             if self in parsed.who_info:   # only give aggressive response when directed at the cat.
                 self.tell_others("{Title} hisses! I wouldn't make %s angry if I were you!" % self.objective)
         elif parsed.verb in ("hello", "hi", "greet", "meow"):
-            title = capital(self.title)
-            self.location.tell("%s stares at %s incomprehensibly." % (title, actor.title),
-                               specific_targets={actor},
-                               specific_target_msg="%s stares at you incomprehensibly." % title)
+            self.tell_others_target("{Actor} stares at {target} incomprehensibly.", target=actor)
         else:
             message = (parsed.message or parsed.unparsed).lower().split()
             if self.name in message or "cat" in message:
-                title = capital(self.title)
-                self.location.tell("%s looks up at %s and wiggles %s tail." % (title, actor.title, self.possessive),
-                                   specific_targets={actor},
-                                   specific_target_msg="%s looks up at you and wiggles %s tail." % (title, self.possessive))
+                self.tell_others_target("{Actor} looks up at {target} and wiggles %s tail." % self.possessive, target=actor)
 
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")
