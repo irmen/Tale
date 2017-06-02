@@ -138,7 +138,7 @@ def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> Genera
             continue
         victim.wiz_destroy(player, ctx)  # actually destroy it
         player.tell("You destroyed %r." % victim)
-        player.tell_others("{Title} makes some gestures and a tiny black hole appears.\n"
+        player.tell_others("{Actor} makes some gestures and a tiny black hole appears.\n"
                            "%s disappears in it, and the black hole immediately vanishes." % lang.capital(victim.title))
 
 
@@ -149,7 +149,7 @@ def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generato
     if parsed.args and parsed.args[0] == '.':
         # clean the current location
         p("Cleaning the stuff in your environment.")
-        player.tell_others("{Title} cleans out the environment.")
+        player.tell_others("{Actor} cleans out the environment.")
         for item in set(player.location.items):
             player.location.remove(item, player)
             item.destroy(ctx)
@@ -165,7 +165,7 @@ def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generato
         victim = parsed.who_order[0]
         if (yield "input", ("Are you sure you want to clean out %s?" % victim.title, lang.yesno)):
             p("Cleaning inventory of %s." % victim)
-            player.tell_others("{Title} cleans out the inventory of %s." % victim.title)
+            player.tell_others("{Actor} cleans out the inventory of %s." % victim.title)
             items = victim.inventory
             for item in items:
                 victim.remove(item, player)
@@ -269,7 +269,7 @@ def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 def teleport_to(player: Player, location: base.Location) -> None:
     """helper function for teleport command, to teleport the player somewhere"""
-    player.tell_others("{Title} makes some gestures and a portal suddenly opens.")
+    player.tell_others("{Actor} makes some gestures and a portal suddenly opens.")
     player.tell_others("%s jumps into the portal, which quickly closes behind %s." % (lang.capital(player.subjective), player.objective))
     player.teleported_from = player.location  # used for the 'return' command
     player.move(location, silent=True)
@@ -311,7 +311,7 @@ def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         who.teleported_from = None
         who.move(previous_location, silent=True)
         who.tell_others("Suddenly, a shimmering portal opens!")
-        who.tell_others("{Title} tumbles out of it, and the portal quickly closes again.")
+        who.tell_others("{Actor} tumbles out of it, and the portal quickly closes again.")
     else:
         player.tell("Can't determine <player>%s</>'s previous location." % who.name)
 
@@ -358,7 +358,7 @@ items that are normally fixed in place (move item to playername)."""
         raise ParseError("There seems to be no <item>%s</> here." % thing.name)
     thing.move(target, player)
     player.tell("Moved <item>%s</> from %s to %s." % (thing.name, thing_container.name, target.name))
-    player.tell_others("{Title} moved %s into %s." % (thing.title, target.title))
+    player.tell_others("{Actor} moved %s into %s." % (thing.title, target.title))
 
 
 @wizcmd("debug")

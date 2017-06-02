@@ -55,7 +55,7 @@ def do_locate(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         raise ParseError("Can only search for one thing at a time.")
     name = parsed.args[0]
     p("You look around to see if you can locate %s." % name)
-    player.tell_others("{Title} looks around.")
+    player.tell_others("{Actor} looks around.")
     if parsed.who_order:
         thing = parsed.who_order[0]
         if thing is player:
@@ -107,7 +107,7 @@ def do_drop(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator
         if items:
             items_str = lang.join(lang.a(item.title) for item in items)
             player.tell("You drop <item>%s</>." % items_str)
-            player.tell_others("{Title} drops %s." % items_str)
+            player.tell_others("{Actor} drops %s." % items_str)
         else:
             player.tell("You didn't drop anything.")
 
@@ -170,7 +170,7 @@ def do_empty(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if items_moved:
         itemnames = lang.join(items_moved)
         player.tell("You %s: <item>%s</>." % (action, itemnames))
-        player.tell_others("{Title} %s: %s." % (action, itemnames))
+        player.tell_others("{Actor} %s: %s." % (action, itemnames))
     else:
         player.tell("You %s nothing." % action)
 
@@ -217,17 +217,17 @@ def do_put(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
                 # first take the item from the room, then move it to the target location
                 item.move(player, player)
                 p("You take %s." % item.title)
-                player.tell_others("{Title} takes %s." % item.title)
+                player.tell_others("{Actor} takes %s." % item.title)
                 item.move(where, player)
                 p("You put it in the <item>%s</>." % where.name)
-                player.tell_others("{Title} puts it in the %s." % where.name)
+                player.tell_others("{Actor} puts it in the %s." % where.name)
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
         p(message)
     if inventory_items:
         items_msg = lang.join(lang.a(item.title) for item in inventory_items)
-        player.tell_others("{Title} puts %s in the %s." % (items_msg, where.name))
+        player.tell_others("{Actor} puts %s in the %s." % (items_msg, where.name))
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
@@ -263,7 +263,7 @@ def do_combine_two(player: Player, parsed: ParseResult, ctx: util.Context) -> No
         result = item2.combine([item1], player)
         if result:
             replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
-                          "{Title} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective)
             return
     except ActionRefused:
         pass
@@ -271,7 +271,7 @@ def do_combine_two(player: Player, parsed: ParseResult, ctx: util.Context) -> No
     if not result:
         raise ActionRefused("You can't combine those.")
     replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
-                  "{Title} tinkers with some things %s carries." % player.subjective)
+                  "{Actor} tinkers with some things %s carries." % player.subjective)
 
 
 @cmd("combine")
@@ -289,7 +289,7 @@ def do_combine_many(player: Player, parsed: ParseResult, ctx: util.Context) -> N
         result = item.combine(others, player)
         if result is not None:
             replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
-                          "{Title} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective)
             return
     except ActionRefused:
         pass
@@ -298,7 +298,7 @@ def do_combine_many(player: Player, parsed: ParseResult, ctx: util.Context) -> N
         result = item.combine(others, player)
         if result is not None:
             replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
-                          "{Title} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective)
             return
     except ActionRefused:
         pass
@@ -346,7 +346,7 @@ def do_take(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if where is player:
         raise ActionRefused("There's no reason to take things from yourself.")
     if isinstance(where, base.Living):
-        player.tell_others("{Title} tries to steal things from %s." % where.title)
+        player.tell_others("{Actor} tries to steal things from %s." % where.title)
         if where.aggressive:
             where.start_attack(player)  # stealing stuff is a hostile act!
         raise ActionRefused("You can't just steal stuff from <living>%s</>!" % where.title)
@@ -416,10 +416,10 @@ def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudOb
         return 0
     if where_str:
         player_msg = "You take <item>{items}</> from the <item>%s</>." % where_str
-        room_msg = "<player>{{Title}}</> takes <item>{items}</> from the <item>%s</>." % where_str
+        room_msg = "<player>{{Actor}}</> takes <item>{items}</> from the <item>%s</>." % where_str
     else:
         player_msg = "You take <item>{items}</>."
-        room_msg = "<player>{{Title}}</> takes <item>{items}</>."
+        room_msg = "<player>{{Actor}}</> takes <item>{items}</>."
     items = list(items)
     refused = []
     for item in items:
@@ -463,11 +463,11 @@ def do_throw(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         # first take the item from the room
         item.move(player, player, verb="take")
         player.tell("You take <item>%s</>." % item.title)
-        player.tell_others("{Title} takes %s." % item.title)
+        player.tell_others("{Actor} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
     item.move(player.location, player, verb="throw")
     player.tell("You throw the <item>%s</> at %s, missing %s by a hair." % (item.title, where.title, where.objective))
-    player.tell_others("{Title} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
+    player.tell_others("{Actor} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:
         where.start_attack(player)
 
@@ -668,7 +668,7 @@ def do_examine(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         if living is player:
             # player examines him/herself
             p("You are <living>%s</>. But you knew that already." % lang.capital(living.title))
-            player.tell_others("{Title} is looking at %sself." % living.objective)
+            player.tell_others("{Actor} is looking at %sself." % living.objective)
             return
         # if "wizard" in player.privileges:
         #     tell(repr(living), end=True)
@@ -812,7 +812,7 @@ def do_yell(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
     player.tell("You yell: " + message)
-    player.tell_others("{Title} yells: %s" % message)
+    player.tell_others("{Actor} yells: %s" % message)
     player.location.message_nearby_locations("Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
 
 
@@ -834,7 +834,7 @@ def do_say(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
                 _, _, message = message.partition(parsed.args[0])
                 message = message.lstrip()
     player.tell("You say%s: %s" % (target, message))
-    player.tell_others("{Title} says%s: %s" % (target, message))
+    player.tell_others("{Actor} says%s: %s" % (target, message))
 
 
 @cmd("wait")
@@ -854,7 +854,7 @@ def do_wait(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             raise ActionRefused("You can't wait for something that's not alive.")
         who = lang.join(who.title for who in parsed.who_order)
         player.tell("You wait for %s." % who)
-        player.tell_others("{Title} waits for %s." % who)
+        player.tell_others("{Actor} waits for %s." % who)
         return
     if parsed.args:
         if parsed.args[0] in ("till", "until"):
@@ -903,7 +903,7 @@ def print_item_removal(player: Player, item: base.Item, container: base.MudObjec
         player.tell("<dim>(You take the %s from the %s).</>" % (item.name, container.name))
     else:
         player.tell("You take the %s from the %s." % (item.name, container.name))
-    player.tell_others("{Title} takes the %s from the %s." % (item.name, container.name))
+    player.tell_others("{Actor} takes the %s from the %s." % (item.name, container.name))
 
 
 def remove_is_are_args(args: List[str]) -> None:
@@ -1218,7 +1218,7 @@ def do_dice(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if (number, sides) != (1, 6):
         die = "%dd%d" % (number, sides)
     player.tell("You roll %s. The result is: %d." % (die, total))
-    player.tell_others("{Title} rolls %s. The result is: %d." % (die, total))
+    player.tell_others("{Actor} rolls %s. The result is: %d." % (die, total))
     if number > 1:
         player.location.tell("The individual rolls were: %s" % values)
 
@@ -1229,7 +1229,7 @@ def do_coin(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     number, _ = util.roll_dice(sides=2)
     result = ["heads", "tails"][number - 1]
     player.tell("You toss a coin. The result is: %s!" % result)
-    player.tell_others("{Title} tosses a coin. The result is: %s!" % result)
+    player.tell_others("{Actor} tosses a coin. The result is: %s!" % result)
 
 
 @cmd("motd")

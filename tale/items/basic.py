@@ -67,14 +67,14 @@ class Boxlike(Container):
             raise ActionRefused("It's already open.")
         self.opened = True
         actor.tell("You opened the %s." % self.name)
-        actor.tell_others("{Title} opened the %s." % self.name)
+        actor.tell_others("{Actor} opened the %s." % self.name)
 
     def close(self, actor: Living, item: Item=None) -> None:
         if not self.opened:
             raise ActionRefused("It's already closed.")
         self.opened = False
         actor.tell("You closed the %s." % self.name)
-        actor.tell_others("{Title} closed the %s." % self.name)
+        actor.tell_others("{Actor} closed the %s." % self.name)
 
     @property
     def inventory(self) -> FrozenSet[Item]:
@@ -310,7 +310,7 @@ class Catapult(Weapon):
         if parsed.verb == "shoot":
             if self in actor:
                 actor.tell("While the weapon is fine, you don't have munition. Shooting is not happening.")
-                actor.tell_others("{Title} fiddles a bit with %s %s." % (actor.possessive, self.title))
+                actor.tell_others("{Actor} fiddles a bit with %s %s." % (actor.possessive, self.title))
             else:
                 actor.tell("You see the weapon lying there. To use it, you'll have to pick it up first though.")
             return True

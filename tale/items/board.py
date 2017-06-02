@@ -111,7 +111,7 @@ class BulletinBoard(Item):
         return True
 
     def do_list_messages(self, actor: Living) -> None:
-        actor.tell_others("{Title} studies the %s." % self.title)
+        actor.tell_others("{Actor} studies the %s." % self.title)
         actor.tell("You look at the %s." % self.title)
         actor.tell(self._description)
         if not self.__posts:
@@ -142,7 +142,7 @@ class BulletinBoard(Item):
     def do_write_message(self, actor: Living) -> Generator:
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
-        actor.tell_others("{Title} is writing a message on the %s." % self.title)
+        actor.tell_others("{Actor} is writing a message on the %s." % self.title)
         yield from self.dialog_write_message(actor, None)
 
     def dialog_write_message(self, actor: Living, in_reply_to: PostType=None) -> Generator[Tuple[str, Any], str, None]:
@@ -196,7 +196,7 @@ class BulletinBoard(Item):
         if self.readonly and "wizard" not in actor.privileges:
             raise ActionRefused("You can't write on it.")
         num, post = self._get_post(arg)
-        actor.tell_others("{Title} is writing a message on the %s." % self.title)
+        actor.tell_others("{Actor} is writing a message on the %s." % self.title)
         yield from self.dialog_write_message(actor, post)
 
     def do_remove_message(self, arg: str, actor: Living) -> None:
@@ -206,14 +206,14 @@ class BulletinBoard(Item):
         if "wizard" in actor.privileges or actor.name == post["author"]:
             del self.__posts[num - 1]
             actor.tell("You've removed message #%d ('%s') from the board." % (num, post["subject"]))
-            actor.tell_others("{Title} took a message off the %s." % self.title)
+            actor.tell_others("{Actor} took a message off the %s." % self.title)
             self.save()
         else:
             raise ActionRefused("You cannot remove that message.")
 
     def do_read_message(self, arg: str, actor: Living) -> None:
         num, post = self._get_post(arg)
-        actor.tell_others("{Title} reads something on the %s." % self.title)
+        actor.tell_others("{Actor} reads something on the %s." % self.title)
         actor.tell("<ul>Subject: '{subject}' by {author} on {date}. It reads:</>".format(**post), end=True)
         for paragraph in post["text"].split("\n\n"):
             actor.tell(paragraph, end=True)

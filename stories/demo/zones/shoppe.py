@@ -61,7 +61,7 @@ class James(Living, Listener):
             rat.do_socialize("recoil")
             direction = rat.select_random_move()
             if direction:
-                rat.tell_others("{Title} runs away towards the door!")
+                rat.tell_others("{Actor} runs away towards the door!")
                 rat.move(direction.target, self)
             mud_context.driver.defer(2, self.rat_scream, "smile at " + self.name)
 

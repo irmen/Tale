@@ -345,7 +345,7 @@ class Item(MudObject):
         item = self.clone()
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item) + " (spawned in your inventory)")
-        actor.tell_others("{Title} conjures up %s, and quickly pockets it." % lang.a(item.title))
+        actor.tell_others("{Actor} conjures up %s, and quickly pockets it." % lang.a(item.title))
         return item
 
     @util.authorized("wizard")
@@ -814,7 +814,7 @@ class Living(MudObject):
     def wiz_clone(self, actor: 'Living') -> 'Living':
         duplicate = copy.deepcopy(self)
         actor.tell("Cloned into: " + repr(duplicate) + " (spawned in current location)")
-        actor.tell_others("{Title} summons %s..." % lang.a(duplicate.title))
+        actor.tell_others("{Actor} summons %s..." % lang.a(duplicate.title))
         actor.location.insert(duplicate, actor)
         actor.location.tell("%s appears." % lang.capital(duplicate.title))
         return duplicate
@@ -864,29 +864,22 @@ class Living(MudObject):
         """Tell something to this creature, but do it after all other messages."""
         pending_tells.send(lambda: self.tell(message))
 
-    def tell_others(self, message: str) -> None:
+    def tell_others(self, message: str, target: Optional['Living']=None) -> None:
         """
         Send a message to the other livings in the location, but not to self.
         There are a few formatting strings for easy shorthands:
-        {title}/{Title} = the living's title, and the title with a capital letter.
+        {actor}/{Actor} = the acting living's title / acting living's title capitalized.
+        {target}/{Target} = the target's title / target's title capitalized.
         If you need even more tweaks with telling stuff, use living.location.tell directly.
         """
-        formats = {"title": self.title, "Title": lang.capital(self.title)}      # XXX replace title by actor??
-        self.location.tell(message.format(**formats), exclude_living=self)
-
-    def tell_others_target(self, message: str, target: 'Living') -> None:
-        # XXX doc this!
-        # XXX integrate into tell_others (optional target)
-        room_msg = message.format(actor=self.title, Actor=lang.capital(self.title),
-                                  target=target.title, Target=lang.capital(target.title))
-        for living in self.location.livings:
-            if living is target:
-                target_msg = message.format(actor=self.title, Actor=lang.capital(self.title), target="you", Target="You")
-                target.tell(target_msg)
-            else:
-                living.tell(room_msg)
-        tap = self.location.get_wiretap()
-        tap.send((self.name, room_msg))
+        if target is None:
+            room_msg = message.format(actor=self.title, Actor=lang.capital(self.title))
+            self.location.tell(room_msg, exclude_living=self)
+        else:
+            room_msg = message.format(actor=self.title, Actor=lang.capital(self.title),
+                                      target=target.title, Target=lang.capital(target.title))
+            spec_msg = message.format(actor=self.title, Actor=lang.capital(self.title), target="you", Target="You")
+            self.location.tell(room_msg, exclude_living=self, specific_targets={target}, specific_target_msg=spec_msg)
 
     def parse(self, commandline: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse the commandline into something that can be processed by the soul (ParseResult)"""
@@ -928,7 +921,7 @@ class Living(MudObject):
                 # emulate the say command (which is not an emote, but it's convenient to be able to use it as such)
                 verb, _, rest = cmdline.partition(" ")
                 rest = rest.strip()
-                self.tell_others("{Title} says: " + rest)
+                self.tell_others("{Actor} says: " + rest)
             else:
                 raise
 
@@ -1346,7 +1339,7 @@ class Door(Exit):
         else:
             self.opened = True
             actor.tell("You opened it.")
-            actor.tell_others("{Title} opened the %s." % self.name)
+            actor.tell_others("{Actor} opened the %s." % self.name)
             if self.linked_door:
                 self.linked_door.door.opened = True
                 if self.linked_door.open_msg:
@@ -1358,7 +1351,7 @@ class Door(Exit):
             raise ActionRefused("It's already closed.")
         self.opened = False
         actor.tell("You closed it.")
-        actor.tell_others("{Title} closed the %s." % self.name)
+        actor.tell_others("{Actor} closed the %s." % self.name)
         if self.linked_door:
             self.linked_door.door.opened = False
             if self.linked_door.close_msg:
@@ -1381,7 +1374,7 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
         actor.tell("Your %s fits, it is now locked." % key.title)
-        actor.tell_others("{Title} locked the %s with %s." % (self.name, lang.a(key.title)))
+        actor.tell_others("{Actor} locked the %s with %s." % (self.name, lang.a(key.title)))
         if self.linked_door:
             self.linked_door.door.locked = True
 
@@ -1402,7 +1395,7 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
         actor.tell("Your %s fits, it is now unlocked." % key.title)
-        actor.tell_others("{Title} unlocked the %s with %s." % (self.name, lang.a(key.title)))
+        actor.tell_others("{Actor} unlocked the %s with %s." % (self.name, lang.a(key.title)))
         if self.linked_door:
             self.linked_door.door.locked = False
 

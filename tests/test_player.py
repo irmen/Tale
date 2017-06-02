@@ -242,7 +242,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(["one two three"], julie.messages)
         fritz.clearmessages()
         julie.clearmessages()
-        player.tell_others("{title} and {Title}")
+        player.tell_others("{actor} and {Actor}")
         self.assertEqual(["wizard Merlin and Wizard Merlin"], fritz.messages)
 
     def test_wiretap(self):

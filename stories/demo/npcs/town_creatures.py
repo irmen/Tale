@@ -30,7 +30,7 @@ class VillageIdiot(Living):
 class TownCrier(Living):
     @call_periodically(20, 40)
     def do_cry(self, ctx: util.Context) -> None:
-        self.tell_others("{Title} yells: welcome everyone!")
+        self.tell_others("{Actor} yells: welcome everyone!")
         self.location.message_nearby_locations("Someone nearby is yelling: welcome everyone!")
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
@@ -43,7 +43,7 @@ class TownCrier(Living):
         elif parsed.verb == "greet" and self in parsed.who_info:
             greet = True
         if greet:
-            self.tell_others("{Title} says: \"Hello there, %s.\"" % actor.title)
+            self.tell_others("{Actor} says: \"Hello there, %s.\"" % actor.title)
 
 
 class WalkingRat(Living):
@@ -54,9 +54,9 @@ class WalkingRat(Living):
     @call_periodically(5, 15)
     def do_idle_action(self, ctx: util.Context) -> None:
         if random.random() < 0.5:
-            self.tell_others("{Title} wiggles %s tail." % self.possessive)
+            self.tell_others("{Actor} wiggles %s tail." % self.possessive)
         else:
-            self.tell_others("{Title} sniffs around and moves %s whiskers." % self.possessive)
+            self.tell_others("{Actor} sniffs around and moves %s whiskers." % self.possessive)
 
     @call_periodically(10, 20)
     def do_random_move(self, ctx: util.Context) -> None:

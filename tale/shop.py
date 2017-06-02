@@ -329,7 +329,7 @@ class Shopkeeper(Living):
         if self.shop.banks_money:
             # shopkeeper puts money over a limit in the bank
             if self.money > banking_money_limit:
-                self.tell_others("Swiftly, {title} puts some excess money away in a secret stash somewhere. "
+                self.tell_others("Swiftly, {actor} puts some excess money away in a secret stash somewhere. "
                                  "You failed to see where it went.")
                 self.money = banking_money_limit
         return True

@@ -64,16 +64,16 @@ class Cat(Living):
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug", "caress", "rub"):
-            self.tell_others("{Title} curls up in a ball and purrs contently.")
+            self.tell_others("{Actor} curls up in a ball and purrs contently.")
         elif parsed.verb in AGGRESSIVE_VERBS:
             if self in parsed.who_info:   # only give aggressive response when directed at the cat.
-                self.tell_others("{Title} hisses! I wouldn't make %s angry if I were you!" % self.objective)
+                self.tell_others("{Actor} hisses! I wouldn't make %s angry if I were you!" % self.objective)
         elif parsed.verb in ("hello", "hi", "greet", "meow"):
-            self.tell_others_target("{Actor} stares at {target} incomprehensibly.", target=actor)
+            self.tell_others("{Actor} stares at {target} incomprehensibly.", target=actor)
         else:
             message = (parsed.message or parsed.unparsed).lower().split()
             if self.name in message or "cat" in message:
-                self.tell_others_target("{Actor} looks up at {target} and wiggles %s tail." % self.possessive, target=actor)
+                self.tell_others("{Actor} looks up at {target} and wiggles %s tail." % self.possessive, target=actor)
 
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")

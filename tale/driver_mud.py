@@ -98,7 +98,7 @@ class MudDriver(driver.Driver):
             conn.player.tell("<it><rev>Automatic logout:  You have been logged out because "
                              "you've been idle for too long (%d minutes)</>" % idle_limit_minutes, end=True)
             conn.player.tell("\n")
-            conn.player.tell_others("{Title} has been idling around for too long.")
+            conn.player.tell_others("{Actor} has been idling around for too long.")
             self.disconnect_player(conn)  # remove players who stay idle too long
 
     def disconnect_player(self, conn_or_player: Union[PlayerConnection, Player]) -> None:
@@ -113,7 +113,7 @@ class MudDriver(driver.Driver):
             raise TypeError("connection or player object expected")
         assert self.all_players[name] is conn
         if conn.player.location:
-            conn.player.tell_others("{Title} suddenly shimmers and fades from sight. %s left the game."
+            conn.player.tell_others("{Actor} suddenly shimmers and fades from sight. %s left the game."
                                     % lang.capital(conn.player.subjective))
         del self.all_players[name]
         conn.write_output()
@@ -361,7 +361,7 @@ class LimboReaper(base.Living):
         # consider all livings currently in Limbo or having their location set to Limbo
         if self.location is not base._limbo:
             # we somehow got misplaced, teleport back to limbo
-            self.tell_others("{Title} looks around in wonder and says, \"I'm not supposed to be here.\"")
+            self.tell_others("{Actor} looks around in wonder and says, \"I'm not supposed to be here.\"")
             self.move(base._limbo, self)
             return
         in_limbo = {living for living in self.location.livings if living is not self}
