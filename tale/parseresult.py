@@ -4,7 +4,8 @@ Helper stuff for command parsing.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-from typing import Dict, Optional, List
+from collections import OrderedDict
+from typing import Optional, List
 
 
 class ParseResult:
@@ -16,16 +17,22 @@ class ParseResult:
         def __str__(self) -> str:
             return "[seq=%d, prev_word=%s]" % (self.sequence, self.previous_word)
 
+    class WhoInfoOrderedDict(OrderedDict):
+        def __missing__(self, key):
+            self[key] = value = ParseResult.WhoInfo()
+            return value
+
     def __init__(self, verb: str, adverb: str=None, message: str=None, bodypart: str=None, qualifier: str=None,
-                 args: List[str]=None, who_info: Dict=None, who_order: List=None,
+                 args: List[str]=None, who_info: WhoInfoOrderedDict=None, who_order: List=None,
                  unrecognized: List=None, unparsed: str="") -> None:
         self.verb = verb
         self.adverb = adverb
         self.message = message
         self.bodypart = bodypart
         self.qualifier = qualifier
-        self.who_info = who_info or {}      # WhoInfo for all objects parsed  (note: who-objects can be items, livings, and exits!)
-        self.who_order = who_order or []    # the order of the occurrence of the objects in the input text   # @todo replace with ordereddict???
+        # the WhoInfo for all objects parsed  (note: who-objects can be items, livings, and exits!):
+        self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
+        self.who_order = who_order or []    # the order of the occurrence of the objects in the input text   # @todo replace with ordereddict who_info
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
@@ -33,7 +40,7 @@ class ParseResult:
             self.recalc_who_info()
 
     def recalc_who_info(self) -> None:
-        self.who_info = {}
+        self.who_info.clear()
         for sequence, who in enumerate(self.who_order):
             self.who_info[who] = ParseResult.WhoInfo(sequence)
 

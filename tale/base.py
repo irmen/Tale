@@ -1653,8 +1653,8 @@ class Soul:
         bodypart = None   # type: str
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
-        who_info = defaultdict(ParseResult.WhoInfo)   # type: Dict[Union[Living, Item, Exit], ParseResult.WhoInfo]
-        who_order = []   # type: List[Union[Living, Item, Exit]]
+        who_info = ParseResult.WhoInfoOrderedDict()
+        who_order = []   # type: List[Union[Living, Item, Exit]]    # @todo replace with ordereddict who_info
         who_sequence = 0
         unparsed = cmd
 
@@ -1787,8 +1787,8 @@ class Soul:
                             who_sequence += 1
                             who_order.append(living)
                 else:
-                    who_info = {}
-                    who_order = []
+                    who_info.clear()
+                    who_order.clear()
                     who_sequence = 0
                 arg_words.append(word)
                 previous_word = None

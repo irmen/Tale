@@ -103,5 +103,6 @@ class UnknownVerbException(ParseError):
 class StoryCompleted(TaleFlowControlException):
     """
     This is raised as soon as the (IF) story has been completed by the player!
+    Do not use this in a Mud story.
     """
     pass
