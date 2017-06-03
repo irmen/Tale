@@ -14,7 +14,7 @@ global-exclude .idea
 global-exclude .cache
 global-exclude *_cache
 global-exclude */__pycache__/*
-global-exclude *.pyc
-global-exclude *.pyo
+global-exclude *.py[cozd]
+global-exclude *.zip
 global-exclude *.coverage
 global-exclude nosetests.xml
