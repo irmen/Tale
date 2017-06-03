@@ -9,10 +9,9 @@ import datetime
 import unittest
 
 from tale import pubsub, mud_context
-from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key
+from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, ParseResult
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, LocationIntegrityError
-from tale.parseresult import ParseResult
 from tale.player import Player
 from tale.story import MoneyType
 from tale.tio.iobase import strip_text_styles

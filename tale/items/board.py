@@ -11,9 +11,8 @@ from collections import deque
 from typing import Tuple, Dict, Any, Generator, List, Sequence, MutableSequence
 
 from .. import lang, mud_context
-from ..base import Item, Living
+from ..base import Item, Living, ParseResult
 from ..errors import ActionRefused, ParseError, AsyncDialog, TaleError
-from ..parseresult import ParseResult
 
 __all__ = ["BulletinBoard", "bulletinboard"]
 

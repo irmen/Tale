@@ -5,10 +5,10 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from tale.parseresult import ParseResult
 from tale.player import Player
 from tale.util import Context
 from tale.cmds import wizcmd, cmd
+from tale.base import ParseResult
 
 
 @wizcmd("demo")

@@ -25,8 +25,7 @@ import appdirs
 
 from . import __version__ as tale_version_str
 from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs
-from .base import Location, Exit
-from .parseresult import ParseResult
+from .base import Location, Exit, ParseResult
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH
 

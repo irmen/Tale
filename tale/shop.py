@@ -28,10 +28,9 @@ from typing import Tuple, Set
 
 from . import lang
 from . import mud_context
-from .base import Item, Living
+from .base import Item, Living, ParseResult
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .items.basic import Trash
-from .parseresult import ParseResult
 from .util import sorted_by_name, Context
 
 banking_money_limit = 15000.0

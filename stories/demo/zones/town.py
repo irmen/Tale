@@ -9,12 +9,11 @@ from typing import Union, Optional
 
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
-from tale.base import Location, Exit, Door, Item, Container, Key, Living
+from tale.base import Location, Exit, Door, Item, Container, Key, Living, ParseResult
 from tale.driver import Driver
 from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
 from tale.items.board import bulletinboard
-from tale.parseresult import ParseResult
 from tale.player import Player
 
 

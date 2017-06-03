@@ -15,11 +15,10 @@ from io import StringIO
 import tale
 from tale import races, pubsub, mud_context
 from tale.accounts import MudAccounts
-from tale.base import Location, Exit, Item, Stats, Living
+from tale.base import Location, Exit, Item, Stats, Living, ParseResult
 from tale.charbuilder import IFCharacterBuilder, MudCharacterBuilder, valid_playable_race, PlayerNaming
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, ParseError, NonSoulVerb
-from tale.parseresult import ParseResult
 from tale.player import Player, TextBuffer, PlayerConnection
 from tale.story import *
 from tale.tio.console_io import ConsoleIo

@@ -8,8 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import inspect
 from typing import Generator, Tuple, Any, Optional, Sequence
 
-from .parseresult import ParseResult
-
 
 class TaleError(Exception):
     """base class for tale related errors"""
@@ -81,10 +79,9 @@ class NonSoulVerb(TaleFlowControlException):
     However the command string has been parsed and the calling code could try
     to handle the verb by itself instead.
     """
-    def __init__(self, parsed: ParseResult) -> None:
-        assert isinstance(parsed, ParseResult)
-        super().__init__(parsed.verb)
-        self.parsed = parsed
+    def __init__(self, parseresult) -> None:
+        super().__init__(parseresult.verb)
+        self.parsed = parseresult
 
 
 class UnknownVerbException(ParseError):

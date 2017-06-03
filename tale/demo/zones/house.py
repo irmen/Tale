@@ -7,10 +7,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 
-from tale.base import Location, Exit, Door, Key, Living
+from tale.base import Location, Exit, Door, Key, Living, ParseResult
 from tale.errors import StoryCompleted
 from tale.lang import capital
-from tale.parseresult import ParseResult
 from tale.player import Player
 from tale.util import Context, call_periodically
 from tale.items.basic import elastic_band, woodenYstick

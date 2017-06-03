@@ -9,9 +9,8 @@ import textwrap
 from typing import NamedTuple, FrozenSet, Optional, Union, List
 
 from .. import lang, mud_context
-from ..base import Item, Container, Weapon, Living
+from ..base import Item, Container, Weapon, Living, ParseResult
 from ..errors import ActionRefused, TaleError
-from ..parseresult import ParseResult
 
 
 __all__ = ["Boxlike", "Drink", "Food", "GameClock", "Light", "MagicItem", "Money",

@@ -11,9 +11,9 @@ import tale.cmds
 from tale.cmds import cmdfunc_signature_valid, disable_notify_action, disabled_in_gamemode, overrides_soul, no_soul_parse, cmd, wizcmd
 from tale.story import GameMode
 from tale.player import Player
-from tale.parseresult import ParseResult
 from tale.util import Context
 from tale.errors import TaleError
+from tale.base import ParseResult
 
 
 class TestCommandDecorators:

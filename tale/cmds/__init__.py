@@ -9,8 +9,8 @@ import functools
 import inspect
 from typing import Dict, Callable, Tuple, Generator, Iterable, Optional
 from ..player import Player
-from ..parseresult import ParseResult
 from ..story import GameMode
+from ..base import ParseResult
 from .. import util, errors
 
 

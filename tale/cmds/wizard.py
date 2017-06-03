@@ -18,7 +18,6 @@ from typing import Generator
 from . import wizcmd, disabled_in_gamemode
 from .. import base, lang, util, pubsub, races, __version__
 from ..errors import ParseError, ActionRefused, NonSoulVerb
-from ..parseresult import ParseResult
 from ..player import Player
 from ..story import *
 
@@ -40,7 +39,7 @@ def lookup_module_path(path: str) -> ModuleType:
 
 
 @wizcmd("ls")
-def do_ls(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_ls(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """List the contents of a module path under the library tree (try !ls .items.basic)
 or in the story's zone module (try !ls zones)"""
     p = player.tell
@@ -68,7 +67,7 @@ or in the story's zone module (try !ls zones)"""
 
 
 @wizcmd("clone")
-def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
+def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Generator:
     """Clone an item or living directly from the room or inventory, or from an object in the module path"""
     if not parsed.args:
         raise ParseError("Clone what?")
@@ -123,7 +122,7 @@ def do_clone(player: Player, parsed: ParseResult, ctx: util.Context) -> Generato
 
 
 @wizcmd("destroy")
-def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
+def do_destroy(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Generator:
     """Destroys an object or creature."""
     if not parsed.who_order:
         raise ParseError("Destroy what or who?")
@@ -143,7 +142,7 @@ def do_destroy(player: Player, parsed: ParseResult, ctx: util.Context) -> Genera
 
 
 @wizcmd("clean")
-def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generator:
+def do_clean(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Generator:
     """Destroys all objects contained in something or someones inventory, or the current location (.)"""
     p = player.tell
     if parsed.args and parsed.args[0] == '.':
@@ -179,7 +178,7 @@ def do_clean(player: Player, parsed: ParseResult, ctx: util.Context) -> Generato
 
 @wizcmd("pdb")
 @disabled_in_gamemode(GameMode.MUD)
-def do_pdb(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_pdb(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Starts a Python debugging session. (Only available in IF mode)"""
     ctx.conn.pause()
     print("----------Entering PDB debugger session----------")
@@ -190,7 +189,7 @@ def do_pdb(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("wiretap")
-def do_wiretap(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_wiretap(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Adds a wiretap to something to overhear the messages they receive.
 'wiretap .' taps the room, 'wiretap name' taps a creature with that name,
 'wiretap -clear' gets rid of all taps."""
@@ -216,7 +215,7 @@ def do_wiretap(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("teleport", "teleport_to")
-def do_teleport(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_teleport(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Teleport to a location or creature, or teleport a creature to you.
 '!teleport .module.path.to.creature' teleports that creature to your location.
 '!teleport_to .module.path.to.object' teleports you to that location or creature's location.
@@ -294,7 +293,7 @@ def teleport_someone_to_player(who: base.Living, player: Player) -> None:
 
 
 @wizcmd("return")
-def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Return a player to the location where they were before a teleport."""
     if len(parsed.who_order) == 1:
         who = parsed.who_order[0]
@@ -317,7 +316,7 @@ def do_return(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("reload")
-def do_reload(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_reload(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Reload the given python module under the library tree (try !reload .items.basic)
 or one of the story's zone module (try !reload zones.town). This is not always reliable
 and may produce weird results just like when reloading modules that are still used in python!"""
@@ -330,7 +329,7 @@ and may produce weird results just like when reloading modules that are still us
 
 
 @wizcmd("move")
-def do_move(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_move(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Move something or someone to another location (.), item or creature.
 This may work around possible restrictions that could prevent stuff
 to be moved around normally. For instance you could use it to pick up
@@ -362,7 +361,7 @@ items that are normally fixed in place (move item to playername)."""
 
 
 @wizcmd("debug")
-def do_debug(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_debug(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Dumps the internal attribute values of a location (.), item or creature."""
     if not parsed.args:
         raise ParseError("Debug what?")
@@ -380,7 +379,7 @@ def do_debug(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("set")
-def do_set(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_set(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Set an internal attribute of a location (.), object or creature to a new value.
 Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     if not parsed.args:
@@ -418,7 +417,7 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
 
 
 @wizcmd("server")
-def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_server(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Dump some server information."""
     driver = ctx.driver
     config = ctx.config
@@ -465,7 +464,7 @@ def do_server(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("events")
-def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_events(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Dump pending actions."""
     driver = ctx.driver
     config = ctx.config
@@ -482,7 +481,7 @@ def do_events(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("pubsub")
-def do_pubsub(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_pubsub(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Give an overview of the pubsub topics."""
     pending = pubsub.pending()
     player.tell("<bright>Pending pubsub messages overview.</> Active topics (from %d total):" % len(pending))
@@ -499,7 +498,7 @@ def do_pubsub(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("force")
-def do_force(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_force(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Force another living being into performing a given command."""
     if len(parsed.args) < 2 or not parsed.who_order:
         raise ParseError("Force whom to do what?")
@@ -538,7 +537,7 @@ def do_force(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 @wizcmd("accounts")
 @disabled_in_gamemode(GameMode.IF)
-def do_accounts(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_accounts(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Show all registered player accounts"""
     accounts = ctx.driver.mud_accounts.all_accounts()
     wizards = set()
@@ -555,7 +554,7 @@ def do_accounts(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 @wizcmd("add_priv")
 @disabled_in_gamemode(GameMode.IF)
-def do_add_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_add_priv(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """
     Usage: add_priv <account> <privilege>. Adds a privilege to a user account. It will become active on next login.
     """
@@ -574,7 +573,7 @@ def do_add_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 @wizcmd("remove_priv")
 @disabled_in_gamemode(GameMode.IF)
-def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_remove_priv(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """
     Usage: remove_priv <account> <privilege>.
     Remove a privilege from a user account.
@@ -603,7 +602,7 @@ def do_remove_priv(player: Player, parsed: ParseResult, ctx: util.Context) -> No
 
 @wizcmd("ban", "unban")
 @disabled_in_gamemode(GameMode.IF)
-def do_ban_unban_player(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_ban_unban_player(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Bans/unbans a player from logging into the game."""
     if len(parsed.args) != 1:
         raise ParseError("Ban/unban what account?")
@@ -623,7 +622,7 @@ def do_ban_unban_player(player: Player, parsed: ParseResult, ctx: util.Context) 
 
 
 @wizcmd("vnum")
-def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Show the vnum of a location (.) or an object/living,
     or when you provide a vnum as arg, show the object(s) with that vnum.
     Special arguments: items/livings/locations/exits to show the known vnums of that class of objects.
@@ -684,7 +683,7 @@ def do_show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None
 
 
 @wizcmd("vgo")
-def do_go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_go_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Teleport to a specific location or creature, given by its vnum."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the rooms' vnum.")
@@ -707,7 +706,7 @@ def do_go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("vclone")
-def do_clone_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def do_clone_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Clone an existing item or monster with the given vnum."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the item or monster's vnum.")

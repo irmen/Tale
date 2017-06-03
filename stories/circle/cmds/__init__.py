@@ -11,8 +11,8 @@ from tale import lang, util
 from tale.cmds import wizcmd
 from tale.cmds.wizard import teleport_to
 from tale.errors import ActionRefused, ParseError
-from tale.parseresult import ParseResult
 from tale.player import Player
+from tale.base import ParseResult
 
 
 @wizcmd("cvgo")

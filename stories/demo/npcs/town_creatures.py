@@ -7,8 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import random
 
 from tale import lang, util
-from tale.base import Living
-from tale.parseresult import ParseResult
+from tale.base import Living, ParseResult
 from tale.util import call_periodically
 
 

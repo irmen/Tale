@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import time
 import threading
 from typing import Union, Generator, Dict, Tuple, Optional
-from .parseresult import ParseResult
 from .story import GameMode
 from . import accounts
 from . import base
@@ -350,7 +349,7 @@ class LimboReaper(base.Living):
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
 
-    def notify_action(self, parsed: ParseResult, actor: base.Living) -> None:
+    def notify_action(self, parsed: base.ParseResult, actor: base.Living) -> None:
         if parsed.verb == "say":
             actor.tell("%s just stares blankly at you, not saying a word." % lang.capital(self.title))
         else:
