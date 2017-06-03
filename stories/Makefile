@@ -5,12 +5,12 @@ all:
 
 zips: clean
 	echo "Making zips"
-	7z a circle.zip ./circle/*
-	7z a demo.zip ./demo/*
-	7z a zed.zip ./zed_is_me/*
-
+	python -m tale.author zip circle circle.pyz
+	python -m tale.author zip demo demo.pyz
+	python -m tale.author zip zed_is_me zed_is_me.pyz
 
 clean:
 	echo "cleaning"
 	find . -name *.pyc -or -name *.pyo -or -name __pycache__ | xargs rm -rf
-	rm -f *.zip
+	rm -f *.zip *.pyz
+

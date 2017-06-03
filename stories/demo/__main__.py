@@ -13,6 +13,7 @@ try:
 except ImportError as x:
     print("Error loading Tale: ", x, file=sys.stderr)
     print("To run this game you have to install the Tale library.\nUsually 'pip install tale' should be enough.\n", file=sys.stderr)
+    input("Enter to exit: ")
     raise SystemExit
 
 
