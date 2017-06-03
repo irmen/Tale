@@ -31,18 +31,18 @@ class ParseResult:
         self.bodypart = bodypart
         self.qualifier = qualifier
         # the WhoInfo for all objects parsed  (note: who-objects can be items, livings, and exits!):
-        self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
-        self.who_order = who_order or []    # the order of the occurrence of the objects in the input text   # @todo replace with ordereddict who_info
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
-        if self.who_order and not self.who_info:
-            self.recalc_who_info()
+        self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
+        self.__who_order = who_order or []    # the order of the occurrence of the objects in the input text   # @todo replace with ordereddict who_info
+        if who_order and not self.who_info:
+            for sequence, who in enumerate(who_order):
+                self.who_info[who] = ParseResult.WhoInfo(sequence)
 
-    def recalc_who_info(self) -> None:
-        self.who_info.clear()
-        for sequence, who in enumerate(self.who_order):
-            self.who_info[who] = ParseResult.WhoInfo(sequence)
+    @property
+    def who_order(self) -> List:   # @todo replace with ordereddict who_info
+        return self.__who_order
 
     def __str__(self) -> str:
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]

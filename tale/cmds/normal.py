@@ -1015,9 +1015,13 @@ def do_what(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     # is it a soul verb?
     if name in VERBS:
         found = True
-        parsed = ParseResult(name)
-        parsed.who_order = [player]
-        playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
+        try:
+            parsed = ParseResult(name)
+            playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
+        except ParseError:
+            # try again with a person
+            parsed = ParseResult(name, who_order=[player])
+            playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It is a soul emote you can do. <dim>%s: %s</>" % (name, playermessage))
         if name in AGGRESSIVE_VERBS:
             p("It might be regarded as offensive to certain people or beings.")
