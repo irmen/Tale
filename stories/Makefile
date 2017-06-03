@@ -5,9 +5,9 @@ all:
 
 zips: clean
 	echo "Making zips"
-	python -m tale.author zip circle circle.pyz
-	python -m tale.author zip demo demo.pyz
-	python -m tale.author zip zed_is_me zed_is_me.pyz
+	python3 -m tale.author zip circle circle.pyz
+	python3 -m tale.author zip demo demo.pyz
+	python3 -m tale.author zip zed_is_me zed_is_me.pyz
 
 clean:
 	echo "cleaning"

@@ -9,3 +9,4 @@
 /dist/
 /.cache/
 /*_cache/
+.DS_Store
