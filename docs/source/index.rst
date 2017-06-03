@@ -120,25 +120,24 @@ A random list of the features of the current codebase:
 - requires Python 3.5 or newer
 - game engine and framework code is separated from the actual game code
 - single-player Interactive Fiction mode and multi-player MUD mode
-- text console interface, GUI (Tkinter), or web browser interface, switchable by command line argument.
-- MUD mode runs as a web server (no old-skool console access like telnet for now)
-- can load and run games/stories from a zipfile or from extracted folders.
+- selectable interface types: text console interface, GUI (Tkinter), or web browser interface
+- MUD mode runs as a web server (no old-skool console access via telnet or ssh for now)
+- can load and run games/stories directly from a zipfile or from extracted folders.
 - wizard and normal player privileges, wizards gain access to a set of special 'debug' commands that are helpful
-  while testing/debugging the game.
-- the parser uses a soul based on the classic LPC-MUD's 'soul.c', it has been converted to Python and adapted
-- the soul has 250+ 'emotes' such as bounce and shrug.
-- tab-completion of commands (command line requires readline/pyreadline for this)
+  while testing/debugging/administrating the game.
+- the parser uses a soul based on the classic LPC-MUD's 'soul.c' from the late 90's
+- the soul has 250+ 'emotes' such as 'bounce', 'shrug' and 'ponder'.
 - it knows 2200+ adverbs that you can use with these emotes. It does prefix matching so you don't have to type
   it out in full (gives a list of suggestions if multiple words match).
 - it knows about bodyparts that you can target certain actions (such as kick or pat) at.
 - it can deal with object names that consist of multiple words (i.e. contain spaces). For instance, it understands
   when you type 'get the blue pill' when there are multiple pills on the table.
+- tab-completion of commands on systems that support readline
 - you can alter the meaning of a sentence by using words like fail, attempt, don't, suddenly, pretend
 - you can put stuff into a bag and carry the bag, to avoid cluttering your inventory.
 - you can refer to earlier used items and persons by using a pronoun ("examine box / drop it", "examine idiot / slap him").
 - yelling something will actually be heard by creatures in adjacent locations. They'll get a message that
   someone is yelling something, and if possible, where the sound is coming from.
-- it's possible to have items that you can combine into new items.
 - text is nicely formatted when outputted (dynamically wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
 - uses smartypants to automatically render quotes, dashes, ellipsis in a nicer way.
@@ -146,6 +145,7 @@ A random list of the features of the current codebase:
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib
 - supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
+- it's possible for items to be combined into new items.
 - game clock is independent of real-time wall clock, configurable speed and start time
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.
 - there is a simple decorator that makes that a method gets invoked periodically, for asynchronous actions
@@ -153,10 +153,11 @@ A random list of the features of the current codebase:
 - you can also quite easily schedule calls to be executed at a defined later moment in time
 - using generators (yield statements) instead of regular input() calls,
   it is easy to create sequential dialogs (question-response) that will be handled without blocking the driver
+  (the driver loop is not yet fully asynchronous but that may come in the future)
 - easy definition of commands in separate functions, uses docstrings to define command help texts
-- command function code is quite compact due to convenient parameters, and available methods on the game objects
+- command function implementations are quite compact due to convenient parameters, and available methods on the game objects
 - command code gets parse information from the soul parser as parameter; very little parsing needs to be done in the command code itself
-- there's a set of configurable parameters on a per-story basis
+- there's a large set of configurable parameters on a per-story basis
 - stories can define their own introduction text and completion texts
 - stories can define their own commands or override existing commands
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.

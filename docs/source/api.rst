@@ -37,11 +37,6 @@ Tale API
 .. automodule:: tale.lang
     :members:
 
-:mod:`tale.parseresult` --- Command parsing support
----------------------------------------------------
-.. automodule:: tale.parseresult
-    :members:
-
 :mod:`tale.player` --- Players
 ------------------------------
 .. automodule:: tale.player
