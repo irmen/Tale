@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import unittest
+import collections
 
 import tale
 import tale.base
@@ -214,13 +215,35 @@ class TestSoul(unittest.TestCase):
         parsed = soul.parse(player, "smile at myself and kate and cat")
         self.assertEqual(["myself", "kate", "cat"], parsed.args)
         self.assertEqual([player, kate, cat], parsed.who_order)
-        parsed = soul.parse(player, "smile at kate, cat and cat")
-        self.assertEqual(["kate", "cat", "cat"], parsed.args, "deal with multiple occurences")
-        self.assertEqual([kate, cat], parsed.who_order, "deal with multiple occurrences in who_order")
         parsed = soul.parse(player, "smile at kate cat myself")
         self.assertEqual("at", parsed.who_info[kate].previous_word, "ony kate has a previous word")
         self.assertEqual(None, parsed.who_info[cat].previous_word, "cat doesn't have a previous word")
         self.assertEqual(None, parsed.who_info[player].previous_word, "player doesn't have a previous word")
+        # multiple references to the same entity is a parse error:
+        with self.assertRaises(tale.errors.ParseError) as x:
+            soul.parse(player, "smile at kate, cat and cat")
+        self.assertTrue("cat" in str(x.exception))
+        self.assertTrue("multiple" in str(x.exception))
+
+    def test_sanity(self):
+        with self.assertRaises(AssertionError):
+            tale.base.ParseResult("walk", who_info={})    # must be ordered dict
+        tale.base.ParseResult("walk", who_info=collections.OrderedDict())  # must be ordered dict
+        who_info = collections.OrderedDict()
+        cat = tale.base.Living("cat", "f")
+        dog = tale.base.Living("dog", "m")
+        who_info[cat] = "info1"
+        who_info[dog] = "info2"
+        who_list = []
+        tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
+        who_list = [cat, dog]
+        tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
+        who_list = [dog]
+        with self.assertRaises(ValueError):
+            tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
+        who_list = [cat, dog, cat]
+        with self.assertRaises(tale.errors.ParseError):
+            tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
 
     def test_who123(self):
         soul = tale.base.Soul()
@@ -230,7 +253,7 @@ class TestSoul(unittest.TestCase):
         player.move(tale.base.Location("somewhere"))
         cat.move(player.location)
         kate.move(player.location)
-        parsed = soul.parse(player, "smile at cat and kate and myself and the cat and kate")
+        parsed = soul.parse(player, "smile at cat and kate and myself")
         self.assertEqual(cat, parsed.who_1)
         self.assertEqual((cat, kate), parsed.who_12)
         self.assertEqual((cat, kate, player), parsed.who_123)

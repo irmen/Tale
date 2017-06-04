@@ -40,7 +40,7 @@ import copy
 import random
 import re
 from weakref import WeakValueDictionary
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict, Counter
 from textwrap import dedent
 from types import ModuleType
 from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
@@ -91,10 +91,16 @@ class ParseResult:
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
+        assert who_info is None or isinstance(who_info, OrderedDict)  # otherwise parser order gets messed up
         self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
-        assert isinstance(self.who_info, OrderedDict)  # otherwise parser order gets messed up
-        # XXX if who_list and self.who_info:
-        #    raise ParseError("can't have both who_list and who_info initialized")
+        if who_list:
+            # check if we have duplicates in the who_list
+            c = Counter(who_list).most_common(1)
+            if c[0][1] > 1:
+                raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
+                                 .format(c[0][0].name))
+            if who_info and list(who_info) != who_list:
+                raise ValueError("who_info and who_list are both provided but contain different entities")
         if who_list and not self.who_info:   # @todo replace
             duplicates = set()
             for sequence, who in enumerate(who_list):
@@ -102,7 +108,8 @@ class ParseResult:
                     duplicates.add(who)
                 self.who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
-                raise ParseError("You can do only one thing at the same time with " + lang.join(s.name for s in duplicates))
+                raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
+                                 .format(lang.join(s.name for s in duplicates)))
 
     @property
     def who_order(self) -> List:  # @todo replace with ordereddict who_info/ who_123
