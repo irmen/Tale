@@ -1757,7 +1757,7 @@ class Soul:
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
         who_info = ParseResult.WhoInfoOrderedDict()
-        who_order = []   # type: List[ParsedWhoType]
+        who_list = []   # type: List[ParsedWhoType]
         who_sequence = 0
         unparsed = cmd
 
@@ -1846,17 +1846,17 @@ class Soul:
             if word in ("them", "him", "her", "it"):
                 if self.__previously_parsed:
                     # try to connect the pronoun to a previously parsed item/living
-                    who_list = self.match_previously_parsed(player, word)
-                    if who_list:
-                        for who, name in who_list:
+                    prev_who_list = self.match_previously_parsed(player, word)
+                    if prev_who_list:
+                        for who, name in prev_who_list:
                             if include_flag:
                                 who_info[who].sequence = who_sequence
                                 who_info[who].previous_word = previous_word
                                 who_sequence += 1
-                                who_order.append(who)
+                                who_list.append(who)
                             else:
                                 del who_info[who]
-                                who_order.remove(who)
+                                who_list.remove(who)
                             arg_words.append(name)  # put the replacement-name in the args instead of the pronoun
                     previous_word = None
                     continue
@@ -1866,10 +1866,10 @@ class Soul:
                     who_info[player].sequence = who_sequence
                     who_info[player].previous_word = previous_word
                     who_sequence += 1
-                    who_order.append(player)
+                    who_list.append(player)
                 elif player in who_info:
                     del who_info[player]
-                    who_order.remove(player)
+                    who_list.remove(player)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -1889,10 +1889,10 @@ class Soul:
                             who_info[living].sequence = who_sequence
                             who_info[living].previous_word = previous_word
                             who_sequence += 1
-                            who_order.append(living)
+                            who_list.append(living)
                 else:
                     who_info.clear()
-                    who_order.clear()
+                    who_list.clear()
                     who_sequence = 0
                 arg_words.append(word)
                 previous_word = None
@@ -1915,10 +1915,10 @@ class Soul:
                     who_info[living].sequence = who_sequence
                     who_info[living].previous_word = previous_word
                     who_sequence += 1
-                    who_order.append(living)
+                    who_list.append(living)
                 elif living in who_info:
                     del who_info[living]
-                    who_order.remove(living)
+                    who_list.remove(living)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -1928,10 +1928,10 @@ class Soul:
                     who_info[item].sequence = who_sequence
                     who_info[item].previous_word = previous_word
                     who_sequence += 1
-                    who_order.append(item)
+                    who_list.append(item)
                 elif item in who_info:
                     del who_info[item]
-                    who_order.remove(item)
+                    who_list.remove(item)
                 arg_words.append(word)
                 previous_word = None
                 continue
@@ -1942,7 +1942,7 @@ class Soul:
                     who_info[exit].previous_word = previous_word
                     previous_word = None
                     who_sequence += 1
-                    who_order.append(exit)
+                    who_list.append(exit)
                     arg_words.append(exit_name)
                     while wordcount > 1:
                         next(words_enumerator)
@@ -1957,10 +1957,10 @@ class Soul:
                     who_info[item_or_living].sequence = who_sequence
                     who_info[item_or_living].previous_word = previous_word
                     who_sequence += 1
-                    who_order.append(item_or_living)
+                    who_list.append(item_or_living)
                 elif item_or_living in who_info:
                     del who_info[item_or_living]
-                    who_order.remove(item_or_living)
+                    who_list.remove(item_or_living)
                 arg_words.append(full_name)
                 previous_word = None
                 continue
@@ -1971,7 +1971,7 @@ class Soul:
                 continue
             if word not in self._skip_words:
                 # unrecognized word, check if it could be a person's name or an item. (prefix)
-                if not who_order:
+                if not who_list:
                     for name in all_livings:
                         if name.startswith(word):
                             raise ParseError("Perhaps you meant %s?" % name)
@@ -2014,11 +2014,11 @@ class Soul:
             # This is interesting: there's no verb.
             # but maybe the thing the user typed refers to an object or creature.
             # In that case, set the verb to that object's default verb.
-            if len(who_order) == 1:
-                verb = getattr(who_order[1], "default_verb", "examine")
+            if len(who_list) == 1:
+                verb = getattr(who_list[1], "default_verb", "examine")
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
-        return ParseResult(verb, who_info=who_info, who_list=who_order,
+        return ParseResult(verb, who_info=who_info, who_list=who_list,
                            adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
