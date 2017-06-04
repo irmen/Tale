@@ -286,7 +286,10 @@ class TestPlayer(unittest.TestCase):
         player.move(attic)
         parsed = player.parse("wave all")
         self.assertEqual("wave", parsed.verb)
-        self.assertEqual([julie], parsed.who_order)
+        self.assertEqual(1, parsed.who_count)
+        self.assertEqual(julie, parsed.who_1)
+        self.assertEqual((julie, None, None), parsed.who_123)
+        self.assertEqual([julie], list(parsed.who_info))
         who, playermsg, roommsg, targetmsg = player.soul.process_verb_parsed(player, parsed)
         self.assertEqual({julie}, who)
         self.assertEqual("You wave happily at julie.", playermsg)
@@ -296,7 +299,10 @@ class TestPlayer(unittest.TestCase):
             player.parse("befrotzificate all and me", external_verbs={"befrotzificate"})
         parsed = x.exception.parsed
         self.assertEqual("befrotzificate", parsed.verb)
-        self.assertEqual([julie, player], parsed.who_order)
+        self.assertEqual(2, parsed.who_count)
+        self.assertEqual(julie, parsed.who_1)
+        self.assertEqual((julie, player, None), parsed.who_123)
+        self.assertEqual([julie, player], list(parsed.who_info))
         attic.add_exits([Exit("south", "target", "door")])
         try:
             player.parse("push south")
