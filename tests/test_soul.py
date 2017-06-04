@@ -225,11 +225,12 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("at", parsed.who_info[kate].previous_word, "ony kate has a previous word")
         self.assertEqual(None, parsed.who_info[cat].previous_word, "cat doesn't have a previous word")
         self.assertEqual(None, parsed.who_info[player].previous_word, "player doesn't have a previous word")
-        # multiple references to the same entity is a parse error:
-        with self.assertRaises(tale.errors.ParseError) as x:
-            soul.parse(player, "smile at kate, cat and cat")
-        self.assertTrue("cat" in str(x.exception))
-        self.assertTrue("multiple" in str(x.exception))
+        # multiple references to the same entity are folded into one:
+        parsed = soul.parse(player, "smile at kate, cat and cat")
+        self.assertEqual(["kate", "cat", "cat"], parsed.args)
+        self.assertEqual([kate, cat], list(parsed.who_info))
+        self.assertEqual(2, parsed.who_count)
+        self.assertEqual((kate, cat, None), parsed.who_123)
 
     def test_sanity(self):
         with self.assertRaises(AssertionError):
@@ -244,12 +245,10 @@ class TestSoul(unittest.TestCase):
         tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
         who_list = [cat, dog]
         tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
-        who_list = [dog]
-        with self.assertRaises(ValueError):
-            tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
         who_list = [cat, dog, cat]
+        tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
         with self.assertRaises(tale.errors.ParseError):
-            tale.base.ParseResult("walk", who_info=who_info, who_list=who_list)
+            tale.base.ParseResult("walk", who_info=None, who_list=who_list)
 
     def test_who123(self):
         soul = tale.base.Soul()

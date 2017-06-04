@@ -93,23 +93,15 @@ class ParseResult:
         self.unparsed = unparsed
         assert who_info is None or isinstance(who_info, OrderedDict)  # otherwise parser order gets messed up
         self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
-        if who_list:  # @todo get rid of this list
-            # check if we have duplicates in the who_list
-            c = Counter(who_list).most_common(1)
-            if c[0][1] > 1:
-                # @todo support 'take all from someone'
-                raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
-                                 .format(c[0][0].name))
-            if self.who_info and list(self.who_info) != who_list:
-                raise ValueError("who_info and who_list are both provided but contain different entities")
-        if who_list and not self.who_info:   # @todo get rid of this list
+        if who_list and not self.who_info:
+            # initialize the who_info dictionary from the given list and check for duplicates
+            # if who_info is ALSO provided, we ignore who_list.
             duplicates = set()
             for sequence, who in enumerate(who_list):
                 if who in self.who_info:
                     duplicates.add(who)
                 self.who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
-                # @todo support 'take all from someone'
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(lang.join(s.name for s in duplicates)))
         self.who_count = len(self.who_info)
@@ -1167,7 +1159,7 @@ class Living(MudObject):
 
     def start_attack(self, victim: 'Living') -> None:
         """Starts attacking the given living until death ensues on either side."""
-        # @todo I'm not yet sure if the combat/attack logic should go here (on Living), or that it should be split across NPC / Player...
+        # @todo I'm not yet sure if the combat/attack logic should go here (just on Living), or that it should be split with Player...
         # @todo actual fight
         name = lang.capital(self.title)
         room_msg = "%s starts attacking %s!" % (name, victim.title)
@@ -1765,7 +1757,7 @@ class Soul:
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
         who_info = ParseResult.WhoInfoOrderedDict()
-        who_order = []   # type: List[ParsedWhoType]    # @todo replace with ordereddict who_info
+        who_order = []   # type: List[ParsedWhoType]
         who_sequence = 0
         unparsed = cmd
 
