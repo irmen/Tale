@@ -359,7 +359,7 @@ NONLIVING_OK_VERBS = {
     "raise", "recoil", "reply", "rotate", "scowl", "scream", "shake",
     "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "smell", "sniff",
     "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
-    "swing", "tongue", "touch", "trust", "turn", "understand", "utter", "want",
+    "swing", "squeeze", "tongue", "touch", "trust", "turn", "understand", "utter", "want",
     "watch", "wave", "wiggle", "wobble", "worship", "wrinkle", "yawn"
 }
 

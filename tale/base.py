@@ -995,7 +995,7 @@ class Living(MudObject):
             raise NonSoulVerb(parsed)
         if parsed.verb not in verbdefs.NONLIVING_OK_VERBS:
             # check if any of the targeted objects is a non-living
-            if not all(isinstance(who, Living) for who in parsed.who_order):
+            if any(not isinstance(who, Living) for who in parsed.who_order):
                 raise NonSoulVerb(parsed)
         self.validate_socialize_targets(parsed)
         return parsed

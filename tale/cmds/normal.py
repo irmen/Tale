@@ -232,7 +232,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
 
 def replace_items(player: Player, existing: List[base.Item], replacement: base.Item, message: str, others_message: str) -> None:
     # removes all existing items from player's inventory and replaces them with the given replacement item
-    if not all(item in player for item in existing):
+    if any(item not in player for item in existing):
         raise ParseError("can only replace items that are in player's inventory")
     for item in existing:
         player.remove(item, player)
@@ -280,7 +280,7 @@ def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context)
         raise ParseError("Combine %s with what?" % parsed.who_order[0].title)
     if len(parsed.who_info) < 2:
         raise ParseError("Combine which things?")
-    if not all(item in player for item in parsed.who_info):
+    if any(item not in player for item in parsed.who_info):
         raise ActionRefused("You should pick all of those up first if you want to combine them.")
     # 'combine W and X and Y and Z' -> first try (w,x,y) on Z, then (x,y,z) on W as second option
     item, others = parsed.who_order[-1], parsed.who_order[:-1]
@@ -849,11 +849,14 @@ def do_wait(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             raise ActionRefused("Who exactly do you want to wait for?")
     if parsed.who_order:
         # check if any of the targeted objects is a non-living
-        if not all(isinstance(who, base.Living) for who in parsed.who_order):
+        if any(not isinstance(who, base.Living) for who in parsed.who_order):
             raise ActionRefused("You can't wait for something that's not alive.")
-        who = lang.join(who.title for who in parsed.who_order)
-        player.tell("You wait for %s." % who)
-        player.tell_others("{Actor} waits for %s." % who)
+        if parsed.who_1 is player:
+            player.tell("You wait for yourself to figure out what you just meant to do.")
+        else:
+            who = lang.join(who.title for who in parsed.who_order)
+            player.tell("You wait for %s." % who)
+            player.tell_others("{Actor} waits for %s." % who)
         return
     if parsed.args:
         if parsed.args[0] in ("till", "until"):

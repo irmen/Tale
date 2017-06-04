@@ -69,7 +69,7 @@ def cmd(command: str, *aliases: str) -> Callable:
     """
     Decorator to define a parser command function and its verb(s).
     """
-    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+    if not isinstance(command, str) or any(not isinstance(alias, str) for alias in aliases):
         raise TypeError("command name and aliases should be provided as string arguments")
 
     def cmd2(func: Callable) -> Callable:
@@ -99,7 +99,7 @@ def wizcmd(command: str, *aliases: str) -> Callable:
     It will add a privilege check wrapper.
     Note that the wizard command (and the aliases) are prefixed by a '!' to make them stand out from normal commands.
     """
-    if not isinstance(command, str) or not all(isinstance(alias, str) for alias in aliases):
+    if not isinstance(command, str) or any(not isinstance(alias, str) for alias in aliases):
         raise TypeError("command name and aliases should be provided as string arguments")
     prefixed_command = "!" + command
     prefixed_aliases = ["!" + alias for alias in aliases]
