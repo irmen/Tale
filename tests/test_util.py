@@ -311,6 +311,14 @@ class TestUtil(unittest.TestCase):
         util.call_periodically(0)(func)
         self.assertIsNone(func._tale_periodically)
 
+    def test_sortedby(self):
+        a = Item("a", "big A")
+        b = Item("b", "micro B")
+        c = Item("c", "epic C")
+        stuff = [c, b, a]
+        self.assertEqual([a, b, c], util.sorted_by_name(stuff))
+        self.assertEqual([a, c, b], util.sorted_by_title(stuff))
+
 
 class TestVfs(unittest.TestCase):
     def test_resource_text(self):

@@ -30,7 +30,7 @@ def do_inventory(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
     """Show the items you are carrying."""
     if parsed.who_order and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
-        other = parsed.who_order[0]
+        other = parsed.who_1
         other.show_inventory(player, ctx)
     else:
         inventory = player.inventory
@@ -55,8 +55,8 @@ def do_locate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
     name = parsed.args[0]
     p("You look around to see if you can locate %s." % name)
     player.tell_others("{Actor} looks around.")
-    if parsed.who_order:
-        thing = parsed.who_order[0]
+    if parsed.who_count:
+        thing = parsed.who_1
         if thing is player:
             p("You are here, in <location>%s</>." % player.location.name)
             return
@@ -121,8 +121,8 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                 player.tell("You hold onto your stuff.")
     else:
         # drop a single item from the inventory (or a container in the inventory)
-        if parsed.who_order:
-            item = parsed.who_order[0]
+        if parsed.who_count:
+            item = parsed.who_1
             if item in player:
                 drop_stuff([item], player)
             else:
@@ -146,7 +146,7 @@ def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         raise ParseError("Empty what or who?")
     if parsed.who_count > 1:
         raise ParseError("Please be more specific, only empty one thing at a time.")
-    container = parsed.who_order[0]
+    container = parsed.who_1
     if not isinstance(container, base.Container):
         raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
     if container in player.location:
@@ -277,13 +277,14 @@ def do_combine_two(player: Player, parsed: base.ParseResult, ctx: util.Context) 
 def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Combine two or more items you are carrying. If successful, this can perhaps result in a new item!"""
     if parsed.who_count == 1:
-        raise ParseError("Combine %s with what?" % parsed.who_order[0].title)
+        raise ParseError("Combine %s with what?" % parsed.who_1.title)
     if parsed.who_count < 2:
         raise ParseError("Combine which things?")
     if any(item not in player for item in parsed.who_info):
         raise ActionRefused("You should pick all of those up first if you want to combine them.")
     # 'combine W and X and Y and Z' -> first try (w,x,y) on Z, then (x,y,z) on W as second option
-    item, others = parsed.who_order[-1], parsed.who_order[:-1]
+    all_who = list(parsed.who_info)
+    item, others = all_who[-1], all_who[:-1]
     try:
         result = item.combine(others, player)
         if result is not None:
@@ -292,7 +293,7 @@ def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context)
             return
     except ActionRefused:
         pass
-    item, others = parsed.who_order[0], parsed.who_order[1:]
+    item, others = all_who[0], all_who[1:]
     try:
         result = item.combine(others, player)
         if result is not None:
@@ -311,10 +312,10 @@ def do_loot(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         raise ParseError("Loot what or who?")
     if parsed.who_count > 1:
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
-    container = parsed.who_order[0]
+    container = parsed.who_1
     if not isinstance(container, base.Container):
         raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
-    raise RetryParse("take all from " + parsed.who_order[0].name)
+    raise RetryParse("take all from " + parsed.who_1.name)
 
 
 @cmd("take", "get", "steal", "rob")
@@ -328,7 +329,7 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         what_names = parsed.args
         where = None
     else:
-        if parsed.who_order:
+        if parsed.who_count:
             last_obj = parsed.who_order[-1]
             if parsed.who_info[last_obj].previous_word == "from":
                 # take x[,y and z] from something
@@ -455,7 +456,7 @@ def do_throw(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
     if parsed.who_count != 2:
         raise ParseError("Throw what where?")
-    item, where = parsed.who_order[0], parsed.who_order[1]
+    item, where = parsed.who_12
     if isinstance(item, base.Living):
         raise ActionRefused("You can't throw that.")
     if item in player.location:
@@ -485,7 +486,7 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                 pass   # go on below
             else:
                 # we're giving some money away
-                recipient = parsed.who_order[0]
+                recipient = parsed.who_1
                 if not recipient:
                     raise ActionRefused("Give it to whom?")
                 if not isinstance(recipient, base.Living):
@@ -536,10 +537,10 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     if len([who for who in parsed.who_order if isinstance(who, base.Living)]) > 1:
         # if there's more than one living, it's not clear who to give stuff to
         raise ActionRefused("It's not clear who you want to give things to.")
-    if isinstance(parsed.who_order[0], base.Living):
+    if isinstance(parsed.who_1, base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
         things = parsed.who_order[1:]
-        give_stuff(player, things, None, target=parsed.who_order[0])
+        give_stuff(player, things, None, target=parsed.who_1)
         return
     elif isinstance(parsed.who_order[-1], base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
@@ -654,8 +655,8 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
     """Examine something or someone thoroughly."""
     p = player.tell
     living = None
-    if parsed.who_info and isinstance(parsed.who_order[0], base.Living):
-        living = parsed.who_order[0]
+    if parsed.who_info and isinstance(parsed.who_1, base.Living):
+        living = parsed.who_1
         name = living.name
     if not living:
         if not parsed.args:
@@ -735,7 +736,7 @@ def do_stats(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     if not parsed.args:
         target = player
     elif parsed.who_count == 1:
-        target = parsed.who_order[0]
+        target = parsed.who_1
         if not isinstance(target, base.Living):
             raise ActionRefused("That doesn't have stats.")
     else:
@@ -825,8 +826,8 @@ def do_say(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "."
     target = ""
-    if parsed.who_order:
-        possible_target = parsed.who_order[0]
+    if parsed.who_count:
+        possible_target = parsed.who_1
         if parsed.who_info[possible_target].previous_word == "to":
             if parsed.args[0] in (possible_target.name, possible_target.title) or parsed.args[0] in possible_target.aliases:
                 target = " to " + possible_target.title
@@ -847,7 +848,7 @@ def do_wait(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     if "for" in parsed.unrecognized:
         if not parsed.who_info:
             raise ActionRefused("Who exactly do you want to wait for?")
-    if parsed.who_order:
+    if parsed.who_count:
         # check if any of the targeted objects is a non-living
         if any(not isinstance(who, base.Living) for who in parsed.who_order):
             raise ActionRefused("You can't wait for something that's not alive.")
@@ -959,9 +960,9 @@ def do_open(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     """Do something with a door, exit or item, possibly by using something. Example: open door,  unlock chest with key"""
     if len(parsed.args) not in (1, 2) or parsed.unrecognized:
         raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
-    if parsed.who_order:
-        if isinstance(parsed.who_order[0], base.Living):
-            raise ActionRefused("You can't do that with <living>%s</>." % parsed.who_order[0].title)
+    if parsed.who_count:
+        if isinstance(parsed.who_1, base.Living):
+            raise ActionRefused("You can't do that with <living>%s</>." % parsed.who_1.title)
     what_name = parsed.args[0]
     with_item_name = None
     with_item = None
@@ -1175,7 +1176,7 @@ def do_exits(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
 @cmd("use")
 def do_use(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """General object use. Most of the time, you'll need to be more specific to say exactly what you want to do with it."""
-    if not parsed.who_order:
+    if not parsed.who_count:
         raise ActionRefused("Use what?")
     if parsed.who_count > 1:
         # check if there are exactly 2 items mentioned that the player is carrying, assume 'combine' in that case
@@ -1186,7 +1187,7 @@ def do_use(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
                 return do_combine_two(player, parsed, ctx)
         subj = "them"
     else:
-        who = parsed.who_order[0]
+        who = parsed.who_1
         if isinstance(who, base.Living):
             if who is player:
                 raise ActionRefused("Please be more specific: what do you want to do?")
@@ -1251,7 +1252,7 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     """Flee in a random or given direction, possibly escaping a combat situation."""
     exit = None
     if parsed.who_count == 1:
-        exit = parsed.who_order[0]
+        exit = parsed.who_1
         if not isinstance(exit, base.Exit):
             raise ParseError("You can't flee there.")
         exit.allow_passage(player)
@@ -1318,11 +1319,13 @@ def do_show(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     """Shows something to someone else."""
     if parsed.who_count != 2:
         raise ParseError("Show what to whom?")
-    shown = parsed.who_order[0]
+    shown, target = parsed.who_12
     if shown not in player:
         raise ActionRefused("You don't have <item>%s</>." % lang.a(shown.title))
-    target = parsed.who_order[1]
-    player.tell("You show the <item>%s</> to <living>%s</>." % (shown.title, target.title))
+    if target is player:
+        player.tell("You show the <item>%s</> to yourself. Well, that was interesting." % shown.title)
+    else:
+        player.tell("You show the <item>%s</> to <living>%s</>." % (shown.title, target.title))
     room_msg = "%s shows %s to %s." % (lang.capital(player.title), lang.a(shown.title), target.title)
     target_msg = "%s shows you %s." % (lang.capital(player.title), lang.a(shown.title))
     player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets={target})
@@ -1380,7 +1383,7 @@ def do_brief(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
 @cmd("activate")
 def do_activate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Activate something, turn it on, or switch it on."""
-    if not parsed.who_order:
+    if not parsed.who_count:
         raise ParseError("Activate what?")
     for what in parsed.who_order:
         try:
@@ -1396,7 +1399,7 @@ def do_activate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> 
 @cmd("deactivate")
 def do_deactivate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Deactivate something, turn it of, or switch it off."""
-    if not parsed.who_order:
+    if not parsed.who_count:
         raise ParseError("Deactivate what?")
     for what in parsed.who_order:
         try:
@@ -1413,7 +1416,7 @@ def do_deactivate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
 def do_switch(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Switch something on or off."""
     if parsed.who_count == 1:
-        who = parsed.who_order[0]
+        who = parsed.who_1
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
             do_activate(player, parsed, ctx)
             return
@@ -1431,7 +1434,7 @@ def do_switch(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
 def do_turn(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Turn something (rotate it), or turn something on or off."""
     if parsed.who_count == 1:
-        who = parsed.who_order[0]
+        who = parsed.who_1
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
             do_activate(player, parsed, ctx)
             return
@@ -1452,7 +1455,7 @@ def do_manipulate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
     if parsed.verb == "manip":
         parsed.verb = "manipulate"
     if parsed.who_count == 1:
-        what = parsed.who_order[0]
+        what = parsed.who_1
         try:
             what.manipulate(parsed.verb, player)
             return
@@ -1469,7 +1472,7 @@ def do_manipulate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
 def do_read(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Read something."""
     if parsed.who_count == 1:
-        what = parsed.who_order[0]
+        what = parsed.who_1
         what.read(player)
     else:
         raise ParseError("Read what?")

@@ -14,6 +14,7 @@ from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, LocationIntegrityError
 from tale.player import Player
 from tale.story import MoneyType
+from tale.shop import Shopkeeper
 from tale.tio.iobase import strip_text_styles
 from tale.util import Context, MoneyFormatter
 from tests.supportstuff import FakeDriver, MsgTraceNPC, Wiretap
@@ -900,6 +901,43 @@ class TestContainer(unittest.TestCase):
         self.assertFalse(key in bag)
         with self.assertRaises(ActionRefused):
             _ = bag in key
+
+    def test_allow_give_item(self):
+        key = Item("key")
+        player = Player("julie", "f")
+        shopkeep = Shopkeeper("seller", "m")
+        wizard = Living("merlin", "m")
+        wizard.privileges.add("wizard")
+        mob = Living("mob1", "m")
+        # mobs only allow items from themselves or wizard.
+        mob.allow_give_item(key, mob)
+        mob.allow_give_item(key, wizard)
+        with self.assertRaises(ActionRefused):
+            mob.allow_give_item(key, None)
+        with self.assertRaises(ActionRefused):
+            mob.allow_give_item(key, player)
+        with self.assertRaises(ActionRefused):
+            mob.allow_give_item(key, shopkeep)
+        # player allows items always.
+        player.allow_give_item(key, None)
+        player.allow_give_item(key, player)
+        player.allow_give_item(key, mob)
+        # shopkeeper doesn't allow it because you have to SELL it.
+        with self.assertRaises(ActionRefused):
+            shopkeep.allow_give_item(key, None)
+        with self.assertRaises(ActionRefused):
+            shopkeep.allow_give_item(key, player)
+        with self.assertRaises(ActionRefused):
+            shopkeep.allow_give_item(key, mob)
+
+    def test_allow_give_money(self):
+        player = Player("julie", "f")
+        shopkeep = Shopkeeper("seller", "m")
+        rat = Living("rat", "n", race="rodent")
+        with self.assertRaises(ActionRefused):
+            rat.allow_give_money(player, 1.0)   # cannot give money to non-human
+        player.allow_give_money(shopkeep, 1.0)
+        shopkeep.allow_give_money(player, 1.0)
 
     def test_inventory(self):
         bag = Container("bag")

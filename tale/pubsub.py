@@ -77,7 +77,7 @@ class Topic:
 
     def subscribe(self, subscriber: Listener) -> None:
         if not isinstance(subscriber, Listener):
-            raise TypeError("subscriber needs to be a Listener")
+            raise TypeError("subscriber must be a Listener")
         self.subscribers.add(weakref.ref(subscriber))
 
     def unsubscribe(self, subscriber: Listener) -> None:

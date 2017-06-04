@@ -5,10 +5,13 @@ Creatures living in the central town.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import random
+from typing import Any
 
-from tale import lang, util
+from tale import lang, util, mud_context
 from tale.base import Living, ParseResult
 from tale.util import call_periodically
+from tale.shop import Shopkeeper
+from tale.pubsub import Listener, TopicNameType
 
 
 class VillageIdiot(Living):
@@ -48,7 +51,7 @@ class TownCrier(Living):
 class WalkingRat(Living):
     def init(self) -> None:
         super().init()
-        self.aggressive = True
+        self.aggressive = False
 
     @call_periodically(5, 15)
     def do_idle_action(self, ctx: util.Context) -> None:
@@ -62,3 +65,36 @@ class WalkingRat(Living):
         direction = self.select_random_move()
         if direction:
             self.move(direction.target, self)
+
+
+class ShoppeShopkeeper(Shopkeeper, Listener):
+    def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
+        if topicname[0] == "wiretap-location":
+            if "Rat arrives" in event[1]:
+                mud_context.driver.defer(2, self.rat_event, "glance at rat")
+            elif "kicks rat" in event[1]:
+                name = event[1].split("kicks rat")[0].strip()
+                living = self.location.search_living(name)
+                if living:
+                    mud_context.driver.defer(2, self.rat_event, "smile " + living.name)
+
+    def rat_event(self, action: str, ctx: util.Context) -> None:
+        self.do_socialize(action)
+
+
+class CustomerJames(Living, Listener):
+    """The customer in the shoppe, trying to sell a Lamp, and helpful as rat deterrent."""
+    def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
+        if topicname[0] == "wiretap-location":
+            if "Rat arrives" in event[1]:
+                mud_context.driver.defer(4, self.rat_kick)
+
+    def rat_kick(self, ctx: util.Context) -> None:
+        rat = self.location.search_living("rat")
+        if rat:
+            self.do_socialize("kick rat")
+            rat.do_socialize("recoil")
+            direction = rat.select_random_move()
+            if direction:
+                rat.tell_others("{Actor} runs away towards the door!")
+                rat.move(direction.target, self)

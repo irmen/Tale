@@ -382,6 +382,11 @@ def sorted_by_name(stuff: Iterable[Any]) -> Iterable[Any]:
     return sorted(stuff, key=lambda thing: thing.name.lower())
 
 
+def sorted_by_title(stuff: Iterable[Any]) -> Iterable[Any]:
+    """Returns the objects sorted by their title attribute (case insensitive)"""
+    return sorted(stuff, key=lambda thing: thing.title.lower())
+
+
 def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, detailed: bool=True, with_self: bool=False) -> List[str]:
     """Formats an exception traceback. If you ask for detailed formatting,
     the result will contain info on the variables in each stack frame.

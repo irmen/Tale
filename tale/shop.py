@@ -17,7 +17,7 @@ Shopping related commands will be roughly::
     SELL
       > sell sword       (sell the first sword in your inventory)
     VALUE/APPRAISE
-        ask shop keeper how much he is willing to pay for an item:
+        asks shop keeper how much he is willing to pay for an item:
       > value sword      (appraise the first sword in your inventory)
 
 """
@@ -31,7 +31,7 @@ from . import mud_context
 from .base import Item, Living, ParseResult
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .items.basic import Trash
-from .util import sorted_by_name, Context
+from .util import sorted_by_title, Context
 
 banking_money_limit = 15000.0
 
@@ -80,13 +80,16 @@ class ShopBehavior:
 class Shopkeeper(Living):
     def init(self) -> None:
         super().init()
+        self.privileges.add("shopkeeper")   # allow for some item transfers (buy/sell) that would otherwise be blocked
         self.shop = ShopBehavior()
         self.verbs = {
             "shop": "Go shopping! This shows some information about the shop, and what it has for sale.",
             "list": "Go shopping! This shows some information about the shop, and what it has for sale.",
-            "sell": "Sell stuff",
-            "buy": "Buy stuff",
-            "value": "Ask the shopkeeper about what he or she's willing to pay for an item",
+            "sell": "Sell something you carry with you: sell <name>",
+            "buy": "Buy something from the shop: buy <item-for-sale> or buy #<itemnumber> (see list)",
+            "purchase": "Buy something from the shop: buy <item-for-sale> or buy #<itemnumber> (see list)",
+            "haggle": "Try to haggle.",
+            "value": "Ask the shopkeeper about what he or she's willing to pay for an item.",
             "appraise": "Ask the shopkeeper about what he or she's willing to pay for an item",
             "info": "Ask about an item on sale. Name the item or give its list number.",
             "inquire": "Ask about an item on sale. Name the item or give its list number.",
@@ -137,11 +140,15 @@ class Shopkeeper(Living):
         return item, designator
 
     def _get_from_list(self, number: int) -> Item:
-        shoplist = list(sorted_by_name(self.inventory))
+        shoplist = list(sorted_by_title(self.inventory))
         try:
             return shoplist[number - 1]
         except IndexError:
             raise ActionRefused("That number doesn't appear on the list of items that are for sale.")
+
+    def allow_give_item(self, item: Item, actor: 'Living') -> None:
+        """Do we accept given items? Raise ActionRefused if not. Shopkeeper can only be sold items to!"""
+        raise ActionRefused("You can't give stuff to %s just like that, try selling it instead." % self.title)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
         # react to some things people might say such as "ask about <item>/<number>"
@@ -173,10 +180,13 @@ class Shopkeeper(Living):
             return self.shop_inquire(parsed, actor)
         elif parsed.verb in ("value", "appraise"):
             return self.shop_appraise(parsed, actor)
-        elif parsed.verb == "buy":
+        elif parsed.verb in ("buy", "purchase"):
             return self.shop_buy(parsed, actor)
         elif parsed.verb == "sell":
             return self.shop_sell(parsed, actor)
+        elif parsed.verb == "haggle":
+            self.do_socialize("exclaim No haggling")
+            return True
         else:
             return False  # unrecognised verb
 
@@ -196,7 +206,7 @@ class Shopkeeper(Living):
         else:
             actor.tell("%s shows you a list of what is in stock at the moment:" % lang.capital(self.subjective), end=True)
             txt = ["<ul>  # <dim>|</><ul>  item                        <dim>|</><ul> price     </>"]
-            for i, item in enumerate(sorted_by_name(self.inventory), start=1):
+            for i, item in enumerate(sorted_by_title(self.inventory), start=1):
                 price = item.value * self.shop.sellprofit
                 txt.append("%3d. %-30s  %s" % (i, item.title, mud_context.driver.moneyfmt.display(price)))
             actor.tell("\n".join(txt), format=False)
@@ -266,6 +276,11 @@ class Shopkeeper(Living):
         if item.value <= 0:
             actor.tell("%s tells you it's worthless." % lang.capital(self.title))
             return True
+        if isinstance(item, Trash) or Item.search_item(item.title, self.shop.forsale):
+            actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_shopdoesnotbuy))
+            if self.shop.action_temper:
+                self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
+            return True
         # @todo charisma bonus/malus
         price = item.value * self.shop.buyprofit
         value_str = mud_context.driver.moneyfmt.display(price)
@@ -274,7 +289,7 @@ class Shopkeeper(Living):
         return True
 
     def shop_buy(self, parsed: ParseResult, actor: Living) -> bool:
-        if len(parsed.args) != 1:
+        if len(parsed.args) != 1:    # @todo support amount to buy?
             raise ParseError("I don't understand what you want to buy.")
         item = None
         name = parsed.args[0]
@@ -283,8 +298,8 @@ class Shopkeeper(Living):
             try:
                 num = int(name[1:])
                 if num <= 0:
-                    raise ValueError("num needs to be 1 or higher")
-                item = list(sorted_by_name(self.inventory))[num - 1]
+                    raise ValueError("num must be 1 or higher")
+                item = list(sorted_by_title(self.inventory))[num - 1]
                 if Item.search_item(item.title, self.shop.forsale):
                     item = item.clone()  # make a clone and sell that, the forsale items should never run out
             except ValueError:
@@ -309,12 +324,10 @@ class Shopkeeper(Living):
             if self.shop.action_temper:
                 self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
             return True
-        item.move(actor, actor)
+        item.move(actor, self)   # works, because self has 'shopkeeper' privileges
         actor.money -= price
         self.money += price
         assert actor.money >= 0.0
-        self.do_socialize("thank " + actor.name)
-        actor.tell("You've bought the %s!" % item.name)
         if self.shop.msg_shopsolditem:
             if "%d" in self.shop.msg_shopsolditem:
                 # old-style (circle) message with just a numeric value for the money
@@ -325,6 +338,8 @@ class Shopkeeper(Living):
             actor.tell("%s says: \"%s\"" % (lang.capital(self.title), sold_msg))
         else:
             actor.tell("You paid %s for it." % mud_context.driver.moneyfmt.display(price))
+        self.do_socialize("thank " + actor.name)
+        actor.tell("You've bought the %s!" % item.name)
         if self.shop.banks_money:
             # shopkeeper puts money over a limit in the bank
             if self.money > banking_money_limit:

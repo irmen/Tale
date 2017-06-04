@@ -77,8 +77,8 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("externalverb", x.exception.parsed.verb)
         with self.assertRaises(tale.errors.NonSoulVerb) as x:
             soul.process_verb(player, "who who", external_verbs={"who"})
-        self.assertEqual("who", x.exception.parsed.verb, "who as external verb needs to be processed as normal arg, not as adverb")
-        self.assertEqual(["who"], x.exception.parsed.args, "who as external verb needs to be processed as normal arg, not as adverb")
+        self.assertEqual("who", x.exception.parsed.verb, "who as external verb must be processed as normal arg, not as adverb")
+        self.assertEqual(["who"], x.exception.parsed.args, "who as external verb must be processed as normal arg, not as adverb")
 
     def testExternalVerbUnknownWords(self):
         soul = tale.base.Soul()
@@ -865,16 +865,16 @@ class TestSoul(unittest.TestCase):
         soul.remember_previous_parse(parsed)
         parsed = soul.parse(player, "kiss her")
         self.assertEqual(["(By 'her', we assume you meant Kate.)\n"], player.test_get_output_paragraphs())
-        self.assertEqual(kate_npc, parsed.who_order[0])
+        self.assertEqual(kate_npc, parsed.who_1)
         # it
         parsed = soul.parse(player, "hug dinosaur")
         soul.remember_previous_parse(parsed)
         parsed = soul.parse(player, "kiss it")
         self.assertEqual(["(By 'it', we assume you meant dinosaur.)\n"], player.test_get_output_paragraphs())
-        self.assertEqual(dino_npc, parsed.who_order[0])
+        self.assertEqual(dino_npc, parsed.who_1)
         with self.assertRaises(tale.errors.ParseError) as x:
             parsed = soul.parse(player, "kiss her")
-        self.assertEqual("It is not clear who you're referring to.", str(x.exception))
+        self.assertEqual("It is not clear who or what you're referring to.", str(x.exception))
         # them
         parsed = soul.parse(player, "hug kate and dinosaur")
         soul.remember_previous_parse(parsed)

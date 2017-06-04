@@ -303,6 +303,7 @@ class Catapult(Weapon):
     # you can create this directly but it is more fun if it is created by combining a Y-stick and an elastic band.
     def init(self):
         super().init()
+        self.value = 15.0
         self.verbs = {"shoot": "Fire the weapon!"}
 
     def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
@@ -317,8 +318,10 @@ class Catapult(Weapon):
 
 
 woodenYstick = WoodenYstick("stick", "wooden y-shaped stick", "A firm, Y-shaped wooden stick. You can hold it pretty comfortably.")
+woodenYstick.value = 4
 elastic_band = ElasticBand("band", "large elastic band", "It is a pretty strong and large elastic band. "
                                                          "It's not the type used to hold small packages but rather looks "
                                                          "like it came off a catapult of some sort.")
+elastic_band.value = 2.2
 elastic_band.aliases.add("elastic")
 elastic_band.aliases.add("elastic band")

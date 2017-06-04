@@ -139,7 +139,11 @@ class Player(base.Living, pubsub.Listener):
         super().destroy(ctx)
 
     def allow_give_money(self, actor: base.Living, amount: float) -> None:
-        """Do we accept money? Raise ActionRefused if not."""
+        """Do we accept money? Raise ActionRefused if not. For Player, the default is that we accept."""
+        pass
+
+    def allow_give_item(self, item: base.Item, actor: base.Living) -> None:
+        """Do we accept given items? Raise ActionRefused if not. For Player, the default is that we accept."""
         pass
 
     def get_pending_input(self) -> Sequence[str]:

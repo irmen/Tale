@@ -81,8 +81,8 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         obj = getattr(module, objectname, None)
         if not obj:
             raise ActionRefused("Object not found")
-    elif parsed.who_order:
-        obj = parsed.who_order[0]
+    elif parsed.who_count:
+        obj = parsed.who_1
     else:
         raise ActionRefused("Object not found")
 
@@ -124,7 +124,7 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
 @wizcmd("destroy")
 def do_destroy(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Generator:
     """Destroys an object or creature."""
-    if not parsed.who_order:
+    if not parsed.who_count:
         raise ParseError("Destroy what or who?")
     if parsed.unrecognized:
         raise ParseError("It's not clear what you mean by: " + ",".join(parsed.unrecognized))
@@ -161,7 +161,7 @@ def do_clean(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
     else:
         if parsed.who_count != 1:
             raise ParseError("Clean what or who?")
-        victim = parsed.who_order[0]
+        victim = parsed.who_1
         if (yield "input", ("Are you sure you want to clean out %s?" % victim.title, lang.yesno)):
             p("Cleaning inventory of %s." % victim)
             player.tell_others("{Actor} cleans out the inventory of %s." % victim.title)
@@ -202,7 +202,7 @@ def do_wiretap(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
     elif arg == "-clear":
         player.clear_wiretaps()
         player.tell("All wiretaps removed.")
-    elif parsed.who_order:
+    elif parsed.who_count:
         for living in parsed.who_order:
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
@@ -296,7 +296,7 @@ def teleport_someone_to_player(who: base.Living, player: Player) -> None:
 def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Return a player to the location where they were before a teleport."""
     if parsed.who_count == 1:
-        who = parsed.who_order[0]
+        who = parsed.who_1
     elif parsed.who_count == 0:
         who = player
     else:
@@ -336,14 +336,14 @@ to be moved around normally. For instance you could use it to pick up
 items that are normally fixed in place (move item to playername)."""
     if len(parsed.args) != 2 or parsed.who_count < 1:
         raise ActionRefused("Move what where?")
-    thing = parsed.who_order[0]
+    thing = parsed.who_1
     if isinstance(thing, base.Living):
         raise ActionRefused("* use 'teleport' instead to move livings around.")
     if parsed.args[1] == "." and parsed.who_count == 1:
         # current room is the target
         target = player.location
     elif parsed.who_count == 2:
-        target = parsed.who_order[1]
+        target = parsed.who_12[1]
     else:
         raise ParseError("It's not clear what you want to move where.")
     if thing is target:
@@ -368,8 +368,8 @@ def do_debug(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     name = parsed.args[0]
     if name == ".":
         obj = player.location
-    elif parsed.who_order:
-        obj = parsed.who_order[0]
+    elif parsed.who_count:
+        obj = parsed.who_1
     else:
         raise ActionRefused("Can't find %s." % name)
     txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
@@ -502,7 +502,7 @@ def do_force(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     """Force another living being into performing a given command."""
     if len(parsed.args) < 2 or not parsed.who_order:
         raise ParseError("Force whom to do what?")
-    target = parsed.who_order[0]
+    target = parsed.who_1
     if not isinstance(target, base.Living):
         raise ActionRefused("You cannot force <item>%s</> to do anything." % target.title)
     verb = parsed.args[1]
@@ -632,8 +632,8 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
     name = parsed.args[0]
     if name == ".":
         obj = player.location
-    elif parsed.who_order:
-        obj = parsed.who_order[0]
+    elif parsed.who_count:
+        obj = parsed.who_1
     elif name in {"items", "livings", "locations", "exits"}:
         player.tell("All known " + name + ": (limiting to 100)", end=True)
         count = 0

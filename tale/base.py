@@ -117,23 +117,23 @@ class ParseResult:
         return list(self.who_info)  # this is in order because who_info is OrderedDict
 
     @property
-    def who_1(self) -> Optional[ParsedWhoType]:
-        """Gets the first occurring Who from the parsed line (or None if it doesn't exist)"""
+    def who_1(self) -> Optional[Any]:
+        """Gets the first occurring ParsedWhoType from the parsed line (or None if it doesn't exist)"""
         return next(iter(self.who_info)) if self.who_info else None
 
     @property
-    def who_12(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType]]:
+    def who_12(self) -> Tuple[Optional[Any], Optional[Any]]:
         """
-        Returns a tuple (MudObject, MudObject) representing the first two occurring Whos in the parsed line.
+        Returns a tuple (ParsedWhoType, ParsedWhoType) representing the first two occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
         """
         whos = list(self.who_info)    # this is in order because who_info is OrderedDict
         return tuple((whos + [None, None])[:2])   # type: ignore
 
     @property
-    def who_123(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType], Optional[ParsedWhoType]]:
+    def who_123(self) -> Tuple[Optional[Any], Optional[Any], Optional[Any]]:
         """
-        Returns a tuple (MudObject, MudObject, MudObject) representing the first three occurring Whos in the parsed line.
+        Returns a tuple (ParsedWhoType, ParsedWhoType, ParsedWhoType) representing the first three occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
         """
         whos = list(self.who_info)    # this is in order because who_info is OrderedDict
@@ -347,12 +347,12 @@ class Item(MudObject):
     """
 
     def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
-        super().__init__(name, title, description, short_description)
         self.contained_in = None   # type: Union[Location, Container, Living]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
+        super().__init__(name, title, description, short_description)
 
     def init(self) -> None:
         """
@@ -520,11 +520,12 @@ class Location(MudObject):
     You can test for containment with 'in': item in loc, npc in loc
     """
     def __init__(self, name: str, description: str=None) -> None:
-        super().__init__(name, description=description)
-        self.name = name      # make sure we preserve the case; base object stores it lowercase
+        self.name = name
         self.livings = set()  # type: Set[Living] # set of livings in this location
         self.items = set()    # type: Set[Item] # set of all items in the room
         self.exits = {}       # type: Dict[str, Exit] # dictionary of all exits: exit_direction -> Exit object with target & descr
+        super().__init__(name, description=description)
+        self.name = name      # make sure we preserve the case; base object overwrites it in lowercase
 
     def __contains__(self, obj: Union['Living', Item]) -> bool:
         return obj in self.livings or obj in self.items
@@ -879,14 +880,17 @@ class Living(MudObject):
         assert item is not None
         if not isinstance(item, Item):
             raise ActionRefused("You can't do that.")
-        if actor is self or actor is not None and "wizard" in actor.privileges:
-            self.__inventory.add(item)
-            item.contained_in = self
-            return
-        if self.aggressive:
-            raise ActionRefused("It's probably not a good idea to give %s to %s." % (item.title, self.title))
-        # default behavior is to refuse stuff given to us:
-        raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
+        try:
+            self.allow_give_item(item, actor)  # if this passes we are good to go
+            if self.aggressive and actor is not self:
+                raise ActionRefused()
+        except ActionRefused:
+            if actor is None or ("wizard" not in actor.privileges and "shopkeeper" not in actor.privileges):
+                if self.aggressive:
+                    raise ActionRefused("It's probably not a good idea to give things to %s." % self.title)
+                raise
+        self.__inventory.add(item)
+        item.contained_in = self
 
     def remove(self, item: Union['Living', Item], actor: Optional['Living']) -> None:
         """remove an item from the inventory"""
@@ -968,8 +972,8 @@ class Living(MudObject):
         """
         Send a message to the other livings in the location, but not to self.
         There are a few formatting strings for easy shorthands:
-        {actor}/{Actor} = the acting living's title / acting living's title capitalized.
-        {target}/{Target} = the target's title / target's title capitalized.
+        {actor}/{Actor} = the acting living's title / acting living's title capitalized (subject in the sentence)
+        {target}/{Target} = the target's title / target's title capitalized (object in the sentence)
         If you need even more tweaks with telling stuff, use living.location.tell directly.
         """
         if target is None:
@@ -1174,6 +1178,11 @@ class Living(MudObject):
         """Do we accept money? Raise ActionRefused if not."""
         if self.stats.race not in (None, "human"):
             raise ActionRefused("You can't do that.")
+
+    def allow_give_item(self, item: Item, actor: 'Living') -> None:
+        """Do we accept given items? Raise ActionRefused if not."""
+        if actor is None or actor is not self and "wizard" not in actor.privileges:
+            raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
     def _handle_verb_base(self, parsed: ParseResult, actor: 'Living') -> bool:
         """
@@ -2040,7 +2049,7 @@ class Soul:
                 player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, lang.join(who.title for who in matches)))
                 return [(who, who.name) for who in matches]
             else:
-                raise ParseError("It is not clear who you're referring to.")
+                raise ParseError("It is not clear who or what you're referring to.")
         for who in self.__previously_parsed.who_info:
             # first see if it is an exit
             if pronoun == "it":
@@ -2055,7 +2064,7 @@ class Soul:
                     return [(who, who.name)]
                 player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, who.title))
                 raise ParseError("%s is no longer around." % lang.capital(who.subjective))
-        raise ParseError("It is not clear who you're referring to.")
+        raise ParseError("It is not clear who or what you're referring to.")
 
     @staticmethod
     def poss_replacement(actor: Living, target: MudObject, observer: Optional[Living]) -> str:
