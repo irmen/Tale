@@ -1,6 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
+[security] Add SSL certificate to web server and use HTTPS only.
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
 [code]  use websockets or comet long polling instead of 0.5 sec polling to update the text in the browser
@@ -13,8 +14,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Let driver store player's state once in a while (every minute or so), when they logout, and when they get disconnected.
 [feature] New mud-mode save command that immediately triggers the driver to store the player's state. (already exists for IF-mode)
 [feature] Let players define aliases for certain commands (including args) "alias w_s=wield sword"
-[feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard)
-[feature] Notify player if mail arrived.
+[feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard). Notify player if mail arrived.
 [feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade/flee
 [feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset? (circle has zones and zone resets)
 [info,feature] DAMAGE TYPES:
@@ -24,10 +24,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[feature] Parser: allow simple question/answer dialog. 'no/yes' verbs to reply to a stated question? Use answer/say/tell commands?
 [code] Use prompt_toolkit for a nicer command line interface?
-
-[code] get rid of parseresult.who_order in favor of the who_info ordereddict/who_123
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this

@@ -289,6 +289,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(1, parsed.who_count)
         self.assertEqual(julie, parsed.who_1)
         self.assertEqual((julie, None, None), parsed.who_123)
+        self.assertEqual(julie, parsed.who_last)
         self.assertEqual([julie], list(parsed.who_info))
         who, playermsg, roommsg, targetmsg = player.soul.process_verb_parsed(player, parsed)
         self.assertEqual({julie}, who)
@@ -303,6 +304,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(julie, parsed.who_1)
         self.assertEqual((julie, player, None), parsed.who_123)
         self.assertEqual([julie, player], list(parsed.who_info))
+        self.assertEqual(player, parsed.who_last)
         attic.add_exits([Exit("south", "target", "door")])
         try:
             player.parse("push south")

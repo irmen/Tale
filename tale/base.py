@@ -93,28 +93,26 @@ class ParseResult:
         self.unparsed = unparsed
         assert who_info is None or isinstance(who_info, OrderedDict)  # otherwise parser order gets messed up
         self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
-        if who_list:
+        if who_list:  # @todo get rid of this list
             # check if we have duplicates in the who_list
             c = Counter(who_list).most_common(1)
             if c[0][1] > 1:
+                # @todo support 'take all from someone'
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(c[0][0].name))
             if self.who_info and list(self.who_info) != who_list:
                 raise ValueError("who_info and who_list are both provided but contain different entities")
-        if who_list and not self.who_info:   # @todo replace
+        if who_list and not self.who_info:   # @todo get rid of this list
             duplicates = set()
             for sequence, who in enumerate(who_list):
                 if who in self.who_info:
                     duplicates.add(who)
                 self.who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
+                # @todo support 'take all from someone'
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(lang.join(s.name for s in duplicates)))
         self.who_count = len(self.who_info)
-
-    @property
-    def who_order(self) -> List:  # @todo replace with ordereddict who_info/ who_123
-        return list(self.who_info)  # this is in order because who_info is OrderedDict
 
     @property
     def who_1(self) -> Optional[Any]:
@@ -139,6 +137,13 @@ class ParseResult:
         whos = list(self.who_info)    # this is in order because who_info is OrderedDict
         return tuple((whos + [None, None, None])[:3])   # type: ignore
 
+    @property
+    def who_last(self) -> Optional[Any]:
+        """Gets the last occurring ParsedWhoType on the line (or None if there wasn't any)"""
+        if self.who_info:
+            return list(self.who_info)[-1]
+        return None
+
     def __str__(self) -> str:
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]
         s = [
@@ -152,11 +157,8 @@ class ParseResult:
             " unrecognized=%s" % self.unrecognized,
             " who_count=%d" % self.who_count,
             " who_info=%s" % "\n   ".join(who_info_str),
-            " who_1=%s" % self.who_1,
-            " who_12=%s" % str(self.who_12),
             " who_123=%s" % str(self.who_123),
-            " who_info keys=%s" % list(self.who_info),
-            " who_order=%s" % self.who_order,
+            " who_last=%s" % str(self.who_last),
             " unparsed=%s" % self.unparsed
         ]
         return "\n".join(s)

@@ -203,7 +203,7 @@ def do_wiretap(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         player.clear_wiretaps()
         player.tell("All wiretaps removed.")
     elif parsed.who_count:
-        for living in parsed.who_order:
+        for living in parsed.who_info:
             if living is player:
                 raise ActionRefused("Can't wiretap yourself.")
             if isinstance(living, base.Item):
@@ -500,7 +500,7 @@ def do_pubsub(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
 @wizcmd("force")
 def do_force(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Force another living being into performing a given command."""
-    if len(parsed.args) < 2 or not parsed.who_order:
+    if len(parsed.args) < 2 or not parsed.who_info:
         raise ParseError("Force whom to do what?")
     target = parsed.who_1
     if not isinstance(target, base.Living):

@@ -214,11 +214,13 @@ class TestSoul(unittest.TestCase):
         self.assertEqual([cat, kate, player], list(parsed.who_info))
         self.assertEqual(3, parsed.who_count)
         self.assertEqual((cat, kate, player), parsed.who_123)
+        self.assertEqual(player, parsed.who_last)
         parsed = soul.parse(player, "smile at myself and kate and cat")
         self.assertEqual(["myself", "kate", "cat"], parsed.args)
         self.assertEqual([player, kate, cat], list(parsed.who_info))
         self.assertEqual(3, parsed.who_count)
         self.assertEqual((player, kate, cat), parsed.who_123)
+        self.assertEqual(cat, parsed.who_last)
         parsed = soul.parse(player, "smile at kate cat myself")
         self.assertEqual("at", parsed.who_info[kate].previous_word, "ony kate has a previous word")
         self.assertEqual(None, parsed.who_info[cat].previous_word, "cat doesn't have a previous word")
@@ -231,7 +233,7 @@ class TestSoul(unittest.TestCase):
 
     def test_sanity(self):
         with self.assertRaises(AssertionError):
-            tale.base.ParseResult("walk", who_info={})    # must be ordered dict
+            tale.base.ParseResult("walk", who_info={})    # must be ordered dict instead
         tale.base.ParseResult("walk", who_info=collections.OrderedDict())  # must be ordered dict
         who_info = collections.OrderedDict()
         cat = tale.base.Living("cat", "f")
@@ -261,14 +263,17 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(cat, parsed.who_1)
         self.assertEqual((cat, kate), parsed.who_12)
         self.assertEqual((cat, kate, player), parsed.who_123)
+        self.assertEqual(player, parsed.who_last)
         parsed = soul.parse(player, "smile at kate")
         self.assertEqual(kate, parsed.who_1)
         self.assertEqual((kate, None), parsed.who_12)
         self.assertEqual((kate, None, None), parsed.who_123)
+        self.assertEqual(kate, parsed.who_last)
         parsed = soul.parse(player, "smile")
         self.assertIsNone(parsed.who_1)
         self.assertEqual((None, None), parsed.who_12)
         self.assertEqual((None, None, None), parsed.who_123)
+        self.assertEqual(None, parsed.who_last)
 
     def testVerbTarget(self):
         soul = tale.base.Soul()
@@ -577,6 +582,7 @@ class TestSoul(unittest.TestCase):
         self.assertTrue(all(isinstance(x, tale.base.Living) for x in parsed.who_info), "parse must return Livings in 'who'")
         self.assertEqual(targets, list(parsed.who_info))
         self.assertEqual(tuple(targets), parsed.who_123)
+        self.assertEqual(targets[-1], parsed.who_last)
         parsed = soul.parse(player, "slap myself")
         self.assertEqual(None, parsed.qualifier)
         self.assertEqual("slap", parsed.verb)
@@ -586,6 +592,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(1, parsed.who_count)
         self.assertEqual([player], list(parsed.who_info), "myself should be player")
         self.assertEqual(player, parsed.who_1)
+        self.assertEqual(player, parsed.who_last)
         parsed = soul.parse(player, "slap all")
         self.assertEqual(None, parsed.qualifier)
         self.assertEqual("slap", parsed.verb)
@@ -595,6 +602,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(3, parsed.who_count, "all should not include player")
         self.assertEqual(targets, list(parsed.who_info), "all should not include player")
         self.assertEqual(tuple(targets), parsed.who_123)
+        self.assertEqual(targets[-1], parsed.who_last)
         parsed = soul.parse(player, "slap all but kate")
         self.assertEqual(2, parsed.who_count, "all but kate should only be max and the dino")
         self.assertEqual([max_npc, dino_npc], list(parsed.who_info), "all but kate should only be max and the dino")
@@ -603,10 +611,12 @@ class TestSoul(unittest.TestCase):
         self.assertEqual(4, parsed.who_count)
         self.assertEqual(targets_with_player, list(parsed.who_info), "all and myself should include player")
         self.assertEqual(tuple(targets_with_player[:3]), parsed.who_123)
+        self.assertEqual(targets_with_player[-1], parsed.who_last)
         parsed = soul.parse(player, "slap newspaper")
         self.assertEqual([newspaper], list(parsed.who_info), "must be able to perform soul verb on item")
         self.assertEqual(1, parsed.who_count)
         self.assertEqual(newspaper, parsed.who_1)
+        self.assertEqual(newspaper, parsed.who_last)
         with self.assertRaises(tale.errors.ParseError) as x:
             soul.parse(player, "slap dino")
         self.assertEqual("Perhaps you meant dinosaur?", str(x.exception), "must suggest living with prefix")

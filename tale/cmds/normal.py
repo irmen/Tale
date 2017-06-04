@@ -28,7 +28,7 @@ from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
 @disable_notify_action
 def do_inventory(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Show the items you are carrying."""
-    if parsed.who_order and "wizard" in player.privileges:
+    if parsed.who_info and "wizard" in player.privileges:
         # wizards may look at the inventory of everything else
         other = parsed.who_1
         other.show_inventory(player, ctx)
@@ -140,7 +140,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
 @cmd("empty")
 def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Remove the contents from an object."""
-    if len(parsed.args) != 1 or not parsed.who_order:
+    if len(parsed.args) != 1 or not parsed.who_info:
         if parsed.args[0] in ("bags", "pockets"):
             raise RetryParse("drop all")
         raise ParseError("Empty what or who?")
@@ -186,7 +186,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
         if len(parsed.args) != 2:
             raise ParseError("Put what where?")
         what = list(player.inventory)
-        where = parsed.who_order[-1]   # last object is where to put the stuff
+        where = parsed.who_last   # last object is where to put the stuff
         if what:
             if not (yield "input", ("Are you sure you want to put everything away?", lang.yesno)):
                 p("You leave everything where it is.")
@@ -194,8 +194,9 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
     elif parsed.unrecognized:
         raise ActionRefused("You don't see %s." % lang.join(parsed.unrecognized))
     else:
-        what = list(parsed.who_order)[:-1]
-        where = parsed.who_order[-1]
+        whos = list(parsed.who_info)
+        what = whos[:-1]
+        where = whos[-1]
     if isinstance(where, base.Living):
         raise ActionRefused("You can't put stuff in <living>%s</>, try giving it to %s?" % (where.name, where.objective))
     inventory_items = []
@@ -308,7 +309,7 @@ def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context)
 @cmd("loot", "pilfer", "sack")
 def do_loot(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Take all things from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
-    if len(parsed.args) != 1 or not parsed.who_order:
+    if len(parsed.args) != 1 or not parsed.who_info:
         raise ParseError("Loot what or who?")
     if parsed.who_count > 1:
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
@@ -329,8 +330,8 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         what_names = parsed.args
         where = None
     else:
-        if parsed.who_count:
-            last_obj = parsed.who_order[-1]
+        if parsed.who_info:
+            last_obj = parsed.who_last
             if parsed.who_info[last_obj].previous_word == "from":
                 # take x[,y and z] from something
                 what_names = parsed.args[:-1]
@@ -389,14 +390,14 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             # take things from the room
             if parsed.unrecognized:
                 p("You don't see %s." % lang.join(parsed.unrecognized))
-            livings = [item for item in parsed.who_order if item in player.location.livings]
+            livings = [item for item in parsed.who_info if item in player.location.livings]
             for living in livings:
                 try_pick_up_living(player, living)
             if not player.location.items:
                 raise ActionRefused("There's nothing here to take.")
             else:
                 items_to_take = []
-                for item in parsed.who_order:
+                for item in parsed.who_info:
                     if item in player.location.items:
                         items_to_take.append(item)
                     elif isinstance(item, base.Exit):
@@ -534,18 +535,18 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
             return
 
     # give one or more specific items.
-    if len([who for who in parsed.who_order if isinstance(who, base.Living)]) > 1:
+    if len([who for who in parsed.who_info if isinstance(who, base.Living)]) > 1:
         # if there's more than one living, it's not clear who to give stuff to
         raise ActionRefused("It's not clear who you want to give things to.")
     if isinstance(parsed.who_1, base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
-        things = parsed.who_order[1:]
+        things = list(parsed.who_info)[1:]
         give_stuff(player, things, None, target=parsed.who_1)
         return
-    elif isinstance(parsed.who_order[-1], base.Living):
+    elif isinstance(parsed.who_last, base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
-        things = parsed.who_order[:-1]
-        give_stuff(player, things, None, target=parsed.who_order[-1])
+        things = list(parsed.who_info)[:-1]
+        give_stuff(player, things, None, target=parsed.who_last)
         return
     else:
         raise ActionRefused("It's not clear who you want to give things to.")
@@ -769,8 +770,8 @@ def do_tell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     The other player doesn't have to be in the same location as you."""
     if len(parsed.args) < 1:
         raise ActionRefused("Tell whom what?")
-    # we can't use parsed.who_order directly, because the message could be directed to a player
-    # that is not in the same location (and hence will not appear in parsed.who_order)
+    # we can't use parsed.who_info directly, because the message could be directed to a player
+    # that is not in the same location (and hence will not appear in parsed.who_info)
     name = parsed.args[0]
     living = player.location.search_living(name)
     if not living:
@@ -850,12 +851,12 @@ def do_wait(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             raise ActionRefused("Who exactly do you want to wait for?")
     if parsed.who_count:
         # check if any of the targeted objects is a non-living
-        if any(not isinstance(who, base.Living) for who in parsed.who_order):
+        if any(not isinstance(who, base.Living) for who in parsed.who_info):
             raise ActionRefused("You can't wait for something that's not alive.")
         if parsed.who_1 is player:
             player.tell("You wait for yourself to figure out what you just meant to do.")
         else:
-            who = lang.join(who.title for who in parsed.who_order)
+            who = lang.join(who.title for who in parsed.who_info)
             player.tell("You wait for %s." % who)
             player.tell_others("{Actor} waits for %s." % who)
         return
@@ -1385,7 +1386,7 @@ def do_activate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> 
     """Activate something, turn it on, or switch it on."""
     if not parsed.who_count:
         raise ParseError("Activate what?")
-    for what in parsed.who_order:
+    for what in parsed.who_info:
         try:
             what.activate(player)
         except ActionRefused as ex:
@@ -1401,7 +1402,7 @@ def do_deactivate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
     """Deactivate something, turn it of, or switch it off."""
     if not parsed.who_count:
         raise ParseError("Deactivate what?")
-    for what in parsed.who_order:
+    for what in parsed.who_info:
         try:
             what.deactivate(player)
         except ActionRefused as ex:
