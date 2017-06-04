@@ -1,7 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
-[security] Add SSL certificate to web server and use HTTPS only.
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
 [code]  use websockets or comet long polling instead of 0.5 sec polling to update the text in the browser

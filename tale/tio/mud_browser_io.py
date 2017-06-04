@@ -73,12 +73,16 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     The actual wsgi app that the player's browser connects to.
     This one is capable of dealing with multiple connected clients (multi-player).
     """
-    def __init__(self, driver: Driver) -> None:
+    def __init__(self, driver: Driver, use_ssl: bool, ssl_certs: Tuple[str]) -> None:
         super().__init__(driver)
+        CustomWsgiServer.use_ssl = use_ssl
+        if use_ssl and ssl_certs:
+            CustomWsgiServer.ssl_cert_locations = ssl_certs
 
     @classmethod
-    def create_app_server(cls, driver: Driver) -> WSGIServer:
-        wsgi_app = SessionMiddleware(cls(driver), MemorySessionFactory())
+    def create_app_server(cls, driver: Driver, *,
+                          use_ssl: bool=False, ssl_certs: Tuple[str]=None) -> WSGIServer:
+        wsgi_app = SessionMiddleware(cls(driver, use_ssl, ssl_certs), MemorySessionFactory())
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
@@ -143,8 +147,20 @@ class CustomRequestHandler(WSGIRequestHandler):
 
 
 class CustomWsgiServer(ThreadingMixIn, WSGIServer):
-    """A multi-threaded wsgi server with a larger request queue size than the default."""
+    """
+    A multi-threaded wsgi server with a larger request queue size than the default.
+    Set use_ssl to True to enable HTTPS mode instead of unencrypted HTTP.
+    """
     request_queue_size = 200
+    use_ssl = False
+    ssl_cert_locations = ("./cert/localhost.pem", "./cert/localhost_cert.pem")    # keyfile, certfile
+
+    def server_bind(self):
+        if self.use_ssl:
+            print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
+            import ssl
+            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0], certfile=self.ssl_cert_locations[1], server_side=True)
+        return super().server_bind()
 
 
 class SessionMiddleware:

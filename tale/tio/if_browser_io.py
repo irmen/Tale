@@ -91,7 +91,11 @@ class HttpIo(iobase.IoAdapterBase):
         """mainloop for the web browser interface for single player mode"""
         import webbrowser
         from threading import Thread
-        url = "http://%s:%d/tale/" % self.wsgi_server.server_address
+        protocol = "https" if self.wsgi_server.use_ssl else "http"
+        hostname, port = self.wsgi_server.server_address
+        if hostname.startswith("127.0"):
+            hostname = "localhost"
+        url = "%s://%s:%d/tale/" % (protocol, hostname, port)
         print("\nAccess the game on this web server url:  ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))   # type: ignore
         t.daemon = True
@@ -416,14 +420,18 @@ class TaleWsgiApp(TaleWsgiAppBase):
     Note that it is deliberatly simplistic and ony able to handle a single
     player connection; it only works for 'if' single-player game mode.
     """
-    def __init__(self, driver: Driver, player_connection: PlayerConnection) -> None:
+    def __init__(self, driver: Driver, player_connection: PlayerConnection, use_ssl: bool, ssl_certs: Tuple[str]) -> None:
         super().__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
+        CustomWsgiServer.use_ssl = use_ssl
+        if use_ssl and ssl_certs:
+            CustomWsgiServer.ssl_cert_locations = ssl_certs
 
     @classmethod
-    def create_app_server(cls, driver: Driver, player_connection: PlayerConnection) -> Callable:
-        wsgi_app = SessionMiddleware(cls(driver, player_connection))
+    def create_app_server(cls, driver: Driver, player_connection: PlayerConnection, *,
+                          use_ssl: bool=False, ssl_certs: Tuple[str]=None) -> Callable:
+        wsgi_app = SessionMiddleware(cls(driver, player_connection, use_ssl, ssl_certs))
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5
@@ -457,7 +465,20 @@ class CustomRequestHandler(WSGIRequestHandler):
 
 
 class CustomWsgiServer(WSGIServer):
+    """
+    A simple wsgi server with a modest request queue size, meant for single user access.
+    Set use_ssl to True to enable HTTPS mode instead of unencrypted HTTP.
+    """
     request_queue_size = 10
+    use_ssl = False
+    ssl_cert_locations = ("./cert/localhost.pem", "./cert/localhost_cert.pem")    # keyfile, certfile
+
+    def server_bind(self):
+        if self.use_ssl:
+            print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
+            import ssl
+            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0], certfile=self.ssl_cert_locations[1], server_side=True)
+        return super().server_bind()
 
 
 class SessionMiddleware:

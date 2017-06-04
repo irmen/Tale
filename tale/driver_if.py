@@ -89,7 +89,7 @@ class IFDriver(driver.Driver):
             io = TkinterIo(self.story.config, connection)
         elif player_io_type == "web":
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
-            wsgi_server = TaleWsgiApp.create_app_server(self, connection)
+            wsgi_server = TaleWsgiApp.create_app_server(self, connection, use_ssl=False, ssl_certs=None)   # you can enable SSL here
             io = HttpIo(connection, wsgi_server)
         elif player_io_type == "console":
             from .tio.console_io import ConsoleIo
