@@ -92,28 +92,39 @@ class ParseResult:
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
         assert who_info is None or isinstance(who_info, OrderedDict)  # otherwise parser order gets messed up
-        self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
+        self.__who_info = who_info or ParseResult.WhoInfoOrderedDict()
         if who_list:
             # check if we have duplicates in the who_list
             c = Counter(who_list).most_common(1)
             if c[0][1] > 1:
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(c[0][0].name))
-            if who_info and list(who_info) != who_list:
+            if self.__who_info and list(self.__who_info) != who_list:
                 raise ValueError("who_info and who_list are both provided but contain different entities")
-        if who_list and not self.who_info:   # @todo replace
+        if who_list and not self.__who_info:   # @todo replace
             duplicates = set()
             for sequence, who in enumerate(who_list):
-                if who in self.who_info:
+                if who in self.__who_info:
                     duplicates.add(who)
-                self.who_info[who] = ParseResult.WhoInfo(sequence)
+                self.__who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(lang.join(s.name for s in duplicates)))
+        self.__who_count = len(self.who_info)
 
     @property
     def who_order(self) -> List:  # @todo replace with ordereddict who_info/ who_123
         return list(self.who_info)  # this is in order because who_info is OrderedDict
+
+    @property
+    def who_count(self) -> int:
+        """Gets the number of Who's that were parsed and are available in who_info etc."""
+        return self.__who_count
+
+    @property
+    def who_info(self) -> WhoInfoOrderedDict:
+        """Gets the parsed Who's and some additional info about them"""
+        return self.__who_info
 
     @property
     def who_1(self) -> Optional[ParsedWhoType]:
@@ -149,6 +160,7 @@ class ParseResult:
             " message=%s" % self.message,
             " args=%s" % self.args,
             " unrecognized=%s" % self.unrecognized,
+            " who_count=%d" % self.who_count,
             " who_info=%s" % "\n   ".join(who_info_str),
             " who_1=%s" % self.who_1,
             " who_12=%s" % str(self.who_12),
@@ -995,7 +1007,7 @@ class Living(MudObject):
             raise NonSoulVerb(parsed)
         if parsed.verb not in verbdefs.NONLIVING_OK_VERBS:
             # check if any of the targeted objects is a non-living
-            if any(not isinstance(who, Living) for who in parsed.who_order):
+            if any(not isinstance(who, Living) for who in parsed.who_info):
                 raise NonSoulVerb(parsed)
         self.validate_socialize_targets(parsed)
         return parsed
@@ -1628,12 +1640,12 @@ class Soul:
                 action_room = qual_room % action_room if use_room_default else qual_room % action
                 action = qual_action % action
             # construct message seen by player
-            targetnames = [self.who_replacement(player, target, player) for target in parsed.who_order]
+            targetnames = [self.who_replacement(player, target, player) for target in parsed.who_info]
             player_msg = action.replace(" \nWHO", " " + lang.join(targetnames))
             player_msg = player_msg.replace(" \nYOUR", " your")
             player_msg = player_msg.replace(" \nMY", " your")
             # construct message seen by room
-            targetnames = [self.who_replacement(player, target, None) for target in parsed.who_order]
+            targetnames = [self.who_replacement(player, target, None) for target in parsed.who_info]
             room_msg = action_room.replace(" \nWHO", " " + lang.join(targetnames))
             room_msg = room_msg.replace(" \nYOUR", " " + player.possessive)
             room_msg = room_msg.replace(" \nMY", " " + player.objective)
@@ -1645,8 +1657,8 @@ class Soul:
             target_msg = target_msg.replace(" \nSUBJ", " you")
             target_msg = target_msg.replace(" \nMY", " " + player.objective)
             # fix up POSS, IS, SUBJ in the player and room messages
-            if len(parsed.who_order) == 1:
-                only_living = parsed.who_order[0]
+            if parsed.who_count == 1:
+                only_living = parsed.who_1
                 subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
                 player_msg = player_msg.replace(" \nIS", " is")
                 player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
@@ -1655,8 +1667,8 @@ class Soul:
                 room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
                 room_msg = room_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, None))
             else:
-                targetnames_player = lang.join([Soul.poss_replacement(player, living, player) for living in parsed.who_order])
-                targetnames_room = lang.join([Soul.poss_replacement(player, living, None) for living in parsed.who_order])
+                targetnames_player = lang.join([Soul.poss_replacement(player, living, player) for living in parsed.who_info])
+                targetnames_room = lang.join([Soul.poss_replacement(player, living, None) for living in parsed.who_info])
                 player_msg = player_msg.replace(" \nIS", " are")
                 player_msg = player_msg.replace(" \nSUBJ", " they")
                 player_msg = player_msg.replace(" \nPOSS", " " + lang.possessive(targetnames_player))
@@ -1718,7 +1730,7 @@ class Soul:
         elif vtype == verbdefs.SHRT:
             action = parsed.verb + "$" + self.spacify(verbdata[2]) + " \nHOW"
         elif vtype == verbdefs.PERS:
-            action = verbdata[3] if parsed.who_order else verbdata[2]
+            action = verbdata[3] if parsed.who_count else verbdata[2]
         elif vtype == verbdefs.SIMP:
             action = verbdata[2]
         else:
@@ -2029,29 +2041,29 @@ class Soul:
         """
         if pronoun == "them":
             # plural (any item/living qualifies)
-            matches = list(self.__previously_parsed.who_order)
+            matches = list(self.__previously_parsed.who_info)
             for who in matches:
                 if not player.search_item(who.name) and who not in player.location.livings:
-                    player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                    player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, who.title))
                     raise ParseError("%s is no longer around." % lang.capital(who.subjective))
             if matches:
-                player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, lang.join(who.title for who in matches)))
+                player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, lang.join(who.title for who in matches)))
                 return [(who, who.name) for who in matches]
             else:
                 raise ParseError("It is not clear who you're referring to.")
-        for who in self.__previously_parsed.who_order:
+        for who in self.__previously_parsed.who_info:
             # first see if it is an exit
             if pronoun == "it":
                 for direction, exit in player.location.exits.items():
                     if exit is who:
-                        player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, direction))
+                        player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, direction))
                         return [(who, direction)]
             # not an exit, try an item or a living
             if pronoun == who.objective:
                 if player.search_item(who.name) or who in player.location.livings:
-                    player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                    player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, who.title))
                     return [(who, who.name)]
-                player.tell("<dim>(By '%s', it is assumed you meant %s.)</>" % (pronoun, who.title))
+                player.tell("<dim>(By '%s', we assume you meant %s.)</>" % (pronoun, who.title))
                 raise ParseError("%s is no longer around." % lang.capital(who.subjective))
         raise ParseError("It is not clear who you're referring to.")
 

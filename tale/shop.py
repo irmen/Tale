@@ -204,16 +204,16 @@ class Shopkeeper(Living):
 
     def shop_inquire(self, parsed: ParseResult, actor: Living) -> bool:
         item = None
-        if len(parsed.who_order) == 2:
+        if parsed.who_count == 2:
             # 'ask lucy about clock/#5/5'
-            item = parsed.who_order[0]
+            item = parsed.who_12[0]
             if not isinstance(item, Item):
-                item = parsed.who_order[1]
+                item = parsed.who_12[1]
                 if not isinstance(item, Item):
                     item = None
-        elif len(parsed.who_order) == 1:
+        elif parsed.who_count == 1:
             # 'ask about clock/#5/5'
-            item = parsed.who_order[0]
+            item = parsed.who_1
             if not isinstance(item, Item):
                 item = None
         if item:
@@ -224,7 +224,7 @@ class Shopkeeper(Living):
         if not item:
             # no items in the question, try to extract name/number and look in the shop list #
             for word in parsed.unrecognized:
-                if word in ("#", "about", "over"):
+                if word in ("#", "about", "over", "concerning"):
                     continue
                 if word.startswith("#"):
                     word = word[1:]
