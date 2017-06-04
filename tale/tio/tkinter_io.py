@@ -314,7 +314,13 @@ class TaleGUI:
         self.window.commandEntry.bind('<Tab>', tab_pressed)
 
     def mainloop(self, player_connection):
-        self.root.mainloop()   # tkinter main loop
+        while True:
+            try:
+                self.root.mainloop()   # tkinter main loop
+                break
+            except KeyboardInterrupt:
+                print("* break: close the application via its Gui instead.")
+                continue
         self.window = None
         self.root = None
         self.io.gui_terminated()

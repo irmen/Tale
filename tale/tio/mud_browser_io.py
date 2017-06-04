@@ -73,7 +73,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     The actual wsgi app that the player's browser connects to.
     This one is capable of dealing with multiple connected clients (multi-player).
     """
-    def __init__(self, driver: Driver, use_ssl: bool, ssl_certs: Tuple[str]) -> None:
+    def __init__(self, driver: Driver, use_ssl: bool, ssl_certs: Tuple[str, str]) -> None:
         super().__init__(driver)
         CustomWsgiServer.use_ssl = use_ssl
         if use_ssl and ssl_certs:
@@ -81,7 +81,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
     @classmethod
     def create_app_server(cls, driver: Driver, *,
-                          use_ssl: bool=False, ssl_certs: Tuple[str]=None) -> WSGIServer:
+                          use_ssl: bool=False, ssl_certs: Tuple[str, str]=None) -> WSGIServer:
         wsgi_app = SessionMiddleware(cls(driver, use_ssl, ssl_certs), MemorySessionFactory())
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)

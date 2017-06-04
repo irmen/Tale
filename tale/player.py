@@ -415,7 +415,7 @@ class PlayerConnection:
         self.io.critical_error()
 
     def singleplayer_mainloop(self) -> None:
-        self.io.singleplayer_mainloop(self)
+        self.io.singleplayer_mainloop(self)   # this does not return
 
     def pause(self, unpause: bool=False) -> None:
         self.io.pause(unpause)

@@ -308,7 +308,7 @@ class Driver(pubsub.Listener):
                 print("* break - stopping server loop")
                 if self.all_players:
                     print("  %d players are connected: %s" % (len(self.all_players), "; ".join(self.all_players)))
-                self._stop_mainloop = lang.yesno(input("Are you sure you want to exit the Tale driver? "))
+                self._stop_mainloop = lang.yesno(input("Are you sure you want to exit the Tale driver, and kill the game? "))
             except Exception:
                 # other exceptions are logged but don't break the server loop (hopefully the game can continue)
                 # @todo only print it to the player that caused the error (if possible) + to the error log

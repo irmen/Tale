@@ -15,7 +15,7 @@ from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 
 from . import iobase
-from .. import vfs
+from .. import vfs, lang
 from .styleaware_wrapper import tag_split_re
 from .. import __version__ as tale_version_str
 from ..driver import Driver
@@ -101,7 +101,12 @@ class HttpIo(iobase.IoAdapterBase):
         t.daemon = True
         t.start()
         while not self.stop_main_loop:
-            self.wsgi_server.handle_request()
+            try:
+                self.wsgi_server.handle_request()
+            except KeyboardInterrupt:
+                print("* break - stopping server loop")
+                if lang.yesno(input("Are you sure you want to exit the Tale driver, and kill the game? ")):
+                    break
         print("Game shutting down.")
 
     def pause(self, unpause: bool=False) -> None:
@@ -420,7 +425,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
     Note that it is deliberatly simplistic and ony able to handle a single
     player connection; it only works for 'if' single-player game mode.
     """
-    def __init__(self, driver: Driver, player_connection: PlayerConnection, use_ssl: bool, ssl_certs: Tuple[str]) -> None:
+    def __init__(self, driver: Driver, player_connection: PlayerConnection, use_ssl: bool, ssl_certs: Tuple[str, str]) -> None:
         super().__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
@@ -430,7 +435,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
 
     @classmethod
     def create_app_server(cls, driver: Driver, player_connection: PlayerConnection, *,
-                          use_ssl: bool=False, ssl_certs: Tuple[str]=None) -> Callable:
+                          use_ssl: bool=False, ssl_certs: Tuple[str, str]=None) -> Callable:
         wsgi_app = SessionMiddleware(cls(driver, player_connection, use_ssl, ssl_certs))
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
