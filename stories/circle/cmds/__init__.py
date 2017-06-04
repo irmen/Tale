@@ -5,6 +5,7 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from typing import Union
 from zones import make_location, make_item, make_mob
 
 from tale import lang, util
@@ -12,7 +13,7 @@ from tale.cmds import wizcmd
 from tale.cmds.wizard import teleport_to
 from tale.errors import ActionRefused, ParseError
 from tale.player import Player
-from tale.base import ParseResult
+from tale.base import ParseResult, Location, Living, Item, Exit
 
 
 @wizcmd("cvgo")
@@ -35,6 +36,7 @@ def show_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     if not parsed.args:
         raise ParseError("From what should I show the circle-vnum?")
     name = parsed.args[0]
+    obj = None  # type: Union[Location, Living, Item, Exit]
     if name == ".":
         obj = player.location
     elif parsed.who_info:

@@ -127,7 +127,7 @@ class Deferred:
 
     def __eq__(self, other):
         if self.__class__ == other.__class__:
-            return self.due_gametime == other.due_gametime and type(self.owner) == type(other.owner)\
+            return self.due_gametime == other.due_gametime and self.owner.__class__ == other.owner.__class__ \
                 and self.action == other.action and self.vargs == other.vargs and self.kwargs == other.kwargs
         return NotImplemented
 

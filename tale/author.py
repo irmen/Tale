@@ -45,7 +45,7 @@ tale.main.run_from_cmdline(args)
 
 def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=False) -> None:
     if os.path.exists(zipfilename):
-        raise IOError("output file already exists: "+zipfilename)
+        raise IOError("output file already exists: " + zipfilename)
     with zipfile.ZipFile(zipfilename, mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
         os.chdir(path)
         print("Creating zip file from '{}'...".format(path))

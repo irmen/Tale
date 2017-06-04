@@ -102,10 +102,10 @@ class ParseResult:
                     duplicates.add(who)
                 self.who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
-                raise ParseError("You can do only one thing at the same time with "+lang.join(s.name for s in duplicates))
+                raise ParseError("You can do only one thing at the same time with " + lang.join(s.name for s in duplicates))
 
     @property
-    def who_order(self) -> List:  # @todo replace with ordereddict who_info
+    def who_order(self) -> List:  # @todo replace with ordereddict who_info/ who_123
         return list(self.who_info)  # this is in order because who_info is OrderedDict
 
     @property
