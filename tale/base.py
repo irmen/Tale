@@ -92,49 +92,39 @@ class ParseResult:
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
         assert who_info is None or isinstance(who_info, OrderedDict)  # otherwise parser order gets messed up
-        self.__who_info = who_info or ParseResult.WhoInfoOrderedDict()
+        self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
         if who_list:
             # check if we have duplicates in the who_list
             c = Counter(who_list).most_common(1)
             if c[0][1] > 1:
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(c[0][0].name))
-            if self.__who_info and list(self.__who_info) != who_list:
+            if self.who_info and list(self.who_info) != who_list:
                 raise ValueError("who_info and who_list are both provided but contain different entities")
-        if who_list and not self.__who_info:   # @todo replace
+        if who_list and not self.who_info:   # @todo replace
             duplicates = set()
             for sequence, who in enumerate(who_list):
-                if who in self.__who_info:
+                if who in self.who_info:
                     duplicates.add(who)
-                self.__who_info[who] = ParseResult.WhoInfo(sequence)
+                self.who_info[who] = ParseResult.WhoInfo(sequence)
             if duplicates:
                 raise ParseError("You can do only one thing at the same time with {}. Try to use multiple separate commands instead."
                                  .format(lang.join(s.name for s in duplicates)))
-        self.__who_count = len(self.who_info)
+        self.who_count = len(self.who_info)
 
     @property
     def who_order(self) -> List:  # @todo replace with ordereddict who_info/ who_123
         return list(self.who_info)  # this is in order because who_info is OrderedDict
 
     @property
-    def who_count(self) -> int:
-        """Gets the number of Who's that were parsed and are available in who_info etc."""
-        return self.__who_count
-
-    @property
-    def who_info(self) -> WhoInfoOrderedDict:
-        """Gets the parsed Who's and some additional info about them"""
-        return self.__who_info
-
-    @property
     def who_1(self) -> Optional[ParsedWhoType]:
-        """Gets the first occurring subject from the parsed line (or None if it doesn't exist)"""
+        """Gets the first occurring Who from the parsed line (or None if it doesn't exist)"""
         return next(iter(self.who_info)) if self.who_info else None
 
     @property
     def who_12(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType]]:
         """
-        Returns a tuple (MudObject, MudObject) representing the first two occurring subjects in the parsed line.
+        Returns a tuple (MudObject, MudObject) representing the first two occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
         """
         whos = list(self.who_info)    # this is in order because who_info is OrderedDict
@@ -143,7 +133,7 @@ class ParseResult:
     @property
     def who_123(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType], Optional[ParsedWhoType]]:
         """
-        Returns a tuple (MudObject, MudObject, MudObject) representing the first three occurring subjects in the parsed line.
+        Returns a tuple (MudObject, MudObject, MudObject) representing the first three occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
         """
         whos = list(self.who_info)    # this is in order because who_info is OrderedDict

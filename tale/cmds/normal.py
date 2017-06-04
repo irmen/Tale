@@ -50,7 +50,7 @@ def do_locate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
     p = player.tell
     if not parsed.args:
         raise ParseError("Locate what/who?")
-    if len(parsed.args) > 1 or len(parsed.who_order) > 1:
+    if len(parsed.args) > 1 or parsed.who_count > 1:
         raise ParseError("Can only search for one thing at a time.")
     name = parsed.args[0]
     p("You look around to see if you can locate %s." % name)
@@ -144,7 +144,7 @@ def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         if parsed.args[0] in ("bags", "pockets"):
             raise RetryParse("drop all")
         raise ParseError("Empty what or who?")
-    if len(parsed.who_order) > 1:
+    if parsed.who_count > 1:
         raise ParseError("Please be more specific, only empty one thing at a time.")
     container = parsed.who_order[0]
     if not isinstance(container, base.Container):
@@ -247,7 +247,7 @@ def replace_items(player: Player, existing: List[base.Item], replacement: base.I
 def do_combine_two(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Combine two items you are carrying by attaching them, applying them or installing them together.
     If successful, this can perhaps result in a new item!"""
-    if len(parsed.who_info) != 2:
+    if parsed.who_count != 2:
         if parsed.verb == "attach":
             raise ParseError("Attach what to what?")
         if parsed.verb == "apply":
@@ -276,9 +276,9 @@ def do_combine_two(player: Player, parsed: base.ParseResult, ctx: util.Context) 
 @cmd("combine")
 def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Combine two or more items you are carrying. If successful, this can perhaps result in a new item!"""
-    if len(parsed.who_info) == 1:
+    if parsed.who_count == 1:
         raise ParseError("Combine %s with what?" % parsed.who_order[0].title)
-    if len(parsed.who_info) < 2:
+    if parsed.who_count < 2:
         raise ParseError("Combine which things?")
     if any(item not in player for item in parsed.who_info):
         raise ActionRefused("You should pick all of those up first if you want to combine them.")
@@ -309,7 +309,7 @@ def do_loot(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     """Take all things from something or someone else. Keep in mind that stealing and robbing is frowned upon, to say the least."""
     if len(parsed.args) != 1 or not parsed.who_order:
         raise ParseError("Loot what or who?")
-    if len(parsed.who_order) > 1:
+    if parsed.who_count > 1:
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
     container = parsed.who_order[0]
     if not isinstance(container, base.Container):
@@ -453,7 +453,7 @@ def try_pick_up_living(player: Player, living: base.Living) -> None:
 @cmd("throw")
 def do_throw(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Throw something you are carrying at someone or something. If you don't have it yet, you will first pick it up."""
-    if len(parsed.who_order) != 2:
+    if parsed.who_count != 2:
         raise ParseError("Throw what where?")
     item, where = parsed.who_order[0], parsed.who_order[1]
     if isinstance(item, base.Living):
@@ -476,7 +476,7 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     """Give something (or all things) you are carrying to someone else."""
     if len(parsed.args) < 2:
         raise ParseError("Give what to whom?")
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         # first try if the first one or two words can be interpreted as an amount of money
         if ctx.config.money_type:
             try:
@@ -734,7 +734,7 @@ def do_stats(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     """Prints the gender, race and stats information of yourself, or another creature or player."""
     if not parsed.args:
         target = player
-    elif len(parsed.who_order) == 1:
+    elif parsed.who_count == 1:
         target = parsed.who_order[0]
         if not isinstance(target, base.Living):
             raise ActionRefused("That doesn't have stats.")
@@ -1177,9 +1177,9 @@ def do_use(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """General object use. Most of the time, you'll need to be more specific to say exactly what you want to do with it."""
     if not parsed.who_order:
         raise ActionRefused("Use what?")
-    if len(parsed.who_order) > 1:
+    if parsed.who_count > 1:
         # check if there are exactly 2 items mentioned that the player is carrying, assume 'combine' in that case
-        if len(parsed.who_info) == 2:
+        if parsed.who_count == 2:
             item1, item2 = tuple(parsed.who_info)
             if item1 in player and item2 in player:
                 player.tell("<dim>(It is assumed that you want to combine them.)</>")
@@ -1250,7 +1250,7 @@ def do_motd(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
 def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Flee in a random or given direction, possibly escaping a combat situation."""
     exit = None
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         exit = parsed.who_order[0]
         if not isinstance(exit, base.Exit):
             raise ParseError("You can't flee there.")
@@ -1316,7 +1316,7 @@ def do_transcript(player: Player, parsed: base.ParseResult, ctx: util.Context) -
 @cmd("show")
 def do_show(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Shows something to someone else."""
-    if len(parsed.who_order) != 2:
+    if parsed.who_count != 2:
         raise ParseError("Show what to whom?")
     shown = parsed.who_order[0]
     if shown not in player:
@@ -1387,7 +1387,7 @@ def do_activate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> 
             what.activate(player)
         except ActionRefused as ex:
             msg = str(ex)
-            if len(parsed.who_order) > 1:
+            if parsed.who_count > 1:
                 player.tell("%s: %s" % (what.name, msg))
             else:
                 player.tell(msg)
@@ -1403,7 +1403,7 @@ def do_deactivate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
             what.deactivate(player)
         except ActionRefused as ex:
             msg = str(ex)
-            if len(parsed.who_order) > 1:
+            if parsed.who_count > 1:
                 player.tell("%s: %s" % (what.name, msg))
             else:
                 player.tell(msg)
@@ -1412,7 +1412,7 @@ def do_deactivate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
 @cmd("switch")
 def do_switch(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Switch something on or off."""
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         who = parsed.who_order[0]
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
             do_activate(player, parsed, ctx)
@@ -1420,7 +1420,7 @@ def do_switch(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
         elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
             do_deactivate(player, parsed, ctx)
             return
-    elif len(parsed.who_order) == 0:
+    elif parsed.who_count == 0:
         arg = parsed.unparsed.partition(" ")[0]
         if arg in ("on", "off"):
             raise ParseError("Switch %s what?" % arg)
@@ -1430,7 +1430,7 @@ def do_switch(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
 @cmd("turn")
 def do_turn(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Turn something (rotate it), or turn something on or off."""
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         who = parsed.who_order[0]
         if parsed.who_info[who].previous_word == "on" or parsed.unparsed.endswith(" on"):
             do_activate(player, parsed, ctx)
@@ -1438,7 +1438,7 @@ def do_turn(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         elif parsed.who_info[who].previous_word == "off" or parsed.unparsed.endswith(" off"):
             do_deactivate(player, parsed, ctx)
             return
-    elif len(parsed.who_order) == 0:
+    elif parsed.who_count == 0:
         arg = parsed.unparsed.partition(" ")[0]
         if arg in ("on", "off"):
             raise ParseError("Turn %s what?" % arg)
@@ -1451,7 +1451,7 @@ def do_manipulate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
     """Manipulate something."""
     if parsed.verb == "manip":
         parsed.verb = "manipulate"
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         what = parsed.who_order[0]
         try:
             what.manipulate(parsed.verb, player)
@@ -1468,7 +1468,7 @@ def do_manipulate(player: Player, parsed: base.ParseResult, ctx: util.Context) -
 @cmd("read")
 def do_read(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Read something."""
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         what = parsed.who_order[0]
         what.read(player)
     else:

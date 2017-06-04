@@ -126,7 +126,7 @@ class Shopkeeper(Living):
         raise ActionRefused("The shop is currently closed! Come back another time, during opening hours.")
 
     def _parse_item(self, parsed: ParseResult, actor: Living) -> Tuple[Item, str]:
-        if len(parsed.who_info) != 1:
+        if parsed.who_count != 1:
             raise ParseError("I don't understand what single item you're talking about.")
         item, info = parsed.who_info.popitem()
         if item not in actor:

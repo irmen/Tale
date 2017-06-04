@@ -159,7 +159,7 @@ def do_clean(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         if player.location.items:
             p("Some items refused to be destroyed!")
     else:
-        if len(parsed.who_order) != 1:
+        if parsed.who_count != 1:
             raise ParseError("Clean what or who?")
         victim = parsed.who_order[0]
         if (yield "input", ("Are you sure you want to clean out %s?" % victim.title, lang.yesno)):
@@ -295,9 +295,9 @@ def teleport_someone_to_player(who: base.Living, player: Player) -> None:
 @wizcmd("return")
 def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Return a player to the location where they were before a teleport."""
-    if len(parsed.who_order) == 1:
+    if parsed.who_count == 1:
         who = parsed.who_order[0]
-    elif len(parsed.who_order) == 0:
+    elif parsed.who_count == 0:
         who = player
     else:
         raise ActionRefused("You can only return one person at a time.")
@@ -334,15 +334,15 @@ def do_move(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
 This may work around possible restrictions that could prevent stuff
 to be moved around normally. For instance you could use it to pick up
 items that are normally fixed in place (move item to playername)."""
-    if len(parsed.args) != 2 or len(parsed.who_order) < 1:
+    if len(parsed.args) != 2 or parsed.who_count < 1:
         raise ActionRefused("Move what where?")
     thing = parsed.who_order[0]
     if isinstance(thing, base.Living):
         raise ActionRefused("* use 'teleport' instead to move livings around.")
-    if parsed.args[1] == "." and len(parsed.who_order) == 1:
+    if parsed.args[1] == "." and parsed.who_count == 1:
         # current room is the target
         target = player.location
-    elif len(parsed.who_order) == 2:
+    elif parsed.who_count == 2:
         target = parsed.who_order[1]
     else:
         raise ParseError("It's not clear what you want to move where.")
