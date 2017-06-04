@@ -60,12 +60,17 @@ pending_tells = pubsub.topic("driver-pending-tells")
 async_dialogs = pubsub.topic("driver-async-dialogs")
 
 
+ParsedWhoType = Union['Living', 'Item', 'Exit']
+ContainingType = Union['Location', 'Container', 'Living']
+
+
 class ParseResult:
     """Captures the result of a parsed input line."""
     class WhoInfo:
+        """parse details of this Who in the line"""
         def __init__(self, seqnr: int = 0) -> None:
-            self.sequence = seqnr
-            self.previous_word = None  # type: Optional[str]
+            self.sequence = seqnr  # at what position does this Who occur
+            self.previous_word = None  # type: Optional[str]   # what is the word preceding it
 
         def __str__(self) -> str:
             return "[seq=%d, prev_word=%s]" % (self.sequence, self.previous_word)
@@ -75,27 +80,56 @@ class ParseResult:
             self[key] = value = ParseResult.WhoInfo()
             return value
 
-    def __init__(self, verb: str, adverb: str = None, message: str = None, bodypart: str = None, qualifier: str = None,
-                 args: List[str] = None, who_info: WhoInfoOrderedDict = None, who_order: List = None,
-                 unrecognized: List = None, unparsed: str = "") -> None:
+    def __init__(self, verb: str, *, adverb: str = None, message: str = None, bodypart: str = None, qualifier: str = None,
+                 args: List[str] = None, who_info: WhoInfoOrderedDict = None,
+                 unrecognized: List[str] = None, unparsed: str = "", who_list: List = None) -> None:
         self.verb = verb
         self.adverb = adverb
         self.message = message
         self.bodypart = bodypart
         self.qualifier = qualifier
-        # the WhoInfo for all objects parsed  (note: who-objects can be items, livings, and exits!):
         self.args = args or []
         self.unrecognized = unrecognized or []
         self.unparsed = unparsed
         self.who_info = who_info or ParseResult.WhoInfoOrderedDict()
-        self.__who_order = who_order or []  # the order of the occurrence of the objects in the input text   # @todo replace with ordereddict who_info
-        if who_order and not self.who_info:
-            for sequence, who in enumerate(who_order):
+        assert isinstance(self.who_info, OrderedDict)  # otherwise parser order gets messed up
+        # XXX if who_list and self.who_info:
+        #    raise ParseError("can't have both who_list and who_info initialized")
+        if who_list and not self.who_info:   # @todo replace
+            duplicates = set()
+            for sequence, who in enumerate(who_list):
+                if who in self.who_info:
+                    duplicates.add(who)
                 self.who_info[who] = ParseResult.WhoInfo(sequence)
+            if duplicates:
+                raise ParseError("You can do only one thing at the same time with "+lang.join(s.name for s in duplicates))
 
     @property
     def who_order(self) -> List:  # @todo replace with ordereddict who_info
-        return self.__who_order
+        return list(self.who_info)  # this is in order because who_info is OrderedDict
+
+    @property
+    def who_1(self) -> Optional[ParsedWhoType]:
+        """Gets the first occurring subject from the parsed line (or None if it doesn't exist)"""
+        return next(iter(self.who_info)) if self.who_info else None
+
+    @property
+    def who_12(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType]]:
+        """
+        Returns a tuple (MudObject, MudObject) representing the first two occurring subjects in the parsed line.
+        If no such subject exists, None is returned in its place.
+        """
+        whos = list(self.who_info)    # this is in order because who_info is OrderedDict
+        return tuple((whos + [None, None])[:2])   # type: ignore
+
+    @property
+    def who_123(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType], Optional[ParsedWhoType]]:
+        """
+        Returns a tuple (MudObject, MudObject, MudObject) representing the first three occurring subjects in the parsed line.
+        If no such subject exists, None is returned in its place.
+        """
+        whos = list(self.who_info)    # this is in order because who_info is OrderedDict
+        return tuple((whos + [None, None, None])[:3])   # type: ignore
 
     def __str__(self) -> str:
         who_info_str = [" %s->%s" % (living.name, info) for living, info in self.who_info.items()]
@@ -109,6 +143,10 @@ class ParseResult:
             " args=%s" % self.args,
             " unrecognized=%s" % self.unrecognized,
             " who_info=%s" % "\n   ".join(who_info_str),
+            " who_1=%s" % self.who_1,
+            " who_12=%s" % str(self.who_12),
+            " who_123=%s" % str(self.who_123),
+            " who_info keys=%s" % list(self.who_info),
             " who_order=%s" % self.who_order,
             " unparsed=%s" % self.unparsed
         ]
@@ -266,7 +304,7 @@ class MudObject:
         # verb: move, shove, swivel, shift, manipulate, rotate, press, poke, push, turn
         raise ActionRefused("You can't %s that." % verb)
 
-    def move(self, target: Union['Location', 'Container', 'Living'], actor: 'Living'=None,
+    def move(self, target: ContainingType, actor: 'Living'=None,
              silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
@@ -301,7 +339,7 @@ class Item(MudObject):
 
     def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
         super().__init__(name, title, description, short_description)
-        self.contained_in = None   # type: Union[Location, Living, Container]
+        self.contained_in = None   # type: Union[Location, Container, Living]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
@@ -343,7 +381,7 @@ class Item(MudObject):
     def inventory_size(self) -> int:
         raise ActionRefused("You can't look inside of that.")
 
-    def move(self, target: Union['Location', 'Container', 'Living'], actor: 'Living'=None,
+    def move(self, target: ContainingType, actor: 'Living'=None,
              silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
@@ -363,8 +401,7 @@ class Item(MudObject):
             source_container.insert(self, actor)
             raise
 
-    def notify_moved(self, source_container: Union['Location', 'Container', 'Living'],
-                     target_container: Union['Location', 'Container', 'Living'], actor: 'Living') -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: 'Living') -> None:
         """Called when the item has been moved from one place to another"""
         pass
 
@@ -517,7 +554,7 @@ class Location(MudObject):
         """get a wiretap for this location"""
         return pubsub.topic(("wiretap-location", self.name))
 
-    def tell(self, room_msg: str, exclude_living: 'Living'=None, specific_targets: Set[Union['Living', Item, 'Exit']]=None,
+    def tell(self, room_msg: str, exclude_living: 'Living'=None, specific_targets: Set[Union[ParsedWhoType]]=None,
              specific_target_msg: str="") -> None:
         """
         Tells something to the livings in the room (excluding the living from exclude_living).
@@ -1083,7 +1120,7 @@ class Living(MudObject):
         return item  # skip the container
 
     def locate_item(self, name: str, include_inventory: bool=True, include_location: bool=True,
-                    include_containers_in_inventory: bool=True) -> Tuple[Item, Union[Location, 'Container', 'Living']]:
+                    include_containers_in_inventory: bool=True) -> Tuple[Item, ContainingType]:
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -1520,7 +1557,7 @@ class Soul:
         return verb in verbdefs.VERBS
 
     def process_verb(self, player: Living, commandstring: str, external_verbs: Set[str]=set()) \
-            -> Tuple[str, Tuple[Set[Union[Living, Item, Exit]], str, str, str]]:
+            -> Tuple[str, Tuple[Set[ParsedWhoType], str, str, str]]:
         """
         Parse a command string and return a tuple containing the main verb (tickle, ponder, ...)
         and another tuple containing the targets of the action (excluding the player) and the various action messages.
@@ -1536,7 +1573,7 @@ class Soul:
             verb = parsed.verb
         return verb, result
 
-    def process_verb_parsed(self, player: Living, parsed: ParseResult) -> Tuple[Set[Union[Living, Item, Exit]], str, str, str]:
+    def process_verb_parsed(self, player: Living, parsed: ParseResult) -> Tuple[Set[ParsedWhoType], str, str, str]:
         """
         This function takes a verb and the arguments given by the user,
         creates various display messages that can be sent to the players and room,
@@ -1576,7 +1613,7 @@ class Soul:
             where = " " + verbdata[1][2]  # replace bodyparts string by specific one from verbs table
         how = self.spacify(adverb)
 
-        def result_messages(action: str, action_room: str) -> Tuple[Set[Union[Living, Item, Exit]], str, str, str]:
+        def result_messages(action: str, action_room: str) -> Tuple[Set[ParsedWhoType], str, str, str]:
             action = action.strip()
             action_room = action_room.strip()
             if parsed.qualifier:
@@ -1636,7 +1673,7 @@ class Soul:
         if vtype == verbdefs.DEUX:
             action = verbdata[2]
             action_room = verbdata[3]
-            if not self.check_person(action, parsed.who_order):
+            if not self.check_person(action, parsed):
                 raise ParseError("The verb %s needs a person." % parsed.verb)
             action = action.replace(" \nWHERE", where)
             action_room = action_room.replace(" \nWHERE", where)
@@ -1685,7 +1722,7 @@ class Soul:
         else:
             action = action.replace(" \nAT", "")
 
-        if not self.check_person(action, parsed.who_order):
+        if not self.check_person(action, parsed):
             raise ParseError("The verb %s needs a person." % parsed.verb)
 
         action = action.replace(" \nHOW", how)
@@ -1708,7 +1745,7 @@ class Soul:
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
         who_info = ParseResult.WhoInfoOrderedDict()
-        who_order = []   # type: List[Union[Living, Item, Exit]]    # @todo replace with ordereddict who_info
+        who_order = []   # type: List[ParsedWhoType]    # @todo replace with ordereddict who_info
         who_sequence = 0
         unparsed = cmd
 
@@ -1755,7 +1792,8 @@ class Soul:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
                 unparsed = unparsed[len(exit_name):].lstrip()
-                raise NonSoulVerb(ParseResult(verb=exit_name, who_order=[exit], qualifier=qualifier, unparsed=unparsed))
+                who_info = ParseResult.WhoInfoOrderedDict()
+                raise NonSoulVerb(ParseResult(verb=exit_name, who_list=[exit], qualifier=qualifier, unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -1968,7 +2006,7 @@ class Soul:
                 verb = getattr(who_order[1], "default_verb", "examine")
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
-        return ParseResult(verb, who_info=who_info, who_order=who_order,
+        return ParseResult(verb, who_info=who_info, who_list=who_order,
                            adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 
@@ -2041,14 +2079,14 @@ class Soul:
             else:
                 return target.title      # ... kicks ...
 
-    def check_person(self, action: str, who: Sequence[str]) -> bool:
-        if not who and ("\nWHO" in action or "\nPOSS" in action):
+    def check_person(self, action: str, parsed: ParseResult) -> bool:
+        if not parsed.who_info and ("\nWHO" in action or "\nPOSS" in action):
             return False
         return True
 
     def check_name_with_spaces(self, words: Sequence[str], startindex: int, all_livings: Dict[str, Living],
                                all_items: Dict[str, Item], all_exits: Dict[str, Exit]) \
-            -> Tuple[Optional[Union[Living, Item, Exit]], Optional[str], int]:
+            -> Tuple[Optional[ParsedWhoType], Optional[str], int]:
         """
         Searches for a name used in sentence where the name consists of multiple words (separated by space).
         You provide the sequence of words that forms the sentence and the startindex of the first word

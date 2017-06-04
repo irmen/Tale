@@ -1019,14 +1019,14 @@ def do_what(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         except ParseError:
             # try again with a person
-            parsed = base.ParseResult(name, who_order=[player])
+            parsed = base.ParseResult(name, who_list=[player])
             playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It is a soul emote you can do. <dim>%s: %s</>" % (name, playermessage))
         if name in AGGRESSIVE_VERBS:
             p("It might be regarded as offensive to certain people or beings.")
     if name in BODY_PARTS:
         found = True
-        parsed = base.ParseResult("pat", who_order=[player], bodypart=name, message="hi")
+        parsed = base.ParseResult("pat", who_list=[player], bodypart=name, message="hi")
         playermessage, roommessage = player.soul.process_verb_parsed(player, parsed)[1:3]
         p("It denotes a body part. <dim>pat myself %s -> %s</>" % (name, playermessage))
     if name in ACTION_QUALIFIERS:

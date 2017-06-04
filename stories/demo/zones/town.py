@@ -9,7 +9,7 @@ from typing import Union, Optional
 
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
-from tale.base import Location, Exit, Door, Item, Container, Key, Living, ParseResult
+from tale.base import Location, Exit, Door, Item, Container, Key, Living, ParseResult, ContainingType
 from tale.driver import Driver
 from tale.errors import ActionRefused, TaleError, StoryCompleted
 from tale.items.basic import trashcan, newspaper, gem, gameclock, pouch
@@ -62,7 +62,7 @@ lane.init_inventory([board])
 
 
 class CursedGem(Item):
-    def move(self, target: Union[Location, Container, Living], actor: Living=None,
+    def move(self, target: ContainingType, actor: Living=None,
              silent: bool=False, is_player: bool=False, verb: str="move") -> None:
         if self.contained_in is actor and "wizard" not in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
@@ -282,8 +282,7 @@ alley.insert(computer, None)
 
 
 class DoorKey(Key):
-    def notify_moved(self, source_container: Union[Location, Container, Living],
-                     target_container: Union[Location, Container, Living], actor: Living) -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
         # check if a player picked up this key
         player = None
         if isinstance(target_container, Player):
@@ -305,8 +304,7 @@ class MagicGameEnd(Item):
         super().__init__("magic orb", description="A magic orb of some sort.")
         self.aliases = {"orb"}
 
-    def notify_moved(self, source_container: Union[Location, Container, Living],
-                     target_container: Union[Location, Container, Living], actor: Living) -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
         if isinstance(actor, Player):
             actor.tell("You try to pick up the orb, but as soon as you touch it it ends this game!")
             raise StoryCompleted

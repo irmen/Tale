@@ -240,7 +240,7 @@ class Shopkeeper(Living):
                 else:
                     # got a number in the shop
                     item = self._get_from_list(number)
-        if item:
+        if item and isinstance(item, Item):
             # got an item, inquire about it
             if item not in self:
                 raise ActionRefused("That is not something from the shop. You can examine the %s as usual." % item.name)

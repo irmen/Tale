@@ -16,7 +16,7 @@ from tale.base import ParseResult
 
 
 @wizcmd("cvgo")
-def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def go_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Go to a specific circlemud room, given by its circle-vnum."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the rooms' circle-vnum.")
@@ -29,7 +29,7 @@ def go_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("cvnum")
-def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def show_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Show the circle-vnum of a location (.) or an object/living,
     or when you provide a circle-vnum as arg, show the object(s) with that circle-vnum."""
     if not parsed.args:
@@ -37,8 +37,8 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     name = parsed.args[0]
     if name == ".":
         obj = player.location
-    elif parsed.who_order:
-        obj = parsed.who_order[0]
+    elif parsed.who_info:
+        obj = parsed.who_1
     else:
         try:
             vnum = int(parsed.args[0])
@@ -67,7 +67,7 @@ def show_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
 
 
 @wizcmd("cvspawn")
-def spawn_vnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
+def spawn_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
     """Spawn an item or monster with the given circle-vnum (or both if the circle-vnum is the same)."""
     if len(parsed.args) != 1:
         raise ParseError("You have to give the item or monster's circle-vnum.")

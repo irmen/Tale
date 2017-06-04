@@ -112,7 +112,7 @@ class Player(base.Living, pubsub.Listener):
         else:
             self.tell("You see nothing.")
 
-    def move(self, target: Union[base.Location, base.Container, base.Living], actor: base.Living=None,
+    def move(self, target: base.ContainingType, actor: base.Living=None,
              silent: bool=False, is_player: bool=True, verb: str="move") -> None:
         """
         Delegate to Living but with is_player set to True.

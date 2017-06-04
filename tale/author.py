@@ -55,7 +55,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
             files[:] = [f for f in files if not f.endswith(".pyc") and not f.endswith(".pyo")]
             for f in files:
                 filename = os.path.join(base, f)
-                has_main_py |= base in ('', '.') and f == "__main__.py"
+                has_main_py = has_main_py or (base in ('', '.') and f == "__main__.py")
                 zip.write(filename)
                 if verbose:
                     print(filename)
@@ -66,7 +66,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
         else:
             print("\nThe story didn't provide a __main__.py itself.")
             print("This file is required to be able to do 'python story.zip'")
-            print("Possible game modes:", set(v.value for v in tale.story.GameMode.__members__.values()))
+            print("Possible game modes:", set(v.value for v in tale.story.GameMode.__members__.values()))  # type: ignore
             while True:
                 try:
                     mode = tale.story.GameMode(input("\nWhat is the required game mode? "))

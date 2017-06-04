@@ -170,7 +170,7 @@ class TestSoul(unittest.TestCase):
         cat = tale.base.Living("cat", "n", title="hairy cat")
         targets = [philip, kate, cat]
         # peer
-        parsed = tale.base.ParseResult("peer", who_order=targets)
+        parsed = tale.base.ParseResult("peer", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual(set(targets), who)
         self.assertTrue(player_msg.startswith("You peer at "))
@@ -216,11 +216,32 @@ class TestSoul(unittest.TestCase):
         self.assertEqual([player, kate, cat], parsed.who_order)
         parsed = soul.parse(player, "smile at kate, cat and cat")
         self.assertEqual(["kate", "cat", "cat"], parsed.args, "deal with multiple occurences")
-        self.assertEqual([kate, cat, cat], parsed.who_order, "deal with multiple occurrences")
+        self.assertEqual([kate, cat], parsed.who_order, "deal with multiple occurrences in who_order")
         parsed = soul.parse(player, "smile at kate cat myself")
         self.assertEqual("at", parsed.who_info[kate].previous_word, "ony kate has a previous word")
         self.assertEqual(None, parsed.who_info[cat].previous_word, "cat doesn't have a previous word")
         self.assertEqual(None, parsed.who_info[player].previous_word, "player doesn't have a previous word")
+
+    def test_who123(self):
+        soul = tale.base.Soul()
+        player = tale.player.Player("julie", "f")
+        kate = tale.base.Living("kate", "f", title="Kate")
+        cat = tale.base.Living("cat", "n", title="hairy cat")
+        player.move(tale.base.Location("somewhere"))
+        cat.move(player.location)
+        kate.move(player.location)
+        parsed = soul.parse(player, "smile at cat and kate and myself and the cat and kate")
+        self.assertEqual(cat, parsed.who_1)
+        self.assertEqual((cat, kate), parsed.who_12)
+        self.assertEqual((cat, kate, player), parsed.who_123)
+        parsed = soul.parse(player, "smile at kate")
+        self.assertEqual(kate, parsed.who_1)
+        self.assertEqual((kate, None), parsed.who_12)
+        self.assertEqual((kate, None, None), parsed.who_123)
+        parsed = soul.parse(player, "smile")
+        self.assertIsNone(parsed.who_1)
+        self.assertEqual((None, None), parsed.who_12)
+        self.assertEqual((None, None, None), parsed.who_123)
 
     def testVerbTarget(self):
         soul = tale.base.Soul()
@@ -318,7 +339,7 @@ class TestSoul(unittest.TestCase):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
         targets = [tale.base.Living("max", "m")]
-        parsed = tale.base.ParseResult("beep", who_order=targets)
+        parsed = tale.base.ParseResult("beep", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You triumphantly beep max on the nose.", player_msg)
         self.assertEqual("Julie triumphantly beeps max on the nose.", room_msg)
@@ -337,7 +358,7 @@ class TestSoul(unittest.TestCase):
         soul = tale.base.Soul()
         player = tale.player.Player("julie", "f")
         targets = [tale.base.Living("max", "m")]
-        parsed = tale.base.ParseResult("tickle", qualifier="fail", who_order=targets)
+        parsed = tale.base.ParseResult("tickle", qualifier="fail", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You try to tickle max, but fail miserably.", player_msg)
         self.assertEqual("Julie tries to tickle max, but fails miserably.", room_msg)
@@ -624,7 +645,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You grin evilly.", player_msg)
         self.assertEqual("Julie grins evilly.", room_msg)
         # drool
-        parsed = tale.base.ParseResult("drool", who_order=targets)
+        parsed = tale.base.ParseResult("drool", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You drool on max.", player_msg)
         self.assertEqual("Julie drools on max.", room_msg)
@@ -635,19 +656,19 @@ class TestSoul(unittest.TestCase):
         player = tale.player.Player("julie", "f")
         targets = [tale.base.Living("max", "m")]
         # peer
-        parsed = tale.base.ParseResult("peer", who_order=targets)
+        parsed = tale.base.ParseResult("peer", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You peer at max.", player_msg)
         self.assertEqual("Julie peers at max.", room_msg)
         self.assertEqual("Julie peers at you.", target_msg)
         # tease
-        parsed = tale.base.ParseResult("tease", who_order=targets)
+        parsed = tale.base.ParseResult("tease", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You tease max.", player_msg)
         self.assertEqual("Julie teases max.", room_msg)
         self.assertEqual("Julie teases you.", target_msg)
         # turn
-        parsed = tale.base.ParseResult("turn", who_order=targets)
+        parsed = tale.base.ParseResult("turn", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You turn your head towards max.", player_msg)
         self.assertEqual("Julie turns her head towards max.", room_msg)
@@ -662,13 +683,13 @@ class TestSoul(unittest.TestCase):
             parsed = tale.base.ParseResult("bonk")
             soul.process_verb_parsed(player, parsed)
         # pounce
-        parsed = tale.base.ParseResult("pounce", who_order=targets)
+        parsed = tale.base.ParseResult("pounce", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You pounce max playfully.", player_msg)
         self.assertEqual("Julie pounces max playfully.", room_msg)
         self.assertEqual("Julie pounces you playfully.", target_msg)
         # hold
-        parsed = tale.base.ParseResult("hold", who_order=targets)
+        parsed = tale.base.ParseResult("hold", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You hold max in your arms.", player_msg)
         self.assertEqual("Julie holds max in her arms.", room_msg)
@@ -698,7 +719,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You shiver with fear.", player_msg)
         self.assertEqual("Julie shivers with fear.", room_msg)
         # fear2
-        parsed = tale.base.ParseResult("fear", who_order=targets)
+        parsed = tale.base.ParseResult("fear", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You fear max.", player_msg)
         self.assertEqual("Julie fears max.", room_msg)
@@ -715,7 +736,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You scream loudly.", player_msg)
         self.assertEqual("Julie screams loudly.", room_msg)
         # scream 2
-        parsed = tale.base.ParseResult("scream", who_order=targets)
+        parsed = tale.base.ParseResult("scream", who_list=targets)
         parsed.adverb = "angrily"
         parsed.message = "why"
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
@@ -723,7 +744,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie screams 'why' angrily at max.", room_msg)
         self.assertEqual("Julie screams 'why' angrily at you.", target_msg)
         # ask
-        parsed = tale.base.ParseResult("ask", message="are you happy", who_order=targets)
+        parsed = tale.base.ParseResult("ask", message="are you happy", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You ask max: are you happy?", player_msg)
         self.assertEqual("Julie asks max: are you happy?", room_msg)
@@ -734,7 +755,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You look puzzled.", player_msg)
         self.assertEqual("Julie looks puzzled.", room_msg)
         # puzzle2
-        parsed = tale.base.ParseResult("puzzle", who_order=targets)
+        parsed = tale.base.ParseResult("puzzle", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You look puzzled at max.", player_msg)
         self.assertEqual("Julie looks puzzled at max.", room_msg)
@@ -778,7 +799,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("You watch the surroundings carefully.", player_msg)
         self.assertEqual("Julie watches the surroundings carefully.", room_msg)
         # watch2
-        parsed = tale.base.ParseResult("watch", who_order=targets)
+        parsed = tale.base.ParseResult("watch", who_list=targets)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertEqual("You watch max carefully.", player_msg)
         self.assertEqual("Julie watches max carefully.", room_msg)
@@ -792,7 +813,7 @@ class TestSoul(unittest.TestCase):
         self.assertEqual("Julie waves her hand in front of your face, are you there?", target_msg)
         # ayt
         targets2 = [tale.base.Living("max", "m"), player]
-        parsed = tale.base.ParseResult("ayt", who_order=targets2)
+        parsed = tale.base.ParseResult("ayt", who_list=targets2)
         who, player_msg, room_msg, target_msg = soul.process_verb_parsed(player, parsed)
         self.assertTrue(player_msg.startswith("You wave your hand in front of "))
         self.assertTrue("max's" in player_msg and "your own" in player_msg)
