@@ -98,7 +98,11 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
             return value
         raise ValueError("That race does not exist. Choose from: " + str(races.races.keys()))
 
-    if issubclass(obj, base.Item):
+    if isinstance(obj, base.MudObject):
+        obj.wiz_clone(player)  # clone an existing object
+    elif not inspect.isclass(obj):
+        raise ActionRefused("Cannot clone that, it's not a MudObject")
+    elif issubclass(obj, base.Item):
         # create a new Item instance
         name = yield "input", ("object Name?", string_entered)
         title = yield "input", "object Title (optional, don't start with 'the')?"
@@ -106,6 +110,7 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         short_desc = yield "input", "object short description (optional)?"
         if (yield "input", ("Okay with this?", lang.yesno)):
             obj = obj(name, title, description, short_desc)
+            obj.wiz_clone(player, False)
     elif issubclass(obj, base.Living):
         # create a new Living instance
         name = yield "input", ("living Name?", string_entered)
@@ -116,9 +121,9 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         short_desc = yield "input", "living short description (optional)?"
         if (yield "input", ("Okay with this?", lang.yesno)):
             obj = obj(name, gender, race, title, description, short_desc)
-    if not isinstance(obj, base.MudObject):
+            obj.wiz_clone(player, False)
+    else:
         raise ActionRefused("Cannot clone that, it's not a MudObject")
-    obj.wiz_clone(player)  # actually clone it
 
 
 @wizcmd("destroy")

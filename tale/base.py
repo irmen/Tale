@@ -189,20 +189,43 @@ class MudObject:
         if cls is MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
         instance = super().__new__(cls)
+        MudObject._track_vnum(instance)
+        return instance
+
+    @staticmethod
+    def _track_vnum(instance: Any, fix_clones: bool=False):
         # create and store a new unique vnum for this mudobject
         instance.vnum = MudObject.__seq
         MudObject.__seq += 1
-        if issubclass(cls, Item):
+        if isinstance(instance, Item):
             MudObject.all_items[instance.vnum] = instance
-        elif issubclass(cls, Living):
+        elif isinstance(instance, Living):
             MudObject.all_livings[instance.vnum] = instance
-        elif issubclass(cls, Exit):
+        elif isinstance(instance, Exit):
             MudObject.all_exits[instance.vnum] = instance
-        elif issubclass(cls, Location):
+        elif isinstance(instance, Location):
             MudObject.all_locations[instance.vnum] = instance
         else:
-            raise TypeError("weird MudObj subtype: " + str(cls))
-        return instance
+            raise TypeError("weird MudObj subtype: " + type(instance))
+        if fix_clones:
+            # the 'clone' command consumes too man vnums because of the way deepcopy works.
+            # try to find the double registration and remove it.
+            pid = instance.vnum - 1
+            existing = MudObject.all_items.get(pid, None)
+            if existing is instance:
+                del MudObject.all_items[pid]
+            else:
+                existing = MudObject.all_livings.get(pid, None)
+                if existing is instance:
+                    del MudObject.all_livings[pid]
+                else:
+                    existing = MudObject.all_exits(pid, None)
+                    if existing is instance:
+                        del MudObject.all_exits[pid]
+                    else:
+                        existing = MudObject.all_locations.get(pid, None)
+                        if existing is instance:
+                            del MudObject.all_locations[pid]
 
     def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
         self._extradesc = None  # type: Dict[str,str]
@@ -435,8 +458,8 @@ class Item(MudObject):
         raise ActionRefused("That makes no sense.")
 
     @util.authorized("wizard")
-    def wiz_clone(self, actor: 'Living') -> 'Item':
-        item = self.clone()
+    def wiz_clone(self, actor: 'Living', make_clone: bool=True) -> 'Item':
+        item = self.clone() if make_clone else self
         actor.insert(item, actor)
         actor.tell("Cloned into: " + repr(item) + " (spawned in your inventory)")
         actor.tell_others("{Actor} conjures up %s, and quickly pockets it." % lang.a(item.title))
@@ -483,13 +506,12 @@ class Item(MudObject):
                 raise ValueError("can't clone something that has other stuff in it")
         except ActionRefused:
             pass
-        if self.location:
-            # avoid deepcopying the location
-            location, self.location = self.location, None
-            duplicate = copy.deepcopy(self)
-            self.location = duplicate.location = location
-            return duplicate
-        return copy.deepcopy(self)
+        # avoid deepcopying the location
+        location, self.location = self.location, None
+        duplicate = copy.deepcopy(self)
+        self.location = duplicate.location = location
+        MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy resets initially given vnum so hand out a new one
+        return duplicate
 
 
 class Weapon(Item):
@@ -909,8 +931,15 @@ class Living(MudObject):
         self.soul = None   # truly die ;-)
 
     @util.authorized("wizard")
-    def wiz_clone(self, actor: 'Living') -> 'Living':
-        duplicate = copy.deepcopy(self)
+    def wiz_clone(self, actor: 'Living', make_clone: bool=True) -> 'Living':
+        if make_clone:
+            # avoid deepcopying the location
+            location, self.location = self.location, None
+            duplicate = copy.deepcopy(self)
+            self.location = location
+            MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy overwrites initially given vnum so make a new one
+        else:
+            duplicate = self
         actor.tell("Cloned into: " + repr(duplicate) + " (spawned in current location)")
         actor.tell_others("{Actor} summons %s..." % lang.a(duplicate.title))
         actor.location.insert(duplicate, actor)

@@ -302,4 +302,6 @@ class IFDriver(driver.Driver):
             if self.story.config.display_gametime:
                 player.tell("Game time: %s" % self.game_clock)
             player.tell("\n")
+            if self.wizard_override:
+                player.privileges.add("wizard")
             return player

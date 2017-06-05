@@ -79,7 +79,7 @@ class ShoppeShopkeeper(Shopkeeper, Listener):
                     mud_context.driver.defer(2, self.rat_event, "smile " + living.name)
 
     def rat_event(self, action: str, ctx: util.Context) -> None:
-        if self.location.search_living("rat"):
+        if "rat" not in action or self.location.search_living("rat"):
             self.do_socialize(action)
 
 
