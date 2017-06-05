@@ -129,6 +129,7 @@ class Player(base.Living, pubsub.Listener):
         pubsub.unsubscribe_all(self)
 
     def destroy(self, ctx: util.Context) -> None:
+        self.clear_wiretaps()
         self.activate_transcript(None, None)
         super().destroy(ctx)
 

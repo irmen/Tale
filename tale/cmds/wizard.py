@@ -378,7 +378,7 @@ def do_debug(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     else:
         raise ActionRefused("Can't find %s." % name)
     txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
-    for varname, value in sorted(vars(obj).items()):
+    for varname, value in sorted(vars(obj).items()):        # @todo also dump @properties
         txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
     player.tell("\n".join(txt), format=False)
 

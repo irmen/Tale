@@ -8,8 +8,8 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import time
 import threading
-from typing import Generator, Optional
-from .story import GameMode, TickMethod
+from typing import Generator, Optional, Dict, Any, List
+from .story import GameMode, TickMethod, StoryConfig
 from . import base
 from . import charbuilder
 from . import driver
@@ -68,7 +68,7 @@ class IFDriver(driver.Driver):
             return
         # XXX bogus data
         locations = frozenset([player.location])
-        items = frozenset(player.location.items)
+        items = frozenset(player.location.items) | frozenset(player.inventory)
         livings = frozenset(player.location.livings)
         exits = frozenset(player.location.exits.values())
         serializer = savegames.TaleSerializer()
@@ -122,7 +122,9 @@ class IFDriver(driver.Driver):
         if load_saved_game:
             loaded_player = self._load_saved_game(conn.player)
             if loaded_player:
-                conn.player = loaded_player
+                # switch active player objects and remove the player placeholder used while connecting
+                old_player, conn.player = conn.player, loaded_player
+                old_player.destroy(util.Context(self, self.game_clock, self.story.config, conn))
                 conn.player.tell("\n")
                 prompt = self.story.welcome_savegame(conn.player)
                 if prompt:
@@ -268,7 +270,7 @@ class IFDriver(driver.Driver):
             self.server_loop_durations.append(loop_duration)
             conn.write_output()
 
-    def _load_saved_game(self, player: Player) -> Optional[Player]:
+    def _load_saved_game(self, existing_player: Player) -> Optional[Player]:
         # at this time, game loading/saving is only supported in single player IF mode.
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
@@ -283,41 +285,91 @@ class IFDriver(driver.Driver):
             self._stop_driver()
             raise SystemExit(10)
         except FileNotFoundError:
-            player.tell("No saved game data found.", end=True)
+            existing_player.tell("No saved game data found.", end=True)
             return None
         except IOError as x:
-            player.tell("Failed to load save game data: "+str(x), end=True)
+            existing_player.tell("Failed to load save game data: "+str(x), end=True)
             return None
         else:
             savegame_version = raw_state["story_config"]["version"]
             if savegame_version != self.story.config.version:
-                player.tell("\n")
-                player.tell("<it>Note: the saved game data is from a different version of the game and may cause problems.</>")
-                player.tell("We'll attempt to load it anyway. (Current game version: %s / Saved game data version: %s). "
-                            % (self.story.config.version, savegame_version), end=True)
-            state = serializer.recreate_classes(raw_state, SavegameExistingObjectsFinder())
+                existing_player.tell("\n")
+                existing_player.tell("<it>Note: the saved game data is from a different version of the game and may cause problems.</>")
+                existing_player.tell("We'll attempt to load it anyway. (Current game version: %s / Saved game data version: %s). "
+                                     % (self.story.config.version, savegame_version), end=True)
+            objects_finder = SavegameExistingObjectsFinder()
+            state = serializer.recreate_classes(raw_state, objects_finder)
             # Because loading a complete saved game is strictly for single player 'if' mode,
             # we load a new player and simply replace all players with this one.
-            player = state["player"]
-            self.all_players = {player.name: conn}
-            self.deferreds = state["deferreds"]
-            self.game_clock = state["clock"]
-            self.story.config = state["config"]
+            import pprint; pprint.pprint(state)  # XXX
+            player_info = state["player"]
+            deferreds = state["deferreds"]    # XXX convert
+            clock = state["clock"]    # XXX convert
+            storyconfig = state["story_config"]    # XXX convert
+
+            # sanity checks before we go on
+            # XXX assert isinstance(deferreds, list)
+            # XXX assert isinstance(clock, util.GameDateTime)
+            # XXX assert isinstance(storyconfig, StoryConfig)
+
+            new_player = objects_finder.hookup_player(player_info, state["items"])
+
+            self.all_players = {new_player.name: conn}
+            # XXX self.deferreds = deferreds
+            # XXX self.game_clock = clock
+            # XXX self.story.config = storyconfig
             self.waiting_for_input = {}   # can't keep the old waiters around
-            player.tell("\n")
-            player.tell("Game loaded.")
-            player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")  # XXX fix save games.
+            new_player.tell("\n")
+            new_player.tell("Game loaded.")
+            new_player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")  # XXX fix save games.
             if self.story.config.display_gametime:
-                player.tell("Game time: %s" % self.game_clock)
-            player.tell("\n")
+                new_player.tell("Game time: %s" % self.game_clock)
+                new_player.tell("\n")
             if self.wizard_override:
-                player.privileges.add("wizard")
-            return player
+                new_player.privileges.add("wizard")
+            return new_player
 
 
 class SavegameExistingObjectsFinder:
     def item(self, vnum: int, name: str, classname: str) -> base.Item:
-        pass
+        pass  # XXX
 
     def living(self, vnum: int, name: str, classname: str) -> base.Living:
-        pass
+        pass  # XXX
+
+    def resolve_location_ref(self, vnum: int, name: str, classname: str) -> base.Location:
+        loc = base.MudObject.all_locations.get(vnum, None)
+        if not loc:
+            raise errors.TaleError("location vnum not found: "+str(vnum))
+        if loc.name != name or savegames.qual_classname(loc) != classname:
+            raise errors.TaleError("location inconsistency for vnum "+str(vnum))
+        return loc
+
+    def resolve_item_ref(self, vnum: int, name: str, classname: str, new_items: List[Dict[str, Any]]) -> base.Item:
+        item = base.MudObject.all_items.get(vnum, None)
+        if not item:
+            for ni in new_items:
+                if ni["old_vnum"] == vnum:
+                    item = ni["item"]
+                    if item.name == name and savegames.qual_classname(item) == classname:
+                        return item
+                    else:
+                        raise errors.TaleError("item name/class inconsistency for old_vnum "+str(vnum))
+            raise LookupError("item vnum not found: "+str(vnum))
+        if item.name != name or savegames.qual_classname(item) != classname:
+            raise errors.TaleError("item inconsistency for vnum "+str(vnum))
+        return item
+
+    def hookup_player(self, player_info: Dict[str, Any], new_items: Dict[str, Any]) -> Player:
+        new_player = player_info["player"]
+        assert isinstance(new_player, Player)
+        new_player.known_locations = {self.resolve_location_ref(*ref) for ref in player_info["known_locs"]}
+        inv = [self.resolve_item_ref(*ref, new_items) for ref in player_info["inventory"]]
+        for thing in inv:
+            if thing.contained_in and thing.contained_in is not new_player:
+                # remove the item from its original location, the player now has it in its pocketses
+                thing.contained_in.remove(thing, None)
+        new_player.init_inventory(inv)
+        loc = self.resolve_location_ref(*player_info["location"])
+        loc.insert(new_player, None)
+        return new_player

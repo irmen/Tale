@@ -57,12 +57,13 @@ class TaleSerializer:
             # "story_version": story.version,
             # "tale_version_required": story.requires_tale,
             "story_config": story,
-            "story_name": story.name,
+            "clock": clock,
             "player": player,
             "items": list(items),
             "livings": list(livings),
             "locations": list(locations),
-            "exits": list(exits)
+            "exits": list(exits),
+            "deferreds": list(deferreds),
         }
         serialized = self.serializer.serialize(data)
         return self.encrypt(serialized)
@@ -75,7 +76,7 @@ class TaleSerializer:
     def decrypt(self, data: ByteString) -> ByteString:
         if not data.startswith(b"TALESAVE"):
             return data
-        data = bytes(b ^ self.xor_key for b in data)
+        data = bytes(b ^ self.xor_key for b in data[8:])
         digest, data = data.split(maxsplit=1)
         if not digest.startswith(b"digest="):
             raise TaleError("corrupt or hacked save game file")
@@ -255,19 +256,23 @@ class TaleSerializer:
         clazz = getattr(importlib.import_module(modulename), classname)
         return clazz
 
-    def make_Item(self, data: Dict, existing_object_lookup) -> Item:
+    def make_Item(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
+        old_vnum = data["vnum"]
         item = existing_object_lookup.item(data["vnum"], data["name"], data["__class__"])
         if item:
             # overwrite existing attributes
-            del data["vnum"]
             item.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
         else:
             # create new item
             itemclass = self.lookup_class(data["__class__"])
             item = itemclass(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+        del data["vnum"]
         item.aliases = set(data.pop("aliases"))
         self.apply_attributes(item, data)
-        return item
+        return {
+            "old_vnum": old_vnum,
+            "item": item
+        }
 
     def make_Living(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         living = existing_object_lookup.living(data["vnum"], data["name"], data["__class__"])
@@ -316,7 +321,11 @@ class TaleSerializer:
                 raise AttributeError("{}.{} doesn't exist".format(obj.__class__, name))
             atype = type(getattr(obj, name))
             if type(value) is not atype:
-                raise TypeError("{}.{} has different type".format(obj.__class__, name))
+                if type(value) is int and atype is float:
+                    # special case for int vs float (accept ints if type is float)
+                    value = float(value)
+                else:
+                    raise TypeError("{}.{} has different type".format(obj.__class__, name))
             setattr(obj, name, value)
 
 
