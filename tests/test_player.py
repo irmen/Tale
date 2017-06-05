@@ -51,6 +51,23 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual("f", player.stats.gender)
         self.assertEqual("she", player.subjective)
 
+    def test_init_names(self):
+        j = Player("julie", "f", race="human", descr="   this is julie    ", short_descr="     short descr of julie    ")
+        self.assertEqual("julie", j.name)
+        self.assertEqual("Julie", j.title)
+        self.assertEqual("this is julie", j.description)
+        self.assertEqual("short descr of julie", j.short_description)
+        j.init_names("zoe", "great zoe", "   new descr   ", "    new short descr    ")
+        self.assertEqual("zoe", j.name)
+        self.assertEqual("Great zoe", j.title)
+        self.assertEqual("new descr", j.description)
+        self.assertEqual("new short descr", j.short_description)
+        j.init_names("petra", None, None, None)
+        self.assertEqual("petra", j.name)
+        self.assertEqual("Petra", j.title)
+        self.assertEqual("", j.description)
+        self.assertEqual("", j.short_description)
+
     def test_tell(self) -> None:
         player = Player("fritz", "m")
         player.tell(5)  # type: ignore
@@ -607,7 +624,7 @@ class TestCharacterBuilders(unittest.TestCase):
         self.assertEqual("elemental", p.stats.race)
         self.assertEqual("n", p.stats.gender)
         self.assertEqual(races.BodyType.NEBULOUS, p.stats.bodytype)
-        self.assertEqual("grand master", p.title)
+        self.assertEqual("Grand master", p.title)
 
     def test_idle(self):
         p = Player("dummy", "f")

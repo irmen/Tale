@@ -8,15 +8,16 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import time
 import threading
-import pickle
 from typing import Generator, Optional
 from .story import GameMode, TickMethod
+from . import base
 from . import charbuilder
 from . import driver
 from . import errors
 from . import lang
 from . import pubsub
 from . import util
+from . import savegames
 from .player import PlayerConnection, Player
 from .tio import DEFAULT_SCREEN_DELAY
 from .tio import iobase
@@ -65,14 +66,14 @@ class IFDriver(driver.Driver):
         if not self.story.config.savegames_enabled:
             player.tell("It is not possible to save your progress.")
             return
-        state = {
-            "version": self.story.config.version,
-            "player": player,
-            "deferreds": self.deferreds,
-            "clock": self.game_clock,
-            "config": self.story.config
-        }
-        savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
+        # XXX bogus data
+        locations = frozenset([player.location])
+        items = frozenset(player.location.items)
+        livings = frozenset(player.location.livings)
+        exits = frozenset(player.location.exits.values())
+        serializer = savegames.TaleSerializer()
+        print("SAVING, PLAYER name={}  title={}".format(player.name, player.title))  # XXX
+        savedata = serializer.serialize(self.story.config, player, items, livings, locations, exits, self.deferreds, self.game_clock)
         self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"] = savedata
         player.tell("Game saved.")
         player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")   # XXX fix save games.
@@ -269,27 +270,32 @@ class IFDriver(driver.Driver):
 
     def _load_saved_game(self, player: Player) -> Optional[Player]:
         # at this time, game loading/saving is only supported in single player IF mode.
-        # @todo fix that all mudobjects are duplicated when loading a pickle save game.
         assert len(self.all_players) == 1
         conn = list(self.all_players.values())[0]
         try:
             savegame = self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"].data
-            state = pickle.loads(savegame)
+            serializer = savegames.TaleSerializer()
+            raw_state = serializer.deserialize(savegame)
             del savegame
-        except (pickle.PickleError, ValueError, TypeError) as x:
+        except (ValueError, TypeError) as x:
             print("There was a problem loading the saved game data:")
             print(type(x).__name__, x)
             self._stop_driver()
             raise SystemExit(10)
-        except IOError:
+        except FileNotFoundError:
             player.tell("No saved game data found.", end=True)
             return None
+        except IOError as x:
+            player.tell("Failed to load save game data: "+str(x), end=True)
+            return None
         else:
-            if state["version"] != self.story.config.version:
-                player.tell("This saved game data was from a different version of the game and cannot be used.")
-                player.tell("(Current game version: %s  Saved game data version: %s)" % (self.story.config.version, state["version"]))
+            savegame_version = raw_state["story_config"]["version"]
+            if savegame_version != self.story.config.version:
                 player.tell("\n")
-                return None
+                player.tell("<it>Note: the saved game data is from a different version of the game and may cause problems.</>")
+                player.tell("We'll attempt to load it anyway. (Current game version: %s / Saved game data version: %s). "
+                            % (self.story.config.version, savegame_version), end=True)
+            state = serializer.recreate_classes(raw_state, SavegameExistingObjectsFinder())
             # Because loading a complete saved game is strictly for single player 'if' mode,
             # we load a new player and simply replace all players with this one.
             player = state["player"]
@@ -307,3 +313,11 @@ class IFDriver(driver.Driver):
             if self.wizard_override:
                 player.privileges.add("wizard")
             return player
+
+
+class SavegameExistingObjectsFinder:
+    def item(self, vnum: int, name: str, classname: str) -> base.Item:
+        pass
+
+    def living(self, vnum: int, name: str, classname: str) -> base.Living:
+        pass

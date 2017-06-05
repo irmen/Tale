@@ -188,9 +188,9 @@ class MudObject:
     def __new__(cls, *args, **kwargs):
         if cls is MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
-        instance = super().__new__(cls)
-        MudObject._track_vnum(instance)
-        return instance
+        _instance = super().__new__(cls)
+        MudObject._track_vnum(_instance)
+        return _instance
 
     @staticmethod
     def _track_vnum(instance: Any, fix_clones: bool=False):
@@ -290,7 +290,7 @@ class MudObject:
             assert not title.startswith("a ") and not title.startswith("A "), "title must not start with 'a'"
         self._title = title or name
         self._description = dedent(descr).strip() if descr else ""
-        self._short_description = short_descr
+        self._short_description = short_descr.strip() if short_descr else ""
         self._extradesc = {}   # maps keyword to description
 
     def add_extradesc(self, keywords: Set[str], description: str) -> None:
@@ -547,13 +547,6 @@ class Location(MudObject):
 
     def __contains__(self, obj: Union['Living', Item]) -> bool:
         return obj in self.livings or obj in self.items
-
-    def __getstate__(self) -> dict:
-        state = dict(self.__dict__)
-        return state
-
-    def __setstate__(self, state: dict):
-        self.__dict__ = state
 
     def init_inventory(self, objects: Iterable[Union[Item, 'Living']]) -> None:
         """Set the location's initial item and livings 'inventory'"""
@@ -874,13 +867,6 @@ class Living(MudObject):
         assert len(self.__inventory) == 0
         for item in items:
             self.insert(item, self)
-
-    def __getstate__(self) -> dict:
-        state = dict(self.__dict__)
-        return state
-
-    def __setstate__(self, state: dict) -> None:
-        self.__dict__ = state
 
     def __contains__(self, item: Union['Living', Item, Location]) -> bool:
         return item in self.__inventory

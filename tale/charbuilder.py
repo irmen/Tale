@@ -28,7 +28,8 @@ class PlayerNaming:
         assert self._name
         assert self.gender
         player.init_gender(self.gender)
-        player.init_names(self._name, self.title, self.description, None)
+        title = None if self.title == self._name else self.title
+        player.init_names(self._name, title, self.description, None)
         player.stats = self.stats
         player.money = self.money
 

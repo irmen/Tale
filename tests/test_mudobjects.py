@@ -632,8 +632,6 @@ class TestLiving(unittest.TestCase):
         text = " ".join(msg.strip() for msg in collector.messages)
         self.assertEqual("Julie is carrying: key", text)
 
-
-class TestNPC(unittest.TestCase):
     def test_init(self):
         rat = Living("rat", "n", race="rodent")
         julie = Living("julie", "f", title="attractive Julie",
@@ -701,6 +699,23 @@ class TestNPC(unittest.TestCase):
         self.assertEqual(room2, room1.npc_left_target)
         self.assertEqual(npc, room2.npc_arrived)
         self.assertEqual(room1, room2.npc_arrived_from)
+
+    def test_init_names(self):
+        j = Living("julie", "f", race="human", descr="   this is julie    ", short_descr="     short descr of julie    ")
+        self.assertEqual("julie", j.name)
+        self.assertEqual("julie", j.title)
+        self.assertEqual("this is julie", j.description)
+        self.assertEqual("short descr of julie", j.short_description)
+        j.init_names("zoe", "great zoe", "   new descr   ", "    new short descr    ")
+        self.assertEqual("zoe", j.name)
+        self.assertEqual("great zoe", j.title)
+        self.assertEqual("new descr", j.description)
+        self.assertEqual("new short descr", j.short_description)
+        j.init_names("petra", None, None, None)
+        self.assertEqual("petra", j.name)
+        self.assertEqual("petra", j.title)
+        self.assertEqual("", j.description)
+        self.assertEqual("", j.short_description)
 
 
 class TestAggressiveNpc(unittest.TestCase):

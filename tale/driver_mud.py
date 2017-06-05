@@ -238,6 +238,7 @@ class MudDriver(driver.Driver):
             ctx = util.Context(self, self.game_clock, self.story.config, None)
             # mr. Smith move: delete the other player and restore its properties in us
             existing_player.destroy(ctx)
+            del existing_player
             conn.player.__setstate__(state)
             name_info = charbuilder.PlayerNaming()
             name_info.money = state["money"]

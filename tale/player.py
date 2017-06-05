@@ -44,25 +44,20 @@ class Player(base.Living, pubsub.Listener):
         self.init_nonserializables()
 
     def init_nonserializables(self) -> None:
+        # these things cannot be serialized or have to be reinitialized
+        # call this function after deserialization.
         self._input = queue.Queue()   # type: Any
         self.input_is_available = Event()
         self.transcript = None  # type: IO[Any]
         self._output = TextBuffer()
 
+    def init_names(self, name: str, title: str, descr: str, short_descr: str) -> None:
+        title = lang.capital(title or name)  # make sure the title of a player remains capitalized
+        super().init_names(name, title, descr, short_descr)
+
     def __repr__(self):
         return "<%s '%s' #%d @ 0x%x, privs:%s>" % (self.__class__.__name__, self.name, self.vnum,
                                                    id(self), ",".join(self.privileges) or "-")
-
-    def __getstate__(self) -> dict:
-        state = super().__getstate__()
-        # skip all non-serializable things (or things that need to be reinitialized)
-        for name in ["_input", "_output", "input_is_available", "transcript"]:
-            del state[name]
-        return state
-
-    def __setstate__(self, state: dict) -> None:
-        super().__setstate__(state)
-        self.init_nonserializables()
 
     def set_screen_sizes(self, indent: int, width: int) -> None:
         self.screen_indent = indent

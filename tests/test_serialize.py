@@ -13,7 +13,7 @@ from tests.supportstuff import FakeDriver
 
 
 def serializecycle(obj):
-    ser = pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
+    ser = pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)   # XXX serpent
     return pickle.loads(ser)
 
 

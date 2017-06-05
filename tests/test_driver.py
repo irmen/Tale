@@ -138,7 +138,7 @@ class TestDeferreds(unittest.TestCase):
         with self.assertRaises(ValueError):
             d = tale.driver.Deferred(due, lambda a, ctx=None: 1, [42], None)
 
-    def testSerializable(self):
+    def testSerializable(self):   # XXX serpent
         target = Thing()
         deferreds = [tale.driver.Deferred(datetime.datetime.now(), target.append, [1, 2, 3], {"kwarg": 42}),
                      tale.driver.Deferred(datetime.datetime.now(), os.getcwd, [], None),

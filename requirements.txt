@@ -1,3 +1,4 @@
 appdirs
 colorama>=0.3.6
 smartypants>=1.8.6
+serpent>=1.19
