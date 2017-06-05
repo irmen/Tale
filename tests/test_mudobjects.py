@@ -1131,6 +1131,16 @@ class TestMudObject(unittest.TestCase):
         self.assertIs(e1, MudObject.all_exits[e1.vnum])
         self.assertIs(n1, MudObject.all_livings[n1.vnum])
 
+    def test_story_data(self):
+        i = Item("thing")
+        self.assertEqual({}, i.story_data)
+        i.story_data["test"] = 42
+        self.assertEqual({"test": 42}, i.story_data)
+        p = Player("julie", "f", race="human")
+        self.assertEqual({}, p.story_data)
+        p.story_data["test"] = 42
+        self.assertEqual({"test": 42}, p.story_data)
+
 
 if __name__ == '__main__':
     unittest.main()

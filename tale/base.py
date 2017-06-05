@@ -237,6 +237,7 @@ class MudObject:
         # verb handling is done via handle_verb() callbacks.
         self.verbs = {}  # type: Dict[str, str]
         # register all periodical tagged methods
+        self.story_data = {}  # type: Dict[Any, Any]   # not used by Tale itself, story can put custom data here. Use builtin types only.
         self.init()
         if util.get_periodicals(self):
             mud_context.driver.register_periodicals(self)
