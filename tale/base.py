@@ -1340,9 +1340,10 @@ class Exit(MudObject):
         long_description = long_description or short_description
         super().__init__(direction, title=title, description=long_description, short_description=short_description)
         self.aliases = aliases
-        # The driver needs to know about all exits,
-        # it will hook them all up once initialization is complete.
-        mud_context.driver.register_exit(self)
+        if not self.target:
+            # The driver needs to know about all unbound exits,
+            # it will hook them all up once initialization is complete.
+            mud_context.driver.register_exit(self)
 
     def __repr__(self):
         targetname = self.target.name if self.target else self._target_str
