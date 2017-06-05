@@ -67,8 +67,8 @@ south_street.add_exits([
     Exit(["south", "butcher"], butcher, "The butcher shop is to the south.")
 ])
 
-parking_key = Key("key", "rusty key", "It is what appears to be an old key, with a label on it.",
-                  "On the ground is a key, it's become quite rusty.")
+parking_key = Key("key", "rusty key", description="It is what appears to be an old key, with a label on it.",
+                  short_description="On the ground is a key, it's become quite rusty.")
 parking_key.key_for(parking_gate)
 parking_key.add_extradesc({"label"}, "The label says: 'parking area gate'.")
 

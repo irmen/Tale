@@ -232,8 +232,8 @@ class TestPlayer(unittest.TestCase):
         attic = Location("Attic", "A dark attic.")
         player = Player("merlin", "m")
         player.title = "wizard Merlin"
-        julie = MsgTraceNPC("julie", "f", "human")
-        fritz = MsgTraceNPC("fritz", "m", "human")
+        julie = MsgTraceNPC("julie", "f", race="human")
+        fritz = MsgTraceNPC("fritz", "m", race="human")
         julie.move(attic, silent=True)
         fritz.move(attic, silent=True)
         player.move(attic, silent=True)

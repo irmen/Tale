@@ -272,12 +272,12 @@ newspaper.text = """
         It looks like a boring article, and you have better things to do."""
 newspaper.aliases.add("paper")
 
-rock = Item("rock", "large rock", "A pretty large rock. It looks extremely heavy.")
-gem = Item("gem", "sparkling gem", "Light sparkles from this beautiful gem.")
-diamond = Item("diamond", "large blinking diamond", "This is the biggest diamond you have ever seen.")
-pouch = Container("pouch", "small leather pouch", "It is opened and closed with a thin leather strap.")
+rock = Item("rock", "large rock", description="A pretty large rock. It looks extremely heavy.")
+gem = Item("gem", "sparkling gem", description="Light sparkles from this beautiful gem.")
+diamond = Item("diamond", "large blinking diamond", description="This is the biggest diamond you have ever seen.")
+pouch = Container("pouch", "small leather pouch", description="It is opened and closed with a thin leather strap.")
 trashcan = Boxlike("trashcan", "dented steel trashcan")
-gameclock = GameClock("clock", title="ticking clock", short_description="The clock makes ticking noises.")
+gameclock = GameClock("clock", "ticking clock", short_description="The clock makes ticking noises.")
 
 
 class WoodenYstick(Item):
@@ -287,7 +287,7 @@ class WoodenYstick(Item):
             thing = other[0]
             if isinstance(thing, ElasticBand):
                 # combine elastic band and Y-stick into .... the catapult
-                catapult = Catapult("catapult", "flimsy catapult", "A flimsy looking catapult. It looks like it might just work though!")
+                catapult = Catapult("catapult", "flimsy catapult", description="A flimsy looking catapult. It looks like it might just work though!")
                 catapult.aliases.add("flimsy catapult")
                 return catapult
         return None
@@ -317,11 +317,13 @@ class Catapult(Weapon):
         return False
 
 
-woodenYstick = WoodenYstick("stick", "wooden y-shaped stick", "A firm, Y-shaped wooden stick. You can hold it pretty comfortably.")
+woodenYstick = WoodenYstick("stick", "wooden y-shaped stick",
+                            description="A firm, Y-shaped wooden stick. You can hold it pretty comfortably.")
 woodenYstick.value = 4
-elastic_band = ElasticBand("band", "large elastic band", "It is a pretty strong and large elastic band. "
-                                                         "It's not the type used to hold small packages but rather looks "
-                                                         "like it came off a catapult of some sort.")
+elastic_band = ElasticBand("band", "large elastic band",
+                           description="It is a pretty strong and large elastic band. "
+                                       "It's not the type used to hold small packages but rather looks "
+                                       "like it came off a catapult of some sort.")
 elastic_band.value = 2.2
 elastic_band.aliases.add("elastic")
 elastic_band.aliases.add("elastic band")

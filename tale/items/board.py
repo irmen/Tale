@@ -245,7 +245,8 @@ class BulletinBoard(Item):
             print("Bulletin board '%s' save error: %s" % (self.name, x))
 
 
-bulletinboard = BulletinBoard("board", "wooden bulletin board", "The board contains a little plaque: \"important announcements\".",
-                              "On a wall, a bulletin board is visible.")
+bulletinboard = BulletinBoard("board", title="wooden bulletin board",
+                              description="The board contains a little plaque: \"important announcements\".",
+                              short_description="On a wall, a bulletin board is visible.")
 bulletinboard.aliases.add("messages")
 bulletinboard.aliases.add("bulletin")

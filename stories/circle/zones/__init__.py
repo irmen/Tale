@@ -119,7 +119,7 @@ def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
     # we take the stats from the 'human' race because the circle data lacks race and stats
-    mob = mob_class(name, c_mob.gender, "human", title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
+    mob = mob_class(name, c_mob.gender, race="human", title=title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
     mob.circle_vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:

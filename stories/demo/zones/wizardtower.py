@@ -16,8 +16,8 @@ hall = Location("Main hall of the Tower of Magic",
     The main hall of this ancient wizard tower sparkles with traces of magic.
     Everything seems to glow a little from within. You can hear a very faint hum.
     """)
-table = Item("table", "oak table", "A large dark table with a lot of cracks in its surface.")
-key = Item("key", "rusty key", "An old rusty key without a label.")
+table = Item("table", "oak table", description="A large dark table with a lot of cracks in its surface.")
+key = Item("key", "rusty key", description="An old rusty key without a label.")
 
 
 class Drone(Living):

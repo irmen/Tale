@@ -228,7 +228,7 @@ class MudObject:
                         if existing is instance:
                             del MudObject.all_locations[pid]
 
-    def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
+    def __init__(self, name: str, title: str = None, *, description: str = None, short_description: str = None) -> None:
         self._extradesc = None  # type: Dict[str,str]
         self.name = self._description = self._title = self._short_description = None  # type: str
         self.init_names(name, title, description, short_description)
@@ -363,13 +363,13 @@ class Item(MudObject):
     to check containment.
     """
 
-    def __init__(self, name: str, title: str = None, description: str = None, short_description: str = None) -> None:
+    def __init__(self, name: str, title: str = None, *, description: str = None, short_description: str = None) -> None:
         self.contained_in = None   # type: Union[Location, Container, Living]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
-        super().__init__(name, title, description, short_description)
+        super().__init__(name, title=title, description=description, short_description=short_description)
 
     def init(self) -> None:
         """
@@ -841,7 +841,7 @@ class Living(MudObject):
     They are always inside a Location (Limbo when not specified yet).
     They also have an inventory object, and you can test for containment with item in living.
     """
-    def __init__(self, name: str, gender: str, race: str="human",
+    def __init__(self, name: str, gender: str, *, race: str="human",
                  title: str=None, description: str=None, short_description: str=None) -> None:
         if race:
             self.stats = Stats.from_race(race, gender=gender)
@@ -858,7 +858,7 @@ class Living(MudObject):
         self.previous_commandline = None   # type: str
         self._previous_parse = None  # type: ParseResult
         self.teleported_from = None   # type: Location   # used by teleport/return commands
-        super().__init__(name, title, description, short_description)
+        super().__init__(name, title=title, description=description, short_description=short_description)
 
     def init_gender(self, gender: str) -> None:
         """(re)set gender attributes"""

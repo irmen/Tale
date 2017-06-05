@@ -435,7 +435,7 @@ class TestSoul(unittest.TestCase):
 
     def testAdverbs(self):
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         # check handling of more than one adverb
         with self.assertRaises(tale.errors.ParseError) as ex:
             soul.process_verb(player, "cough sickly and noisily")
@@ -451,7 +451,7 @@ class TestSoul(unittest.TestCase):
 
     def testUnrecognisedWord(self):
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         with self.assertRaises(tale.errors.ParseError):
             soul.process_verb(player, "cough hubbabubba")
 
@@ -557,7 +557,7 @@ class TestSoul(unittest.TestCase):
 
     def testParse(self):
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         room = tale.base.Location("somewhere")
         south_exit = tale.base.Exit("south", room, "a door to the south")
         east_exit = tale.base.Exit("east", room, "a door to the east")
@@ -642,7 +642,7 @@ class TestSoul(unittest.TestCase):
     def testParseMovement(self):
         # check movement parsing for room exits
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         room = tale.base.Location("somewhere")
         south_exit = tale.base.Exit("south", room, "a door to the south")
         east_exit = tale.base.Exit("east", room, "a door to the east")
@@ -669,7 +669,7 @@ class TestSoul(unittest.TestCase):
 
     def testUnparsed(self):
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         parsed = soul.parse(player, "fart")
         self.assertEqual("", parsed.unparsed)
         parsed = soul.parse(player, "grin sadistically")
@@ -882,7 +882,7 @@ class TestSoul(unittest.TestCase):
 
     def testPronounReferences(self):
         soul = tale.base.Soul()
-        player = tale.player.Player("julie", "f", "human")
+        player = tale.player.Player("julie", "f", race="human")
         room = tale.base.Location("somewhere")
         room2 = tale.base.Location("somewhere else")
         player.move(room)

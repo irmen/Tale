@@ -32,16 +32,16 @@ class TestSerializing(unittest.TestCase):
     def test_basic(self):
         o = serializecycle(races.races)
         self.assertEqual(races.races, o)
-        o = base.Item("name", "title", "description")
+        o = base.Item("name", "title", description="description")
         o.aliases = ["alias"]
         x = serializecycle(o)
         self.assert_base_attrs(x)
         self.assertEqual(["alias"], x.aliases)
 
     def test_items_and_container(self):
-        o = base.Item("name", "title", "description")
+        o = base.Item("name", "title", description="description")
         o.aliases = ["alias"]
-        bag = base.Container("name", "title", "description")
+        bag = base.Container("name", "title", description="description")
         bag.insert(o, None)
         x = serializecycle(bag)
         self.assert_base_attrs(x)

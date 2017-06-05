@@ -31,8 +31,8 @@ class TestLocations(unittest.TestCase):
         e1 = Exit("up", self.attic, "A ladder leads up.")
         e2 = Exit(["door", "east"], self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
         self.hall.add_exits([e1, e2])
-        self.table = Item("table", "oak table", "a large dark table with a lot of cracks in its surface")
-        self.key = Item("key", "rusty key", "an old rusty key without a label", short_description="Someone forgot a key.")
+        self.table = Item("table", "oak table", description="a large dark table with a lot of cracks in its surface")
+        self.key = Item("key", "rusty key", description="an old rusty key without a label", short_description="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
         self.magazine2 = Item("magazine", "university magazine")
         self.rat = Living("rat", "n", race="rodent")
@@ -127,9 +127,9 @@ class TestLocations(unittest.TestCase):
         self.assertEqual(None, container, "should not search in bags in inventory")
 
     def test_tell(self):
-        rat = MsgTraceNPC("rat", "n", "rodent")
+        rat = MsgTraceNPC("rat", "n", race="rodent")
         self.assertTrue(rat._init_called, "init() must be called from __init__")
-        julie = MsgTraceNPC("julie", "f", "human")
+        julie = MsgTraceNPC("julie", "f", race="human")
         hall = Location("hall")
         hall.livings = [rat, julie]
         hall.tell("roommsg")
@@ -741,12 +741,12 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("", item.description)
 
     def test_description(self):
-        item = Item("key", "rusty old key", "a small old key that's rusted")
+        item = Item("key", "rusty old key", description="a small old key that's rusted")
         self.assertEqual("key", item.name)
         self.assertEqual("rusty old key", item.title)
         self.assertEqual("a small old key that's rusted", item.description)
         item = Item("key", "rusty old key",
-                    """
+                    description="""
                     a very small, old key that's rusted
                     """)
         self.assertEqual("key", item.name)
@@ -961,7 +961,7 @@ class TestContainer(unittest.TestCase):
             bag.inventory.add(5)
 
     def test_title(self):
-        bag = Container("bag", "leather bag", "a small leather bag")
+        bag = Container("bag", "leather bag", description="a small leather bag")
         stone = Item("stone")
         player = Player("julie", "f")
         self.assertEqual("bag", bag.name)
@@ -1088,11 +1088,11 @@ class TestItem(unittest.TestCase):
 class TestMudObject(unittest.TestCase):
     def test_basics(self):
         try:
-            x = Item("name", "the title", "description")
+            x = Item("name", "the title", description="description")
             self.fail("assertion error expected")
         except AssertionError:
             pass
-        x = Item("name", "title", "description")
+        x = Item("name", "title", description="description")
         x.init()
         with self.assertRaises(ActionRefused):
             x.activate(None)
@@ -1109,7 +1109,7 @@ class TestMudObject(unittest.TestCase):
             MudObject("name")
 
     def test_vnum(self):
-        i1 = Item("name", "title", "description")
+        i1 = Item("name", "title", description="description")
         self.assertGreater(i1.vnum, 0)
         i2 = Item("name2", "another item")
         self.assertEqual(i1.vnum + 1, i2.vnum)

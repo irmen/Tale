@@ -83,7 +83,7 @@ class IFDriver(driver.Driver):
     def connect_player(self, player_io_type: str, line_delay: int) -> PlayerConnection:
         connection = PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
-        new_player = Player(connect_name, "n", "elemental", "This player is still connecting to the game.")
+        new_player = Player(connect_name, "n", race="elemental", description="This player is still connecting to the game.")
         io = None  # type: iobase.IoAdapterBase
         if player_io_type == "gui":
             from .tio.tkinter_io import TkinterIo

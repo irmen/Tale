@@ -77,7 +77,7 @@ class Cat(Living):
 
 cat = Cat("garfield", "m", race="cat", description="A very obese cat, orange and black. It looks tired, but glances at you happily.")
 livingroom.insert(cat, None)
-key = Key("key", "small rusty key", "This key is small and rusty. It has a label attached, reading \"garden door\".")
+key = Key("key", "small rusty key", description="This key is small and rusty. It has a label attached, reading \"garden door\".")
 key.key_for(door)
 closet.insert(key, None)
 
