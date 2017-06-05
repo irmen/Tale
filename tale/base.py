@@ -198,19 +198,20 @@ class MudObject:
         instance.vnum = MudObject.__seq
         MudObject.__seq += 1
         if isinstance(instance, Item):
-            MudObject.all_items[instance.vnum] = instance
+            MudObject.all_items[instance.vnum] = instance    # type: ignore
         elif isinstance(instance, Living):
-            MudObject.all_livings[instance.vnum] = instance
+            MudObject.all_livings[instance.vnum] = instance    # type: ignore
         elif isinstance(instance, Exit):
-            MudObject.all_exits[instance.vnum] = instance
+            MudObject.all_exits[instance.vnum] = instance    # type: ignore
         elif isinstance(instance, Location):
-            MudObject.all_locations[instance.vnum] = instance
+            MudObject.all_locations[instance.vnum] = instance    # type: ignore
         else:
-            raise TypeError("weird MudObj subtype: " + type(instance))
+            raise TypeError("weird MudObj subtype: " + str(type(instance)))
         if fix_clones:
             # the 'clone' command consumes too man vnums because of the way deepcopy works.
             # try to find the double registration and remove it.
             pid = instance.vnum - 1
+            existing = None   # type: MudObject
             existing = MudObject.all_items.get(pid, None)
             if existing is instance:
                 del MudObject.all_items[pid]
@@ -219,7 +220,7 @@ class MudObject:
                 if existing is instance:
                     del MudObject.all_livings[pid]
                 else:
-                    existing = MudObject.all_exits(pid, None)
+                    existing = MudObject.all_exits.get(pid, None)
                     if existing is instance:
                         del MudObject.all_exits[pid]
                     else:
@@ -237,9 +238,8 @@ class MudObject:
         self.verbs = {}  # type: Dict[str, str]
         # register all periodical tagged methods
         self.init()
-        for func, period in util.get_periodicals(self).items():
-            assert len(period) == 3
-            mud_context.driver.defer(period, func)
+        if util.get_periodicals(self):
+            mud_context.driver.register_periodicals(self)
 
     def init(self) -> None:
         """
@@ -511,6 +511,7 @@ class Item(MudObject):
         duplicate = copy.deepcopy(self)
         self.location = duplicate.location = location
         MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy resets initially given vnum so hand out a new one
+        mud_context.driver.register_periodicals(duplicate)
         return duplicate
 
 
@@ -938,6 +939,7 @@ class Living(MudObject):
             duplicate = copy.deepcopy(self)
             self.location = location
             MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy overwrites initially given vnum so make a new one
+            mud_context.driver.register_periodicals(duplicate)
         else:
             duplicate = self
         actor.tell("Cloned into: " + repr(duplicate) + " (spawned in current location)")
@@ -2154,8 +2156,5 @@ class Soul:
         return None, None, 0
 
 
-_limbo = Location("Limbo",
-                  """
-                  The intermediate or transitional place or state. There's only nothingness.
-                  Living beings end up here if they're not in a proper location yet.
-                  """)
+_limbo = Location("Limbo", "The intermediate or transitional place or state. There's only nothingness. "
+                           "Living beings end up here if they're not in a proper location yet.")

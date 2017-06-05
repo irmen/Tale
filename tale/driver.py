@@ -24,8 +24,7 @@ from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Genera
 import appdirs
 
 from . import __version__ as tale_version_str
-from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs
-from .base import Location, Exit, ParseResult
+from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs, base
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH
 
@@ -190,7 +189,7 @@ class Driver(pubsub.Listener):
     Handles main game loop, player connections, and loading/saving of game state.
     """
     def __init__(self) -> None:
-        self.unbound_exits = []    # type: List[Exit]
+        self.unbound_exits = []    # type: List[base.Exit]
         self.deferreds = []   # type: List[Deferred]  # heapq
         self.deferreds_lock = threading.Lock()
         self.server_started = datetime.datetime.now().replace(microsecond=0)
@@ -517,7 +516,7 @@ class Driver(pubsub.Listener):
             if _verb in self.commands.no_soul_parsing:
                 # don't use the soul to parse it further
                 player.turns += 1
-                raise errors.NonSoulVerb(ParseResult(_verb, unparsed=_rest.strip()))
+                raise errors.NonSoulVerb(base.ParseResult(_verb, unparsed=_rest.strip()))
             else:
                 # Parse the command by using the soul.
                 all_verbs = set(command_verbs) | custom_verbs
@@ -578,7 +577,7 @@ class Driver(pubsub.Listener):
         player.move(xt.target)
         player.look()
 
-    def lookup_location(self, location_name: str) -> Location:
+    def lookup_location(self, location_name: str) -> base.Location:
         location = self.zones
         modulename = "zones"
         for name in location_name.split('.'):
@@ -666,7 +665,7 @@ class Driver(pubsub.Listener):
     def do_save(self, player: player.Player) -> None:
         raise NotImplementedError
 
-    def register_exit(self, exit: Exit) -> None:
+    def register_exit(self, exit: base.Exit) -> None:
         if not exit.target:
             self.unbound_exits.append(exit)
 
@@ -732,6 +731,11 @@ class Driver(pubsub.Listener):
         with self.deferreds_lock:
             self.deferreds = [d for d in self.deferreds if d.owner is not owner]
             heapq.heapify(self.deferreds)
+
+    def register_periodicals(self, obj: base.MudObject) -> None:
+        for func, period in util.get_periodicals(obj).items():
+            assert len(period) == 3
+            mud_context.driver.defer(period, func)
 
     @property
     def uptime(self) -> Tuple[int, int, int]:

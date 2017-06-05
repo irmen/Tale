@@ -1,6 +1,7 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
+[bugfix] Save games don't really work, they will result in a lot of duplicate disjoint objects when loaded again. Pickling the world is not the best choice.
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
 [code]  use websockets or comet long polling instead of 0.5 sec ajax polling to update the text in the browser

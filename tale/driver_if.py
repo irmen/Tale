@@ -75,6 +75,7 @@ class IFDriver(driver.Driver):
         savedata = pickle.dumps(state, protocol=pickle.HIGHEST_PROTOCOL)
         self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"] = savedata
         player.tell("Game saved.")
+        player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")   # XXX fix save games.
         if self.story.config.display_gametime:
             player.tell("Game time: %s" % self.game_clock)
         player.tell("\n")
@@ -299,6 +300,7 @@ class IFDriver(driver.Driver):
             self.waiting_for_input = {}   # can't keep the old waiters around
             player.tell("\n")
             player.tell("Game loaded.")
+            player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")  # XXX fix save games.
             if self.story.config.display_gametime:
                 player.tell("Game time: %s" % self.game_clock)
             player.tell("\n")

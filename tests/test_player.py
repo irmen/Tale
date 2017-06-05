@@ -183,7 +183,9 @@ class TestPlayer(unittest.TestCase):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
         player.look()
-        self.assertEqual(["[Limbo]\n", "The intermediate or transitional place or state. There's only nothingness.\nLiving beings end up here if they're not in a proper location yet.\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Limbo]\n", "The intermediate or transitional place or state. There's only nothingness. "
+                                       "Living beings end up here if they're not in a proper location yet.\n"]
+                         , player.test_get_output_paragraphs())
         player.move(attic, silent=True)
         player.look(short=True)
         self.assertEqual(["[Attic]\n"], player.test_get_output_paragraphs())

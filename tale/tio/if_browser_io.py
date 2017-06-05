@@ -482,7 +482,8 @@ class CustomWsgiServer(WSGIServer):
         if self.use_ssl:
             print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
             import ssl
-            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0], certfile=self.ssl_cert_locations[1], server_side=True)
+            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0],
+                                          certfile=self.ssl_cert_locations[1], server_side=True)
         return super().server_bind()
 
 
