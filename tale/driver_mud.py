@@ -76,7 +76,7 @@ class MudDriver(driver.Driver):
             raise ValueError("mud connections can only be done via web interface")
         connection = PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
-        new_player = Player(connect_name, "n", race="elemental", description="This player is still connecting to the game.")
+        new_player = Player(connect_name, "n", race="elemental", descr="This player is still connecting to the game.")
         connection.player = new_player
         from .tio.mud_browser_io import MudHttpIo
         connection.io = MudHttpIo(connection)
@@ -347,9 +347,9 @@ class LimboReaper(base.Living):
     def __init__(self) -> None:
         super().__init__(
             "reaper", "m", race="elemental", title="Grim Reaper",
-            description="He wears black robes with a hood. Where a face should be, there is only nothingness. "
+            descr="He wears black robes with a hood. Where a face should be, there is only nothingness. "
                         "He is carrying a large ominous scythe that looks very, very sharp.",
-            short_description="A figure clad in black, carrying a scythe, is also present.")
+            short_descr="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
 

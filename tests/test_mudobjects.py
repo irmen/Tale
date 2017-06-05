@@ -31,14 +31,14 @@ class TestLocations(unittest.TestCase):
         e1 = Exit("up", self.attic, "A ladder leads up.")
         e2 = Exit(["door", "east"], self.street, "A heavy wooden door to the east blocks the noises from the street outside.")
         self.hall.add_exits([e1, e2])
-        self.table = Item("table", "oak table", description="a large dark table with a lot of cracks in its surface")
-        self.key = Item("key", "rusty key", description="an old rusty key without a label", short_description="Someone forgot a key.")
+        self.table = Item("table", "oak table", descr="a large dark table with a lot of cracks in its surface")
+        self.key = Item("key", "rusty key", descr="an old rusty key without a label", short_descr="Someone forgot a key.")
         self.magazine = Item("magazine", "university magazine")
         self.magazine2 = Item("magazine", "university magazine")
         self.rat = Living("rat", "n", race="rodent")
         self.rat2 = Living("rat", "n", race="rodent")
-        self.fly = Living("fly", "n", race="insect", short_description="A fly buzzes around your head.")
-        self.julie = Living("julie", "f", title="attractive Julie", description="She's quite the looker.")
+        self.fly = Living("fly", "n", race="insect", short_descr="A fly buzzes around your head.")
+        self.julie = Living("julie", "f", title="attractive Julie", descr="She's quite the looker.")
         self.julie.aliases = {"chick"}
         self.player = Player("player", "m")
         self.pencil = Item("pencil", title="fountain pen")
@@ -637,7 +637,7 @@ class TestNPC(unittest.TestCase):
     def test_init(self):
         rat = Living("rat", "n", race="rodent")
         julie = Living("julie", "f", title="attractive Julie",
-                    description="""
+                       descr="""
                     She's quite the looker.
                     """, race="human")
         self.assertFalse(julie.aggressive)
@@ -741,12 +741,12 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("", item.description)
 
     def test_description(self):
-        item = Item("key", "rusty old key", description="a small old key that's rusted")
+        item = Item("key", "rusty old key", descr="a small old key that's rusted")
         self.assertEqual("key", item.name)
         self.assertEqual("rusty old key", item.title)
         self.assertEqual("a small old key that's rusted", item.description)
         item = Item("key", "rusty old key",
-                    description="""
+                    descr="""
                     a very small, old key that's rusted
                     """)
         self.assertEqual("key", item.name)
@@ -961,7 +961,7 @@ class TestContainer(unittest.TestCase):
             bag.inventory.add(5)
 
     def test_title(self):
-        bag = Container("bag", "leather bag", description="a small leather bag")
+        bag = Container("bag", "leather bag", descr="a small leather bag")
         stone = Item("stone")
         player = Player("julie", "f")
         self.assertEqual("bag", bag.name)
@@ -1088,11 +1088,11 @@ class TestItem(unittest.TestCase):
 class TestMudObject(unittest.TestCase):
     def test_basics(self):
         try:
-            x = Item("name", "the title", description="description")
+            x = Item("name", "the title", descr="description")
             self.fail("assertion error expected")
         except AssertionError:
             pass
-        x = Item("name", "title", description="description")
+        x = Item("name", "title", descr="description")
         x.init()
         with self.assertRaises(ActionRefused):
             x.activate(None)
@@ -1109,7 +1109,7 @@ class TestMudObject(unittest.TestCase):
             MudObject("name")
 
     def test_vnum(self):
-        i1 = Item("name", "title", description="description")
+        i1 = Item("name", "title", descr="description")
         self.assertGreater(i1.vnum, 0)
         i2 = Item("name2", "another item")
         self.assertEqual(i1.vnum + 1, i2.vnum)

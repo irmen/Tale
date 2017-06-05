@@ -228,10 +228,10 @@ class MudObject:
                         if existing is instance:
                             del MudObject.all_locations[pid]
 
-    def __init__(self, name: str, title: str = None, *, description: str = None, short_description: str = None) -> None:
+    def __init__(self, name: str, title: str = None, *, descr: str = None, short_descr: str = None) -> None:
         self._extradesc = None  # type: Dict[str,str]
         self.name = self._description = self._title = self._short_description = None  # type: str
-        self.init_names(name, title, description, short_description)
+        self.init_names(name, title, descr, short_descr)
         self.aliases = set()  # type: Set[str]
         # any custom verbs that need to be recognised (verb->docstring mapping),
         # verb handling is done via handle_verb() callbacks.
@@ -281,15 +281,15 @@ class MudObject:
         assert isinstance(value, dict)
         self._extradesc = value
 
-    def init_names(self, name: str, title: str, description: str, short_description: str) -> None:
+    def init_names(self, name: str, title: str, descr: str, short_descr: str) -> None:
         """(re)set the name and description attributes"""
         self.name = name.lower()
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
             assert not title.startswith("a ") and not title.startswith("A "), "title must not start with 'a'"
         self._title = title or name
-        self._description = dedent(description).strip() if description else ""
-        self._short_description = short_description
+        self._description = dedent(descr).strip() if descr else ""
+        self._short_description = short_descr
         self._extradesc = {}   # maps keyword to description
 
     def add_extradesc(self, keywords: Set[str], description: str) -> None:
@@ -363,13 +363,13 @@ class Item(MudObject):
     to check containment.
     """
 
-    def __init__(self, name: str, title: str = None, *, description: str = None, short_description: str = None) -> None:
+    def __init__(self, name: str, title: str = None, *, descr: str = None, short_descr: str = None) -> None:
         self.contained_in = None   # type: Union[Location, Container, Living]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
-        super().__init__(name, title=title, description=description, short_description=short_description)
+        super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init(self) -> None:
         """
@@ -536,12 +536,12 @@ class Location(MudObject):
     Has connections ('exits') to other Locations.
     You can test for containment with 'in': item in loc, npc in loc
     """
-    def __init__(self, name: str, description: str=None) -> None:
+    def __init__(self, name: str, descr: str=None) -> None:
         self.name = name
         self.livings = set()  # type: Set[Living] # set of livings in this location
         self.items = set()    # type: Set[Item] # set of all items in the room
         self.exits = {}       # type: Dict[str, Exit] # dictionary of all exits: exit_direction -> Exit object with target & descr
-        super().__init__(name, description=description)
+        super().__init__(name, descr=descr)
         self.name = name      # make sure we preserve the case; base object overwrites it in lowercase
 
     def __contains__(self, obj: Union['Living', Item]) -> bool:
@@ -842,7 +842,7 @@ class Living(MudObject):
     They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name: str, gender: str, *, race: str="human",
-                 title: str=None, description: str=None, short_description: str=None) -> None:
+                 title: str=None, descr: str=None, short_descr: str=None) -> None:
         if race:
             self.stats = Stats.from_race(race, gender=gender)
         else:
@@ -858,7 +858,7 @@ class Living(MudObject):
         self.previous_commandline = None   # type: str
         self._previous_parse = None  # type: ParseResult
         self.teleported_from = None   # type: Location   # used by teleport/return commands
-        super().__init__(name, title=title, description=description, short_description=short_description)
+        super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init_gender(self, gender: str) -> None:
         """(re)set gender attributes"""
@@ -1322,7 +1322,7 @@ class Exit(MudObject):
     Note that the exit's origin is not stored in the exit object.
     """
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location],
-                 short_description: str, long_description: str=None) -> None:
+                 short_descr: str, long_descr: str=None) -> None:
         assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
         if isinstance(directions, str):
             direction = directions
@@ -1337,8 +1337,8 @@ class Exit(MudObject):
         else:
             self._target_str = target_location
             title = "Exit to <unbound:%s>" % target_location
-        long_description = long_description or short_description
-        super().__init__(direction, title=title, description=long_description, short_description=short_description)
+        long_descr = long_descr or short_descr
+        super().__init__(direction, title=title, descr=long_descr, short_descr=short_descr)
         self.aliases = aliases
         if not self.target:
             # The driver needs to know about all unbound exits,
@@ -1406,13 +1406,13 @@ class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
     """
-    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_description: str,
-                 long_description: str=None, locked: bool=False, opened: bool=True) -> None:
+    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_descr: str,
+                 long_descr: str=None, locked: bool=False, opened: bool=True) -> None:
         self.locked = locked
         self.opened = opened
-        self.__description_prefix = long_description or short_description
+        self.__description_prefix = long_descr or short_descr
         self.key_code = ""   # you can optionally set this to any code that a key must match to unlock the door
-        super().__init__(directions, target_location, short_description, long_description)
+        super().__init__(directions, target_location, short_descr, long_descr)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
         self.linked_door = None  # type: Door.DoorPairLink

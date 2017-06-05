@@ -17,7 +17,7 @@ toothpick = Item("toothpick", "pointy wooden toothpick")
 toothpick.value = 0.12
 shopinfo.forsale.add(toothpick)   # never run out of toothpicks
 shopinfo.banks_money = True
-shopkeeper = ShoppeShopkeeper("Lucy", "f", short_description="Lucy, the shop owner, is looking happily at her newly arrived customer.")
+shopkeeper = ShoppeShopkeeper("Lucy", "f", short_descr="Lucy, the shop owner, is looking happily at her newly arrived customer.")
 shopkeeper.money = 14000
 shop = Location("Curiosity Shoppe", "A weird little shop. It sells odd stuff.")
 shop.insert(shopkeeper, None)
@@ -44,7 +44,7 @@ shop.insert(clock, None)
 shop.insert(paper, None)
 lamp = Item("lamp", "rather small lamp")
 lamp.value = 600
-customer = CustomerJames("James", "m", title="Sir James", description="Sir James is trying to sell something, it looks like a lamp.")
+customer = CustomerJames("James", "m", title="Sir James", descr="Sir James is trying to sell something, it looks like a lamp.")
 lamp.add_extradesc({"lamp"}, "The lamp looks quite old, but otherwise is rather unremarkable."
                              " There is something weird going on with the cord though!")
 lamp.add_extradesc({"cord"}, "Even when the lamp doesn't move, the power cord keeps snaking around as if it were alive. How odd.")

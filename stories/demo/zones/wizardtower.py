@@ -16,8 +16,8 @@ hall = Location("Main hall of the Tower of Magic",
     The main hall of this ancient wizard tower sparkles with traces of magic.
     Everything seems to glow a little from within. You can hear a very faint hum.
     """)
-table = Item("table", "oak table", description="A large dark table with a lot of cracks in its surface.")
-key = Item("key", "rusty key", description="An old rusty key without a label.")
+table = Item("table", "oak table", descr="A large dark table with a lot of cracks in its surface.")
+key = Item("key", "rusty key", descr="An old rusty key without a label.")
 
 
 class Drone(Living):
@@ -33,7 +33,7 @@ class Drone(Living):
 
 
 drone = Drone("drone", "n", race="bot", title="mindless drone",
-              description="A stupid metallic drone. It just hovers here with no apparent reason. It has a little label attached to it.")
+              descr="A stupid metallic drone. It just hovers here with no apparent reason. It has a little label attached to it.")
 drone.add_extradesc({"label"}, "The label reads: \"Wall-E was my cousin\".")
 drone.aggressive = True
 

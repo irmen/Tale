@@ -32,16 +32,16 @@ class TestSerializing(unittest.TestCase):
     def test_basic(self):
         o = serializecycle(races.races)
         self.assertEqual(races.races, o)
-        o = base.Item("name", "title", description="description")
+        o = base.Item("name", "title", descr="description")
         o.aliases = ["alias"]
         x = serializecycle(o)
         self.assert_base_attrs(x)
         self.assertEqual(["alias"], x.aliases)
 
     def test_items_and_container(self):
-        o = base.Item("name", "title", description="description")
+        o = base.Item("name", "title", descr="description")
         o.aliases = ["alias"]
-        bag = base.Container("name", "title", description="description")
+        bag = base.Container("name", "title", descr="description")
         bag.insert(o, None)
         x = serializecycle(bag)
         self.assert_base_attrs(x)
@@ -95,7 +95,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("somewhere It is closed and locked.", x.description)
 
     def test_npc(self):
-        o = base.Living("name", "n", title="title", description="description", race="dragon")
+        o = base.Living("name", "n", title="title", descr="description", race="dragon")
         x = serializecycle(o)
         self.assert_base_attrs(x)
         self.assertFalse(x.aggressive)
@@ -104,7 +104,7 @@ class TestSerializing(unittest.TestCase):
         o = base.Soul()
         x = serializecycle(o)
         self.assertIsNotNone(x)
-        p = player.Player("name", "n", description="description")
+        p = player.Player("name", "n", descr="description")
         p.title = "title"
         p.money = 42
         x = serializecycle(p)

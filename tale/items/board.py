@@ -246,7 +246,7 @@ class BulletinBoard(Item):
 
 
 bulletinboard = BulletinBoard("board", title="wooden bulletin board",
-                              description="The board contains a little plaque: \"important announcements\".",
-                              short_description="On a wall, a bulletin board is visible.")
+                              descr="The board contains a little plaque: \"important announcements\".",
+                              short_descr="On a wall, a bulletin board is visible.")
 bulletinboard.aliases.add("messages")
 bulletinboard.aliases.add("bulletin")

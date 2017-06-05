@@ -28,9 +28,9 @@ class Player(base.Living, pubsub.Listener):
     Player controlled entity.
     Has a Soul for social interaction.
     """
-    def __init__(self, name: str, gender: str, *, race: str="human", description: str=None, short_description: str=None) -> None:
+    def __init__(self, name: str, gender: str, *, race: str="human", descr: str=None, short_descr: str=None) -> None:
         title = lang.capital(name)
-        super().__init__(name, gender, race=race, title=title, description=description, short_description=short_description)
+        super().__init__(name, gender, race=race, title=title, descr=descr, short_descr=short_descr)
         self.turns = 0
         self.state = {}  # type: Dict[Any, Any]
         self.hints = hints.HintSystem()

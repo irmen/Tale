@@ -104,18 +104,18 @@ lane.add_exits([WizardTowerEntry("west", "wizardtower.hall",
                                  "To the west is the wizard's tower. It seems to be protected by a force-field.")])
 
 towncrier = TownCrier("laish", "f", title="Laish the town crier",
-                      description="The town crier is awfully quiet today. She seems rather preoccupied with something.")
+                      descr="The town crier is awfully quiet today. She seems rather preoccupied with something.")
 towncrier.aliases = {"crier", "town crier"}
 
-idiot = VillageIdiot("idiot", "m", title="blubbering idiot", description="""
+idiot = VillageIdiot("idiot", "m", title="blubbering idiot", descr="""
     This person's engine is running but there is nobody behind the wheel.
     He is a few beers short of a six-pack. Three ice bricks shy of an igloo.
     Not the sharpest knife in the drawer. Anyway you get the idea: it's an idiot.
     """)
 
-rat = WalkingRat("rat", "n", race="rodent", description="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
+rat = WalkingRat("rat", "n", race="rodent", descr="A filthy looking rat. Its whiskers tremble slightly as it peers back at you.")
 
-ant = Living("ant", "n", race="insect", short_description="A single ant seems to have lost its way.")
+ant = Living("ant", "n", race="insect", short_descr="A single ant seems to have lost its way.")
 
 clock = gameclock.clone()
 clock.short_description = "On the pavement lies a clock, it seems to be working still."
@@ -131,10 +131,10 @@ class AlleyOfDoors(Location):
 
 alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
-door1 = Door(["first door", "door one"], alley, "There's a door marked 'door one'.", long_description=descr, locked=False, opened=True)
-door2 = Door(["second door", "door two"], alley, "There's a door marked 'door two'.", long_description=descr, locked=True, opened=False)
-door3 = Door(["third door", "door three"], alley, "There's a door marked 'door three'.", long_description=descr, locked=False, opened=False)
-door4 = Door(["fourth door", "door four"], alley, "There's a door marked 'door four'.", long_description=descr, locked=True, opened=False)
+door1 = Door(["first door", "door one"], alley, "There's a door marked 'door one'.", long_descr=descr, locked=False, opened=True)
+door2 = Door(["second door", "door two"], alley, "There's a door marked 'door two'.", long_descr=descr, locked=True, opened=False)
+door3 = Door(["third door", "door three"], alley, "There's a door marked 'door three'.", long_descr=descr, locked=False, opened=False)
+door4 = Door(["fourth door", "door four"], alley, "There's a door marked 'door four'.", long_descr=descr, locked=True, opened=False)
 alley.add_exits([
     door1, door2, door3, door4,
     Exit(["north", "square"], square, "You can go north which brings you back to the square."),
@@ -271,7 +271,7 @@ class Computer(Item):
         return False
 
 
-computer = Computer("computer", short_description="A computer is connected to the doors via a couple of wires.")
+computer = Computer("computer", short_descr="A computer is connected to the doors via a couple of wires.")
 computer.verbs = {
     # register some custom verbs. You can redefine existing verbs, so be careful.
     "hack": "Attempt to hack an electronic device.",
@@ -294,14 +294,14 @@ class DoorKey(Key):
                 actor.tell_later("<dim>(You will remember this event.)</>")
 
 
-doorkey = DoorKey("key", description="A key with a little label marked 'Game Over'.")
+doorkey = DoorKey("key", descr="A key with a little label marked 'Game Over'.")
 doorkey.key_for(end_door)
 alley.insert(doorkey, None)
 
 
 class MagicGameEnd(Item):
     def __init__(self) -> None:
-        super().__init__("magic orb", description="A magic orb of some sort.")
+        super().__init__("magic orb", descr="A magic orb of some sort.")
         self.aliases = {"orb"}
 
     def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:

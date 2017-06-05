@@ -119,7 +119,7 @@ def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
     # we take the stats from the 'human' race because the circle data lacks race and stats
-    mob = mob_class(name, c_mob.gender, race="human", title=title, description=c_mob.detaileddesc, short_description=c_mob.longdesc)
+    mob = mob_class(name, c_mob.gender, race="human", title=title, descr=c_mob.detaileddesc, short_descr=c_mob.longdesc)
     mob.circle_vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
         for ed in c_mob.extradesc:
@@ -170,39 +170,39 @@ def make_item(vnum: int) -> Item:
         title = title[2:]
     if vnum in circle_bulletin_boards:
         # it's a bulletin board
-        item = BulletinBoard(name, title, short_description=c_obj.longdesc)
+        item = BulletinBoard(name, title, short_descr=c_obj.longdesc)
         item.storage_file = circle_bulletin_boards[vnum]   # note that some instances reuse the same board
         item.load()
         # remove the item name from the extradesc
         c_obj.extradesc = [ed for ed in c_obj.extradesc if item.name not in ed["keywords"]]
     elif c_obj.type == "container":
         if c_obj.typespecific.get("closeable"):
-            item = Boxlike(name, title, short_description=c_obj.longdesc)
+            item = Boxlike(name, title, short_descr=c_obj.longdesc)
             item.opened = True
             if "closed" in c_obj.typespecific:
                 item.opened = not c_obj.typespecific["closed"]
         else:
-            item = Container(name, title, short_description=c_obj.longdesc)
+            item = Container(name, title, short_descr=c_obj.longdesc)
     elif c_obj.type == "weapon":
-        item = Weapon(name, title, short_description=c_obj.longdesc)
+        item = Weapon(name, title, short_descr=c_obj.longdesc)
         # @todo weapon attrs
     elif c_obj.type == "armor":
-        item = Armour(name, title, short_description=c_obj.longdesc)
+        item = Armour(name, title, short_descr=c_obj.longdesc)
         # @todo armour attrs
     elif c_obj.type == "key":
-        item = Key(name, title, short_description=c_obj.longdesc)
+        item = Key(name, title, short_descr=c_obj.longdesc)
         item.key_for(code=vnum)   # the key code is just the item's vnum
     elif c_obj.type == "note":  # doesn't yet occur in the obj files though
-        item = Note(name, title, short_description=c_obj.longdesc)
+        item = Note(name, title, short_descr=c_obj.longdesc)
     elif c_obj.type == "food":
-        item = Food(name, title, short_description=c_obj.longdesc)
+        item = Food(name, title, short_descr=c_obj.longdesc)
         item.affect_fullness = c_obj.typespecific["filling"]
         item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type == "light":
-        item = Light(name, title, short_description=c_obj.longdesc)
+        item = Light(name, title, short_descr=c_obj.longdesc)
         item.capacity = c_obj.typespecific["capacity"]
     elif c_obj.type == "scroll":
-        item = Scroll(name, title, short_description=c_obj.longdesc)
+        item = Scroll(name, title, short_descr=c_obj.longdesc)
         item.spell_level = c_obj.typespecific["level"]
         spells = {c_obj.typespecific["spell1"]}
         if "spell2" in c_obj.typespecific:
@@ -211,15 +211,15 @@ def make_item(vnum: int) -> Item:
             spells.add(c_obj.typespecific["spell3"])
         item.spells = frozenset(spells)
     elif c_obj.type in ("staff", "wand"):
-        item = MagicItem(name, title, short_description=c_obj.longdesc)
+        item = MagicItem(name, title, short_descr=c_obj.longdesc)
         item.level = c_obj.typespecific["level"]
         item.capacity = c_obj.typespecific["capacity"]
         item.remaining = c_obj.typespecific["remaining"]
         item.spell = c_obj.typespecific["spell"]
     elif c_obj.type == "trash":
-        item = Trash(name, title, short_description=c_obj.longdesc)
+        item = Trash(name, title, short_descr=c_obj.longdesc)
     elif c_obj.type == "drinkcontainer":
-        item = Drink(name, title, short_description=c_obj.longdesc)
+        item = Drink(name, title, short_descr=c_obj.longdesc)
         item.capacity = c_obj.typespecific["capacity"]
         item.quantity = c_obj.typespecific["remaining"]
         item.contents = c_obj.typespecific["drinktype"]
@@ -229,7 +229,7 @@ def make_item(vnum: int) -> Item:
         item.affect_thirst = drinktype.thirst
         item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type == "potion":
-        item = Potion(name, title, short_description=c_obj.longdesc)
+        item = Potion(name, title, short_descr=c_obj.longdesc)
         item.spell_level = c_obj.typespecific["level"]
         spells = {c_obj.typespecific["spell1"]}
         if "spell2" in c_obj.typespecific:
@@ -238,21 +238,21 @@ def make_item(vnum: int) -> Item:
             spells.add(c_obj.typespecific["spell3"])
         item.spells = frozenset(spells)
     elif c_obj.type == "money":
-        item = Money(name, title, short_description=c_obj.longdesc)
+        item = Money(name, title, short_descr=c_obj.longdesc)
         item.value = c_obj.typespecific["amount"]
     elif c_obj.type == "boat":
-        item = Boat(name, title, short_description=c_obj.longdesc)
+        item = Boat(name, title, short_descr=c_obj.longdesc)
     elif c_obj.type == "worn":
-        item = Wearable(name, title, short_description=c_obj.longdesc)
+        item = Wearable(name, title, short_descr=c_obj.longdesc)
         # @todo worn attrs
     elif c_obj.type == "fountain":
-        item = Fountain(name, title, short_description=c_obj.longdesc)
+        item = Fountain(name, title, short_descr=c_obj.longdesc)
         item.capacity = c_obj.typespecific["capacity"]
         item.quantity = c_obj.typespecific["remaining"]
         item.contents = c_obj.typespecific["drinktype"]
         item.poisoned = c_obj.typespecific.get("ispoisoned", False)
     elif c_obj.type in ("treasure", "other"):
-        item = Item(name, title, short_description=c_obj.longdesc)
+        item = Item(name, title, short_descr=c_obj.longdesc)
     else:
         raise ValueError("invalid obj type: " + c_obj.type)
     for ed in c_obj.extradesc:
