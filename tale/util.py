@@ -403,12 +403,15 @@ def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, de
     if detailed:
         def makestrvalue(value: Any) -> str:
             try:
-                return repr(value)
+                sval = repr(value)
             except:
                 try:
-                    return str(value)
+                    sval = str(value)
                 except:
                     return "<ERROR>"
+            if len(sval) > 250:
+                return sval[:250] + "   ...(truncated to 250)"
+            return sval
 
         import linecache
         try:
@@ -424,10 +427,10 @@ def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, de
                     location = "%s.%s" % (frame.f_locals["self"].__class__.__name__, frame.f_code.co_name)
                 else:
                     location = frame.f_code.co_name
-                result.append("   ----\n")
+                result.append("   ----\n\n")
                 result.append("File \"%s\", line %d, in %s\n" % (sourcefilename, ex_tb.tb_lineno, location))
                 result.append("Source code:\n")
-                result.append("    " + linecache.getline(sourcefilename, ex_tb.tb_lineno).strip() + "\n")
+                result.append("    " + linecache.getline(sourcefilename, ex_tb.tb_lineno).strip() + "\n\n")
                 if not skiplocals:
                     names = set()  # type: Set[str]
                     names.update(getattr(frame.f_code, "co_varnames", ()))
