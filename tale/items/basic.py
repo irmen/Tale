@@ -112,14 +112,13 @@ class GameClock(Item):
 
     @property
     def description(self) -> str:
-        if mud_context.config.display_gametime:
-            if self.use_locale:
-                display = mud_context.driver.game_clock.clock.strftime("%c")
-            else:
-                display = mud_context.driver.game_clock.clock.strftime("%Y-%m-%d %H:%M:%S")
-            return "It reads: " + display
-        else:
+        if not mud_context.config or not mud_context.config.display_gametime:
             return "It looks broken."
+        if self.use_locale:
+            display = mud_context.driver.game_clock.clock.strftime("%c")
+        else:
+            display = mud_context.driver.game_clock.clock.strftime("%Y-%m-%d %H:%M:%S")
+        return "It reads: " + display
 
     @description.setter
     def description(self, value: str) -> None:

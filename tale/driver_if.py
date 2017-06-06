@@ -125,6 +125,7 @@ class IFDriver(driver.Driver):
                 # switch active player objects and remove the player placeholder used while connecting
                 old_player, conn.player = conn.player, loaded_player
                 old_player.destroy(util.Context(self, self.game_clock, self.story.config, conn))
+                del old_player
                 conn.player.tell("\n")
                 prompt = self.story.welcome_savegame(conn.player)
                 if prompt:
