@@ -93,6 +93,7 @@ class Deferred:
     If you set a (low_seconds, high_seconds) periodical tuple, the deferred will be called periodically
     where the next trigger time is randomized within the given interval.
     The due time is given in Game Time, not in real/wall time!
+    Note that the vargs/kwargs should be serializable or savegames are impossible!
     """
     def __init__(self, due_gametime: datetime.datetime, action: Callable, vargs: Sequence[Any], kwargs: Dict[str, Any],
                  *, periodical: Tuple[float, float]=None) -> None:

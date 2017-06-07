@@ -12,7 +12,7 @@ import os
 import pathlib
 import pkgutil
 import sys
-from typing import ByteString, Union, IO, Any, Iterable
+from typing import Union, IO, Any, Iterable
 
 __all__ = ["VfsError", "VirtualFileSystem", "internal_resources"]
 
@@ -37,7 +37,7 @@ def is_text(mimetype: str) -> bool:
 
 class Resource:
     """Simple container of a resource name, its data (string or binary) and the mime type"""
-    def __init__(self, name: str, data: Union[str, ByteString], mimetype: str="application/octet-stream", mtime: float=0.0) -> None:
+    def __init__(self, name: str, data: Union[str, bytes], mimetype: str="application/octet-stream", mtime: float=0.0) -> None:
         self.is_text = is_text(mimetype)
         if self.is_text:
             if not isinstance(data, str):
@@ -196,7 +196,7 @@ class VirtualFileSystem:
                     data = self._uncompress(compressor, data, is_text(mimetype))
                 return Resource(name, data, mimetype, mtime)
 
-    def __setitem__(self, name: str, data: Union[Resource, str, ByteString]) -> None:
+    def __setitem__(self, name: str, data: Union[Resource, str, bytes]) -> None:
         """
         Stores the data on the given resource name.
         Overwrites an existing resource if any.

@@ -1,8 +1,8 @@
-import codecs
+import datetime
 import hmac
 import importlib
 import pprint
-from typing import Any, Tuple, List, Optional, Dict, Set, FrozenSet, Type, ByteString
+from typing import Any, Tuple, List, Optional, Dict, Set, FrozenSet, Type
 
 from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
 from .items.basic import Drink, GameClock
@@ -14,10 +14,10 @@ from .driver import Deferred
 import serpent
 
 
-def mudobj_ref(mudobj: MudObject) -> Optional[Tuple[int, str, str]]:
-    """generate a serializable reference (vnum, name, classname) for a MudObject"""
+def mudobj_ref(mudobj: MudObject) -> Optional[Tuple[int, str, str, str]]:
+    """generate a serializable reference (vnum, name, classname, baseclassname) for a MudObject"""
     if mudobj:
-        return mudobj.vnum, mudobj.name, qual_classname(mudobj)
+        return mudobj.vnum, mudobj.name, qual_classname(mudobj), qual_baseclassname(mudobj)
     return None
 
 
@@ -27,11 +27,37 @@ def qual_classname(obj: Any, cls: bool=False) -> str:
     return obj.__module__ + "." + obj.__name__
 
 
+def qual_baseclassname(obj: MudObject) -> str:
+    mro = obj.__class__.__mro__
+    if Location in mro:
+        return qual_classname(Location, cls=True)
+    elif Exit in mro:
+        return qual_classname(Exit, cls=True)
+    elif Player in mro:
+        return qual_classname(Player, cls=True)
+    elif Living in mro:
+        return qual_classname(Living, cls=True)
+    elif Item in mro:
+        return qual_classname(Item, cls=True)
+    else:
+        raise ValueError("cannot determine Tale base class", obj)
+
+
 class TaleSerializer:
     xor_key = 0x5c
     hmac_key = b"please do not hack the save files"
 
     def __init__(self):
+        def serialize_dummy(obj: Any, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+            print("SERIALIZE", obj, " @@@TODO@@@")  # XXX
+            out.append("'@@@TODO@@@'")
+        serpent.register_class(Player, self.serialize_player)
+        serpent.register_class(Location, serialize_dummy)
+        serpent.register_class(Stats, self.serialize_stats)
+        serpent.register_class(Item, self.serialize_item)
+        serpent.register_class(Living, self.serialize_living)
+        serpent.register_class(Exit, serialize_dummy)
+        serpent.register_class(Deferred, self.serialize_deferred)
         self.serializer = serpent.Serializer(indent=True, module_in_classname=True)
 
     def serialize(self, story: StoryConfig, player: Player, items: FrozenSet[Item], livings: FrozenSet[Living],
@@ -68,47 +94,28 @@ class TaleSerializer:
         serialized = self.serializer.serialize(data)
         return self.encrypt(serialized)
 
-    def encrypt(self, data: ByteString) -> ByteString:
-        digest = hmac.HMAC(key=self.hmac_key, msg=data, digestmod="sha").hexdigest()
+    def encrypt(self, data: bytes) -> bytes:
+        return data # XXX
+        digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()
         data = b"digest=" + digest.encode("ascii") + b"\n" + data
         return b"TALESAVE" + bytes(b ^ self.xor_key for b in data)
 
-    def decrypt(self, data: ByteString) -> ByteString:
-        if not data.startswith(b"TALESAVE"):
-            return data
-        data = bytes(b ^ self.xor_key for b in data[8:])
-        digest, data = data.split(maxsplit=1)
-        if not digest.startswith(b"digest="):
-            raise TaleError("corrupt or hacked save game file")
-        check = digest.split(b"=")[1].decode("ascii")
-        calculated = hmac.HMAC(key=self.hmac_key, msg=data, digestmod="sha").hexdigest()
-        if check != calculated:
-            raise IOError("corrupt or hacked save game file")
-        return data
-
-    @staticmethod
-    def add_basic_properties(state: Dict[str, Any], obj: MudObject) -> None:
+    def add_basic_properties(self, state: Dict[str, Any], obj: MudObject) -> None:
         state["__class__"] = qual_classname(obj)
-        mro = obj.__class__.__mro__
-        if Location in mro:
-            state["__base_class__"] = qual_classname(Location, cls=True)
-        elif Exit in mro:
-            state["__base_class__"] = qual_classname(Exit, cls=True)
-        elif Player in mro:
-            state["__base_class__"] = qual_classname(Player, cls=True)
-        elif Living in mro:
-            state["__base_class__"] = qual_classname(Living, cls=True)
-        elif Item in mro:
-            state["__base_class__"] = qual_classname(Item, cls=True)
-        else:
-            raise ValueError("cannot determine Tale base class", obj)
+        state["__base_class__"] = qual_baseclassname(obj)
         state["title"] = obj.title
         state["descr"] = obj.description
         state["short_descr"] = obj.short_description
         state["extra_desc"] = obj.extra_desc
 
-    @staticmethod
-    def serialize_stats(obj: Stats, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+    def serialize_deferred(self, obj: Deferred, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+        state = dict(vars(obj))
+        state["__class__"] = qual_classname(obj)
+        if not isinstance(state["owner"], str):
+            state["owner"] = mudobj_ref(state["owner"])
+        ser._serialize(state, out, indentlevel)
+
+    def serialize_stats(self, obj: Stats, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
         state = {
             "__class__": qual_classname(obj),
             "race": obj.race,
@@ -124,8 +131,7 @@ class TaleSerializer:
         }
         ser._serialize(state, out, indentlevel)
 
-    @staticmethod
-    def serialize_player(obj: Player, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+    def serialize_player(self, obj: Player, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
         state = dict(vars(obj))
         # remove stuff we don't want to serialize at all
         unserialized_attrs = {"subjective", "possessive", "objective", "teleported_from", "soul",
@@ -141,7 +147,7 @@ class TaleSerializer:
             raise TaleError("player unserialized_attrs inconsistency")
 
         # basic properties:
-        TaleSerializer.add_basic_properties(state, obj)
+        self.add_basic_properties(state, obj)
         # attrs that are treated in a special way:
         state["race"] = obj.stats.race
         state["known_locations"] = {mudobj_ref(loc) for loc in state["known_locations"]}
@@ -149,8 +155,7 @@ class TaleSerializer:
         state["inventory"] = {mudobj_ref(thing) for thing in obj.inventory}
         ser._serialize(state, out, indentlevel)
 
-    @staticmethod
-    def serialize_item(obj: Item, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+    def serialize_item(self, obj: Item, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
         if obj.contained_in and obj not in obj.contained_in:
             raise TaleError("item {} containment inconsistency".format(obj))
         state = dict(vars(obj))
@@ -161,11 +166,10 @@ class TaleSerializer:
             elif name in ["contained_in"]:
                 del state[name]
         # basic properties:
-        TaleSerializer.add_basic_properties(state, obj)
+        self.add_basic_properties(state, obj)
         ser._serialize(state, out, indentlevel)
 
-    @staticmethod
-    def serialize_living(obj: Living, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+    def serialize_living(self, obj: Living, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
         if obj.location and obj.location is not _limbo and obj not in obj.location:
             raise TaleError("living {} location inconsistency".format(obj))
         state = dict(vars(obj))
@@ -181,15 +185,30 @@ class TaleSerializer:
         if skipped_attrs != unserialized_attrs:
             raise TaleError("living unserialized_attrs inconsistency")
         # basic properties:
-        TaleSerializer.add_basic_properties(state, obj)
+        self.add_basic_properties(state, obj)
         # attrs that are treated in a special way:
         state["race"] = obj.stats.race
         state["location"] = mudobj_ref(state["location"])
         state["inventory"] = {mudobj_ref(thing) for thing in obj.inventory}
         ser._serialize(state, out, indentlevel)
 
+
+class TaleDeserializer:
     def deserialize(self, data):
         return serpent.loads(self.decrypt(data))
+
+    def decrypt(self, data: bytes) -> bytes:
+        if not data.startswith(b"TALESAVE"):
+            return data
+        data = bytes(b ^ TaleSerializer.xor_key for b in data[8:])
+        digest, data = data.split(maxsplit=1)
+        if not digest.startswith(b"digest="):
+            raise TaleError("corrupt or hacked save game file")
+        check = digest.split(b"=")[1].decode("ascii")
+        calculated = hmac.HMAC(TaleSerializer.hmac_key, msg=data, digestmod="sha").hexdigest()
+        if check != calculated:
+            raise IOError("corrupt or hacked save game file")
+        return data
 
     def recreate_classes(self, literal, existing_object_lookup):
         t = type(literal)
@@ -226,6 +245,8 @@ class TaleSerializer:
                 return True, self.make_Stats(d)
             elif clz == "tale.hints.HintSystem":
                 return True, self.make_HintSystem(d)
+            elif clz == "tale.driver.Deferred":
+                return True, self.make_Deferred(d, existing_object_lookup)
             else:
                 return False, None
 
@@ -258,7 +279,10 @@ class TaleSerializer:
 
     def make_Item(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         old_vnum = data["vnum"]
-        item = existing_object_lookup.item(data["vnum"], data["name"], data["__class__"])
+        try:
+            item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"], [])
+        except LookupError:
+            item = None
         if item:
             # overwrite existing attributes
             item.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
@@ -275,12 +299,12 @@ class TaleSerializer:
         }
 
     def make_Living(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
-        living = existing_object_lookup.living(data["vnum"], data["name"], data["__class__"])
+        living = existing_object_lookup.resolve_living_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
         if living:
             # overwrite existing attributes
-            del data["vnum"]
             living.init_gender(data.pop("gender"))
             living.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+            del data["race"]
         else:
             # create new item
             livingclass = self.lookup_class(data["__class__"])
@@ -308,6 +332,16 @@ class TaleSerializer:
         self.apply_attributes(stats, data)
         return stats
 
+    def make_Deferred(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
+        due = datetime.datetime.strptime(data["due_gametime"], "%Y-%m-%dT%H:%M:%S.%f")
+        d = Deferred(due, qual_classname, data["vargs"], data["kwargs"], periodical=data["periodical"])   # create for dummy action
+        d.action = data["action"]
+        d.owner = None   # hooked up later
+        return {
+            "deferred": d,
+            "owner": data["owner"]
+        }
+
     def make_HintSystem(self, data: Dict) -> HintSystem:
         hs = HintSystem()
         self.apply_attributes(hs, data)
@@ -328,17 +362,6 @@ class TaleSerializer:
                     raise TypeError("{}.{} has different type".format(obj.__class__, name))
             setattr(obj, name, value)
 
-
-def serialize_dummy(obj: Any, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
-    print("SERIALIZE", obj, " @@@TODO@@@") # XXX
-    out.append("'@@@TODO@@@'")
-
-serpent.register_class(Player, TaleSerializer.serialize_player)
-serpent.register_class(Location, serialize_dummy)
-serpent.register_class(Stats, TaleSerializer.serialize_stats)
-serpent.register_class(Item, TaleSerializer.serialize_item)
-serpent.register_class(Living, TaleSerializer.serialize_living)
-serpent.register_class(Exit, serialize_dummy)
 
 
 #---------------------test code--------------------
@@ -374,10 +397,10 @@ def test():
     print("-------2classes--------")
 
     class ExistingObjectGetter:
-        def item(self, vnum: int, name: str, classname: str) -> Item:
+        def item(self, vnum: int, name: str, classname: str, baseclassname: str) -> Item:
             pass
 
-        def living(self, vnum: int, name: str, classname: str) -> Living:
+        def living(self, vnum: int, name: str, classname: str, baseclassname: str) -> Living:
             pass
 
     p2 = ts.recreate_classes(p2, existing_object_lookup=ExistingObjectGetter())
