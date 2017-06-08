@@ -129,7 +129,12 @@ class TaleSerializer:
         state = dict(vars(obj))
         state["__class__"] = qual_classname(obj)
         if not isinstance(state["owner"], str):
-            state["owner"] = mudobj_ref(state["owner"])
+            try:
+                ref = mudobj_ref(state["owner"])
+            except Exception:
+                # owner is not a regular mudobj
+                ref = "class:" + qual_classname(state["owner"])
+            state["owner"] = ref
         ser._serialize(state, out, indentlevel)
 
     def serialize_stats(self, obj: Stats, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:

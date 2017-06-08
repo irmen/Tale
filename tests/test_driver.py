@@ -8,7 +8,6 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import heapq
 import os
-import pickle
 import unittest
 
 import tale.base
@@ -137,15 +136,6 @@ class TestDeferreds(unittest.TestCase):
             tale.driver.Deferred(due, scoped_function, [], None)
         with self.assertRaises(ValueError):
             d = tale.driver.Deferred(due, lambda a, ctx=None: 1, [42], None)
-
-    def testSerializable(self):   # XXX serpent
-        target = Thing()
-        deferreds = [tale.driver.Deferred(datetime.datetime.now(), target.append, [1, 2, 3], {"kwarg": 42}),
-                     tale.driver.Deferred(datetime.datetime.now(), os.getcwd, [], None),
-                     tale.driver.Deferred(datetime.datetime.now(), module_level_func, [], None)]
-        ser = pickle.dumps(deferreds, pickle.HIGHEST_PROTOCOL)
-        data = pickle.loads(ser)
-        self.assertEqual(deferreds, data)
 
     def testDue_realtime(self):
         # test due timings where the gameclock == realtime clock
