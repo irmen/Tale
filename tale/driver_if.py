@@ -297,7 +297,7 @@ class IFDriver(driver.Driver):
             existing_player.tell("No saved game data found.", end=True)
             return None
         except IOError as x:
-            existing_player.tell("Failed to load save game data: "+str(x), end=True)
+            existing_player.tell("Failed to load save game data: " + str(x), end=True)
             return None
         else:
             savegame_version = raw_state["story_config"]["version"]
@@ -342,31 +342,32 @@ class IFDriver(driver.Driver):
 class SavegameExistingObjectsFinder:
     def resolve_ref(self, vnum: int, name: str, classname: str, baseclassname: str, new_items: List[Dict[str, Any]]) -> base.MudObject:
         if baseclassname == "tale.base.Item":
-            return self.resolve_item_ref(vnum, name, classname, baseclassname, new_items)
+            return self.resolve_item_ref(vnum, name, classname, baseclassname, new_items=new_items)
         elif baseclassname == "tale.base.Location":
             return self.resolve_location_ref(vnum, name, classname, baseclassname)
         elif baseclassname == "tale.base.Living":
             return self.resolve_living_ref(vnum, name, classname, baseclassname)
         else:
-            raise errors.TaleError("invalid base class for resolve_ref: "+baseclassname)
+            raise errors.TaleError("invalid base class for resolve_ref: " + baseclassname)
 
     def resolve_location_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Location:
         loc = base.MudObject.all_locations.get(vnum, None)
         if not loc:
-            raise LookupError("location vnum not found: "+str(vnum))
+            raise LookupError("location vnum not found: " + str(vnum))
         if loc.name != name or savegames.qual_classname(loc) != classname or savegames.qual_baseclassname(loc) != baseclassname:
-            raise errors.TaleError("location inconsistency for vnum "+str(vnum))
+            raise errors.TaleError("location inconsistency for vnum " + str(vnum))
         return loc
 
-    def resolve_living_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Location:
+    def resolve_living_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Living:
         liv = base.MudObject.all_livings.get(vnum, None)
         if not liv:
-            raise LookupError("living vnum not found: "+str(vnum))
+            raise LookupError("living vnum not found: " + str(vnum))
         if liv.name != name or savegames.qual_classname(liv) != classname or savegames.qual_baseclassname(liv) != baseclassname:
-            raise errors.TaleError("living inconsistency for vnum "+str(vnum))
+            raise errors.TaleError("living inconsistency for vnum " + str(vnum))
         return liv
 
-    def resolve_item_ref(self, vnum: int, name: str, classname: str, baseclassname: str, new_items: List[Dict[str, Any]]) -> base.Item:
+    def resolve_item_ref(self, vnum: int, name: str, classname: str, baseclassname: str,
+                         *, new_items: List[Dict[str, Any]]=[]) -> base.Item:
         item = base.MudObject.all_items.get(vnum, None)
         if not item:
             for newitem in new_items:
@@ -376,10 +377,10 @@ class SavegameExistingObjectsFinder:
                             and savegames.qual_baseclassname(item) == baseclassname:
                         return item
                     else:
-                        raise errors.TaleError("item name/class inconsistency for old_vnum "+str(vnum))
-            raise LookupError("item vnum not found: "+str(vnum))
+                        raise errors.TaleError("item name/class inconsistency for old_vnum " + str(vnum))
+            raise LookupError("item vnum not found: " + str(vnum))
         if item.name != name or savegames.qual_classname(item) != classname or savegames.qual_baseclassname(item) != baseclassname:
-            raise errors.TaleError("item inconsistency for vnum "+str(vnum))
+            raise errors.TaleError("item inconsistency for vnum " + str(vnum))
         return item
 
     def hookup_player(self, player_info: Dict[str, Any], new_items: List[Dict[str, Any]]) -> Player:
@@ -396,11 +397,11 @@ class SavegameExistingObjectsFinder:
         loc.insert(new_player, None)
         return new_player
 
-    def hookup_deferreds(self, deferreds_info: Dict[str, Any], new_items: List[Dict[str, Any]]) -> List[driver.Deferred]:
-        result = []
+    def hookup_deferreds(self, deferreds_info: List[Dict[str, driver.Deferred]], new_items: List[Dict[str, Any]]) -> List[driver.Deferred]:
+        result = []  # type: List[driver.Deferred]
         for d_info in deferreds_info:
             new_deferred = d_info["deferred"]
             assert isinstance(new_deferred, driver.Deferred)
-            new_deferred.owner = self.resolve_ref(*d_info["owner"], new_items=new_items)
+            new_deferred.owner = self.resolve_ref(*d_info["owner"], new_items=new_items)   # type: ignore
             result.append(new_deferred)
         return result

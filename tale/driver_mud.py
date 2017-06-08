@@ -234,7 +234,7 @@ class MudDriver(driver.Driver):
             existing_player.tell("\n")
             existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
             existing_player.tell("\n")
-            state = existing_player.__getstate__()
+            state = dict(vars(existing_player))
             state["name"] = conn.player.name  # we can only take the real name after existing player has been kicked out
             existing_player_location = existing_player.location
             self.disconnect_player(existing_player)
@@ -242,7 +242,7 @@ class MudDriver(driver.Driver):
             # mr. Smith move: delete the other player and restore its properties in us
             existing_player.destroy(ctx)
             del existing_player
-            conn.player.__setstate__(state)
+            conn.player.__setstate__(state)         # XXX overwrite existing player in another way.
             name_info = charbuilder.PlayerNaming()
             name_info.money = state["money"]
             name_info.name = state["name"]
@@ -352,7 +352,7 @@ class LimboReaper(base.Living):
         super().__init__(
             "reaper", "m", race="elemental", title="Grim Reaper",
             descr="He wears black robes with a hood. Where a face should be, there is only nothingness. "
-                        "He is carrying a large ominous scythe that looks very, very sharp.",
+                  "He is carrying a large ominous scythe that looks very, very sharp.",
             short_descr="A figure clad in black, carrying a scythe, is also present.")
         self.aliases = {"figure", "death"}
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)

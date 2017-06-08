@@ -20,7 +20,7 @@ import serpent
 def mudobj_ref(mudobj: MudObject) -> Optional[Tuple[int, str, str, str]]:
     """generate a serializable reference (vnum, name, classname, baseclassname) for a MudObject"""
     if mudobj:
-        return mudobj.vnum, mudobj.name, qual_classname(mudobj), qual_baseclassname(mudobj)
+        return mudobj.vnum, mudobj.name, qual_classname(mudobj), qual_baseclassname(mudobj)    # type: ignore
     return None
 
 
@@ -98,7 +98,7 @@ class TaleSerializer:
         return self.obfuscate(serialized)
 
     def obfuscate(self, data: bytes) -> bytes:
-        digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()
+        digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()    # type: ignore   # mypy hmac issue
         data = b"digest=" + digest.encode("ascii") + b"\n" + data
         data = gzip.compress(data)
         return b"TALESAVE1" + bytes(b ^ self.xor_key for b in data)
@@ -113,7 +113,7 @@ class TaleSerializer:
 
     def add_inventory_property(self, state: Dict[str, Any], obj: MudObject) -> None:
         try:
-            inv = obj.inventory
+            inv = obj.inventory     # type: ignore
         except (AttributeError, ActionRefused):
             pass   # this thing doesn't have inventory
         else:
@@ -130,11 +130,10 @@ class TaleSerializer:
         state["__class__"] = qual_classname(obj)
         if not isinstance(state["owner"], str):
             try:
-                ref = mudobj_ref(state["owner"])
+                state["owner"] = mudobj_ref(state["owner"])
             except Exception:
                 # owner is not a regular mudobj
-                ref = "class:" + qual_classname(state["owner"])
-            state["owner"] = ref
+                state["owner"] = "class:" + qual_classname(state["owner"])
         ser._serialize(state, out, indentlevel)
 
     def serialize_stats(self, obj: Stats, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
@@ -249,7 +248,7 @@ class TaleDeserializer:
         if not digest.startswith(b"digest="):
             raise TaleError("corrupt or hacked save game file")
         check = digest.split(b"=")[1].decode("ascii")
-        calculated = hmac.HMAC(TaleSerializer.hmac_key, msg=data, digestmod="sha").hexdigest()
+        calculated = hmac.HMAC(TaleSerializer.hmac_key, msg=data, digestmod="sha").hexdigest()   # type: ignore   # mypy hmac issue
         if check != calculated:
             raise IOError("corrupt or hacked save game file")
         return data
@@ -330,7 +329,8 @@ class TaleDeserializer:
     def make_Item(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         old_vnum = data["vnum"]
         try:
-            item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"], [])
+            item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"],
+                                                           data["__class__"], data["__base_class__"], new_items=[])
             if item.contained_in:
                 wizard = Living("wizard", "m")
                 wizard.privileges.add("wizard")
@@ -448,8 +448,7 @@ class TaleDeserializer:
             setattr(obj, name, value)
 
 
-
-#---------------------test code--------------------
+# ---------------------test code--------------------
 
 def test():
     cof = Drink("coffee")
