@@ -1320,8 +1320,10 @@ class Exit(MudObject):
         self.target = None  # type: Location
         if isinstance(target_location, Location):
             self.target = target_location
+            self._target_str = ""
             title = "Exit to " + self.target.title
         else:
+            self.target = None
             self._target_str = target_location
             title = "Exit to <unbound:%s>" % target_location
         long_descr = long_descr or short_descr

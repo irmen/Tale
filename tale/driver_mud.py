@@ -68,6 +68,9 @@ class MudDriver(driver.Driver):
             player.tell("There's currently no message-of-the-day.", end=True)
             player.tell("\n")
 
+    def do_check_savefile_free(self, player: Player) -> bool:
+        raise errors.ActionRefused("Currently, saving is not supported in MUD mode.")
+
     def do_save(self, player: Player) -> None:
         raise errors.ActionRefused("Currently, saving is not supported in MUD mode.")
 

@@ -663,6 +663,9 @@ class Driver(pubsub.Listener):
             self._server_tick()
         return True, None     # wait was uneventful. (@todo return False if something happened)
 
+    def do_check_savefile_free(self, player: player.Player) -> bool:
+        raise NotImplementedError
+
     def do_save(self, player: player.Player) -> None:
         raise NotImplementedError
 

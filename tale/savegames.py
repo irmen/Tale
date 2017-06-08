@@ -2,6 +2,7 @@ import datetime
 import hmac
 import importlib
 import pprint
+import gzip
 from typing import Any, Tuple, List, Optional, Dict, Set, Type, Sequence
 
 from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
@@ -50,19 +51,13 @@ class TaleSerializer:
     hmac_key = b"please do not hack the save files"
 
     def __init__(self):
-        def serialize_dummy(obj: Any, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
-            print("SERIALIZE", obj, " @@@TODO@@@")  # XXX
-            out.append("'@@@TODO@@@'")
-
-        # XXX the following is a problem in Serpent and will crash on python < 3.6
-        # XXX you have to be able to specify a search order of the registered classes...
         serpent.register_class(Player, self.serialize_player)
         serpent.register_class(ShopBehavior, self.serialize_shopbehavior)
-        serpent.register_class(Location, serialize_dummy)   #  XXX
+        serpent.register_class(Location, self.serialize_location)
         serpent.register_class(Stats, self.serialize_stats)
         serpent.register_class(Item, self.serialize_item)
         serpent.register_class(Living, self.serialize_living)
-        serpent.register_class(Exit, serialize_dummy)  # XXX
+        serpent.register_class(Exit, self.serialize_exit)
         serpent.register_class(Deferred, self.serialize_deferred)
         self.serializer = serpent.Serializer(indent=True, module_in_classname=True)
 
@@ -81,9 +76,8 @@ class TaleSerializer:
             raise ValueError("missing item (from locations)")
         if any(l is not player and l not in livings for loc in locations for l in loc.livings):
             raise ValueError("missing living (from locations)")
-        # XXX
-        # if any(living.location is not None and living.location not in locations for living in livings):
-        #     raise ValueError("missing location (from livings)")
+        if any(living.location is not None and living.location not in locations for living in livings):
+            raise ValueError("missing location (from livings)")
         if player.location is not None and player.location not in locations:
             raise ValueError("missing location (from player)")
         if any(e not in exits for loc in locations for e in loc.exits.values()):
@@ -104,10 +98,10 @@ class TaleSerializer:
         return self.obfuscate(serialized)
 
     def obfuscate(self, data: bytes) -> bytes:
-        return data # XXX remove to enable obfuscation
         digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()
         data = b"digest=" + digest.encode("ascii") + b"\n" + data
-        return b"TALESAVE" + bytes(b ^ self.xor_key for b in data)
+        data = gzip.compress(data)
+        return b"TALESAVE1" + bytes(b ^ self.xor_key for b in data)
 
     def add_basic_properties(self, state: Dict[str, Any], obj: MudObject) -> None:
         state["__class__"] = qual_classname(obj)
@@ -214,15 +208,38 @@ class TaleSerializer:
         state["inventory"] = {mudobj_ref(thing) for thing in obj.inventory}
         ser._serialize(state, out, indentlevel)
 
+    def serialize_exit(self, obj: Exit, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+        state = dict(vars(obj))
+        # remove stuff we don't want to serialize at all
+        for name in list(state):
+            if name.startswith("_") and name != "_target_str":
+                del state[name]
+        self.add_basic_properties(state, obj)
+        state["target"] = mudobj_ref(state["target"])
+        ser._serialize(state, out, indentlevel)
+
+    def serialize_location(self, obj: Location, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+        state = dict(vars(obj))
+        # remove stuff we don't want to serialize at all
+        for name in list(state):
+            if name.startswith("_"):
+                del state[name]
+        self.add_basic_properties(state, obj)
+        # livings and items, and the exits, present in this location:
+        state["livings"] = {mudobj_ref(l) for l in state["livings"]}
+        state["items"] = {mudobj_ref(i) for i in state["items"]}
+        state["exits"] = {mudobj_ref(e) for e in state["exits"].values()}
+        ser._serialize(state, out, indentlevel)
+
 
 class TaleDeserializer:
     def deserialize(self, data):
         return serpent.loads(self.deobfuscate(data))
 
     def deobfuscate(self, data: bytes) -> bytes:
-        if not data.startswith(b"TALESAVE"):
+        if not data.startswith(b"TALESAVE1"):
             return data
-        data = bytes(b ^ TaleSerializer.xor_key for b in data[8:])
+        data = gzip.decompress(bytes(b ^ TaleSerializer.xor_key for b in data[9:]))
         digest, data = data.split(maxsplit=1)
         if not digest.startswith(b"digest="):
             raise TaleError("corrupt or hacked save game file")

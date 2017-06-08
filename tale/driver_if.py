@@ -62,19 +62,29 @@ class IFDriver(driver.Driver):
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:
         pass   # no motd in IF mode
 
+    def do_check_savefile_free(self, player: Player) -> bool:
+        if not self.story.config.savegames_enabled:
+            raise errors.ActionRefused("It is not possible to save your progress.")
+        savegame_filename = util.storyname_to_filename(self.story.config.name) + ".savegame"
+        try:
+            _ = self.user_resources[savegame_filename]
+            return False
+        except FileNotFoundError:
+            return True
+
     def do_save(self, player: Player) -> None:
         if not self.story.config.savegames_enabled:
-            player.tell("It is not possible to save your progress.")
-            return
-        locations = [player.location]    # XXX all locations
-        items = [i for i in base.MudObject.all_items.values() if i.contained_in]
-        livings = [l for l in base.MudObject.all_livings.values() if l.location]
-        exits = list(base.MudObject.all_exits.values())
+            raise errors.ActionRefused("It is not possible to save your progress.")
         serializer = savegames.TaleSerializer()
-        savedata = serializer.serialize(self.story.config, player, items, livings, locations, exits, self.deferreds, self.game_clock)
+        all_locations = [loc for loc in base.MudObject.all_locations.values()]
+        all_items = [i for i in base.MudObject.all_items.values() if i.contained_in]
+        all_livings = [l for l in base.MudObject.all_livings.values() if l.location]
+        all_exits = list(base.MudObject.all_exits.values())
+        savedata = serializer.serialize(self.story.config, player, all_items, all_livings, all_locations, all_exits,
+                                        self.deferreds, self.game_clock)
+        del all_locations, all_exits, all_items, all_livings
         self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"] = savedata
         player.tell("Game saved.")
-        player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")   # XXX fix save games.
         if self.story.config.display_gametime:
             player.tell("Game time: %s" % self.game_clock)
         player.tell("\n")

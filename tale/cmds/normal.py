@@ -17,7 +17,7 @@ from .. import races
 from .. import util
 from .. import cmds
 from ..accounts import MudAccounts
-from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse, AsyncDialog
 from ..items.basic import GameClock
 from ..player import Player
 from ..story import GameMode
@@ -913,7 +913,7 @@ def do_quit(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     if (yield "input", ("Are you sure you want to quit?", lang.yesno)):
         if ctx.config.server_mode != GameMode.MUD and ctx.config.savegames_enabled:
             if (yield "input", ("Would you like to save your progress?", lang.yesno)):
-                do_save(player, parsed, ctx)
+                yield from do_save(player, parsed, ctx)
         player.tell("\n")
         raise SessionExit()
     player.tell("Good, thank you for staying.")
@@ -1301,8 +1301,12 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
 @cmd("save")
 @disable_notify_action
 @disabled_in_gamemode(GameMode.MUD)
-def do_save(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
+def do_save(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Generator:
     """Save your game."""
+    if not ctx.driver.do_check_savefile_free(player):
+        if not (yield "input", ("Are you sure you want to overwrite the previous save game?", lang.yesno)):
+            player.tell("Ok, not saved.")
+            return
     ctx.driver.do_save(player)
 
 

@@ -108,7 +108,7 @@ class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
     def test_storyconfig(self):
         c1 = StoryConfig()
         c2 = StoryConfig()
-        self.assertIsNone(c1.name)
+        self.assertEqual("", c1.name)
         self.assertEqual(c1, c2)
         c2.name = "dummy"
         self.assertNotEqual(c1, c2)
