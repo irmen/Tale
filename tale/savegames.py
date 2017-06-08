@@ -1,5 +1,4 @@
 import datetime
-import hmac
 import importlib
 import pprint
 import gzip
@@ -47,8 +46,7 @@ def qual_baseclassname(obj: MudObject) -> str:
 
 
 class TaleSerializer:
-    xor_key = 0x5c
-    hmac_key = b"please do not hack the save files"
+    xor_key = 0x5c    # please do not hack the save files
 
     def __init__(self):
         serpent.register_class(Player, self.serialize_player)
@@ -98,8 +96,6 @@ class TaleSerializer:
         return self.obfuscate(serialized)
 
     def obfuscate(self, data: bytes) -> bytes:
-        digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()    # type: ignore   # mypy hmac issue
-        data = b"digest=" + digest.encode("ascii") + b"\n" + data
         data = gzip.compress(data)
         return b"TALESAVE1" + bytes(b ^ self.xor_key for b in data)
 
@@ -243,15 +239,7 @@ class TaleDeserializer:
     def deobfuscate(self, data: bytes) -> bytes:
         if not data.startswith(b"TALESAVE1"):
             return data
-        data = gzip.decompress(bytes(b ^ TaleSerializer.xor_key for b in data[9:]))
-        digest, data = data.split(maxsplit=1)
-        if not digest.startswith(b"digest="):
-            raise TaleError("corrupt or hacked save game file")
-        check = digest.split(b"=")[1].decode("ascii")
-        calculated = hmac.HMAC(TaleSerializer.hmac_key, msg=data, digestmod="sha").hexdigest()   # type: ignore   # mypy hmac issue
-        if check != calculated:
-            raise IOError("corrupt or hacked save game file")
-        return data
+        return gzip.decompress(bytes(b ^ TaleSerializer.xor_key for b in data[9:]))
 
     def recreate_classes(self, literal, existing_object_lookup):
         t = type(literal)
