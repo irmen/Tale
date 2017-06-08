@@ -1276,10 +1276,10 @@ class Container(Item):
         return item in self.__inventory
 
     def destroy(self, ctx: util.Context) -> None:
-        super().destroy(ctx)
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
+        super().destroy(ctx)
 
     def insert(self, item: Union[Living, Item], actor: Optional[Living]) -> None:
         assert item is not None

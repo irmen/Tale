@@ -231,17 +231,34 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
         p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
 
 
-def replace_items(player: Player, existing: List[base.Item], replacement: base.Item, message: str, others_message: str) -> None:
+def replace_items(player: Player, existing: List[base.Item], replacement: base.Item,
+                  message: str, others_message: str, ctx: util.Context) -> None:
     # removes all existing items from player's inventory and replaces them with the given replacement item
     if any(item not in player for item in existing):
         raise ParseError("can only replace items that are in player's inventory")
-    for item in existing:
-        player.remove(item, player)
-    player.insert(replacement, player)
-    if message:
-        player.tell(message)
-    if others_message:
-        player.tell_others(others_message)
+    try:
+        for item in existing:
+            player.remove(item, player)
+    except ActionRefused:
+        # restore items
+        for item in existing:
+            player.insert(item, player)
+        raise
+    try:
+        player.insert(replacement, player)
+    except ActionRefused:
+        # restore items
+        for item in existing:
+            player.insert(item, player)
+        raise
+    else:
+        for item in existing:
+            item.destroy(ctx)
+            del item
+        if message:
+            player.tell(message)
+        if others_message:
+            player.tell_others(others_message)
 
 
 @cmd("attach", "apply", "install")
@@ -263,7 +280,7 @@ def do_combine_two(player: Player, parsed: base.ParseResult, ctx: util.Context) 
         result = item2.combine([item1], player)
         if result:
             replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
-                          "{Actor} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective, ctx)
             return
     except ActionRefused:
         pass
@@ -271,7 +288,7 @@ def do_combine_two(player: Player, parsed: base.ParseResult, ctx: util.Context) 
     if not result:
         raise ActionRefused("You can't combine those.")
     replace_items(player, [item1, item2], result, "You created %s!" % lang.a(result.title),
-                  "{Actor} tinkers with some things %s carries." % player.subjective)
+                  "{Actor} tinkers with some things %s carries." % player.subjective, ctx)
 
 
 @cmd("combine")
@@ -290,7 +307,7 @@ def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context)
         result = item.combine(others, player)
         if result is not None:
             replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
-                          "{Actor} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective, ctx)
             return
     except ActionRefused:
         pass
@@ -299,7 +316,7 @@ def do_combine_many(player: Player, parsed: base.ParseResult, ctx: util.Context)
         result = item.combine(others, player)
         if result is not None:
             replace_items(player, others + [item], result, "You created %s!" % lang.a(result.title),
-                          "{Actor} tinkers with some things %s carries." % player.subjective)
+                          "{Actor} tinkers with some things %s carries." % player.subjective, ctx)
             return
     except ActionRefused:
         pass

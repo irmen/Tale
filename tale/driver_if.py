@@ -66,11 +66,10 @@ class IFDriver(driver.Driver):
         if not self.story.config.savegames_enabled:
             player.tell("It is not possible to save your progress.")
             return
-        # XXX bogus data
-        locations = frozenset([player.location])
-        items = frozenset(player.location.items) | frozenset(player.inventory)
-        livings = frozenset(player.location.livings)
-        exits = frozenset(player.location.exits.values())
+        locations = [player.location]    # XXX all locations
+        items = [i for i in base.MudObject.all_items.values() if i.contained_in]
+        livings = [l for l in base.MudObject.all_livings.values() if l.location]
+        exits = list(base.MudObject.all_exits.values())
         serializer = savegames.TaleSerializer()
         savedata = serializer.serialize(self.story.config, player, items, livings, locations, exits, self.deferreds, self.game_clock)
         self.user_resources[util.storyname_to_filename(self.story.config.name) + ".savegame"] = savedata
@@ -301,23 +300,22 @@ class IFDriver(driver.Driver):
             state = deserializer.recreate_classes(raw_state, objects_finder)
             # Because loading a complete saved game is strictly for single player 'if' mode,
             # we load a new player and simply replace all players with this one.
-            import pprint; pprint.pprint(state)  # XXX
-            clock = state["clock"]    # XXX convert in deserializesr
-            storyconfig = state["story_config"]    # XXX convert in deserializer
-            # sanity checks before we go on
-            assert isinstance(clock, util.GameDateTime)
-            assert isinstance(storyconfig, StoryConfig)
-            self.game_clock = clock
-            self.story.config = storyconfig
-
-            # replace all current deferreds by the ones from the save file:
-            self.deferreds = []
-            for d in objects_finder.hookup_deferreds(state["deferreds"], state["items"]):
-                assert isinstance(d, driver.Deferred) and d.owner and d.action
-                self._enqueue_deferred(d)
-
-            # get the new player from the save file
+            clock = state["clock"]
+            story_config = state["story_config"]
+            new_deferreds = objects_finder.hookup_deferreds(state["deferreds"], state["items"])
             new_player = objects_finder.hookup_player(state["player"], state["items"])
+            # sanity checks before we go on
+            assert isinstance(new_player, Player)
+            assert isinstance(clock, util.GameDateTime)
+            assert isinstance(story_config, StoryConfig)
+            assert all(isinstance(d, driver.Deferred) for d in new_deferreds)
+
+            # activate loaded state.
+            self.game_clock = clock
+            self.story.config = story_config
+            self.deferreds = []
+            for d in new_deferreds:
+                self._enqueue_deferred(d)
             self.all_players = {new_player.name: conn}
             self.waiting_for_input = {}   # can't keep the old waiters around
             new_player.tell("\n")
@@ -345,7 +343,7 @@ class SavegameExistingObjectsFinder:
     def resolve_location_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Location:
         loc = base.MudObject.all_locations.get(vnum, None)
         if not loc:
-            raise errors.TaleError("location vnum not found: "+str(vnum))
+            raise LookupError("location vnum not found: "+str(vnum))
         if loc.name != name or savegames.qual_classname(loc) != classname or savegames.qual_baseclassname(loc) != baseclassname:
             raise errors.TaleError("location inconsistency for vnum "+str(vnum))
         return loc
@@ -353,7 +351,7 @@ class SavegameExistingObjectsFinder:
     def resolve_living_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Location:
         liv = base.MudObject.all_livings.get(vnum, None)
         if not liv:
-            raise errors.TaleError("living vnum not found: "+str(vnum))
+            raise LookupError("living vnum not found: "+str(vnum))
         if liv.name != name or savegames.qual_classname(liv) != classname or savegames.qual_baseclassname(liv) != baseclassname:
             raise errors.TaleError("living inconsistency for vnum "+str(vnum))
         return liv

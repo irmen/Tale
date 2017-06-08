@@ -81,5 +81,5 @@ key = Key("key", "small rusty key", descr="This key is small and rusty. It has a
 key.key_for(door)
 closet.insert(key, None)
 
-closet.insert(woodenYstick, None)
-livingroom.insert(elastic_band, None)
+closet.insert(woodenYstick.clone(), None)
+livingroom.insert(elastic_band.clone(), None)

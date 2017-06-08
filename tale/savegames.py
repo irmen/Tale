@@ -2,15 +2,17 @@ import datetime
 import hmac
 import importlib
 import pprint
-from typing import Any, Tuple, List, Optional, Dict, Set, FrozenSet, Type
+from typing import Any, Tuple, List, Optional, Dict, Set, Type, Sequence
 
 from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
 from .items.basic import Drink, GameClock
-from .story import StoryConfig
+from .story import StoryConfig, MoneyType, GameMode, TickMethod
 from .player import Player
-from .errors import TaleError
+from .errors import TaleError, ActionRefused
 from .hints import HintSystem
 from .driver import Deferred
+from .util import GameDateTime
+from .shop import ShopBehavior, Shopkeeper
 import serpent
 
 
@@ -51,20 +53,26 @@ class TaleSerializer:
         def serialize_dummy(obj: Any, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
             print("SERIALIZE", obj, " @@@TODO@@@")  # XXX
             out.append("'@@@TODO@@@'")
+
+        # XXX the following is a problem in Serpent and will crash on python < 3.6
+        # XXX you have to be able to specify a search order of the registered classes...
         serpent.register_class(Player, self.serialize_player)
-        serpent.register_class(Location, serialize_dummy)
+        serpent.register_class(ShopBehavior, self.serialize_shopbehavior)
+        serpent.register_class(Location, serialize_dummy)   #  XXX
         serpent.register_class(Stats, self.serialize_stats)
         serpent.register_class(Item, self.serialize_item)
         serpent.register_class(Living, self.serialize_living)
-        serpent.register_class(Exit, serialize_dummy)
+        serpent.register_class(Exit, serialize_dummy)  # XXX
         serpent.register_class(Deferred, self.serialize_deferred)
         self.serializer = serpent.Serializer(indent=True, module_in_classname=True)
 
-    def serialize(self, story: StoryConfig, player: Player, items: FrozenSet[Item], livings: FrozenSet[Living],
-                  locations: FrozenSet[Location], exits: FrozenSet[Exit],
-                  deferreds: FrozenSet[Deferred], clock: GameClock):
-        livings -= {player}
-        locations |= {_limbo}
+    def serialize(self, story: StoryConfig, player: Player, items: Sequence[Item], livings: Sequence[Living],
+                  locations: Sequence[Location], exits: Sequence[Exit],
+                  deferreds: Sequence[Deferred], clock: GameDateTime):
+        livings = [l for l in livings if l is not player]
+        if _limbo not in locations:
+            locations = list(locations)
+            locations.append(_limbo)
         if any(i not in items for i in player.inventory):
             raise ValueError("missing item (from player inventory)")
         if any(i not in items for living in livings for i in living.inventory):
@@ -73,8 +81,9 @@ class TaleSerializer:
             raise ValueError("missing item (from locations)")
         if any(l is not player and l not in livings for loc in locations for l in loc.livings):
             raise ValueError("missing living (from locations)")
-        if any(living.location is not None and living.location not in locations for living in livings):
-            raise ValueError("missing location (from livings)")
+        # XXX
+        # if any(living.location is not None and living.location not in locations for living in livings):
+        #     raise ValueError("missing location (from livings)")
         if player.location is not None and player.location not in locations:
             raise ValueError("missing location (from player)")
         if any(e not in exits for loc in locations for e in loc.exits.values()):
@@ -84,18 +93,18 @@ class TaleSerializer:
             # "tale_version_required": story.requires_tale,
             "story_config": story,
             "clock": clock,
+            "items": items,
+            "livings": livings,
+            "locations": locations,
+            "exits": exits,
+            "deferreds": deferreds,
             "player": player,
-            "items": list(items),
-            "livings": list(livings),
-            "locations": list(locations),
-            "exits": list(exits),
-            "deferreds": list(deferreds),
         }
         serialized = self.serializer.serialize(data)
-        return self.encrypt(serialized)
+        return self.obfuscate(serialized)
 
-    def encrypt(self, data: bytes) -> bytes:
-        return data # XXX
+    def obfuscate(self, data: bytes) -> bytes:
+        return data # XXX remove to enable obfuscation
         digest = hmac.HMAC(self.hmac_key, msg=data, digestmod="sha").hexdigest()
         data = b"digest=" + digest.encode("ascii") + b"\n" + data
         return b"TALESAVE" + bytes(b ^ self.xor_key for b in data)
@@ -107,6 +116,20 @@ class TaleSerializer:
         state["descr"] = obj.description
         state["short_descr"] = obj.short_description
         state["extra_desc"] = obj.extra_desc
+
+    def add_inventory_property(self, state: Dict[str, Any], obj: MudObject) -> None:
+        try:
+            inv = obj.inventory
+        except (AttributeError, ActionRefused):
+            pass   # this thing doesn't have inventory
+        else:
+            state["inventory"] = {mudobj_ref(m) for m in inv}
+
+    def serialize_shopbehavior(self, obj: ShopBehavior, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
+        state = dict(vars(obj))
+        state["__class__"] = qual_classname(obj)
+        state["forsale"] = {mudobj_ref(i) for i in state["forsale"]}
+        ser._serialize(state, out, indentlevel)
 
     def serialize_deferred(self, obj: Deferred, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
         state = dict(vars(obj))
@@ -135,7 +158,7 @@ class TaleSerializer:
         state = dict(vars(obj))
         # remove stuff we don't want to serialize at all
         unserialized_attrs = {"subjective", "possessive", "objective", "teleported_from", "soul",
-                              "input_is_available", "transcript", "previous_commandline", "last_input_time"}
+                              "input_is_available", "transcript", "last_input_time", "previous_commandline"}
         skipped_attrs = set()
         for name in list(state):
             if name.startswith("_"):
@@ -163,10 +186,10 @@ class TaleSerializer:
         for name in list(state):
             if name.startswith("_"):
                 del state[name]
-            elif name in ["contained_in"]:
+            elif name == "contained_in":  # where the item is located, is referenced from that container/living/location later.
                 del state[name]
-        # basic properties:
-        self.add_basic_properties(state, obj)
+        self.add_basic_properties(state, obj)  # basic properties
+        self.add_inventory_property(state, obj)  # inventory (of Container subtype)
         ser._serialize(state, out, indentlevel)
 
     def serialize_living(self, obj: Living, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
@@ -174,7 +197,7 @@ class TaleSerializer:
             raise TaleError("living {} location inconsistency".format(obj))
         state = dict(vars(obj))
         # remove stuff we don't want to serialize at all
-        unserialized_attrs = {"subjective", "possessive", "objective", "teleported_from", "soul"}
+        unserialized_attrs = {"subjective", "possessive", "objective", "teleported_from", "soul", "previous_commandline"}
         skipped_attrs = set()
         for name in list(state):
             if name.startswith("_"):
@@ -184,8 +207,7 @@ class TaleSerializer:
                 skipped_attrs.add(name)
         if skipped_attrs != unserialized_attrs:
             raise TaleError("living unserialized_attrs inconsistency")
-        # basic properties:
-        self.add_basic_properties(state, obj)
+        self.add_basic_properties(state, obj)  # basic properties
         # attrs that are treated in a special way:
         state["race"] = obj.stats.race
         state["location"] = mudobj_ref(state["location"])
@@ -195,9 +217,9 @@ class TaleSerializer:
 
 class TaleDeserializer:
     def deserialize(self, data):
-        return serpent.loads(self.decrypt(data))
+        return serpent.loads(self.deobfuscate(data))
 
-    def decrypt(self, data: bytes) -> bytes:
+    def deobfuscate(self, data: bytes) -> bytes:
         if not data.startswith(b"TALESAVE"):
             return data
         data = bytes(b ^ TaleSerializer.xor_key for b in data[8:])
@@ -247,6 +269,12 @@ class TaleDeserializer:
                 return True, self.make_HintSystem(d)
             elif clz == "tale.driver.Deferred":
                 return True, self.make_Deferred(d, existing_object_lookup)
+            elif clz == "tale.util.GameDateTime":
+                return True, self.make_GameDateTime(d)
+            elif clz == "tale.story.StoryConfig":
+                return True, self.make_StoryConfig(d)
+            elif clz == "tale.shop.ShopBehavior":
+                return True, self.make_ShopBehavior(d)
             else:
                 return False, None
 
@@ -281,41 +309,50 @@ class TaleDeserializer:
         old_vnum = data["vnum"]
         try:
             item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"], [])
+            if item.contained_in:
+                wizard = Living("wizard", "m")
+                wizard.privileges.add("wizard")
+                item.contained_in.remove(item, wizard)   # will be hooked up later again
+                assert item.contained_in is None
         except LookupError:
-            item = None
-        if item:
-            # overwrite existing attributes
-            item.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
-        else:
             # create new item
             itemclass = self.lookup_class(data["__class__"])
             item = itemclass(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+        else:
+            # re-init existing
+            item.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
         del data["vnum"]
+        inv = data.pop("inventory", None)
         item.aliases = set(data.pop("aliases"))
         self.apply_attributes(item, data)
         return {
             "old_vnum": old_vnum,
-            "item": item
+            "item": item,
+            "inventory": inv
         }
 
     def make_Living(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
-        living = existing_object_lookup.resolve_living_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
-        if living:
-            # overwrite existing attributes
-            living.init_gender(data.pop("gender"))
-            living.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
-            del data["race"]
-        else:
+        try:
+            living = existing_object_lookup.resolve_living_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
+        except LookupError:
             # create new item
             livingclass = self.lookup_class(data["__class__"])
             living = livingclass(data.pop("name"), data.pop("gender"), race=data.pop("race"),
                                  title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+        else:
+            # overwrite existing attributes
+            living.init_gender(data.pop("gender"))
+            living.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+            del data["race"]
         living.aliases = set(data.pop("aliases"))
         living.privileges = set(data.pop("privileges"))
         inv = data.pop("inventory")
         loc = data.pop("location")
         living.stats = self.recreate_classes(data.pop("stats"), None)
         old_vnum = data.pop("vnum")
+        if isinstance(living, Shopkeeper):
+            # special handling of Shopkeepers
+            self.shop = self.make_ShopBehavior(data.pop("shop"))
         self.apply_attributes(living, data)
         return {
             "living": living,
@@ -323,6 +360,27 @@ class TaleDeserializer:
             "location": loc,
             "old_vnum": old_vnum
         }
+
+    def make_StoryConfig(self, data: Dict) -> StoryConfig:
+        conf = StoryConfig()
+        epoch = data.pop("epoch")
+        conf.epoch = self.parse_datestr(epoch) if epoch else None
+        conf.money_type = MoneyType(data.pop("money_type"))
+        conf.server_mode = GameMode(data.pop("server_mode"))
+        conf.supported_modes = {GameMode(m) for m in data.pop("supported_modes")}
+        conf.server_tick_method = TickMethod(data.pop("server_tick_method"))
+        self.apply_attributes(conf, data)
+        return conf
+
+    def make_GameDateTime(self, data: Dict) -> GameDateTime:
+        return GameDateTime(self.parse_datestr(data["clock"]), data["times_realtime"])
+
+    def make_ShopBehavior(self, data: Dict) -> ShopBehavior:
+        shop = ShopBehavior()
+        shop.willbuy = set(data.pop("willbuy"))
+        shop.wontdealwith = set(data.pop("wontdealwith"))
+        self.apply_attributes(shop, data)
+        return shop
 
     def make_Stats(self, data: Dict) -> Stats:
         if data["race"]:
@@ -333,7 +391,7 @@ class TaleDeserializer:
         return stats
 
     def make_Deferred(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
-        due = datetime.datetime.strptime(data["due_gametime"], "%Y-%m-%dT%H:%M:%S.%f")
+        due = self.parse_datestr(data["due_gametime"])
         d = Deferred(due, qual_classname, data["vargs"], data["kwargs"], periodical=data["periodical"])   # create for dummy action
         d.action = data["action"]
         d.owner = None   # hooked up later
@@ -346,6 +404,11 @@ class TaleDeserializer:
         hs = HintSystem()
         self.apply_attributes(hs, data)
         return hs
+
+    def parse_datestr(self, datestr: str) -> datetime.datetime:
+        if '.' not in datestr:
+            datestr += ".0"
+        return datetime.datetime.strptime(datestr, "%Y-%m-%dT%H:%M:%S.%f")
 
     def apply_attributes(self, obj: Any, data: Dict) -> None:
         for name, value in data.items():

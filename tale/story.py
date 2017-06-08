@@ -42,15 +42,15 @@ class StoryConfig:
     and are serializable, so they can be saved to disk as part of a save game file.
     """
     def __init__(self) -> None:
-        self.name = None                     # type: str # the name of the story
-        self.author = None                   # type: str # the story's author name
-        self.author_address = None           # type: str # the author's email address
+        self.name = ""                       # the name of the story
+        self.author = ""                     # the story's author name
+        self.author_address = ""             # the author's email address
         self.version = "1.6"                 # arbitrary but is used to check savegames for compatibility
         self.requires_tale = "3.4"           # tale library required to run the game
         self.supported_modes = {GameMode.IF}    # what driver modes (if/mud) are supported by this story
-        self.player_name = None              # type: str # set a name to create a prebuilt player, None to use the character builder
-        self.player_gender = None            # type: str # m/f/n
-        self.player_race = None              # type: str # default is "human" ofcourse, but you can select something else if you want
+        self.player_name = ""                # set a name to create a prebuilt player, None to use the character builder
+        self.player_gender = ""              # m/f/n
+        self.player_race = "human"           # default is "human" ofcourse, but you can select something else if you want
         self.player_money = 0.0              # starting money
         self.money_type = MoneyType.NOTHING  # money type modern/fantasy/nothing
         self.server_tick_method = TickMethod.COMMAND   # command (waits for player entry) or timer (async timer driven)
@@ -59,13 +59,13 @@ class StoryConfig:
         self.max_wait_hours = 2              # the max. number of hours (gametime) the player is allowed to wait (>=0)
         self.display_gametime = False        # enable/disable display of the game time at certain moments
         self.epoch = None                    # type: datetime.datetime # start date/time of the game clock
-        self.startlocation_player = None     # type: str # name of the location where a player starts the game in
-        self.startlocation_wizard = None     # type: str # name of the location where a wizard player starts the game in
+        self.startlocation_player = ""       # name of the location where a player starts the game in
+        self.startlocation_wizard = ""       # name of the location where a wizard player starts the game in
         self.savegames_enabled = True        # allow savegames?
         self.show_exits_in_look = True       # with the look command, also show exit descriptions automatically?
-        self.license_file = None             # type: str # game license file, if applicable
-        self.mud_host = None                 # type: str # for mud mode: hostname to bind the server on
-        self.mud_port = None                 # type: int # for mud mode: port number to bind the server on
+        self.license_file = ""               # game license file, if applicable
+        self.mud_host = ""                   # for mud mode: hostname to bind the server on
+        self.mud_port = 0                    # for mud mode: port number to bind the server on
         self.zones = []                      # type: List[str]  # names of zone modules to load, in this order
         self.server_mode = GameMode.IF       # the actual game mode the server is operating in (will be set at startup time)
 

@@ -23,10 +23,6 @@ class Story(StoryBase):
     config.version = "1.6"
     config.requires_tale = "3.4"
     config.supported_modes = {GameMode.MUD}
-    config.player_name = None
-    config.player_gender = None
-    config.player_race = None
-    config.player_money = 0.0
     config.money_type = MoneyType.FANTASY
     config.server_tick_method = TickMethod.TIMER
     config.server_tick_time = 1.0
