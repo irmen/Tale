@@ -36,18 +36,18 @@ Getting started
 ---------------
 Install tale, preferably using ``pip install tale``. You can also download the source, and then execute ``python setup.py install``.
 
-Tale requires the  `appdirs <http://pypi.python.org/pypi/appdirs/>`_
-library to sensibly store data files such as savegames.
+Tale requires the  `appdirs <http://pypi.python.org/pypi/appdirs/>`_ library to sensibly store data files such as savegames.
 
-It requires the  `smartypants <http://pypi.python.org/pypi/smartypants/>`_
-library to print out nicely formatted quotes and dashes.
-This is not used by default on windows when you're using the plain console interface, because the windows console needs some user tweaking to
-be able to display this correctly (you need to ``chcp 1252`` and you have to use a unicode console font instead of the default)
+It requires the  `smartypants <http://pypi.python.org/pypi/smartypants/>`_ library to print out nicely formatted quotes and dashes.
 
-On Windows, it requires the  `colorama <http://pypi.python.org/pypi/colorama/>`_
-library to print out text accents (bold, bright, underlined, reversevideo etc).
-This library is not needed on other operating systems.
+It requires the  `colorama <http://pypi.python.org/pypi/colorama/>`_ library to print out text accents (bold, bright, underlined, reversevideo etc).
 
+It requires the `serpent <http://pypi.python.org/pypi/serpent/>`_ library to be able to save and load game data (savegames).
+
+(All of these libraries should be installed automatically if you use pip to install tale itself)
+
+Optionally, you can install the `prompt_toolkit <https://pypi.python.org/pypi/prompt_toolkit/>`_ library for a nicer console text interface experience,
+but this one is not strictly required to be able to run.
 
 After all that, you'll need a story to run it on (tale by itself doesn't do anything,
 it's only a framework to build games with).

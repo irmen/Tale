@@ -9,11 +9,18 @@ import signal
 import sys
 import threading
 from typing import Iterable, Tuple, Any, Optional, List
+try:
+    import prompt_toolkit
+    from prompt_toolkit.contrib.completers import WordCompleter
+except ImportError:
+    prompt_toolkit = None
 
 from . import colorama_patched as colorama
 from . import styleaware_wrapper, iobase
 from ..driver import Driver
 from ..player import PlayerConnection, Player
+from ..base import Container
+
 
 colorama.init()
 assert type(colorama.Style.DIM) is str, "Incompatible colorama library installed. Please upgrade to a more recent version (0.3.6+)"
@@ -75,7 +82,18 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # by the main thread that handles screen *output*
                 # (otherwise the prompt will often appear before any regular screen output)
                 old_player = player_connection.player
-                cmd = input()  # blocking console input call
+                # do blocking console input call
+                if prompt_toolkit:
+                    # word completion for the names of things and people
+                    player = player_connection.player
+                    names = {i.name for i in player.location.items}
+                    names |= {l.name for l in player.location.livings if l is not player}
+                    names |= {i.name for container in player.inventory if isinstance(container, Container) for i in container.inventory}
+                    names |= {i.name for i in player.inventory}
+                    completer = WordCompleter(names)
+                    cmd = prompt_toolkit.prompt("\n>> ", patch_stdout=True, completer=completer, complete_while_typing=False)
+                else:
+                    cmd = input()
                 player_connection.player.store_input_line(cmd)
                 if old_player is not player_connection.player:
                     # this situation occurs when a save game has been restored,
@@ -105,6 +123,7 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def install_tab_completion(self, driver: Driver) -> None:
         """Install tab completion using readline, if available"""
+        # @todo use prompt_toolkit if that is available for completion
         if os.name == "nt":
             # pyreadline on windows behaves weird and screws up the output. So disable by default.
             return
@@ -166,14 +185,18 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def output_no_newline(self, text: str) -> None:
         """Like output, but just writes a single line, without end-of-line."""
-        super().output_no_newline(text)
-        print(self._apply_style(text, self.do_styles), end="")
-        sys.stdout.flush()
+        if prompt_toolkit:
+            self.output(text)
+        else:
+            super().output_no_newline(text)
+            print(self._apply_style(text, self.do_styles), end="")
+            sys.stdout.flush()
 
     def write_input_prompt(self) -> None:
         """write the input prompt '>>'"""
-        print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
-        sys.stdout.flush()
+        if not prompt_toolkit:
+            print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
+            sys.stdout.flush()
 
     def break_pressed(self) -> None:
         """do something when the player types ctrl-C (break)"""
