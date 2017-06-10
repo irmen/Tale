@@ -541,6 +541,7 @@ def make_shop(vnum: int) -> ShopBehavior:
 def init_zones() -> None:
     """Populate the zones and initialize inventories and door states. Set up shops."""
     print("Initializing zones.")
+    global converted_mobs, converted_items, converted_rooms, converted_shops
     num_shops = num_mobs = num_items = 0
     all_shopkeepers = {shop.shopkeeper for shop in shops.values()}
     for vnum in sorted(zones):
@@ -628,3 +629,9 @@ def init_zones() -> None:
     # for vnum in sorted(missing):
     #    item = make_item(vnum)
     #    print("  cvnum %d: %s" % (item.circle_vnum, item))
+
+    # clean up
+    converted_shops.clear()
+    converted_rooms.clear()
+    converted_items.clear()
+    converted_mobs.clear()

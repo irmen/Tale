@@ -460,24 +460,23 @@ class Driver(pubsub.Listener):
         """
         self.game_clock.add_realtime(datetime.timedelta(seconds=self.story.config.server_tick_time))
         ctx = util.Context(self, self.game_clock, self.story.config, None)
-        while self.deferreds:
-            deferred = None
-            with self.deferreds_lock:
-                if self.deferreds:
-                    deferred = self.deferreds[0]
-                    if deferred.due_gametime <= self.game_clock.clock:
-                        deferred = heapq.heappop(self.deferreds)
-                    else:
-                        deferred = None
-                        break
-            if deferred:
-                # calling the deferred needs to be outside the lock because it can reschedule a new deferred
-                try:
-                    deferred(ctx=ctx)  # call the deferred and provide a context object
-                except Exception:
-                    print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
-                    print("".join(util.format_traceback()), file=sys.stderr)
-                    print("(Please report this problem)", file=sys.stderr)
+
+        due_deferreds = []
+        with self.deferreds_lock:
+            while self.deferreds:
+                deferred = self.deferreds[0]
+                if deferred.due_gametime > self.game_clock.clock:
+                    break
+                due_deferreds.append(heapq.heappop(self.deferreds))
+        for deferred in due_deferreds:
+            try:
+                deferred(ctx=ctx)  # call the deferred and provide a context object
+            except Exception:
+                print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
+                print("".join(util.format_traceback()), file=sys.stderr)
+                print("(Please report this problem)", file=sys.stderr)
+        del due_deferreds
+
         pubsub.sync()
         for name, conn in list(self.all_players.items()):
             if conn.player and conn.io and conn.player.location:
