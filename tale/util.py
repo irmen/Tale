@@ -11,6 +11,7 @@ import inspect
 import random
 import sys
 import traceback
+from decimal import Decimal
 from types import MemberDescriptorType
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
@@ -30,16 +31,19 @@ class MoneyFormatter:
     """Display and parsing of money. Supports 'fantasy' and 'modern' style money."""
     money_words_fantasy = {"gold", "silver", "copper", "coppers"}
     money_words_modern = {"dollar", "dollars", "cent", "cents"}
+    smallest_amount = Decimal("1")
 
     def __init__(self, money_type: MoneyType) -> None:
         if money_type == MoneyType.FANTASY:
             self.display = self.money_display_fantasy
             self.money_to_float = self.money_to_float_fantasy
             self.money_words = self.money_words_fantasy
+            self.smallest_amount = Decimal("0.1")   # 1 copper
         elif money_type == MoneyType.MODERN:
             self.display = self.money_display_modern
             self.money_to_float = self.money_to_float_modern
             self.money_words = self.money_words_modern
+            self.smallest_amount = Decimal("0.01")   # 1 dollarcent
         else:
             raise ValueError("invalid money type " + str(money_type))
 
@@ -100,25 +104,29 @@ class MoneyFormatter:
                         raise ValueError("invalid coin letter")
                 except ValueError:
                     raise ValueError("That's not an amount of money.")
-            return result
+            return self.roundoff(result)
         result = coins.get("gold", 0.0) * 10.0
         result += coins.get("silver", 0.0)
         result += coins.get("copper", 0.0) / 10.0
         result += coins.get("coppers", 0.0) / 10.0
-        return result
+        return self.roundoff(result)
 
     def money_to_float_modern(self, coins: Union[str, Dict[str, float]]) -> float:
         """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
         if isinstance(coins, str):
             if coins.startswith("$"):
-                return float(coins[1:])
+                return self.roundoff(float(coins[1:]))
             else:
                 raise ValueError("That's not an amount of money.")
         result = coins.get("dollar", 0.0)
         result += coins.get("dollars", 0.0)
         result += coins.get("cent", 0.0) / 100.0
         result += coins.get("cents", 0.0) / 100.0
-        return result
+        return self.roundoff(result)
+
+    def roundoff(self, amount: float) -> float:
+        # make sure a floating point amount is rounded off to the correct maximum number of digits for this money type
+        return round(amount, abs(self.smallest_amount.as_tuple().exponent))
 
     def parse(self, words: Sequence[str]) -> float:
         """Convert a parsed sequence of words to the amount of money it represents (float)"""

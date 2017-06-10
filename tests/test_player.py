@@ -481,6 +481,7 @@ class TestPlayerConnection(unittest.TestCase):
 
     def test_input(self):
         player = Player("julie", "f")
+        player.prompt_toolkit_enabled = False
         with WrappedConsoleIO(None) as io:
             pc = PlayerConnection(player, io)
             player.tell("first this text")
@@ -492,6 +493,7 @@ class TestPlayerConnection(unittest.TestCase):
     def test_peek_output(self):
         player = Player("fritz", "m")
         pc = PlayerConnection(player, ConsoleIo(None))
+        player.prompt_toolkit_enabled = False
         player.set_screen_sizes(0, 100)
         player.tell("line1")
         player.tell("line2")
@@ -501,6 +503,7 @@ class TestPlayerConnection(unittest.TestCase):
 
     def test_write_output(self):
         player = Player("julie", "f")
+        player.prompt_toolkit_enabled = False
         with WrappedConsoleIO(None) as io:
             pc = PlayerConnection(player, io)
             player.tell("hello 1", end=True)
@@ -792,6 +795,7 @@ class TestMudAccounts(unittest.TestCase):
 class WrappedConsoleIO(ConsoleIo):
     def __init__(self, connection: PlayerConnection) -> None:
         super().__init__(connection)
+        self.do_prompt_toolkit = False
 
     def __enter__(self):
         self._old_stdout = sys.stdout
