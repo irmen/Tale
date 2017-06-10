@@ -401,3 +401,7 @@ def init_zones() -> None:
     # for vnum in sorted(missing):
     #     item = make_item(vnum)
     #     print("  cvnum %d: %s" % (item.circle_vnum, item))
+
+
+# @todo teller machine verbs. (cvnum #3034)
+# @todo blob eats up trash items?  oozing green gelatinous blob, cvnum #3068

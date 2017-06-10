@@ -52,13 +52,16 @@ def _check_required_libraries():
         print("The 'appdirs' Python library (any recent version) is required to play this game.", file=sys.stderr)
         all_good = False
     if not colorama or LooseVersion(colorama.__version__) < colorama_version_required:
-        print("The 'colorama' Python library (version >= {}) is required to play this game.".format(colorama_version_required), file=sys.stderr)
+        print("The 'colorama' Python library (version >= {}) is required to play this game."
+              .format(colorama_version_required), file=sys.stderr)
         all_good = False
     if not smartypants or LooseVersion(smartypants.__version__) < smartypants_version_required:
-        print("The 'smartypants' Python library (version >= {}) is required to play this game.".format(smartypants_version_required), file=sys.stderr)
+        print("The 'smartypants' Python library (version >= {}) is required to play this game."
+              .format(smartypants_version_required), file=sys.stderr)
         all_good = False
     if not serpent or LooseVersion(serpent.__version__) < serpent_version_required:
-        print("The 'serpent' Python library (version >= {}) is required to play this game.".format(serpent_version_required), file=sys.stderr)
+        print("The 'serpent' Python library (version >= {}) is required to play this game."
+              .format(serpent_version_required), file=sys.stderr)
         all_good = False
     if not all_good:
         print("\nInstall this/these and try again. Try using your package manager (on Linux) or try executing the following command:")

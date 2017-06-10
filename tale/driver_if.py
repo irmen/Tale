@@ -330,7 +330,7 @@ class IFDriver(driver.Driver):
             self.waiting_for_input = {}   # can't keep the old waiters around
             new_player.tell("\n")
             new_player.tell("Game loaded.")
-            new_player.tell("<bright><it>NOTE: save games are not yet working reliably!!!</>")  # XXX fix save games.
+            new_player.tell("<bright><it>NOTE: loading of save games is not yet fully implemented!!!</>")  # XXX fix loading of save games.
             if self.story.config.display_gametime:
                 new_player.tell("Game time: %s" % self.game_clock)
                 new_player.tell("\n")

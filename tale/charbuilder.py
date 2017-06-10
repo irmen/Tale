@@ -17,7 +17,7 @@ from .player import Player, PlayerConnection
 
 class PlayerNaming:
     def __init__(self) -> None:
-        self._name = self.title = self.gender = self.description = None  # type: str
+        self._name = self.title = self.gender = self.description = self.short_description = None  # type: str
         self.money = mud_context.config.player_money
         self.stats = Stats()
         self.wizard = False
@@ -29,7 +29,7 @@ class PlayerNaming:
         assert self.gender
         player.init_gender(self.gender)
         title = None if self.title == self._name else self.title
-        player.init_names(self._name, title, self.description, None)
+        player.init_names(self._name, title, self.description, self.short_description)
         player.stats = self.stats
         player.money = self.money
 

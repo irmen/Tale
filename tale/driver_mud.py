@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import time
 import threading
-from typing import Union, Generator, Dict, Tuple, Optional
+from typing import Union, Generator, Dict, Tuple, Optional, Any
 from .story import GameMode
 from . import accounts
 from . import base
@@ -234,28 +234,21 @@ class MudDriver(driver.Driver):
             existing_player.tell("\n")
             existing_player.tell("<it><rev>You are kicked from the game. Your account is now logged in from elsewhere.</>")
             existing_player.tell("\n")
-            state = dict(vars(existing_player))
-            state["name"] = conn.player.name  # we can only take the real name after existing player has been kicked out
-            existing_player_location = existing_player.location
+            state = {}
+            for name, value in vars(existing_player).items():
+                if not name.startswith("_") and name not in ("vnum", "soul", "input_is_available", "teleported_from", "transcript"):
+                    state[name] = value
+            state["title"] = existing_player.title
+            state["description"] = existing_player.description
+            state["short_description"] = existing_player.short_description
+            state["inventory"] = existing_player.inventory
+            state["extra_desc"] = existing_player.extra_desc
             self.disconnect_player(existing_player)
             ctx = util.Context(self, self.game_clock, self.story.config, None)
-            # mr. Smith move: delete the other player and restore its properties in us
             existing_player.destroy(ctx)
             del existing_player
-            conn.player.__setstate__(state)         # XXX overwrite existing player in another way.
-            name_info = charbuilder.PlayerNaming()
-            name_info.money = state["money"]
-            name_info.name = state["name"]
-            name_info.gender = state["gender"]
-            name_info.stats = state["stats"]
-            name_info.name = account.name  # assume the real name now
-            self._rename_player(conn.player, name_info)
+            self._overwrite_player(conn.player, state)
             conn.output("\n")
-            same_location = conn.player.location is existing_player_location
-            conn.player.move(existing_player_location, silent=same_location)
-            if same_location:
-                conn.player.location.tell("%s appears again. Is %s a different person, you wonder?" %
-                                          (lang.capital(conn.player.title), conn.player.subjective), exclude_living=conn.player)
         else:
             # for a normal log in, set the connecting player to the proper account name, and move them to the starting location.
             name_info = charbuilder.PlayerNaming()
@@ -278,6 +271,31 @@ class MudDriver(driver.Driver):
         self.show_motd(conn.player, True)
         conn.player.look(short=False)  # force a 'look' command to get our bearings
         # after this, the generator (dialog) ends and we drop down into the regular command loop
+
+    def _overwrite_player(self, player: Player, state: Dict[str, Any]) -> None:
+        location = state.pop("location")
+        player.privileges = state.pop("privileges")
+        name_info = charbuilder.PlayerNaming()
+        name_info.name = state.pop("name")
+        name_info.title = state.pop("title")
+        name_info.gender = state.pop("gender")
+        name_info.description = state.pop("description")
+        name_info.short_description = state.pop("short_description")
+        name_info.stats = state.pop("stats")
+        name_info.money = state.pop("money")
+        name_info.wizard = "wizard" in player.privileges
+        self._rename_player(player, name_info)
+        player.aliases = state.pop("aliases")
+        player.hints = state.pop("hints")
+        player.known_locations = state.pop("known_locations")
+        player.story_data = state.pop("story_data")
+        player.turns = state.pop("turns")
+        for keyword, description in state.pop("extra_desc").items():
+            player.add_extradesc({keyword}, description)
+        player.init_inventory(state.pop("inventory"))
+        player.move(location, silent=True)
+        player.location.tell("%s appears again. Is %s a different person, you wonder?" %
+                             (lang.capital(player.title), player.subjective), exclude_living=player)
 
     def main_loop(self, conn: Optional[PlayerConnection]) -> None:
         """
@@ -399,7 +417,7 @@ class LimboReaper(base.Living):
                 candidate.tell(self.title + " menacingly raises his scythe!")
                 shown = 3
             elif duration >= 63 and shown < 4:
-                candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You are destroyed.")
+                candidate.tell(self.title + " swings down his scythe and slices your soul cleanly in half. You have been destroyed.")
                 shown = 4
             elif duration >= 64 and "wizard" not in candidate.privileges:
                 try:
