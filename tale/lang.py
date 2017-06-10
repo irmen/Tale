@@ -12,6 +12,7 @@ from typing import List, Iterable
 
 from . import vfs
 
+
 # genders are m,f,n
 SUBJECTIVE = {"m": "he", "f": "she", "n": "it"}
 POSSESSIVE = {"m": "his", "f": "her", "n": "its"}
@@ -167,8 +168,18 @@ __number_words = [
     "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
 ]
+
 __tens_words = [
     None, None, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+]
+
+__number_ordinals = [
+    "zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
+    "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth"
+]
+
+__tens_ordinals = [
+    None, "tenth", "twentieth", "thirtieth", "fortieth", "fiftieth", "sixtieth", "seventieth", "eightieth", "ninetieth"
 ]
 
 
@@ -186,7 +197,7 @@ def spell_number(number: float) -> str:
         tens, ones = divmod(n, 10)
         if tens <= 9:
             if ones > 0:
-                return __tens_words[tens] + " " + __number_words[ones]
+                return __tens_words[tens] + "-" + __number_words[ones]
             return __tens_words[tens]
         return str(n)
     sign = ""
@@ -209,6 +220,37 @@ def spell_number(number: float) -> str:
     elif fraction < 0.005:
         return "about " + sign + spell_positive_int(whole)
     return str(orig_number)  # can't spell other fractions
+
+
+def spell_ordinal(number: int) -> str:
+    """Return a spelling of the ordinal number. Supports positive and negative ints."""
+    number = int(number)
+    n = abs(number)
+    sign = "" if number >= 0 else "minus "
+    if n <= 20:
+        return sign + __number_ordinals[n]
+    tens, ones = divmod(n, 10)
+    if tens <= 9:
+        if ones > 0:
+            return sign + __tens_words[tens] + "-" + __number_ordinals[ones]
+        return __tens_ordinals[tens]    # XXX ordinals
+    return ordinal(n)
+
+
+def ordinal(number: int) -> str:
+    """return the simple ordinal (1st, 3rd, 8th etc) of a number. Supports positive and negative ints."""
+    suf = "th"
+    number = int(number)
+    anum = abs(number)
+    if (anum % 100) // 10 != 1:
+        n = anum % 10
+        if n == 1:
+            suf = "st"
+        elif n == 2:
+            suf = "nd"
+        elif n == 3:
+            suf = "rd"
+    return "%d%s" % (number, suf)
 
 
 __plural_irregularities = {
