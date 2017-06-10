@@ -15,13 +15,16 @@ from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key
 from tale.errors import LocationIntegrityError
 from tale.items.basic import *
 from tale.items.board import BulletinBoard
+from tale.items.bank import Bank
 from tale.shop import ShopBehavior, Shopkeeper
-from tale.util import roll_dice, Context
+from tale.util import roll_dice
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
 from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
+from .circle_mobs import *
+
 
 print("\nPre-loading circle data files.")
 mobs = get_mobs()
@@ -42,17 +45,237 @@ converted_items = set()  # type: Set[int]
 converted_shops = {}     # type: Dict[int, ShopBehavior]  # cache for the shop data
 
 
-class CircleMob(Living):
-    """Monster NPC having tailored behavior to suit circle data"""
-    def init(self) -> None:
-        super().init()
+# the four bulletin boards
+# see spec_assign.c/assign_objects()
+# @todo board levels, readonly, etc.
+circle_bulletin_boards = {
+    3096: "boards/social.json",
+    3097: "boards/frozen.json",
+    3098: "boards/immort.json",
+    3099: "boards/mort.json"
+}
 
-    def do_wander(self, ctx: Context) -> None:
-        # Let the mob wander randomly. Note: not all mobs do this!
-        direction = self.select_random_move()
-        if direction:
-            self.move(direction.target, self)
-        ctx.driver.defer(random.randint(20, 60), self.do_wander)
+# the banks (atms, credit card)
+# see spec_assign.c/assign_objects()
+# @todo bank class and its verbs
+circle_banks = {
+    3034: "bank/bank.json",
+    3036: "bank/bank.json"
+}
+
+circle_donation_room = 3063     # items and gold donated by wizards end up here as help for newbies  @todo make donation room
+
+
+# the various mob types, see spec_assign.c/assign_mobiles()
+circle_mob_class = {
+    1: MPuff,
+
+    # Immortal Zone
+    1200: MReceptionist,
+    1201: MPostmaster,
+    1202: MJanitor,
+
+    # Midgaard
+    3005: MReceptionist,
+    3010: MPostmaster,
+    3020: MGuild,
+    3021: MGuild,
+    3022: MGuild,
+    3023: MGuild,
+    3024: MGuildguard,
+    3025: MGuildguard,
+    3026: MGuildguard,
+    3027: MGuildguard,
+    3059: MCityguard,
+    3060: MCityguard,
+    3061: MJanitor,
+    3062: MFido,
+    3066: MFido,
+    3067: MCityguard,
+    3068: MJanitor,
+    3095: MCryogenicist,
+    3105: MMayor,
+
+    # MORIA
+    4000: MSnake,
+    4001: MSnake,
+    4053: MSnake,
+    4100: MMagicuser,
+    4102: MSnake,
+    4103: MThief,
+
+    # Redferne's
+    7900: MCityguard,
+
+    # PYRAMID
+    5300: MSnake,
+    5301: MSnake,
+    5304: MThief,
+    5305: MThief,
+    5309: MMagicuser,  # should breath fire
+    5311: MMagicuser,
+    5313: MMagicuser,  # should be a cleric
+    5314: MMagicuser,  # should be a cleric
+    5315: MMagicuser,  # should be a cleric
+    5316: MMagicuser,  # should be a cleric
+    5317: MMagicuser,
+
+    # High Tower Of Sorcery
+    2501: MMagicuser,  # should likely be cleric
+    2504: MMagicuser,
+    2507: MMagicuser,
+    2508: MMagicuser,
+    2510: MMagicuser,
+    2511: MThief,
+    2514: MMagicuser,
+    2515: MMagicuser,
+    2516: MMagicuser,
+    2517: MMagicuser,
+    2518: MMagicuser,
+    2520: MMagicuser,
+    2521: MMagicuser,
+    2522: MMagicuser,
+    2523: MMagicuser,
+    2524: MMagicuser,
+    2525: MMagicuser,
+    2526: MMagicuser,
+    2527: MMagicuser,
+    2528: MMagicuser,
+    2529: MMagicuser,
+    2530: MMagicuser,
+    2531: MMagicuser,
+    2532: MMagicuser,
+    2533: MMagicuser,
+    2534: MMagicuser,
+    2536: MMagicuser,
+    2537: MMagicuser,
+    2538: MMagicuser,
+    2540: MMagicuser,
+    2541: MMagicuser,
+    2548: MMagicuser,
+    2549: MMagicuser,
+    2552: MMagicuser,
+    2553: MMagicuser,
+    2554: MMagicuser,
+    2556: MMagicuser,
+    2557: MMagicuser,
+    2559: MMagicuser,
+    2560: MMagicuser,
+    2562: MMagicuser,
+    2564: MMagicuser,
+
+    # SEWERS
+    7006: MSnake,
+    7009: MMagicuser,
+    7200: MMagicuser,
+    7201: MMagicuser,
+    7202: MMagicuser,
+
+    # FOREST
+    6112: MMagicuser,
+    6113: MSnake,
+    6114: MMagicuser,
+    6115: MMagicuser,
+    6116: MMagicuser,  # should be a cleric
+    6117: MMagicuser,
+
+    # ARACHNOS
+    6302: MMagicuser,
+    6309: MMagicuser,
+    6312: MMagicuser,
+    6314: MMagicuser,
+    6315: MMagicuser,
+
+    # Desert
+    5004: MMagicuser,
+    5005: MGuildguard,  # brass dragon
+    5010: MMagicuser,
+    5014: MMagicuser,
+
+    # Drow City
+    5103: MMagicuser,
+    5104: MMagicuser,
+    5107: MMagicuser,
+    5108: MMagicuser,
+
+    # Old Thalos
+    5200: MMagicuser,
+    5201: MMagicuser,
+    5209: MMagicuser,
+
+    # New Thalos
+    # 5481 - Cleric (or Mage... but he IS a high priest... *shrug*)
+    5404: MReceptionist,
+    5421: MMagicuser,
+    5422: MMagicuser,
+    5423: MMagicuser,
+    5424: MMagicuser,
+    5425: MMagicuser,
+    5426: MMagicuser,
+    5427: MMagicuser,
+    5428: MMagicuser,
+    5434: MCityguard,
+    5440: MMagicuser,
+    5455: MMagicuser,
+    5461: MCityguard,
+    5462: MCityguard,
+    5463: MCityguard,
+    5482: MCityguard,
+
+    5400: MGuildmaster_Mage,
+    5401: MGuildmaster_Cleric,
+    5402: MGuildmaster_Warrior,
+    5403: MGuildmaster_Thief,
+    5456: MGuildguard_Mage,
+    5457: MGuildguard_Cleric,
+    5458: MGuildguard_Warrior,
+    5459: MGuildguard_Thief,
+
+    # ROME
+    12009: MMagicuser,
+    12018: MCityguard,
+    12020: MMagicuser,
+    12021: MCityguard,
+    12025: MMagicuser,
+    12030: MMagicuser,
+    12031: MMagicuser,
+    12032: MMagicuser,
+
+    # DWARVEN KINGDOM
+    6500: MCityguard,
+    6502: MMagicuser,
+    6509: MMagicuser,
+    6516: MMagicuser,
+
+
+    # mob classes from the King Welmar's Castle zone (150): (see castle.c)
+
+    15000: MCastleGuard,  # Gwydion
+    15001: MKingWelmar,  # Our dear friend: the King
+    15003: MCastleGuard,  # Jim
+    15004: MCastleGuard,  # Brian
+    15005: MCastleGuard,  # Mick
+    15006: MCastleGuard,  # Matt
+    15007: MCastleGuard,  # Jochem
+    15008: MCastleGuard,  # Anne
+    15009: MCastleGuard,  # Andrew
+    15010: MCastleGuard,  # Bertram
+    15011: MCastleGuard,  # Jeanette
+    15012: MPeter,  	# Peter
+    15013: MTrainingMaster,  # The training master
+    15015: MThief,       # Ergan... have a better idea?
+    15016: MJames,  	# James the Butler
+    15017: MCleaning,  # Ze Cleaning Fomen
+    15020: MTim,  	# Tim: Tom's twin
+    15021: MTom,  	# Tom: Tim's twin
+    15024: MDicknDavid,  # Dick: guard of the Treasury
+    15025: MDicknDavid,  # David: Dicks brother
+    15026: MJerry,  	# Jerry: the Gambler
+    15027: MCastleGuard,  # Michael
+    15028: MCastleGuard,  # Hans
+    15029: MCastleGuard,  # Boris
+    15032: MMagicuser,  # Pit Fiend, have something better?  Use it
+}
 
 
 def make_location(vnum: int) -> Location:
@@ -60,6 +283,7 @@ def make_location(vnum: int) -> Location:
     Get a Tale location object for the given circle room vnum.
     This performs an on-demand conversion of the circle room data to Tale.
     """
+    # @todo deal with location type ('inside') and attributes ('nomob', 'dark', 'death'...)
     try:
         return converted_rooms[vnum]   # get cached version if available
     except KeyError:
@@ -119,6 +343,7 @@ def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
     if title.startswith("a ") or title.startswith("A "):
         title = title[2:]
     # we take the stats from the 'human' race because the circle data lacks race and stats
+    mob_class = circle_mob_class.get(vnum, mob_class)
     mob = mob_class(name, c_mob.gender, race="human", title=title, descr=c_mob.detaileddesc, short_descr=c_mob.longdesc)
     mob.circle_vnum = vnum  # keep the vnum
     if hasattr(c_mob, "extradesc"):
@@ -148,14 +373,6 @@ def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
     return mob
 
 
-circle_bulletin_boards = {
-    3096: "boards/social.json",
-    3097: "boards/frozen.json",
-    3098: "boards/immort.json",
-    3099: "boards/mort.json"
-}   # the four bulletin boards  @todo board levels, readonly, etc.
-
-
 @no_type_check
 def make_item(vnum: int) -> Item:
     """Create an instance of an item for the given vnum"""
@@ -173,8 +390,17 @@ def make_item(vnum: int) -> Item:
         item = BulletinBoard(name, title, short_descr=c_obj.longdesc)
         item.storage_file = circle_bulletin_boards[vnum]   # note that some instances reuse the same board
         item.load()
-        # remove the item name from the extradesc
-        c_obj.extradesc = [ed for ed in c_obj.extradesc if item.name not in ed["keywords"]]
+        # remove the item name from the extradesc to avoid 'not working' messages
+        c_obj.extradesc = [ed for ed in c_obj.extradesc if ed["keywords"] != {item.name}]
+    elif vnum in circle_banks:
+        # it's a bank (atm, creditcard)
+        item = Bank(name, title, short_descr=c_obj.longdesc)
+        item.storage_file = circle_banks[vnum]    # instances may reuse the same bank storage file
+        if c_obj.weight > 50 or "canttake" in c_obj.wear:
+            item.portable = False
+        else:
+            item.portable = True
+        item.load()
     elif c_obj.type == "container":
         if c_obj.typespecific.get("closeable"):
             item = Boxlike(name, title, short_descr=c_obj.longdesc)
@@ -256,7 +482,8 @@ def make_item(vnum: int) -> Item:
     else:
         raise ValueError("invalid obj type: " + c_obj.type)
     for ed in c_obj.extradesc:
-        item.add_extradesc(ed["keywords"], ed["text"])
+        kwds = ed["keywords"] - {name}  # remove the item name from the extradesc to avoid doubles
+        item.add_extradesc(kwds, ed["text"])
     item.circle_vnum = vnum  # keep the vnum
     item.aliases = aliases
     item.value = c_obj.cost
@@ -399,9 +626,5 @@ def init_zones() -> None:
     missing = set(objs) - set(converted_items)
     print(len(missing), "unused item types.")
     # for vnum in sorted(missing):
-    #     item = make_item(vnum)
-    #     print("  cvnum %d: %s" % (item.circle_vnum, item))
-
-
-# @todo teller machine verbs. (cvnum #3034)
-# @todo blob eats up trash items?  oozing green gelatinous blob, cvnum #3068
+    #    item = make_item(vnum)
+    #    print("  cvnum %d: %s" % (item.circle_vnum, item))
