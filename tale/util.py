@@ -484,6 +484,7 @@ def call_periodically(period: float, max_period: float=None):
     You can set a fixed period (in real-time seconds) or a period interval in which a random
     next occurrence is then chosen for every call.
     Setting the period to 0 or None will stop the periodical calls.
+    The method is called with a 'ctx' keyword argument set to a Context object.
     """
     def mark(func):
         if not period:

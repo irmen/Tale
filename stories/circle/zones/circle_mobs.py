@@ -7,7 +7,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import random
 from tale.base import Living
-from tale.util import Context
+from tale.util import Context, call_periodically
 from tale.shop import Shopkeeper
 
 
@@ -30,7 +30,7 @@ class CircleMob(Living):
         direction = self.select_random_move()
         if direction:
             self.move(direction.target, self)
-        ctx.driver.defer(random.randint(20, 60), self.do_wander)
+        ctx.driver.defer(random.randint(20, 60), self.do_wander)   # @todo timings
 
 
 # @todo implement the behavior of the various mob classes (see spec_procs.c / castle.c)
@@ -66,7 +66,18 @@ class MGuildmaster(CircleMob):
 
 
 class MPuff(CircleMob):
-    pass
+    """Puff the dragon"""
+    @call_periodically(10)
+    def do_special(self, ctx: Context) -> None:
+        r = random.randint(0, 30)
+        if r == 0:
+            self.do_socialize("say \"My god!  It's full of stars!\"")
+        elif r == 1:
+            self.do_socialize("say \"How'd all those fish get up here?\"")
+        elif r == 2:
+            self.do_socialize("say \"I'm a very female dragon.\"")
+        elif r == 3:
+            self.do_socialize("say \"I've got a peaceful, easy feeling.\"")
 
 
 class MFido(CircleMob):

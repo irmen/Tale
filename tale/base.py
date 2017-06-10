@@ -1178,7 +1178,8 @@ class Living(MudObject):
     def start_attack(self, victim: 'Living') -> None:
         """Starts attacking the given living until death ensues on either side."""
         # @todo I'm not yet sure if the combat/attack logic should go here (just on Living), or that it should be split with Player...
-        # @todo actual fight
+        # @todo actual fight.   Also implement 'assist' command to help someone that is already fighting.
+        # NOTE: combat commands should have a check so that you cannot spam them!
         name = lang.capital(self.title)
         room_msg = "%s starts attacking %s!" % (name, victim.title)
         victim_msg = "%s starts attacking you!" % name
