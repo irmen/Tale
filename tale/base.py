@@ -2036,7 +2036,7 @@ class Soul:
             # but maybe the thing the user typed refers to an object or creature.
             # In that case, set the verb to that object's default verb.
             if len(who_list) == 1:
-                verb = getattr(who_list[1], "default_verb", "examine")
+                verb = getattr(who_list[0], "default_verb", "examine")
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
         return ParseResult(verb, who_info=who_info, who_list=who_list,
