@@ -12,7 +12,7 @@ from tale.shop import Shopkeeper
 
 
 __all__ = ("CircleMob", "MPostmaster", "MCityguard", "MReceptionist", "MCryogenicist", "MFido",
-           "MGuild", "MGuildguard", "MJanitor", "MMagicuser", "MMayor", "MPuff", "MSnake", "MThief",
+           "MGuildmaster", "MGuildguard", "MJanitor", "MMagicuser", "MMayor", "MPuff", "MSnake", "MThief",
            "MGuildguard_Cleric", "MGuildguard_Mage", "MGuildguard_Thief", "MGuildguard_Warrior",
            "MGuildmaster_Cleric", "MGuildmaster_Mage", "MGuildmaster_Thief", "MGuildmaster_Warrior",
            "MCastleGuard", "MJames", "MCleaning", "MDicknDavid", "MJerry", "MKingWelmar",
@@ -37,6 +37,7 @@ class CircleMob(Living):
 
 
 class MShopkeeper(CircleMob, Shopkeeper):
+    # most of the behavior is already present in Shopkeeper.
     pass
 
 
@@ -60,7 +61,7 @@ class MGuildguard(CircleMob):
     pass
 
 
-class MGuild(CircleMob):
+class MGuildmaster(CircleMob):
     pass
 
 
@@ -92,19 +93,19 @@ class MMagicuser(CircleMob):
     pass
 
 
-class MGuildmaster_Mage(CircleMob):      # @todo MGuild?
+class MGuildmaster_Mage(MGuildmaster):
     pass
 
 
-class MGuildmaster_Cleric(CircleMob):
+class MGuildmaster_Cleric(MGuildmaster):
     pass
 
 
-class MGuildmaster_Warrior(CircleMob):
+class MGuildmaster_Warrior(MGuildmaster):
     pass
 
 
-class MGuildmaster_Thief(CircleMob):
+class MGuildmaster_Thief(MGuildmaster):
     pass
 
 
