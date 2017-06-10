@@ -1548,6 +1548,8 @@ def do_config(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
             player.screen_styles_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
         elif param == "smartquotes":
             player.smartquotes_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
+        elif param == "prompttk":
+            player.prompt_toolkit_enabled = value.lower() in ("y", "yes", "true", "enable", "enabled", "on")
         else:
             raise ActionRefused("Invalid parameter name.")
         player.tell("Configuration modified.", end=True)
@@ -1557,6 +1559,7 @@ def do_config(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
     player.tell("  width <dim>(screen width) =</> %d" % player.screen_width, format=False)
     player.tell("  styles <dim>(enable text styles) =</> %s" % player.screen_styles_enabled, format=False)
     player.tell("  smartquotes <dim>(use typographic quotes) =</> %s" % player.smartquotes_enabled, format=False)
+    player.tell("  prompttk <dim>(use prompt_toolkit input) =</> %s" % player.prompt_toolkit_enabled, format=False)
 
 
 @cmd("hint")

@@ -83,7 +83,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # (otherwise the prompt will often appear before any regular screen output)
                 old_player = player_connection.player
                 # do blocking console input call
-                if prompt_toolkit:
+                if prompt_toolkit and self.do_prompt_toolkit:
                     # word completion for the names of things and people
                     player = player_connection.player
                     names = {i.name for i in player.location.items}
@@ -185,7 +185,7 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def output_no_newline(self, text: str) -> None:
         """Like output, but just writes a single line, without end-of-line."""
-        if prompt_toolkit:
+        if prompt_toolkit and self.do_prompt_toolkit:
             self.output(text)
         else:
             super().output_no_newline(text)
@@ -194,7 +194,7 @@ class ConsoleIo(iobase.IoAdapterBase):
 
     def write_input_prompt(self) -> None:
         """write the input prompt '>>'"""
-        if not prompt_toolkit:
+        if not prompt_toolkit or not self.do_prompt_toolkit:
             print(self._apply_style("\n<dim>>></> ", self.do_styles), end="")
             sys.stdout.flush()
 

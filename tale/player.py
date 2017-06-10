@@ -37,6 +37,7 @@ class Player(base.Living, pubsub.Listener):
         self.screen_indent = DEFAULT_SCREEN_INDENT
         self.screen_styles_enabled = True
         self.smartquotes_enabled = True
+        self.prompt_toolkit_enabled = True
         self.output_line_delay = 50   # milliseconds.
         self.brief = 0  # 0=off, 1=short descr. for known locations, 2=short descr. for all locations
         self.known_locations = set()   # type: Set[base.Location]
@@ -363,6 +364,7 @@ class PlayerConnection:
             # (re)set a few io parameters because they can be changed dynamically
             self.io.do_styles = self.player.screen_styles_enabled
             self.io.do_smartquotes = self.player.smartquotes_enabled
+            self.io.do_prompt_toolkit = self.player.prompt_toolkit_enabled
             if mud_context.config.server_mode == GameMode.IF and self.player.output_line_delay > 0:
                 for line in output.rstrip().splitlines():
                     self.io.output(line)
