@@ -16,7 +16,7 @@ from tale.errors import LocationIntegrityError
 from tale.items.basic import *
 from tale.items.board import BulletinBoard
 from tale.items.bank import Bank
-from tale.shop import ShopBehavior, Shopkeeper
+from tale.shop import ShopBehavior
 from tale.util import roll_dice
 from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
@@ -331,7 +331,7 @@ def make_exit(c_exit: SimpleNamespace) -> Exit:
         return exit
 
 
-def make_mob(vnum: int, mob_class: Type=CircleMob) -> Living:
+def make_mob(vnum: int, mob_class: Type[CircleMob]=CircleMob) -> Living:
     """Create an instance of an item for the given vnum"""
     c_mob = mobs[vnum]
     aliases_list = list(c_mob.aliases)  # type: List[str]
@@ -548,7 +548,7 @@ def init_zones() -> None:
         for mobref in zone.mobs:
             if mobref.circle_vnum in all_shopkeepers:
                 # mob is a shopkeeper, we need to make a shop+shopkeeper rather than a regular mob
-                mob = make_mob(mobref.circle_vnum, mob_class=Shopkeeper)
+                mob = make_mob(mobref.circle_vnum, mob_class=MShopkeeper)
                 # find the shop it works for
                 shop_vnums = [vnum for vnum, shop in shops.items() if shop.shopkeeper == mobref.circle_vnum]
                 assert len(shop_vnums) == 1

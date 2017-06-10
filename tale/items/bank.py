@@ -54,7 +54,6 @@ class Bank(Item):
         return
 
     def do_transaction(self, actor: Living, parsed: ParseResult) -> None:
-        # @todo withdraw/deposit
         if not parsed.args:
             raise ActionRefused("You forgot to specify the amount of money.")
         amount = mud_context.driver.moneyfmt.parse(parsed.unrecognized)
@@ -67,6 +66,7 @@ class Bank(Item):
             self.accounts[actor.name] = round(self.accounts[actor.name] + amount, 7)
             self.log_transaction(actor, parsed.verb, amount, self.accounts[actor.name])
             try:
+                assert actor.money >= 0.0 and self.accounts[actor.name] >= 0.0
                 self.save()
             except Exception:
                 self.accounts[actor.name] = old_balance
@@ -84,6 +84,7 @@ class Bank(Item):
             self.accounts[actor.name] = round(self.accounts[actor.name] - amount, 7)
             self.log_transaction(actor, parsed.verb, amount, self.accounts[actor.name])
             try:
+                assert actor.money >= 0.0 and self.accounts[actor.name] >= 0.0
                 self.save()
             except Exception:
                 self.accounts[actor.name] = old_balance

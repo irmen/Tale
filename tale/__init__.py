@@ -47,7 +47,6 @@ def _check_required_libraries():
     smartypants_version_required = LooseVersion("1.8.6")
     colorama_version_required = LooseVersion("0.3.6")
     serpent_version_required = LooseVersion("1.22")
-    print()
     if not appdirs:
         print("The 'appdirs' Python library (any recent version) is required to play this game.", file=sys.stderr)
         all_good = False

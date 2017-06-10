@@ -8,18 +8,21 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import random
 from tale.base import Living
 from tale.util import Context
+from tale.shop import Shopkeeper
+
 
 __all__ = ("CircleMob", "MPostmaster", "MCityguard", "MReceptionist", "MCryogenicist", "MFido",
            "MGuild", "MGuildguard", "MJanitor", "MMagicuser", "MMayor", "MPuff", "MSnake", "MThief",
            "MGuildguard_Cleric", "MGuildguard_Mage", "MGuildguard_Thief", "MGuildguard_Warrior",
            "MGuildmaster_Cleric", "MGuildmaster_Mage", "MGuildmaster_Thief", "MGuildmaster_Warrior",
            "MCastleGuard", "MJames", "MCleaning", "MDicknDavid", "MJerry", "MKingWelmar",
-           "MPeter", "MTim", "MTom", "MTrainingMaster")
+           "MPeter", "MTim", "MTom", "MTrainingMaster", "MShopkeeper")
 
 
 class CircleMob(Living):
     """Monster NPC having tailored behavior to suit circle data"""
     def init(self) -> None:
+        self.circle_vnum = 0
         super().init()
 
     def do_wander(self, ctx: Context) -> None:
@@ -31,6 +34,11 @@ class CircleMob(Living):
 
 
 # @todo implement the behavior of the various mob classes (see spec_procs.c / castle.c)
+
+
+class MShopkeeper(CircleMob, Shopkeeper):
+    pass
+
 
 class MPostmaster(CircleMob):
     pass
