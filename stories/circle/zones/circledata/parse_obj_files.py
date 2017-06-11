@@ -16,21 +16,19 @@ from tale.vfs import VirtualFileSystem
 __all__ = ["get_objs"]
 
 
-objs = {}  # type: Dict[int, SimpleNamespace]
-
-
 def parse_file(content):
 
     content = [line.strip() for line in content]
     reasdstate = 'vNum'
     linenum = 0
+    result = []
 
     while linenum < len(content):
         line = content[linenum]
 
         if reasdstate == 'vNum':
             if line == '$':
-                break  # reached end of file
+                return result  # reached end of file
             vNumArg = line[1:]
             aliasArg = content[linenum + 1][:-1].split()
             shortDescArg = content[linenum + 2][:-1]
@@ -359,27 +357,29 @@ def parse_file(content):
             for k, v in affectArg.items():
                 obj.affects[affectTypes[k]] = int(v)
 
-            objs[obj.circle_vnum] = obj
+            result.append(obj)
             reasdstate = 'vNum'
+    raise IOError("Expected $ at end of file")
 
 
-def parse_all(vfs: VirtualFileSystem) -> None:
-    for filename in vfs["world/obj/index"].text.splitlines():
-        if filename == "$":
-            break
-        data = vfs["world/obj/" + filename].text.splitlines()
-        parse_file(data)
+_objs = {}  # type: Dict[int, SimpleNamespace]
 
 
-def get_objs() -> Dict[int, SimpleNamespace]:
-    if not objs:
-        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
-        parse_all(vfs)
-        assert len(objs) == 679, "all objs must be loaded"
-    return objs
+def get_objs(vfs: VirtualFileSystem = None) -> Dict[int, SimpleNamespace]:
+    if not _objs:
+        vfs = vfs or VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        for filename in vfs["world/obj/index"].text.splitlines():
+            if filename == "$":
+                break
+            data = vfs["world/obj/" + filename].text.splitlines()
+            result = parse_file(data)
+            for obj in result:
+                _objs[obj.circle_vnum] = obj
+        assert len(_objs) == 679, "all objs must be loaded"
+    return _objs
 
 
 if __name__ == "__main__":
     vfs = VirtualFileSystem(root_path=".", everythingtext=True)
-    parse_all(vfs)
-    print("parsed", len(objs), "objs.")
+    result = get_objs(vfs=vfs)
+    print("parsed", len(result), "objs.")

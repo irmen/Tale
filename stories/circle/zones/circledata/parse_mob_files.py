@@ -17,7 +17,6 @@ from tale.vfs import VirtualFileSystem
 __all__ = ["get_mobs"]
 
 
-mobs = {}  # type: Dict[int, SimpleNamespace]
 extendedMobPat = re.compile('(.*?):(.*)')
 
 
@@ -27,13 +26,14 @@ def parse_file(content):
 
     readstate = 'vNum'
     linenum = 0
+    result = []
 
     while linenum < len(content):
         line = content[linenum]
 
         if readstate == 'vNum':
             if line == '$':
-                break  # reached end of file
+                return result  # reached end of file
             vNumArg = line[1:]
             aliasArg = content[linenum + 1][:-1].split()
             shortDescArg = content[linenum + 2][:-1]
@@ -173,27 +173,28 @@ def parse_file(content):
                 affection=set(affectAttribs),
                 extended={k.lower(): v for k, v in extendedMobArg.items()}
             )
-            mobs[mob.circle_vnum] = mob
+            result.append(mob)
             readstate = 'vNum'
+    raise IOError("Expected $ at end of file")
 
 
-def parse_all(vfs: VirtualFileSystem) -> None:
-    for filename in vfs["world/mob/index"].text.splitlines():
-        if filename == "$":
-            break
-        data = vfs["world/mob/" + filename].text.splitlines()
-        parse_file(data)
+_mobs = {}  # type: Dict[int, SimpleNamespace]
 
 
-def get_mobs() -> Dict[int, SimpleNamespace]:
-    if not mobs:
-        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
-        parse_all(vfs)
-        assert len(mobs) == 569, "all mobs must be loaded"
-    return mobs
+def get_mobs(vfs: VirtualFileSystem = None) -> Dict[int, SimpleNamespace]:
+    if not _mobs:
+        vfs = vfs or VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        for filename in vfs["world/mob/index"].text.splitlines():
+            if filename == "$":
+                break
+            data = vfs["world/mob/" + filename].text.splitlines()
+            for mob in parse_file(data):
+                _mobs[mob.circle_vnum] = mob
+        assert len(_mobs) == 569, "all mobs must be loaded"
+    return _mobs
 
 
 if __name__ == "__main__":
     vfs = VirtualFileSystem(root_path=".", everythingtext=True)
-    parse_all(vfs)
-    print("parsed", len(mobs), "mobs.")
+    result = get_mobs(vfs=vfs)
+    print("parsed", len(result), "mobs.")

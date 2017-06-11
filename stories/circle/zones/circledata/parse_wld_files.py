@@ -9,14 +9,11 @@ http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/circle-3.1/doc/building.
 """
 
 from types import SimpleNamespace
-from typing import Dict, List
+from typing import Dict
 from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_rooms"]
-
-
-rooms = {}  # type: Dict[int, SimpleNamespace]
 
 
 def parse_file(content):
@@ -25,13 +22,14 @@ def parse_file(content):
     readstate = 'vNum'
     descarg = ''
     linenum = 0
+    result = []
 
     while linenum < len(content):
         line = content[linenum]
 
         if readstate == 'vNum':
             if line == '$':
-                break  # reached end of file
+                return result  # reached end of file
             vNumArg = line[1:]
             nameArg = content[linenum + 1][:-1]
             readstate = 'desc'
@@ -135,29 +133,30 @@ def parse_file(content):
                 desc = {"keywords": set(arg["keywords"].split()), "text": arg["desc"].replace("\n", " ")}
                 room.extradesc.append(desc)
 
-            rooms[room.circle_vnum] = room
+            result.append(room)
             descarg = ''
             readstate = 'vNum'
             linenum += 1
+    raise IOError("Expected $ at end of file")
 
 
-def parse_all(vfs: VirtualFileSystem) -> None:
-    for filename in vfs["world/wld/index"].text.splitlines():
-        if filename == "$":
-            break
-        data = vfs["world/wld/" + filename].text.splitlines()
-        parse_file(data)
+_rooms = {}  # type: Dict[int, SimpleNamespace]
 
 
-def get_rooms() -> Dict[int, SimpleNamespace]:
-    if not rooms:
-        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
-        parse_all(vfs)
-        assert len(rooms) == 1878, "all rooms must be loaded"
-    return rooms
+def get_rooms(vfs: VirtualFileSystem = None) -> Dict[int, SimpleNamespace]:
+    if not _rooms:
+        vfs = vfs or VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        for filename in vfs["world/wld/index"].text.splitlines():
+            if filename == "$":
+                break
+            data = vfs["world/wld/" + filename].text.splitlines()
+            for room in parse_file(data):
+                _rooms[room.circle_vnum] = room
+        assert len(_rooms) == 1878, "all rooms must be loaded"
+    return _rooms
 
 
 if __name__ == "__main__":
     vfs = VirtualFileSystem(root_path=".", everythingtext=True)
-    parse_all(vfs)
-    print("parsed", len(rooms), "rooms.")
+    result = get_rooms(vfs=vfs)
+    print("parsed", len(result), "rooms.")

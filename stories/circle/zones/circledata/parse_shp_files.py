@@ -16,18 +16,16 @@ from tale.vfs import VirtualFileSystem
 __all__ = ["get_shops"]
 
 
-shops = {}   # type: Dict[int, SimpleNamespace]
-
-
 def parse_file(content):
     content = [line.strip() for line in content][1:]  # skip the first "CircleMUD v3.0 Shop File~" line
     linenum = 0
+    result = []
 
     while linenum < len(content):
         line = content[linenum]
 
         if line == '$~':
-            break  # reached end of file
+            return result  # reached end of file
         vNumArg = line[1:-1]
         linenum += 1
 
@@ -159,26 +157,27 @@ def parse_file(content):
             rooms={int(vnum) for vnum in shopRoomsArg},
             wontdealwith=wontdealattr
         )
-        shops[shop.circle_vnum] = shop
+        result.append(shop)
+    raise IOError("Expected $~ at end of file")
 
 
-def parse_all(vfs: VirtualFileSystem) -> None:
-    for filename in vfs["world/shp/index"].text.splitlines():
-        if filename == "$":
-            break
-        data = vfs["world/shp/" + filename].text.splitlines()
-        parse_file(data)
+_shops = {}   # type: Dict[int, SimpleNamespace]
 
 
-def get_shops() -> Dict[int, SimpleNamespace]:
-    if not shops:
-        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
-        parse_all(vfs)
-        assert len(shops) == 46, "all shops must be loaded"
-    return shops
+def get_shops(vfs: VirtualFileSystem = None) -> Dict[int, SimpleNamespace]:
+    if not _shops:
+        vfs = vfs or VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        for filename in vfs["world/shp/index"].text.splitlines():
+            if filename == "$":
+                break
+            data = vfs["world/shp/" + filename].text.splitlines()
+            for shop in parse_file(data):
+                _shops[shop.circle_vnum] = shop
+        assert len(_shops) == 46, "all shops must be loaded"
+    return _shops
 
 
 if __name__ == "__main__":
     vfs = VirtualFileSystem(root_path=".", everythingtext=True)
-    parse_all(vfs)
-    print("parsed", len(shops), "shops.")
+    result = get_shops(vfs=vfs)
+    print("parsed", len(result), "shops.")
