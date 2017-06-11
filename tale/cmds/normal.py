@@ -1497,6 +1497,12 @@ def do_read(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         what = parsed.who_1
         what.read(player)
     else:
+        if parsed.args:
+            # check if name is in location's or an item's extradesc
+            text = player.search_extradesc(parsed.args[0])
+            if text:
+                player.tell(text)
+                return
         raise ParseError("Read what?")
 
 

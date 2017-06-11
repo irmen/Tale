@@ -233,7 +233,7 @@ def spell_ordinal(number: int) -> str:
     if tens <= 9:
         if ones > 0:
             return sign + __tens_words[tens] + "-" + __number_ordinals[ones]
-        return __tens_ordinals[tens]    # XXX ordinals
+        return __tens_ordinals[tens]
     return ordinal(n)
 
 

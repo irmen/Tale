@@ -5,43 +5,31 @@ Package containing the zones of the game.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-import random
-import re
-from types import SimpleNamespace
-from typing import Set, List, Type, Dict, no_type_check
-
-from tale import mud_context
-from tale.base import Location, Item, Exit, Door, Armour, Container, Weapon, Key, Living
-from tale.errors import LocationIntegrityError
+from typing import Set, Dict, no_type_check
+from tale.base import Item, Door, Armour, Container, Weapon, Key
 from tale.items.basic import *
 from tale.items.board import BulletinBoard
 from tale.items.bank import Bank
 from tale.shop import ShopBehavior
-from tale.util import roll_dice
-from .circledata.parse_mob_files import get_mobs
 from .circledata.parse_obj_files import get_objs
 from .circledata.parse_shp_files import get_shops
-from .circledata.parse_wld_files import get_rooms
 from .circledata.parse_zon_files import get_zones
-from .circle_mobs import *
 
 
 print("\nPre-loading circle data files.")
-mobs = get_mobs()
-print(len(mobs), "mobs loaded.")
 objs = get_objs()
 print(len(objs), "objects loaded.")
 shops = get_shops()
 print(len(shops), "shops loaded.")
-rooms = get_rooms()
-print(len(rooms), "rooms loaded.")
 zones = get_zones()
 print(len(zones), "zones loaded.")
 
 
+from .circle_mobs import *
+from .circle_locations import *
+
+
 # various caches, DO NOT CLEAR THESE, or duplicates might be spawned
-converted_rooms = {}     # type: Dict[int, Location]
-converted_mobs = set()   # type: Set[int]
 converted_items = set()  # type: Set[int]
 converted_shops = {}     # type: Dict[int, ShopBehavior]
 
@@ -63,315 +51,6 @@ circle_banks = {
     3034: "bank/bank.json",
     3036: "bank/bank.json"
 }
-
-circle_donation_room = 3063     # items and gold donated by wizards end up here as help for newbies  @todo make donation room
-
-
-# the various mob types, see spec_assign.c/assign_mobiles()
-circle_mob_class = {
-    1: MPuff,
-
-    # Immortal Zone
-    1200: MReceptionist,
-    1201: MPostmaster,
-    1202: MJanitor,
-
-    # Midgaard
-    3005: MReceptionist,
-    3010: MPostmaster,
-    3020: MGuildmaster,
-    3021: MGuildmaster,
-    3022: MGuildmaster,
-    3023: MGuildmaster,
-    3024: MGuildguard,
-    3025: MGuildguard,
-    3026: MGuildguard,
-    3027: MGuildguard,
-    3059: MCityguard,
-    3060: MCityguard,
-    3061: MJanitor,
-    3062: MFido,
-    3066: MFido,
-    3067: MCityguard,
-    3068: MJanitor,
-    3095: MCryogenicist,
-    3105: MMayor,
-
-    # MORIA
-    4000: MSnake,
-    4001: MSnake,
-    4053: MSnake,
-    4100: MMagicuser,
-    4102: MSnake,
-    4103: MThief,
-
-    # Redferne's
-    7900: MCityguard,
-
-    # PYRAMID
-    5300: MSnake,
-    5301: MSnake,
-    5304: MThief,
-    5305: MThief,
-    5309: MMagicuser,  # should breath fire
-    5311: MMagicuser,
-    5313: MMagicuser,  # should be a cleric
-    5314: MMagicuser,  # should be a cleric
-    5315: MMagicuser,  # should be a cleric
-    5316: MMagicuser,  # should be a cleric
-    5317: MMagicuser,
-
-    # High Tower Of Sorcery
-    2501: MMagicuser,  # should likely be cleric
-    2504: MMagicuser,
-    2507: MMagicuser,
-    2508: MMagicuser,
-    2510: MMagicuser,
-    2511: MThief,
-    2514: MMagicuser,
-    2515: MMagicuser,
-    2516: MMagicuser,
-    2517: MMagicuser,
-    2518: MMagicuser,
-    2520: MMagicuser,
-    2521: MMagicuser,
-    2522: MMagicuser,
-    2523: MMagicuser,
-    2524: MMagicuser,
-    2525: MMagicuser,
-    2526: MMagicuser,
-    2527: MMagicuser,
-    2528: MMagicuser,
-    2529: MMagicuser,
-    2530: MMagicuser,
-    2531: MMagicuser,
-    2532: MMagicuser,
-    2533: MMagicuser,
-    2534: MMagicuser,
-    2536: MMagicuser,
-    2537: MMagicuser,
-    2538: MMagicuser,
-    2540: MMagicuser,
-    2541: MMagicuser,
-    2548: MMagicuser,
-    2549: MMagicuser,
-    2552: MMagicuser,
-    2553: MMagicuser,
-    2554: MMagicuser,
-    2556: MMagicuser,
-    2557: MMagicuser,
-    2559: MMagicuser,
-    2560: MMagicuser,
-    2562: MMagicuser,
-    2564: MMagicuser,
-
-    # SEWERS
-    7006: MSnake,
-    7009: MMagicuser,
-    7200: MMagicuser,
-    7201: MMagicuser,
-    7202: MMagicuser,
-
-    # FOREST
-    6112: MMagicuser,
-    6113: MSnake,
-    6114: MMagicuser,
-    6115: MMagicuser,
-    6116: MMagicuser,  # should be a cleric
-    6117: MMagicuser,
-
-    # ARACHNOS
-    6302: MMagicuser,
-    6309: MMagicuser,
-    6312: MMagicuser,
-    6314: MMagicuser,
-    6315: MMagicuser,
-
-    # Desert
-    5004: MMagicuser,
-    5005: MGuildguard,  # brass dragon
-    5010: MMagicuser,
-    5014: MMagicuser,
-
-    # Drow City
-    5103: MMagicuser,
-    5104: MMagicuser,
-    5107: MMagicuser,
-    5108: MMagicuser,
-
-    # Old Thalos
-    5200: MMagicuser,
-    5201: MMagicuser,
-    5209: MMagicuser,
-
-    # New Thalos
-    # 5481 - Cleric (or Mage... but he IS a high priest... *shrug*)
-    5404: MReceptionist,
-    5421: MMagicuser,
-    5422: MMagicuser,
-    5423: MMagicuser,
-    5424: MMagicuser,
-    5425: MMagicuser,
-    5426: MMagicuser,
-    5427: MMagicuser,
-    5428: MMagicuser,
-    5434: MCityguard,
-    5440: MMagicuser,
-    5455: MMagicuser,
-    5461: MCityguard,
-    5462: MCityguard,
-    5463: MCityguard,
-    5482: MCityguard,
-
-    5400: MGuildmaster_Mage,
-    5401: MGuildmaster_Cleric,
-    5402: MGuildmaster_Warrior,
-    5403: MGuildmaster_Thief,
-    5456: MGuildguard_Mage,
-    5457: MGuildguard_Cleric,
-    5458: MGuildguard_Warrior,
-    5459: MGuildguard_Thief,
-
-    # ROME
-    12009: MMagicuser,
-    12018: MCityguard,
-    12020: MMagicuser,
-    12021: MCityguard,
-    12025: MMagicuser,
-    12030: MMagicuser,
-    12031: MMagicuser,
-    12032: MMagicuser,
-
-    # DWARVEN KINGDOM
-    6500: MCityguard,
-    6502: MMagicuser,
-    6509: MMagicuser,
-    6516: MMagicuser,
-
-
-    # mob classes from the King Welmar's Castle zone (150): (see castle.c)
-
-    15000: MCastleGuard,  # Gwydion
-    15001: MKingWelmar,  # Our dear friend: the King
-    15003: MCastleGuard,  # Jim
-    15004: MCastleGuard,  # Brian
-    15005: MCastleGuard,  # Mick
-    15006: MCastleGuard,  # Matt
-    15007: MCastleGuard,  # Jochem
-    15008: MCastleGuard,  # Anne
-    15009: MCastleGuard,  # Andrew
-    15010: MCastleGuard,  # Bertram
-    15011: MCastleGuard,  # Jeanette
-    15012: MPeter,  	# Peter
-    15013: MTrainingMaster,  # The training master
-    15015: MThief,       # Ergan... have a better idea?
-    15016: MJames,  	# James the Butler
-    15017: MCleaning,  # Ze Cleaning Fomen
-    15020: MTim,  	# Tim: Tom's twin
-    15021: MTom,  	# Tom: Tim's twin
-    15024: MDicknDavid,  # Dick: guard of the Treasury
-    15025: MDicknDavid,  # David: Dicks brother
-    15026: MJerry,  	# Jerry: the Gambler
-    15027: MCastleGuard,  # Michael
-    15028: MCastleGuard,  # Hans
-    15029: MCastleGuard,  # Boris
-    15032: MMagicuser,  # Pit Fiend, have something better?  Use it
-}
-
-
-def make_location(vnum: int) -> Location:
-    """
-    Get a Tale location object for the given circle room vnum.
-    This performs an on-demand conversion of the circle room data to Tale.
-    """
-    # @todo deal with location type ('inside') and attributes ('nomob', 'dark', 'death'...)
-    try:
-        return converted_rooms[vnum]   # get cached version if available
-    except KeyError:
-        c_room = rooms[vnum]
-        loc = Location(c_room.name, c_room.desc)
-        loc.circle_vnum = vnum   # type: ignore  # keep the circle vnum
-        for ed in c_room.extradesc:
-            loc.add_extradesc(ed["keywords"], ed["text"])
-        converted_rooms[vnum] = loc
-        for circle_exit in c_room.exits.values():
-            if circle_exit.roomlink >= 0:
-                xt = make_exit(circle_exit)
-                while True:
-                    try:
-                        xt.bind(loc)
-                        break
-                    except LocationIntegrityError as x:
-                        if x.direction in xt.aliases:
-                            # circlemud exit keywords can be duplicated over various exits
-                            # if we have a conflict, just remove the alias from the exit and try again
-                            xt.aliases = xt.aliases - {x.direction}
-                            continue
-                        else:
-                            if loc.exits[x.direction] is xt:
-                                # this can occur, the exit is already bound
-                                break
-                            else:
-                                # in this case a true integrity error occurred
-                                raise
-            else:
-                # add the description of the inaccessible exit to the room's own description.
-                loc.description += " " + circle_exit.desc
-        return loc
-
-
-def make_exit(c_exit: SimpleNamespace) -> Exit:
-    """Create an instance of a door or exit for the given circle exit"""
-    if c_exit.type in ("normal", "pickproof"):
-        door = Door(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
-        door.aliases |= c_exit.keywords
-        return door
-    else:
-        exit = Exit(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
-        exit.aliases |= c_exit.keywords
-        return exit
-
-
-def make_mob(vnum: int, mob_class: Type[CircleMob]=CircleMob) -> Living:
-    """Create an instance of an item for the given vnum"""
-    c_mob = mobs[vnum]
-    aliases_list = list(c_mob.aliases)  # type: List[str]
-    name = aliases_list[0]
-    aliases = set(aliases_list[1:])   # type: Set[str]
-    title = c_mob.shortdesc
-    if title.startswith("the ") or title.startswith("The "):
-        title = title[4:]
-    if title.startswith("a ") or title.startswith("A "):
-        title = title[2:]
-    # we take the stats from the 'human' race because the circle data lacks race and stats
-    mob_class = circle_mob_class.get(vnum, mob_class)
-    mob = mob_class(name, c_mob.gender, race="human", title=title, descr=c_mob.detaileddesc, short_descr=c_mob.longdesc)
-    mob.circle_vnum = vnum  # keep the vnum
-    if hasattr(c_mob, "extradesc"):
-        for ed in c_mob.extradesc:
-            mob.add_extradesc(ed["keywords"], ed["text"])
-    mob.aliases = aliases
-    mob.aggressive = "aggressive" in c_mob.actions
-    mob.money = float(c_mob.gold)
-    mob.stats.alignment = c_mob.alignment
-    mob.stats.xp = c_mob.xp
-    number, sides, hp = map(int, re.match(r"(\d+)d(\d+)\+(\d+)$", c_mob.maxhp_dice).groups())
-    if number > 0 and sides > 0:
-        hp += roll_dice(number, sides)[0]
-    mob.stats.hp = hp
-    mob.stats.maxhp_dice = c_mob.maxhp_dice
-    mob.stats.level = max(1, c_mob.level)   # 1..50
-    # convert AC -10..10 to more modern 0..20   (naked person(0)...plate armor(10)...battletank(20))
-    # special elites can go higher (limit 100), weaklings with utterly no defenses can go lower (limit -100)
-    mob.stats.ac = max(-100, min(100, 10 - c_mob.ac))
-    mob.stats.attack_dice = c_mob.barehanddmg_dice
-    if "sentinel" not in c_mob.actions:
-        mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
-    # @todo load position? (standing/sleeping/sitting...)
-    # @todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
-    # @todo actions, affection,...
-    converted_mobs.add(vnum)
-    return mob
 
 
 @no_type_check
