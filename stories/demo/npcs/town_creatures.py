@@ -69,10 +69,15 @@ class WalkingRat(Living):
 
 class ShoppeShopkeeper(Shopkeeper, Listener):
     def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
-        if topicname[0] == "wiretap-location":
-            if "Rat arrives" in event[1]:
-                mud_context.driver.defer(2, self.rat_event, "glance at rat")
-            elif "kicks rat" in event[1]:
+        if topicname == "shoppe-rat-arrival":
+            # rat arrived in the shop
+            mud_context.driver.defer(2, self.rat_event, "glance at rat")
+        elif topicname == "shoppe-player-arrival":
+            # player arrived in the shop
+            mud_context.driver.defer(3, self.do_socialize, "welcome "+event.name)
+        elif topicname[0] == "wiretap-location":
+            if "kicks rat" in event[1]:
+                # be happy about someone that is kicking the vermin!
                 name = event[1].split("kicks rat")[0].strip()
                 living = self.location.search_living(name)
                 if living:
@@ -86,9 +91,12 @@ class ShoppeShopkeeper(Shopkeeper, Listener):
 class CustomerJames(Living, Listener):
     """The customer in the shoppe, trying to sell a Lamp, and helpful as rat deterrent."""
     def pubsub_event(self, topicname: TopicNameType, event: Any) -> Any:
-        if topicname[0] == "wiretap-location":
-            if "Rat arrives" in event[1]:
-                mud_context.driver.defer(4, self.rat_kick)
+        if topicname == "shoppe-rat-arrival":
+            # rat arrived in the shop, we're going to kick it out!
+            mud_context.driver.defer(4, self.rat_kick)
+        elif topicname == "shoppe-player-arrival":
+            # player arrived in the shop.
+            mud_context.driver.defer(5, self.do_socialize, "nod "+event.name)
 
     def rat_kick(self, ctx: util.Context) -> None:
         rat = self.location.search_living("rat")
