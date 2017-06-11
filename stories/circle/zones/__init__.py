@@ -5,14 +5,18 @@ Package containing the zones of the game.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+from collections import deque
+from typing import MutableSequence
+from tale.driver import Driver
 from tale.base import Door, Container
-from .circledata.parse_zon_files import get_zones, get_zones
-from .circledata.circle_mobs import make_mob, converted_mobs, MShopkeeper, init_circle_mobs
-from .circledata.circle_locations import make_location, make_exit, converted_rooms, make_shop, converted_shops, init_circle_locations
+from tale.util import Context
+from .circledata.parse_zon_files import get_zones
+from .circledata.circle_mobs import make_mob, converted_mobs, mobs_with_special, MShopkeeper, init_circle_mobs
+from .circledata.circle_locations import make_location, converted_rooms, make_shop, converted_shops, init_circle_locations
 from .circledata.circle_items import make_item, converted_items, unconverted_objs, init_circle_items
 
 
-def init_zones() -> None:
+def init_zones(driver: Driver) -> None:
     """Populate the zones and initialize inventories and door states. Set up shops."""
     print("Initializing zones.")
     zones = get_zones()
@@ -101,5 +105,35 @@ def init_zones() -> None:
 
     print("Activated: %d mob types, %d item types, %d rooms, %d shop types" % (
         len(converted_mobs), len(converted_items), len(converted_rooms), len(converted_shops)))
-    print("Spawned: %d mobs, %d items, %d shops" % (num_mobs, num_items, num_shops))
+    print("Spawned: %d mobs (%d specials), %d items, %d shops" % (num_mobs, len(mobs_with_special), num_items, num_shops))
     print(len(unconverted_objs()), "unused item defs.")
+
+    # divide all the special mobs over the 5 mobs buckets (via their hash number)
+    # this prevents all 300+ special mobs doing something every 10 seconds at the same time
+    global _special_mobs_buckets
+    assert len(_special_mobs_buckets) == 5
+    for mob in mobs_with_special:
+        _special_mobs_buckets[(hash(mob) // 10) % 5].append(mob)
+    mobs_with_special.clear()
+    # set up the periodical pulse events
+    mobile_timer = 10.0 / len(_special_mobs_buckets)
+    driver.defer((1.6, mobile_timer, mobile_timer), pulse_mobile)
+    driver.defer((4.5, 10.0, 10.0), pulse_zone)
+
+
+_special_mobs_buckets = deque([[], [], [], [], []])   # type: MutableSequence[list]
+
+
+def pulse_mobile(ctx: Context=None) -> None:
+    """
+    Called every so often to handle mob activity (other than combat).
+    Via round robin scheduling every mob gets called once every 10 seconds, but not all at the same time.
+    """
+    for mob in _special_mobs_buckets[0]:
+        mob.do_special(ctx)
+    _special_mobs_buckets.rotate()      # type: ignore
+
+
+def pulse_zone(ctx: Context=None) -> None:
+    """Called every 10 seconds to handle zone activity"""
+    pass   # @todo zone pulse

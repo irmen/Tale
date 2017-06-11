@@ -9,14 +9,13 @@ import re
 import random
 from types import SimpleNamespace
 from typing import Type, List, Set, Dict
-from tale import mud_context
 from tale.base import Living
 from tale.util import Context, call_periodically, roll_dice
 from tale.shop import Shopkeeper
 from .parse_mob_files import get_mobs
 
 
-__all__ = ("converted_mobs", "make_mob", "init_circle_mobs")
+__all__ = ("converted_mobs", "mobs_with_special", "make_mob", "init_circle_mobs")
 
 
 mobs = {}   # type: Dict[int, SimpleNamespace]
@@ -32,14 +31,22 @@ class CircleMob(Living):
     """Monster NPC having tailored behavior to suit circle data"""
     def init(self) -> None:
         self.circle_vnum = 0
+        self.actions = set()   # type: Set[str]
         super().init()
 
     def do_wander(self, ctx: Context) -> None:
-        # Let the mob wander randomly. Note: not all mobs do this!
-        direction = self.select_random_move()
-        if direction:
-            self.move(direction.target, self)
-        ctx.driver.defer(random.randint(20, 60), self.do_wander)   # @todo timings
+        # Let the mob wander randomly. Note: not all mobs do this! (some are 'sentinel')
+        if random.random() <= 0.333:
+            direction = self.select_random_move()
+            if direction:
+                # @todo avoid certain directions, don't leave zone if 'stayzone' etc.
+                self.move(direction.target, self)
+
+    def do_special(self, ctx: Context) -> None:
+        # The special behavior of the mob. Not all mobs have this!
+        if "sentinel" not in self.actions:
+            self.do_wander(ctx)
+        # @todo more actions such as scavenge
 
 
 # @todo implement the behavior of the various mob classes (see spec_procs.c / castle.c)
@@ -401,6 +408,7 @@ circle_mob_class = {
 
 # various caches, DO NOT CLEAR THESE, or duplicates might be spawned
 converted_mobs = set()   # type: Set[int]
+mobs_with_special = set()     # type: Set[CircleMob]
 
 
 def make_mob(vnum: int, mob_class: Type[CircleMob]=CircleMob) -> Living:
@@ -436,8 +444,12 @@ def make_mob(vnum: int, mob_class: Type[CircleMob]=CircleMob) -> Living:
     # special elites can go higher (limit 100), weaklings with utterly no defenses can go lower (limit -100)
     mob.stats.ac = max(-100, min(100, 10 - c_mob.ac))
     mob.stats.attack_dice = c_mob.barehanddmg_dice
-    if "sentinel" not in c_mob.actions:
-        mud_context.driver.defer(random.randint(2, 30), mob.do_wander)
+    assert isinstance(c_mob.actions, set)
+    mob.actions = c_mob.actions
+    if "special" in c_mob.actions:
+        # this mob has the 'special' flag which means it has special programmed behavior that must periodically be triggered
+        # movement of the mob is one thing that this takes care of (if the mob is not sentinel)
+        mobs_with_special.add(mob)
     # @todo load position? (standing/sleeping/sitting...)
     # @todo convert thac0 to appropriate attack stat (armor penetration? to-hit bonus?)
     # @todo actions, affection,...

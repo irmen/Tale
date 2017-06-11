@@ -7,7 +7,8 @@ Interesting link: http://www.brasslantern.org/writers/
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-[code,circle] turn the 500 do_wander deferreds into one global. ?how to randomize movement a little? (via 10 hashcode buckets?)
+[feature] implement IP-address based ban
+[circle] fix the zone errors (putting items into non-existing containers)
 [feature] Write things (including crash logs) to a logfile for the server admins.
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] SSH interface via Paramiko?
@@ -16,7 +17,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 [feature] Mailbox system: can mail messages, money and items to other players. Only when mailbox in vicinity (unless wizard). Notify player if mail arrived.
 [feature] Follow other creatures: follow.  If you have a follower and want to try to stop him: evade/flee
 [feature] World zones: (optional) timed zone resets to reset to starting configuration. Or global server reset? (circle has zones and zone resets)
-[info,feature] DAMAGE TYPES:
+[feature] DAMAGE TYPES:
     blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
     trauma/wound, suffocation, deathray (zap-command), EMP, karma, pressure, decompression, inertia
 
@@ -27,6 +28,7 @@ General ideas/TODO:
 [code] a story must be able to limit the choice of available races for players.
 [code] a story must be able to add extra dialog to the create-new-player process.
 [code] Make a wizard kill command that instantly kills a living and/or player. Nothing remains. (see ACMD(do_kill) in act.offensive.c)
+    This requires a combat system with healt/damage/death logic in place though (what happens to dead creatures? corpse/loot drop/respawn?)
 [code] If leaving in one of the normal directions (n, e, u, d etc) print "X leaves east." rather than "X leaves."
 [code] If door is opened/unlocked/lockpicked, tell this to the room AND also the room on the other side
 [code] (once locations have flags such as 'outside') make out/outside a meta-exit that looks for obvious exit to take to to to outside location.

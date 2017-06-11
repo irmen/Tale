@@ -43,7 +43,7 @@ class Story(StoryBase):
         print("Story initialization started by driver.")
         self.driver = driver
         from zones import init_zones
-        init_zones()
+        init_zones(driver)
 
     def init_player(self, player: Player) -> None:
         """
