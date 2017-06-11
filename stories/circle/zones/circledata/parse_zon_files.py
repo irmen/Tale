@@ -1,173 +1,184 @@
 """
 Parse CircleMUD zone files.
 
-Initially based on code by Al Sweigart, but heavily modified since:
+Initially based on code by Al Sweigart, but has now been fully rewritten:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+
+File format description:
+http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/circle-3.1/doc/building.pdf
 """
 
-from types import SimpleNamespace
-from typing import Dict
+from typing import Dict, Iterator, List, Optional, Tuple
 from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_zones"]
 
 
-zones = {}  # type: Dict[int, SimpleNamespace]
+class ZMobile:
+    __slots__ = ("vnum", "max_exist", "room", "comment", "inventory", "equip")
+
+    def __init__(self, vnum: int, max_exist: int, room: int, comment: Optional[str]) -> None:
+        self.vnum = vnum
+        self.max_exist = max_exist
+        self.room = room
+        self.comment = comment
+        self.inventory = []  # type: List[ZObject]
+        self.equip = {}   # type: Dict[str, Tuple[int, int]]
 
 
-def parse_file(content):
-    content = [line.strip() for line in content]
+class ZObject:
+    __slots__ = ("vnum", "max_exist", "room", "contains")
 
-    linenum = 0
-    allmobs = []
-    alldoors = []
-    allobjects = []
-    allremove = []
-
-    # import pdb; pdb.set_trace()
-    vnumArg = content[linenum][1:]
-    linenum += 1
-    while content[linenum].startswith('*'): linenum += 1
-    zonenameArg = content[linenum][:-1]
-    linenum += 1
-    while content[linenum].startswith('*'): linenum += 1
-    startroomArg, endroomArg, lifespanArg, resetArg = content[linenum].split()
-    linenum += 1
-
-    while linenum < len(content):  # read in commands
-        line = content[linenum]
-        if line.startswith('*'):
-            linenum += 1
-            continue
-
-        if line == 'S':
-            break  # reached end of file
-
-        line = content[linenum].split()
-
-        command = line[0]
-
-        if command == 'M':
-            # output.write('m %s' % lineNum)
-            #  add a mob
-            #  NOTE - I'm ignoring the if-flag for mobs
-            allmobs.append({'vnum': line[2], 'max': line[3], 'room': line[4], 'inv': [], 'equip': {}})
-        elif command == 'G':
-            # output.write('g %s' % lineNum)
-            allmobs[-1]['inv'].append({'vnum': line[2], 'max': line[3]})
-        elif command == 'E':
-            # output.write('e %s' % lineNum)
-            allmobs[-1]['equip'][line[4]] = {'vnum': line[2], 'max': line[3]}
-        elif command == 'O':
-            # output.write('o %s' % lineNum)
-            allobjects.append({'vnum': line[2], 'max': line[3], 'room': line[4], 'contains': []})
-        elif command == 'P':
-            # output.write('p %s' % lineNum)
-            obj_to_load = line[2]
-            obj_to_put_into = line[4]
-            for o in allobjects:
-                if o['vnum'] == obj_to_put_into:
-                    o['contains'].append({'vnum': obj_to_load, 'max': line[3]})
-        elif command == 'D':
-            # output.write('d %s' % lineNum)
-            alldoors.append({'room': line[2], 'exit': line[3], 'state': line[4]})
-        elif command == 'R':
-            # output.write('r %s' % lineNum)
-            allremove.append({'room': line[2], 'vnum': line[3]})
-        linenum += 1
-
-    exitMap = {'0': 'north',
-               '1': 'east',
-               '2': 'south',
-               '3': 'west',
-               '4': 'up',
-               '5': 'down'}
-    doorstateMap = {'0': 'open', '1': 'closed', '2': 'locked'}
-    wornMap = {'0': 'light',
-               '1': 'rightfinger',
-               '2': 'leftfinger',
-               '3': 'neck1',
-               '4': 'neck2',
-               '5': 'body',
-               '6': 'head',
-               '7': 'legs',
-               '8': 'feet',
-               '9': 'hands',
-               '10': 'arms',
-               '11': 'shield',
-               '12': 'aboutbody',
-               '13': 'waist',
-               '14': 'rightwrist',
-               '15': 'leftwrist',
-               '16': 'wield',
-               '17': 'held'}
-    resetMap = {'0': 'never', '1': 'afterdeserted', '2': 'asap'}
-
-    zone = SimpleNamespace(
-        circle_vnum=int(vnumArg),
-        name=zonenameArg,
-        startroom=int(startroomArg),
-        endroom=int(endroomArg),
-        lifespan_minutes=int(lifespanArg),
-        resetmode=resetMap[resetArg],
-        mobs=[],
-        objects=[],
-        doors=[]
-    )
-    for m in allmobs:
-        mob = SimpleNamespace(
-            circle_vnum=int(m["vnum"]),
-            globalmax=int(m["max"]),
-            room=int(m["room"]),
-            inventory={},
-            equipped={}
-        )
-        for i in m['inv']:
-            mob.inventory[int(i["vnum"])] = int(i["max"])
-        for k, v in m['equip'].items():
-            mob.equipped[int(v["vnum"])] = {
-                "globalmax": int(v["max"]),
-                "wornon": wornMap[k]
-            }
-        zone.mobs.append(mob)
-    for o in allobjects:
-        obj = {
-            "vnum": int(o["vnum"]),
-            "globalmax": int(o["max"]),
-            "room": int(o["room"]),
-            "contains": {}   # maps vnum to maximum number of these
-        }
-        for c in o['contains']:
-            obj["contains"][int(c["vnum"])] = int(c["max"])
-        zone.objects.append(obj)
-    for d in alldoors:
-        zone.doors.append({
-            "room": int(d["room"]),
-            "exit": exitMap[d["exit"]],
-            "state": doorstateMap[d["state"]]
-        })
-
-    zones[zone.circle_vnum] = zone
+    def __init__(self, vnum: int, max_exist: int, room: Optional[int]) -> None:
+        self.vnum = vnum
+        self.max_exist = max_exist
+        self.room = room
+        self.contains = []    # type: List[Tuple[int, int]]
 
 
-def parse_all(vfs: VirtualFileSystem) -> None:
-    for filename in vfs["world/zon/index"].text.splitlines():
-        if filename == "$":
+class ZDoorstate:
+    __slots__ = ("room", "exit", "state")
+
+    def __init__(self, room: int, exit: str, state: str) -> None:
+        self.room = room
+        self.exit = exit
+        self.state = state
+
+
+class ZZone:
+    __slots__ = ("vnum", "name", "startroom", "endroom", "lifespan_minutes", "resetmode", "mobs", "objects", "doorstates", "removes")
+
+    def __init__(self, vnum: int) -> None:
+        self.vnum = vnum
+        self.name = ""
+        self.startroom = -1
+        self.endroom = -1
+        self.lifespan_minutes = -1
+        self.resetmode = ""
+        self.mobs = []    # type: List[ZMobile]
+        self.objects = []    # type: List[ZObject]
+        self.doorstates = []    # type: List[ZDoorstate]
+        self.removes = []    # type: List[Tuple[int, int]]    # (room, item)
+
+
+def parse_file(content: str) -> ZZone:
+    equip_positions = {
+        0: 'light',
+        1: 'rightfinger',
+        2: 'leftfinger',
+        3: 'neck1',
+        4: 'neck2',
+        5: 'body',
+        6: 'head',
+        7: 'legs',
+        8: 'feet',
+        9: 'hands',
+        10: 'arms',
+        11: 'shield',
+        12: 'aboutbody',
+        13: 'waist',
+        14: 'rightwrist',
+        15: 'leftwrist',
+        16: 'wield',
+        17: 'held'
+    }
+
+    exit_map = {
+        0: 'north',
+        1: 'east',
+        2: 'south',
+        3: 'west',
+        4: 'up',
+        5: 'down'
+    }
+
+    doorstate_map = {
+        0: 'open',
+        1: 'closed',
+        2: 'locked'  # and closed as well
+    }
+
+    reset_modes = {
+        0: 'never',
+        1: 'deserted',
+        2: 'asap'
+    }
+
+    def iter_lines(src: str) -> Iterator[str]:
+        for line in src.splitlines():
+            if not line.startswith("*"):
+                yield line
+
+    lines = iter_lines(content)
+    zone = ZZone(int(next(lines)[1:]))
+    name = next(lines)
+    if name[-1] != "~":
+        raise ValueError("zone name must end with ~")
+    zone.name = name[:-1]
+    zone.startroom, zone.endroom, zone.lifespan_minutes, resetmode = map(int, next(lines).split())
+    zone.resetmode = reset_modes[resetmode]
+    prev_executed = True
+    all_mobs = {}  # type: Dict[int, ZMobile]
+    all_objs = []  # type: List[ZObject]     # most recently loaded appended at the end
+    last_mobile_vnum = -1
+    while True:
+        line = next(lines)
+        if line == "S":
             break
-        data = vfs["world/zon/" + filename].text.splitlines()
-        parse_file(data)
+        cmd, iff, *args = line.split(maxsplit=5)
+        if iff == '0' or prev_executed:
+            prev_executed = True
+            if cmd == 'M':
+                zm = ZMobile(int(args[0]), int(args[1]), int(args[2]), args[3] if len(args) == 4 else None)
+                all_mobs[zm.vnum] = zm
+                zone.mobs.append(zm)
+                last_mobile_vnum = zm.vnum
+            elif cmd == 'O':
+                zo = ZObject(int(args[0]), int(args[1]), int(args[2]))
+                all_objs.append(zo)
+                zone.objects.append(zo)
+            elif cmd == 'G':
+                zm = all_mobs[last_mobile_vnum]
+                zm.inventory.append(ZObject(int(args[0]), int(args[1]), None))
+            elif cmd == 'E':
+                zm = all_mobs[last_mobile_vnum]
+                equip_pos = equip_positions[int(args[2])]
+                zm.equip[equip_pos] = int(args[0]), int(args[1])        # (vnum, max_exist)
+            elif cmd == 'P':
+                container_vnum = int(args[2])
+                for container in reversed(all_objs):
+                    if container.vnum == container_vnum:
+                        container.contains.append((int(args[0]), int(args[1])))   # (vnum, max_exist)
+                        break
+                else:
+                    print("zone %d: attempt to put %s in non-existing container %s" % (zone.vnum, args[0], args[2]))
+                    # prev_executed = False
+            elif cmd == 'D':
+                zone.doorstates.append(ZDoorstate(int(args[0]), exit_map[int(args[1])], doorstate_map[int(args[2])]))
+            elif cmd == 'R':
+                zone.removes.append((int(args[0]), int(args[1])))    # (room, object)
+            else:
+                raise ValueError("invalid zone command: " + cmd)
+    return zone
 
 
-def get_zones() -> Dict[int, SimpleNamespace]:
-    if not zones:
-        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
-        parse_all(vfs)
-        assert len(zones) == 30, "all zones must be loaded"
-    return zones
+_zones = {}  # type: Dict[int, ZZone]
+
+
+def get_zones(vfs: VirtualFileSystem = None) -> Dict[int, ZZone]:
+    if not _zones:
+        vfs = vfs or VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        for filename in vfs["world/zon/index"].text.splitlines():
+            if filename == "$":
+                break
+            zone = parse_file(vfs["world/zon/" + filename].text)
+            _zones[zone.vnum] = zone
+        assert len(_zones) == 30, "all zones must be loaded"
+    return _zones
 
 
 if __name__ == "__main__":
     vfs = VirtualFileSystem(root_path=".", everythingtext=True)
-    parse_all(vfs)
-    print("parsed", len(zones), "zones.")
+    result = get_zones(vfs=vfs)
+    print("parsed", len(result), "zones.")

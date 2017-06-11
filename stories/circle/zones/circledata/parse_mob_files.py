@@ -3,6 +3,9 @@ Parse CircleMUD mob files.
 
 Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
+
+File format description:
+http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/circle-3.1/doc/building.pdf
 """
 
 import re
