@@ -64,7 +64,7 @@ class WalkingRat(Living):
     def do_random_move(self, ctx: util.Context) -> None:
         direction = self.select_random_move()
         if direction:
-            self.move(direction.target, self)
+            self.move(direction.target, self, direction_name=direction.name)
 
 
 class ShoppeShopkeeper(Shopkeeper, Listener):
@@ -98,4 +98,4 @@ class CustomerJames(Living, Listener):
             direction = rat.select_random_move()
             if direction:
                 rat.tell_others("{Actor} runs away towards the door!")
-                rat.move(direction.target, self)
+                rat.move(direction.target, self, direction_name=direction.name)

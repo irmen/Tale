@@ -31,7 +31,7 @@ from . import mud_context
 from .base import Item, Living, ParseResult
 from .errors import ActionRefused, ParseError, RetrySoulVerb
 from .items.basic import Trash
-from .util import sorted_by_title, Context
+from .util import sorted_by_title
 
 banking_money_limit = 15000.0
 
@@ -102,14 +102,6 @@ class Shopkeeper(Living):
         self.shop = shop
         if self.shop.banks_money:
             self.money = min(self.money, banking_money_limit)   # make sure we don't have surplus cash
-
-    def do_wander(self, ctx: Context) -> None:
-        # Let the shopkeeper wander randomly. Note: not all shopkeepers do this!
-        # (the behavior is activated -or not- where this shopkeeper is created)
-        direction = self.select_random_move()
-        if direction:
-            self.move(direction.target, self)
-        ctx.driver.defer(random.randint(20, 60), self.do_wander)
 
     def validate_open_hours(self, actor: Living=None, current_time: datetime.time=None) -> None:
         if actor and "wizard" in actor.privileges:

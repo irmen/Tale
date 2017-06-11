@@ -435,8 +435,10 @@ class Driver(pubsub.Listener):
                 # to avoid flooding/abuse, we stop the loop after processing one command.
                 break
             except errors.UnknownVerbException as x:
-                if x.verb in {"north", "east", "south", "west", "northeast", "northwest", "southeast", "southwest",
-                              "north east", "north west", "south east", "south west", "up", "down"}:
+                if x.verb in {"north", "east", "south", "west",
+                              "northeast", "northwest", "southeast", "southwest",
+                              "north east", "north west", "south east", "south west",
+                              "up", "down"}:
                     p.tell("You can't go in that direction.")
                 else:
                     p.tell("The verb '%s' is unrecognized." % x.verb)
@@ -578,7 +580,7 @@ class Driver(pubsub.Listener):
     def go_through_exit(self, player: player.Player, direction: str) -> None:
         xt = player.location.exits[direction]
         xt.allow_passage(player)
-        player.move(xt.target)
+        player.move(xt.target, direction_name=xt.name)
         player.look()
 
     def lookup_location(self, location_name: str) -> base.Location:

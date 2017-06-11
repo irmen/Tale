@@ -40,7 +40,7 @@ class CircleMob(Living):
             direction = self.select_random_move()
             if direction:
                 # @todo avoid certain directions, don't leave zone if 'stayzone' etc.
-                self.move(direction.target, self)
+                self.move(direction.target, self, direction_name=direction.name)
 
     def do_special(self, ctx: Context) -> None:
         # The special behavior of the mob. Not all mobs have this!

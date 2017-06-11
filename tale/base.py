@@ -332,7 +332,7 @@ class MudObject:
         raise ActionRefused("You can't %s that." % verb)
 
     def move(self, target: ContainingType, actor: 'Living'=None,
-             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
@@ -409,7 +409,7 @@ class Item(MudObject):
         raise ActionRefused("You can't look inside of that.")
 
     def move(self, target: ContainingType, actor: 'Living'=None,
-             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
@@ -614,8 +614,10 @@ class Location(MudObject):
                     yelled_locations.add(exit.target)
                     for direction, return_exit in exit.target.exits.items():
                         if return_exit.target is self:
-                            if direction in {"north", "east", "south", "west", "northeast", "northwest", "southeast",
-                                             "southwest", "left", "right", "front", "back"}:
+                            if direction in {"north", "east", "south", "west",
+                                             "northeast", "northwest", "southeast", "southwest",
+                                             "north east", "north west", "south east", "south west",
+                                             "left", "right", "front", "back"}:
                                 direction = "the " + direction
                             elif direction in {"up", "above", "upstairs"}:
                                 direction = "above"
@@ -1103,13 +1105,27 @@ class Living(MudObject):
             actor.tell("The reason was: {0!r} {0!s}".format(x))
 
     def move(self, target: Union[Location, 'Container', 'Living'], actor: 'Living'=None,
-             silent: bool=False, is_player: bool=False, verb: str="move") -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
         """
         Leave the current location, enter the new location (transactional).
         Moving a living is only supported to a Location target.
         Messages are being printed to the locations if the move was successful.
         """
         assert isinstance(target, Location), "can only move to a Location"
+
+        def display_direction(direction: str) -> str:
+            if direction in {"north", "east", "south", "west", "out", "outside",
+                             "northeast", "northwest", "southeast", "southwest",
+                             "north east", "north west", "south east", "south west"}:
+                return direction
+            if direction in {"up", "above", "upstairs"}:
+                return "up"
+            if direction in {"down", "below", "downstairs"}:
+                return "down"
+            if direction in {"left", "right"}:
+                return "to the "+direction
+            return None
+
         actor = actor or self
         original_location = None
         if self.location:
@@ -1122,7 +1138,12 @@ class Living(MudObject):
                 original_location.insert(self, actor)
                 raise
             if not silent:
-                original_location.tell("%s leaves." % lang.capital(self.title), exclude_living=self)
+                direction_txt = display_direction(direction_name)
+                if direction_txt:
+                    message = "%s leaves %s." % (lang.capital(self.title), direction_txt)
+                else:
+                    message = "%s leaves." % lang.capital(self.title)
+                original_location.tell(message, exclude_living=self)
             # queue event
             if is_player:
                 pending_actions.send(lambda who=self, where=target: original_location.notify_player_left(who, where))
