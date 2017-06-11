@@ -13,10 +13,15 @@ from .circledata.parse_wld_files import get_rooms
 from .circle_mobs import make_mob
 
 
-__all__ = ["PetShop", "converted_rooms", "make_location", "make_exit"]
+__all__ = ["converted_rooms", "make_location", "make_exit"]
 
 
 class PetShop(Location):
+    """
+    A special shop where you can buy pets.
+    Because Livings cannot be in anyone's inventory (and because the Circle data files
+    specify it this way) the pets for sale are in the 'back room' that has a circle vnum +1 of this room itself.
+    """
     def init(self):
         super().init()
         self.verbs = {
@@ -64,11 +69,22 @@ class PetShop(Location):
             return super().handle_verb(parsed, actor)
 
 
+class Garbagedump(Location):
+    """
+    Special location that is a garbage dump. It destroys stuff dropped here
+    (and rewards players for keeping things tidy)
+    """
+    def init(self):
+        super().init()
+    # @todo trash cleanup
+
+
 # various caches, DO NOT CLEAR THESE, or duplicates might be spawned
 converted_rooms = {}     # type: Dict[int, Location]
 
 circle_donation_room = 3063    # items and gold donated by wizards end up here as help for newbies  @todo make donation room
 circle_pet_shops = {3031}      # special shops, they sell living creatures!
+circle_dump_rooms = {3030}     # special rooms that are a garbage dump and destroy dropped stuff.
 
 
 rooms = get_rooms()
@@ -85,11 +101,12 @@ def make_location(vnum: int) -> Location:
         return converted_rooms[vnum]   # get cached version if available
     except KeyError:
         c_room = rooms[vnum]
-        if vnum not in circle_pet_shops:
-            loc = Location(c_room.name, c_room.desc)
-        else:
-            # location is a special shop
+        if vnum in circle_dump_rooms or "death" in c_room.attributes:
+            loc = Garbagedump(c_room.name, c_room.desc)
+        elif vnum in circle_pet_shops:
             loc = PetShop(c_room.name, c_room.desc)
+        else:
+            loc = Location(c_room.name, c_room.desc)
         loc.circle_vnum = vnum   # type: ignore  # keep the circle vnum
         for ed in c_room.extradesc:
             loc.add_extradesc(ed["keywords"], ed["text"])
