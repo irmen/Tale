@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import distutils.version
 import enum
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Set
 
 from . import __version__ as tale_version_str
 from .errors import StoryConfigError
@@ -52,6 +52,7 @@ class StoryConfig:
         self.player_gender = ""              # m/f/n
         self.player_race = "human"           # default is "human" ofcourse, but you can select something else if you want
         self.player_money = 0.0              # starting money
+        self.playable_races = set()          # type: Set[str]  # if specified, specify a subset of the allowed playable races
         self.money_type = MoneyType.NOTHING  # money type modern/fantasy/nothing
         self.server_tick_method = TickMethod.COMMAND   # command (waits for player entry) or timer (async timer driven)
         self.server_tick_time = 5.0          # time between server ticks (in seconds) (usually 1.0 for 'timer' tick method)

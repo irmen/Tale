@@ -24,6 +24,7 @@ class Story(StoryBase):
     config.requires_tale = "3.4"
     config.supported_modes = {GameMode.IF, GameMode.MUD}
     config.player_money = 15.5
+    config.playable_races = {"human", "elf", "dark-elf"}
     config.money_type = MoneyType.MODERN
     config.server_tick_method = TickMethod.TIMER
     config.server_tick_time = 1.0

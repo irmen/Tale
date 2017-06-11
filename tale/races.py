@@ -1050,9 +1050,8 @@ _races = {
 }
 
 
-# create the races classes from the races table above.
-
-playable_races = {'dwarf', 'elf', 'half-elf', 'half-orc', 'halfling', 'human', 'orc'}  # races that can be chosen by players
+# Races that can be chosen by players. Can be changed in story configuration.
+playable_races = {'human', 'dwarf', 'elf', 'dark-elf', 'half-elf', 'half-orc', 'halfling', 'orc', 'goblin', 'hobbit'}
 
 RStats = NamedTuple("RStats", [("agi", Tuple[int, int]),
                                ("cha", Tuple[int, int]),

@@ -74,7 +74,7 @@ class ShoppeShopkeeper(Shopkeeper, Listener):
             mud_context.driver.defer(2, self.rat_event, "glance at rat")
         elif topicname == "shoppe-player-arrival":
             # player arrived in the shop
-            mud_context.driver.defer(3, self.do_socialize, "welcome "+event.name)
+            mud_context.driver.defer(3, self.do_socialize, "welcome " + event.name)
         elif topicname[0] == "wiretap-location":
             if "kicks rat" in event[1]:
                 # be happy about someone that is kicking the vermin!
@@ -96,7 +96,7 @@ class CustomerJames(Living, Listener):
             mud_context.driver.defer(4, self.rat_kick)
         elif topicname == "shoppe-player-arrival":
             # player arrived in the shop.
-            mud_context.driver.defer(5, self.do_socialize, "nod "+event.name)
+            mud_context.driver.defer(5, self.do_socialize, "nod " + event.name)
 
     def rat_kick(self, ctx: util.Context) -> None:
         rat = self.location.search_living("rat")

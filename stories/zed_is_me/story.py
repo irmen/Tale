@@ -25,6 +25,7 @@ class Story(StoryBase):
     config.player_name = "julie"
     config.player_gender = "f"
     config.player_race = "human"
+    config.playable_races = {"human"}
     config.startlocation_player = "houses.livingroom"
     config.startlocation_wizard = "houses.livingroom"
     config.zones = ["houses", "magnolia_st", "rose_st"]

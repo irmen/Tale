@@ -16,7 +16,7 @@ import tale
 from tale import races, pubsub, mud_context
 from tale.accounts import MudAccounts
 from tale.base import Location, Exit, Item, Stats, Living, ParseResult
-from tale.charbuilder import IFCharacterBuilder, MudCharacterBuilder, valid_playable_race, PlayerNaming
+from tale.charbuilder import IFCharacterBuilder, MudCharacterBuilder, ValidRaceValidator, PlayerNaming
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, ParseError, NonSoulVerb
 from tale.player import Player, TextBuffer, PlayerConnection
@@ -576,9 +576,10 @@ class TestCharacterBuilders(unittest.TestCase):
 
     def test_if_build(self):
         conn = PlayerConnection()
+        conf = StoryConfig()
         with WrappedConsoleIO(conn) as io:
             conn.io = io
-            b = IFCharacterBuilder(conn)
+            b = IFCharacterBuilder(conn, conf)
             builder = b.build_character()
             why, what = next(builder)
             self.assertEqual("input", why)
@@ -586,9 +587,10 @@ class TestCharacterBuilders(unittest.TestCase):
 
     def test_mud_build(self):
         conn = PlayerConnection()
+        conf = StoryConfig()
         with WrappedConsoleIO(conn) as io:
             conn.io = io
-            b = MudCharacterBuilder(conn, "PETER")
+            b = MudCharacterBuilder(conn, "PETER", conf)
             self.assertEqual("peter", b.naming.name)
             builder = b.build_character()
             why, what = next(builder)
@@ -596,16 +598,17 @@ class TestCharacterBuilders(unittest.TestCase):
             self.assertEqual("Please type in the desired password.", what[0])
 
     def test_validate_race(self):
-        self.assertEqual("human", valid_playable_race("human"))
-        self.assertEqual("human", valid_playable_race("HUMAN"))
+        validator = ValidRaceValidator(races.playable_races)
+        self.assertEqual("human", validator("human"))
+        self.assertEqual("human", validator("HUMAN"))
         with self.assertRaises(ValueError):
-            valid_playable_race("elemental")
+            validator("elemental")
         with self.assertRaises(ValueError):
-            valid_playable_race("xyz12343")
+            validator("xyz12343")
         with self.assertRaises(ValueError):
-            valid_playable_race("")
+            validator("")
         with self.assertRaises(ValueError):
-            valid_playable_race(None)
+            validator(None)
 
     def test_playernaming(self):
         n = PlayerNaming()

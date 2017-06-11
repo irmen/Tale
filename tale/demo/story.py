@@ -27,6 +27,7 @@ class Story(StoryBase):
     config.player_name = "julie"
     config.player_gender = "f"
     config.player_race = "human"
+    config.playable_races = {"human"}
     config.player_money = 15.5
     config.money_type = MoneyType.MODERN
     config.server_tick_method = TickMethod.TIMER

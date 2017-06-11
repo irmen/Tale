@@ -1123,7 +1123,7 @@ class Living(MudObject):
             if direction in {"down", "below", "downstairs"}:
                 return "down"
             if direction in {"left", "right"}:
-                return "to the "+direction
+                return "to the " + direction
             return None
 
         actor = actor or self

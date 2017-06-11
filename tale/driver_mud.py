@@ -136,8 +136,8 @@ class MudDriver(driver.Driver):
             password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
             email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
             gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
-            conn.output("You can choose one of the following races: ", lang.join(races.playable_races))
-            race = yield "input", ("Player race?", charbuilder.valid_playable_race)
+            conn.output("You can choose one of the following races: ", lang.join(self.story.config.playable_races))
+            race = yield "input", ("Player race?", charbuilder.ValidRaceValidator(self.story.config.playable_races))
             # review the account
             conn.player.tell("<bright>Please review your new character.</>", end=True)
             conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" %
@@ -177,7 +177,7 @@ class MudDriver(driver.Driver):
                     continue
                 # self-service account creation
                 conn.player.tell("\n")
-                builder = charbuilder.MudCharacterBuilder(conn, name)
+                builder = charbuilder.MudCharacterBuilder(conn, name, self.story.config)
                 result = yield from builder.build_character()
                 if not result:
                     continue

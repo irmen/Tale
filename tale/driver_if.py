@@ -158,7 +158,7 @@ class IFDriver(driver.Driver):
         else:
             # No story player config: create a character with the builder
             # This is unusual though, normally any 'if' story should provide a player config
-            builder = charbuilder.IFCharacterBuilder(conn)
+            builder = charbuilder.IFCharacterBuilder(conn, self.story.config)
             name_info = yield from builder.build_character()
             if not name_info:
                 raise errors.TaleError("should have a name now")

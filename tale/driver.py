@@ -27,6 +27,7 @@ from . import __version__ as tale_version_str
 from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs, base
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH
+from .races import playable_races
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -270,6 +271,14 @@ class Driver(pubsub.Listener):
         user_data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.user_resources = vfs.VirtualFileSystem(root_path=user_data_dir, readonly=False)  # r/w to the local 'user data' directory
         self.story.init(self)
+        if self.story.config.playable_races:
+            # story provides playable races. Check that every race is known.
+            invalid = self.story.config.playable_races - playable_races
+            if invalid:
+                raise errors.StoryConfigError("invalid playable_races")
+        else:
+            # no particular races in story config, take the defaults
+            self.story.config.playable_races = playable_races
         self.zones = self._load_zones(self.story.config.zones)
         self.lookup_location(self.story.config.startlocation_player)
         self.lookup_location(self.story.config.startlocation_wizard)

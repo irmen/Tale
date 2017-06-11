@@ -5,14 +5,14 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Generator
+from typing import Generator, Set
 
 from . import lang
 from . import mud_context
-from . import races
 from .accounts import MudAccounts
 from .base import Stats
 from .player import Player, PlayerConnection
+from .story import StoryConfig
 
 
 class PlayerNaming:
@@ -44,8 +44,9 @@ class PlayerNaming:
 
 class IFCharacterBuilder:
     """Create a new player character interactively."""
-    def __init__(self, conn: PlayerConnection) -> None:
+    def __init__(self, conn: PlayerConnection, config: StoryConfig) -> None:
         self.conn = conn
+        self.config = config
         self.naming = PlayerNaming()
 
     def ask_name(self) -> Generator:
@@ -64,8 +65,8 @@ class IFCharacterBuilder:
         yield from self.ask_name()
         yield from self.ask_credentials()
         self.naming.gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
-        self.conn.player.tell("You can choose one of the following races: " + lang.join(races.playable_races))
-        race = yield "input", ("What should be the race of your player character?", valid_playable_race)
+        self.conn.player.tell("You can choose one of the following races: " + lang.join(self.config.playable_races))
+        race = yield "input", ("What should be the race of your player character?", ValidRaceValidator(self.config.playable_races))
         self.naming.stats = Stats.from_race(race, gender=self.naming.gender)
         self.naming.description = "A regular person." if self.naming.stats.race == "human" else "A weird creature."
         okay = yield from self.ask_confirm()
@@ -74,8 +75,8 @@ class IFCharacterBuilder:
 
 class MudCharacterBuilder(IFCharacterBuilder):
     """Create a new player character interactively."""
-    def __init__(self, conn: PlayerConnection, name: str) -> None:
-        super().__init__(conn)
+    def __init__(self, conn: PlayerConnection, name: str, config: StoryConfig) -> None:
+        super().__init__(conn, config)
         self.naming.name = name
 
     def ask_name(self) -> Generator:
@@ -99,8 +100,12 @@ class MudCharacterBuilder(IFCharacterBuilder):
         return False
 
 
-def valid_playable_race(value: str) -> str:
-    value = value.lower() if value else ""
-    if value in races.playable_races:
-        return value
-    raise ValueError("That is not a valid race.")
+class ValidRaceValidator:
+    def __init__(self, valid_races: Set[str]) -> None:
+        self.valid_races = valid_races
+
+    def __call__(self, value: str) -> str:
+        value = value.lower() if value else ""
+        if value in self.valid_races:
+            return value
+        raise ValueError("That is not a valid race.")

@@ -25,7 +25,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 General ideas/TODO:
 -------------------
 [code] make money an object as well that you can drop/pick up. See circlemud? handler.c/create_money and obj vnum #5015
-[code] a story must be able to limit the choice of available races for players.
 [code] a story must be able to add extra dialog to the create-new-player process.
 [code] Make a wizard kill command that instantly kills a living and/or player. Nothing remains. (see ACMD(do_kill) in act.offensive.c)
     This requires a combat system with healt/damage/death logic in place though (what happens to dead creatures? corpse/loot drop/respawn?)
