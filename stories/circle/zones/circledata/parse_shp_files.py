@@ -5,16 +5,14 @@ Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import re
 from types import SimpleNamespace
-from typing import Dict, List
+from typing import Dict
 from tale.vfs import VirtualFileSystem
 
 
 __all__ = ["get_shops"]
 
 
-extendedMobPat = re.compile('(.*?):(.*)')
 shops = {}   # type: Dict[int, SimpleNamespace]
 
 
@@ -161,8 +159,7 @@ def parse_file(content):
         shops[shop.circle_vnum] = shop
 
 
-def parse_all() -> None:
-    vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+def parse_all(vfs: VirtualFileSystem) -> None:
     for filename in vfs["world/shp/index"].text.splitlines():
         if filename == "$":
             break
@@ -172,11 +169,13 @@ def parse_all() -> None:
 
 def get_shops() -> Dict[int, SimpleNamespace]:
     if not shops:
-        parse_all()
+        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        parse_all(vfs)
         assert len(shops) == 46, "all shops must be loaded"
     return shops
 
 
 if __name__ == "__main__":
-    shops = get_shops()
+    vfs = VirtualFileSystem(root_path=".", everythingtext=True)
+    parse_all(vfs)
     print("parsed", len(shops), "shops.")

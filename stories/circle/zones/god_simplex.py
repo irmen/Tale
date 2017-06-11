@@ -1,4 +1,4 @@
-from . import make_location
+from .circledata.circle_locations import make_location
 
 zone_vnum = 12   # god simplex
 boardroom_vnum = 1204    # start room for wizards

@@ -1,5 +1,5 @@
 """
-Package containing the mob classes of the game.
+The mob classes of the Circle game.
 
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
@@ -7,21 +7,25 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 
 import re
 import random
-from typing import Type, List, Set
+from types import SimpleNamespace
+from typing import Type, List, Set, Dict
 from tale import mud_context
 from tale.base import Living
 from tale.util import Context, call_periodically, roll_dice
 from tale.shop import Shopkeeper
-from .circledata.parse_mob_files import get_mobs
+from .parse_mob_files import get_mobs
 
 
-__all__ = ("CircleMob", "MPostmaster", "MCityguard", "MReceptionist", "MCryogenicist", "MFido",
-           "MGuildmaster", "MGuildguard", "MJanitor", "MMagicuser", "MMayor", "MPuff", "MSnake", "MThief",
-           "MGuildguard_Cleric", "MGuildguard_Mage", "MGuildguard_Thief", "MGuildguard_Warrior",
-           "MGuildmaster_Cleric", "MGuildmaster_Mage", "MGuildmaster_Thief", "MGuildmaster_Warrior",
-           "MCastleGuard", "MJames", "MCleaning", "MDicknDavid", "MJerry", "MKingWelmar",
-           "MPeter", "MTim", "MTom", "MTrainingMaster", "MShopkeeper",
-           "converted_mobs", "make_mob")
+__all__ = ("converted_mobs", "make_mob", "init_circle_mobs")
+
+
+mobs = {}   # type: Dict[int, SimpleNamespace]
+
+
+def init_circle_mobs() -> None:
+    global mobs
+    mobs = get_mobs()
+    print(len(mobs), "mobs loaded.")
 
 
 class CircleMob(Living):
@@ -394,9 +398,6 @@ circle_mob_class = {
     15032: MMagicuser,  # Pit Fiend, have something better?  Use it
 }
 
-
-mobs = get_mobs()
-print(len(mobs), "mobs loaded.")
 
 # various caches, DO NOT CLEAR THESE, or duplicates might be spawned
 converted_mobs = set()   # type: Set[int]

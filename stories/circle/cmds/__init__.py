@@ -5,7 +5,7 @@ Package containing new and overridden game commands.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Union
+from typing import Union, List
 from zones import make_location, make_item, make_mob
 
 from tale import lang, util
@@ -46,7 +46,7 @@ def show_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
             vnum = int(parsed.args[0])
         except ValueError as x:
             raise ActionRefused(str(x))
-        objects = []
+        objects = []   # type: List[Union[Location, Living, Item, Exit]]
         try:
             objects.append(make_item(vnum))
         except KeyError:

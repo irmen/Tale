@@ -5,9 +5,8 @@ Initially based on code by Al Sweigart, but heavily modified since:
 http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-your-text-adventure-game/
 """
 
-import re
 from types import SimpleNamespace
-from typing import Dict, Any, List
+from typing import Dict, Any
 from tale.vfs import VirtualFileSystem
 
 
@@ -15,7 +14,6 @@ __all__ = ["get_objs"]
 
 
 objs = {}  # type: Dict[int, SimpleNamespace]
-extendedMobPat = re.compile('(.*?):(.*)')
 
 
 def parse_file(content):
@@ -362,8 +360,7 @@ def parse_file(content):
             reasdstate = 'vNum'
 
 
-def parse_all() -> None:
-    vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+def parse_all(vfs: VirtualFileSystem) -> None:
     for filename in vfs["world/obj/index"].text.splitlines():
         if filename == "$":
             break
@@ -373,11 +370,13 @@ def parse_all() -> None:
 
 def get_objs() -> Dict[int, SimpleNamespace]:
     if not objs:
-        parse_all()
+        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        parse_all(vfs)
         assert len(objs) == 679, "all objs must be loaded"
     return objs
 
 
 if __name__ == "__main__":
-    objs = get_objs()
+    vfs = VirtualFileSystem(root_path=".", everythingtext=True)
+    parse_all(vfs)
     print("parsed", len(objs), "objs.")

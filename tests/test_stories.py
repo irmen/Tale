@@ -74,10 +74,13 @@ class TestCircleStory(StoryCaseBase, unittest.TestCase):
         self.assertEqual("Circle", s.config.name)
 
     def test_zones_and_vnums(self):
+        from zones.circledata.circle_mobs import init_circle_mobs, make_mob
+        from zones.circledata.circle_locations import init_circle_locations, make_location, make_shop
+        from zones.circledata.circle_items import init_circle_items, make_item
+        init_circle_locations()
+        init_circle_mobs()
+        init_circle_items()
         import zones.midgaard_city
-        from zones.circle_mobs import make_mob
-        from zones.circle_locations import make_location
-        from zones import make_item, make_shop
         self.assertEqual("The Temple Of Midgaard", zones.midgaard_city.temple.name)
         o = make_mob(5017)
         self.assertEqual("camel", o.name)

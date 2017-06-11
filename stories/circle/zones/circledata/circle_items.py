@@ -5,19 +5,25 @@ Creating the special items in the Circle story.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Set, no_type_check
+from types import SimpleNamespace
+from typing import Set, Dict, no_type_check
 from tale.base import Item, Armour, Container, Weapon, Key
 from tale.items.basic import *
 from tale.items.board import BulletinBoard
 from tale.items.bank import Bank
-from .circledata.parse_obj_files import get_objs
+from .parse_obj_files import get_objs
 
 
 __all__ = ("converted_items", "make_item", "unconverted_objs")
 
 
-objs = get_objs()
-print(len(objs), "objects loaded.")
+objs = {}    # type: Dict[int, SimpleNamespace]
+
+
+def init_circle_items() -> None:
+    global objs
+    objs = get_objs()
+    print(len(objs), "objects loaded.")
 
 
 # various caches, DO NOT CLEAR THESE, or duplicates might be spawned
@@ -47,6 +53,7 @@ circle_banks = {
 }
 
 
+@no_type_check
 def make_item(vnum: int) -> Item:
     """Create an instance of an item for the given vnum"""
     c_obj = objs[vnum]

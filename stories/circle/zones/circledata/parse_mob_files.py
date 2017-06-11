@@ -7,7 +7,7 @@ http://inventwithpython.com/blog/2012/03/19/circlemud-data-in-xml-format-for-you
 
 import re
 from types import SimpleNamespace
-from typing import Dict, List
+from typing import Dict
 from tale.vfs import VirtualFileSystem
 
 
@@ -174,8 +174,7 @@ def parse_file(content):
             readstate = 'vNum'
 
 
-def parse_all() -> None:
-    vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+def parse_all(vfs: VirtualFileSystem) -> None:
     for filename in vfs["world/mob/index"].text.splitlines():
         if filename == "$":
             break
@@ -185,11 +184,13 @@ def parse_all() -> None:
 
 def get_mobs() -> Dict[int, SimpleNamespace]:
     if not mobs:
-        parse_all()
+        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        parse_all(vfs)
         assert len(mobs) == 569, "all mobs must be loaded"
     return mobs
 
 
 if __name__ == "__main__":
-    mobs = get_mobs()
+    vfs = VirtualFileSystem(root_path=".", everythingtext=True)
+    parse_all(vfs)
     print("parsed", len(mobs), "mobs.")

@@ -138,8 +138,7 @@ def parse_file(content):
             linenum += 1
 
 
-def parse_all() -> None:
-    vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+def parse_all(vfs: VirtualFileSystem) -> None:
     for filename in vfs["world/wld/index"].text.splitlines():
         if filename == "$":
             break
@@ -149,11 +148,13 @@ def parse_all() -> None:
 
 def get_rooms() -> Dict[int, SimpleNamespace]:
     if not rooms:
-        parse_all()
+        vfs = VirtualFileSystem(root_package="zones.circledata", everythingtext=True)
+        parse_all(vfs)
         assert len(rooms) == 1878, "all rooms must be loaded"
     return rooms
 
 
 if __name__ == "__main__":
-    rooms = get_rooms()
+    vfs = VirtualFileSystem(root_path=".", everythingtext=True)
+    parse_all(vfs)
     print("parsed", len(rooms), "rooms.")
