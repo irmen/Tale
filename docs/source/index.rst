@@ -11,6 +11,8 @@ What is Tale?
 It is a library for building `Interactive Fiction <http://en.wikipedia.org/wiki/Interactive_fiction>`_,
 mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
+It is some sort of cross-breed between LPMud, CircleMud/DikuMud, and Infocom™ Z-machine.
+
 Tale requires Python 3.5 or newer.
 (If you have an older version of Python, stick to Tale 2.8 or older, which still supports Python 2.7 as well)
 
