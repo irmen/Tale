@@ -470,9 +470,8 @@ class TestDoorsExits(unittest.TestCase):
         loc1 = Location("room1", "room one")
         loc2 = Location("room2", "room two")
         key = Key("key")
-        door_one_two = Door("two", loc2, "door to room two", locked=True, opened=False)
-        door_two_one = door_one_two.reverse_door("one", loc1, "door to room one", reverse_open_msg="door one open", reverse_close_msg="door one close",
-                                                 this_open_msg="door two open", this_close_msg="door two close")
+        door_one_two = Door("door_two", loc2, "door to room two", locked=True, opened=False)
+        door_two_one = door_one_two.reverse_door("door_one", loc1, "door to room one")
         loc1.add_exits([door_one_two])
         loc2.add_exits([door_two_one])
         door_one_two.key_code = "555"
@@ -485,22 +484,22 @@ class TestDoorsExits(unittest.TestCase):
         self.assertFalse(door_two_one.opened)
         lucy = Living("lucy", "f")
 
-        door_two_one.unlock(lucy, item=key)
+        door_two_one.unlock(lucy, item=key)   # unlock door from other side
         self.assertFalse(door_one_two.locked)
-        door_two_one.open(lucy)
+        door_two_one.open(lucy)    # open door from other side
         self.assertTrue(door_one_two.opened)
         pubsub.sync()
-        self.assertEqual(["door one open"], pubsub1.messages)
+        self.assertEqual(["The door_one is unlocked from the other side.", "The door_one is opened from the other side."], pubsub1.messages)
         self.assertEqual([], pubsub2.messages)
-        door_one_two.close(lucy)
-        door_one_two.lock(lucy, item=key)
+        door_one_two.close(lucy)    # close door from other side
+        door_one_two.lock(lucy, item=key)  # lock door from other side
         self.assertTrue(door_two_one.locked)
         self.assertFalse(door_two_one.opened)
         pubsub1.clear()
         pubsub2.clear()
         pubsub.sync()
         self.assertEqual([], pubsub1.messages)
-        self.assertEqual(["door two close"], pubsub2.messages)
+        self.assertEqual(["The door_two is closed from the other side.", "The door_two is locked from the other side."], pubsub2.messages)
 
 
 class PubsubCollector(pubsub.Listener):

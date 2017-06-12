@@ -821,7 +821,7 @@ def do_emote(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     player.tell_others(emote_msg)
 
 
-@cmd("yell")
+@cmd("yell", "shout")
 def do_yell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Yell something. People in nearby locations will also be able to hear you."""
     if not parsed.unparsed:

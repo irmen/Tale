@@ -3,40 +3,31 @@ ADMIN/WIZARD STUFF
 See also http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/lib/text/help/wizhelp.hlp
 broadcast
     like shout, except overrides all blocking
-anchor, unanchor
-    anchor something so that it cannot leave its location
-god
-    god mode on/off (can't take damage)
 invis
     makes you invisible to all players of lower level under all circumstances (again to turn visible again)
-quell, peace
-    stop all fights in your environment   (again to resume fights)
+    this means a creature has to have a invis-flag, and when a text referes to it the name/title should be replaced with "someone/something"
+peace <who>
+    stop all fights in your environment or just a single aggressive creature
 reset
     reset an object to initial state (....how? where do we store initial state?)
 resurrect
-    return a dead person or creature to the land of the living
+    return a dead NPC to the land of the living  (zombie-of-xxx?)
 wizards
     shows list of all known active wizard users
 zap
-    deal a massive amount of damage to a creature (death ray)
+    deal a massive amount of damage to a creature (death ray) mostly an insta-kill.
     
 
 PLAYER STUFF
 ------------
-shout
-    shout a message to all players in the mud (doesn't matter where they are)
-block, unblock
-    block messages from someone
 equipment
-    show the armor items you are wearing
-kills
-    shows a list of your victories
-pvp
-    toggle pvp
+    show the armor items you are wearing and weapons you are wielding
+victories
+    shows a list of your battle victories
 prompt
-    customize your prompt
+    customize your prompt (show hp, etc)
 quests
-    show a list of the quests you have completed
+    show a list of the quests you are on and the ones you have completed
 skills
     the skills you have
 spells
@@ -44,50 +35,21 @@ spells
 (attack/kill/fight), stop attack[ing]/stop combat/stop fight[ing]
     start/stop combat. When engaged in combat, the target is
     'remembered' for subsequent attack commands
+murder
+    player killing (normally attacking a player results in a warning message)
 cast
     cast a spell on a creature or an object
-learn
-    learn an ability, skill or spell from someone or something
-stealth
-    toggle stealth, if you possess that skill. (too low stamina -> too tired.)
-teach
-    teach an ability, skill or spell to another player
 
 
 ITEM ACTIONS
 ------------
-detach, remove
-    break stuff apart again
-    remove X = remove weapon/armour (see unwield/unwear)
-    remove X from Y = detach stuff --> Y.detach(X, actor)
-    
-capture, catch
-    capture creature with an object (catch mouse with/in a trap)
-free, release, liberate
-    set a captured creature free again (free it from a trap)
-    
 drink
-    drink something
+    drink something that is a drink to restore ...
 eat
-    eat something
-hunger/thirst
-    show hunger/thirst status
+    eat something edible to restore stamina and health
 
-empty
-    remove substance from a vessel  (empty cmd already exists to take everything out of a container)
+empty <vessel>
+    remove liquid from a vessel
+    (existing empty cmd takes every item out of a container)
 fill
-    fill a vessel with a substance
- 
-light, burn
-    light a light source.  light thing with other: if it needs ignition
-extinguish, douse
-    extinguish a light source
-    
-lockpick/pick [lock]
-    open a lock with force or with a tool
-
-wear, put on, take off, unwear, remove
-    wear/remove armor
-
-wield, unwield, remove
-    wield/remove weapon
+    fill a vessel with a liquid
