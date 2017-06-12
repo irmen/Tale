@@ -1388,7 +1388,6 @@ class Exit(MudObject):
             assert isinstance(target, Location)
             self.target = target
             self.title = "Exit to " + target.title
-            self.name = self.title.lower()
             del self._target_str
 
     def allow_passage(self, actor: Living) -> None:
@@ -1433,9 +1432,10 @@ class Door(Exit):
         """
         Set up a second door in the other location that is paired with this door.
         Opening this door will also open the other door etc.    Returns the new door object.
+        (we need 2 doors because the name/exit descriptions are often different from both locations)
         """
         other_door = Door(directions, returning_location, short_description, long_description, locked=self.locked, opened=self.opened)
-        self.linked_door = other_door       # @todo hmm. can't we make a Door reference 2 locations....
+        self.linked_door = other_door
         other_door.linked_door = self
         other_door.key_code = self.key_code
         return other_door
@@ -1480,7 +1480,7 @@ class Door(Exit):
             actor.tell_others("{Actor} opens the %s." % self.name)
             if self.linked_door:
                 self.linked_door.opened = True
-                self.target.tell("The %s is opened from the other side." % self.name)
+                self.target.tell("The %s is opened from the other side." % self.linked_door.name)
 
     def close(self, actor: Living, item: Item=None) -> None:
         """Close the door with optional item. Notifies actor and room of this event."""
@@ -1491,7 +1491,7 @@ class Door(Exit):
         actor.tell_others("{Actor} closes the %s." % self.name)
         if self.linked_door:
             self.linked_door.opened = False
-            self.target.tell("The %s is closed from the other side." % self.name)
+            self.target.tell("The %s is closed from the other side." % self.linked_door.name)
 
     def lock(self, actor: Living, item: Item=None) -> None:
         """Lock the door with the proper key (optional)."""
@@ -1515,7 +1515,7 @@ class Door(Exit):
         actor.tell_others("{Actor} locks the %s with %s." % (self.name, lang.a(key.title)))
         if self.linked_door:
             self.linked_door.locked = True
-            self.target.tell("The %s is locked from the other side." % self.name)
+            self.target.tell("The %s is locked from the other side." % self.linked_door.name)
 
     def unlock(self, actor: Living, item: Item=None) -> None:
         """Unlock the door with the proper key (optional)."""
@@ -1539,7 +1539,7 @@ class Door(Exit):
         actor.tell_others("{Actor} unlocks the %s with %s." % (self.name, lang.a(key.title)))
         if self.linked_door:
             self.linked_door.locked = False
-            self.target.tell("The %s is unlocked from the other side." % self.name)
+            self.target.tell("The %s is unlocked from the other side." % self.linked_door.name)
 
     def check_key(self, item: Item) -> bool:
         """Check if the item is a proper key for this door (based on key_code)"""

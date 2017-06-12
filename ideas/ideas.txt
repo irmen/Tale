@@ -27,29 +27,23 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[code] If door is opened/unlocked/lockpicked, tell this to the room AND also the room on the other side
 [code] make money an object as well that you can drop/pick up. See circlemud? handler.c/create_money and obj vnum #5015
-[code] Make a wizard kill command that instantly kills a living and/or player. Nothing remains. (see ACMD(do_kill) in act.offensive.c)
-    This requires a combat system with healt/damage/death logic in place though (what happens to dead creatures? corpse/loot drop/respawn?)
-[code] (once locations have flags such as 'outside') make out/outside a meta-exit that looks for obvious exit to take to to to outside location.
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
     wear, put on, take off, unwear, remove <armor> | wield, unwield, remove <weapon>
 [feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [feature] lockpicking skill to unlock doors without having key
-[code, API] path-finding: GOTO/GO TO <location/living/item> (must have examined it before, to remember it. See also next idea).
-[code, API] search/find/locate: keep track of stuff you've encountered and mention that if the player searches for something
-    (like: search key -> "you remember that there was [a key] [somewhere at/in/on <location>]")
-[publish] upload the story(s) as separate files to pypi? http://docs.python.org/2/distutils/extending.html#adding-new-distribution-types
-[feature] show a list of duplicates if dealing with multiple things with the same name?
+[code, API] path-finding: GOTO/GO TO <location> (must have examined it before, to remember it. See also next idea).
 [code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly). Much like the circle importers.
-[feature] Hunger/thirst/fatigue?
+[feature] Hunger/thirst/fatigue(movement/staminapoints)?
 
 
-[feature] Light/Dark
---------------------
+[feature] Light/Dark, Weather
+-----------------------------
 light level in rooms: dark/light? or three states?  (0=pitch black, 0.5=dark/dusk, 1=normal daylight)
 darkness in locations -> can't see location/exits/items/players (unless they're fluorescent, or unless you explicitly examine <direction>?)
 if there's a lightsource in the room (or someone has a light source in their inventory), the room is lit. (thus: determine light state dynamically)
 Dynamic Day/night cycle?  Note that some rooms should always be lit (inside a building perhaps) so a flag for that is needed.
+(Do we even want rooms to get really dark in the night time? or is darkness only for things such as caves that are permanently dark)
+Circlemud has a dynamic day/night cycle and weather system. Locations marked 'indoors' are not notified of changes.

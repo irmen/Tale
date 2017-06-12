@@ -452,7 +452,7 @@ class TestDoorsExits(unittest.TestCase):
         zones.town.square = Location("square")
         exit._bind_target(zones)
         self.assertEqual("Exit to square", exit.title)
-        self.assertEqual("exit to square", exit.name)
+        self.assertEqual("outside", exit.name)
 
     def test_aliases(self):
         loc = Location("hall", "empty hall")
@@ -470,8 +470,8 @@ class TestDoorsExits(unittest.TestCase):
         loc1 = Location("room1", "room one")
         loc2 = Location("room2", "room two")
         key = Key("key")
-        door_one_two = Door("door_two", loc2, "door to room two", locked=True, opened=False)
-        door_two_one = door_one_two.reverse_door("door_one", loc1, "door to room one")
+        door_one_two = Door("door_to_two", loc2, "door to room two", locked=True, opened=False)
+        door_two_one = door_one_two.reverse_door("door_to_one", loc1, "door to room one")
         loc1.add_exits([door_one_two])
         loc2.add_exits([door_two_one])
         door_one_two.key_code = "555"
@@ -489,7 +489,7 @@ class TestDoorsExits(unittest.TestCase):
         door_two_one.open(lucy)    # open door from other side
         self.assertTrue(door_one_two.opened)
         pubsub.sync()
-        self.assertEqual(["The door_one is unlocked from the other side.", "The door_one is opened from the other side."], pubsub1.messages)
+        self.assertEqual(["The door_to_two is unlocked from the other side.", "The door_to_two is opened from the other side."], pubsub1.messages)
         self.assertEqual([], pubsub2.messages)
         door_one_two.close(lucy)    # close door from other side
         door_one_two.lock(lucy, item=key)  # lock door from other side
@@ -499,7 +499,7 @@ class TestDoorsExits(unittest.TestCase):
         pubsub2.clear()
         pubsub.sync()
         self.assertEqual([], pubsub1.messages)
-        self.assertEqual(["The door_two is closed from the other side.", "The door_two is locked from the other side."], pubsub2.messages)
+        self.assertEqual(["The door_to_one is closed from the other side.", "The door_to_one is locked from the other side."], pubsub2.messages)
 
 
 class PubsubCollector(pubsub.Listener):
