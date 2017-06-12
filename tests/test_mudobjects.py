@@ -263,7 +263,7 @@ class TestDoorsExits(unittest.TestCase):
         Door("out", "xyz", "short desc", locked=False, opened=True)
         Door("out", "xyz", "short desc", locked=True, opened=False)
         with self.assertRaises(ValueError):
-            Door("out", "xyz", "short desc", locked=True, opened=True)
+            Door("out", "xyz", "short desc", locked=True, opened=True)  # cannot be open and locked
 
     def test_actions(self):
         player = Player("julie", "f")
@@ -279,10 +279,16 @@ class TestDoorsExits(unittest.TestCase):
         with self.assertRaises(ActionRefused) as x:
             door.open(player)  # fail, it's already open
         self.assertEqual("It's already open.", str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            door.unlock(player)  # fail, makes no sense to unlock an open door.
+        self.assertTrue(str(x.exception).startswith("It's already open"))
+        with self.assertRaises(ActionRefused) as x:
+            door.lock(player)  # locking an open door is not possible
+        self.assertTrue(str(x.exception).startswith("The door is open!"))
         door.close(player)
         self.assertFalse(door.opened, "must be closed")
         with self.assertRaises(ActionRefused) as x:
-            door.lock(player)  # default door can't be locked
+            door.lock(player)  # door can't be locked without a key
         self.assertEqual("You don't seem to have the means to lock it.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
             door.unlock(player)  # fail, it's not locked
@@ -357,6 +363,11 @@ class TestDoorsExits(unittest.TestCase):
         door.lock(player)
         self.assertTrue(door.locked)
         door.unlock(player)
+        self.assertFalse(door.locked)
+        door.opened = True
+        with self.assertRaises(ActionRefused) as x:
+            door.lock(player)
+        self.assertTrue(str(x.exception).startswith("The door is open!"))
         player.remove(key, player)
         with self.assertRaises(ActionRefused):
             door.lock(player)
@@ -455,7 +466,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual({"up", "door", "down", "hatch", "manhole", "east", "garden"}, set(loc.exits.keys()))
         self.assertEqual(loc.exits["down"], loc.exits["hatch"])
 
-    def test_door_pair(self):
+    def test_linked_door_pair(self):
         loc1 = Location("room1", "room one")
         loc2 = Location("room2", "room two")
         key = Key("key")

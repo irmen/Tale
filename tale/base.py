@@ -1507,6 +1507,8 @@ class Door(Exit):
         """Lock the door with the proper key (optional)."""
         if self.locked:
             raise ActionRefused("It's already locked.")
+        if self.opened:
+            raise ActionRefused("The door is open! It makes no sense trying to lock it like this.")
         if item:
             if self.check_key(item):
                 key = item
@@ -1526,6 +1528,8 @@ class Door(Exit):
 
     def unlock(self, actor: Living, item: Item=None) -> None:
         """Unlock the door with the proper key (optional)."""
+        if self.opened:
+            raise ActionRefused("It's already open, so there's not much unlocking to be done.")
         if not self.locked:
             raise ActionRefused("It's not locked.")
         if item:

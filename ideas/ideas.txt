@@ -26,11 +26,10 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[code] If door is opened/unlocked/lockpicked, tell this to the room AND also the room on the other side
 [code] make money an object as well that you can drop/pick up. See circlemud? handler.c/create_money and obj vnum #5015
-[code] a story must be able to add extra dialog to the create-new-player process.
 [code] Make a wizard kill command that instantly kills a living and/or player. Nothing remains. (see ACMD(do_kill) in act.offensive.c)
     This requires a combat system with healt/damage/death logic in place though (what happens to dead creatures? corpse/loot drop/respawn?)
-[code] If door is opened/unlocked/lockpicked, tell this to the room AND also the room on the other side
 [code] (once locations have flags such as 'outside') make out/outside a meta-exit that looks for obvious exit to take to to to outside location.
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
