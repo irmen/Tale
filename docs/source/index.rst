@@ -189,7 +189,8 @@ Copyright
 ---------
 
 Tale is copyright © Irmen de Jong (irmen@razorvine.net | http://www.razorvine.net).
-It's licensed under GPL v3, see http://www.gnu.org/licenses/gpl.html
+Since version 3.4, it's licensed under GNU LGPL v3, see https://www.gnu.org/licenses/lgpl-3.0.html
+Versions older than that have a different license (GPL v3).
 
 
 API documentation

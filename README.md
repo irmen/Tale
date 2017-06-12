@@ -7,8 +7,9 @@
 
 This software is copyright (c) by Irmen de Jong (irmen@razorvine.net).
 
-This software is released under the GPL v3 software license.
+This software is released under the GNU LGPL v3 software license.
 This license, including disclaimer, is available in the 'LICENSE.txt' file.
+
 
 
 Tale requires Python 3.5 or newer.

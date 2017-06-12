@@ -1520,12 +1520,12 @@ def do_license(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         t("\n")
         t(ctx.resources[ctx.config.license_file].text, end=True)
         t("\n")
-    # print GPL 3.0 banner
+    # print LGPL 3.0 banner
     t("<bright>Tale: mud driver, mudlib and interactive fiction framework.", end=True)
     t("Copyright (c) by Irmen de Jong.</>", end=True)
     t("This program comes with ABSOLUTELY NO WARRANTY. This is free software,")
     t("and you are welcome to redistribute it under the terms and conditions")
-    t("of the GNU General Public License version 3. See the file LICENSE.txt", end=True)
+    t("of the GNU Lesser General Public License version 3, see LICENSE.txt", end=True)
     t("-- -- -- --", end=True)
 
 
