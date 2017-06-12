@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import distutils.version
 import enum
-from typing import Optional, Any, List, Set
+from typing import Optional, Any, List, Set, Generator
 
 from . import __version__ as tale_version_str
 from .errors import StoryConfigError
@@ -49,7 +49,7 @@ class StoryConfig:
         self.requires_tale = "3.4"           # tale library required to run the game
         self.supported_modes = {GameMode.IF}    # what driver modes (if/mud) are supported by this story
         self.player_name = ""                # set a name to create a prebuilt player, None to use the character builder
-        self.player_gender = ""              # m/f/n
+        self.player_gender = ""              # m/f (n is technically possible, but not preferred)
         self.player_race = "human"           # default is "human" ofcourse, but you can select something else if you want
         self.player_money = 0.0              # starting money
         self.playable_races = set()          # type: Set[str]  # if specified, specify a subset of the allowed playable races
@@ -83,6 +83,17 @@ class StoryBase:
         Called by the game driver when it is done with its initial initialization.
         """
         pass
+
+    def create_account_dialog(self, playerconnection, playernaming) -> Generator:
+        """
+        Override to add extra dialog options to the character creation process.
+        Because there's no actual player yet, you receive PlayerConnection and PlayerNaming arguments.
+        Write stuff to the user via playerconnection.output(...)
+        Ask questions using the yield "input", "question?"  mechanism.
+        Return True to declare all is well, and False to abort the player creation process.
+        """
+        return True
+        yield
 
     def init_player(self, player) -> None:
         """

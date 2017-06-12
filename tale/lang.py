@@ -321,3 +321,15 @@ def validate_gender(value: str) -> str:
         if value[0] in GENDERS and GENDERS[value[0]] == value:
             return value
     raise ValueError("That is not a valid gender.")
+
+
+def validate_gender_mf(value: str) -> str:
+    value = value.lower() if value else ""
+    genders = dict(GENDERS)
+    genders.pop("n")
+    if value in genders:
+        return value
+    if len(value) > 1:
+        if value[0] in genders and genders[value[0]] == value:
+            return value
+    raise ValueError("That is not a valid gender.")

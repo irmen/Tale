@@ -57,16 +57,19 @@ class IFCharacterBuilder:
         yield from []
 
     def ask_confirm(self) -> Generator:
-        return True
-        # noinspection PyUnreachableCode
-        yield
+        # review the account
+        self.conn.player.tell("<bright>Please review your choices.</>", end=True)
+        self.conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s"
+                              % (self.naming.name, lang.GENDERS[self.naming.gender], self.naming.stats.race), end=True)
+        okay = yield "input", ("You cannot change your name later. Do you accept your choices?", lang.yesno)
+        return okay
 
     def build_character(self) -> Generator:
         yield from self.ask_name()
         yield from self.ask_credentials()
-        self.naming.gender = yield "input", ("What is the gender of your player character (m/f/n)?", lang.validate_gender)
         self.conn.player.tell("You can choose one of the following races: " + lang.join(self.config.playable_races))
         race = yield "input", ("What should be the race of your player character?", ValidRaceValidator(self.config.playable_races))
+        self.naming.gender = yield "input", ("What is the gender of your character (m/f)?", lang.validate_gender_mf)
         self.naming.stats = Stats.from_race(race, gender=self.naming.gender)
         self.naming.description = "A regular person." if self.naming.stats.race == "human" else "A weird creature."
         okay = yield from self.ask_confirm()
@@ -84,7 +87,14 @@ class MudCharacterBuilder(IFCharacterBuilder):
         yield from []
 
     def ask_credentials(self) -> Generator:
-        self.naming.password = yield "input-noecho", ("Please type in the desired password.", MudAccounts.accept_password)
+        while True:
+            password = yield "input-noecho", ("Please type in the desired password.", MudAccounts.accept_password)
+            password2 = yield "input-noecho", ("Please retype the password.", MudAccounts.accept_password)
+            if password != password2:
+                self.conn.output("<it>The passwords don't match! Please try again.</>")
+            else:
+                break
+        self.naming.password = password
         self.naming.email = yield "input", ("Please type in your email address.", MudAccounts.accept_email)
 
     def ask_confirm(self) -> Generator:
@@ -96,7 +106,8 @@ class MudCharacterBuilder(IFCharacterBuilder):
         okay = yield "input", ("You cannot change your name later. Do you want to create this character?", lang.yesno)
         if okay:
             return True
-        self.conn.player.tell("Ok, let's get back to the beginning then.", end=True)
+        self.conn.player.tell("<it>Ok, let's get back to the beginning then.</>", end=True)
+        self.conn.player.tell("-- -- -- --", end=True)
         return False
 
 

@@ -133,16 +133,25 @@ class MudDriver(driver.Driver):
         while True:
             conn.output("Creating new admin user.")
             name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
-            password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
+            while True:
+                password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
+                password2 = yield "input-noecho", ("Please retype the admin password.", accounts.MudAccounts.accept_password)
+                if password != password2:
+                    conn.output("<it>The passwords don't match! Please try again.</>")
+                else:
+                    break
             email = yield "input", ("Please type in the admin's email address.", accounts.MudAccounts.accept_email)
-            gender = yield "input", ("What is your gender (m/f/n)?", lang.validate_gender)
             conn.output("You can choose one of the following races: ", lang.join(self.story.config.playable_races))
             race = yield "input", ("Player race?", charbuilder.ValidRaceValidator(self.story.config.playable_races))
+            gender = yield "input", ("What is the gender of your character (m/f)?", lang.validate_gender_mf)
             # review the account
-            conn.player.tell("<bright>Please review your new character.</>", end=True)
+            conn.player.tell("<bright>Please review the admin character.</>", end=True)
             conn.player.tell("<dim> name:</> %s,  <dim>gender:</> %s,  <dim>race:</> %s,  <dim>email:</> %s" %
                              (name, lang.GENDERS[gender], race, email), end=True)
             if not (yield "input", ("You cannot change your name later. Do you want to create this admin account?", lang.yesno)):
+                conn.player.tell("<it>Okay, lets try that again then.</>", end=True)
+                conn.player.tell("-- -- -- --", end=True)
+                conn.write_output()
                 continue
             else:
                 break
@@ -174,17 +183,25 @@ class MudDriver(driver.Driver):
                     continue
                 conn.player.tell("'<player>%s</>' is the name of a new character." % name)
                 if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
+                    conn.player.tell("<it>Okay, let's try that again.</>", end=True)
+                    conn.player.tell("-- -- -- --", end=True)
+                    conn.write_output()
                     continue
                 # self-service account creation
                 conn.player.tell("\n")
                 builder = charbuilder.MudCharacterBuilder(conn, name, self.story.config)
-                result = yield from builder.build_character()
-                if not result:
+                name_info = yield from builder.build_character()
+                if not name_info:
                     continue
-                self.mud_accounts.create(result.name, result.password, result.email, result.stats)
-                del result
+                result = yield from self.story.create_account_dialog(conn, name_info)   # story can customize more things
+                if not result:
+                    conn.player.tell("\n<bright>Your account has not been created!</>", end=True)
+                    conn.player.tell("-- -- -- --", end=True)
+                    continue
+                self.mud_accounts.create(name_info.name, name_info.password, name_info.email, name_info.stats)
+                del name_info
                 conn.player.tell("\n<bright>Your new account has been created!</>  Go ahead and log in with it.", end=True)
-                conn.player.tell("\n")
+                conn.player.tell("-- -- -- --", end=True)
                 continue
 
             # ask and validate the password.

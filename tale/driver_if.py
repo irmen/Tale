@@ -161,7 +161,14 @@ class IFDriver(driver.Driver):
             builder = charbuilder.IFCharacterBuilder(conn, self.story.config)
             name_info = yield from builder.build_character()
             if not name_info:
-                raise errors.TaleError("should have a name now")
+                conn.output("\nUser was undecided when creating player character.\n")
+                self._stop_driver()
+                raise SystemExit(0)
+            result = yield from self.story.create_account_dialog(conn, name_info)   # story can customize more things
+            if not result:
+                conn.output("\nStory aborted player creation dialog.\n")
+                self._stop_driver()
+                raise SystemExit(0)
 
         player = conn.player
         self._rename_player(player, name_info)

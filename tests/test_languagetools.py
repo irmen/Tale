@@ -232,6 +232,21 @@ class TestLanguagetools(unittest.TestCase):
         with self.assertRaises(ValueError):
             lang.validate_gender("nope")
 
+    def test_gender_mf(self):
+        self.assertEqual("f", lang.validate_gender_mf("f"))
+        self.assertEqual("m", lang.validate_gender_mf("m"))
+        self.assertEqual("f", lang.validate_gender_mf("F"))
+        self.assertEqual("female", lang.validate_gender_mf("Female"))
+        self.assertEqual("male", lang.validate_gender_mf("MALE"))
+        with self.assertRaises(ValueError):
+            self.assertEqual("n", lang.validate_gender_mf("n"))
+        with self.assertRaises(ValueError):
+            lang.validate_gender_mf(None)
+        with self.assertRaises(ValueError):
+            lang.validate_gender_mf("")
+        with self.assertRaises(ValueError):
+            lang.validate_gender_mf("nope")
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
