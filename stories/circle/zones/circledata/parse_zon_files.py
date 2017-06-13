@@ -24,7 +24,7 @@ class ZMobile:
         self.room = room
         self.comment = comment
         self.inventory = []  # type: List[ZObject]
-        self.equip = {}   # type: Dict[str, Tuple[int, int]]
+        self.equip = {}   # type: Dict[str, ZObject]
 
 
 class ZObject:
@@ -140,11 +140,15 @@ def parse_file(content: str) -> ZZone:
                 zone.objects.append(zo)
             elif cmd == 'G':
                 zm = all_mobs[last_mobile_vnum]
-                zm.inventory.append(ZObject(int(args[0]), int(args[1]), None))
+                zo = ZObject(int(args[0]), int(args[1]), None)
+                all_objs.append(zo)
+                zm.inventory.append(zo)
             elif cmd == 'E':
                 zm = all_mobs[last_mobile_vnum]
                 equip_pos = equip_positions[int(args[2])]
-                zm.equip[equip_pos] = int(args[0]), int(args[1])        # (vnum, max_exist)
+                zo = ZObject(int(args[0]), int(args[1]), None)
+                all_objs.append(zo)
+                zm.equip[equip_pos] = zo
             elif cmd == 'P':
                 container_vnum = int(args[2])
                 for container in reversed(all_objs):
@@ -152,7 +156,8 @@ def parse_file(content: str) -> ZZone:
                         container.contains.append((int(args[0]), int(args[1])))   # (vnum, max_exist)
                         break
                 else:
-                    print("zone %d: attempt to put %s in non-existing container %s" % (zone.vnum, args[0], args[2]))
+                    descr = "?" if len(args) < 4 else args[3]
+                    print("zone %d: attempt to put %s (%s) in non-existing container %s" % (zone.vnum, args[0], descr, args[2]))
                     # prev_executed = False
             elif cmd == 'D':
                 zone.doorstates.append(ZDoorstate(int(args[0]), exit_map[int(args[1])], doorstate_map[int(args[2])]))

@@ -6,9 +6,9 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 from collections import deque
-from typing import MutableSequence
+from typing import MutableSequence, List
 from tale.driver import Driver
-from tale.base import Door, Container
+from tale.base import Door, Container, Item
 from tale.util import Context
 from .circledata.parse_zon_files import get_zones
 from .circledata.circle_mobs import make_mob, converted_mobs, mobs_with_special, MShopkeeper, init_circle_mobs
@@ -41,18 +41,30 @@ def init_zones(driver: Driver) -> None:
                 num_shops += 1
             else:
                 mob = make_mob(mobref.vnum)
-            for wear_position, (vnum, max_exists) in mobref.equip.items():
-                obj = make_item(vnum)
-                # @todo actually wield/wear the item
+            inventory = []  # type: List[Item]
+            for wear_position, obj_ref in mobref.equip.items():
+                obj = make_item(obj_ref.vnum)
+                inventory.append(obj)    # @todo actually wield/wear the item! instead of putting it in the inventory
                 num_items += 1
-            inventory = set()
-            for objref in mobref.inventory:
-                assert not objref.contains, "items in mob inventory cannot yet contain stuff"
-                obj = make_item(objref.vnum)
-                inventory.add(obj)
+                if obj_ref.contains:
+                    items_in_equipped = []  # type: List[Item]
+                    for (c_vnum, c_max_exists) in obj_ref.contains:
+                        items_in_equipped.append(make_item(c_vnum))
+                    obj.init_inventory(items_in_equipped)
+                    num_items += len(items_in_equipped)
+            for obj_ref in mobref.inventory:
+                obj = make_item(obj_ref.vnum)
+                inventory.append(obj)
                 num_items += 1
+                if obj_ref.contains:
+                    items_in_carried = []  # type: List[Item]
+                    for (c_vnum, c_max_exists) in obj_ref.contains:
+                        items_in_carried.append(make_item(c_vnum))
+                    obj.init_inventory(items_in_carried)
+                    num_items += len(items_in_carried)
             if inventory:
                 mob.init_inventory(inventory)
+                del inventory
             if mobref.vnum in all_shopkeepers:
                 # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
                 if mob.inventory_size < len(mob.shop.forsale):   # type: ignore
@@ -69,14 +81,12 @@ def init_zones(driver: Driver) -> None:
             obj = make_item(obj_ref.vnum)
             loc = make_location(obj_ref.room)
             loc.insert(obj, None)
-            inventory = set()
-            for vnum, max_exists in obj_ref.contains:
-                sub_item = make_item(vnum)
-                num_items += 1
-                inventory.add(sub_item)
-            if inventory:
-                assert isinstance(obj, Container)
-                obj.init_inventory(inventory)
+            if obj_ref.contains:
+                items_in_room_obj = []  # type: List[Item]
+                for vnum, max_exists in obj_ref.contains:
+                    items_in_room_obj.append(make_item(vnum))
+                obj.init_inventory(items_in_room_obj)
+                num_items += len(items_in_room_obj)
             num_items += 1
         for door_state in zone.doorstates:
             loc = make_location(door_state.room)
