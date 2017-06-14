@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 from typing import Any, List
 
-from tale import pubsub, util, driver, base
+from tale import pubsub, util, driver, base, story
 
 
 class Thing:
@@ -25,6 +25,7 @@ class FakeDriver(driver.Driver):
         super().__init__()
         # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
+        self.moneyfmt = util.MoneyFormatter(story.MoneyType.MODERN)
 
 
 class Wiretap(pubsub.Listener):

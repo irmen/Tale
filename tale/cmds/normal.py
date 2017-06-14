@@ -437,6 +437,7 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
                             p("There's no <item>%s</> here." % item.name)
                 take_stuff(player, items_to_take, player.location)
                 return
+            p("Take things from what?")
 
 
 def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudObject, where_str: str=None) -> int:

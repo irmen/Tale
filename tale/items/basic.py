@@ -278,7 +278,8 @@ class Money(Item):   # @todo add unit tests for money
         elif value < 1000:
             descr = "It looks to be about " + mft.display(100 * (value//100)) + "."
         elif value < 100000:
-            guess = 1000 * (value // 1000 + random.randint(0, value // 1000))
+            v = value // 1000
+            guess = 1000 * (v + random.randint(-v//3, v//3))
             descr = "You guess it is, maybe, " + mft.display(guess) + "."
         else:
             descr = "It is A LOT of " + mft.money_name + "."
@@ -289,6 +290,9 @@ class Money(Item):   # @todo add unit tests for money
             short_descr = lang.A(title) + " is lying here."
         super().__init__(name, title, descr=descr, short_descr=short_descr)
         self.value = value
+
+    def __repr__(self):
+        return "<%s '%s' value=%f #%d @ 0x%x>" % (self.__class__.__name__, self.name, self.value, self.vnum, id(self))
 
     def add_to_location(self, location: Location, actor: Living) -> None:
         # if there's already some money in the location, add it to the pile. If not, just drop this money object.

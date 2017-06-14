@@ -1916,9 +1916,10 @@ class Soul:
             if word in verbdefs.BODY_PARTS:
                 if bodypart:
                     raise ParseError("You can't do that both %s and %s." % (verbdefs.BODY_PARTS[bodypart], verbdefs.BODY_PARTS[word]))
-                bodypart = word
-                arg_words.append(word)
-                continue
+                if (word not in all_items and word not in all_livings) or previous_word == "my":
+                    bodypart = word
+                    arg_words.append(word)
+                    continue
             if word in ("everyone", "everybody", "all"):
                 if include_flag:
                     if not all_livings:

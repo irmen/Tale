@@ -168,7 +168,8 @@ def make_item(vnum: int) -> Item:
         item.add_extradesc(kwds, ed["text"])
     item.circle_vnum = vnum  # keep the vnum
     item.aliases = aliases
-    item.value = c_obj.cost
+    if c_obj.cost > 0:
+        item.value = c_obj.cost
     item.rent = c_obj.rent
     item.weight = c_obj.weight
     # @todo: affects, effects, wear

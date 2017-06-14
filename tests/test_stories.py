@@ -13,6 +13,7 @@ import tale.verbdefs
 from tale import mud_context
 from tale.story import StoryConfig, StoryBase, StoryConfigError
 from tests.supportstuff import FakeDriver
+from tale.items.basic import Money
 
 
 class StoryCaseBase:
@@ -95,6 +96,10 @@ class TestCircleStory(StoryCaseBase, unittest.TestCase):
         self.assertEqual("puke", o.action_temper)
         self.assertEqual({"trash", "light", "treasure", "container", "food"}, o.willbuy)
         self.assertEqual(5411, o.circle_vnum)
+        o = make_item(2539)
+        self.assertIsInstance(o, Money)
+        self.assertEqual("pile", o.name)
+        self.assertEqual(23574.0, o.value, "money object must have value>0")
 
 
 class TestBuiltinDemoStory(StoryCaseBase, unittest.TestCase):
