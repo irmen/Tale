@@ -123,6 +123,7 @@ def make_location(vnum: int) -> Location:
         else:
             loc = Location(c_room.name, c_room.desc)
         loc.circle_vnum = vnum   # type: ignore  # keep the circle vnum
+        loc.circle_zone = c_room.zone    # type: ignore  # keep the circle zone number
         for ed in c_room.extradesc:
             loc.add_extradesc(ed["keywords"], ed["text"])
         converted_rooms[vnum] = loc
