@@ -146,7 +146,8 @@ A random list of the features of the current codebase:
 - game can be saved (and reloaded); pickle is used to serialize the full game world state
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib
-- supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars)
+- supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars). Text descriptions adapt to this.
+- money can be given away, dropped on the floor, and picked up.
 - it's possible for items to be combined into new items.
 - game clock is independent of real-time wall clock, configurable speed and start time
 - server 'tick' synced with command entry, or independent. This means things can happen in the background.

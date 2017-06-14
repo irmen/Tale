@@ -29,20 +29,20 @@ def roll_dice(number: int=1, sides: int=6) -> Tuple[int, List[int]]:
 
 class MoneyFormatter:
     """Display and parsing of money. Supports 'fantasy' and 'modern' style money."""
-    money_words_fantasy = {"gold", "silver", "copper", "coppers"}
-    money_words_modern = {"dollar", "dollars", "cent", "cents"}
     smallest_amount = Decimal("1")
 
     def __init__(self, money_type: MoneyType) -> None:
         if money_type == MoneyType.FANTASY:
             self.display = self.money_display_fantasy
             self.money_to_float = self.money_to_float_fantasy
-            self.money_words = self.money_words_fantasy
+            self.money_words = {"gold", "silver", "copper", "coppers"}
+            self.money_name = "coins"
             self.smallest_amount = Decimal("0.1")   # 1 copper
         elif money_type == MoneyType.MODERN:
             self.display = self.money_display_modern
             self.money_to_float = self.money_to_float_modern
-            self.money_words = self.money_words_modern
+            self.money_words = {"dollar", "dollars", "cent", "cents"}
+            self.money_name = "money"
             self.smallest_amount = Decimal("0.01")   # 1 dollarcent
         else:
             raise ValueError("invalid money type " + str(money_type))
@@ -52,6 +52,7 @@ class MoneyFormatter:
         Display amount of money in gold/silver/copper units,
         base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
         """
+        # @todo make base unit 1 gold.. why the hassle?
         gold, amount = divmod(amount, 10.0)
         silver, copper = divmod(amount, 1.0)
         copper = round(copper * 10.0)

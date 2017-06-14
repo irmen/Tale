@@ -61,10 +61,12 @@ def make_item(vnum: int) -> Item:
     name = aliases[0]
     aliases = set(aliases[1:])
     title = c_obj.shortdesc
-    if title.startswith("the ") or title.startswith("The "):
-        title = title[4:]
-    if title.startswith("a ") or title.startswith("A "):
+    if title.startswith(("a ", "A ")):
         title = title[2:]
+    elif title.startswith(("an ", "An ")):
+        title = title[3:]
+    elif title.startswith(("the ", "The ")):
+        title = title[4:]
     if vnum in circle_bulletin_boards:
         # it's a bulletin board
         item = BulletinBoard(name, title, short_descr=c_obj.longdesc)
@@ -144,8 +146,8 @@ def make_item(vnum: int) -> Item:
             spells.add(c_obj.typespecific["spell3"])
         item.spells = frozenset(spells)
     elif c_obj.type == "money":
-        item = Money(name, title, short_descr=c_obj.longdesc)
-        item.value = c_obj.typespecific["amount"]
+        value = c_obj.typespecific["amount"]
+        item = Money(name, value, title=title, short_descr=c_obj.longdesc)
     elif c_obj.type == "boat":
         item = Boat(name, title, short_descr=c_obj.longdesc)
     elif c_obj.type == "worn":

@@ -17,8 +17,8 @@ from .. import races
 from .. import util
 from .. import cmds
 from ..accounts import MudAccounts
-from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse, AsyncDialog
-from ..items.basic import GameClock
+from ..errors import ParseError, ActionRefused, SessionExit, RetrySoulVerb, RetryParse
+from ..items.basic import GameClock, Money
 from ..player import Player
 from ..story import GameMode
 from ..verbdefs import VERBS, ACTION_QUALIFIERS, BODY_PARTS, AGGRESSIVE_VERBS
@@ -89,7 +89,6 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     """Drop an item (or all items) you are carrying."""
     if not parsed.args:
         raise ParseError("Drop what?")
-
     def drop_stuff(items, container):
         items = list(items)
         refused = []
@@ -120,7 +119,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
             else:
                 player.tell("You hold onto your stuff.")
     else:
-        # drop a single item from the inventory (or a container in the inventory)
+        # drop a single item from the inventory (or a container in the inventory), or perhaps some coins
         if parsed.who_count:
             item = parsed.who_1
             if item in player:
@@ -134,7 +133,19 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                     player.tell_object_location(item, container)
                 drop_stuff([item], container)
             else:
-                raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
+                # perhaps it's some money then?
+                try:
+                    amount = ctx.driver.moneyfmt.parse(parsed.args)
+                except ParseError:
+                    raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
+                if amount > player.money:
+                    raise ActionRefused("You don't have that much money.")
+                money = Money(ctx.driver.moneyfmt.money_name, amount)       # @todo title, descr, short descr
+                money.add_to_location(player.location, player)
+                player.money -= amount
+                player.tell("You reach into your pockets and put %s on the ground." % ctx.driver.moneyfmt.display(amount, short=True))
+                player.tell_others("{Actor} reaches into %s pockets and puts some %s on the ground."
+                                   % (player.possessive, ctx.driver.moneyfmt.money_name))
 
 
 @cmd("empty")

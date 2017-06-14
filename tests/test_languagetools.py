@@ -17,12 +17,16 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("a House", lang.a("House"))
         self.assertEqual("an egg", lang.a("egg"))
         self.assertEqual("an egg", lang.a("an egg"))
+        self.assertEqual("An egg", lang.a("An egg"))
         self.assertEqual("a university", lang.a("university"))
         self.assertEqual("a university magazine", lang.a("university magazine"))
         self.assertEqual("an unindent", lang.a("unindent"))
         self.assertEqual("a user", lang.a("user"))
         self.assertEqual("a history", lang.a("history"))
         self.assertEqual("an hour", lang.a("hour"))
+        self.assertEqual("A user", lang.A("user"))
+        self.assertEqual("An hour", lang.A("hour"))
+        self.assertEqual("An egg", lang.A("An egg"))
 
     def testAexceptions(self):
         self.assertEqual("an unicycle", lang.a("unicycle"), "unicycle -> an, without regged exception")

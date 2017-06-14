@@ -288,6 +288,7 @@ class MudObject:
         if title:
             assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
             assert not title.startswith("a ") and not title.startswith("A "), "title must not start with 'a'"
+            assert not title.startswith("an ") and not title.startswith("An "), "title must not start with 'an'"
         self._title = title or name
         self._description = dedent(descr).strip() if descr else ""
         self._short_description = short_descr.strip() if short_descr else ""

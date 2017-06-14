@@ -5,11 +5,12 @@ A couple of basic items that go beyond the few base types.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
+import random
 import textwrap
 from typing import NamedTuple, FrozenSet, Optional, Union, List
 
-from .. import lang, mud_context
-from ..base import Item, Container, Weapon, Living, ParseResult
+from .. import lang, mud_context, util
+from ..base import Item, Container, Weapon, Living, ParseResult, Location, ContainingType
 from ..errors import ActionRefused, TaleError
 
 
@@ -234,10 +235,77 @@ class Food(Item):
         self.poisoned = False
 
 
-class Money(Item):
-    def init(self) -> None:
-        super().init()
-        # the amount of money is stored in item.value
+class Money(Item):   # @todo add unit tests for money
+    """Some money that is lying around. When picked up, it's added to the money the creature is carrying."""
+    def __init__(self, name: str, value: float, *, title: Optional[str]=None, short_descr: Optional[str]=None) -> None:
+        mft = mud_context.driver.moneyfmt
+        if value <= 0.0:
+            raise ValueError("attempt to create money with value <= 0")
+        if value <= 1.0:
+            title = "tiny amount of "
+        elif value <= 10:
+            title = "tiny pile of "
+        elif value <= 20:
+            title = "handful of "
+        elif value <= 75:
+            title = "little pile of "
+        elif value <= 200:
+            title = "small pile of "
+        elif value <= 1000:
+            title = "pile of "
+        elif value <= 5000:
+            title = "big pile of "
+        elif value <= 10000:
+            title = "large heap of "
+        elif value <= 20000:
+            title = "huge mound of "
+        elif value <= 75000:
+            title = "enormous mound of "
+        elif value <= 150000:
+            title = "small mountain of "
+        elif value <= 250000:
+            title = "mountain of "
+        elif value <= 500000:
+            title = "huge mountain of "
+        elif value <= 1000000:
+            title = "enormous mountain of "
+        else:
+            title = "absolutely colossal mountain of "
+        if value < 10:
+            descr = "There is " + mft.display(value) + "."
+        elif value < 100:
+            descr = "There is about " + mft.display(10 * (value//10)) + "."
+        elif value < 1000:
+            descr = "It looks to be about " + mft.display(100 * (value//100)) + "."
+        elif value < 100000:
+            guess = 1000 * (value // 1000 + random.randint(0, value // 1000))
+            descr = "You guess it is, maybe, " + mft.display(guess) + "."
+        else:
+            descr = "It is A LOT of " + mft.money_name + "."
+        title += mft.money_name
+        if short_descr:
+            short_descr = lang.capital(short_descr)
+        else:
+            short_descr = lang.A(title) + " is lying here."
+        super().__init__(name, title, descr=descr, short_descr=short_descr)
+        self.value = value
+
+    def add_to_location(self, location: Location, actor: Living) -> None:
+        # if there's already some money in the location, add it to the pile. If not, just drop this money object.
+        assert self.value > 0.0
+        for m in location.items:
+            if isinstance(m, Money):
+                m.value += self.value
+                break
+        else:
+            location.insert(self, actor)
+
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
+        # make sure that when the money is moved into a living, it is discarded and its value is added to the living's money.
+        if isinstance(target_container, Living):
+            target_container.remove(self, actor)
+            target_container.money += self.value
+            self.destroy(util.Context(mud_context.driver, mud_context.driver.game_clock, mud_context.config, None))
 
 
 class Boat(Item):

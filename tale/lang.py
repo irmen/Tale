@@ -73,18 +73,23 @@ __articles = {"the", "a", "an"}
 
 
 def a(word: str) -> str:
-    """a or an? simplistic version: if the word starts with aeiou, returns an, otherwise a"""
+    """a or an? simplistic version: if the word starts with a vowel, returns an, otherwise a"""
     if not word:
         return ""
-    if word.startswith(("a ", "an ")):
+    if word.startswith(("a ", "an ", "A ", "An ")):
         return word
     firstword = word.split(None, 1)[0]
     exception = __a_exceptions.get(firstword.lower(), None)
     if exception:
         return exception + " " + word
-    elif word.startswith(('a', 'e', 'i', 'o', 'u')):
+    elif word.startswith(('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')):
         return "an " + word
     return "a " + word
+
+
+def A(word: str) -> str:
+    """A or An? simplistic version: if the word starts with a vowel, returns An, otherwise A"""
+    return capital(a(word))
 
 
 def reg_a_exceptions(exceptions):
