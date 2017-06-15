@@ -34,9 +34,6 @@ class Boxlike(Container):
         self.txt_descr_open_filled = "It is a %s, with an open lid, and there's something in it." % self.name
         self.txt_descr_open_empty = "It is a %s, with an open lid." % self.name
 
-    def allow_item_move(self, actor: Living, verb: str="move") -> None:
-        raise ActionRefused("You can't %s %s." % (verb, self.title))
-
     @property
     def title(self) -> str:
         if self.opened:

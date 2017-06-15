@@ -10,7 +10,7 @@ import unittest
 from tale import mud_context
 from tale import util, player, base
 from tale.errors import ActionRefused
-from tale.items import basic
+from tale.items import basic, board, bank
 from tale.story import StoryConfig
 from tests.supportstuff import FakeDriver
 
@@ -74,6 +74,42 @@ class TestBasicItems(unittest.TestCase):
         self.assertIsNone(stick.combine([elastic, thing], self.actor))
         catapult = stick.combine([elastic], self.actor)
         self.assertIsInstance(catapult, basic.Catapult)
+
+    def test_takability(self):
+        p = base.Living("living", "m")
+        item = base.Item("item")
+        self.assertTrue(item.takeable)
+        item.move(p, p)
+        brd = board.BulletinBoard("board")
+        self.assertFalse(brd.takeable)
+        with self.assertRaises(ActionRefused) as x:
+            brd.move(p, p, verb="frob")
+        self.assertEquals("You can't frob board.", str(x.exception))
+        bx = basic.Boxlike("box")
+        self.assertTrue(bx.takeable)
+        bx.move(p, p)
+        bnk = bank.Bank("bank")
+        self.assertFalse(bnk.takeable)
+        with self.assertRaises(ActionRefused) as x:
+            bnk.move(p, p, verb="frob")
+        self.assertEquals("The bank won't budge.", str(x.exception))
+        with self.assertRaises(ActionRefused) as x:
+            bnk.allow_item_move(p, verb="frob")
+        self.assertEquals("The bank won't budge.", str(x.exception))
+        # now flip the flags around
+        bnk.takeable = True
+        bnk.allow_item_move(p)
+        bnk.move(p, p)
+        bx.takeable = False
+        with self.assertRaises(ActionRefused) as x:
+            bx.move(p, p, verb="frob")
+        self.assertEquals("You can't frob box.", str(x.exception))
+        brd.takeable = True
+        brd.move(p, p)
+        item.takeable = False
+        with self.assertRaises(ActionRefused) as x:
+            item.move(p, p, verb="frob")
+        self.assertEquals("You can't frob item.", str(x.exception))
 
 
 if __name__ == '__main__':

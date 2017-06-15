@@ -371,6 +371,7 @@ class Item(MudObject):
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
         self.weight = 0.0  # some abstract unit
+        self.takeable = True    # can this item be taken/picked up?
         super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init(self) -> None:
@@ -435,7 +436,8 @@ class Item(MudObject):
 
     def allow_item_move(self, actor: 'Living', verb: str="move") -> None:
         """Does the item allow to be moved (picked up, given away) by someone? (yes; no ActionRefused is raised)"""
-        pass
+        if not self.takeable:
+            raise ActionRefused("You can't %s %s." % (verb, self.title))
 
     def open(self, actor: 'Living', item: 'Item'=None) -> None:
         raise ActionRefused("You can't open that.")

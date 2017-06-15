@@ -26,6 +26,7 @@ class BulletinBoard(Item):
 
     def init(self) -> None:
         super().init()
+        self.takeable = False
         self.__posts = deque(maxlen=self.max_num_posts)  # type: MutableSequence[PostType]   # some py 3.5's don't have typing.Deque
         self.readonly = False
         self.storage_file = None  # type: str
@@ -44,9 +45,6 @@ class BulletinBoard(Item):
     @posts.setter
     def posts(self, value: Sequence[PostType]):
         self.__posts = deque(value, maxlen=self.max_num_posts)
-
-    def allow_item_move(self, actor: Living, verb: str="move") -> None:
-        raise ActionRefused("You can't %s %s." % (verb, self.title))
 
     @property
     def description(self) -> str:

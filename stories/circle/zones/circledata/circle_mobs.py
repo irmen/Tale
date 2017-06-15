@@ -58,7 +58,6 @@ class CircleMob(Living):
             try:
                 most_valuable.move(self, self, verb="take")
                 self.tell_others("{Actor} picks up %s." % most_valuable.title)
-                print("SCAVENGED!!!", self, most_valuable.name, most_valuable.vnum)   # XXX
             except ActionRefused:
                 pass
 

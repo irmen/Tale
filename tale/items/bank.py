@@ -23,7 +23,7 @@ class Bank(Item):
     """An item (such as ATM or cash card) that you can deposit and withdraw money from. The money is then safe when you log out."""
     def init(self) -> None:
         super().init()
-        self.portable = False   # can be set to true for instance when it's a credit card
+        self.takeable = False   # can be set to true for instance when it's a credit card
         self.storage_file = None  # type: str
         self.verbs = {
             "balance": "See what the balance on your bank account is.",
@@ -34,7 +34,7 @@ class Bank(Item):
         self.transaction_log = deque(maxlen=self.max_num_transactions)   # type: MutableSequence[str]   # py 3.5's don't have typing.Deque
 
     def allow_item_move(self, actor: Living, verb: str="move") -> None:
-        if not self.portable:
+        if not self.takeable:
             raise ActionRefused("The %s won't budge." % self.name)
 
     def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:

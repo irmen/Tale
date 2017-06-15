@@ -77,10 +77,8 @@ def make_item(vnum: int) -> Item:
         # it's a bank (atm, creditcard)
         item = Bank(name, title, short_descr=c_obj.longdesc)
         item.storage_file = circle_banks[vnum]    # instances may reuse the same bank storage file
-        if c_obj.weight > 50 or "canttake" in c_obj.wear:
-            item.portable = False
-        else:
-            item.portable = True
+        if c_obj.weight > 50:
+            c_obj.takeable = False
         item.load()
     elif c_obj.type == "container":
         if c_obj.typespecific.get("closeable"):
@@ -171,8 +169,7 @@ def make_item(vnum: int) -> Item:
         item.value = c_obj.cost
     item.rent = c_obj.rent
     item.weight = c_obj.weight
+    item.takeable = c_obj.takeable
     # @todo: affects, effects, wear
-    if not c_obj.takeable:
-        print("NON-TAKEABLE", item.name, item.circle_vnum)  # @todo make items non-takeable
     converted_items.add(vnum)
     return item
