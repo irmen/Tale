@@ -171,11 +171,15 @@ def parse_file(content):
                 if wearBitVectorArg >= 2:
                     wearBitVectorArg -= 2
                     wearAttribs.append('finger')
-                if wearBitVectorArg < 1:
-                    # wearBitVectorArg -= 1
+                if wearBitVectorArg == 1:
+                    wearAttribs.append('takeable')
+                else:
                     wearAttribs.append('canttake')
             else:
-                if 'a' in wearBitVectorArg: wearAttribs.append('takeable')
+                if 'a' in wearBitVectorArg:
+                    wearAttribs.append('takeable')
+                else:
+                    wearAttribs.append('canttake')
                 if 'b' in wearBitVectorArg: wearAttribs.append('finger')
                 if 'c' in wearBitVectorArg: wearAttribs.append('neck')
                 if 'd' in wearBitVectorArg: wearAttribs.append('body')
@@ -298,6 +302,7 @@ def parse_file(content):
                 # actiondesc=actionDescArg or None,  # there is never an action desc??
                 effects=set(effectAttribs),
                 wear=set(wearAttribs),
+                takeable="takeable" in wearAttribs
             )
 
             if valueDefs[typeFlagArg] != [None, None, None, None]:

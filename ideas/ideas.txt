@@ -7,7 +7,6 @@ Interesting link: http://www.brasslantern.org/writers/
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
-
 [feature] implement IP-address based ban
 [feature] global chat broadcast channel for
 [code] the story_data from a player object should be stored into the account database when account is saved and restored when account is loaded.

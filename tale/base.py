@@ -434,7 +434,7 @@ class Item(MudObject):
         pass
 
     def allow_item_move(self, actor: 'Living', verb: str="move") -> None:
-        """Does the item allow to be moved by someone? (yes; no ActionRefused is raised)"""
+        """Does the item allow to be moved (picked up, given away) by someone? (yes; no ActionRefused is raised)"""
         pass
 
     def open(self, actor: 'Living', item: 'Item'=None) -> None:

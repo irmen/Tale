@@ -12,6 +12,7 @@ from typing import Type, List, Set, Dict
 from tale.base import Living
 from tale.util import Context, call_periodically, roll_dice
 from tale.shop import Shopkeeper
+from tale.errors import ActionRefused
 from .parse_mob_files import get_mobs
 
 
@@ -35,20 +36,40 @@ class CircleMob(Living):
         super().init()
 
     def do_wander(self, ctx: Context) -> None:
-        # Let the mob wander randomly. Note: not all mobs do this! (some are 'sentinel')
-        if random.random() <= 0.333:
-            direction = self.select_random_move()
-            if direction:
-                if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:
-                    return   # mob must stay in its own zone
-                # @todo avoid certain directions, conditions, etc
-                self.move(direction.target, self, direction_name=direction.name)
+        # Let the mob wander randomly.
+        direction = self.select_random_move()
+        if direction:
+            if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:
+                return   # mob must stay in its own zone
+            # @todo avoid certain directions, conditions, etc
+            self.move(direction.target, self, direction_name=direction.name)
+
+    def do_scavenge(self, ctx: Context) -> None:
+        # Pick up the most valuable item in the room.
+        most_valuable = None
+        for item in self.location.items:
+            try:
+                item.allow_item_move(self, "take")
+                if most_valuable is None or item.value > most_valuable.value:
+                    most_valuable = item
+            except ActionRefused:
+                pass
+        if most_valuable:
+            try:
+                most_valuable.move(self, self, verb="take")
+                self.tell_others("{Actor} picks up %s." % most_valuable.title)
+                print("SCAVENGED!!!", self, most_valuable.name, most_valuable.vnum)   # XXX
+            except ActionRefused:
+                pass
 
     def do_special(self, ctx: Context) -> None:
-        # The special behavior of the mob. Not all mobs have this!
+        # The special behavior of the mob. Not all mobs have these flags set!
         if "sentinel" not in self.actions:
-            self.do_wander(ctx)
-        # @todo more actions such as scavenge
+            if random.random() <= 0.333:
+                self.do_wander(ctx)
+        if "scavenger" in self.actions:
+            if random.random() < 0.1:
+                self.do_scavenge(ctx)
 
 
 # @todo implement the behavior of the various mob classes (see spec_procs.c / castle.c)

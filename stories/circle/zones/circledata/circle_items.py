@@ -46,7 +46,6 @@ circle_bulletin_boards = {
 
 # the banks (atms, credit card)
 # see spec_assign.c/assign_objects()
-# @todo bank class and its verbs
 circle_banks = {
     3034: "bank/bank.json",
     3036: "bank/bank.json"
@@ -173,5 +172,7 @@ def make_item(vnum: int) -> Item:
     item.rent = c_obj.rent
     item.weight = c_obj.weight
     # @todo: affects, effects, wear
+    if not c_obj.takeable:
+        print("NON-TAKEABLE", item.name, item.circle_vnum)  # @todo make items non-takeable
     converted_items.add(vnum)
     return item
