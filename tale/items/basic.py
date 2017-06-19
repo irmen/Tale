@@ -271,12 +271,12 @@ class Money(Item):   # @todo add unit tests for money
         if value < 10:
             descr = "There is " + mft.display(value) + "."
         elif value < 100:
-            descr = "There is about " + mft.display(10 * (value//10)) + "."
+            descr = "There is about " + mft.display(10 * (value // 10)) + "."
         elif value < 1000:
-            descr = "It looks to be about " + mft.display(100 * (value//100)) + "."
+            descr = "It looks to be about " + mft.display(100 * (value // 100)) + "."
         elif value < 100000:
             v = value // 1000
-            guess = 1000 * (v + random.randint(-v//3, v//3))
+            guess = 1000 * (v + random.randint(int(-v / 3), int(v / 3)))
             descr = "You guess it is, maybe, " + mft.display(guess) + "."
         else:
             descr = "It is A LOT of " + mft.money_name + "."

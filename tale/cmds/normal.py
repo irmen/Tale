@@ -89,6 +89,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     """Drop an item (or all items) you are carrying."""
     if not parsed.args:
         raise ParseError("Drop what?")
+
     def drop_stuff(items, container):
         items = list(items)
         refused = []

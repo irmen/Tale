@@ -9,7 +9,7 @@ import re
 import random
 from types import SimpleNamespace
 from typing import Type, List, Set, Dict
-from tale.base import Living
+from tale.base import Living, Item
 from tale.util import Context, call_periodically, roll_dice
 from tale.shop import Shopkeeper
 from tale.errors import ActionRefused
@@ -39,14 +39,14 @@ class CircleMob(Living):
         # Let the mob wander randomly.
         direction = self.select_random_move()
         if direction:
-            if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:
+            if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:  # type: ignore
                 return   # mob must stay in its own zone
             # @todo avoid certain directions, conditions, etc
             self.move(direction.target, self, direction_name=direction.name)
 
     def do_scavenge(self, ctx: Context) -> None:
         # Pick up the most valuable item in the room.
-        most_valuable = None
+        most_valuable = None   # type: Item
         for item in self.location.items:
             try:
                 item.allow_item_move(self, "take")
