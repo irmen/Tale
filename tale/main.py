@@ -15,6 +15,7 @@ from .story import GameMode
 
 
 def run_from_cmdline(cmdline: Sequence[str]) -> None:
+    """Run Tale from the commandline."""
     parser = argparse.ArgumentParser(description="""
         Tale framework %s game driver. Use this to launch a game and specify some settings.
         Sometimes the game will provide its own startup script that invokes this automatically.

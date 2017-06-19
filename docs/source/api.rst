@@ -2,14 +2,19 @@
 Tale API
 ********
 
-:mod:`tale.base` --- Base classes
----------------------------------
-.. automodule:: tale.base
-    :members:
-
 :mod:`tale.accounts` --- Player account logic
 ---------------------------------------------
 .. automodule:: tale.accounts
+    :members:
+
+:mod:`tale.author` --- Story Author tools
+-----------------------------------------
+.. automodule:: tale.author
+    :members:
+
+:mod:`tale.base` --- Base classes
+---------------------------------
+.. automodule:: tale.base
     :members:
 
 :mod:`tale.charbuilder` --- Character builder
@@ -17,9 +22,19 @@ Tale API
 .. automodule:: tale.charbuilder
     :members:
 
-:mod:`tale.driver` --- Game driver/server
------------------------------------------
+:mod:`tale.driver` --- Game driver/server common logic
+------------------------------------------------------
 .. automodule:: tale.driver
+    :members:
+
+:mod:`tale.driver_if` --- IF single player Game driver
+------------------------------------------------------
+.. automodule:: tale.driver_if
+    :members:
+
+:mod:`tale.driver_mud` --- MUD multiplayer Game driver/server
+-------------------------------------------------------------
+.. automodule:: tale.driver_mud
     :members:
 
 :mod:`tale.errors` --- Exceptions
@@ -37,14 +52,14 @@ Tale API
 .. automodule:: tale.lang
     :members:
 
+:mod:`tale.main` --- Command line entrypoint
+--------------------------------------------
+.. automodule:: tale.main
+    :members:
+
 :mod:`tale.player` --- Players
 ------------------------------
 .. automodule:: tale.player
-    :members:
-
-:mod:`tale.races` --- Races and creature attributes
----------------------------------------------------
-.. automodule:: tale.races
     :members:
 
 :mod:`tale.pubsub` --- Simple synchronous pubsub/event mechanism
@@ -52,14 +67,24 @@ Tale API
 .. automodule:: tale.pubsub
     :members:
 
-:mod:`tale.story` --- Story configuration
------------------------------------------
-.. automodule:: tale.story
+:mod:`tale.races` --- Races and creature attributes
+---------------------------------------------------
+.. automodule:: tale.races
+    :members:
+
+:mod:`tale.savegames` --- Save/Load game logic
+----------------------------------------------
+.. automodule:: tale.savegames
     :members:
 
 :mod:`tale.shop` --- Shops
 --------------------------
 .. automodule:: tale.shop
+    :members:
+
+:mod:`tale.story` --- Story configuration
+-----------------------------------------
+.. automodule:: tale.story
     :members:
 
 :mod:`tale.util` --- Generic utilities
@@ -120,6 +145,11 @@ Tale API
 :mod:`tale.tio.styleaware_wrapper` --- Text wrapping
 ----------------------------------------------------
 .. automodule:: tale.tio.styleaware_wrapper
+    :members:
+
+:mod:`tale.items.bank` --- Bank definitions (ATM, credit card)
+--------------------------------------------------------------
+.. automodule:: tale.items.bank
     :members:
 
 :mod:`tale.items.basic` --- Item definitions

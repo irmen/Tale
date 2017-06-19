@@ -44,6 +44,7 @@ tale.main.run_from_cmdline(args)
 
 
 def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=False) -> None:
+    """Zip a story (possibly including the tale library itself - but not its dependencies, to avoid license hassles) into a zip file."""
     if os.path.exists(zipfilename):
         raise IOError("output file already exists: " + zipfilename)
     with zipfile.ZipFile(zipfilename, mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
@@ -92,6 +93,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
 
 
 def run_from_cmdline(args: Sequence[str]) -> None:
+    """Entrypoint from the commandline to invoke the available tools from this module."""
     if len(args) < 1:
         print("Give command to execute, one of:  zip")
         raise SystemExit()
