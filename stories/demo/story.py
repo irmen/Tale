@@ -20,8 +20,8 @@ class Story(StoryBase):
     config.name = "Tale Demo"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.8"
-    config.requires_tale = "3.4"
+    config.version = "1.9"
+    config.requires_tale = "3.5"
     config.supported_modes = {GameMode.IF, GameMode.MUD}
     config.player_money = 15.5
     config.playable_races = {"human", "elf", "dark-elf"}
