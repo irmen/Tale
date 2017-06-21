@@ -52,7 +52,7 @@ class MoneyFormatter:
         Display amount of money in gold/silver/copper units,
         base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
         """
-        # @todo make base unit 1 gold.. why the hassle?
+        # @todo make base unit 1 gold.. (0.1 = 1 silver, 0.01 = 1 copper) ... because why the hassle?
         gold, amount = divmod(amount, 10.0)
         silver, copper = divmod(amount, 1.0)
         copper = round(copper * 10.0)

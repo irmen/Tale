@@ -9,7 +9,7 @@ import unittest
 
 from tale import mud_context
 from tale import util, player, base
-from tale.errors import ActionRefused
+from tale.errors import ActionRefused, TaleError
 from tale.items import basic, board, bank
 from tale.story import StoryConfig
 from tests.supportstuff import FakeDriver
@@ -74,6 +74,49 @@ class TestBasicItems(unittest.TestCase):
         self.assertIsNone(stick.combine([elastic, thing], self.actor))
         catapult = stick.combine([elastic], self.actor)
         self.assertIsInstance(catapult, basic.Catapult)
+
+    def test_money(self):
+        with self.assertRaises(ValueError):
+            basic.Money("moneyz", 0.0)
+        with self.assertRaises(ValueError):
+            basic.Money("moneyz", -1.0)
+        m = basic.Money("moneyz", 123.45, title="many coinz", short_descr="tremendous amount of moneys")
+        self.assertEqual("many coinz", m.title)
+        self.assertEqual("Tremendous amount of moneys", m.short_description)
+        self.assertEqual("It looks to be about 100 dollars.", m.description)
+        self.assertEqual(123.45, m.value)
+        m = basic.Money("moneyz", 123.45, title="purse with coins")
+        self.assertEqual("purse with coins", m.title)
+        self.assertEqual("A purse with coins is lying here.", m.short_description)
+        self.assertEqual("It looks to be about 100 dollars.", m.description)
+        m = basic.Money("moneyz", 123.45)
+        self.assertEqual("small pile of money", m.title)
+        self.assertEqual("A small pile of money is lying here.", m.short_description)
+        self.assertEqual("It looks to be about 100 dollars.", m.description)
+        m = basic.Money("moneyz", 5123)
+        self.assertEqual("large heap of money", m.title)
+        self.assertEqual("A large heap of money is lying here.", m.short_description)
+        self.assertTrue(m.description.startswith("You guess it is, maybe, "))
+        m = basic.Money("moneyz", 512345)
+        self.assertEqual("enormous mountain of money", m.title)
+        self.assertEqual("An enormous mountain of money is lying here.", m.short_description)
+        self.assertEqual("It is A LOT of money.", m.description)
+        m = basic.Money("moneyz", 999512345)
+        self.assertEqual("absolutely colossal mountain of money", m.title)
+        self.assertEqual("An absolutely colossal mountain of money is lying here.", m.short_description)
+        self.assertEqual("It is A LOT of money.", m.description)
+        m = basic.Money("moneyz", 123.45)
+        loc = base.Location("loc")
+        m.add_to_location(loc, None)
+        with self.assertRaises(TaleError):
+            m.add_to_location(loc, None)  # cannot add to loc more than once
+        self.assertIs(loc, m.location)
+        m2 = list(loc.items)[0]
+        self.assertIs(m, m2)
+        m3 = basic.Money("mmmm", 999.99)
+        m3.add_to_location(loc, None)
+        m2 = list(loc.items)[0]
+        self.assertEqual(123.45+999.99, m2.value)
 
     def test_takability(self):
         p = base.Living("living", "m")

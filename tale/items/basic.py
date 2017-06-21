@@ -232,42 +232,44 @@ class Food(Item):
         self.poisoned = False
 
 
-class Money(Item):   # @todo add unit tests for money
+class Money(Item):
     """Some money that is lying around. When picked up, it's added to the money the creature is carrying."""
     def __init__(self, name: str, value: float, *, title: Optional[str]=None, short_descr: Optional[str]=None) -> None:
         mft = mud_context.driver.moneyfmt
         if value <= 0.0:
             raise ValueError("attempt to create money with value <= 0")
-        if value <= 1.0:
-            title = "tiny amount of "
-        elif value <= 10:
-            title = "tiny pile of "
-        elif value <= 20:
-            title = "handful of "
-        elif value <= 75:
-            title = "little pile of "
-        elif value <= 200:
-            title = "small pile of "
-        elif value <= 1000:
-            title = "pile of "
-        elif value <= 5000:
-            title = "big pile of "
-        elif value <= 10000:
-            title = "large heap of "
-        elif value <= 20000:
-            title = "huge mound of "
-        elif value <= 75000:
-            title = "enormous mound of "
-        elif value <= 150000:
-            title = "small mountain of "
-        elif value <= 250000:
-            title = "mountain of "
-        elif value <= 500000:
-            title = "huge mountain of "
-        elif value <= 1000000:
-            title = "enormous mountain of "
-        else:
-            title = "absolutely colossal mountain of "
+        if not title:
+            if value <= 1.0:
+                title = "tiny amount of "
+            elif value <= 10:
+                title = "tiny pile of "
+            elif value <= 20:
+                title = "handful of "
+            elif value <= 75:
+                title = "little pile of "
+            elif value <= 200:
+                title = "small pile of "
+            elif value <= 1000:
+                title = "pile of "
+            elif value <= 5000:
+                title = "big pile of "
+            elif value <= 10000:
+                title = "large heap of "
+            elif value <= 20000:
+                title = "huge mound of "
+            elif value <= 75000:
+                title = "enormous mound of "
+            elif value <= 150000:
+                title = "small mountain of "
+            elif value <= 250000:
+                title = "mountain of "
+            elif value <= 500000:
+                title = "huge mountain of "
+            elif value <= 1000000:
+                title = "enormous mountain of "
+            else:
+                title = "absolutely colossal mountain of "
+            title += mft.money_name
         if value < 10:
             descr = "There is " + mft.display(value) + "."
         elif value < 100:
@@ -280,7 +282,6 @@ class Money(Item):   # @todo add unit tests for money
             descr = "You guess it is, maybe, " + mft.display(guess) + "."
         else:
             descr = "It is A LOT of " + mft.money_name + "."
-        title += mft.money_name
         if short_descr:
             short_descr = lang.capital(short_descr)
         else:
@@ -294,6 +295,8 @@ class Money(Item):   # @todo add unit tests for money
     def add_to_location(self, location: Location, actor: Living) -> None:
         # if there's already some money in the location, add it to the pile. If not, just drop this money object.
         assert self.value > 0.0
+        if self in location.items:
+            raise TaleError("money is already in the location")
         for m in location.items:
             if isinstance(m, Money):
                 m.value += self.value
