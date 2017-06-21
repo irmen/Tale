@@ -29,25 +29,105 @@ def roll_dice(number: int=1, sides: int=6) -> Tuple[int, List[int]]:
 
 class MoneyFormatter:
     """Display and parsing of money. Supports 'fantasy' and 'modern' style money."""
+    money_words = set()    # type: Set[str]
+    money_name = ""
     smallest_amount = Decimal("1")
 
-    def __init__(self, money_type: MoneyType) -> None:
+    @staticmethod
+    def create_for(money_type: MoneyType) -> 'MoneyFormatter':
         if money_type == MoneyType.FANTASY:
-            self.display = self.money_display_fantasy
-            self.money_to_float = self.money_to_float_fantasy
-            self.money_words = {"gold", "silver", "copper", "coppers"}
-            self.money_name = "coins"
-            self.smallest_amount = Decimal("0.1")   # 1 copper
+            return MoneyFormatterFantasy()
         elif money_type == MoneyType.MODERN:
-            self.display = self.money_display_modern
-            self.money_to_float = self.money_to_float_modern
-            self.money_words = {"dollar", "dollars", "cent", "cents"}
-            self.money_name = "money"
-            self.smallest_amount = Decimal("0.01")   # 1 dollarcent
+            return MoneyFormatterModern()
         else:
             raise ValueError("invalid money type " + str(money_type))
 
-    def money_display_fantasy(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
+    def roundoff(self, amount: float) -> float:
+        # make sure a floating point amount is rounded off to the correct maximum number of digits for this money type
+        return round(amount, abs(self.smallest_amount.as_tuple().exponent))
+
+    def parse(self, words: Sequence[str]) -> float:
+        """Convert a parsed sequence of words to the amount of money it represents (float)"""
+        if len(words) == 1:
+            try:
+                return self.to_float(words[0])
+            except ValueError:
+                pass
+        elif len(words) == 2:
+            try:
+                return self.to_float(words[0] + words[1])
+            except ValueError:
+                pass
+        coins = {}  # type: Dict[str, float]
+        if set(words) & self.money_words:
+            # check if all words are either a number (currency) or a money word
+            amount = None
+            for word in words:
+                if word in self.money_words:
+                    if amount:
+                        if word in coins:
+                            raise ParseError("What amount?")
+                        coins[word] = amount
+                        amount = None
+                    else:
+                        raise ParseError("What amount?")
+                else:
+                    try:
+                        amount = float(word)
+                    except ValueError:
+                        raise ParseError("What amount?")
+            return self.to_float(coins)
+        raise ParseError("That is not an amount of money.")
+
+    def display(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
+        raise NotImplementedError("use subclass")
+
+    def to_float(self, coins: Union[str, Dict[str, float]]) -> float:
+        raise NotImplementedError("use subclass")
+
+
+class MoneyFormatterModern(MoneyFormatter):
+    money_words = {"dollar", "dollars", "cent", "cents"}
+    money_name = "money"
+    smallest_amount = Decimal("0.01")  # 1 dollarcent
+
+    def display(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
+        """
+        Display amount of money in modern currency (dollars/cents).
+        """
+        if short:
+            return "$ %.2f" % amount
+        dollar, cents = divmod(amount, 1.0)
+        cents = round(cents * 100.0)
+        result = []
+        if dollar:
+            result.append("%d " % dollar + lang.pluralize("dollar", dollar))
+        if cents:
+            result.append("%d " % cents + lang.pluralize("cent", cents))
+        if result:
+            return lang.join(result)
+        return zero_msg
+
+    def to_float(self, coins: Union[str, Dict[str, float]]) -> float:
+        """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
+        if isinstance(coins, str):
+            if coins.startswith("$"):
+                return self.roundoff(float(coins[1:]))
+            else:
+                raise ValueError("That's not an amount of money.")
+        result = coins.get("dollar", 0.0)
+        result += coins.get("dollars", 0.0)
+        result += coins.get("cent", 0.0) / 100.0
+        result += coins.get("cents", 0.0) / 100.0
+        return self.roundoff(result)
+
+
+class MoneyFormatterFantasy(MoneyFormatter):
+    money_words = {"gold", "silver", "copper", "coppers"}
+    money_name = "coins"
+    smallest_amount = Decimal("0.1")  # 1 copper
+
+    def display(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
         """
         Display amount of money in gold/silver/copper units,
         base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
@@ -69,24 +149,7 @@ class MoneyFormatter:
             return lang.join(result)
         return zero_msg
 
-    def money_display_modern(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
-        """
-        Display amount of money in modern currency (dollars/cents).
-        """
-        if short:
-            return "$ %.2f" % amount
-        dollar, cents = divmod(amount, 1.0)
-        cents = round(cents * 100.0)
-        result = []
-        if dollar:
-            result.append("%d " % dollar + lang.pluralize("dollar", dollar))
-        if cents:
-            result.append("%d " % cents + lang.pluralize("cent", cents))
-        if result:
-            return lang.join(result)
-        return zero_msg
-
-    def money_to_float_fantasy(self, coins: Union[str, Dict[str, float]]) -> float:
+    def to_float(self, coins: Union[str, Dict[str, float]]) -> float:
         """Either a dictionary containing the values per coin type, or a string '11g/22s/33c' is converted to float."""
         if isinstance(coins, str):
             if not coins:
@@ -111,56 +174,6 @@ class MoneyFormatter:
         result += coins.get("copper", 0.0) / 10.0
         result += coins.get("coppers", 0.0) / 10.0
         return self.roundoff(result)
-
-    def money_to_float_modern(self, coins: Union[str, Dict[str, float]]) -> float:
-        """Either a dictionary containing the values per coin type, or a string '$1234.55' is converted to float."""
-        if isinstance(coins, str):
-            if coins.startswith("$"):
-                return self.roundoff(float(coins[1:]))
-            else:
-                raise ValueError("That's not an amount of money.")
-        result = coins.get("dollar", 0.0)
-        result += coins.get("dollars", 0.0)
-        result += coins.get("cent", 0.0) / 100.0
-        result += coins.get("cents", 0.0) / 100.0
-        return self.roundoff(result)
-
-    def roundoff(self, amount: float) -> float:
-        # make sure a floating point amount is rounded off to the correct maximum number of digits for this money type
-        return round(amount, abs(self.smallest_amount.as_tuple().exponent))
-
-    def parse(self, words: Sequence[str]) -> float:
-        """Convert a parsed sequence of words to the amount of money it represents (float)"""
-        if len(words) == 1:
-            try:
-                return self.money_to_float(words[0])
-            except ValueError:
-                pass
-        elif len(words) == 2:
-            try:
-                return self.money_to_float(words[0] + words[1])
-            except ValueError:
-                pass
-        coins = {}  # type: Dict[str, float]
-        if set(words) & self.money_words:
-            # check if all words are either a number (currency) or a money word
-            amount = None
-            for word in words:
-                if word in self.money_words:
-                    if amount:
-                        if word in coins:
-                            raise ParseError("What amount?")
-                        coins[word] = amount
-                        amount = None
-                    else:
-                        raise ParseError("What amount?")
-                else:
-                    try:
-                        amount = float(word)
-                    except ValueError:
-                        raise ParseError("What amount?")
-            return self.money_to_float(coins)
-        raise ParseError("That is not an amount of money.")
 
 
 def parse_time(args: Sequence[str]) -> datetime.time:

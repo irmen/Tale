@@ -21,11 +21,11 @@ class Thing:
 
 
 class FakeDriver(driver.Driver):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
-        self.moneyfmt = util.MoneyFormatter(story.MoneyType.MODERN)
+        self.moneyfmt = util.MoneyFormatter.create_for(story.MoneyType.MODERN)
 
 
 class Wiretap(pubsub.Listener):

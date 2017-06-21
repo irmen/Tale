@@ -626,7 +626,7 @@ class TestLiving(unittest.TestCase):
         ctx = Ctx()
         ctx.config.money_type = MoneyType.MODERN
         ctx.driver = MoneyDriverDummy()
-        ctx.driver.moneyfmt = MoneyFormatter(ctx.config.money_type)
+        ctx.driver.moneyfmt = MoneyFormatter.create_for(ctx.config.money_type)
         julie = Living("julie", "f", race="human")
         tap = julie.get_wiretap()
         collector = PubsubCollector()

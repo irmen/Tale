@@ -47,9 +47,9 @@ class TestUtil(unittest.TestCase):
         p.tell_object_location(p, room)
         self.assertTrue("in your current location" in "".join(p.test_get_output_paragraphs()))
 
-    def test_moneydisplay(self):
+    def test_moneydisplay(self) -> None:
         # fantasy
-        mf = util.MoneyFormatter(MoneyType.FANTASY)
+        mf = util.MoneyFormatter.create_for(MoneyType.FANTASY)
         self.assertEqual("nothing", mf.display(0))
         self.assertEqual("zilch", mf.display(0, zero_msg="zilch"))
         self.assertEqual("nothing", mf.display(0.01))
@@ -60,7 +60,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("12g/3s/2c", mf.display(123.24, True))
         self.assertEqual("12g/3s/3c", mf.display(123.26, True))
         # modern
-        mf = util.MoneyFormatter(MoneyType.MODERN)
+        mf = util.MoneyFormatter.create_for(MoneyType.MODERN)
         self.assertEqual("nothing", mf.display(0))
         self.assertEqual("zilch", mf.display(0, zero_msg="zilch"))
         self.assertEqual("nothing", mf.display(0.001))
@@ -73,27 +73,27 @@ class TestUtil(unittest.TestCase):
         self.assertEqual("$ 123.24", mf.display(123.244, True))
         self.assertEqual("$ 123.25", mf.display(123.246, True))
 
-    def test_money_to_float(self):
+    def test_to_float(self):
         with self.assertRaises(ValueError):
-            util.MoneyFormatter("bubblewrap")
+            util.MoneyFormatter.create_for("bubblewrap")
         # fantasy
-        mf = util.MoneyFormatter(MoneyType.FANTASY)
-        self.assertEqual(0.0, mf.money_to_float({}))
-        self.assertAlmostEqual(0.3, mf.money_to_float({"copper": 1.0, "coppers": 2.0}), places=4)
-        self.assertAlmostEqual(325.6, mf.money_to_float({"gold": 22.5, "silver": 100.2, "copper": 4}), places=4)
-        self.assertAlmostEqual(289.3, mf.money_to_float("22g/66s/33c"), places=4)
+        mf = util.MoneyFormatter.create_for(MoneyType.FANTASY)
+        self.assertEqual(0.0, mf.to_float({}))
+        self.assertAlmostEqual(0.3, mf.to_float({"copper": 1.0, "coppers": 2.0}), places=4)
+        self.assertAlmostEqual(325.6, mf.to_float({"gold": 22.5, "silver": 100.2, "copper": 4}), places=4)
+        self.assertAlmostEqual(289.3, mf.to_float("22g/66s/33c"), places=4)
         # modern
-        mf = util.MoneyFormatter(MoneyType.MODERN)
-        self.assertEqual(0.0, mf.money_to_float({}))
-        self.assertAlmostEqual(0.55, mf.money_to_float({"cent": 22, "cents": 33}), places=4)
-        self.assertAlmostEqual(55.0, mf.money_to_float({"dollar": 22, "dollars": 33}), places=4)
-        self.assertAlmostEqual(5.42, mf.money_to_float({"dollar": 5, "cent": 42}), places=4)
-        self.assertAlmostEqual(3.45, mf.money_to_float("$3.45"), places=4)
-        self.assertAlmostEqual(3.45, mf.money_to_float("$  3.45"), places=4)
+        mf = util.MoneyFormatter.create_for(MoneyType.MODERN)
+        self.assertEqual(0.0, mf.to_float({}))
+        self.assertAlmostEqual(0.55, mf.to_float({"cent": 22, "cents": 33}), places=4)
+        self.assertAlmostEqual(55.0, mf.to_float({"dollar": 22, "dollars": 33}), places=4)
+        self.assertAlmostEqual(5.42, mf.to_float({"dollar": 5, "cent": 42}), places=4)
+        self.assertAlmostEqual(3.45, mf.to_float("$3.45"), places=4)
+        self.assertAlmostEqual(3.45, mf.to_float("$  3.45"), places=4)
 
-    def test_words_to_money(self):
+    def test_words_to_money(self) -> None:
         # fantasy
-        mf = util.MoneyFormatter(MoneyType.FANTASY)
+        mf = util.MoneyFormatter.create_for(MoneyType.FANTASY)
         with self.assertRaises(ParseError):
             mf.parse([])
         with self.assertRaises(ParseError):
@@ -105,7 +105,7 @@ class TestUtil(unittest.TestCase):
         self.assertAlmostEqual(451.6, mf.parse(["44", "gold", "5", "silver", "66", "copper"]), places=4)
         self.assertAlmostEqual(451.6, mf.parse(["44g/5s/66c"]), places=4)
         # modern
-        mf = util.MoneyFormatter(MoneyType.MODERN)
+        mf = util.MoneyFormatter.create_for(MoneyType.MODERN)
         with self.assertRaises(ParseError):
             mf.parse([])
         with self.assertRaises(ParseError):
@@ -119,8 +119,8 @@ class TestUtil(unittest.TestCase):
         self.assertAlmostEqual(46.15, mf.parse(["$ 46.15"]), places=4)
         self.assertAlmostEqual(46.15, mf.parse(["$", "46.15"]), places=4)
 
-    def test_parse_money_decimals(self):
-        mf = util.MoneyFormatter(MoneyType.FANTASY)
+    def test_parse_money_decimals(self) -> None:
+        mf = util.MoneyFormatter.create_for(MoneyType.FANTASY)
         self.assertEqual(23.4, mf.parse(["2g/3s/4c"]))
         self.assertEqual(20.0, mf.parse(["2g"]))
         self.assertEqual(29.0, mf.parse(["2.9g"]))
@@ -133,7 +133,7 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(29.8, mf.parse(["2", "gold", "9", "silver", "8", "copper"]))
         self.assertEqual(29.9, mf.parse(["2.01", "gold", "9.02", "silver", "8.03", "copper"]))
         self.assertEqual(23.9, mf.parse(["2.01", "gold", "38.3", "copper"]))
-        mf = util.MoneyFormatter(MoneyType.MODERN)
+        mf = util.MoneyFormatter.create_for(MoneyType.MODERN)
         self.assertEqual(23.40, mf.parse(["$ 23.401"]))
         self.assertEqual(23.40, mf.parse(["$ 23.40123"]))
         self.assertEqual(23.41, mf.parse(["$ 23.40567"]))

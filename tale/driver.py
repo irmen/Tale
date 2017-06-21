@@ -265,7 +265,7 @@ class Driver(pubsub.Listener):
         self.game_clock = util.GameDateTime(self.story.config.epoch or self.server_started, self.story.config.gametime_to_realtime)
         self.moneyfmt = None
         if self.story.config.money_type != MoneyType.NOTHING:
-            self.moneyfmt = util.MoneyFormatter(self.story.config.money_type)
+            self.moneyfmt = util.MoneyFormatter.create_for(self.story.config.money_type)
         user_data_dir = pathlib.Path(appdirs.user_data_dir("Tale-" + util.storyname_to_filename(self.story.config.name),
                                                            "Razorvine", roaming=True))
         user_data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)

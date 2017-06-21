@@ -292,6 +292,9 @@ class Money(Item):
     def __repr__(self):
         return "<%s '%s' value=%f #%d @ 0x%x>" % (self.__class__.__name__, self.name, self.value, self.vnum, id(self))
 
+    def __float__(self):
+        return self.value
+
     def add_to_location(self, location: Location, actor: Living) -> None:
         # if there's already some money in the location, add it to the pile. If not, just drop this money object.
         assert self.value > 0.0

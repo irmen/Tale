@@ -116,7 +116,9 @@ class TestBasicItems(unittest.TestCase):
         m3 = basic.Money("mmmm", 999.99)
         m3.add_to_location(loc, None)
         m2 = list(loc.items)[0]
-        self.assertEqual(123.45+999.99, m2.value)
+        self.assertEqual(1123.44, m2.value)
+        # test cast to float
+        self.assertEqual(1123.44, float(m2))
 
     def test_takability(self):
         p = base.Living("living", "m")
