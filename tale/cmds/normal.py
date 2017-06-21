@@ -141,7 +141,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                     raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
                 if amount > player.money:
                     raise ActionRefused("You don't have that much money.")
-                money = Money(ctx.driver.moneyfmt.money_name, amount)       # @todo title, descr, short descr
+                money = Money(ctx.driver.moneyfmt.money_name, amount)
                 money.add_to_location(player.location, player)
                 player.money -= amount
                 player.tell("You reach into your pockets and put %s on the ground." % ctx.driver.moneyfmt.display(amount, short=True))

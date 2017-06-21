@@ -378,8 +378,13 @@ def do_debug(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     else:
         raise ActionRefused("Can't find %s." % name)
     txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
-    for varname, value in sorted(vars(obj).items()):        # @todo also dump @properties
-        txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
+    # first, @properties
+    for propname, prop in sorted(inspect.getmembers(type(obj), lambda o: isinstance(o, property))):
+        txt.append("<dim>.</>%s<dim>:</> %r" % (propname, prop.__get__(obj)))
+    # now, normal non-private attributes
+    for varname, value in sorted(vars(obj).items()):
+        if not varname.startswith('_'):
+            txt.append("<dim>.</>%s<dim>:</> %r" % (varname, value))
     player.tell("\n".join(txt), format=False)
 
 
