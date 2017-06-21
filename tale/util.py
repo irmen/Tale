@@ -125,17 +125,16 @@ class MoneyFormatterModern(MoneyFormatter):
 class MoneyFormatterFantasy(MoneyFormatter):
     money_words = {"gold", "silver", "copper", "coppers"}
     money_name = "coins"
-    smallest_amount = Decimal("0.1")  # 1 copper
+    smallest_amount = Decimal("0.01")  # 1 copper (1/100th of 1 gold)
 
     def display(self, amount: float, short: bool=False, zero_msg: str="nothing") -> str:
         """
         Display amount of money in gold/silver/copper units,
-        base unit=silver, 10 silver=1 gold, 0.1 silver=1 copper
+        base unit=1 gold, 10 silver=1 gold, 10 copper=1 silver
         """
-        # @todo make base unit 1 gold.. (0.1 = 1 silver, 0.01 = 1 copper) ... because why the hassle?
-        gold, amount = divmod(amount, 10.0)
-        silver, copper = divmod(amount, 1.0)
-        copper = round(copper * 10.0)
+        gold, amount = divmod(amount, 1.0)
+        silver, copper = divmod(amount, 0.1)
+        copper = round(copper * 100.0)
         if short:
             return "%dg/%ds/%dc" % (gold, silver, copper)
         result = []
@@ -159,20 +158,20 @@ class MoneyFormatterFantasy(MoneyFormatter):
                 c, _, coins = coins.partition("/")
                 try:
                     if c.endswith("g"):
-                        result += float(c[:-1]) * 10.0
-                    elif c.endswith("s"):
                         result += float(c[:-1])
-                    elif c.endswith("c"):
+                    elif c.endswith("s"):
                         result += float(c[:-1]) / 10.0
+                    elif c.endswith("c"):
+                        result += float(c[:-1]) / 100.0
                     else:
                         raise ValueError("invalid coin letter")
                 except ValueError:
                     raise ValueError("That's not an amount of money.")
             return self.roundoff(result)
-        result = coins.get("gold", 0.0) * 10.0
-        result += coins.get("silver", 0.0)
-        result += coins.get("copper", 0.0) / 10.0
-        result += coins.get("coppers", 0.0) / 10.0
+        result = coins.get("gold", 0.0)
+        result += coins.get("silver", 0.0) / 10.0
+        result += coins.get("copper", 0.0) / 100.0
+        result += coins.get("coppers", 0.0) / 100.0
         return self.roundoff(result)
 
 
