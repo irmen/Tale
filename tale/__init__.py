@@ -48,26 +48,35 @@ def _check_required_libraries():
     colorama_version_required = LooseVersion("0.3.6")
     serpent_version_required = LooseVersion("1.22")
     if not appdirs:
-        print("The 'appdirs' Python library (any recent version) is required to play this game.", file=sys.stderr)
+        print("The 'appdirs' Python library (any recent version) is required to run Tale.", file=sys.stderr)
         all_good = False
     if not colorama or LooseVersion(colorama.__version__) < colorama_version_required:
-        print("The 'colorama' Python library (version >= {}) is required to play this game."
+        print("The 'colorama' Python library (version >= {}) is required to run Tale."
               .format(colorama_version_required), file=sys.stderr)
         all_good = False
     if not smartypants or LooseVersion(smartypants.__version__) < smartypants_version_required:
-        print("The 'smartypants' Python library (version >= {}) is required to play this game."
+        print("The 'smartypants' Python library (version >= {}) is required to run Tale."
               .format(smartypants_version_required), file=sys.stderr)
         all_good = False
     if not serpent or LooseVersion(serpent.__version__) < serpent_version_required:
-        print("The 'serpent' Python library (version >= {}) is required to play this game."
+        print("The 'serpent' Python library (version >= {}) is required to run Tale."
               .format(serpent_version_required), file=sys.stderr)
         all_good = False
     if not all_good:
         print("\nInstall this/these and try again. Try using your package manager (on Linux) or try executing the following command:")
         print('  pip install --user "appdirs" "smartypants>={spv}" "colorama>={cv}" "serpent>={sv}"'
               .format(spv=smartypants_version_required, cv=colorama_version_required, sv=serpent_version_required))
-        input("\nEnter to exit: ")
-        raise SystemExit(1)
+        choice = input("\nDo you want to attempt to install them (using pip) right now (y/n)? ")
+        if choice == 'y':
+            import pip
+            statuscode = pip.main(["install", "--user", "appdirs", "smartypants>=" + str(smartypants_version_required),
+                                   "colorama>=" + str(colorama_version_required), "serpent>=" + str(serpent_version_required)])
+            if statuscode:
+                print("\n\nInstallation failed.\n")
+                raise SystemExit(statuscode)
+            else:
+                print("\n\nInstallation finished, try to run me again now.\n")
+        raise SystemExit
 
 _check_required_libraries()
 del _check_required_libraries
