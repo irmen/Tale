@@ -19,7 +19,7 @@ from . import colorama_patched as colorama
 from . import styleaware_wrapper, iobase
 from ..driver import Driver
 from ..player import PlayerConnection, Player
-from ..base import Container
+from .. import mud_context
 
 
 colorama.init()
@@ -85,12 +85,8 @@ class ConsoleIo(iobase.IoAdapterBase):
                 # do blocking console input call
                 if prompt_toolkit and self.do_prompt_toolkit:
                     # word completion for the names of things and people
-                    player = player_connection.player
-                    names = {i.name for i in player.location.items}
-                    names |= {l.name for l in player.location.livings if l is not player}
-                    names |= {i.name for container in player.inventory if isinstance(container, Container) for i in container.inventory}
-                    names |= {i.name for i in player.inventory}
-                    completer = WordCompleter(names)
+                    all_candidates = self.tab_complete_get_all_candidates(mud_context.driver)
+                    completer = WordCompleter(all_candidates)
                     cmd = prompt_toolkit.prompt("\n>> ", patch_stdout=True, completer=completer, complete_while_typing=False)
                 else:
                     cmd = input()
@@ -122,8 +118,9 @@ class ConsoleIo(iobase.IoAdapterBase):
             print("\n" * 10)
 
     def install_tab_completion(self, driver: Driver) -> None:
-        """Install tab completion using readline, if available"""
-        # @todo use prompt_toolkit if that is available for completion
+        """Install tab completion using readline, or prompt_toolkit, if available"""
+        if prompt_toolkit:
+            return   # completion is handled when the prompt_toolkit prompt is created
         if os.name == "nt":
             # pyreadline on windows behaves weird and screws up the output. So disable by default.
             return

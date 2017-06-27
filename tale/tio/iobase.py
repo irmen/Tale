@@ -116,18 +116,21 @@ class IoAdapterBase:
         """pause/ unpause the input loop"""
         raise NotImplementedError("implement this in subclass")
 
-    def tab_complete(self, prefix: str, driver) -> List[str]:
-        if not prefix:
+    def tab_complete_get_all_candidates(self, driver) -> List[str]:
+        return self.tab_complete("", driver, True)
+
+    def tab_complete(self, prefix: str, driver, get_all: bool=False) -> List[str]:
+        if not prefix and not get_all:
             return []
         prefix = prefix.lower()
         player = self.player_connection.player
-        verbs = [verb for verb in driver.current_verbs(player) if verb.startswith(prefix)]
-        livings = [living.name for living in player.location.livings if living.name.startswith(prefix)]
-        livings_aliases = [alias for living in player.location.livings for alias in living.aliases if alias.startswith(prefix)]
-        items = [item.name for item in player.location.items if item.name.startswith(prefix)]
-        items_aliases = [alias for item in player.location.items for alias in item.aliases if alias.startswith(prefix)]
-        exits = [xt for xt in player.location.exits if xt.startswith(prefix)]
-        inventory = [item.name for item in player.inventory if item.name.startswith(prefix)]
-        inventory_aliases = [alias for item in player.inventory for alias in item.aliases if alias.startswith(prefix)]
-        emotes = [verb for verb in verbdefs.VERBS if verb.startswith(prefix)]
-        return list(sorted(verbs + livings + items + exits + inventory + emotes + livings_aliases + items_aliases + inventory_aliases))
+        verbs = {verb for verb in driver.current_verbs(player) if verb.startswith(prefix)}
+        livings = {living.name for living in player.location.livings if living.name.startswith(prefix)}
+        livings_aliases = {alias for living in player.location.livings for alias in living.aliases if alias.startswith(prefix)}
+        items = {item.name for item in player.location.items if item.name.startswith(prefix)}
+        items_aliases = {alias for item in player.location.items for alias in item.aliases if alias.startswith(prefix)}
+        exits = {xt for xt in player.location.exits if xt.startswith(prefix)}
+        inventory = {item.name for item in player.inventory if item.name.startswith(prefix)}
+        inventory_aliases = {alias for item in player.inventory for alias in item.aliases if alias.startswith(prefix)}
+        emotes = {verb for verb in verbdefs.VERBS if verb.startswith(prefix)}
+        return list(sorted(verbs | livings | items | exits | inventory | emotes | livings_aliases | items_aliases | inventory_aliases))
