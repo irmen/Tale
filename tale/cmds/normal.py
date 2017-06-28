@@ -834,17 +834,19 @@ def do_emote(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     player.tell_others(emote_msg)
 
 
-@cmd("yell", "shout")
+@cmd("yell", "shout", "scream")
 def do_yell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Yell something. People in nearby locations will also be able to hear you."""
+    print(parsed)
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
     message = parsed.unparsed
     if not parsed.unparsed.endswith((".", "!", "?")):
         message += "!"
-    player.tell("You yell: " + message)
-    player.tell_others("{Actor} yells: %s" % message)
-    player.location.message_nearby_locations("Someone nearby is yelling: " + message)  # yell this to adjacent locations as well
+    player.tell("You %s: %s" % (parsed.verb, message))
+    player.tell_others("{Actor} %ss: %s" % (parsed.verb, message))
+    # send this to nearby locations as well:
+    player.location.message_nearby_locations("Someone nearby is %s: %s" % (lang.fullverb(parsed.verb), message))
 
 
 @cmd("say")

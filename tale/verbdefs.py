@@ -163,7 +163,7 @@ VERBS = {
     "consult":   (SIMP, None, " \nHOW consult$ \nAT \nWHAT", ""),
     "mumble":    (SIMP, None, "mumble$ \nMSG \nHOW \nAT", "to"),
     "murmur":    (SIMP, None, "murmur$ \nMSG \nHOW \nAT", "to"),
-    "scream":    (SIMP, ("loudly", ), "scream$ \nMSG \nHOW \nAT", "at"),
+    # "scream":    (SIMP, ("loudly", ), "scream$ \nMSG \nHOW \nAT", "at"),     # replaced by a command
     # "yell":     (SIMP, ("in a high pitched voice", ), "yell$ \nMSG \nHOW \nAT", "at"),    # replaced by a command
     "command":   (SIMP, (None, "follow orders"), "command$ \nWHO \nHOW to \nWHAT"),
     "utter":     (SIMP, (None, "ehh..."), " \nHOW utter$ \nMSG \nAT", "to"),
@@ -356,7 +356,7 @@ NONLIVING_OK_VERBS = {
     "hmm", "ignore", "jerk", "judge", "kick", "laugh", "leer", "lick", "like", "listen",
     "love", "lust", "meow", "moan", "mumble", "murmur", "mutter", "nod", "nominate",
     "ogle", "peer", "point", "puke", "pull", "push", "purr", "puzzle", "quote",
-    "raise", "recoil", "reply", "rotate", "scowl", "scream", "shake",
+    "raise", "recoil", "reply", "rotate", "scowl", "shake",
     "shove", "sing", "smile", "snap", "snarl", "sneer", "sneeze", "smell", "sniff",
     "snigger", "snort", "spill", "spin", "spit", "spray", "stare", "surrender",
     "swing", "squeeze", "tongue", "touch", "trust", "turn", "understand", "utter", "want",

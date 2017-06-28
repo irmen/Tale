@@ -177,7 +177,7 @@ class MudObject:
     possessive = "its"
     objective = "it"
     gender = "n"
-    # the vnum machinery for all created MudObjects:
+    # the vnum machinery for all created MudObjects:    # @todo move to metaclass?
     __seq = 1
     all_items = WeakValueDictionary()       # type: WeakValueDictionary[int, Item]
     all_livings = WeakValueDictionary()     # type: WeakValueDictionary[int, Living]
