@@ -156,6 +156,51 @@ class ParseResult:
         return "\n".join(s)
 
 
+class MudObjRegistry:
+    # the vnum machinery for all created MudObjects:
+    seq_nr = 1
+    all_items = WeakValueDictionary()       # type: WeakValueDictionary[int, Item]
+    all_livings = WeakValueDictionary()     # type: WeakValueDictionary[int, Living]
+    all_locations = WeakValueDictionary()   # type: WeakValueDictionary[int, Location]
+    all_exits = WeakValueDictionary()       # type: WeakValueDictionary[int, Exit]
+
+    @staticmethod
+    def track_vnum(instance: Any, fix_clones: bool=False):
+        # create and store a new unique vnum for this mudobject
+        instance.vnum = MudObjRegistry.seq_nr
+        MudObjRegistry.seq_nr += 1
+        if isinstance(instance, Item):
+            MudObjRegistry.all_items[instance.vnum] = instance    # type: ignore
+        elif isinstance(instance, Living):
+            MudObjRegistry.all_livings[instance.vnum] = instance    # type: ignore
+        elif isinstance(instance, Exit):
+            MudObjRegistry.all_exits[instance.vnum] = instance    # type: ignore
+        elif isinstance(instance, Location):
+            MudObjRegistry.all_locations[instance.vnum] = instance    # type: ignore
+        else:
+            raise TypeError("weird MudObj subtype: " + str(type(instance)))
+        if fix_clones:
+            # the 'clone' command consumes too many vnums because of the way deepcopy works.
+            # try to find the double registration and remove it.
+            pid = instance.vnum - 1
+            existing = None   # type: MudObject
+            existing = MudObjRegistry.all_items.get(pid, None)
+            if existing is instance:
+                del MudObjRegistry.all_items[pid]
+            else:
+                existing = MudObjRegistry.all_livings.get(pid, None)
+                if existing is instance:
+                    del MudObjRegistry.all_livings[pid]
+                else:
+                    existing = MudObjRegistry.all_exits.get(pid, None)
+                    if existing is instance:
+                        del MudObjRegistry.all_exits[pid]
+                    else:
+                        existing = MudObjRegistry.all_locations.get(pid, None)
+                        if existing is instance:
+                            del MudObjRegistry.all_locations[pid]
+
+
 class MudObject:
     """
     Root class of all objects in the mud world
@@ -177,56 +222,14 @@ class MudObject:
     possessive = "its"
     objective = "it"
     gender = "n"
-    # the vnum machinery for all created MudObjects:    # @todo move to metaclass?
-    __seq = 1
-    all_items = WeakValueDictionary()       # type: WeakValueDictionary[int, Item]
-    all_livings = WeakValueDictionary()     # type: WeakValueDictionary[int, Living]
-    all_locations = WeakValueDictionary()   # type: WeakValueDictionary[int, Location]
-    all_exits = WeakValueDictionary()       # type: WeakValueDictionary[int, Exit]
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
         if cls is MudObject:
             raise TypeError("don't create MudObject directly, use one of the subclasses")
-        _instance = super().__new__(cls)
-        MudObject._track_vnum(_instance)
-        return _instance
-
-    @staticmethod
-    def _track_vnum(instance: Any, fix_clones: bool=False):
-        # create and store a new unique vnum for this mudobject
-        instance.vnum = MudObject.__seq
-        MudObject.__seq += 1
-        if isinstance(instance, Item):
-            MudObject.all_items[instance.vnum] = instance    # type: ignore
-        elif isinstance(instance, Living):
-            MudObject.all_livings[instance.vnum] = instance    # type: ignore
-        elif isinstance(instance, Exit):
-            MudObject.all_exits[instance.vnum] = instance    # type: ignore
-        elif isinstance(instance, Location):
-            MudObject.all_locations[instance.vnum] = instance    # type: ignore
-        else:
-            raise TypeError("weird MudObj subtype: " + str(type(instance)))
-        if fix_clones:
-            # the 'clone' command consumes too man vnums because of the way deepcopy works.
-            # try to find the double registration and remove it.
-            pid = instance.vnum - 1
-            existing = None   # type: MudObject
-            existing = MudObject.all_items.get(pid, None)
-            if existing is instance:
-                del MudObject.all_items[pid]
-            else:
-                existing = MudObject.all_livings.get(pid, None)
-                if existing is instance:
-                    del MudObject.all_livings[pid]
-                else:
-                    existing = MudObject.all_exits.get(pid, None)
-                    if existing is instance:
-                        del MudObject.all_exits[pid]
-                    else:
-                        existing = MudObject.all_locations.get(pid, None)
-                        if existing is instance:
-                            del MudObject.all_locations[pid]
+        instance = super().__new__(cls)
+        MudObjRegistry.track_vnum(instance)
+        return instance
 
     def __init__(self, name: str, title: str = None, *, descr: str = None, short_descr: str = None) -> None:
         self._extradesc = None  # type: Dict[str,str]
@@ -514,7 +517,7 @@ class Item(MudObject):
         location, self.location = self.location, None
         duplicate = copy.deepcopy(self)
         self.location = duplicate.location = location
-        MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy resets initially given vnum so hand out a new one
+        MudObjRegistry.track_vnum(duplicate, fix_clones=True)   # deepcopy resets initially given vnum so hand out a new one
         mud_context.driver.register_periodicals(duplicate)
         return duplicate
 
@@ -930,7 +933,7 @@ class Living(MudObject):
             location, self.location = self.location, None
             duplicate = copy.deepcopy(self)
             self.location = location
-            MudObject._track_vnum(duplicate, fix_clones=True)   # deepcopy overwrites initially given vnum so make a new one
+            MudObjRegistry.track_vnum(duplicate, fix_clones=True)   # deepcopy overwrites initially given vnum so make a new one
             mud_context.driver.register_periodicals(duplicate)
         else:
             duplicate = self

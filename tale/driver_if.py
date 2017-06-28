@@ -76,10 +76,10 @@ class IFDriver(driver.Driver):
         if not self.story.config.savegames_enabled:
             raise errors.ActionRefused("It is not possible to save your progress.")
         serializer = savegames.TaleSerializer()
-        all_locations = [loc for loc in base.MudObject.all_locations.values()]
-        all_items = [i for i in base.MudObject.all_items.values() if i.contained_in]
-        all_livings = [l for l in base.MudObject.all_livings.values() if l.location]
-        all_exits = list(base.MudObject.all_exits.values())
+        all_locations = [loc for loc in base.MudObjRegistry.all_locations.values()]
+        all_items = [i for i in base.MudObjRegistry.all_items.values() if i.contained_in]
+        all_livings = [l for l in base.MudObjRegistry.all_livings.values() if l.location]
+        all_exits = list(base.MudObjRegistry.all_exits.values())
         savedata = serializer.serialize(self.story.config, player, all_items, all_livings, all_locations, all_exits,
                                         self.deferreds, self.game_clock)
         del all_locations, all_exits, all_items, all_livings
@@ -358,7 +358,7 @@ class SavegameExistingObjectsFinder:
             raise errors.TaleError("invalid base class for resolve_ref: " + baseclassname)
 
     def resolve_location_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Location:
-        loc = base.MudObject.all_locations.get(vnum, None)
+        loc = base.MudObjRegistry.all_locations.get(vnum, None)
         if not loc:
             raise LookupError("location vnum not found: " + str(vnum))
         if loc.name != name or savegames.qual_classname(loc) != classname or savegames.qual_baseclassname(loc) != baseclassname:
@@ -366,7 +366,7 @@ class SavegameExistingObjectsFinder:
         return loc
 
     def resolve_living_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Living:
-        liv = base.MudObject.all_livings.get(vnum, None)
+        liv = base.MudObjRegistry.all_livings.get(vnum, None)
         if not liv:
             raise LookupError("living vnum not found: " + str(vnum))
         if liv.name != name or savegames.qual_classname(liv) != classname or savegames.qual_baseclassname(liv) != baseclassname:
@@ -375,7 +375,7 @@ class SavegameExistingObjectsFinder:
 
     def resolve_item_ref(self, vnum: int, name: str, classname: str, baseclassname: str,
                          *, new_items: List[Dict[str, Any]]=[]) -> base.Item:
-        item = base.MudObject.all_items.get(vnum, None)
+        item = base.MudObjRegistry.all_items.get(vnum, None)
         if not item:
             for newitem in new_items:
                 if newitem["old_vnum"] == vnum:

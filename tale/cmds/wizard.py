@@ -465,10 +465,10 @@ def do_server(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
     elif config.server_tick_method == TickMethod.COMMAND:
         txt.append("Loop duration:  n/a (command driven)")
     txt.append("Number of objects:")
-    txt.append("  locations: %d" % len(list(base.MudObject.all_locations.keys())))
-    txt.append("  livings:   %d" % len(list(base.MudObject.all_livings.keys())))
-    txt.append("  items:     %d" % len(list(base.MudObject.all_items.keys())))
-    txt.append("  exits:     %d" % len(list(base.MudObject.all_exits.keys())))
+    txt.append("  locations: %d" % len(list(base.MudObjRegistry.all_locations.keys())))
+    txt.append("  livings:   %d" % len(list(base.MudObjRegistry.all_livings.keys())))
+    txt.append("  items:     %d" % len(list(base.MudObjRegistry.all_items.keys())))
+    txt.append("  exits:     %d" % len(list(base.MudObjRegistry.all_exits.keys())))
     txt.append("  python:    %d" % len(gc.get_objects()))
     player.tell("\n".join(txt), format=False)
 
@@ -648,22 +648,22 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
         player.tell("All known " + name + ": (limiting to 100)", end=True)
         count = 0
         if name == "items":
-            for vnum, item in list(base.MudObject.all_items.items())[:100]:
+            for vnum, item in list(base.MudObjRegistry.all_items.items())[:100]:
                 location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else ""  # type: ignore
                 player.tell("%d - %s  (%s)" % (vnum, item.name, location), end=True)
                 count += 1
         elif name == "livings":
-            for vnum, living in list(base.MudObject.all_livings.items())[:100]:
+            for vnum, living in list(base.MudObjRegistry.all_livings.items())[:100]:
                 location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else ""  # type: ignore
                 is_player = "[player]" if isinstance(living, Player) else ""
                 player.tell("%d - %s  %s (%s)" % (vnum, living.name, is_player, location), end=True)
                 count += 1
         elif name == "locations":
-            for vnum, loc in list(base.MudObject.all_locations.items())[:100]:
+            for vnum, loc in list(base.MudObjRegistry.all_locations.items())[:100]:
                 player.tell("%d - %s" % (vnum, loc.name), end=True)
                 count += 1
         elif name == "exits":
-            for vnum, exit in list(base.MudObject.all_exits.items())[:100]:
+            for vnum, exit in list(base.MudObjRegistry.all_exits.items())[:100]:
                 player.tell("%d - %s, target: %s" % (vnum, exit.name, exit.target.name), end=True)
                 count += 1
         player.tell("Count: %d" % count)
@@ -673,18 +673,18 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
             vnum = int(parsed.args[0])
         except ValueError as x:
             raise ActionRefused(str(x))
-        if vnum in base.MudObject.all_items:
-            item = base.MudObject.all_items[vnum]
+        if vnum in base.MudObjRegistry.all_items:
+            item = base.MudObjRegistry.all_items[vnum]
             location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else "<none>"  # type: ignore
             player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, location))
-        elif vnum in base.MudObject.all_livings:
-            living = base.MudObject.all_livings[vnum]
+        elif vnum in base.MudObjRegistry.all_livings:
+            living = base.MudObjRegistry.all_livings[vnum]
             location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
             player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, location))
-        elif vnum in base.MudObject.all_locations:
-            player.tell("Location with vnum %d: %r" % (vnum, base.MudObject.all_locations[vnum]))
-        elif vnum in base.MudObject.all_exits:
-            player.tell("Exit with vnum %d: %r" % (vnum, base.MudObject.all_exits[vnum]))
+        elif vnum in base.MudObjRegistry.all_locations:
+            player.tell("Location with vnum %d: %r" % (vnum, base.MudObjRegistry.all_locations[vnum]))
+        elif vnum in base.MudObjRegistry.all_exits:
+            player.tell("Exit with vnum %d: %r" % (vnum, base.MudObjRegistry.all_exits[vnum]))
         else:
             player.tell("There is nothing with that vnum.")
         return
@@ -701,10 +701,10 @@ def do_go_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         vnum = int(parsed.args[0])
     except ValueError as x:
         raise ActionRefused(str(x))
-    if vnum in base.MudObject.all_locations:
-        teleport_to(player, base.MudObject.all_locations[vnum])
-    elif vnum in base.MudObject.all_livings:
-        living = base.MudObject.all_livings[vnum]
+    if vnum in base.MudObjRegistry.all_locations:
+        teleport_to(player, base.MudObjRegistry.all_locations[vnum])
+    elif vnum in base.MudObjRegistry.all_livings:
+        living = base.MudObjRegistry.all_livings[vnum]
         location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
         player.tell("(creature: %s, location: %s)" % (living, location))
         if living.location:
@@ -724,10 +724,10 @@ def do_clone_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -
         vnum = int(parsed.args[0])
     except ValueError as x:
         raise ActionRefused(str(x))
-    if vnum in base.MudObject.all_items:
-        base.MudObject.all_items[vnum].wiz_clone(player)
-    elif vnum in base.MudObject.all_livings:
-        living = base.MudObject.all_livings[vnum]
+    if vnum in base.MudObjRegistry.all_items:
+        base.MudObjRegistry.all_items[vnum].wiz_clone(player)
+    elif vnum in base.MudObjRegistry.all_livings:
+        living = base.MudObjRegistry.all_livings[vnum]
         if isinstance(living, Player):
             raise ActionRefused("You cannot clone %s." % living.objective)
         living.wiz_clone(player)

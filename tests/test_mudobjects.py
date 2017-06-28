@@ -9,7 +9,7 @@ import datetime
 import unittest
 
 from tale import pubsub, mud_context
-from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, ParseResult
+from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, ParseResult, MudObjRegistry
 from tale.demo.story import Story as DemoStory
 from tale.errors import ActionRefused, LocationIntegrityError
 from tale.player import Player
@@ -1148,17 +1148,17 @@ class TestMudObject(unittest.TestCase):
         self.assertGreater(e1.vnum, 0)
         n1 = Living("fox", "f")
         self.assertGreater(n1.vnum, 0)
-        self.assertIn(i1.vnum, MudObject.all_items)
-        self.assertIn(i2.vnum, MudObject.all_items)
-        self.assertNotIn(i1.vnum, MudObject.all_locations)
-        self.assertIn(l1.vnum, MudObject.all_locations)
-        self.assertIn(e1.vnum, MudObject.all_exits)
-        self.assertIn(n1.vnum, MudObject.all_livings)
-        self.assertIs(i1, MudObject.all_items[i1.vnum])
-        self.assertIs(i2, MudObject.all_items[i2.vnum])
-        self.assertIs(l1, MudObject.all_locations[l1.vnum])
-        self.assertIs(e1, MudObject.all_exits[e1.vnum])
-        self.assertIs(n1, MudObject.all_livings[n1.vnum])
+        self.assertIn(i1.vnum, MudObjRegistry.all_items)
+        self.assertIn(i2.vnum, MudObjRegistry.all_items)
+        self.assertNotIn(i1.vnum, MudObjRegistry.all_locations)
+        self.assertIn(l1.vnum, MudObjRegistry.all_locations)
+        self.assertIn(e1.vnum, MudObjRegistry.all_exits)
+        self.assertIn(n1.vnum, MudObjRegistry.all_livings)
+        self.assertIs(i1, MudObjRegistry.all_items[i1.vnum])
+        self.assertIs(i2, MudObjRegistry.all_items[i2.vnum])
+        self.assertIs(l1, MudObjRegistry.all_locations[l1.vnum])
+        self.assertIs(e1, MudObjRegistry.all_exits[e1.vnum])
+        self.assertIs(n1, MudObjRegistry.all_livings[n1.vnum])
 
     def test_story_data(self):
         i = Item("thing")
