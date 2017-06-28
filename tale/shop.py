@@ -273,7 +273,7 @@ class Shopkeeper(Living):
             if self.shop.action_temper:
                 self.do_socialize("%s %s" % (self.shop.action_temper, actor.name))
             return True
-        # @todo charisma bonus/malus
+        # @todo charisma bonus/penalty
         price = item.value * self.shop.buyprofit
         value_str = mud_context.driver.moneyfmt.display(price)
         actor.tell("%s appraises the %s." % (lang.capital(self.title), item.name))
@@ -309,7 +309,7 @@ class Shopkeeper(Living):
             actor.tell("%s says: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantbuy))
             return True
         # sell the item to the customer
-        # @todo charisma bonus/malus
+        # @todo charisma bonus/penalty
         price = item.value * self.shop.sellprofit
         if price > actor.money:
             actor.tell("%s tells you: \"%s\"" % (lang.capital(self.title), self.shop.msg_playercantafford))
@@ -355,7 +355,7 @@ class Shopkeeper(Living):
             return True
         # @todo check wontdealwith
         # @todo check item type
-        # check money  # @todo charisma bonus/malus
+        # check money  # @todo charisma bonus/penalty
         price = item.value * self.shop.buyprofit
         limit = self.money * 0.75   # shopkeeper should not spend more than 75% of his money on a single sale
         if price >= limit:

@@ -1,7 +1,15 @@
 COMBAT MODEL
 ------------
 
-This needs a lot of work!
+This still needs a lot of work!
+
+GENERAL
+-------
+no immediate processing of combat related commands, that would make it possible to cheat a fight by spamming attack commands.
+combat related commands only change an "in combat" flag
+combat is processed in a controlled way by the driver where a combat action/trigger is done every 1? 2? seconds or so.
+
+
 
 LEVEL  [1 - 30]
 ---------------
@@ -50,3 +58,4 @@ Ac ranges from -100 to +100
 ATTACK BONUS/POWER/?
 --------------------
 @todo (based on thac0 from circle data)
+
