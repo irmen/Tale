@@ -54,12 +54,13 @@ garden.add_exits([
     Exit(["house", "doors"], neighbors_house, "The garden doors are open and lead back to the house.")
 ])
 
-bedroom.add_exits([
-    Exit(["ladder", "down"], garden, "The ladder that is placed outside of the window provides access down to the garden below.")
-])
-
 neighbors_house.add_exits([
     Exit(["street", "north"], "magnolia_st.street2", "The street is back north."),
     Exit(["up", "stairs"], bedroom, "Up the stairs is the bedroom."),
     Exit(["garden", "doors"], garden, "The garden doors are open and lead to... the garden.")
+])
+
+bedroom.add_exits([
+    Exit(["stairs"], neighbors_house, "Stairs lead back to the rest of the house."),
+    Exit(["ladder", "down"], garden, "The ladder that is placed outside of the window provides access down to the garden below.")
 ])

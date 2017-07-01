@@ -75,6 +75,7 @@ class IFDriver(driver.Driver):
     def do_save(self, player: Player) -> None:
         if not self.story.config.savegames_enabled:
             raise errors.ActionRefused("It is not possible to save your progress.")
+        # XXX crashes in Zed game with recursion error...
         serializer = savegames.TaleSerializer()
         all_locations = [loc for loc in base.MudObjRegistry.all_locations.values()]
         all_items = [i for i in base.MudObjRegistry.all_items.values() if i.contained_in]

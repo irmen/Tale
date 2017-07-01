@@ -27,6 +27,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[code] add helper functions to easily create a connecting pair of Exits or reverse Doors between 2 locations
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this

@@ -1326,7 +1326,7 @@ class Container(Item):
 
 class Exit(MudObject):
     """
-    An 'exit' that connects one location to another. It is strictly one-way.
+    An 'exit' that connects one location to another. It is strictly one-way!
     Directions can be a single string or a sequence of directions (all meaning the same exit).
     You can use a Location object as target, or a string designating the location
     (for instance "town.square" means the square location object in game.zones.town).
@@ -1421,6 +1421,8 @@ class Exit(MudObject):
 class Door(Exit):
     """
     A special exit that connects one location to another but which can be closed or even locked.
+    Because a single door is still only one-way, you have to create a second -linked- door to go back.
+    This is easily done by the ``reverse_door`` method.
     """
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_descr: str,
                  long_descr: str=None, locked: bool=False, opened: bool=False) -> None:
@@ -1542,7 +1544,7 @@ class Door(Exit):
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
         actor.tell("Your %s fits, it is now unlocked." % key.title)
-        actor.tell_others("{Actor} unlocks the %s with %s." % (self.name, lang.a(key.title)))
+        actor.tell_others("{Actor} unlocks the %s with %s %s." % (self.name, actor.possessive, key.title))
         if self.linked_door:
             self.linked_door.locked = False
             self.target.tell("The %s is unlocked from the other side." % self.linked_door.name)
@@ -1581,7 +1583,7 @@ class Door(Exit):
 
 
 class Key(Item):
-    """A key which has a unique code. It can be used to open the matching Door."""
+    """A key which has a unique code. It can be used to open a matching Door. Set the door or code using the key_for method."""
     def init(self) -> None:
         self.key_code = ""
 

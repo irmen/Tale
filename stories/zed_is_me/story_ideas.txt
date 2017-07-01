@@ -55,10 +55,10 @@ als je zelf yellt dan moeten mensen in de buurt daar op reageren, en wanderers o
                                  |  Bedroom | ladder     |            |   |
                                  |          |     +------+            |   |
                                  +----------+         .               |   |
-                                                      .               |   |
+                                                      v               |   |
                                                  +-----------+    +---+---+---+
                                                  |           |    |           |
                                                  |  storage  <----+ butcher   |
-                                                 |           |    |           |
-                                                 |           |    |           |
+                                                 |           | locked         |
+                                                 |           |  door          |
                                                  +-----------+    +-----------+

@@ -8,6 +8,7 @@ butcher, storage room
 """
 
 import zones.magnolia_st
+import zones.houses
 
 from tale.base import Location, Exit, Door, Key, _limbo
 
@@ -17,8 +18,8 @@ south_street = Location("Rose Street", "The southern part of Rose Street.")
 
 crossing = Location("Crossing", "Town Crossing.")
 crossing.add_exits([
-    Exit("west", "magnolia_st.street2", "Westwards lies Magnolia Street."),
-    Exit("east", "magnolia_st.street3", "Magnolia Street extends to the east, eventually leading towards the factory."),
+    Exit("west", zones.magnolia_st.street2, "Westwards lies Magnolia Street."),
+    Exit("east", zones.magnolia_st.street3, "Magnolia Street extends to the east, eventually leading towards the factory."),
     Exit("north", north_street, "A part of Rose Street lies to the north."),
     Exit("south", south_street, "Rose Street continues to the south.")
 ])
@@ -48,12 +49,16 @@ parking_gate.key_code = "111"
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
 storage_room = Location("Storage Cell", "The butcher's meat storage cell. Brrrrr, it is cold here!")
+storage_room_door = Door(["door", "storage"], storage_room, "A door leads to the storage room.",
+                         "The meat storage is behind it. The door's locked with a security card instead of a key.",
+                         locked=True, opened=False)
+storage_room_door.key_code = "butcher1"
 butcher.add_exits([
     Exit(["north", "street"], south_street, "Rose street is back to the north."),
-    Door(["door", "storage"], storage_room, "A door leads to the storage room.")
+    storage_room_door
 ])
 storage_room.add_exits([
-    Door(["door", "shop"], butcher, "The door leads back to the shop.")
+    storage_room_door.reverse_door(["door", "shop"], butcher, "The door leads back to the shop.")
 ])
 
 north_street.add_exits([
@@ -73,3 +78,7 @@ parking_key.key_for(parking_gate)
 parking_key.add_extradesc({"label"}, "The label says: 'parking area gate'.")
 
 butcher.insert(parking_key, None)
+
+butcher_key = Key("card", "security card", descr="It is a security card, with a single word 'storage' written on it.")
+butcher_key.key_for(storage_room_door)
+zones.houses.garden.insert(butcher_key, None)
