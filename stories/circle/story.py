@@ -35,6 +35,7 @@ class Story(StoryBase):
     config.show_exits_in_look = False
     config.mud_host = "localhost"
     config.mud_port = 8200
+    config.license_file = "messages/license.txt"
     # story-specific fields follow:
     driver = None     # will be set by init()
 

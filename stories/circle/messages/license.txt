@@ -1,0 +1,39 @@
+
+Tale "Circle" mudlib, based on world definition files from CircleMud 3.0.
+Only the data files are used, none of the original C code is being used in any way.
+
+
+
+                    C  I  R  C  L  E  M  U  D     3  .  0
+
+
+CircleMUD was developed from DikuMUD (Gamma 0.0) by Jeremy "Ras" Elson at
+Johns Hopkins University's Department of Computer Science.  All code unique
+to CircleMUD is protected under a copyright by the Trustees of the Johns
+Hopkins University.  Additional development coordinated by Alex Fletcher,
+George Greer, and Daniel Koepke with feedback from CircleMUD mailing list.
+
+CircleMUD is freeware and can be downloaded via anonymous FTP from
+ftp.circlemud.org or ftp2.circlemud.org in pub/CircleMUD.  Its developers
+can be contacted at cdev@circlemud.org.
+
+Type HELP CIRCLEMUD for more information.
+
+============================================================================
+
+
+
+                   Original game idea, concept, and design:
+
+          Katja Nyboe               [Superwoman] (katz@freja.diku.dk)
+          Tom Madsen              [Stormbringer] (noop@freja.diku.dk)
+          Hans Henrik Staerfeldt           [God] (bombman@freja.diku.dk)
+          Michael Seifert                 [Papi] (seifert@freja.diku.dk)
+          Sebastian Hammer               [Quinn] (quinn@freja.diku.dk)
+
+------------------------------------------------------------------------------
+Additional contributions from Michael Curran, Bill Wisner, Mads Haar, and
+Stephan Dahl.
+
+Originally developed at:
+  DIKU - The Department of Computer Science at the University of Copenhagen.
