@@ -1423,7 +1423,7 @@ class Door(Exit):
     A special exit that connects one location to another but which can be closed or even locked.
     """
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_descr: str,
-                 long_descr: str=None, locked: bool=False, opened: bool=True) -> None:
+                 long_descr: str=None, locked: bool=False, opened: bool=False) -> None:
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_descr or short_descr

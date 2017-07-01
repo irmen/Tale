@@ -328,12 +328,12 @@ class TestDoorsExits(unittest.TestCase):
 
         door = Door("north", hall, "Some door.")
         self.assertEqual("Some door.", door.short_description)
-        self.assertEqual("Some door. It is open and unlocked.", door.description)
-        self.assertTrue(door.opened)
+        self.assertEqual("Some door. It is closed and unlocked.", door.description)
+        self.assertFalse(door.opened)
         self.assertFalse(door.locked)
         door = Door("north", hall, "Some door.", "This is a peculiar door leading north.")
         self.assertEqual("Some door.", door.short_description)
-        self.assertEqual("This is a peculiar door leading north. It is open and unlocked.", door.description)
+        self.assertEqual("This is a peculiar door leading north. It is closed and unlocked.", door.description)
 
     def test_with_key(self):
         player = Player("julie", "f")
