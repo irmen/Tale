@@ -35,7 +35,8 @@ lane = Location("Lane of Magicks",
     you can't see any houses or other landmarks. The road seems to go on forever though.
     """)
 
-square.add_exits([Exit(["north", "lane"], lane, "A long straight lane leads north towards the horizon.")])
+Exit.connect(square, ["north", "lane"], "A long straight lane leads north towards the horizon.", None,
+             lane, "south", "The town square lies to the south.", None)
 
 paper = newspaper.clone()
 paper.aliases = {"paper"}
@@ -88,14 +89,13 @@ cursed_gem = CursedGem("black gem")
 cursed_gem.aliases = {"gem"}
 normal_gem = Item("blue gem")
 normal_gem.aliases = {"gem"}
-lane.add_exits([Exit("south", square, "The town square lies to the south.")])
 lane.add_exits([Exit(["shop", "north east", "northeast", "ne"], "shoppe.shop", "There's a curiosity shop to the north-east.")])
 
 
 class WizardTowerEntry(Exit):
     def allow_passage(self, actor: Living) -> None:
         if "wizard" in actor.privileges:
-            actor.tell("You pass through the force-field.")
+            actor.tell("You pass through the force-field.", end=True)
         else:
             raise ActionRefused("You can't go that way, the force-field is impenetrable.")
 
@@ -137,11 +137,11 @@ door3 = Door(["third door", "door three"], alley, "There's a door marked 'door t
 door4 = Door(["fourth door", "door four"], alley, "There's a door marked 'door four'.", long_descr=descr, locked=True, opened=False)
 alley.add_exits([
     door1, door2, door3, door4,
-    Exit(["north", "square"], square, "You can go north which brings you back to the square."),
 ])
 
-square.add_exits([Exit(["alley", "south"], alley, "There's an alley to the south.",
-                       "It looks like a very small alley, but you can walk through it.")])
+Exit.connect(alley, ["north", "square"], "You can go north which brings you back to the square.", None,
+             square, ["alley", "south"],
+             "There's an alley to the south.", "It looks like a very small alley, but you can walk through it.")
 
 
 class GameEnd(Location):
@@ -232,6 +232,8 @@ class Computer(Item):
         actor.tell("The computer beeps quietly. The screen shows: \"%s\"" % message)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         if parsed.verb in ("hello", "hi"):
             self.process_typed_command("hello", "", actor)
         elif parsed.verb in ("say", "yell"):

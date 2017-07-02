@@ -19,7 +19,7 @@ kitchen = Location("Kitchen", "A small but well supplied kitchen. Rather than or
                               "A window lets you look outside.")
 kitchen.add_extradesc({"window", "outside"},
                       "Through the kitchen window you can see your small garden and behind that, the children's playground.")
-kitchen.init_inventory([Money("cash", 8.0, title="small amount of cash")])  # not enough to buy or bargain for the medicine, player needs to find more
+kitchen.init_inventory([Money("cash", 8.0, title="small amount of cash")])  # not enough, player needs to find more
 
 
 Exit.connect(livingroom, "kitchen",

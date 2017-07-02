@@ -108,7 +108,7 @@ class Apothecary(Living):
                 raise ActionRefused("It is no longer available for sale.")
             amount = mud_context.driver.moneyfmt.parse(parsed.args)
             price = mud_context.driver.moneyfmt.display(self.pills_price)
-            if amount < self.pills_price/2:
+            if amount < self.pills_price / 2:
                 actor.tell("%s glares angrily at you and says, \"No way! I want at least half the original price! "
                            "Did't I tell you? They were %s!\"" % (lang.capital(self.title), price))
                 raise ActionRefused()
@@ -139,9 +139,9 @@ class Apothecary(Living):
         self.tell_others("{Actor} says: \"Here's your medicine, now get out of here!\"")
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         # react on mentioning the medicine
-        if parsed.verb in self.verbs:
-            return
         if "medicine" in parsed.unparsed or "pills" in parsed.unparsed or "bottle" in parsed.unparsed:
             if self.search_item("pills", include_location=False):  # do we still have the pills?
                 price = mud_context.driver.moneyfmt.display(self.pills_price)

@@ -10,7 +10,7 @@ butcher, storage room
 import random
 import zones.houses
 
-from tale.base import Location, Exit, Door, Key, _limbo, Living
+from tale.base import Location, Exit, Door, Key, _limbo, Living, ParseResult
 from tale.items.basic import Money
 from tale.util import call_periodically, Context
 
@@ -81,6 +81,12 @@ class Friend(Living):
         else:
             self.do_command_verb("yell \"Help me, I'm locked in\"", ctx)
 
+    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
+        if self in parsed.who_info:
+            self.do_socialize("smile " + actor.name)
+
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
 butcher.insert(parking_key, None)
@@ -89,13 +95,11 @@ Exit.connect(butcher, ["north", "street"], "Rose street is back to the north.", 
 
 storage_room = StorageRoom("Storage room", "The butcher's meat storage room. Brrrrr, it is cold here!")
 
-storage_room_door, _ = Door.connect(butcher,
-     ["door", "storage"],
-     "A door leads to the storage room.", "The meat storage is behind it. The door's locked with a security card instead of a key.",
-     storage_room,
-     ["door", "shop"],
-     "The door leads back to the shop.", None,
-     locked=True, key_code="butcher1")
+storage_room_door, _ = Door.connect(butcher, ["door", "storage"],
+    "A door leads to the storage room.", "The meat storage is behind it. The door's locked with a security card instead of a key.",
+    storage_room, ["door", "shop"],
+    "The door leads back to the shop.", None,
+    locked=True, key_code="butcher1")
 
 friend = Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
 storage_room.insert(friend, None)

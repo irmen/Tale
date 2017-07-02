@@ -393,6 +393,8 @@ class LimboReaper(base.Living):
         self.candidates = {}    # type: Dict[base.Living, Tuple[float, int]]  # living (usually a player) --> (first_seen, texts shown)
 
     def notify_action(self, parsed: base.ParseResult, actor: base.Living) -> None:
+        if self is actor:
+            return
         if parsed.verb == "say":
             actor.tell("%s just stares blankly at you, not saying a word." % lang.capital(self.title))
         else:

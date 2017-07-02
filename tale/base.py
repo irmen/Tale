@@ -359,6 +359,10 @@ class MudObject:
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
         Custom verbs are notified however, even if they were already handled by handle_verb!
+        It's good practice to first do a check like this::
+
+            if actor is self or parsed.verb in self.verbs:
+                return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         """
         pass
 
@@ -775,6 +779,10 @@ class Location(MudObject):
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
         Custom verbs are notified however, even if they were already handled by handle_verb!
+        It's good practice to first do a check like this::
+
+            if actor is self or parsed.verb in self.verbs:
+                return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         """
         pass
 
@@ -1298,6 +1306,10 @@ class Living(MudObject):
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
         Custom verbs are notified however, even if they were already handled by handle_verb!
+        It's good practice to first do a check like this::
+
+            if actor is self or parsed.verb in self.verbs:
+                return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         """
         pass
 
@@ -1404,6 +1416,7 @@ class Exit(MudObject):
             self._target_str = target_location
             title = "Exit to <unbound:%s>" % target_location
         long_descr = long_descr or short_descr
+        # the name of the exit/door is the first direction given (any others are aliases)
         super().__init__(direction, title=title, descr=long_descr, short_descr=short_descr)
         self.aliases = aliases
         if not self.target:
@@ -1591,12 +1604,10 @@ class Door(Exit):
                 raise ActionRefused("You can't use that to lock it.")
         else:
             key = self.search_key(actor)
-            if key:
-                actor.tell("<dim>(You use your %s; %s matches the lock.)</>" % (key.title, key.subjective))
-            else:
+            if not key:
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
-        actor.tell("Your %s fits, it is now locked." % key.title)
+        actor.tell("Your %s fits, the %s is now locked." % (key.title, self.name))
         actor.tell_others("{Actor} locks the %s with %s." % (self.name, lang.a(key.title)))
         if self.linked_door:
             self.linked_door.locked = True
@@ -1615,12 +1626,10 @@ class Door(Exit):
                 raise ActionRefused("You can't use that to unlock it.")
         else:
             key = self.search_key(actor)
-            if key:
-                actor.tell("<dim>(You use your %s; %s matches the lock.)</>" % (key.title, key.subjective))
-            else:
+            if not key:
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
-        actor.tell("Your %s fits, it is now unlocked." % key.title)
+        actor.tell("Your %s fits, the %s is now unlocked." % (key.title, self.name))
         actor.tell_others("{Actor} unlocks the %s with %s %s." % (self.name, actor.possessive, key.title))
         if self.linked_door:
             self.linked_door.locked = False

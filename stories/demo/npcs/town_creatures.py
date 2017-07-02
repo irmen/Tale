@@ -36,6 +36,8 @@ class TownCrier(Living):
         self.location.message_nearby_locations("Someone nearby is yelling: welcome everyone!")
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         greet = False
         if parsed.verb in ("hi", "hello"):
             greet = True

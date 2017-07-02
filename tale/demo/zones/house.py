@@ -18,7 +18,6 @@ from tale.verbdefs import AGGRESSIVE_VERBS
 
 # define the various locations
 
-
 class GameEnd(Location):
     def notify_player_arrived(self, player: Player, previous_location: Location) -> None:
         # player has entered, and thus the story ends
@@ -38,13 +37,11 @@ outside = GameEnd("Outside", "It is beautiful weather outside.")
 door = Door(
     ["garden", "door"], outside,
     "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.",
-    locked=True, opened=False)
-door.key_code = "1"
-# use an exit with an unbound target (string), the driver will link this up:
-closet_exit = Exit("closet", "house.closet", "There's a small closet in your house.")
-livingroom.add_exits([door, closet_exit])
-# use another exit with a bound target (object):
-closet.add_exits([Exit("living room", livingroom, "You can see the living room.")])
+    locked=True, opened=False, key_code="1")    # oneway door, once outside you're finished, so no reason to go back in
+livingroom.add_exits([door])
+
+Exit.connect(livingroom, "closet", "There's a small closet in your house.", None,
+             closet, ["living room", "back"], "You can see the living room where you came from.", None)
 
 
 # define items and NPCs
@@ -62,6 +59,8 @@ class Cat(Living):
         # it's possible to stop the periodical calling by setting:  call_periodically(0)(Cat.do_purr)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         if parsed.verb in ("pet", "stroke", "tickle", "cuddle", "hug", "caress", "rub"):
             self.tell_others("{Actor} curls up in a ball and purrs contently.")
         elif parsed.verb in AGGRESSIVE_VERBS:

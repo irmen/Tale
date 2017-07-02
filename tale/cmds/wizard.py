@@ -104,6 +104,7 @@ def do_clone(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         raise ActionRefused("Cannot clone that, it's not a MudObject")
     elif issubclass(obj, base.Item):
         # create a new Item instance
+        # @todo check __init__ signature, some items are subclasses with different init args
         name = yield "input", ("object Name?", string_entered)
         title = yield "input", "object Title (optional, don't start with 'the')?"
         description = yield "input", "object description (optional)?"
