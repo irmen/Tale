@@ -155,7 +155,7 @@ def make_location(vnum: int) -> Location:
 
 def make_exit(c_exit: SimpleNamespace) -> Exit:
     """Create an instance of a door or exit for the given circle exit"""
-    if c_exit.type in ("normal", "pickproof"):
+    if c_exit.type in ("normal", "pickproof"):  # @todo other door types? reverse doors? locks/keys?
         door = Door(c_exit.direction, make_location(c_exit.roomlink), c_exit.desc)
         door.aliases |= c_exit.keywords
         return door

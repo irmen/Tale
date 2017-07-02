@@ -3,7 +3,7 @@ The house, where the player starts the game.
 Also defines the Neighbor's house, where other things can be found.
 """
 
-from tale.base import Location, Exit, Door
+from tale.base import Location, Exit
 from tale.items.basic import Money
 
 
@@ -20,15 +20,10 @@ kitchen.add_extradesc({"window", "outside"},
 kitchen.init_inventory([Money("cash", 8.0, title="small amount of cash")])  # not enough to buy or bargain for the medicine, player needs to find more
 
 #  Exits
-
-front_door = Door(["door", "outside", "street"], "magnolia_st.street1", "Your front door leads outside, to the street.",
-                  "There's a heavy front door here that leads to the streets outside.", opened=False)
-house_door = front_door.reverse_door(["house", "north", "inside"], livingroom,
-                                     "You can go back inside your house.", "It's your house, on the north side of the street.")
 livingroom.add_exits([
     Exit("kitchen", kitchen, "Your kitchen is adjacent to this room.",
                              "You can see your kitchen. The previous house owners had a door there but you removed it."),
-    front_door
+    # front_door exit is defined in the street zone module
 ])
 
 kitchen.add_exits([

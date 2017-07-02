@@ -10,7 +10,7 @@ import random
 from tale import mud_context, lang
 from tale.base import Location, Exit, Door, Living, ParseResult, Item
 from tale.errors import StoryCompleted, ActionRefused, ParseError, TaleError
-from zones import houses
+from zones import houses, rose_st
 
 
 street1 = Location("Magnolia Street", "Your house is on Magnolia Street, one of the larger streets in town. "
@@ -30,21 +30,32 @@ factory.add_exits([
 ])
 
 
+Door.connect(houses.livingroom,
+             ["door", "outside", "street"], "Your front door leads outside, to the street.",
+             "There's a heavy front door here that leads to the streets outside.",
+             street1,
+             ["house", "north", "inside"], "You can go back inside your house.",
+             "It's your house, on the north side of the street.")
+
 street1.add_exits([
-    houses.house_door,
+    # house front door is already connected above
     Exit(["pharmacy", "west"], pharmacy, "The west end of the street leads to the pharmacy."),
     Exit(["town", "east"], street2, "The street extends eastwards, towards the rest of the town.")
 ])
 
-playground_gate = Door(["north", "gate", "playground"], "rose_st.playground",
-                       "To the north there is a small gate that connects to the children's playground.", opened=False)
-street_gate = playground_gate.reverse_door(["gate", "south"], street2, "The gate that leads back to Magnolia Street is south.")
+
+Door.connect(street2,
+             ["north", "gate", "playground"],
+             "To the north there is a small gate that connects to the children's playground.", None,
+             rose_st.playground,
+             ["gate", "south"],
+             "The gate that leads back to Magnolia Street is south.", None)
+
 street2.add_exits([
     Exit(["west"], street1, "The street extends to the west, where your house is."),
     Exit(["east", "crossing"], "rose_st.crossing", "There's a crossing to the east."),
     Exit(["south", "house", "neighbors"], houses.neighbors_house,
          "You can see the house from the neighbors across the street, to the south."),
-    playground_gate
 ])
 
 street3.add_exits([

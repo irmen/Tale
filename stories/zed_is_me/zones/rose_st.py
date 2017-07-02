@@ -8,7 +8,6 @@ butcher, storage room
 """
 
 import random
-import zones.magnolia_st
 import zones.houses
 
 from tale.base import Location, Exit, Door, Key, _limbo, Living
@@ -21,8 +20,8 @@ south_street = Location("Rose Street", "The southern part of Rose Street.")
 
 crossing = Location("Crossing", "Town Crossing.")
 crossing.add_exits([
-    Exit("west", zones.magnolia_st.street2, "Westwards lies Magnolia Street."),
-    Exit("east", zones.magnolia_st.street3, "Magnolia Street extends to the east, eventually leading towards the factory."),
+    Exit("west", "magnolia_st.street2", "Westwards lies Magnolia Street."),
+    Exit("east", "magnolia_st.street3", "Magnolia Street extends to the east, eventually leading towards the factory."),
     Exit("north", north_street, "A part of Rose Street lies to the north."),
     Exit("south", south_street, "Rose Street continues to the south.")
 ])
@@ -32,9 +31,8 @@ playground = Location("Playground", "Children's playground. You see a rusty merr
 playground.add_extradesc({"west", "house"}, "You can see your house from here!")
 playground.add_exits([
     Door("fence", _limbo, "On the north end of the playground is a sturdy looking padlocked fence.",
-         locked=True, opened=False),  # this door is never meant to be opened
+         locked=True, opened=False, key_code="999999999"),  # this door is never meant to be opened
     Exit(["east", "street"], north_street, "Rose Street is back east."),
-    zones.magnolia_st.street_gate
 ])
 
 carpark = Location("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "
@@ -77,21 +75,22 @@ class Friend(Living):
 
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
-storage_room = StorageRoom("Storage room", "The butcher's meat storage room. Brrrrr, it is cold here!")
-storage_room_door = Door(["door", "storage"], storage_room, "A door leads to the storage room.",
-                         "The meat storage is behind it. The door's locked with a security card instead of a key.",
-                         locked=True, opened=False)
-storage_room_door.key_code = "butcher1"
 butcher.add_exits([
     Exit(["north", "street"], south_street, "Rose street is back to the north."),
-    storage_room_door
 ])
-storage_room.add_exits([
-    storage_room_door.reverse_door(["door", "shop"], butcher, "The door leads back to the shop.")
-])
+
+storage_room = StorageRoom("Storage room", "The butcher's meat storage room. Brrrrr, it is cold here!")
+
+storage_room_door, _ = Door.connect(butcher,
+     ["door", "storage"],
+     "A door leads to the storage room.", "The meat storage is behind it. The door's locked with a security card instead of a key.",
+     storage_room,
+     ["door", "shop"],
+     "The door leads back to the shop.", None,
+     locked=True, key_code="butcher1")
+
 friend = Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
 storage_room.insert(friend, None)
-
 
 north_street.add_exits([
     Exit(["west", "playground"], playground, "The children's playground is to the west."),
