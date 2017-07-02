@@ -2,6 +2,8 @@
 [![Build Status](https://travis-ci.org/irmen/Tale.svg?branch=master)](https://travis-ci.org/irmen/Tale)
 [![Latest Version](https://img.shields.io/pypi/v/tale.svg)](https://pypi.python.org/pypi/tale/)
 
+![Tale logo](docs/source/_static/tale-large.png)
+
 'Tale' - mud, mudlib & interactive fiction framework
 ====================================================
 
@@ -24,6 +26,7 @@ Required third party libraries:
 Optional third party library:
 - ``prompt_toolkit``  (provides a nicer console text interface experience)
 
-Read the documentation for more details on how to get started. It is online at http://pythonhosted.org/tale/
+Read the documentation for more details on how to get started.
+It is online at http://pythonhosted.org/tale/ and http://tale.readthedocs.io/
 
 If my server is up, you can find a running MUD instance there, see http://www.razorvine.net/
