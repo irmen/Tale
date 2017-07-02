@@ -1,0 +1,3 @@
+# tale is 3.5+ only
+python:
+  version: 3.5
