@@ -4,14 +4,12 @@ Interesting link: http://www.brasslantern.org/writers/
 [code] finish the loading of saved game data
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
-[html]  use html5 EventSource instead of 0.5 sec ajax polling to update the text in the browser
-    see https://www.html5rocks.com/en/tutorials/eventsource/basics/  and  https://github.com/Yaffle/EventSource
 
 
 Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [feature] implement IP-address based ban
-[feature] global chat broadcast channel (like wow's /1)
+[feature] global chat broadcast channel (like wow's /1) with minimum level requirement to use it (against spammers)
 [code] the story_data from a player object should be stored (as serpent serialized form) into the account database when account
     is saved and restored when account is loaded. This allows for the story to add stuff to account creation
     and add extra persistent fields to a player.
@@ -30,15 +28,18 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[html]  use html5 EventSource instead of 0.5 sec ajax polling to update the text in the browser
+    see https://www.html5rocks.com/en/tutorials/eventsource/basics/  and  https://github.com/Yaffle/EventSource
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
+[feature] combat system.
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
     wear, put on, take off, unwear, remove <armor> | wield, unwield, remove <weapon>
 [feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [code, API] path-finding: GOTO/GO TO <location> (must have examined it before, to remember it. See also next idea).
-[code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly). Much like the circle importers.
-[feature] Hunger/thirst/fatigue(movement/staminapoints)?
+[code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly like the circle importers?)
+[feature] Hunger/thirst/fatigue (movement/staminapoints)?
 [feature] class/skill system, lockpicking skill to unlock doors without having key, ...
 
 

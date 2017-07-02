@@ -1,8 +1,6 @@
 ADMIN/WIZARD STUFF
 ------------------
 See also http://www.circlemud.org/pub/CircleMUD/3.x/uncompressed/current/lib/text/help/wizhelp.hlp
-broadcast
-    like shout, except overrides all blocking
 invis
     makes you invisible to all players of lower level under all circumstances (again to turn visible again)
     this means a creature has to have a invis-flag, and when a text referes to it the name/title should be replaced with "someone/something"
@@ -22,34 +20,27 @@ PLAYER STUFF
 ------------
 equipment
     show the armor items you are wearing and weapons you are wielding
-victories
-    shows a list of your battle victories
-prompt
-    customize your prompt (show hp, etc)
 quests
     show a list of the quests you are on and the ones you have completed
 skills
     the skills you have
 spells
     the spells you know
-(attack/kill/fight), stop attack[ing]/stop combat/stop fight[ing]
-    start/stop combat. When engaged in combat, the target is
-    'remembered' for subsequent attack commands
 murder
     player killing (normally attacking a player results in a warning message)
-cast
+cast <spell>
     cast a spell on a creature or an object
 
 
 ITEM ACTIONS
 ------------
 drink
-    drink something that is a drink to restore ...
+    drink something to restore ... health/stamina/mana/??? maybe affect other stats (temporarily)
 eat
-    eat something edible to restore stamina and health
+    eat something edible to restore stamina and health, maybe affect other stats (temporarily)
 
 empty <vessel>
     remove liquid from a vessel
-    (existing empty cmd takes every item out of a container)
+    (existing empty cmd takes every item out of a container so it has to be extended)
 fill
     fill a vessel with a liquid
