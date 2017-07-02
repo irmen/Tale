@@ -19,17 +19,6 @@ street2 = Location("Magnolia Street", "Another part of the street.")
 street3 = Location("Magnolia Street (east)", "The eastern part of Magnolia Street.")
 
 
-pharmacy = Location("Pharmacy", "A pharmacy. It is completely empty, all medicine seems gone.")
-pharmacy.add_exits([
-    Exit(["east", "outside", "street"], street1, "Magnolia street is outside towards the east.")
-])
-
-factory = Location("ArtiGrow factory", "This area is the ArtiGrow fertilizer factory.")
-factory.add_exits([
-    Exit(["west", "street"], street3, "You can leave the factory to the west, back to Magnolia Street.")
-])
-
-
 Door.connect(houses.livingroom,
              ["door", "outside", "street"], "Your front door leads outside, to the street.",
              "There's a heavy front door here that leads to the streets outside.",
@@ -37,12 +26,20 @@ Door.connect(houses.livingroom,
              ["house", "north", "inside"], "You can go back inside your house.",
              "It's your house, on the north side of the street.")
 
-street1.add_exits([
-    # house front door is already connected above
-    Exit(["pharmacy", "west"], pharmacy, "The west end of the street leads to the pharmacy."),
-    Exit(["town", "east"], street2, "The street extends eastwards, towards the rest of the town.")
-])
 
+pharmacy = Location("Pharmacy", "A pharmacy. It is completely empty, all medicine seems gone.")
+
+Exit.connect(pharmacy, ["east", "outside", "street"], "Magnolia street is outside towards the east.", None,
+             street1, ["pharmacy", "west"], "The west end of the street leads to the pharmacy.", None)
+
+
+factory = Location("ArtiGrow factory", "This area is the ArtiGrow fertilizer factory.")
+
+Exit.connect(factory, ["west", "street"], "You can leave the factory to the west, back to Magnolia Street.", None,
+             street3, ["factory", "east"], "Eastwards you'll enter the ArtiGrow factory area.", None)
+
+Exit.connect(street1, ["town", "east"], "The street extends eastwards, towards the rest of the town.", None,
+             street2, "west", "The street extends to the west, where your house is.", None)
 
 Door.connect(street2,
              ["north", "gate", "playground"],
@@ -51,15 +48,14 @@ Door.connect(street2,
              ["gate", "south"],
              "The gate that leads back to Magnolia Street is south.", None)
 
+Exit.connect(street2, ["south", "house", "neighbors"], "You can see the house from the neighbors across the street, to the south.", None,
+             houses.neighbors_house, ["street", "north"], "The street is back north.", None)
+
 street2.add_exits([
-    Exit(["west"], street1, "The street extends to the west, where your house is."),
     Exit(["east", "crossing"], "rose_st.crossing", "There's a crossing to the east."),
-    Exit(["south", "house", "neighbors"], houses.neighbors_house,
-         "You can see the house from the neighbors across the street, to the south."),
 ])
 
 street3.add_exits([
-    Exit(["factory", "east"], factory, "Eastwards you'll enter the ArtiGrow factory area."),
     Exit(["west", "crossing"], "rose_st.crossing", "There's a crossing to the west.")
 ])
 
