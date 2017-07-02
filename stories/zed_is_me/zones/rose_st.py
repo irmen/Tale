@@ -12,6 +12,7 @@ import zones.magnolia_st
 import zones.houses
 
 from tale.base import Location, Exit, Door, Key, _limbo, Living
+from tale.items.basic import Money
 from tale.util import call_periodically, Context
 
 
@@ -44,6 +45,11 @@ carpark.add_exits([
     Exit(["gate", "street"], north_street, "Rose street is back through the gate.")
 ])
 
+# not enough to buy the medicine, player needs to find more, or haggle:
+carpark.init_inventory([Money("wallet", 16.0, title="small wallet",
+    short_descr="A wallet lies on the pavement, someone seems to have lost it. There's some money in it.")])
+
+
 parking_gate = Door(["gate", "parking"], carpark,
                     "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.",
                     locked=True, opened=False)
@@ -60,14 +66,14 @@ class StorageRoom(Location):
 
 
 class Friend(Living):
-    # @todo add more behavior
+    # @todo add more behavior (should follow player, to go to the car together, but only if player has the medicine)
     @call_periodically(10.0, 20.0)
     def say_something(self, ctx: Context) -> None:
         door_open = any(d.opened for d in self.location.exits.values() if isinstance(d, Door))
         if door_open:
-            self.do_socialize("say \"Finally someone that rescued me! Thank you so much.\"")   # @todo ...and run away?
+            self.do_socialize("say \"Finally someone who rescued me! Thank you so much.\"")   # @todo ...follow player
         else:
-            self.do_verb("yell \"Help me, I'm locked in\"", ctx)
+            self.do_command_verb("yell \"Help me, I'm locked in\"", ctx)
 
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")

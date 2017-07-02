@@ -6,20 +6,20 @@ Single-Player IF turn-based (command-driven).
 - 'flee' to get rid of them (they follow you when walking away normally)
 - slowly spawn more wanderers to build up the pressure
 - require keycard to free your friend Peter
-- Peter will need a medicine before you can leave the village (@todo leave how?)
-- you'll have to 'bribe' (custom verb) that medicine from someone else
-- bribing with money (or simply give $$$)
-- find enough money first (1x $4,50  1x $5,50 = $10)
+- Peter will need a medicine before you can leave the village (@todo with the yellow car in the car park)
+- you'll have to 'haggle'/'bargain' (custom verbs) that medicine from someone else
+- haggling with less money (or simply give the full price $)
+- find enough money first (haggle needs $10 at least, full price=$20)
 - @todo remove temp exit
 
 
 MAP OF THE TOWN:
 
-                                               +-------------+     +----------+
-                                               |             |     |          |
-                                               |  car parking<-----+  gate    |
-                                               |             |     |          |
-                                               |             |     +--+---+---+
+                                               +-------------+
+                                               |             |
+                                               |  car parking<------  gate
+                                               |             |
+                                               |             |        |   |
                                                +-------------+        |   |
                                                locked fence           |   |
              +-------------+                      ^                   |   |

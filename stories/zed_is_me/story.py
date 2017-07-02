@@ -22,6 +22,7 @@ class Story(StoryBase):
     config.version = "1.8"
     config.requires_tale = "3.5"
     config.supported_modes = {GameMode.IF}
+    config.money_type = MoneyType.MODERN
     config.player_name = "julie"
     config.player_gender = "f"
     config.player_race = "human"
