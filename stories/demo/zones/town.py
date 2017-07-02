@@ -5,7 +5,7 @@ The central town, which is the place where mud players start/log in
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Union, Optional
+from typing import Union, Optional, Sequence
 
 from npcs.town_creatures import TownCrier, VillageIdiot, WalkingRat
 
@@ -63,7 +63,7 @@ lane.init_inventory([board])
 
 class CursedGem(Item):
     def move(self, target: ContainingType, actor: Living=None,
-             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_names: Sequence[str]=None) -> None:
         if self.contained_in is actor and "wizard" not in actor.privileges:
             raise ActionRefused("The gem is cursed! It sticks to your hand, you can't get rid of it!")
         super().move(target, actor, verb=verb)

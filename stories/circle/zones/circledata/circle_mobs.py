@@ -42,7 +42,7 @@ class CircleMob(Living):
             if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:  # type: ignore
                 return   # mob must stay in its own zone
             # @todo avoid certain directions, conditions, etc
-            self.move(direction.target, self, direction_name=direction.name)
+            self.move(direction.target, self, direction_names=[direction.name])
 
     def do_scavenge(self, ctx: Context) -> None:
         # Pick up the most valuable item in the room.

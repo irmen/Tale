@@ -9,7 +9,7 @@ magnolia st. 2, magnolia st. 3, factory
 import random
 from tale import mud_context, lang
 from tale.base import Location, Exit, Door, Living, ParseResult, Item
-from tale.errors import StoryCompleted, ActionRefused, ParseError
+from tale.errors import StoryCompleted, ActionRefused, ParseError, TaleError
 from zones import houses
 
 
@@ -87,6 +87,10 @@ class Apothecary(Living):
         if self.search_item("pills", include_location=False):
             return "%s looks scared, and clenches a small bottle in %s hands." % (lang.capital(self.subjective), self.possessive)
         return "%s looks scared." % self.subjective
+
+    @description.setter
+    def description(self, value: str) -> None:
+        raise TaleError("cannot set dynamic description")
 
     def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
         pills = self.search_item("pills", include_location=False)

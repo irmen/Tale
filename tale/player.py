@@ -108,12 +108,12 @@ class Player(base.Living, pubsub.Listener):
             self.tell("You see nothing.")
 
     def move(self, target: base.ContainingType, actor: base.Living=None,
-             *, silent: bool=False, is_player: bool=True, verb: str="move", direction_name: str=None) -> None:
+             *, silent: bool=False, is_player: bool=True, verb: str="move", direction_names: Sequence[str]=None) -> None:
         """
         Delegate to Living but with is_player set to True.
         Moving the player is only supported to a target Location.
         """
-        super().move(target, actor, silent=silent, is_player=True, verb=verb, direction_name=direction_name)
+        super().move(target, actor, silent=silent, is_player=True, verb=verb, direction_names=direction_names)
 
     def create_wiretap(self, target: Union[base.Location, base.Living]) -> None:
         if "wizard" not in self.privileges:

@@ -589,7 +589,7 @@ class Driver(pubsub.Listener):
     def go_through_exit(self, player: player.Player, direction: str) -> None:
         xt = player.location.exits[direction]
         xt.allow_passage(player)
-        player.move(xt.target, direction_name=xt.name)
+        player.move(xt.target, direction_names=[xt.name] + list(xt.aliases))
         player.look()
 
     def lookup_location(self, location_name: str) -> base.Location:

@@ -335,7 +335,7 @@ class MudObject:
         raise ActionRefused("You can't %s that." % verb)
 
     def move(self, target: ContainingType, actor: 'Living'=None,
-             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_names: Sequence[str]=None) -> None:
         # move the MudObject to a different place (location, container, living).
         raise ActionRefused("You can't %s that." % verb)
 
@@ -417,7 +417,7 @@ class Item(MudObject):
         raise ActionRefused("You can't look inside of that.")
 
     def move(self, target: ContainingType, actor: 'Living'=None,
-             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_names: Sequence[str]=None) -> None:
         """
         Leave the container the item is currently in, enter the target container (transactional).
         Because items can move on various occasions, there's no message being printed.
@@ -582,7 +582,7 @@ class Location(MudObject):
 
     def get_wiretap(self) -> pubsub.Topic:
         """get a wiretap for this location"""
-        return pubsub.topic(("wiretap-location", self.name))
+        return pubsub.topic(("wiretap-location", "%s#%d" % (self.name, self.vnum)))  # type: ignore
 
     def tell(self, room_msg: str, exclude_living: 'Living'=None, specific_targets: Set[Union[ParsedWhoType]]=None,
              specific_target_msg: str="") -> None:
@@ -971,7 +971,7 @@ class Living(MudObject):
 
     def get_wiretap(self) -> pubsub.Topic:
         """get a wiretap for this living"""
-        return pubsub.topic(("wiretap-living", self.name))
+        return pubsub.topic(("wiretap-living", "%s#%d" % (self.name, self.vnum)))  # type: ignore
 
     def tell(self, message: str, *, end: bool=False, format: bool=True) -> 'Living':
         """
@@ -1143,7 +1143,7 @@ class Living(MudObject):
             actor.tell("The reason was: {0!r} {0!s}".format(x))
 
     def move(self, target: Union[Location, 'Container', 'Living'], actor: 'Living'=None,
-             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_name: str=None) -> None:
+             *, silent: bool=False, is_player: bool=False, verb: str="move", direction_names: Sequence[str]=None) -> None:
         """
         Leave the current location, enter the new location (transactional).
         Moving a living is only supported to a Location target.
@@ -1151,17 +1151,18 @@ class Living(MudObject):
         """
         assert isinstance(target, Location), "can only move to a Location"
 
-        def display_direction(direction: str) -> str:
-            if direction in {"north", "east", "south", "west", "out", "outside",
-                             "northeast", "northwest", "southeast", "southwest",
-                             "north east", "north west", "south east", "south west"}:
-                return direction
-            if direction in {"up", "above", "upstairs"}:
-                return "up"
-            if direction in {"down", "below", "downstairs"}:
-                return "down"
-            if direction in {"left", "right"}:
-                return "to the " + direction
+        def display_direction(directions: Sequence[str]) -> str:
+            for direction in directions or []:
+                if direction in {"north", "east", "south", "west", "out", "outside",
+                                 "northeast", "northwest", "southeast", "southwest",
+                                 "north east", "north west", "south east", "south west"}:
+                    return direction
+                if direction in {"up", "above", "upstairs"}:
+                    return "up"
+                if direction in {"down", "below", "downstairs"}:
+                    return "down"
+                if direction in {"left", "right"}:
+                    return "to the " + direction
             return None
 
         actor = actor or self
@@ -1176,7 +1177,7 @@ class Living(MudObject):
                 original_location.insert(self, actor)
                 raise
             if not silent:
-                direction_txt = display_direction(direction_name)
+                direction_txt = display_direction(direction_names)
                 if direction_txt:
                     message = "%s leaves %s." % (lang.capital(self.title), direction_txt)
                 else:
