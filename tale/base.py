@@ -1052,7 +1052,7 @@ class Living(MudObject):
             else:
                 raise
 
-    def do_verb(self, cmdline: str, ctx: util.Context) -> None:
+    def do_command_verb(self, cmdline: str, ctx: util.Context) -> None:
         """
         Perform a verb, parsed from a command line. This is an easy way to make a Npc do something,
         but it has a pretty large performance overhead. If you can, you should use low level methods

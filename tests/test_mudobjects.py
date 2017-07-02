@@ -752,8 +752,8 @@ class TestLiving(unittest.TestCase):
         j = Living("julie", "f")
         room.insert(j, None)
         room.insert(Item("note"), None)
-        j.do_verb("fart", ctx)         # a soul emote
-        j.do_verb("take note", ctx)    # a command verb
+        j.do_command_verb("fart", ctx)         # a soul emote
+        j.do_command_verb("take note", ctx)    # a command verb
         pubsub.sync()
         self.assertEquals(["Julie farts.", "<player>Julie</> takes <item>a note</>."], listener.messages)
         self.assertEqual(1, j.inventory_size)
