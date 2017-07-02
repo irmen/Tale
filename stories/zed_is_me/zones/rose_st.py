@@ -7,10 +7,12 @@ rose street north, crossing, rose street south
 butcher, storage room
 """
 
+import random
 import zones.magnolia_st
 import zones.houses
 
-from tale.base import Location, Exit, Door, Key, _limbo
+from tale.base import Location, Exit, Door, Key, _limbo, Living
+from tale.util import call_periodically, Context
 
 
 north_street = Location("Rose Street", "The northern part of Rose Street.")
@@ -47,8 +49,25 @@ parking_gate = Door(["gate", "parking"], carpark,
                     locked=True, opened=False)
 parking_gate.key_code = "111"
 
+
+class StorageRoom(Location):
+    @call_periodically(10.0, 20.0)
+    def shiver_from_cold(self, ctx: Context) -> None:
+        # it's cold in the storage room, it makes you shiver
+        if self.livings:
+            living = random.choice(list(self.livings))
+            living.do_socialize("shiver")
+
+
+class Friend(Living):
+    # @todo add more behavior and stop screaming when rescued
+    @call_periodically(10.0, 20.0)
+    def say_something(self, ctx: Context) -> None:
+        self.do_verb("yell \"Help me, I'm locked in\"", ctx)
+
+
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
-storage_room = Location("Storage Cell", "The butcher's meat storage cell. Brrrrr, it is cold here!")
+storage_room = StorageRoom("Storage room", "The butcher's meat storage room. Brrrrr, it is cold here!")
 storage_room_door = Door(["door", "storage"], storage_room, "A door leads to the storage room.",
                          "The meat storage is behind it. The door's locked with a security card instead of a key.",
                          locked=True, opened=False)
@@ -60,6 +79,9 @@ butcher.add_exits([
 storage_room.add_exits([
     storage_room_door.reverse_door(["door", "shop"], butcher, "The door leads back to the shop.")
 ])
+friend = Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
+storage_room.insert(friend, None)
+
 
 north_street.add_exits([
     Exit(["west", "playground"], playground, "The children's playground is to the west."),

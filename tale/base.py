@@ -1036,7 +1036,10 @@ class Living(MudObject):
         self.soul.remember_previous_parse(self._previous_parse)
 
     def do_socialize(self, cmdline: str, external_verbs: Set[str]=set()) -> None:
-        """perform a command line with a socialize/soul verb on the living's behalf"""
+        """
+        Perform a command line with a socialize/soul verb on the living's behalf.
+        It only performs soul emotes, no custom command functions!
+        """
         try:
             parsed = self.parse(cmdline, external_verbs=external_verbs)
             self.do_socialize_cmd(parsed)
@@ -1048,6 +1051,29 @@ class Living(MudObject):
                 self.tell_others("{Actor} says: " + rest)
             else:
                 raise
+
+    def do_verb(self, cmdline: str, ctx: util.Context) -> None:
+        """
+        Perform a verb, parsed from a command line. This is an easy way to make a Npc do something,
+        but it has a pretty large performance overhead. If you can, you should use low level methods
+        instead (such as ``tell_others`` or ``do_socialize`` etc)
+        The verb can be a soul verb (such as 'ponder') but also a command verb.
+        Custom dynamic verbs added by the environment are not supported (yet), and neither are commands
+        that initiate a dialog (generators)
+        This function is not used in the processing of player commands!
+        """
+        command_verbs = ctx.driver.current_verbs(self)
+        try:
+            self.do_socialize(cmdline, command_verbs)
+        except NonSoulVerb as nx:
+            parsed = nx.parsed
+            if parsed.verb in command_verbs:
+                func = ctx.driver.commands.get(self.privileges)[parsed.verb]
+                if getattr(func, "is_generator", False):
+                    raise TaleError("can't let a npc perform a dialog command")
+                func(self, parsed, ctx)
+                if func.enable_notify_action:
+                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
 
     def do_socialize_cmd(self, parsed: ParseResult) -> None:
         """
@@ -1095,7 +1121,6 @@ class Living(MudObject):
                 return
             command_verbs = set(ctx.driver.current_verbs(self))
             if parsed.verb in command_verbs:
-                # Here, one of the commands as annotated with @cmd (or @wizcmd) is executed
                 func = ctx.driver.commands.get(self.privileges)[parsed.verb]
                 if getattr(func, "is_generator", False):
                     dialog = func(self, parsed, ctx)

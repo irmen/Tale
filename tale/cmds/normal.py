@@ -837,7 +837,6 @@ def do_emote(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
 @cmd("yell", "shout", "scream")
 def do_yell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Yell something. People in nearby locations will also be able to hear you."""
-    print(parsed)
     if not parsed.unparsed:
         raise ActionRefused("Yell what?")
     message = parsed.unparsed

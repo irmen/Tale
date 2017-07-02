@@ -11,7 +11,7 @@ import unittest
 from tale import pubsub, mud_context
 from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, ParseResult, MudObjRegistry
 from tale.demo.story import Story as DemoStory
-from tale.errors import ActionRefused, LocationIntegrityError
+from tale.errors import ActionRefused, LocationIntegrityError, UnknownVerbException
 from tale.player import Player
 from tale.story import MoneyType
 from tale.shop import Shopkeeper
@@ -730,6 +730,32 @@ class TestLiving(unittest.TestCase):
         self.assertEqual("petra", j.title)
         self.assertEqual("", j.description)
         self.assertEqual("", j.short_description)
+
+    def test_do_socialize(self):
+        listener = PubsubCollector()
+        room = Location("room")
+        room.get_wiretap().subscribe(listener)
+        j = Living("julie", "f")
+        room.insert(j, None)
+        j.do_socialize("fart")
+        j.do_socialize("say hello")
+        pubsub.sync()
+        self.assertEqual(["Julie farts.", "Julie says: hello"], listener.messages)
+
+    def test_do_verb(self):
+        ctx = Context(FakeDriver(), None, None, None)
+        listener = PubsubCollector()
+        room = Location("room")
+        room.get_wiretap().subscribe(listener)
+        j = Living("julie", "f")
+        room.insert(j, None)
+        j.do_verb("fart", ctx)
+        pubsub.sync()
+        self.assertEquals(["Julie farts."], listener.messages)
+        listener.clear()
+        with self.assertRaises(UnknownVerbException) as x:
+            j.do_verb("coin", ctx)
+        self.assertEquals("coin", x.exception.verb)
 
 
 class TestAggressiveNpc(unittest.TestCase):
