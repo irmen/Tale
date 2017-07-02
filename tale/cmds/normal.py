@@ -1279,9 +1279,9 @@ def do_motd(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     ctx.driver.show_motd(player, notify_no_motd=True)
 
 
-@cmd("flee")
+@cmd("flee", "run")
 def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
-    """Flee in a random or given direction, possibly escaping a combat situation."""
+    """Flee/run in a random or given direction, possibly escaping a combat situation, or shaking off pursuers."""
     exit = None
     if parsed.who_count == 1:
         exit = parsed.who_1
@@ -1294,14 +1294,14 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     if random_direction:
         # choose a random exit direction
         if not player.location.exits:
-            raise ActionRefused("You can't flee anywhere!")
+            raise ActionRefused("You can't run anywhere!")
         exit = random.choice(list(player.location.exits.values()))
     exits_to_try = list(player.location.exits.values())
     exits_to_try.insert(0, exit)
     for exit in exits_to_try:
         try:
             exit.allow_passage(player)
-            player.tell("You flee in a random direction!" if random_direction else "You flee!", end=True)
+            player.tell("You run away in a random direction!" if random_direction else "You run away!", end=True)
             player.tell("\n")
             # @todo stop combat
             player.move(exit.target)

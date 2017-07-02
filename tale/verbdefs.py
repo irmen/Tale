@@ -365,7 +365,7 @@ NONLIVING_OK_VERBS = {
 
 assert NONLIVING_OK_VERBS.issubset(VERBS.keys())
 
-MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "run", "move"}     # used to move through an exit
+MOVEMENT_VERBS = {"enter", "climb", "crawl", "go", "move"}     # used to move through an exit. Note: 'flee' and 'run' are special
 
 
 def adjust_available_verbs(allowed_verbs: Sequence[str]=None, remove_verbs: Sequence[str]=[], add_verbs: Dict[str, Tuple]={}) -> None:
