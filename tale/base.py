@@ -1415,6 +1415,20 @@ class Exit(MudObject):
         targetname = self.target.name if self.target else self._target_str
         return "<base.Exit to '%s' #%d @ 0x%x>" % (targetname, self.vnum, id(self))
 
+    @classmethod
+    def connect(cls, from_loc: Location, directions: Union[str, Sequence[str]], short_descr: str, long_descr: Optional[str],
+                to_loc: Location, return_directions: Union[str, Sequence[str]],
+                return_short_descr: str, return_long_descr: Optional[str]) -> Tuple['Exit', 'Exit']:
+        """
+        Create a pair of exits that connect two locations.
+        (This requires two exit definitions because the directions and descriptions differ for the to- and return-exists)
+        """
+        e1 = cls(directions, to_loc, short_descr, long_descr)
+        e2 = cls(return_directions, from_loc, return_short_descr, return_long_descr)
+        e1.bind(from_loc)
+        e2.bind(to_loc)
+        return e1, e2
+
     def bind(self, location: Location) -> None:
         """Binds the exit to a location."""
         assert isinstance(location, Location)
@@ -1474,15 +1488,29 @@ class Door(Exit):
     This is easily done by the ``reverse_door`` method.
     """
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_descr: str,
-                 long_descr: str=None, locked: bool=False, opened: bool=False) -> None:
+                 long_descr: str=None, locked: bool=False, opened: bool=False, key_code: str="") -> None:
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_descr or short_descr
-        self.key_code = ""   # you can optionally set this to any code that a key must match to unlock the door
+        self.key_code = key_code   # you can optionally set this to any code that a key must match to unlock the door
         super().__init__(directions, target_location, short_descr, long_descr)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
         self.linked_door = None  # type: Door
+
+    @classmethod
+    def connect(cls, from_loc: Location, directions: Union[str, Sequence[str]], short_descr: str, long_descr: Optional[str],
+                to_loc: Location, return_directions: Union[str, Sequence[str]], return_short_descr: str, return_long_descr: Optional[str],
+                locked: bool=False, opened: bool=False, key_code: str="") -> Tuple['Door', 'Door']:
+        """
+        Create a pair of doors that connect two locations.
+        (This requires two door definitions because the directions and descriptions differ for the to- and return-exists)
+        """
+        d1 = cls(directions, to_loc, short_descr, long_descr, locked, opened, key_code)
+        d2 = d1.reverse_door(return_directions, from_loc, return_short_descr, return_long_descr)
+        d1.bind(from_loc)
+        d2.bind(to_loc)
+        return d1, d2
 
     def reverse_door(self, directions: Union[str, Sequence[str]], returning_location: Location,
                      short_description: str, long_description: str=None) -> 'Door':

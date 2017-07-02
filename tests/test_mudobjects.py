@@ -467,16 +467,27 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual({"up", "door", "down", "hatch", "manhole", "east", "garden"}, set(loc.exits.keys()))
         self.assertEqual(loc.exits["down"], loc.exits["hatch"])
 
+    def test_exit_pair(self):
+        loc1 = Location("room1", "room one")
+        loc2 = Location("room2", "room two")
+        exit_one_two, exit_two_one = Exit.connect(loc1, "door_to_two", "door to room two", None,
+                                                  loc2, "door_to_one", "door to room one", None)
+        self.assertIs(loc2, exit_one_two.target)
+        self.assertIs(loc1, exit_two_one.target)
+        self.assertIs(loc2, loc1.exits["door_to_two"].target)
+        self.assertIs(loc1, loc2.exits["door_to_one"].target)
+
     def test_linked_door_pair(self):
         loc1 = Location("room1", "room one")
         loc2 = Location("room2", "room two")
+        door_one_two, door_two_one = Door.connect(loc1, "door_to_two", "door to room two", None,
+                                                  loc2, "door_to_one", "door to room one", None,
+                                                  locked=True, opened=False, key_code="555")
+        self.assertIs(loc2, loc1.exits["door_to_two"].target)
+        self.assertIs(loc1, loc2.exits["door_to_one"].target)
         key = Key("key")
-        door_one_two = Door("door_to_two", loc2, "door to room two", locked=True, opened=False)
-        door_two_one = door_one_two.reverse_door("door_to_one", loc1, "door to room one")
-        loc1.add_exits([door_one_two])
-        loc2.add_exits([door_two_one])
-        door_one_two.key_code = "555"
         key.key_for(door_one_two)
+        self.assertEquals("555", key.key_code)
         pubsub1 = PubsubCollector()
         pubsub2 = PubsubCollector()
         loc1.get_wiretap().subscribe(pubsub1)
