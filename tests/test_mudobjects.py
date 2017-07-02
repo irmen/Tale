@@ -741,6 +741,8 @@ class TestLiving(unittest.TestCase):
         j.do_socialize("say hello")
         pubsub.sync()
         self.assertEqual(["Julie farts.", "Julie says: hello"], listener.messages)
+        with self.assertRaises(UnknownVerbException):
+            j.do_socialize("take note")    # a command verb is not allowed here
 
     def test_do_verb(self):
         ctx = Context(FakeDriver(), None, None, None)
@@ -749,13 +751,12 @@ class TestLiving(unittest.TestCase):
         room.get_wiretap().subscribe(listener)
         j = Living("julie", "f")
         room.insert(j, None)
-        j.do_verb("fart", ctx)
+        room.insert(Item("note"), None)
+        j.do_verb("fart", ctx)         # a soul emote
+        j.do_verb("take note", ctx)    # a command verb
         pubsub.sync()
-        self.assertEquals(["Julie farts."], listener.messages)
-        listener.clear()
-        with self.assertRaises(UnknownVerbException) as x:
-            j.do_verb("coin", ctx)
-        self.assertEquals("coin", x.exception.verb)
+        self.assertEquals(["Julie farts.", "<player>Julie</> takes <item>a note</>."], listener.messages)
+        self.assertEqual(1, j.inventory_size)
 
 
 class TestAggressiveNpc(unittest.TestCase):

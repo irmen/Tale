@@ -211,7 +211,6 @@ class Driver(pubsub.Listener):
         mud_context.driver = self
         for verb, func, privilege in cmds.all_registered_commands():
             self.commands.add(verb, func, privilege)
-        cmds.clear_registered_commands()
         topic_pending_actions.subscribe(self)
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
@@ -229,6 +228,7 @@ class Driver(pubsub.Listener):
         else:
             raise FileNotFoundError("Cannot find specified game")
         assert "story" not in sys.modules, "cannot start new story if it was already loaded before"
+        cmds.clear_registered_commands()    # needed to allow stories to define their own custom commands after this
         import story
         if not hasattr(story, "Story"):
             raise AttributeError("Story class not found in the story file. It should be called 'Story'.")

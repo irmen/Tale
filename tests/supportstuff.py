@@ -26,6 +26,7 @@ class FakeDriver(driver.Driver):
         # fix up some essential attributes on the driver that are normally only present after loading a story file
         self.game_clock = util.GameDateTime(datetime.datetime.now())
         self.moneyfmt = util.MoneyFormatter.create_for(story.MoneyType.MODERN)
+        assert len(self.commands.get([])) > 0
 
 
 class Wiretap(pubsub.Listener):

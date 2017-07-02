@@ -61,6 +61,7 @@ def all_registered_commands() -> Iterable[Tuple[str, Callable, Optional[str]]]:
 
 
 def clear_registered_commands():
+    # needed so a story can register its own additional commands afterwards
     _all_commands.clear()
     _all_wizard_commands.clear()
 
