@@ -236,8 +236,7 @@ class MudObject:
         self.name = self._description = self._title = self._short_description = None  # type: str
         self.init_names(name, title, descr, short_descr)
         self.aliases = set()  # type: Set[str]
-        # any custom verbs that need to be recognised (verb->docstring mapping),
-        # verb handling is done via handle_verb() callbacks.
+        # any custom verbs that need to be recognised (verb->docstring mapping), verb handling is done via handle_verb() callbacks.
         self.verbs = {}  # type: Dict[str, str]
         # register all periodical tagged methods
         self.story_data = {}  # type: Dict[Any, Any]   # not used by Tale itself, story can put custom data here. Use builtin types only.
@@ -351,11 +350,15 @@ class MudObject:
         raise ActionRefused("You can't take things from there.")
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
-        """Handle a custom verb. Return True if handled, False if not handled."""
+        """Handle a custom verb (specified in the verbs dict). Return True if handled, False if not handled."""
         return False
 
     def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
-        """Notify the object of an action performed by someone. This can be any verb, command, soul emote, custom verb."""
+        """
+        Notify the object of an action performed by someone.
+        This can be any verb, command, soul emote, custom verb.
+        Uncompleted actions (error, or ActionRefused) are ignored.
+        """
         pass
 
 
@@ -737,7 +740,7 @@ class Location(MudObject):
         obj.location = None
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
-        """Handle a custom verb. Return True if handled, False if not handled."""
+        """Handle a custom verb (specified in the verbs dict). Return True if handled, False if not handled."""
         # @todo this code cannot deal with yields directly but you can raise AsyncDialog exception,
         # that indicates to the driver that it should initiate the given async dialog when continuing.
         handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)
@@ -748,7 +751,11 @@ class Location(MudObject):
         return handled
 
     def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
-        """Notify the room, its livings and items of an action performed by someone."""
+        """
+        Notify the location, the items in it, and the livings in it, of an action performed by someone.
+        This can be any verb, command, soul emote, custom verb.
+        Uncompleted actions (error, or ActionRefused) are ignored.
+        """
         # Notice that this notification event is invoked by the driver after all
         # actions concerning player input have been handled, so we don't have to
         # queue the delegated calls.
@@ -1260,7 +1267,7 @@ class Living(MudObject):
         return any(item.handle_verb(parsed, actor) for item in self.__inventory)
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
-        """Handle a custom verb. Return True if handled, False if not handled."""
+        """Handle a custom verb (specified in the verbs dict). Return True if handled, False if not handled."""
         return False
 
     def _notify_action_base(self, parsed: ParseResult, actor: 'Living') -> None:
@@ -1274,7 +1281,11 @@ class Living(MudObject):
             item.notify_action(parsed, actor)
 
     def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
-        """Notify the living of an action performed by someone."""
+        """
+        Notify the living of an action performed by someone.
+        This can be any verb, command, soul emote, custom verb.
+        Uncompleted actions (error, or ActionRefused) are ignored.
+        """
         pass
 
     def look(self, short: bool=None) -> None:

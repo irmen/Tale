@@ -17,7 +17,7 @@ from typing import Generator
 
 from . import wizcmd, disabled_in_gamemode
 from .. import base, lang, util, pubsub, races, __version__
-from ..errors import ParseError, ActionRefused, NonSoulVerb
+from ..errors import ParseError, ActionRefused, NonSoulVerb, TaleError, TaleFlowControlException
 from ..player import Player
 from ..story import *
 
@@ -380,7 +380,10 @@ def do_debug(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     txt = ["<bright>%r</>" % obj, "Class defined in: " + inspect.getfile(obj.__class__)]
     # first, @properties
     for propname, prop in sorted(inspect.getmembers(type(obj), lambda o: isinstance(o, property))):
-        txt.append("<dim>.</>%s<dim>:</> %r" % (propname, prop.__get__(obj)))
+        try:
+            txt.append("<dim>.</>%s<dim>:</> %r" % (propname, prop.__get__(obj)))
+        except (TaleFlowControlException, TaleError):
+            pass
     # now, normal non-private attributes
     for varname, value in sorted(vars(obj).items()):
         if not varname.startswith('_'):

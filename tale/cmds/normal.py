@@ -848,7 +848,7 @@ def do_yell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     player.location.message_nearby_locations("Someone nearby is %s: %s" % (lang.fullverb(parsed.verb), message))
 
 
-@cmd("say")
+@cmd("say", "mention")
 @no_soul_parse
 def do_say(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Say something to people near you."""

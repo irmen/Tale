@@ -27,6 +27,8 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[bug] fix save recursion crash
+[code] notify_action should not be called for custom verbs (those are already handled in handle_verb)
 [code] add helper functions to easily create a connecting pair of Exits or reverse Doors between 2 locations
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [feature] conditional/changing/invisible exits, for instance a hatch that is not there until you 'discover' it. (circle data contains such exits?)
