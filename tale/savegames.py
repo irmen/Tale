@@ -4,7 +4,7 @@ import pprint
 import gzip
 from typing import Any, Tuple, List, Optional, Dict, Set, Type, Sequence
 
-from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
+from .base import Item, Location, Living, Exit, Door, MudObject, Stats, _limbo
 from .items.basic import Drink, GameClock
 from .story import StoryConfig, MoneyType, GameMode, TickMethod
 from .player import Player
@@ -216,6 +216,9 @@ class TaleSerializer:
                 del state[name]
         self.add_basic_properties(state, obj)
         state["target"] = mudobj_ref(state["target"])
+        if "linked_door" in state:
+            # it's probably a Door, and linked_door referes to another door (cyclic)
+            state["linked_door"] = mudobj_ref(state["linked_door"])
         ser._serialize(state, out, indentlevel)
 
     def serialize_location(self, obj: Location, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
@@ -268,6 +271,7 @@ class TaleDeserializer:
             return True, self.make_Item(d, existing_object_lookup)
         elif clz == "tale.base.Living":
             return True, self.make_Living(d, existing_object_lookup)
+        # XXX add remaining classes here
         else:
             clz = d.get("__class__", None)
             if clz == "float":

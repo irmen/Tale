@@ -75,7 +75,6 @@ class IFDriver(driver.Driver):
     def do_save(self, player: Player) -> None:
         if not self.story.config.savegames_enabled:
             raise errors.ActionRefused("It is not possible to save your progress.")
-        # XXX crashes in Zed game with recursion error...
         serializer = savegames.TaleSerializer()
         all_locations = [loc for loc in base.MudObjRegistry.all_locations.values()]
         all_items = [i for i in base.MudObjRegistry.all_items.values() if i.contained_in]
@@ -338,7 +337,7 @@ class IFDriver(driver.Driver):
             self.waiting_for_input = {}   # can't keep the old waiters around
             new_player.tell("\n")
             new_player.tell("Game loaded.")
-            new_player.tell("<bright><it>NOTE: loading of save games is not yet fully implemented!!!</>")  # XXX fix loading of save games.
+            new_player.tell("<bright><it>NOTE: loading of save games is not yet fully implemented!!!</>")  # XXX fix loading of save games (recreate classes etc)
             if self.story.config.display_gametime:
                 new_player.tell("Game time: %s" % self.game_clock)
                 new_player.tell("\n")

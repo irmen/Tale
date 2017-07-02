@@ -86,6 +86,24 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         # @todo check
 
+    def test_exit_pair(self):
+        room1 = base.Location("room1")
+        room2 = base.Location("room2")
+        e1, e2 = base.Exit.connect(room1, "room2", "to room 2", None, room2, "room1", "to room 1", None)
+        x = serializecycle(e1)
+        # @todo check
+        x = serializecycle(e2)
+        # @todo check
+
+    def test_door_pair(self):
+        room1 = base.Location("room1")
+        room2 = base.Location("room2")
+        d1, d2 = base.Door.connect(room1, "room2", "to room 2", None, room2, "room1", "to room 1", None)
+        x = serializecycle(d1)
+        print(x)        # @todo check
+        x = serializecycle(d2)
+        print(x)        # @todo check
+
     def test_npc(self):
         o = base.Living("name", "n", title="title", descr="description", race="dragon")
         x = serializecycle(o)
