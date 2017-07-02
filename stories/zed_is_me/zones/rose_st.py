@@ -51,19 +51,23 @@ parking_gate.key_code = "111"
 
 
 class StorageRoom(Location):
-    @call_periodically(10.0, 20.0)
+    @call_periodically(5.0, 20.0)
     def shiver_from_cold(self, ctx: Context) -> None:
-        # it's cold in the storage room, it makes you shiver
+        # it's cold in the storage room, it makes people shiver
         if self.livings:
             living = random.choice(list(self.livings))
             living.do_socialize("shiver")
 
 
 class Friend(Living):
-    # @todo add more behavior and stop screaming when rescued
+    # @todo add more behavior
     @call_periodically(10.0, 20.0)
     def say_something(self, ctx: Context) -> None:
-        self.do_verb("yell \"Help me, I'm locked in\"", ctx)
+        door_open = any(d.opened for d in self.location.exits.values() if isinstance(d, Door))
+        if door_open:
+            self.do_socialize("say \"Finally someone that rescued me! Thank you so much.\"")   # @todo ...and run away?
+        else:
+            self.do_verb("yell \"Help me, I'm locked in\"", ctx)
 
 
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")

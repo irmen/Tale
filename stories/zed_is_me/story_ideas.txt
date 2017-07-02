@@ -1,25 +1,19 @@
 Single-Player IF turn-based (command-driven).
-Maak het niet te moeilijk dus je bent zelf NIET infected.
-Waar moet je dan naar op zoek? Uiteindelijk een manier om het dorp te verlaten!
 
-Er lijkt verder niemand meer te zijn in het dorp, alleen hier en daar verwarde dolende figuren (wanderers).
-Als die je zien komen ze achter je aan en slaan ze je dood --> FAIL
-FLEE is de enige manier om ze kwijt te raken (normaal weglopen helpt niet: ze blijven je dan volgen).
-Als je lawaai maakt komen wanderers uit naastgelegen locaties ook op je af (wel feedback geven aan de speler dat hij geluid maakte)
+- GOAL: Escape village WITH friend WITH medicine.
+- you're both not infected
+- only a few wanderers left in some places that will (slowly) follow you and when they hit you -> GAME OVER
+- 'flee' to get rid of them (they follow you when walking away normally)
+- slowly spawn more wanderers to build up the pressure
+- require keycard to free your friend Peter
+- Peter will need a medicine before you can leave the village (@todo leave how?)
+- you'll have to 'bribe' (custom verb) that medicine from someone else
+- bribing with money (or simply give $$$)
+- find enough money first (1x $4,50  1x $5,50 = $10)
+- @todo remove temp exit
 
-Ergens is een keycard waarmee je een deur kunt openmaken. (storage room ergens)
-Je redt iemand (friend) uit die kamer.
-Deze moet je helpen om uit het dorp weg te komen (waarmee?)
-Hij heeft daar iets bij nodig wat je ergens moet vinden ( die je van iemand moet briben?)
-Als het wel op tijd lukt (hoe?) dan kun je samen ontsnappen -> SUCCES ending
 
-Extra commands?
-"bribe" ->  geef geld aan iemand die een kist bewaakt -van iemand anders- met het geneesmiddel erin dat je nodig hebt (give $... werkt ook)
-Eerst genoeg geld vinden (1x $4,50  1x $5,50 = $10)
-
-YELL-> dit hoor je in de kamer ernaast. Mensen die opgesloten zitten gillen om hulp, dan hoort de speler dat automatisch (zie town crier)
-als je zelf yellt dan moeten mensen in de buurt daar op reageren, en wanderers ook!
-
+MAP OF THE TOWN:
 
                                                +-------------+     +----------+
                                                |             |     |          |
