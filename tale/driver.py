@@ -556,7 +556,7 @@ class Driver(pubsub.Listener):
                     # @todo note: can't deal with yields directly, use errors.AsyncDialog in handle_verb to initiate a dialog
                     handled = player.location.handle_verb(parsed, player)
                     if handled:
-                        topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))
+                        topic_pending_actions.send(lambda actor=player: actor.location._notify_action_all(parsed, actor))
                     else:
                         parse_error = "Please be more specific."
                 if not handled:
@@ -573,7 +573,7 @@ class Driver(pubsub.Listener):
                         else:
                             func(player, parsed, ctx)
                         if func.enable_notify_action:   # type: ignore
-                            topic_pending_actions.send(lambda actor=player: actor.location.notify_action(parsed, actor))
+                            topic_pending_actions.send(lambda actor=player: actor.location._notify_action_all(parsed, actor))
                     else:
                         raise errors.ParseError(parse_error)
             except errors.RetrySoulVerb:

@@ -250,6 +250,7 @@ class TestLocations(unittest.TestCase):
         room.notify_npc_left(player, room2)
         parsed = ParseResult("verb")
         room.notify_action(parsed, player)
+        room._notify_action_all(parsed, player)
 
 
 class TestDoorsExits(unittest.TestCase):

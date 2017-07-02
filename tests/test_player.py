@@ -348,6 +348,7 @@ class TestPlayer(unittest.TestCase):
                 self.handled = False
                 self.handle_verb_called = False
                 self.notify_called = False
+                self.notify_args = None
 
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
@@ -359,6 +360,7 @@ class TestPlayer(unittest.TestCase):
 
             def notify_action(self, parsed, actor):
                 self.notify_called = True
+                self.notify_args = (parsed, actor)
 
         player = SpecialPlayer("julie", "f")
         player.verbs["xywobble"] = ""
@@ -369,6 +371,7 @@ class TestPlayer(unittest.TestCase):
                 self.handled = False
                 self.handle_verb_called = False
                 self.notify_called = False
+                self.notify_args = None
 
             def handle_verb(self, parsed, actor):
                 self.handle_verb_called = True
@@ -380,6 +383,7 @@ class TestPlayer(unittest.TestCase):
 
             def notify_action(self, parsed, actor):
                 self.notify_called = True
+                self.notify_args = (parsed, actor)
 
         chair_in_inventory = Chair("littlechair")
         chair_in_inventory.verbs["kerwaffle"] = ""
@@ -436,10 +440,19 @@ class TestPlayer(unittest.TestCase):
         player.init()
         chair.init()
         chair_in_inventory.init()
-        room.notify_action(parsed, player)
+        room._notify_action_all(parsed, player)
         self.assertTrue(chair.notify_called)
         self.assertTrue(player.notify_called)
         self.assertTrue(chair_in_inventory.notify_called)
+        parsed, actor = chair.notify_args
+        self.assertIs(player, actor)
+        self.assertEquals("kerwaffle", parsed.verb)
+        parsed, actor = player.notify_args
+        self.assertIs(player, actor)
+        self.assertEquals("kerwaffle", parsed.verb)
+        parsed, actor = chair_in_inventory.notify_args
+        self.assertIs(player, actor)
+        self.assertEquals("kerwaffle", parsed.verb)
 
     def test_move_notify(self):
         class LocationNotify(Location):

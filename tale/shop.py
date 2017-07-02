@@ -143,11 +143,9 @@ class Shopkeeper(Living):
         raise ActionRefused("You can't give stuff to %s just like that, try selling it instead." % self.title)
 
     def notify_action(self, parsed: ParseResult, actor: Living) -> None:
+        if actor is self or parsed.verb in self.verbs:
+            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
         # react to some things people might say such as "ask about <item>/<number>"
-        if actor is self:
-            return  # avoid reacting to ourselves
-        if parsed.verb in self.verbs:
-            return  # avoid reacting to verbs we already have a handler for
         unparsed = parsed.unparsed.split()
         if self in parsed.who_info or self.name in unparsed or lang.capital(self.name) in unparsed \
                 or parsed.verb in ("hi", "hello", "greet", "wave") \

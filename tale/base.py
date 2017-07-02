@@ -358,6 +358,7 @@ class MudObject:
         Notify the object of an action performed by someone.
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
+        Custom verbs are notified however, even if they were already handled by handle_verb!
         """
         pass
 
@@ -750,21 +751,32 @@ class Location(MudObject):
                 handled = any(exit.handle_verb(parsed, actor) for exit in set(self.exits.values()))
         return handled
 
+    def _notify_action_all(self, parsed: ParseResult, actor: 'Living') -> None:
+        """
+        Notify the location, the items in it, and the livings in it, of an action performed by someone.
+        Don't override this one in a subclass, override notify_action instead.
+        Uncompleted actions (error, or ActionRefused) are ignored.
+        Custom verbs are notified however, even if they were already handled by handle_verb!
+        """
+        # Notice that this notification event is invoked by the driver after all
+        # actions concerning player input have been handled, so we don't have to
+        # queue the delegated calls.
+        self.notify_action(parsed, actor)
+        for living in self.livings:
+            living._notify_action_all(parsed, actor)
+        for item in self.items:
+            item.notify_action(parsed, actor)
+        for exit in set(self.exits.values()):
+            exit.notify_action(parsed, actor)
+
     def notify_action(self, parsed: ParseResult, actor: 'Living') -> None:
         """
         Notify the location, the items in it, and the livings in it, of an action performed by someone.
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
+        Custom verbs are notified however, even if they were already handled by handle_verb!
         """
-        # Notice that this notification event is invoked by the driver after all
-        # actions concerning player input have been handled, so we don't have to
-        # queue the delegated calls.
-        for living in self.livings:
-            living._notify_action_base(parsed, actor)
-        for item in self.items:
-            item.notify_action(parsed, actor)
-        for exit in set(self.exits.values()):
-            exit.notify_action(parsed, actor)
+        pass
 
     def notify_npc_arrived(self, npc: 'Living', previous_location: 'Location') -> None:
         """a NPC has arrived in this location."""
@@ -1080,7 +1092,7 @@ class Living(MudObject):
                     raise TaleError("can't let a npc perform a dialog command")
                 func(self, parsed, ctx)
                 if func.enable_notify_action:
-                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
+                    pending_actions.send(lambda actor=self: actor.location._notify_action_all(parsed, actor))
 
     def do_socialize_cmd(self, parsed: ParseResult) -> None:
         """
@@ -1090,7 +1102,7 @@ class Living(MudObject):
         who, actor_message, room_message, target_message = self.soul.process_verb_parsed(self, parsed)
         self.tell(actor_message)
         self.location.tell(room_message, self, who, target_message)
-        pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
+        pending_actions.send(lambda actor=self: actor.location._notify_action_all(parsed, actor))
         if parsed.verb in verbdefs.AGGRESSIVE_VERBS:
             # usually monsters immediately attack,
             # other npcs may choose to attack or to ignore it
@@ -1119,7 +1131,7 @@ class Living(MudObject):
             custom_verbs = set(ctx.driver.current_custom_verbs(self))
             if parsed.verb in custom_verbs:
                 if self.location.handle_verb(parsed, self):       # note: can't deal with async dialogs
-                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
+                    pending_actions.send(lambda actor=self: actor.location._notify_action_all(parsed, actor))
                     return
                 else:
                     raise ParseError("That custom verb is not understood by the environment.")
@@ -1135,7 +1147,7 @@ class Living(MudObject):
                     return
                 func(self, parsed, ctx)
                 if func.enable_notify_action:
-                    pending_actions.send(lambda actor=self: actor.location.notify_action(parsed, actor))
+                    pending_actions.send(lambda actor=self: actor.location._notify_action_all(parsed, actor))
                 return
             raise ParseError("Command not understood.")
         except Exception as x:
@@ -1271,11 +1283,10 @@ class Living(MudObject):
         """Handle a custom verb (specified in the verbs dict). Return True if handled, False if not handled."""
         return False
 
-    def _notify_action_base(self, parsed: ParseResult, actor: 'Living') -> None:
+    def _notify_action_all(self, parsed: ParseResult, actor: 'Living') -> None:
         """
         Notify the living of an action performed by someone.
-        Also calls inventory items. Don't override this one in a subclass,
-        override notify_action instead.
+        Also calls inventory items. Don't override this one in a subclass, override notify_action instead.
         """
         self.notify_action(parsed, actor)
         for item in self.__inventory:
@@ -1286,6 +1297,7 @@ class Living(MudObject):
         Notify the living of an action performed by someone.
         This can be any verb, command, soul emote, custom verb.
         Uncompleted actions (error, or ActionRefused) are ignored.
+        Custom verbs are notified however, even if they were already handled by handle_verb!
         """
         pass
 
