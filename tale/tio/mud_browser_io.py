@@ -153,14 +153,14 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     """
     request_queue_size = 200
     use_ssl = False
-    ssl_cert_locations = ("./cert/localhost.pem", "./cert/localhost_cert.pem")    # keyfile, certfile
+    ssl_cert_locations = ("./certs/localhost.pem", "./certs/localhost_cert.pem")    # keyfile, certfile
 
     def server_bind(self):
         if self.use_ssl:
             print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
             import ssl
             self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0],
-                                          certfile=self.ssl_cert_locations[1], server_side=True)
+                                          certfile=self.ssl_cert_locations[1], server_side=True, ssl_version=ssl.PROTOCOL_TLS)
         return super().server_bind()
 
 

@@ -1,7 +1,7 @@
 *.py[codz]
 *.class
 /.eggs/
-*.egg-info
+*.egg-info/
 /MANIFEST
 /.idea/
 /.tox/
