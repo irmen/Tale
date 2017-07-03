@@ -46,7 +46,7 @@ def _check_required_libraries():
     all_good = True
     smartypants_version_required = LooseVersion("1.8.6")
     colorama_version_required = LooseVersion("0.3.6")
-    serpent_version_required = LooseVersion("1.22")
+    serpent_version_required = LooseVersion("1.23")
     if not appdirs:
         print("The 'appdirs' Python library (any recent version) is required to run Tale.", file=sys.stderr)
         all_good = False
