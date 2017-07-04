@@ -12,6 +12,9 @@ import tale.lang as lang
 
 class TestLanguagetools(unittest.TestCase):
     def testA(self):
+        self.assertEqual("", lang.a(""))
+        self.assertEqual("an e", lang.a("e"))
+        self.assertEqual("a q", lang.a("q"))
         self.assertEqual("a house", lang.a("house"))
         self.assertEqual("a house", lang.a("a house"))
         self.assertEqual("a House", lang.a("House"))
@@ -20,19 +23,31 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("An egg", lang.a("An egg"))
         self.assertEqual("a university", lang.a("university"))
         self.assertEqual("a university magazine", lang.a("university magazine"))
-        self.assertEqual("an unindent", lang.a("unindent"))
         self.assertEqual("a user", lang.a("user"))
+        self.assertEqual("an unforgettable experience", lang.a("unforgettable experience"))
+        self.assertEqual("an umbrella", lang.a("umbrella"))
         self.assertEqual("a history", lang.a("history"))
         self.assertEqual("an hour", lang.a("hour"))
+        self.assertEqual("an honour", lang.a("honour"))
+        self.assertEqual("a historic day", lang.a("historic day"))
         self.assertEqual("A user", lang.A("user"))
         self.assertEqual("An hour", lang.A("hour"))
+        self.assertEqual("an uno", lang.a("uno"))
+        self.assertEqual("an hourglass", lang.a("hourglass"))
         self.assertEqual("An egg", lang.A("An egg"))
-
-    def testAexceptions(self):
-        self.assertEqual("an unicycle", lang.a("unicycle"), "unicycle -> an, without regged exception")
-        lang.reg_a_exceptions({"unicycle": "a"})
-        self.assertEqual("a unicycle", lang.a("unicycle"), "unicycle -> a, with regged exception")
-        self.assertEqual("a unicycle wheel", lang.a("unicycle wheel"))
+        self.assertEqual("a unicycle", lang.a("unicycle"))
+        self.assertEqual("a universe", lang.a("universe"))
+        self.assertEqual("an honest mistake", lang.a("honest mistake"))
+        self.assertEqual("a yard", lang.a("yard"))
+        self.assertEqual("a yves", lang.a("yves"))
+        self.assertEqual("an igloo", lang.a("igloo"))
+        self.assertEqual("a yard", lang.a("yard"))
+        self.assertEqual("a YARD", lang.a("YARD"))
+        self.assertEqual("A YARD", lang.A("YARD"))
+        self.assertEqual("an ycleped", lang.a("ycleped"))
+        self.assertEqual("a YCLEPED", lang.a("YCLEPED"))
+        self.assertEqual("an yttric", lang.a("yttric"))
+        self.assertEqual("an yggdrasil", lang.a("yggdrasil"))
 
     def testFullstop(self):
         self.assertEqual("a.", lang.fullstop("a"))

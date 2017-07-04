@@ -36,7 +36,7 @@ def join(words: Iterable[str], conj: str="and", group_multi: bool=True) -> str:
     """
     def apply_amount(count, word):
         prefix, _, rest = word.partition(' ')
-        if rest and prefix in __articles:
+        if rest and prefix in {"the", "a", "an"}:
             # remove the article when we're dealing with multiple occurrences
             word = rest
         return spell_number(count) + " " + pluralize(word)
@@ -61,39 +61,64 @@ def join(words: Iterable[str], conj: str="and", group_multi: bool=True) -> str:
     return "%s, %s %s" % (", ".join(words[:-1]), conj, words[-1])
 
 
-__a_exceptions = {
-    "universe": "a",
-    "university": "a",
-    "user": "a",
-    "hour": "an"
-    # probably more, but these will have to do for now
-}
-
-__articles = {"the", "a", "an"}
-
-
-def a(word: str) -> str:
-    """a or an? simplistic version: if the word starts with a vowel, returns an, otherwise a"""
-    if not word:
+def a(noun_phrase: str) -> str:
+    # algorithm adapted from CPAN package Lingua-EN-Inflect by Damian Conway
+    if not noun_phrase:
         return ""
-    if word.startswith(("a ", "an ", "A ", "An ")):
-        return word
-    firstword = word.split(None, 1)[0]
-    exception = __a_exceptions.get(firstword.lower(), None)
-    if exception:
-        return exception + " " + word
-    elif word.startswith(('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')):
-        return "an " + word
-    return "a " + word
+    if noun_phrase.lower() in {"a", "an"}:
+        return "an "+noun_phrase
+    m = re.search('\w+', noun_phrase)
+    if m:
+        word = m.group(0)
+        if word.lower() in {"a", "an"}:
+            return noun_phrase
+    else:
+        return 'an '+noun_phrase
+
+    wordi = word.lower()
+    if wordi.startswith(('euler', 'heir', 'honest', 'hono')):
+        return 'an '+noun_phrase
+
+    if wordi.startswith('hour') and not wordi.startswith('houri'):
+        return 'an '+noun_phrase
+
+    if len(word) == 1:
+        if wordi in 'aefhilmnorsx':
+            return 'an '+noun_phrase
+        else:
+            return 'a '+noun_phrase
+
+    if re.match(r'(?!FJO|[HLMNS]Y.|RY[EO]|SQU|'
+                  r'(F[LR]?|[HL]|MN?|N|RH?|S[CHKLMNPTVW]?|X(YL)?)[AEIOU])'
+                  r'[FHLMNRSX][A-Z]', word):
+        return 'an '+noun_phrase
+
+    for regex in (r'^e[uw]', r'^onc?e\b',
+                    r'^uni([^nmd]|mo)','^u[bcfhjkqrst][aeiou]'):
+        if re.match(regex, wordi):
+            return 'a '+noun_phrase
+
+    # original regex was /^U[NK][AIEO]?/ but that matches UK, UN, etc.
+    if re.match('^U[NK][AIEO]', word):
+        return 'a '+noun_phrase
+    elif word == word.upper():
+        if wordi[0] in 'aefhilmnorsx':
+            return 'an '+noun_phrase
+        else:
+            return 'a '+noun_phrase
+
+    if wordi[0] in 'aeiou':
+        return 'an '+noun_phrase
+
+    if re.match(r'^y(b[lor]|cl[ea]|fere|gg|p[ios]|rou|tt)', wordi):
+        return 'an '+noun_phrase
+    else:
+        return 'a '+noun_phrase
 
 
 def A(word: str) -> str:
     """A or An? simplistic version: if the word starts with a vowel, returns An, otherwise A"""
     return capital(a(word))
-
-
-def reg_a_exceptions(exceptions):
-    __a_exceptions.update(exceptions)
 
 
 def fullstop(sentence: str, punct: str=".") -> str:
