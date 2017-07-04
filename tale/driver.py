@@ -215,6 +215,9 @@ class Driver(pubsub.Listener):
         topic_pending_tells.subscribe(self)
         topic_async_dialogs.subscribe(self)
 
+    def is_running(self):
+        return not self._stop_mainloop
+
     def start(self, game_file_or_path: str) -> None:
         """Start the driver from a parsed set of arguments"""
         gamepath = pathlib.Path(game_file_or_path)

@@ -57,7 +57,8 @@ class IFDriver(driver.Driver):
         driver_thread = threading.Thread(name="driver", target=self._main_loop_wrapper, args=(connection,))
         driver_thread.daemon = True
         driver_thread.start()
-        connection.singleplayer_mainloop()     # this doesn't return!
+        connection.singleplayer_mainloop()     # this doesn't return! (unless you CTRL-C it)
+        self._stop_mainloop = True
 
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:
         pass   # no motd in IF mode

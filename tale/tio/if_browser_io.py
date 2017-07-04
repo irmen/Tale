@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import json
 import time
+from socketserver import ThreadingMixIn
 from email.utils import formatdate, parsedate
 from hashlib import md5
 from html import escape as html_escape
@@ -210,12 +211,12 @@ class TaleWsgiAppBase:
             return self.wsgi_handle_about(environ, parameters, start_response)
         elif path == "story":
             return self.wsgi_handle_story(environ, parameters, start_response)
-        elif path == "text":
-            return self.wsgi_handle_text(environ, parameters, start_response)
         elif path == "tabcomplete":
             return self.wsgi_handle_tabcomplete(environ, parameters, start_response)
         elif path == "input":
             return self.wsgi_handle_input(environ, parameters, start_response)
+        elif path == "eventsource":
+            return self.wsgi_handle_eventsource(environ, parameters, start_response)
         elif path.startswith("static/"):
             return self.wsgi_handle_static(environ, path, start_response)
         elif path == "quit":
@@ -299,24 +300,28 @@ class TaleWsgiAppBase:
                                    story_author_email=self.driver.story.config.author_address)
         return [txt.encode("utf-8")]
 
-    def wsgi_handle_text(self, environ: Dict[str, Any], parameters: Dict[str, str],
+    def wsgi_handle_eventsource(self, environ: Dict[str, Any], parameters: Dict[str, str],
                          start_response: WsgiStartResponseType) -> Iterable[bytes]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
-        html = conn.io.get_html_to_browser()
-        special = conn.io.get_html_special()
-        start_response('200 OK', [('Content-Type', 'application/json; charset=utf-8'),
-                                  ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                                  ('Pragma', 'no-cache'),
-                                  ('Expires', '0')])
-        response = {"text": "\n".join(html)}
-        if html and conn.player:
-            response["turns"] = conn.player.turns
-            response["location"] = conn.player.location.title if conn.player.location else "???"
-            response["special"] = special
-        return [json.dumps(response).encode("utf-8")]
+        start_response('200 OK', [('Content-Type', 'text/event-stream; charset=utf-8'),
+                                  ('Cache-Control', 'no-cache')])
+        while self.driver.is_running() and conn.io and conn.player:
+            html = conn.io.get_html_to_browser()
+            special = conn.io.get_html_special()
+            if html or special:
+                response = {
+                    "text": "\n".join(html),
+                    "special": special,
+                    "turns": conn.player.turns,
+                    "location": conn.player.location.title if conn.player.location else "???"
+                }
+                result = "event: text\nid: {event_id}\ndata: {data}\n\n"\
+                    .format(event_id=str(time.time()), data=json.dumps(response))
+                yield result.encode("utf-8")
+            time.sleep(0.1)   # @todo add event on conn.io so we don't have to poll it for new text
 
     def wsgi_handle_tabcomplete(self, environ: Dict[str, Any], parameters: Dict[str, str],
                                 start_response: WsgiStartResponseType) -> Iterable[bytes]:
@@ -447,7 +452,8 @@ class TaleWsgiApp(TaleWsgiAppBase):
         # Quit/logged out page. For single player, simply close down the whole driver.
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.driver._stop_driver()
-        return [b"<html><body><script>window.close();</script>Session ended. You may close this window/tab.</body></html>"]
+        return [b"<html><body><script>window.close();</script><p><strong>Tale game session ended.</strong></p>"
+                b"<p>You may close this window/tab.</p></body></html>"]
 
     def wsgi_handle_about(self, environ: Dict[str, Any], parameters: Dict[str, str],
                           start_response: WsgiStartResponseType) -> Iterable[bytes]:
@@ -469,7 +475,7 @@ class CustomRequestHandler(WSGIRequestHandler):
         pass
 
 
-class CustomWsgiServer(WSGIServer):
+class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     """
     A simple wsgi server with a modest request queue size, meant for single user access.
     Set use_ssl to True to enable HTTPS mode instead of unencrypted HTTP.

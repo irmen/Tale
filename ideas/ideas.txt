@@ -28,8 +28,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[html]  use html5 EventSource instead of 0.5 sec ajax polling to update the text in the browser
-    see https://www.html5rocks.com/en/tutorials/eventsource/basics/  and  https://github.com/Yaffle/EventSource
+[html] in wsgi_handle_eventsource create an event in the io class to wait on new text rather than polling every 0.1 s
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system.
