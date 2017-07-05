@@ -23,6 +23,7 @@ class PlayerNaming:
         self.wizard = False
         self.password = None
         self.email = None
+        self.story_data = {}
 
     def apply_to(self, player: Player) -> None:
         assert self._name
@@ -32,6 +33,7 @@ class PlayerNaming:
         player.init_names(self._name, title, self.description, self.short_description)
         player.stats = self.stats
         player.money = self.money
+        player.story_data = self.story_data
 
     @property
     def name(self) -> str:

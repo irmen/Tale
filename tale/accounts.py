@@ -11,7 +11,9 @@ import random
 import re
 import sqlite3
 import time
-from typing import Set, Tuple, List
+import json
+from typing import Set, Tuple, List, Dict, Any
+import serpent
 
 from . import base
 from . import lang
@@ -24,7 +26,8 @@ __all__ = ["Account", "MudAccounts"]
 
 class Account:
     def __init__(self, name: str, email: str, pw_hash: str, pw_salt: str, privileges: Set[str],
-                 created: datetime.datetime, logged_in: datetime.datetime, banned: bool, stats: base.Stats) -> None:
+                 created: datetime.datetime, logged_in: datetime.datetime, banned: bool,
+                 stats: base.Stats, story_data: Dict[Any, Any]) -> None:
         # validation on the suitability of names, emails etc is taken care of by the creating code
         if not isinstance(stats, base.Stats):
             raise TypeError("stats must be of type Stats")
@@ -37,6 +40,7 @@ class Account:
         self.logged_in = logged_in
         self.stats = stats
         self.banned = banned
+        self.story_data = story_data
 
 
 class MudAccounts:
@@ -112,6 +116,15 @@ class MudAccounts:
                             FOREIGN KEY(account) REFERENCES Account(id)
                         );
                         """)
+                    conn.execute("""
+                        CREATE TABLE StoryData(
+                            id integer PRIMARY KEY,
+                            account integer NOT NULL,
+                            format varchar NOT NULL,
+                            data varchar NOT NULL,
+                            FOREIGN KEY(account) REFERENCES Account(id)
+                        );
+                        """)
                     # note: stats not stored in the database are the following:
                     #       all stat_prios (for agi, cha, int etcetera)
                     #       bodytype, language, weight, and size.
@@ -134,6 +147,18 @@ class MudAccounts:
         acc = conn.execute("SELECT * FROM Account WHERE id=?", (account_id,)).fetchone()
         priv_result = conn.execute("SELECT privilege FROM Privilege WHERE account=?", (account_id,)).fetchall()
         privileges = {pr["privilege"] for pr in priv_result}
+        storydata_result = conn.execute("SELECT format, data FROM StoryData WHERE account=?", (account_id,)).fetchone()
+        if storydata_result:
+            if storydata_result["format"] == "json":
+                storydata = json.loads(storydata_result["data"], encoding="utf-8")
+            elif storydata_result["format"] == "serpent":
+                storydata = serpent.loads(storydata_result["data"])
+            else:
+                raise ValueError("invalid storydata format in database: " + storydata_result["format"])
+            if not isinstance(storydata, dict):
+                raise TypeError("storydata should be a dict")
+        else:
+            storydata = {}
         stats_result = dict(conn.execute("SELECT * FROM CharStat WHERE account=?", (account_id,)).fetchone() or {})
         del stats_result["id"]
         del stats_result["account"]
@@ -145,7 +170,7 @@ class MudAccounts:
                 raise AttributeError("stats doesn't have attribute: " + key)
         stats.set_stats_from_race()   # initialize static stats from races table
         return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges,
-                       acc["created"], acc["logged_in"], bool(acc["banned"]), stats)
+                       acc["created"], acc["logged_in"], bool(acc["banned"]), stats, storydata)
 
     def all_accounts(self, having_privilege: str=None) -> List[Account]:
         with self._sqlite_connect() as conn:
@@ -230,7 +255,7 @@ class MudAccounts:
             for privilege in privileges:
                 conn.execute("INSERT INTO Privilege(account, privilege) VALUES (?,?)", (result.lastrowid, privilege))
             self._store_stats(conn, result.lastrowid, stats)
-        return Account(name, email, pwhash, salt, privileges, created, None, False, stats)
+        return Account(name, email, pwhash, salt, privileges, created, None, False, stats, {})
 
     def _store_stats(self, conn: sqlite3.Connection, account_id: int, stats: base.Stats) -> None:
         columns = ["account"]
@@ -261,6 +286,20 @@ class MudAccounts:
                 conn.execute("UPDATE Account SET pw_hash=?, pw_salt=? WHERE id=?", (pwhash, salt, account_id))
             if new_email:
                 conn.execute("UPDATE Account SET email=? WHERE id=?", (new_email, account_id))
+
+    def save_story_data(self, name: str, story_data: Dict[Any, Any]) -> None:
+        if not isinstance(story_data, dict):
+            raise TypeError("story data should be a dict")
+        with self._sqlite_connect() as conn:
+            result = conn.execute("SELECT id FROM Account WHERE name=?", (name,)).fetchone()
+            if not result:
+                raise LookupError("Unknown name.")
+            account_id = result["id"]
+            data = serpent.dumps(story_data)
+            result = conn.execute("UPDATE StoryData SET format=?, data=? WHERE id=?", ("serpent", data, account_id))
+            if result.rowcount == 0:
+                # there's no storydata yet, insert it
+                conn.execute("INSERT INTO StoryData(account, format, data) VALUES (?,?,?)", (account_id, "serpent", data))
 
     @util.authorized("wizard")
     def update_privileges(self, name: str, privileges: Set[str], actor: player.Player) -> Set[str]:

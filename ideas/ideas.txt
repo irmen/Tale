@@ -10,9 +10,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 --------------------------------------------------------------------------
 [feature] implement IP-address based ban
 [feature] global chat broadcast channel (like wow's /1) with minimum level requirement to use it (against spammers)
-[code] the story_data from a player object should be stored (as serpent serialized form) into the account database when account
-    is saved and restored when account is loaded. This allows for the story to add stuff to account creation
-    and add extra persistent fields to a player.
 [feature] Write things (including crash logs) to a logfile for the server admins.
 [feature] check all commands if they provide appropriate feedback to others in the room (such as "Xyz looks around")
 [feature] SSH interface via Paramiko?

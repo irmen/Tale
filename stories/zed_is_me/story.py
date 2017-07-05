@@ -39,7 +39,7 @@ class Story(StoryBase):
 
     def init_player(self, player: Player) -> None:
         """
-        Called by the game driver when it has created the player object.
+        Called by the game driver when it has created the player object (after successful login).
         You can set the hint texts on the player object, or change the state object, etc.
         """
         pass

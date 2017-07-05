@@ -6,11 +6,12 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import datetime
 import sys
-from typing import Optional
+from typing import Optional, Generator
 
 from tale.driver import Driver
 from tale.hints import Hint
-from tale.player import Player
+from tale.player import Player, PlayerConnection
+from tale.charbuilder import PlayerNaming
 from tale.story import *
 
 
@@ -44,13 +45,25 @@ class Story(StoryBase):
 
     def init_player(self, player: Player) -> None:
         """
-        Called by the game driver when it has created the player object.
+        Called by the game driver when it has created the player object (after successful login).
         You can set the hint texts on the player object, or change the state object, etc.
         """
         player.hints.init([
             Hint(None, None, "Find a way to open the door that leads to the exit of the game."),
             Hint("unlocked_enddoor", None, "Step out through the door into the freedom!")
         ])
+
+    def create_account_dialog(self, playerconnection: PlayerConnection, playernaming:PlayerNaming) -> Generator:
+        """
+        Override to add extra dialog options to the character creation process.
+        Because there's no actual player yet, you receive PlayerConnection and PlayerNaming arguments.
+        Write stuff to the user via playerconnection.output(...)
+        Ask questions using the yield "input", "question?"  mechanism.
+        Return True to declare all is well, and False to abort the player creation process.
+        """
+        age = yield "input", "Custom creation question: What is your age?"
+        playernaming.story_data["age"] = int(age)    # will be stored in the database (mud)
+        return True
 
     def welcome(self, player: Player) -> Optional[str]:
         """welcome text when player enters a new game"""

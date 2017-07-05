@@ -797,6 +797,7 @@ class TestMudAccounts(unittest.TestCase):
             account = accs[0]
             self.assertEqual("testname", account.name)
             self.assertEqual({"wizard"}, account.privileges)
+            self.assertEqual({}, account.story_data)
             self.assertEqual("f", account.stats.gender)
             self.assertTrue(races.StatType.AGILITY in account.stats.stat_prios[3])
             self.assertEqual(40, account.stats.agi)
@@ -804,6 +805,23 @@ class TestMudAccounts(unittest.TestCase):
             self.assertEqual(60.0, account.stats.weight)
             self.assertEqual(races.BodySize.HUMAN_SIZED, account.stats.size)
             self.assertEqual("Edhellen", account.stats.language)
+        finally:
+            dbfile.unlink()
+
+    def test_storydata(self):
+        dbfile = pathlib.Path(tempfile.gettempdir()) / "tale_test_accdb_{0:f}.sqlite".format(time.time())
+        try:
+            accounts = MudAccounts(str(dbfile))
+            stats = Stats.from_race("elf", gender='f')
+            accounts.create("testname", "s3cr3t", "test@invalid", stats, {"wizard"})
+            account = accounts.get("testname")
+            self.assertEqual({}, account.story_data)
+            account.story_data = {"test": 42, "thing": [1.2, 3.4]}
+            with self.assertRaises(TypeError):
+                accounts.save_story_data("testname", "must_be_dictionary")   # type: ignore
+            accounts.save_story_data("testname", account.story_data)
+            account = accounts.get("testname")
+            self.assertEqual({"test": 42, "thing": [1.2, 3.4]}, account.story_data)
         finally:
             dbfile.unlink()
 

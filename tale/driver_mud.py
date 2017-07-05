@@ -199,6 +199,7 @@ class MudDriver(driver.Driver):
                     conn.player.tell("-- -- -- --", end=True)
                     continue
                 self.mud_accounts.create(name_info.name, name_info.password, name_info.email, name_info.stats)
+                self.mud_accounts.save_story_data(name_info.name, name_info.story_data)
                 del name_info
                 conn.player.tell("\n<bright>Your new account has been created!</>  Go ahead and log in with it.", end=True)
                 conn.player.tell("-- -- -- --", end=True)
@@ -274,6 +275,7 @@ class MudDriver(driver.Driver):
             name_info.stats = account.stats
             self._rename_player(conn.player, name_info)
             conn.player.privileges = account.privileges
+            conn.player.story_data = account.story_data
             conn.output("\n")
             if "wizard" in conn.player.privileges:
                 conn.player.move(self.lookup_location(self.story.config.startlocation_wizard))
@@ -284,6 +286,7 @@ class MudDriver(driver.Driver):
         if prompt:
             yield "input", "\n" + prompt
         self.story.init_player(conn.player)
+        self.mud_accounts.save_story_data(conn.player.name, conn.player.story_data)
         conn.output("\n")
         self.show_motd(conn.player, True)
         conn.player.look(short=False)  # force a 'look' command to get our bearings

@@ -97,7 +97,7 @@ class StoryBase:
 
     def init_player(self, player) -> None:
         """
-        Called by the game driver when it has created the player object.
+        Called by the game driver when it has created the player object (after successful login).
         You can set the hint texts on the player object, or change the state object, etc.
         For an IF game there is only one player. For a MUD game there will be many players,
         and every player that logs in can be further initialized here.

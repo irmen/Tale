@@ -25,6 +25,7 @@ function setup()
         } else {
             txtdiv.innerHTML += "<p class='server-error'>Connection error.<br><br>Perhaps refreshing the page fixes it. If it doesn't, quit or close your browser and try with a new window.</p>";
         }
+        txtdiv.scrollTop = txtdiv.scrollHeight;
         var cmd_input = document.getElementById("input-cmd");
         cmd_input.disabled=true;
         //   esource.close();       // close the eventsource, so that it won't reconnect
