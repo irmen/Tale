@@ -301,7 +301,7 @@ class TaleWsgiAppBase:
         return [txt.encode("utf-8")]
 
     def wsgi_handle_eventsource(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                         start_response: WsgiStartResponseType) -> Iterable[bytes]:
+                                start_response: WsgiStartResponseType) -> Iterable[bytes]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:

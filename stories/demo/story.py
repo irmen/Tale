@@ -53,7 +53,7 @@ class Story(StoryBase):
             Hint("unlocked_enddoor", None, "Step out through the door into the freedom!")
         ])
 
-    def create_account_dialog(self, playerconnection: PlayerConnection, playernaming:PlayerNaming) -> Generator:
+    def create_account_dialog(self, playerconnection: PlayerConnection, playernaming: PlayerNaming) -> Generator:
         """
         Override to add extra dialog options to the character creation process.
         Because there's no actual player yet, you receive PlayerConnection and PlayerNaming arguments.

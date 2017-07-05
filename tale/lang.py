@@ -66,54 +66,54 @@ def a(noun_phrase: str) -> str:
     if not noun_phrase:
         return ""
     if noun_phrase.lower() in {"a", "an"}:
-        return "an "+noun_phrase
+        return "an " + noun_phrase
     m = re.search('\w+', noun_phrase)
     if m:
         word = m.group(0)
         if word.lower() in {"a", "an"}:
             return noun_phrase
     else:
-        return 'an '+noun_phrase
+        return 'an ' + noun_phrase
 
     wordi = word.lower()
     if wordi.startswith(('euler', 'heir', 'honest', 'hono')):
-        return 'an '+noun_phrase
+        return 'an ' + noun_phrase
 
     if wordi.startswith('hour') and not wordi.startswith('houri'):
-        return 'an '+noun_phrase
+        return 'an ' + noun_phrase
 
     if len(word) == 1:
         if wordi in 'aefhilmnorsx':
-            return 'an '+noun_phrase
+            return 'an ' + noun_phrase
         else:
-            return 'a '+noun_phrase
+            return 'a ' + noun_phrase
 
     if re.match(r'(?!FJO|[HLMNS]Y.|RY[EO]|SQU|'
-                  r'(F[LR]?|[HL]|MN?|N|RH?|S[CHKLMNPTVW]?|X(YL)?)[AEIOU])'
-                  r'[FHLMNRSX][A-Z]', word):
-        return 'an '+noun_phrase
+                r'(F[LR]?|[HL]|MN?|N|RH?|S[CHKLMNPTVW]?|X(YL)?)[AEIOU])'
+                r'[FHLMNRSX][A-Z]', word):
+        return 'an ' + noun_phrase
 
     for regex in (r'^e[uw]', r'^onc?e\b',
-                    r'^uni([^nmd]|mo)','^u[bcfhjkqrst][aeiou]'):
+                  r'^uni([^nmd]|mo)', '^u[bcfhjkqrst][aeiou]'):
         if re.match(regex, wordi):
-            return 'a '+noun_phrase
+            return 'a ' + noun_phrase
 
     # original regex was /^U[NK][AIEO]?/ but that matches UK, UN, etc.
     if re.match('^U[NK][AIEO]', word):
-        return 'a '+noun_phrase
+        return 'a ' + noun_phrase
     elif word == word.upper():
         if wordi[0] in 'aefhilmnorsx':
-            return 'an '+noun_phrase
+            return 'an ' + noun_phrase
         else:
-            return 'a '+noun_phrase
+            return 'a ' + noun_phrase
 
     if wordi[0] in 'aeiou':
-        return 'an '+noun_phrase
+        return 'an ' + noun_phrase
 
     if re.match(r'^y(b[lor]|cl[ea]|fere|gg|p[ios]|rou|tt)', wordi):
-        return 'an '+noun_phrase
+        return 'an ' + noun_phrase
     else:
-        return 'a '+noun_phrase
+        return 'a ' + noun_phrase
 
 
 def A(word: str) -> str:

@@ -5,7 +5,7 @@ Character builder for multi-user mode.
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
-from typing import Generator, Set
+from typing import Generator, Set, Dict, Any
 
 from . import lang
 from . import mud_context
@@ -23,7 +23,7 @@ class PlayerNaming:
         self.wizard = False
         self.password = None
         self.email = None
-        self.story_data = {}
+        self.story_data = {}  # type: Dict[Any, Any]
 
     def apply_to(self, player: Player) -> None:
         assert self._name

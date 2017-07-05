@@ -97,7 +97,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         return super().wsgi_handle_story(environ, parameters, start_response)
 
     def wsgi_handle_eventsource(self, environ: Dict[str, Any], parameters: Dict[str, str],
-                         start_response: WsgiStartResponseType) -> Iterable[bytes]:
+                                start_response: WsgiStartResponseType) -> Iterable[bytes]:
         session = environ["wsgi.session"]
         conn = session.get("player_connection")
         if not conn:
