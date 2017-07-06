@@ -314,13 +314,14 @@ class IFDriver(driver.Driver):
                 existing_player.tell("<it>Note: the saved game data is from a different version of the game and may cause problems.</>")
                 existing_player.tell("We'll attempt to load it anyway. (Current game version: %s / Saved game data version: %s). "
                                      % (self.story.config.version, savegame_version), end=True)
+            import pprint
+            pprint.pprint(raw_state)  # XXX
             objects_finder = SavegameExistingObjectsFinder()
             state = deserializer.recreate_classes(raw_state, objects_finder)
-            # Because loading a complete saved game is strictly for single player 'if' mode,
-            # we load a new player and simply replace all players with this one.
             clock = state["clock"]
             story_config = state["story_config"]
             new_deferreds = objects_finder.hookup_deferreds(state["deferreds"], state["items"])
+            # @todo must create items with the vnums from the save file instead of letting the constructor create new vnums for newly loaded items... (livings too)
             new_player = objects_finder.hookup_player(state["player"], state["items"])
             # sanity checks before we go on
             assert isinstance(new_player, Player)
@@ -336,6 +337,15 @@ class IFDriver(driver.Driver):
                 self._enqueue_deferred(d)
             self.all_players = {new_player.name: conn}
             self.waiting_for_input = {}   # can't keep the old waiters around
+
+            # restore locations, the livings in each location, and the inventory of the livings and locations
+            for loc_ser in state["locations"]:
+                objects_finder.hookup_location(loc_ser, state["items"])
+            # restore exit properties (all exits must already exist in the world, can't create new exits -yet-)
+            for exit_ser in state["exits"]:
+                objects_finder.hookup_exit(exit_ser)
+            # note: items and livings were restored as part of a location or living's inventory.
+
             new_player.tell("\n")
             new_player.tell("Game loaded.")
             new_player.tell("<bright><it>NOTE: loading of save games is not yet fully implemented!!!</>")  # XXX fix loading of save games (recreate classes etc)
@@ -377,6 +387,7 @@ class SavegameExistingObjectsFinder:
     def resolve_item_ref(self, vnum: int, name: str, classname: str, baseclassname: str,
                          *, new_items: List[Dict[str, Any]]=[]) -> base.Item:
         item = base.MudObjRegistry.all_items.get(vnum, None)
+        # @todo items contained in other items
         if not item:
             for newitem in new_items:
                 if newitem["old_vnum"] == vnum:
@@ -413,3 +424,45 @@ class SavegameExistingObjectsFinder:
             new_deferred.owner = self.resolve_ref(*d_info["owner"], new_items=new_items)   # type: ignore
             result.append(new_deferred)
         return result
+
+    def resolve_exit(self, vnum: int, classname: str, baseclassname: str) -> Union[base.Exit, base.Door]:
+        assert baseclassname == "tale.base.Exit"
+        exit = base.MudObjRegistry.all_exits[vnum]
+        if isinstance(exit, base.Door):
+            assert classname == "tale.base.Door"
+        return exit
+
+    def hookup_location(self, loc_info: Dict[str, Any], new_items: List[Dict[str, Any]]) -> None:
+        loc = self.resolve_location_ref(loc_info["vnum"], loc_info["name"], loc_info["__class__"], loc_info["__base_class__"])
+        saved_exit_vnums = set(x[0] for x in loc_info.pop("exits"))
+        if saved_exit_vnums != set(x.vnum for x in loc.exits.values()):
+            raise errors.TaleError("exits mismatch for location vnum " + str(loc_info["vnum"]))
+        # we only set a few things from the saved game data for a location
+        # most importantly: the items in here, and the livings walking around here
+        # a requirement is that the exits don't change so we don't have to hook those up here as well.
+        loc.name = loc_info["name"]
+        loc.aliases = set(loc_info["aliases"])
+        loc.verbs = loc_info["verbs"]
+        loc.story_data = loc_info["story_data"]
+        loc.items = {self.resolve_item_ref(*ref, new_items=new_items) for ref in loc_info["items"]}
+        for thing in loc.items:
+            if thing.contained_in and thing.contained_in is not loc:
+                # remove the item from its original location, it was moved here
+                thing.contained_in.remove(thing, None)
+            thing.contained_in = loc
+        # @todo loc.livings, and their inventories
+        pass
+
+    def hookup_exit(self, exit_info: Dict[str, Any]) -> None:
+        exit = self.resolve_exit(exit_info["vnum"], exit_info["__class__"], exit_info["__base_class__"])
+        target_ref = exit_info.pop("target")
+        target_loc = self.resolve_location_ref(*target_ref)
+        if exit.target is not target_loc:
+            raise errors.TaleError("exit target location changed, exit vnum " + str(exit_info["vnum"]))
+        # we only take a few things from the save game data
+        # we assume the description texts don't change
+        exit.name = exit_info["name"]
+        exit.aliases = set(exit_info.pop("aliases"))
+        exit.verbs = exit_info["verbs"]
+        exit.story_data = exit_info["story_data"]
+        exit._target_str = exit_info["_target_str"]

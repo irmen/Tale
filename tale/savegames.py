@@ -1,11 +1,9 @@
 import datetime
 import importlib
-import pprint
 import gzip
-from typing import Any, Tuple, List, Optional, Dict, Set, Type, Sequence
+from typing import Any, Tuple, List, Optional, Dict, Type, Sequence
 
-from .base import Item, Location, Living, Exit, Door, MudObject, Stats, _limbo
-from .items.basic import Drink, GameClock
+from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
 from .story import StoryConfig, MoneyType, GameMode, TickMethod
 from .player import Player
 from .errors import TaleError, ActionRefused
@@ -268,6 +266,8 @@ class TaleDeserializer:
         if clz == "tale.player.Player":
             return True, self.make_Player(d)
         elif clz == "tale.base.Item":
+            if d.get("__class__", None) == "tale.items.basic.Money":
+                return True, self.make_Money(d, existing_object_lookup)
             return True, self.make_Item(d, existing_object_lookup)
         elif clz == "tale.base.Living":
             return True, self.make_Living(d, existing_object_lookup)
@@ -343,6 +343,35 @@ class TaleDeserializer:
             "old_vnum": old_vnum,
             "item": item,
             "inventory": inv
+        }
+
+    def make_Money(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
+        # Money has no constructor taking descr argument, but it takes a value argument
+        old_vnum = data["vnum"]
+        try:
+            money = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"],
+                                                           data["__class__"], data["__base_class__"], new_items=[])
+            if money.contained_in:
+                wizard = Living("wizard", "m")
+                wizard.privileges.add("wizard")
+                money.contained_in.remove(money, wizard)   # will be hooked up later again
+                assert money.contained_in is None
+        except LookupError:
+            # create new money item
+            itemclass = self.lookup_class(data["__class__"])
+            money = itemclass(data.pop("name"), value=data.pop("value"), title=data.pop("title"), short_descr=data.pop("short_descr"))
+        else:
+            # re-init existing
+            money.init_names(data.pop("name"), title=data.pop("title"), descr=data["descr"], short_descr=data.pop("short_descr"))
+            money.value = data.pop("value")
+        del data["vnum"]
+        del data["descr"]
+        money.aliases = set(data.pop("aliases"))
+        self.apply_attributes(money, data)
+        return {
+            "old_vnum": old_vnum,
+            "item": money,
+            "inventory": None
         }
 
     def make_Living(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
@@ -438,60 +467,3 @@ class TaleDeserializer:
                 else:
                     raise TypeError("{}.{} has different type".format(obj.__class__, name))
             setattr(obj, name, value)
-
-
-# ---------------------test code--------------------
-
-def test():
-    cof = Drink("coffee")
-    cof.contents = "coffee"
-    cof.capacity = 99
-    loc = Location("house")
-    l = Living("rat", "m", race="rodent")
-    e = Exit("south", loc, "going south")
-    loc.add_exits([e])
-    p = Player("julie", "f", short_descr="short description of player")
-    p.story_data["derp"] = "HELLO!!!"
-    p.privileges.add("wizard")
-    p.money = 9.99
-
-    loc.insert(p, p)
-    p.known_locations.add(loc)
-    p.insert(cof, p)
-
-    ts = TaleSerializer()
-    story = StoryConfig()
-    story.requires_tale = "2.3"
-    story.version = "9.1beta"
-    story.name = "Test serialization story"
-    clock = GameClock("ticker")
-    d = ts.serialize(story, p, {cof}, {p, l}, {loc}, {e}, {}, clock)
-    print(d.decode("utf-8"))
-    p2 = ts.deserialize(d)
-    print("------deserialized-----")
-    pprint.pprint(p2)
-    print("-------2classes--------")
-
-    class ExistingObjectGetter:
-        def item(self, vnum: int, name: str, classname: str, baseclassname: str) -> Item:
-            pass
-
-        def living(self, vnum: int, name: str, classname: str, baseclassname: str) -> Living:
-            pass
-
-    p2 = ts.recreate_classes(p2, existing_object_lookup=ExistingObjectGetter())
-    pprint.pprint(p2)
-
-    p2 = p2["player"]["player"]
-    assert repr(p.stats) == repr(p2.stats)
-    assert p.money == p2.money
-    assert p.aliases == p2.aliases
-    assert p.privileges == p2.privileges
-    assert p.subjective == p2.subjective
-    assert p.title == p2.title
-    assert p.short_description == p2.short_description
-    assert p.story_data == p2.story_data
-
-
-if __name__ == '__main__':
-    test()

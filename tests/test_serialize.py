@@ -9,6 +9,7 @@ import unittest
 import datetime
 
 from tale import mud_context, races, base, player, util, hints, driver
+from tale.items import basic, bank, board
 from tale.story import *
 from tale.savegames import TaleSerializer, TaleDeserializer
 
@@ -42,7 +43,7 @@ class TestSerializing(unittest.TestCase):
         self.assertEqual("description", obj.description)
         self.assertEqual("n", obj.gender)
 
-    def test_basic(self):
+    def test_fundamentals(self):
         o = serializecycle(races.races)
         self.assertEqual(len(races.races), len(o))
         self.assertIn("golem", o)
@@ -104,12 +105,10 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(d2)
         print(x)        # @todo check
 
-    def test_npc(self):
+    def test_player_and_soul(self):
         o = base.Living("name", "n", title="title", descr="description", race="dragon")
         x = serializecycle(o)
         # @todo check
-
-    def test_player_and_soul(self):
         o = base.Soul()
         x = serializecycle(o)
         # @todo check
@@ -150,6 +149,31 @@ class TestSerializing(unittest.TestCase):
                      driver.Deferred(datetime.datetime.now(), module_level_func, [], None),
                      driver.Deferred(datetime.datetime.now(), item.init, [], None)]
         x = serializecycle(deferreds)
+        # @todo check
+
+    def test_bank(self):
+        b = bank.Bank("atm")
+        b.transaction_log.append("transaction: $10")
+        x = serializecycle(b)
+        # @todo check
+
+    def test_money(self):
+        m = basic.Money("cash", 987.65)
+        x = serializecycle(m)
+        # @todo check
+
+    def test_catapult(self):
+        c = basic.Catapult("catapult")
+        c.aliases = {"weapon"}
+        c.story_data = {"force": 99}
+        c.verbs = {"shoot": "fire the weapon"}
+        x = serializecycle(c)
+        # @todo check
+
+    def test_board(self):
+        c = board.BulletinBoard("board")
+        c.posts = {"post1": "hey there"}
+        x = serializecycle(c)
         # @todo check
 
 
