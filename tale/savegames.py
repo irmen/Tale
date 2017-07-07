@@ -1,9 +1,9 @@
 import datetime
 import importlib
 import gzip
-from typing import Any, Tuple, List, Optional, Dict, Type, Sequence
+from typing import Any, Tuple, List, Optional, Dict, Type, Sequence, Union
 
-from .base import Item, Location, Living, Exit, MudObject, Stats, _limbo
+from .base import Item, Location, Living, Exit, Door, MudObject, MudObjRegistry, Stats, _limbo
 from .story import StoryConfig, MoneyType, GameMode, TickMethod
 from .player import Player
 from .errors import TaleError, ActionRefused
@@ -254,6 +254,8 @@ class TaleDeserializer:
             if "__class__" in literal:
                 success, result = self.dict_to_class(literal, existing_object_lookup)
                 if success:
+                    if hasattr(result, "vnum"):
+                        assert result.vnum == literal["vnum"]
                     return result
             result = {}
             for key, value in literal.items():
@@ -271,6 +273,10 @@ class TaleDeserializer:
             return True, self.make_Item(d, existing_object_lookup)
         elif clz == "tale.base.Living":
             return True, self.make_Living(d, existing_object_lookup)
+        elif clz == "tale.base.Exit":
+            return True, self.make_Exit(d, existing_object_lookup)
+        elif clz == "tale.base.Location":
+            return True, self.make_Location(d, existing_object_lookup)
         # XXX add remaining classes here
         else:
             clz = d.get("__class__", None)
@@ -301,7 +307,6 @@ class TaleDeserializer:
         known_locs = data.pop("known_locations")
         p.hints = self.recreate_classes(data.pop("hints"), None)
         p.stats = self.recreate_classes(data.pop("stats"), None)
-        old_vnum = data.pop("vnum")
         assert p.title == data.pop("title")
         self.apply_attributes(p, data)
         p.init_nonserializables()
@@ -310,7 +315,6 @@ class TaleDeserializer:
             "inventory": inv,
             "location": loc,
             "known_locs": known_locs,
-            "old_vnum": old_vnum
         }
 
     def lookup_class(self, classname: str) -> Type:
@@ -319,10 +323,8 @@ class TaleDeserializer:
         return clazz
 
     def make_Item(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
-        old_vnum = data["vnum"]
         try:
-            item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"],
-                                                           data["__class__"], data["__base_class__"], new_items=[])
+            item = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
             if item.contained_in:
                 wizard = Living("wizard", "m")
                 wizard.privileges.add("wizard")
@@ -331,7 +333,8 @@ class TaleDeserializer:
         except LookupError:
             # create new item
             itemclass = self.lookup_class(data["__class__"])
-            item = itemclass(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+            item = MudObjRegistry.create_object(itemclass, data.pop("name"), title=data.pop("title"), descr=data.pop("descr"),
+                                                short_descr=data.pop("short_descr"), vnum=data["vnum"])
         else:
             # re-init existing
             item.init_names(data.pop("name"), title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
@@ -340,17 +343,14 @@ class TaleDeserializer:
         item.aliases = set(data.pop("aliases"))
         self.apply_attributes(item, data)
         return {
-            "old_vnum": old_vnum,
             "item": item,
-            "inventory": inv
+            "contains": inv
         }
 
     def make_Money(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         # Money has no constructor taking descr argument, but it takes a value argument
-        old_vnum = data["vnum"]
         try:
-            money = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"],
-                                                           data["__class__"], data["__base_class__"], new_items=[])
+            money = existing_object_lookup.resolve_item_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
             if money.contained_in:
                 wizard = Living("wizard", "m")
                 wizard.privileges.add("wizard")
@@ -359,7 +359,8 @@ class TaleDeserializer:
         except LookupError:
             # create new money item
             itemclass = self.lookup_class(data["__class__"])
-            money = itemclass(data.pop("name"), value=data.pop("value"), title=data.pop("title"), short_descr=data.pop("short_descr"))
+            money = MudObjRegistry.create_object(itemclass, data.pop("name"), value=data.pop("value"), title=data.pop("title"),
+                                                 short_descr=data.pop("short_descr"), vnum=data["vnum"])
         else:
             # re-init existing
             money.init_names(data.pop("name"), title=data.pop("title"), descr=data["descr"], short_descr=data.pop("short_descr"))
@@ -369,19 +370,19 @@ class TaleDeserializer:
         money.aliases = set(data.pop("aliases"))
         self.apply_attributes(money, data)
         return {
-            "old_vnum": old_vnum,
             "item": money,
-            "inventory": None
+            "contains": None
         }
 
     def make_Living(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         try:
             living = existing_object_lookup.resolve_living_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
         except LookupError:
-            # create new item
+            # create new living
             livingclass = self.lookup_class(data["__class__"])
-            living = livingclass(data.pop("name"), data.pop("gender"), race=data.pop("race"),
-                                 title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
+            living = MudObjRegistry.create_object(livingclass, data.pop("name"), data.pop("gender"), race=data.pop("race"),
+                                                  title=data.pop("title"), descr=data.pop("descr"), short_descr=data.pop("short_descr"),
+                                                  vnum=data.pop("vnum"))
         else:
             # overwrite existing attributes
             living.init_gender(data.pop("gender"))
@@ -392,7 +393,6 @@ class TaleDeserializer:
         inv = data.pop("inventory")
         loc = data.pop("location")
         living.stats = self.recreate_classes(data.pop("stats"), None)
-        old_vnum = data.pop("vnum")
         if isinstance(living, Shopkeeper):
             # special handling of Shopkeepers
             self.shop = self.make_ShopBehavior(data.pop("shop"))
@@ -401,7 +401,6 @@ class TaleDeserializer:
             "living": living,
             "inventory": inv,
             "location": loc,
-            "old_vnum": old_vnum
         }
 
     def make_StoryConfig(self, data: Dict) -> StoryConfig:
@@ -433,20 +432,53 @@ class TaleDeserializer:
         self.apply_attributes(stats, data)
         return stats
 
-    def make_Deferred(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
+    def make_Deferred(self, data: Dict, existing_object_lookup) -> Deferred:
         due = self.parse_datestr(data["due_gametime"])
         d = Deferred(due, qual_classname, data["vargs"], data["kwargs"], periodical=data["periodical"])   # create for dummy action
         d.action = data["action"]
-        d.owner = None   # hooked up later
-        return {
-            "deferred": d,
-            "owner": data["owner"]
-        }
+        d.owner = None   # @todo hook this up
+        return d
 
     def make_HintSystem(self, data: Dict) -> HintSystem:
         hs = HintSystem()
         self.apply_attributes(hs, data)
         return hs
+
+    def make_Exit(self, data: Dict, existing_object_lookup) -> Union[Exit, Door]:
+        exit = existing_object_lookup.resolve_exit(data["vnum"], data["__class__"], data["__base_class__"])
+        target_loc = existing_object_lookup.resolve_location_ref(*data["target"])
+        if exit.target is not target_loc:
+            raise TaleError("exit target location changed, exit vnum " + str(exit.vnum))
+        # we only load a few things from the save game data, and we assume the description texts don't change
+        exit.name = data["name"]
+        exit.aliases = set(data.pop("aliases"))
+        exit.verbs = data["verbs"]
+        exit.story_data = data["story_data"]
+        exit._target_str = data["_target_str"]
+        return exit
+
+    def make_Location(self, data: Dict, existing_object_lookup) -> Location:
+        # for now, we only support a static configuration of locs.
+        # this means we won't create new locs, only update existing locs.
+        loc = existing_object_lookup.resolve_location_ref(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
+        saved_exit_vnums = set(x[0] for x in data["exits"])
+        if saved_exit_vnums != set(x.vnum for x in loc.exits.values()):
+            raise TaleError("exits mismatch for location vnum " + str(loc.vnum))
+        # we only set a few things from the saved game data for a location
+        # most importantly: the items in here, and the livings walking around here
+        # a requirement is that the exits don't change so we don't have to hook those up here as well.
+        loc.name = data["name"]
+        loc.aliases = set(data["aliases"])
+        loc.verbs = data["verbs"]
+        loc.story_data = data["story_data"]
+        loc.items = {existing_object_lookup.resolve_item_ref(*ref) for ref in data["items"]}
+        for thing in loc.items:
+            if thing.contained_in and thing.contained_in is not loc:
+                # remove the item from its original location, it was moved here
+                thing.contained_in.remove(thing, None)
+            thing.contained_in = loc
+        # @todo loc.livings
+        return loc
 
     def parse_datestr(self, datestr: str) -> datetime.datetime:
         if '.' not in datestr:

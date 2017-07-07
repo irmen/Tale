@@ -40,10 +40,10 @@ import copy
 import random
 import re
 from weakref import WeakValueDictionary
-from collections import defaultdict, OrderedDict, Counter
+from collections import defaultdict, OrderedDict
 from textwrap import dedent
 from types import ModuleType
-from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List
+from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, Type
 
 from . import lang
 from . import mud_context
@@ -199,6 +199,33 @@ class MudObjRegistry:
                         existing = MudObjRegistry.all_locations.get(pid, None)
                         if existing is instance:
                             del MudObjRegistry.all_locations[pid]
+
+    @classmethod
+    def create_object(cls, objclass: Type, *vargs, **kwargs) -> Any:
+        vnum = 0
+        if "vnum" in kwargs:
+            vnum = kwargs.pop("vnum")
+        thing = objclass(*vargs, **kwargs)
+        if vnum:
+            if issubclass(objclass, Item):
+                if vnum in MudObjRegistry.all_items:
+                    raise TaleError("item with vnum %d already exists" % vnum)
+                del MudObjRegistry.all_items[thing.vnum]
+                thing.vnum = vnum
+                MudObjRegistry.all_items[vnum] = thing
+            elif issubclass(objclass, Living):
+                if vnum in MudObjRegistry.all_livings:
+                    raise TaleError("living with vnum %d already exists" % vnum)
+                del MudObjRegistry.all_livings[thing.vnum]
+                thing.vnum = vnum
+                MudObjRegistry.all_livings[vnum] = thing
+            elif issubclass(objclass, Exit):
+                raise TypeError("creation of Exit for specific vnum is not supported")
+            elif issubclass(objclass, Location):
+                raise TypeError("creation of Location for specific vnum is not supported")
+            else:
+                raise TypeError("weird MudObj subtype: " + str(objclass))
+        return thing
 
 
 class MudObject:
