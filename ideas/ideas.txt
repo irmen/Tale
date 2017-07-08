@@ -1,7 +1,6 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
-[code] finish the loading of saved game data
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
 

@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import sys
 import time
 import threading
-from typing import Generator, Optional, Dict, Any, Union
+from typing import Generator, Optional, Union
 from .story import GameMode, TickMethod, StoryConfig
 from . import base
 from . import charbuilder
@@ -318,9 +318,11 @@ class IFDriver(driver.Driver):
 
             clock = deserializer.recreate_classes(state.pop("clock"), None)
             assert isinstance(clock, util.GameDateTime)
+            self.game_clock = clock
 
             story_config = deserializer.recreate_classes(state.pop("story_config"), None)
             assert isinstance(story_config, StoryConfig)
+            self.story.config = story_config
 
             exits_data = list(sorted(state.pop("exits"), key=lambda d: d.get("vnum")))
             saved_exits = deserializer.recreate_classes(exits_data, objects_finder)
@@ -335,48 +337,51 @@ class IFDriver(driver.Driver):
                 if item_info["contains"]:
                     contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in item_info["contains"]}
                     item.init_inventory(contained)
-            # all items in the game are now created, but they may not yet be in their final place.
-
-            livings_data = list(sorted(state.pop("livings"), key=lambda d: d.get("vnum")))
-            saved_livings_info = deserializer.recreate_classes(livings_data, objects_finder)
-            # @todo link items in living inventory
-            assert all(isinstance(l_dat["living"], base.Living) for l_dat in saved_livings_info)
 
             loc_data = list(sorted(state.pop("locations"), key=lambda d: d.get("vnum")))
             saved_locs = deserializer.recreate_classes(loc_data, objects_finder)
-            # @todo link items contained in locations
             assert all(isinstance(l, base.Location) for l in saved_locs)
+
+            livings_data = list(sorted(state.pop("livings"), key=lambda d: d.get("vnum")))
+            saved_livings_info = deserializer.recreate_classes(livings_data, objects_finder)
+            for living_info in saved_livings_info:
+                living = living_info["living"]
+                assert isinstance(living, base.Living)
+                if living_info["inventory"]:
+                    contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in living_info["inventory"]}
+                    living.init_inventory(contained)
+                loc = objects_finder.resolve_location_ref(*living_info["location"])
+                if living.location and living.location is not loc:
+                    living.location.remove(living, living)
+                loc.insert(living, living)
 
             saved_player_info = deserializer.recreate_classes(state.pop("player"), None)
             saved_player = saved_player_info["player"]
-            # @todo link items in player inventory
             assert isinstance(saved_player, Player)
+            contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in saved_player_info["inventory"]}
+            for thing in contained:
+                if thing.contained_in and thing.contained_in is not saved_player:
+                    # remove the item from its original location, the player now has it in its pocketses
+                    thing.contained_in.remove(thing, None)
+            saved_player.init_inventory(contained)
+            loc = objects_finder.resolve_location_ref(*saved_player_info["location"])
+            if saved_player.location and saved_player.location is not loc:
+                saved_player.location.remove(saved_player, saved_player)
+            loc.insert(saved_player, saved_player)
+            saved_player.known_locations = {objects_finder.resolve_location_ref(*loc_info) for loc_info in saved_player_info["known_locs"]}
+            self.all_players = {saved_player.name: conn}
 
-            saved_deferreds = deserializer.recreate_classes(state.pop("deferreds"), None)
+            saved_deferreds = deserializer.recreate_classes(state.pop("deferreds"), objects_finder)
             assert all(isinstance(d, driver.Deferred) for d in saved_deferreds)
-
-            assert len(state) == 0, "everything must have been converted"
-
-            # activate loaded state.
-            self.game_clock = clock
-            self.story.config = story_config
             self.deferreds = []
             for d in saved_deferreds:
                 self._enqueue_deferred(d)
-            self.all_players = {saved_player.name: conn}
+
+            assert len(state) == 0, "everything must have been converted"
+
             self.waiting_for_input = {}   # can't keep the old waiters around
-
-            # # XXX restore locations, the livings in each location, and the inventory of the livings and locations
-            # for loc_ser in state["locations"]:
-            #     objects_finder.hookup_location(loc_ser, state["items"])
-            # # restore exit properties (all exits must already exist in the world, can't create new exits -yet-)
-            # for exit_ser in state["exits"]:
-            #     objects_finder.hookup_exit(exit_ser)
-            # # note: items and livings were restored as part of a location or living's inventory.
-
             saved_player.tell("\n")
             saved_player.tell("Game loaded.")
-            saved_player.tell("<bright><it>NOTE: loading of save games is not yet fully implemented!!!</>")  # XXX fix loading of save games (recreate classes etc)
             if self.story.config.display_gametime:
                 saved_player.tell("Game time: %s" % self.game_clock)
                 saved_player.tell("\n")
@@ -387,7 +392,6 @@ class IFDriver(driver.Driver):
 
 class SavegameExistingObjectsFinder:
     def resolve_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.MudObject:
-        # @todo unused?
         if baseclassname == "tale.base.Item":
             return self.resolve_item_ref(vnum, name, classname, baseclassname)
         elif baseclassname == "tale.base.Location":
@@ -427,18 +431,3 @@ class SavegameExistingObjectsFinder:
         if isinstance(exit, base.Door):
             assert classname == "tale.base.Door"
         return exit
-
-    def hookup_player(self, player_info: Dict[str, Any]) -> Player:
-        # @todo unused?
-        new_player = player_info["player"]
-        assert isinstance(new_player, Player)
-        new_player.known_locations = {self.resolve_location_ref(*ref) for ref in player_info["known_locs"]}
-        inv = [self.resolve_item_ref(*ref) for ref in player_info["inventory"]]
-        for thing in inv:
-            if thing.contained_in and thing.contained_in is not new_player:
-                # remove the item from its original location, the player now has it in its pocketses
-                thing.contained_in.remove(thing, None)
-        new_player.init_inventory(inv)
-        loc = self.resolve_location_ref(*player_info["location"])
-        loc.insert(new_player, None)
-        return new_player

@@ -277,7 +277,7 @@ class TaleDeserializer:
             return True, self.make_Exit(d, existing_object_lookup)
         elif clz == "tale.base.Location":
             return True, self.make_Location(d, existing_object_lookup)
-        # XXX add remaining classes here
+        # @todo add remaining classes here, if special serialization needs arise
         else:
             clz = d.get("__class__", None)
             if clz == "float":
@@ -436,7 +436,7 @@ class TaleDeserializer:
         due = self.parse_datestr(data["due_gametime"])
         d = Deferred(due, qual_classname, data["vargs"], data["kwargs"], periodical=data["periodical"])   # create for dummy action
         d.action = data["action"]
-        d.owner = None   # @todo hook this up
+        d.owner = existing_object_lookup.resolve_ref(*data["owner"])
         return d
 
     def make_HintSystem(self, data: Dict) -> HintSystem:
@@ -477,7 +477,7 @@ class TaleDeserializer:
                 # remove the item from its original location, it was moved here
                 thing.contained_in.remove(thing, None)
             thing.contained_in = loc
-        # @todo loc.livings
+        # livings are moved in the correct location when they're created elsewhere.
         return loc
 
     def parse_datestr(self, datestr: str) -> datetime.datetime:
