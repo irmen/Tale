@@ -314,9 +314,6 @@ class IFDriver(driver.Driver):
                 existing_player.tell("<it>Note: the saved game data is from a different version of the game and may cause problems.</>")
                 existing_player.tell("We'll attempt to load it anyway. (Current game version: %s / Saved game data version: %s). "
                                      % (self.story.config.version, savegame_version), end=True)
-            import pprint
-            # pprint.pprint(state)  # XXX
-            print("KEYS IN SAVE:", list(state))  # XXX
             objects_finder = SavegameExistingObjectsFinder()
 
             clock = deserializer.recreate_classes(state.pop("clock"), None)
@@ -331,8 +328,14 @@ class IFDriver(driver.Driver):
 
             items_data = list(sorted(state.pop("items"), key=lambda d: d.get("vnum")))
             saved_items_info = deserializer.recreate_classes(items_data, objects_finder)
-            # @todo link items contained in other items
-            assert all(isinstance(i_dat["item"], base.Item) for i_dat in saved_items_info)
+            # link items contained in other items
+            for item_info in saved_items_info:
+                item = item_info["item"]
+                assert isinstance(item, base.Item)
+                if item_info["contains"]:
+                    contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in item_info["contains"]}
+                    item.init_inventory(contained)
+            # all items in the game are now created, but they may not yet be in their final place.
 
             livings_data = list(sorted(state.pop("livings"), key=lambda d: d.get("vnum")))
             saved_livings_info = deserializer.recreate_classes(livings_data, objects_finder)

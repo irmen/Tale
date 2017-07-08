@@ -202,20 +202,20 @@ class MudObjRegistry:
 
     @classmethod
     def create_object(cls, objclass: Type, *vargs, **kwargs) -> Any:
-        vnum = 0
-        if "vnum" in kwargs:
-            vnum = kwargs.pop("vnum")
-        thing = objclass(*vargs, **kwargs)
+        vnum = kwargs.pop("vnum", 0)
         if vnum:
+            # create a new item/living with given vnum, check if vnum is still available.
             if issubclass(objclass, Item):
                 if vnum in MudObjRegistry.all_items:
-                    raise TaleError("item with vnum %d already exists" % vnum)
+                    raise TaleError("item with vnum %d already exists: %r" % (vnum, repr(MudObjRegistry.all_items[vnum])))
+                thing = objclass(*vargs, **kwargs)
                 del MudObjRegistry.all_items[thing.vnum]
                 thing.vnum = vnum
                 MudObjRegistry.all_items[vnum] = thing
             elif issubclass(objclass, Living):
                 if vnum in MudObjRegistry.all_livings:
-                    raise TaleError("living with vnum %d already exists" % vnum)
+                    raise TaleError("living with vnum %d already exists: %r" % (vnum, repr(MudObjRegistry.all_livings[vnum])))
+                thing = objclass(*vargs, **kwargs)
                 del MudObjRegistry.all_livings[thing.vnum]
                 thing.vnum = vnum
                 MudObjRegistry.all_livings[vnum] = thing
@@ -225,7 +225,11 @@ class MudObjRegistry:
                 raise TypeError("creation of Location for specific vnum is not supported")
             else:
                 raise TypeError("weird MudObj subtype: " + str(objclass))
-        return thing
+            cls.seq_nr = max(cls.seq_nr, thing.vnum + 1)
+            return thing
+        else:
+            # just create a new object with the next available vnum.
+            return objclass(*vargs, **kwargs)
 
 
 class MudObject:
