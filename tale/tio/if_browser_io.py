@@ -320,7 +320,9 @@ class TaleWsgiAppBase:
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         start_response('200 OK', [('Content-Type', 'text/event-stream; charset=utf-8'),
-                                  ('Cache-Control', 'no-cache')])
+                                  ('Cache-Control', 'no-cache'),
+                                  ('X-Accel-Buffering', 'no')   # nginx
+                                  ])
         while self.driver.is_running():
             if conn.io and conn.player:
                 conn.io.wait_html_available()
