@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import queue
 import time
 from threading import Event
-from typing import Any, Sequence, Tuple, IO, Dict, Set, List, Union
+from typing import Any, Sequence, Tuple, IO, Optional, Set, List, Union
 
 from . import base
 from . import hints
@@ -336,16 +336,18 @@ class PlayerConnection:
         self.io = io
         self.need_new_input_prompt = True
 
-    def get_output(self) -> str:
+    def get_output(self) -> Optional[str]:
         """
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
         If there is nothing to be outputted, None is returned.
         """
-        formatted = self.io.render_output(self.player._output.get_paragraphs(),
-                                          width=self.player.screen_width, indent=self.player.screen_indent)
-        if formatted and self.player.transcript:
-            self.player.transcript.write(formatted)
-        return formatted or None
+        paragraphs = self.player._output.get_paragraphs()
+        if paragraphs:
+            formatted = self.io.render_output(paragraphs, width=self.player.screen_width, indent=self.player.screen_indent)
+            if formatted and self.player.transcript:
+                self.player.transcript.write(formatted)
+            return formatted or None
+        return None
 
     @property
     def last_output_line(self) -> str:
@@ -412,7 +414,7 @@ class PlayerConnection:
         self.io.critical_error()
 
     def singleplayer_mainloop(self) -> None:
-        self.io.singleplayer_mainloop(self)   # this does not return
+        self.io.singleplayer_mainloop(self)   # this does not return, unless game is closed
 
     def pause(self, unpause: bool=False) -> None:
         self.io.pause(unpause)

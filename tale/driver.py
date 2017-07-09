@@ -297,7 +297,8 @@ class Driver(pubsub.Listener):
             x._bind_target(self.zones)
         self.unbound_exits = []
         sys.excepthook = util.excepthook  # install custom verbose crash reporter
-        self.start_main_loop()   # doesn't exit!
+        self.start_main_loop()   # doesn't exit! (unless game is killed)
+        self._stop_driver()
 
     def start_main_loop(self):
         raise NotImplementedError

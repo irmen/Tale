@@ -24,7 +24,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[html] in wsgi_handle_eventsource create an event in the io class to wait on new text rather than polling every 0.1 s
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system.

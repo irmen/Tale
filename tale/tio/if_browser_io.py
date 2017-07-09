@@ -10,8 +10,8 @@ from socketserver import ThreadingMixIn
 from email.utils import formatdate, parsedate
 from hashlib import md5
 from html import escape as html_escape
-from threading import Lock
-from typing import Iterable, Tuple, Any, Optional, Dict, Callable, List
+from threading import Lock, Event
+from typing import Iterable, Sequence, Tuple, Any, Optional, Dict, Callable, List
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 
@@ -65,14 +65,20 @@ class HttpIo(iobase.IoAdapterBase):
         self.__html_to_browser = []    # type: List[str]   # the lines that need to be displayed in the player's browser
         self.__html_special = []       # type: List[str]   # special out of band commands (such as 'clear')
         self.__html_to_browser_lock = Lock()
+        self.__new_html_available = Event()
+
+    def destroy(self) -> None:
+        self.__new_html_available.set()
 
     def append_html_to_browser(self, text: str) -> None:
         with self.__html_to_browser_lock:
             self.__html_to_browser.append(text)
+            self.__new_html_available.set()
 
     def append_html_special(self, text: str) -> None:
         with self.__html_to_browser_lock:
             self.__html_special.append(text)
+            self.__new_html_available.set()
 
     def get_html_to_browser(self) -> List[str]:
         with self.__html_to_browser_lock:
@@ -83,6 +89,10 @@ class HttpIo(iobase.IoAdapterBase):
         with self.__html_to_browser_lock:
             special, self.__html_special = self.__html_special, []
             return special
+
+    def wait_html_available(self):
+        self.__new_html_available.wait()
+        self.__new_html_available.clear()
 
     def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
         """mainloop for the web browser interface for single player mode"""
@@ -112,21 +122,27 @@ class HttpIo(iobase.IoAdapterBase):
     def clear_screen(self) -> None:
         self.append_html_special("clear")
 
-    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
-        for text, formatted in paragraphs:
-            text = self.convert_to_html(text)
-            if text == "\n":
-                text = "<br>"
-            if formatted:
-                self.__html_to_browser.append("<p>" + text + "</p>\n")
-            else:
-                self.__html_to_browser.append("<pre>" + text + "</pre>\n")
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
+        if not paragraphs:
+            return None
+        with self.__html_to_browser_lock:
+            for text, formatted in paragraphs:
+                text = self.convert_to_html(text)
+                if text == "\n":
+                    text = "<br>"
+                if formatted:
+                    self.__html_to_browser.append("<p>" + text + "</p>\n")
+                else:
+                    self.__html_to_browser.append("<pre>" + text + "</pre>\n")
+            self.__new_html_available.set()
         return None    # the output is pushed to the browser via a buffer, rather than printed to a screen
 
     def output(self, *lines: str) -> None:
         super().output(*lines)
-        for line in lines:
-            self.output_no_newline(line)
+        with self.__html_to_browser_lock:
+            for line in lines:
+                self.output_no_newline(line)
+            self.__new_html_available.set()
 
     def output_no_newline(self, text: str) -> None:
         super().output_no_newline(text)
@@ -134,6 +150,7 @@ class HttpIo(iobase.IoAdapterBase):
         if text == "\n":
             text = "<br>"
         self.__html_to_browser.append("<p>" + text + "</p>\n")
+        self.__new_html_available.set()
 
     def convert_to_html(self, line: str) -> str:
         """Convert style tags to html"""
@@ -304,7 +321,11 @@ class TaleWsgiAppBase:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         start_response('200 OK', [('Content-Type', 'text/event-stream; charset=utf-8'),
                                   ('Cache-Control', 'no-cache')])
-        while self.driver.is_running() and conn.io and conn.player:
+        while self.driver.is_running():
+            if conn.io and conn.player:
+                conn.io.wait_html_available()
+            if not conn.io or not conn.player:
+                break
             html = conn.io.get_html_to_browser()
             special = conn.io.get_html_special()
             if html or special:
@@ -317,7 +338,6 @@ class TaleWsgiAppBase:
                 result = "event: text\nid: {event_id}\ndata: {data}\n\n"\
                     .format(event_id=str(time.time()), data=json.dumps(response))
                 yield result.encode("utf-8")
-            time.sleep(0.1)   # @todo add event on conn.io so we don't have to poll it for new text
 
     def wsgi_handle_tabcomplete(self, environ: Dict[str, Any], parameters: Dict[str, str],
                                 start_response: WsgiStartResponseType) -> Iterable[bytes]:

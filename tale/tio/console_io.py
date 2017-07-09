@@ -8,7 +8,7 @@ import os
 import signal
 import sys
 import threading
-from typing import Iterable, Tuple, Any, Optional, List
+from typing import Sequence, Tuple, Any, Optional, List
 try:
     import prompt_toolkit
     from prompt_toolkit.contrib.completers import WordCompleter
@@ -146,7 +146,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         sys.stderr.flush()
         os.kill(os.getpid(), signal.SIGINT)
 
-    def render_output(self, paragraphs: Iterable[Tuple[str, bool]], **params: Any) -> Optional[str]:
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
