@@ -36,10 +36,6 @@ style_tags_html = {
     "<rev>": ("<span class='txt-rev'>", "</span>"),
     "</>": None,
     "<clear>": None,
-    "<living>": ("<span class='txt-living'>", "</span>"),
-    "<player>": ("<span class='txt-player'>", "</span>"),
-    "<item>": ("<span class='txt-item'>", "</span>"),
-    "<exit>": ("<span class='txt-exit'>", "</span>"),
     "<location>": ("<span class='txt-location'>", "</span>"),
     "<monospaced>": ("<span class='txt-monospaced'>", "</span>")
 }

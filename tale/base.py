@@ -43,7 +43,7 @@ from weakref import WeakValueDictionary
 from collections import defaultdict, OrderedDict
 from textwrap import dedent
 from types import ModuleType
-from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, Type
+from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, Type, no_type_check
 
 from . import lang
 from . import mud_context
@@ -201,6 +201,7 @@ class MudObjRegistry:
                             del MudObjRegistry.all_locations[pid]
 
     @classmethod
+    @no_type_check
     def create_object(cls, objclass: Type, *vargs, **kwargs) -> Any:
         vnum = kwargs.pop("vnum", 0)
         if vnum:
@@ -689,14 +690,14 @@ class Location(MudObject):
         paragraphs = ["<location>[" + self.name + "]</>"]
         if short:
             if self.exits and mud_context.config.show_exits_in_look:
-                paragraphs.append("<exit>Exits</>: " + ", ".join(sorted(set(self.exits.keys()))))
+                paragraphs.append("Exits: " + ", ".join(sorted(set(self.exits.keys()))))
             if self.items:
                 item_names = sorted(item.name for item in self.items)
-                paragraphs.append("<item>You see</>: " + lang.join(item_names))
+                paragraphs.append("You see: " + lang.join(item_names))
             if self.livings:
                 living_names = sorted(living.name for living in self.livings if living != exclude_living)
                 if living_names:
-                    paragraphs.append("<living>Present</>: " + lang.join(living_names))
+                    paragraphs.append("Present here: " + lang.join(living_names))
             return paragraphs
         # normal (long) output
         if self.description:

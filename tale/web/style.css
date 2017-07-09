@@ -96,13 +96,6 @@ p, pre {
     background-color: darkslateblue;
     color: white;
 }
-.txt-living {}
-.txt-player {}
-.txt-item {}
-.txt-exit {
-    color: maroon;
-    font-weight: bold;
-}
 .txt-location {
     color: navy;
     font-weight: bold;

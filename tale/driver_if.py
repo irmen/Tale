@@ -335,8 +335,11 @@ class IFDriver(driver.Driver):
                 item = item_info["item"]
                 assert isinstance(item, base.Item)
                 if item_info["contains"]:
-                    contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in item_info["contains"]}
-                    item.init_inventory(contained)
+                    if isinstance(item, base.Container):
+                        contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in item_info["contains"]}
+                        item.init_inventory(contained)
+                    else:
+                        raise errors.TaleError("can't put stuff in an item that isn't a Container")
 
             loc_data = list(sorted(state.pop("locations"), key=lambda d: d.get("vnum")))
             saved_locs = deserializer.recreate_classes(loc_data, objects_finder)

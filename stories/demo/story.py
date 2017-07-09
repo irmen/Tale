@@ -67,7 +67,7 @@ class Story(StoryBase):
 
     def welcome(self, player: Player) -> Optional[str]:
         """welcome text when player enters a new game"""
-        player.tell("<bright>Hello, <player>%s</><bright>! Welcome to %s.</>" % (player.title, self.config.name), end=True)
+        player.tell("<bright>Hello, %s! Welcome to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].text)
         player.tell("\n")
@@ -75,7 +75,7 @@ class Story(StoryBase):
 
     def welcome_savegame(self, player: Player) -> Optional[str]:
         """welcome text when player enters the game after loading a saved game"""
-        player.tell("<bright>Hello, <player>%s</><bright>, welcome back to %s.</>" % (player.title, self.config.name), end=True)
+        player.tell("<bright>Hello %s, welcome back to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].text)
         player.tell("\n")

@@ -209,7 +209,7 @@ class TestPlayer(unittest.TestCase):
         julie = Living("julie", "f")
         julie.move(attic, silent=True)
         player.look(short=True)
-        self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Attic]\n", "Present here: julie\n"], player.test_get_output_paragraphs())
 
     def test_look_brief(self):
         player = Player("fritz", "m")
@@ -224,10 +224,10 @@ class TestPlayer(unittest.TestCase):
         player.look()
         self.assertEqual(["[Attic]\n", "A dark attic.\n", "Julie is here.\n"], player.test_get_output_paragraphs())
         player.look(short=True)   # override
-        self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Attic]\n", "Present here: julie\n"], player.test_get_output_paragraphs())
         player.brief = 1  # short for known, long for new locations
         player.look()
-        self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Attic]\n", "Present here: julie\n"], player.test_get_output_paragraphs())
         player.move(cellar, silent=True)
         player.look()
         self.assertEqual(["[Cellar]\n", "A gloomy cellar.\n"], player.test_get_output_paragraphs())
@@ -239,9 +239,9 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(["[Cellar]\n"], player.test_get_output_paragraphs())
         player.move(attic, silent=True)
         player.look()
-        self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Attic]\n", "Present here: julie\n"], player.test_get_output_paragraphs())
         player.look(short=True)   # override
-        self.assertEqual(["[Attic]\n", "Present: julie\n"], player.test_get_output_paragraphs())
+        self.assertEqual(["[Attic]\n", "Present here: julie\n"], player.test_get_output_paragraphs())
         player.look(short=False)  # override
         self.assertEqual(["[Attic]\n", "A dark attic.\n", "Julie is here.\n"], player.test_get_output_paragraphs())
 

@@ -77,9 +77,9 @@ class TestLocations(unittest.TestCase):
     def test_look_short(self):
         expected = ["[Attic]"]
         self.assertEqual(expected, strip_text_styles(self.attic.look(short=True)))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present: fly, julie, player, and two rats"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present here: fly, julie, player, and two rats"]
         self.assertEqual(expected, strip_text_styles(self.hall.look(short=True)))
-        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present: fly, julie, and two rats"]
+        expected = ["[Main hall]", "Exits: door, east, up", "You see: key, two magazines, and table", "Present here: fly, julie, and two rats"]
         self.assertEqual(expected, strip_text_styles(self.hall.look(exclude_living=self.player, short=True)))
 
     def test_search_living(self):
@@ -777,7 +777,7 @@ class TestLiving(unittest.TestCase):
         j.do_command_verb("fart", ctx)         # a soul emote
         j.do_command_verb("take note", ctx)    # a command verb
         pubsub.sync()
-        self.assertEquals(["Julie farts.", "<player>Julie</> takes <item>a note</>."], listener.messages)
+        self.assertEquals(["Julie farts.", "Julie takes a note."], listener.messages)
         self.assertEqual(1, j.inventory_size)
 
 

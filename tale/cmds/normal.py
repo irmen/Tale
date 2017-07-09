@@ -37,7 +37,7 @@ def do_inventory(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
         if inventory:
             player.tell("You are carrying:", end=True)
             for item in inventory:
-                player.tell("  <item>%s</>" % item.title, format=False)
+                player.tell("  %s" % item.title, format=False)
         else:
             player.tell("You are carrying nothing.")
         if ctx.config.money_type:
@@ -62,7 +62,7 @@ def do_locate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
             return
         if thing in player.location:
             if isinstance(thing, base.Living):
-                p("<living>%s</> is here next to you." % lang.capital(thing.title))
+                p("%s is here next to you." % lang.capital(thing.title))
             else:
                 player.tell_object_location(thing, player.location, False)
         elif thing in player:
@@ -78,7 +78,7 @@ def do_locate(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
         else:
             otherplayer = ctx.driver.search_player(name)  # global player search
             if otherplayer:
-                player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." %
+                player.tell("%s is playing, %s is currently in '<location>%s</>'." %
                             (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
             else:
                 p("You can't find that.")
@@ -105,7 +105,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
             player.tell(message)
         if items:
             items_str = lang.join(lang.a(item.title) for item in items)
-            player.tell("You drop <item>%s</>." % items_str)
+            player.tell("You drop %s." % items_str)
             player.tell_others("{Actor} drops %s." % items_str)
         else:
             player.tell("You didn't drop anything.")
@@ -138,7 +138,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                 try:
                     amount = ctx.driver.moneyfmt.parse(parsed.args)
                 except ParseError:
-                    raise ActionRefused("You don't have <item>%s</>." % lang.a(arg))
+                    raise ActionRefused("You don't have %s." % lang.a(arg))
                 if amount > player.money:
                     raise ActionRefused("You don't have that much money.")
                 money = Money(ctx.driver.moneyfmt.money_name, amount)
@@ -160,7 +160,7 @@ def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         raise ParseError("Please be more specific, only empty one thing at a time.")
     container = parsed.who_1
     if not isinstance(container, base.Container):
-        raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
+        raise ActionRefused("You can't take anything from %s." % container.title)
     if container in player.location:
         # move the contents to the room
         target = player.location
@@ -180,7 +180,7 @@ def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
             player.tell(str(x))
     if items_moved:
         itemnames = lang.join(items_moved)
-        player.tell("You %s: <item>%s</>." % (action, itemnames))
+        player.tell("You %s: %s." % (action, itemnames))
         player.tell_others("{Actor} %s: %s." % (action, itemnames))
     else:
         player.tell("You %s nothing." % action)
@@ -210,7 +210,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
         what = whos[:-1]
         where = whos[-1]
     if isinstance(where, base.Living):
-        raise ActionRefused("You can't put stuff in <living>%s</>, try giving it to %s?" % (where.name, where.objective))
+        raise ActionRefused("You can't put stuff in %s, try giving it to %s?" % (where.name, where.objective))
     inventory_items = []
     refused = []
     word_before = parsed.who_info[where].previous_word or "in"
@@ -218,7 +218,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
         raise ActionRefused("You can't do that.")  # only supports put X in Y
     for item in what:
         if item is where:
-            p("You can't put <item>%s</> %s itself." % (item.title, word_before))
+            p("You can't put %s %s itself." % (item.title, word_before))
             continue
         try:
             if item in player:
@@ -231,7 +231,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
                 p("You take %s." % item.title)
                 player.tell_others("{Actor} takes %s." % item.title)
                 item.move(where, player)
-                p("You put it in the <item>%s</>." % where.name)
+                p("You put it in the %s." % where.name)
                 player.tell_others("{Actor} puts it in the %s." % where.name)
         except ActionRefused as x:
             refused.append((item, str(x)))
@@ -240,7 +240,7 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
     if inventory_items:
         items_msg = lang.join(lang.a(item.title) for item in inventory_items)
         player.tell_others("{Actor} puts %s in the %s." % (items_msg, where.name))
-        p("You put <item>{items}</> in the <item>{where}</>.".format(items=items_msg, where=where.name))
+        p("You put {items} in the {where}.".format(items=items_msg, where=where.name))
 
 
 def replace_items(player: Player, existing: List[base.Item], replacement: base.Item,
@@ -344,7 +344,7 @@ def do_loot(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         raise ParseError("Please be more specific, you can only loot from one thing at a time.")
     container = parsed.who_1
     if not isinstance(container, base.Container):
-        raise ActionRefused("You can't take anything from <item>%s</>." % container.title)
+        raise ActionRefused("You can't take anything from %s." % container.title)
     raise RetryParse("take all from " + parsed.who_1.name)
 
 
@@ -379,7 +379,7 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         player.tell_others("{Actor} tries to steal things from %s." % where.title)
         if where.aggressive:
             where.start_attack(player)  # stealing stuff is a hostile act!
-        raise ActionRefused("You can't just steal stuff from <living>%s</>!" % where.title)
+        raise ActionRefused("You can't just steal stuff from %s!" % where.title)
     elif parsed.verb == "steal" or parsed.verb == "rob":
         if where is None:
             raise ActionRefused("Steal what from whom?")
@@ -435,7 +435,7 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
                         if item in player:
                             p("You've already got it.")
                         else:
-                            p("There's no <item>%s</> here." % item.name)
+                            p("There's no %s here." % item.name)
                 take_stuff(player, items_to_take, player.location)
                 return
             p("Take things from what?")
@@ -446,11 +446,11 @@ def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudOb
     if not items:
         return 0
     if where_str:
-        player_msg = "You take <item>{items}</> from the <item>%s</>." % where_str
-        room_msg = "<player>{{Actor}}</> takes <item>{items}</> from the <item>%s</>." % where_str
+        player_msg = "You take {items} from the %s." % where_str
+        room_msg = "{{Actor}} takes {items} from the %s." % where_str
     else:
-        player_msg = "You take <item>{items}</>."
-        room_msg = "<player>{{Actor}}</> takes <item>{items}</>."
+        player_msg = "You take {items}."
+        room_msg = "{{Actor}} takes {items}."
     items = list(items)
     refused = []
     for item in items:
@@ -493,11 +493,11 @@ def do_throw(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     if item in player.location:
         # first take the item from the room
         item.move(player, player, verb="take")
-        player.tell("You take <item>%s</>." % item.title)
+        player.tell("You take %s." % item.title)
         player.tell_others("{Actor} takes %s." % item.title)
     # throw the item back into the room, missing the target by a hair. Possibly start combat.
     item.move(player.location, player, verb="throw")
-    player.tell("You throw the <item>%s</> at %s, missing %s by a hair." % (item.title, where.title, where.objective))
+    player.tell("You throw the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     player.tell_others("{Actor} throws the %s at %s, missing %s by a hair." % (item.title, where.title, where.objective))
     if isinstance(where, base.Living) and where.aggressive:
         where.start_attack(player)
@@ -535,10 +535,10 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                         recipient.money += amount
                         amount_formatted = ctx.driver.moneyfmt.display(amount)
                         player_title = lang.capital(player.title)
-                        room_msg = "<player>%s</> gave <living>%s</> some money." % (player_title, recipient.title)
-                        recipient_msg = "<player>%s</> gave you <item>%s</>." % (player_title, amount_formatted)
+                        room_msg = "%s gave %s some money." % (player_title, recipient.title)
+                        recipient_msg = "%s gave you %s." % (player_title, amount_formatted)
                         player.location.tell(room_msg, player, {recipient}, recipient_msg)
-                        player.tell("You gave <living>%s</> <item>%s</>." % (recipient.title, amount_formatted))
+                        player.tell("You gave %s %s." % (recipient.title, amount_formatted))
                         return
                     else:
                         raise ActionRefused("You keep your money.")
@@ -605,12 +605,12 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
     if items:
         items_str = lang.join(lang.a(item.title) for item in items)
         player_str = lang.capital(player.title)
-        room_msg = "<player>%s</> gives <item>%s</> to <living>%s</>." % (player_str, items_str, target.title)
-        target_msg = "<player>%s</> gives you <item>%s</>." % (player_str, items_str)
+        room_msg = "%s gives %s to %s." % (player_str, items_str, target.title)
+        target_msg = "%s gives you %s." % (player_str, items_str)
         player.location.tell(room_msg, exclude_living=player, specific_targets={target}, specific_target_msg=target_msg)
-        p("You give <living>%s</> <item>%s</>." % (target.title, items_str))
+        p("You give %s %s." % (target.title, items_str))
     else:
-        p("You didn't give <living>%s</> anything." % target.title)
+        p("You didn't give %s anything." % target.title)
 
 
 @cmd("help")
@@ -698,7 +698,7 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
     if living:
         if living is player:
             # player examines him/herself
-            p("You are <living>%s</>. But you knew that already." % lang.capital(living.title))
+            p("You are %s. But you knew that already." % lang.capital(living.title))
             player.tell_others("{Actor} is looking at %sself." % living.objective)
             return
         # if "wizard" in player.privileges:
@@ -706,7 +706,7 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         if living.description:
             p(living.description)
         else:
-            p("This is <living>%s</>." % living.title)
+            p("This is %s." % living.title)
         if living.stats.race != "human":
             # only print this race related info when dealing with creatures other than humans
             if living.stats.bodytype and living.stats.size:
@@ -727,12 +727,12 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
             p(item.extra_desc[name])   # print the extra description, rather than a generic message
         else:
             if item in player:
-                p("You're carrying <item>%s</>." % lang.a(item.title))
+                p("You're carrying %s." % lang.a(item.title))
             elif container and container in player:
                 player.tell_object_location(item, container, True)
             else:
                 if not item.description:
-                    p("You see <item>%s</>." % lang.a(item.title))
+                    p("You see %s." % lang.a(item.title))
             if item.description:
                 p(item.description)
         try:
@@ -741,15 +741,15 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
             pass
         else:
             if inventory:
-                p("It contains: <item>%s</>." % lang.join(subitem.title for subitem in inventory))
+                p("It contains: %s." % lang.join(subitem.title for subitem in inventory))
             else:
                 p("It's empty.")
     elif name in player.location.exits:
         p("It seems you can go there:")
-        p("<exit>" + player.location.exits[name].description + "</>")
+        p(player.location.exits[name].description)
     elif name in abbreviations and abbreviations[name] in player.location.exits:
         p("It seems you can go there:")
-        p("<exit>" + player.location.exits[abbreviations[name]].description + "</>")
+        p(player.location.exits[abbreviations[name]].description)
     else:
         # check if name is in location's or an item's extradesc
         text = player.search_extradesc(name)
@@ -774,7 +774,7 @@ def do_stats(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         raise ActionRefused("Show stats from who?")
     gender = lang.GENDERS[target.gender]
     race = target.stats.race or "creature"
-    player.tell("<living>%s</> (%s)" % (target.title, target.name), end=True)
+    player.tell("%s (%s)" % (target.title, target.name), end=True)
     if target is player:
         # if the target inspected is self, show level as well
         player.tell("Level %d " % target.stats.level)
@@ -815,8 +815,8 @@ def do_tell(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     else:
         unparsed = parsed.unparsed[len(name):].lstrip()
         if unparsed:
-            living.tell("<player>%s</> tells you: %s" % (player.name, unparsed))
-            player.tell("You told <living>%s</>." % name)
+            living.tell("%s tells you: %s" % (player.name, unparsed))
+            player.tell("You told %s." % name)
         else:
             player.tell("Tell %s what?" % living.objective)
 
@@ -969,7 +969,7 @@ def do_who(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
         otherplayer = ctx.driver.search_player(name)  # global player search
         if otherplayer:
             found = True
-            player.tell("<player>%s</> is playing, %s is currently in '<location>%s</>'." %
+            player.tell("%s is playing, %s is currently in '<location>%s</>'." %
                         (lang.capital(otherplayer.title), otherplayer.subjective, otherplayer.location.name))
         try:
             do_examine(player, parsed, ctx)
@@ -983,7 +983,7 @@ def do_who(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
         player.tell("\n")
         for conn in ctx.driver.all_players.values():
             other = conn.player
-            player.tell("<player>%s</> (%s): currently in <location>%s</>." %
+            player.tell("%s (%s): currently in <location>%s</>." %
                         (lang.capital(other.name), other.title, other.location.name), end=True)
 
 
@@ -994,7 +994,7 @@ def do_open(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         raise ParseError("%s what? With what?" % lang.capital(parsed.verb))
     if parsed.who_count:
         if isinstance(parsed.who_1, base.Living):
-            raise ActionRefused("You can't do that with <living>%s</>." % parsed.who_1.title)
+            raise ActionRefused("You can't do that with %s." % parsed.who_1.title)
     what_name = parsed.args[0]
     with_item_name = None
     with_item = None
@@ -1010,7 +1010,7 @@ def do_open(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             with_item = player.search_item(with_item_name,
                                            include_inventory=True, include_location=False, include_containers_in_inventory=False)
             if not with_item:
-                raise ActionRefused("You don't have <item>%s</>." % lang.a(with_item_name))
+                raise ActionRefused("You don't have %s." % lang.a(with_item_name))
         getattr(what, parsed.verb)(player, with_item)
         # no need to tell the player or the room, because the verb handler already did this
     else:
@@ -1086,7 +1086,7 @@ def do_what(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     # is it an exit in the current room?
     if name in player.location.exits:
         found = True
-        p("It's a possible way to leave your current location: <exit>%s</>" % player.location.exits[name].short_description)
+        p("It's a possible way to leave your current location: %s" % player.location.exits[name].short_description)
     # is it a npc here?
     living = player.location.search_living(name)
     if living:
@@ -1098,9 +1098,9 @@ def do_what(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             gender = lang.GENDERS[living.gender]
             subj = lang.capital(living.subjective)
             if isinstance(living, Player):
-                p("<player>%s</> is a %s %s (player). %s's here." % (title, gender, living.stats.race or "creature", subj))
+                p("%s is a %s %s (player). %s's here." % (title, gender, living.stats.race or "creature", subj))
             else:
-                p("<living>%s</> is a %s %s. %s's here." % (title, gender, living.stats.race or "creature", subj))
+                p("%s is a %s %s. %s's here." % (title, gender, living.stats.race or "creature", subj))
     # is it an item somewhere?
     item, container = player.locate_item(name, include_inventory=True, include_location=True, include_containers_in_inventory=True)
     if item:
@@ -1191,9 +1191,9 @@ def do_exits(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         player.tell("The following exits are defined for your current location:", end=True)
         for direction, exit in player.location.exits.items():
             if exit.target:
-                player.tell(" <exit>%s</> <dim>--></> <location>%s</>" % (direction, exit.target.name), end=True)
+                player.tell("%s <dim>--></> <location>%s</>" % (direction, exit.target.name), end=True)
             else:
-                player.tell(" <exit>%s</> <dim>--></> (unbound)" % direction, end=True)
+                player.tell("%s <dim>--></> (unbound)" % direction, end=True)
     else:
         player.tell("If you want to know about the possible exits from your location,")
         player.tell("look around the room. Usually the exits are easily visible.")
@@ -1357,11 +1357,11 @@ def do_show(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         raise ParseError("Show what to whom?")
     shown, target = parsed.who_12
     if shown not in player:
-        raise ActionRefused("You don't have <item>%s</>." % lang.a(shown.title))
+        raise ActionRefused("You don't have %s." % lang.a(shown.title))
     if target is player:
-        player.tell("You show the <item>%s</> to yourself. Well, that was interesting." % shown.title)
+        player.tell("You show the %s to yourself. Well, that was interesting." % shown.title)
     else:
-        player.tell("You show the <item>%s</> to <living>%s</>." % (shown.title, target.title))
+        player.tell("You show the %s to %s." % (shown.title, target.title))
     room_msg = "%s shows %s to %s." % (lang.capital(player.title), lang.a(shown.title), target.title)
     target_msg = "%s shows you %s." % (lang.capital(player.title), lang.a(shown.title))
     player.location.tell(room_msg, exclude_living=player, specific_target_msg=target_msg, specific_targets={target})
@@ -1622,10 +1622,6 @@ def do_teststyles(player: Player, parsed: base.ParseResult, ctx: util.Context) -
         ("ul", "<ul>This is UNDERLINED.</>"),
         ("it", "<it>This is ITALIC.</>"),
         ("rev", "<rev>This is REVERSE VIDEO.</>"),
-        ("living", "<living>This is LIVING.</>"),
-        ("player", "<player>This is PLAYER.</>"),
-        ("item", "<item>This is ITEM.</>"),
-        ("exit", "<exit>This is EXIT.</>"),
         ("location", "<location>This is LOCATION.</>"),
         ("(combined)", "<ul><bright>Bright underlined. <rev>(and reverse video even)</>")
     ]

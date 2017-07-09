@@ -215,7 +215,7 @@ def do_wiretap(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
             if isinstance(living, base.Item):
                 raise ActionRefused("Can't wiretap an item, try a living being or a location instead.")
             player.create_wiretap(living)
-            player.tell("Wiretapped <living>%s</>." % living.name)
+            player.tell("Wiretapped %s." % living.name)
     else:
         raise ActionRefused("Wiretap who?")
 
@@ -309,7 +309,7 @@ def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
         raise ActionRefused("You can only return one person at a time.")
     previous_location = who.teleported_from
     if previous_location:
-        player.tell("Returning <player>%s</> to <location>%s</>" % (who.name, previous_location.name))
+        player.tell("Returning %s to <location>%s</>" % (who.name, previous_location.name))
         who.location.tell("Suddenly, a shimmering portal opens!")
         room_msg = "%s is sucked into it, and the portal quickly closes behind %s." % (lang.capital(who.title), who.objective)
         who.location.tell(room_msg, specific_targets={who}, specific_target_msg="You are sucked into it!")
@@ -318,7 +318,7 @@ def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
         who.tell_others("Suddenly, a shimmering portal opens!")
         who.tell_others("{Actor} tumbles out of it, and the portal quickly closes again.")
     else:
-        player.tell("Can't determine <player>%s</>'s previous location." % who.name)
+        player.tell("Can't determine %s's previous location." % who.name)
 
 
 @wizcmd("reload")
@@ -360,9 +360,9 @@ items that are normally fixed in place (move item to playername)."""
     elif thing in player.location:
         thing_container = player.location       # type: ignore
     else:
-        raise ParseError("There seems to be no <item>%s</> here." % thing.name)
+        raise ParseError("There seems to be no %s here." % thing.name)
     thing.move(target, player)
-    player.tell("Moved <item>%s</> from %s to %s." % (thing.name, thing_container.name, target.name))
+    player.tell("Moved %s from %s to %s." % (thing.name, thing_container.name, target.name))
     player.tell_others("{Actor} moved %s into %s." % (thing.title, target.title))
 
 
@@ -518,16 +518,16 @@ def do_force(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         raise ParseError("Force whom to do what?")
     target = parsed.who_1
     if not isinstance(target, base.Living):
-        raise ActionRefused("You cannot force <item>%s</> to do anything." % target.title)
+        raise ActionRefused("You cannot force %s to do anything." % target.title)
     verb = parsed.args[1]
     # simple check for verb validness
     if verb not in ctx.driver.current_verbs(target) and not player.soul.is_verb(verb) and verb not in target.location.exits:
         raise ParseError("You cannot let them do '%s'; I don't know that verb." % verb)
     cmd_parts = parsed.unparsed.partition(verb)
     cmd = cmd_parts[1] + cmd_parts[2]
-    room_msg = "<player>%s</> coerces <player>%s</> into doing something." % (lang.capital(player.title), target.title)
-    target_msg = "<player>%s</> coerces you into doing something!" % lang.capital(player.title)
-    player.tell("You coerce <player>%s</> into following your orders." % target.title)
+    room_msg = "%s coerces %s into doing something." % (lang.capital(player.title), target.title)
+    target_msg = "%s coerces you into doing something!" % lang.capital(player.title)
+    player.tell("You coerce %s into following your orders." % target.title)
     player.location.tell(room_msg, exclude_living=player, specific_targets={target}, specific_target_msg=target_msg)
     if isinstance(target, Player):
         target.store_input_line(cmd)   # insert the command into the target player's input buffer
@@ -581,7 +581,7 @@ def do_add_priv(player: Player, parsed: base.ParseResult, ctx: util.Context) -> 
         raise ActionRefused("No such account.")
     account.privileges.add(priv)
     new_privs = ctx.driver.mud_accounts.update_privileges(name, account.privileges, player)
-    player.tell("Privileges of account <player>%s</> updated to: %s." % (name, new_privs))
+    player.tell("Privileges of account %s updated to: %s." % (name, new_privs))
     player.tell("It will become active on their next login.")
 
 
@@ -603,7 +603,7 @@ def do_remove_priv(player: Player, parsed: base.ParseResult, ctx: util.Context) 
     if priv in account.privileges:
         account.privileges.remove(priv)
         new_privs = ctx.driver.mud_accounts.update_privileges(name, account.privileges, player)
-        player.tell("Privileges of account <player>%s</> updated to: %s." % (name, new_privs))
+        player.tell("Privileges of account %s updated to: %s." % (name, new_privs))
         other = ctx.driver.search_player(name)
         if other:
             other.tell("%s has revoked a certain privilege from you. You are forced to log out and have to log in again. "
@@ -626,12 +626,12 @@ def do_ban_unban_player(player: Player, parsed: base.ParseResult, ctx: util.Cont
         raise ActionRefused("No such account.")
     if parsed.verb == "!ban":
         ctx.driver.mud_accounts.ban(account.name, player)
-        player.tell("Account <player>%s</> has been banned." % account.name)
+        player.tell("Account %s has been banned." % account.name)
         player.tell("They will not be able to log in until unbanned. "
                     "If they're in the game already, you'll have to kick them manually if desired.")
     elif parsed.verb == "!unban":
         ctx.driver.mud_accounts.unban(account.name, player)
-        player.tell("Account <player>%s</> has been unbanned." % account.name)
+        player.tell("Account %s has been unbanned." % account.name)
         player.tell("They will be able to log in again.")
 
 
