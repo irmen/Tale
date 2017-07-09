@@ -129,7 +129,7 @@ class TestBasicItems(unittest.TestCase):
         self.assertFalse(brd.takeable)
         with self.assertRaises(ActionRefused) as x:
             brd.move(p, p, verb="frob")
-        self.assertEquals("You can't frob board.", str(x.exception))
+        self.assertEqual("You can't frob board.", str(x.exception))
         bx = basic.Boxlike("box")
         self.assertTrue(bx.takeable)
         bx.move(p, p)
@@ -137,10 +137,10 @@ class TestBasicItems(unittest.TestCase):
         self.assertFalse(bnk.takeable)
         with self.assertRaises(ActionRefused) as x:
             bnk.move(p, p, verb="frob")
-        self.assertEquals("The bank won't budge.", str(x.exception))
+        self.assertEqual("The bank won't budge.", str(x.exception))
         with self.assertRaises(ActionRefused) as x:
             bnk.allow_item_move(p, verb="frob")
-        self.assertEquals("The bank won't budge.", str(x.exception))
+        self.assertEqual("The bank won't budge.", str(x.exception))
         # now flip the flags around
         bnk.takeable = True
         bnk.allow_item_move(p)
@@ -148,13 +148,13 @@ class TestBasicItems(unittest.TestCase):
         bx.takeable = False
         with self.assertRaises(ActionRefused) as x:
             bx.move(p, p, verb="frob")
-        self.assertEquals("You can't frob box.", str(x.exception))
+        self.assertEqual("You can't frob box.", str(x.exception))
         brd.takeable = True
         brd.move(p, p)
         item.takeable = False
         with self.assertRaises(ActionRefused) as x:
             item.move(p, p, verb="frob")
-        self.assertEquals("You can't frob item.", str(x.exception))
+        self.assertEqual("You can't frob item.", str(x.exception))
 
 
 if __name__ == '__main__':

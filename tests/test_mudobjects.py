@@ -487,7 +487,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertIs(loc1, loc2.exits["door_to_one"].target)
         key = Key("key")
         key.key_for(door_one_two)
-        self.assertEquals("555", key.key_code)
+        self.assertEqual("555", key.key_code)
         pubsub1 = PubsubCollector()
         pubsub2 = PubsubCollector()
         loc1.get_wiretap().subscribe(pubsub1)
@@ -777,7 +777,7 @@ class TestLiving(unittest.TestCase):
         j.do_command_verb("fart", ctx)         # a soul emote
         j.do_command_verb("take note", ctx)    # a command verb
         pubsub.sync()
-        self.assertEquals(["Julie farts.", "Julie takes a note."], listener.messages)
+        self.assertEqual(["Julie farts.", "Julie takes a note."], listener.messages)
         self.assertEqual(1, j.inventory_size)
 
 

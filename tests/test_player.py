@@ -446,13 +446,13 @@ class TestPlayer(unittest.TestCase):
         self.assertTrue(chair_in_inventory.notify_called)
         parsed, actor = chair.notify_args
         self.assertIs(player, actor)
-        self.assertEquals("kerwaffle", parsed.verb)
+        self.assertEqual("kerwaffle", parsed.verb)
         parsed, actor = player.notify_args
         self.assertIs(player, actor)
-        self.assertEquals("kerwaffle", parsed.verb)
+        self.assertEqual("kerwaffle", parsed.verb)
         parsed, actor = chair_in_inventory.notify_args
         self.assertIs(player, actor)
-        self.assertEquals("kerwaffle", parsed.verb)
+        self.assertEqual("kerwaffle", parsed.verb)
 
     def test_move_notify(self):
         class LocationNotify(Location):
