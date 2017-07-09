@@ -103,9 +103,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
         if not conn:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         if not conn or not conn.player or not conn.io:
-            print("MUD-EVENTSOURCE: CLOSING SESSION")   # XXX
             raise SessionMiddleware.CloseSession("{\"error\": \"no longer a valid connection\"}", "application/json")
-        print("MUD-EVENTSOURCE: NEW HANDLER")   # XXX
         return super().wsgi_handle_eventsource(environ, parameters, start_response)
 
     def wsgi_handle_quit(self, environ: Dict[str, Any], parameters: Dict[str, str],
