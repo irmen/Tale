@@ -15,10 +15,7 @@ from ..util import format_traceback
 
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
 
-ALL_STYLE_TAGS = {
-    "dim", "normal", "bright", "ul", "it", "rev", "clear", "/",
-    "living", "player", "item", "exit", "location", "monospaced", "/monospaced"
-}
+ALL_STYLE_TAGS = {"dim", "normal", "bright", "ul", "it", "rev", "clear", "location", "monospaced", "/monospaced", "/"}
 
 
 def strip_text_styles(text: Union[str, Sequence[str]]) -> Union[str, Sequence[str]]:

@@ -35,10 +35,6 @@ style_words = {
     "it": colorama.Style.ITALIC,
     "rev": colorama.Style.REVERSEVID,
     "/": colorama.Style.RESET_ALL,
-    "living": colorama.Style.BRIGHT,
-    "player": colorama.Style.BRIGHT,
-    "item": colorama.Style.BRIGHT,
-    "exit": colorama.Style.BRIGHT,
     "location": colorama.Style.BRIGHT,
     "clear": "\033[1;1H\033[2J",  # ansi sequence to clear the console screen
     "monospaced": "",  # we assume the console is already monospaced font
