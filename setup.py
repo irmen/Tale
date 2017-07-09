@@ -17,16 +17,10 @@ print("version=" + tale_version)
 setup(
     name='tale',
     version=tale_version,
-    packages=['tale', 'tale.cmds', 'tale.items', 'tale.tio', 'tale.demo', 'tale.demo.zones', 'tale.web'],
-    package_data={
-        'tale': ['soul_adverbs.txt'],
-        'tale.tio': ['quill_pen_paper.ico', 'quill_pen_paper.gif'],
-        'tale.web': ['*']
-    },
-    include_package_data=True,
-    url='http://packages.python.org/tale',
+    url='http://tale.readthedocs.io/',
     author='Irmen de Jong',
     author_email='irmen@razorvine.net',
+    license="LGPL3",
     description='Interactive Fiction, MUD & mudlib framework',
     long_description="""Tale is a framework for creating interactive fiction (text adventures), or MUDs (multi-user dungeons).
 
@@ -43,6 +37,13 @@ You can also run the tiny embedded test story like this, after you've installed 
 
 The source code repository is on Github: https://github.com/irmen/Tale
 """,
+    packages=['tale', 'tale.cmds', 'tale.items', 'tale.tio', 'tale.demo', 'tale.demo.zones', 'tale.web'],
+    package_data={
+        'tale': ['soul_adverbs.txt'],
+        'tale.tio': ['quill_pen_paper.ico', 'quill_pen_paper.gif'],
+        'tale.web': ['*']
+    },
+    include_package_data=True,
     keywords="mud, mudlib, interactive fiction, text adventure",
     scripts=["scripts/tale-run.cmd", "scripts/tale-run"],
     platforms="any",
@@ -50,8 +51,6 @@ The source code repository is on Github: https://github.com/irmen/Tale
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
-        "Environment :: MacOS X",
-        "Environment :: Win32 (MS Windows)",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

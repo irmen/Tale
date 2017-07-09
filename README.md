@@ -26,7 +26,6 @@ Required third party libraries:
 Optional third party library:
 - ``prompt_toolkit``  (provides a nicer console text interface experience)
 
-Read the documentation for more details on how to get started.
-It is online at http://pythonhosted.org/tale/ and http://tale.readthedocs.io/
+Read the documentation for more details on how to get started, see http://tale.readthedocs.io/
 
 If my server is up, you can find a running MUD instance there, see http://www.razorvine.net/
