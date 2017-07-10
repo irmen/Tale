@@ -24,8 +24,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[http] deal with proxy timeouts on eventsource connection (nginx) - send 'keepalive' events every now and then? or reconnect automatically?
-[http] try to fix the eventsource polyfill in Edge, it doesn't always immediately show the event message
 [code] Flesh out more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system.

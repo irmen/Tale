@@ -90,8 +90,8 @@ class HttpIo(iobase.IoAdapterBase):
             special, self.__html_special = self.__html_special, []
             return special
 
-    def wait_html_available(self):
-        self.__new_html_available.wait()
+    def wait_html_available(self, timeout: float=None) -> None:
+        self.__new_html_available.wait(timeout=timeout)
         self.__new_html_available.clear()
 
     def singleplayer_mainloop(self, player_connection: PlayerConnection) -> None:
@@ -321,11 +321,13 @@ class TaleWsgiAppBase:
             return self.wsgi_internal_server_error_json(start_response, "not logged in")
         start_response('200 OK', [('Content-Type', 'text/event-stream; charset=utf-8'),
                                   ('Cache-Control', 'no-cache'),
+                                  # ('Transfer-Encoding', 'chunked'),    not allowed by wsgi
                                   ('X-Accel-Buffering', 'no')   # nginx
                                   ])
+        yield (":" + ' '*2050+"\n\n").encode("utf-8")   # padding for older browsers
         while self.driver.is_running():
             if conn.io and conn.player:
-                conn.io.wait_html_available()
+                conn.io.wait_html_available(timeout=15)   # keepalives every 15 sec
             if not conn.io or not conn.player:
                 break
             html = conn.io.get_html_to_browser()
@@ -340,6 +342,8 @@ class TaleWsgiAppBase:
                 result = "event: text\nid: {event_id}\ndata: {data}\n\n"\
                     .format(event_id=str(time.time()), data=json.dumps(response))
                 yield result.encode("utf-8")
+            else:
+                yield "data: keepalive\n\n".encode("utf-8")
 
     def wsgi_handle_tabcomplete(self, environ: Dict[str, Any], parameters: Dict[str, str],
                                 start_response: WsgiStartResponseType) -> Iterable[bytes]:
