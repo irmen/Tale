@@ -1586,8 +1586,7 @@ class Door(Exit):
 
     def __repr__(self):
         target = self.target.name if self.target else self._target_str
-        locked = "locked" if self.locked else "open"
-        return "<base.Door '%s'->'%s' (%s) #%d @ 0x%x>" % (self.name, target, locked, self.vnum, id(self))
+        return "<base.Door '%s'->'%s' #%d @ 0x%x>" % (self.name, target, self.vnum, id(self))
 
     def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through this door?"""

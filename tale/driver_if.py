@@ -429,9 +429,11 @@ class SavegameExistingObjectsFinder:
             raise errors.TaleError("item inconsistency for vnum " + str(vnum))
         return item
 
-    def resolve_exit(self, vnum: int, classname: str, baseclassname: str) -> Union[base.Exit, base.Door]:
+    def resolve_exit(self, vnum: int, name: str, classname: str, baseclassname: str) -> Union[base.Exit, base.Door]:
         assert baseclassname == "tale.base.Exit"
         exit = base.MudObjRegistry.all_exits[vnum]
         if isinstance(exit, base.Door):
             assert classname == "tale.base.Door"
+        if exit.name != name or savegames.qual_classname(exit) != classname or savegames.qual_baseclassname(exit) != baseclassname:
+            raise errors.TaleError("exit/door inconsistency for vnum " + str(vnum))
         return exit

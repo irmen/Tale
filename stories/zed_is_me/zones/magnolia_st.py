@@ -88,4 +88,3 @@ medicine.value = Apothecary.pills_price
 medicine.aliases = {"bottle", "medicine"}
 apothecary.init_inventory([medicine])
 pharmacy.insert(apothecary, None)
-

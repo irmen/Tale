@@ -324,7 +324,7 @@ class TaleWsgiAppBase:
                                   # ('Transfer-Encoding', 'chunked'),    not allowed by wsgi
                                   ('X-Accel-Buffering', 'no')   # nginx
                                   ])
-        yield (":" + ' '*2050+"\n\n").encode("utf-8")   # padding for older browsers
+        yield (":" + ' ' * 2050 + "\n\n").encode("utf-8")   # padding for older browsers
         while self.driver.is_running():
             if conn.io and conn.player:
                 conn.io.wait_html_available(timeout=15)   # keepalives every 15 sec

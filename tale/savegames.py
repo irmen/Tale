@@ -445,7 +445,7 @@ class TaleDeserializer:
         return hs
 
     def make_Exit(self, data: Dict, existing_object_lookup) -> Union[Exit, Door]:
-        exit = existing_object_lookup.resolve_exit(data["vnum"], data["__class__"], data["__base_class__"])
+        exit = existing_object_lookup.resolve_exit(data["vnum"], data["name"], data["__class__"], data["__base_class__"])
         target_loc = existing_object_lookup.resolve_location_ref(*data["target"])
         if exit.target is not target_loc:
             raise TaleError("exit target location changed, exit vnum " + str(exit.vnum))
@@ -455,6 +455,14 @@ class TaleDeserializer:
         exit.verbs = data["verbs"]
         exit.story_data = data["story_data"]
         exit._target_str = data.get("_target_str")
+        if isinstance(exit, Door):
+            exit.locked = data["locked"]
+            exit.opened = data["opened"]
+            exit.key_code = data["key_code"]
+            if data["linked_door"]:
+                linked_door = existing_object_lookup.resolve_exit(*data["linked_door"])
+                if exit.linked_door is not linked_door:
+                    raise TaleError("door linked door changed, door vnum " + str(exit.vnum))  # type: ignore
         return exit
 
     def make_Location(self, data: Dict, existing_object_lookup) -> Location:
