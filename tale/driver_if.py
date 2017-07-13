@@ -409,7 +409,7 @@ class SavegameExistingObjectsFinder:
         loc = base.MudObjRegistry.all_locations.get(vnum, None)
         if not loc:
             raise LookupError("location vnum not found: " + str(vnum))
-        if loc.name != name or savegames.qual_classname(loc) != classname or savegames.qual_baseclassname(loc) != baseclassname:
+        if loc.name != name or savegames.qual_baseclassname(loc) != baseclassname:
             raise errors.TaleError("location inconsistency for vnum " + str(vnum))
         return loc
 
@@ -417,7 +417,7 @@ class SavegameExistingObjectsFinder:
         liv = base.MudObjRegistry.all_livings.get(vnum, None)
         if not liv:
             raise LookupError("living vnum not found: " + str(vnum))
-        if liv.name != name or savegames.qual_classname(liv) != classname or savegames.qual_baseclassname(liv) != baseclassname:
+        if liv.name != name or savegames.qual_baseclassname(liv) != baseclassname:
             raise errors.TaleError("living inconsistency for vnum " + str(vnum))
         return liv
 
@@ -425,7 +425,7 @@ class SavegameExistingObjectsFinder:
         item = base.MudObjRegistry.all_items.get(vnum, None)
         if not item:
             raise LookupError("item vnum not found: " + str(vnum))
-        if item.name != name or savegames.qual_classname(item) != classname or savegames.qual_baseclassname(item) != baseclassname:
+        if item.name != name or savegames.qual_baseclassname(item) != baseclassname:
             raise errors.TaleError("item inconsistency for vnum " + str(vnum))
         return item
 
@@ -434,6 +434,6 @@ class SavegameExistingObjectsFinder:
         exit = base.MudObjRegistry.all_exits[vnum]
         if isinstance(exit, base.Door):
             assert classname == "tale.base.Door"
-        if exit.name != name or savegames.qual_classname(exit) != classname or savegames.qual_baseclassname(exit) != baseclassname:
+        if exit.name != name or savegames.qual_baseclassname(exit) != baseclassname:
             raise errors.TaleError("exit/door inconsistency for vnum " + str(vnum))
         return exit

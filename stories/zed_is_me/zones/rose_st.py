@@ -11,9 +11,11 @@ import random
 import zones.houses
 import zones.npcs
 
-from tale.base import Location, Exit, Door, Key, _limbo
+from tale.base import Location, Exit, Door, Key, Living, ParseResult, _limbo
 from tale.items.basic import Money
+from tale.errors import ParseError, ActionRefused, StoryCompleted
 from tale.util import call_periodically, Context
+from tale import mud_context
 
 
 north_street = Location("Rose Street", "The northern part of Rose Street.")
@@ -41,8 +43,39 @@ playground.add_exits([
 Exit.connect(playground, ["east", "street"], "Rose Street is back east.", None,
              north_street, ["west", "playground"], "The children's playground is to the west.", None)
 
-carpark = Location("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "
-                                  "One yellow convertible grabs your attention.")
+
+class CarPark(Location):
+    def init(self):
+        self.verbs = {"drive": "Drive a car",
+                      "open": "Open something",
+                      "enter": "Enter something",
+                      "sit": "Sit somewhere",
+                      "use": "Use something",
+                      "start": "Start something"
+                      }
+
+    def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
+        if parsed.verb in ("drive", "open", "enter", "sit", "use", "start"):
+            if not parsed.args:
+                raise ParseError("%s what?" % parsed.verb)
+            if "yellow" not in parsed.args and "convertible" not in parsed.args:
+                if "car" in parsed.args or "engine" in parsed.args:
+                    raise ActionRefused("Most of the cars are locked. You should look for one that isn't.")
+                raise ActionRefused("You cannot do that.")
+            # check if Peter is with you
+            if not self.search_living("Peter"):
+                raise ActionRefused("Surely you wouldn't leave the town without your friend Peter! "
+                                    "You should find him and get out here together!")
+            # player drives the yellow car away from here together with her friend Peter, and thus the story ends!
+            actor.tell("\n")
+            actor.tell("\n")
+            actor.tell_text_file(mud_context.resources["messages/completion_success.txt"])
+            raise StoryCompleted
+        return False
+
+
+carpark = CarPark("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "
+                                 "One yellow convertible grabs your attention.")
 carpark.add_extradesc({"cars"}, "They look abandoned. The doors are all locked, except the doors of the yellow convertible.")
 carpark.add_extradesc({"convertible", "yellow"}, "It is a small two seater. You can't believe your eyes, "
                                                  "but the key is actually still in the ignition!")

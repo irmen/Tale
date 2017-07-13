@@ -13,8 +13,8 @@ Single-Player IF turn-based (command-driven).
 - you'll have to 'haggle'/'bargain' (custom verbs) that medicine from someone else
 - haggling with less money (or simply give the full price $)
 - find enough money first (haggle needs $10 at least, full price=$20)
-- @todo yellow car in carpark is exit of the game if Peter is with you
-- @todo remove temp exit
+
+- @todo peter should follow the player (if medicine is carried)
 - @todo wanderers and 'flee' mechanic
 
 
@@ -45,10 +45,10 @@ MAP OF THE TOWN:
 |          |                           |          1-way^          |            |                  |           |
 +----------+                           |               ^          |            |                  |           |
                                  +-----v----+     +----+-+        +---+---+----+                  +-----------+
-                 +-----+         | Neighbor |     |      |            |   |
-                 |TEMP <---hatch-| House    +----->      |            |   |
-                 |EXIT |         |          |     | Gar  |            |   |
-                 +-----+         +------+---+     | den  |            |   |
+                                 | Neighbor |     |      |            |   |
+                                 | House    +----->      |            |   |
+                                 |          |     | Gar  |            |   |
+                                 +------+---+     | den  |            |   |
                                         |         |      |            Rose street
                                  +------v---+     |      |            |   |
                                  |          +----->      |            |   |

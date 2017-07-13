@@ -775,7 +775,10 @@ class Location(MudObject):
         obj.location = None
 
     def handle_verb(self, parsed: ParseResult, actor: 'Living') -> bool:
-        """Handle a custom verb (specified in the verbs dict). Return True if handled, False if not handled."""
+        """
+        Handle a custom verb (specified in the verbs dict of a living/item/exit in this location).
+        Return True if handled, False if not handled.
+        """
         # @todo this code cannot deal with yields directly but you can raise AsyncDialog exception,
         # that indicates to the driver that it should initiate the given async dialog when continuing.
         handled = any(living._handle_verb_base(parsed, actor) for living in self.livings)

@@ -1,3 +1,6 @@
+"""
+NPCS in the game.
+"""
 import random
 from tale.base import Living, Door, ParseResult, Item
 from tale.util import call_periodically, Context

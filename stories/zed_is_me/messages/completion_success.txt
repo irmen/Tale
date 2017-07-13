@@ -1,1 +1,13 @@
-@completion-success text here@
+You open the car's doors and Peter gets into the passenger seat.
+Thankfully the convertible is in mint condition and after turning the
+key in the ignition the engine roars to life.
+Stepping on the gas, you steer the vehicle down the road and head
+out of town. You should find the right people to tell about the
+situation in your home town!
+
+But that is part of the next chapter in this story.
+
+
+Congratulations, you finished this little interactive fiction story!
+
+We hope you enjoyed it!
