@@ -161,7 +161,7 @@ class TestLocations(unittest.TestCase):
         self.assertTrue(("road", "boing") in wiretap_road.msgs)
         self.assertTrue(("road", "The sound is coming from the south.") in wiretap_road.msgs, "road should give sound direction")
         self.assertTrue(("house", "boing") in wiretap_house.msgs)
-        self.assertTrue(("house", "You can't hear where the sound is coming from.") in wiretap_house.msgs, "in the house you can't locate the sound direction")
+        self.assertEqual(1, len(wiretap_house.msgs), "in the house you can't locate the sound direction")
 
     def test_nearby(self):
         plaza = Location("plaza")
@@ -356,11 +356,13 @@ class TestDoorsExits(unittest.TestCase):
         with self.assertRaises(ActionRefused):
             door2.unlock(key)
         door.locked = True
+        door.opened = False
         with self.assertRaises(ActionRefused):
             door.unlock(player)
         key.move(player, player)
         door.unlock(player)
         self.assertFalse(door.locked)
+        door.opened = False
         door.lock(player)
         self.assertTrue(door.locked)
         door.unlock(player)
@@ -496,12 +498,11 @@ class TestDoorsExits(unittest.TestCase):
         self.assertFalse(door_two_one.opened)
         lucy = Living("lucy", "f")
 
-        door_two_one.unlock(lucy, item=key)   # unlock door from other side
+        door_two_one.unlock(lucy, item=key)   # unlock and open door from other side
         self.assertFalse(door_one_two.locked)
-        door_two_one.open(lucy)    # open door from other side
         self.assertTrue(door_one_two.opened)
         pubsub.sync()
-        self.assertEqual(["The door_to_two is unlocked from the other side.", "The door_to_two is opened from the other side."], pubsub1.messages)
+        self.assertEqual(["The door_to_two is unlocked and opened from the other side."], pubsub1.messages)
         self.assertEqual([], pubsub2.messages)
         door_one_two.close(lucy)    # close door from other side
         door_one_two.lock(lucy, item=key)  # lock door from other side

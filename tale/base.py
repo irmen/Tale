@@ -957,7 +957,7 @@ class Living(MudObject):
             if actor is None or ("wizard" not in actor.privileges and "shopkeeper" not in actor.privileges):
                 if self.aggressive:
                     raise ActionRefused("It's probably not a good idea to give things to %s." % self.title)
-            raise
+                raise
         self.__inventory.add(item)
         item.contained_in = self
 
@@ -1659,11 +1659,13 @@ class Door(Exit):
             if not key:
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
-        actor.tell("Your %s fits, the %s is now unlocked." % (key.title, self.name))
-        actor.tell_others("{Actor} unlocks the %s with %s %s." % (self.name, actor.possessive, key.title))
+        self.opened = True
+        actor.tell("Your %s fits! You unlock the %s and open it." % (key.title, self.name))
+        actor.tell_others("{Actor} unlocks the %s with %s %s, and opens it." % (self.name, actor.possessive, key.title))
         if self.linked_door:
             self.linked_door.locked = False
-            self.target.tell("The %s is unlocked from the other side." % self.linked_door.name)
+            self.linked_door.opened = True
+            self.target.tell("The %s is unlocked and opened from the other side." % self.linked_door.name)
 
     def check_key(self, item: Item) -> bool:
         """Check if the item is a proper key for this door (based on key_code)"""

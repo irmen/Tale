@@ -23,6 +23,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[bug] loading door state doesn't work (door remains locked/closed)
 [code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system...!
