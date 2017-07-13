@@ -6,11 +6,11 @@ magnolia st. 1, pharmacy
 magnolia st. 2, magnolia st. 3, factory
 """
 
-import random
-from tale import mud_context, lang
-from tale.base import Location, Exit, Door, Living, ParseResult, Item
-from tale.errors import StoryCompleted, ActionRefused, ParseError, TaleError
+from tale import mud_context
+from tale.base import Location, Exit, Door, Item
+from tale.errors import StoryCompleted
 from zones import houses, rose_st
+from zones.npcs import Apothecary
 
 
 street1 = Location("Magnolia Street", "Your house is on Magnolia Street, one of the larger streets in town. "
@@ -77,90 +77,15 @@ end_exit = Exit(["hatch"], temp_game_end, "There's an ominous looking open hatch
 houses.neighbors_house.add_exits([end_exit])
 
 
-# the pharmacy sales person
-class Apothecary(Living):
-    pills_price = 20.0   # don't randomly change this, there's a fixed amount of money lying in the game...
-
-    def init(self):
-        super().init()
-        self.verbs["haggle"] = "Haggles with a person to make them sell you something below the actual price. " \
-                               "Provide the price you're offering."
-        self.verbs["bargain"] = "Try to make a person sell you something below the actual price. " \
-                                "Provide the price you're offering."
-        self.verbs["buy"] = "Purchase something."
-
-    @property
-    def description(self) -> str:
-        if self.search_item("pills", include_location=False):
-            return "%s looks scared, and clenches a small bottle in %s hands." % (lang.capital(self.subjective), self.possessive)
-        return "%s looks scared." % self.subjective
-
-    @description.setter
-    def description(self, value: str) -> None:
-        raise TaleError("cannot set dynamic description")
-
-    def handle_verb(self, parsed: ParseResult, actor: Living) -> bool:
-        pills = self.search_item("pills", include_location=False)
-        if parsed.verb in ("bargain", "haggle"):
-            if not parsed.args:
-                raise ParseError("For how much money do you want to haggle?")
-            if not pills:
-                raise ActionRefused("It is no longer available for sale.")
-            amount = mud_context.driver.moneyfmt.parse(parsed.args)
-            price = mud_context.driver.moneyfmt.display(self.pills_price)
-            if amount < self.pills_price / 2:
-                actor.tell("%s glares angrily at you and says, \"No way! I want at least half the original price! "
-                           "Did't I tell you? They were %s!\"" % (lang.capital(self.title), price))
-                raise ActionRefused()
-            self.do_buy_pills(actor, pills, amount)
-            return True
-        if parsed.verb == "buy":
-            if not parsed.args:
-                raise ParseError("Buy what?")
-            if "pills" in parsed.args or "bottle" in parsed.args or "medicine" in parsed.args:
-                if not pills:
-                    raise ActionRefused("It is no longer available for sale.")
-                self.do_buy_pills(actor, pills, self.pills_price)
-                return True
-            if pills:
-                raise ParseError("There's nothing left to buy in the shop, except for the pills the apothecary is holding.")
-            else:
-                raise ParseError("There's nothing left to buy.")
-        return False
-
-    def do_buy_pills(self, actor: Living, pills: Item, price: float) -> None:
-        if actor.money < price:
-            raise ActionRefused("You don't have enough money!")
-        actor.money -= price
-        self.money += price
-        pills.move(actor, self)
-        price_str = mud_context.driver.moneyfmt.display(price)
-        actor.tell("After handing %s the %s, %s gives you the %s." % (self.objective, price_str, self.subjective, pills.title))
-        self.tell_others("{Actor} says: \"Here's your medicine, now get out of here!\"")
-
-    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
-        if actor is self or parsed.verb in self.verbs:
-            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
-        # react on mentioning the medicine
-        if "medicine" in parsed.unparsed or "pills" in parsed.unparsed or "bottle" in parsed.unparsed:
-            if self.search_item("pills", include_location=False):  # do we still have the pills?
-                price = mud_context.driver.moneyfmt.display(self.pills_price)
-                self.tell_others("{Actor} clenches the bottle %s's holding even tighter. %s says: "
-                                 "\"You won't get them for free! They will cost you %s!\""
-                                 % (self.subjective, lang.capital(self.subjective), price))
-            else:
-                self.tell_others("{Actor} says: \"Good luck with it!\"")
-        if random.random() < 0.5:
-            actor.tell("%s glares at you." % lang.capital(self.title))
-
-
 apothecary = Apothecary("carla", "f", title="apothecary Carla")
 apothecary.extra_desc["bottle"] = "It is a small bottle of the pills that your friend Peter needs for his illness."
 apothecary.extra_desc["pills"] = apothecary.extra_desc["bottle"]
 apothecary.aliases.add("apothecary")
 
+# the medicine Peter needs
 medicine = Item("pills", "bottle of pills", descr="It looks like the medicine your friend Peter needs for his illness.")
 medicine.value = Apothecary.pills_price
 medicine.aliases = {"bottle", "medicine"}
 apothecary.init_inventory([medicine])
 pharmacy.insert(apothecary, None)
+

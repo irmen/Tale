@@ -9,8 +9,9 @@ butcher, storage room
 
 import random
 import zones.houses
+import zones.npcs
 
-from tale.base import Location, Exit, Door, Key, _limbo, Living, ParseResult
+from tale.base import Location, Exit, Door, Key, _limbo
 from tale.items.basic import Money
 from tale.util import call_periodically, Context
 
@@ -41,9 +42,10 @@ Exit.connect(playground, ["east", "street"], "Rose Street is back east.", None,
              north_street, ["west", "playground"], "The children's playground is to the west.", None)
 
 carpark = Location("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "
-                                  "One yellow car grabs your attention.")
-carpark.add_extradesc({"cars"}, "They look abandoned, but their doors are all locked.")
-carpark.add_extradesc({"car", "yellow"}, "It is a small two seater!")
+                                  "One yellow convertible grabs your attention.")
+carpark.add_extradesc({"cars"}, "They look abandoned. The doors are all locked, except the doors of the yellow convertible.")
+carpark.add_extradesc({"convertible", "yellow"}, "It is a small two seater. You can't believe your eyes, "
+                                                 "but the key is actually still in the ignition!")
 
 # not enough to buy the medicine, player needs to find more, or haggle:
 carpark.init_inventory([Money("wallet", 16.0, title="small wallet",
@@ -71,23 +73,6 @@ class StorageRoom(Location):
             living.do_socialize("shiver")
 
 
-class Friend(Living):
-    # @todo add more behavior (should follow player, to go to the car together, but only if player has the medicine)
-    @call_periodically(10.0, 20.0)
-    def say_something(self, ctx: Context) -> None:
-        door_open = any(d.opened for d in self.location.exits.values() if isinstance(d, Door))
-        if door_open:
-            self.do_socialize("say \"Finally someone who rescued me! Thank you so much.\"")   # @todo ...follow player
-        else:
-            self.do_command_verb("yell \"Help me, I'm locked in\"", ctx)
-
-    def notify_action(self, parsed: ParseResult, actor: Living) -> None:
-        if actor is self or parsed.verb in self.verbs:
-            return  # avoid reacting to ourselves, or reacting to verbs we already have a handler for
-        if self in parsed.who_info:
-            self.do_socialize("smile " + actor.name)
-
-
 butcher = Location("Butcher shop", "The town's butcher shop. Usually there's quite a few people waiting in line, but now it is deserted.")
 butcher.insert(parking_key, None)
 Exit.connect(butcher, ["north", "street"], "Rose street is back to the north.", None,
@@ -101,7 +86,7 @@ storage_room_door, _ = Door.connect(butcher, ["door", "storage"],
     "The door leads back to the shop.", None,
     locked=True, key_code="butcher1")
 
-friend = Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
+friend = zones.npcs.Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
 storage_room.insert(friend, None)
 
 butcher_key = Key("card", "security card", descr="It is a security card, with a single word 'storage' written on it.")
