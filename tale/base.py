@@ -673,8 +673,6 @@ class Location(MudObject):
                                 continue  # no direction description possible for this exit
                             exit.target.tell("The sound is coming from %s." % direction)
                             break
-                    else:
-                        exit.target.tell("You can't hear where the sound is coming from.")
 
     def nearby(self, no_traps: bool=True) -> Iterable['Location']:
         """
@@ -959,7 +957,7 @@ class Living(MudObject):
             if actor is None or ("wizard" not in actor.privileges and "shopkeeper" not in actor.privileges):
                 if self.aggressive:
                     raise ActionRefused("It's probably not a good idea to give things to %s." % self.title)
-                raise
+            raise
         self.__inventory.add(item)
         item.contained_in = self
 

@@ -454,7 +454,7 @@ class TaleDeserializer:
         exit.aliases = set(data.pop("aliases"))
         exit.verbs = data["verbs"]
         exit.story_data = data["story_data"]
-        exit._target_str = data["_target_str"]
+        exit._target_str = data.get("_target_str")
         return exit
 
     def make_Location(self, data: Dict, existing_object_lookup) -> Location:

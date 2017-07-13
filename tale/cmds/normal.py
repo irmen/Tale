@@ -599,8 +599,11 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
             item.move(target, player)
         except ActionRefused as x:
             refused.append((item, str(x)))
+    have_refused_message = False
     for item, message in refused:
-        p(message)
+        if message:
+            p(message)
+            have_refused_message = True
         items.remove(item)
     if items:
         items_str = lang.join(lang.a(item.title) for item in items)
@@ -609,7 +612,7 @@ def give_stuff(player: Player, items: Iterable[base.Item], target_name: str, tar
         target_msg = "%s gives you %s." % (player_str, items_str)
         player.location.tell(room_msg, exclude_living=player, specific_targets={target}, specific_target_msg=target_msg)
         p("You give %s %s." % (target.title, items_str))
-    else:
+    elif not have_refused_message:
         p("You didn't give %s anything." % target.title)
 
 
