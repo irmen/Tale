@@ -34,7 +34,7 @@ Exit.connect(pharmacy, ["east", "outside", "street"], "Magnolia street is outsid
 
 
 class Factory(Location):
-    @call_periodically(10, 20)
+    @call_periodically(10, 20)      # @todo tweak wanderer spawn rate
     def spawn_wanderer(self, ctx: Context) -> None:
         w = Wanderer("blankly staring person", random.choice("mf"), descr="A person staring blankly somewhere.")
         w.aliases = {"person", "staring person"}

@@ -127,6 +127,7 @@ class Friend(Living):
 
 
 class Wanderer(Living):
+    """A strange person wandering about the town, can kill the player if she's not careful to flee/run"""
     def init(self):
         self.attacking = False
 
