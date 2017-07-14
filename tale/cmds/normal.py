@@ -723,6 +723,11 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
             p(living.extra_desc[name])   # print the extra description, rather than a generic message
         if name in player.location.extra_desc:
             p(player.location.extra_desc[name])   # print the extra description, rather than a generic message
+        if living.following:
+            if living.following is player:
+                p("%s's following you." % lang.capital(living.subjective))
+            else:
+                p("It seems that %s's following %s." % (living.subjective, living.following.title))
         return
     item, container = player.locate_item(name)
     if item:
@@ -1282,7 +1287,7 @@ def do_motd(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     ctx.driver.show_motd(player, notify_no_motd=True)
 
 
-@cmd("flee", "run")
+@cmd("flee", "run", "evade")
 def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Flee/run in a random or given direction, possibly escaping a combat situation, or shaking off pursuers."""
     exit = None
@@ -1307,6 +1312,9 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             player.tell("You run away in a random direction!" if random_direction else "You run away!", end=True)
             player.tell("\n")
             # @todo stop combat
+            for liv in player.location.livings:
+                if liv.following is player:
+                    liv.following = None   # stop followers
             player.move(exit.target)
             player.look()
             return

@@ -14,8 +14,7 @@ Single-Player IF turn-based (command-driven).
 - haggling with less money (or simply give the full price $)
 - find enough money first (haggle needs $10 at least, full price=$20)
 
-- @todo peter should follow the player (if medicine is carried)
-- @todo wanderers and 'flee' mechanic
+- @todo wanderers that follow the player (slowly)
 
 
 

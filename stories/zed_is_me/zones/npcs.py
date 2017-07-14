@@ -86,7 +86,6 @@ class Apothecary(Living):
 
 
 class Friend(Living):
-    # @todo add more behavior (should follow player, to go to the car together, but only if player has the medicine)
     @call_periodically(10.0, 20.0)
     def say_something(self, ctx: Context) -> None:
         door_open = any(d.opened for d in self.location.exits.values() if isinstance(d, Door))
@@ -105,7 +104,7 @@ class Friend(Living):
         if living_with_medicine:
             self.do_socialize("say \"Oh, wonderful, you have my medicine! Now let's get out of here!\"")
             self.tell_others("{Actor} starts following you.", target=living_with_medicine)
-            # @todo ...follow player
+            self.following = living_with_medicine
         else:
             self.do_socialize("say \"Have you forgotten about my illness? I am not able to leave without my medicine! "
                               "Please go find it first.\"")

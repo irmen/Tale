@@ -50,6 +50,7 @@ from . import mud_context
 from . import pubsub
 from . import races
 from . import util
+from . import story
 from . import verbdefs
 from .errors import ActionRefused, ParseError, LocationIntegrityError, TaleError, UnknownVerbException, NonSoulVerb
 
@@ -820,20 +821,32 @@ class Location(MudObject):
         pass
 
     def notify_npc_arrived(self, npc: 'Living', previous_location: 'Location') -> None:
-        """a NPC has arrived in this location."""
+        """A NPC has arrived in this location. When you override this be sure to call base method."""
         pass
 
     def notify_npc_left(self, npc: 'Living', target_location: 'Location') -> None:
-        """a NPC has left the location."""
-        pass
+        """A NPC has left the location. When you override this be sure to call base method."""
+        for living in self.livings:
+            if living.following is npc:
+                if mud_context.config.server_tick_method == story.TickMethod.COMMAND:
+                    living.move(target_location)    # move immediately
+                else:
+                    mud_context.driver.defer(2, living.move, target_location)   # move after a short delay
+                break
 
     def notify_player_arrived(self, player, previous_location: 'Location') -> None:
-        """a player has arrived in this location."""
+        """A player has arrived in this location. When you override this be sure to call base method."""
         pass
 
     def notify_player_left(self, player, target_location: 'Location') -> None:
-        """a player has left this location."""
-        pass
+        """A player has left this location. When you override this be sure to call base method."""
+        for living in self.livings:
+            if living.following is player:
+                if mud_context.config.server_tick_method == story.TickMethod.COMMAND:
+                    living.move(target_location)    # move immediately
+                else:
+                    mud_context.driver.defer(2, living.move, target_location)   # move after a short delay
+                break
 
 
 class Stats:
@@ -920,6 +933,7 @@ class Living(MudObject):
         self.previous_commandline = None   # type: str
         self._previous_parse = None  # type: ParseResult
         self.teleported_from = None   # type: Location   # used by teleport/return commands
+        self.following = None   # type: Living    # @todo save/load this
         super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init_gender(self, gender: str) -> None:

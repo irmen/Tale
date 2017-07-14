@@ -77,7 +77,7 @@ class CarPark(Location):
 carpark = CarPark("Car Parking", "There are a few cars still parked over here. Their owners are nowhere to be seen. "
                                  "One yellow convertible grabs your attention.")
 carpark.add_extradesc({"cars"}, "They look abandoned. The doors are all locked, except the doors of the yellow convertible.")
-carpark.add_extradesc({"convertible", "yellow"}, "It is a small two seater. You can't believe your eyes, "
+carpark.add_extradesc({"convertible", "yellow"}, "It is a small two-seater and the doors are open. You can't believe your eyes, "
                                                  "but the key is actually still in the ignition!")
 
 # not enough to buy the medicine, player needs to find more, or haggle:
