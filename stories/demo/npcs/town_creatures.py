@@ -66,7 +66,7 @@ class WalkingRat(Living):
     def do_random_move(self, ctx: util.Context) -> None:
         direction = self.select_random_move()
         if direction:
-            self.move(direction.target, self, direction_names=[direction.name])
+            self.move(direction.target, self, direction_names=direction.names)
 
 
 class ShoppeShopkeeper(Shopkeeper, Listener):

@@ -1,1 +1,13 @@
-@completion-failed text here@
+
+The blankly staring person abruptly turns towards you and grabs you.
+Their arms are strong. "Way too strong for a normal human being..." is the
+last thing that crosses your mind, before they strangle you and everything
+turns to black.
+
+
+You unfortunately didn't manage to escape the town and its weird events this time.
+
+Pay attention to the strange people wandering about. It's probably a good idea
+to avoid them and flee or run away from them when they start attacking you.
+Please try again keeping this in mind!
+

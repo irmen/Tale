@@ -6,9 +6,11 @@ magnolia st. 1, pharmacy
 magnolia st. 2, magnolia st. 3, factory
 """
 
+import random
 from tale.base import Location, Exit, Door, Item
+from tale.util import call_periodically, Context
 from zones import houses, rose_st
-from zones.npcs import Apothecary
+from zones.npcs import Apothecary, Wanderer
 
 
 street1 = Location("Magnolia Street", "Your house is on Magnolia Street, one of the larger streets in town. "
@@ -31,7 +33,15 @@ Exit.connect(pharmacy, ["east", "outside", "street"], "Magnolia street is outsid
              street1, ["pharmacy", "west"], "The west end of the street leads to the pharmacy.", None)
 
 
-factory = Location("ArtiGrow factory", "This area is the ArtiGrow fertilizer factory.")
+class Factory(Location):
+    @call_periodically(10, 20)
+    def spawn_wanderer(self, ctx: Context) -> None:
+        w = Wanderer("blankly staring person", random.choice("mf"), descr="A person staring blankly somewhere.")
+        w.aliases = {"person", "staring person"}
+        w.move(self)
+
+
+factory = Factory("ArtiGrow factory", "This area is the ArtiGrow fertilizer factory.")
 
 Exit.connect(factory, ["west", "street"], "You can leave the factory to the west, back to Magnolia Street.", None,
              street3, ["factory", "east"], "Eastwards you'll enter the ArtiGrow factory area.", None)

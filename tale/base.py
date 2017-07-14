@@ -1475,6 +1475,11 @@ class Exit(MudObject):
         targetname = self.target.name if self.target else self._target_str
         return "<base.Exit to '%s' #%d @ 0x%x>" % (targetname, self.vnum, id(self))
 
+    @property
+    def names(self):
+        """a list of all the names of this direction (name followed by aliases)"""
+        return [self.name] + list(self.aliases)
+
     @classmethod
     def connect(cls, from_loc: Location, directions: Union[str, Sequence[str]], short_descr: str, long_descr: Optional[str],
                 to_loc: Location, return_directions: Union[str, Sequence[str]],

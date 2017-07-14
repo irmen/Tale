@@ -100,6 +100,7 @@ class UnknownVerbException(ParseError):
 class StoryCompleted(TaleFlowControlException):
     """
     This is raised as soon as the (IF) story has been completed by the player!
+    Can be successful, or failed ending. You'll have to print the correct message yourself.
     Do not use this in a Mud story.
     """
     pass
