@@ -9,5 +9,4 @@ But that is part of the next chapter in this story.
 
 
 Congratulations, you finished this little interactive fiction story!
-
 We hope you enjoyed it!
