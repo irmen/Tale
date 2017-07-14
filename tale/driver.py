@@ -28,6 +28,7 @@ from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH
 from .races import playable_races
+from .errors import StoryCompleted
 
 
 topic_pending_actions = pubsub.topic("driver-pending-actions")
@@ -486,6 +487,8 @@ class Driver(pubsub.Listener):
         for deferred in due_deferreds:
             try:
                 deferred(ctx=ctx)  # call the deferred and provide a context object
+            except StoryCompleted:
+                raise    # handled elsewhere (IF)
             except Exception:
                 print("\n* Exception while executing deferred action {0}:".format(deferred), file=sys.stderr)
                 print("".join(util.format_traceback()), file=sys.stderr)
