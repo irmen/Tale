@@ -821,11 +821,23 @@ class Location(MudObject):
         pass
 
     def notify_npc_arrived(self, npc: 'Living', previous_location: 'Location') -> None:
-        """A NPC has arrived in this location. When you override this be sure to call base method."""
+        """
+        A NPC has arrived in this location.
+        When you override this be sure to call base method.
+        This event is not delegated to all items or creatures in the location!
+        If you need that, you should create a pubsub topic event, where the correct
+        objects are listening on.
+        """
         pass
 
     def notify_npc_left(self, npc: 'Living', target_location: 'Location') -> None:
-        """A NPC has left the location. When you override this be sure to call base method."""
+        """
+        A NPC has left the location.
+        When you override this be sure to call base method.
+        This event is not delegated to all items or creatures in the location!
+        If you need that, you should create a pubsub topic event, where the correct
+        objects are listening on.
+        """
         # creatures that follow the npc should move after it.
         for living in self.livings:
             if living.following is npc:
@@ -836,11 +848,23 @@ class Location(MudObject):
                 break
 
     def notify_player_arrived(self, player, previous_location: 'Location') -> None:
-        """A player has arrived in this location. When you override this be sure to call base method."""
+        """
+        A player has arrived in this location.
+        When you override this be sure to call base method.
+        This event is not delegated to all items or creatures in the location!
+        If you need that, you should create a pubsub topic event, where the correct
+        objects are listening on.
+        """
         pass
 
     def notify_player_left(self, player, target_location: 'Location') -> None:
-        """A player has left this location. When you override this be sure to call base method."""
+        """
+        A player has left this location.
+        When you override this be sure to call base method.
+        This event is not delegated to all items or creatures in the location!
+        If you need that, you should create a pubsub topic event, where the correct
+        objects are listening on.
+        """
         # creatures that follow the player should move after them.
         for living in self.livings:
             if living.following is player:

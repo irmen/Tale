@@ -363,7 +363,7 @@ class IFDriver(driver.Driver):
             saved_player_info = deserializer.recreate_classes(state.pop("player"), None)
             saved_player = saved_player_info["player"]
             assert isinstance(saved_player, Player)
-            base.MudObjRegistry.all_livings[saved_player.vnum] = saved_player   # overwrite intermediate player object
+            base.MudObjRegistry.all_livings[saved_player.vnum] = saved_player   # type: ignore  # overwrite intermediate player object
             contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in saved_player_info["inventory"]}
             for thing in contained:
                 if thing.contained_in and thing.contained_in is not saved_player:
