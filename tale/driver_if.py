@@ -357,11 +357,13 @@ class IFDriver(driver.Driver):
                 loc = objects_finder.resolve_location_ref(*living_info["location"])
                 if living.location and living.location is not loc:
                     living.location.remove(living, living)
+                # we can't yet set following because it might still point to a non-existing player object. Do that later.
                 loc.insert(living, living)
 
             saved_player_info = deserializer.recreate_classes(state.pop("player"), None)
             saved_player = saved_player_info["player"]
             assert isinstance(saved_player, Player)
+            base.MudObjRegistry.all_livings[saved_player.vnum] = saved_player   # overwrite intermediate player object
             contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in saved_player_info["inventory"]}
             for thing in contained:
                 if thing.contained_in and thing.contained_in is not saved_player:
@@ -373,7 +375,17 @@ class IFDriver(driver.Driver):
                 saved_player.location.remove(saved_player, saved_player)
             loc.insert(saved_player, saved_player)
             saved_player.known_locations = {objects_finder.resolve_location_ref(*loc_info) for loc_info in saved_player_info["known_locs"]}
+            if saved_player_info["following"]:
+                saved_player.following = objects_finder.resolve_living_ref(*saved_player_info["following"])
             self.all_players = {saved_player.name: conn}
+
+            # creatures that follow other creatures (or the player).
+            # hook this up here at the end otherwise it may point to a non-existing player object.
+            for living_info in saved_livings_info:
+                if living_info["following"]:
+                    living = living_info["living"]
+                    assert isinstance(living, base.Living)
+                    living.following = objects_finder.resolve_living_ref(*living_info["following"])
 
             saved_deferreds = deserializer.recreate_classes(state.pop("deferreds"), objects_finder)
             assert all(isinstance(d, driver.Deferred) for d in saved_deferreds)
@@ -381,6 +393,7 @@ class IFDriver(driver.Driver):
             for d in saved_deferreds:
                 self._enqueue_deferred(d)
 
+            # done, check
             assert len(state) == 0, "everything must have been converted"
 
             self.waiting_for_input = {}   # can't keep the old waiters around
@@ -417,8 +430,11 @@ class SavegameExistingObjectsFinder:
         liv = base.MudObjRegistry.all_livings.get(vnum, None)
         if not liv:
             raise LookupError("living vnum not found: " + str(vnum))
-        if liv.name != name or savegames.qual_baseclassname(liv) != baseclassname:
-            raise errors.TaleError("living inconsistency for vnum " + str(vnum))
+        if liv.name != name:
+            if savegames.qual_baseclassname(liv) != baseclassname:
+                if baseclassname == "tale.player.Player":
+                    return liv  # special case when the living is the Player
+                raise errors.TaleError("living inconsistency for vnum " + str(vnum))
         return liv
 
     def resolve_item_ref(self, vnum: int, name: str, classname: str, baseclassname: str) -> base.Item:

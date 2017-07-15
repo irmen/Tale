@@ -168,6 +168,7 @@ class TaleSerializer:
         state["known_locations"] = {mudobj_ref(loc) for loc in state["known_locations"]}
         state["location"] = mudobj_ref(state["location"])
         state["inventory"] = {mudobj_ref(thing) for thing in obj.inventory}
+        state["following"] = mudobj_ref(state["following"])
         ser._serialize(state, out, indentlevel)
 
     def serialize_item(self, obj: Item, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
@@ -204,6 +205,7 @@ class TaleSerializer:
         state["race"] = obj.stats.race
         state["location"] = mudobj_ref(state["location"])
         state["inventory"] = {mudobj_ref(thing) for thing in obj.inventory}
+        state["following"] = mudobj_ref(state["following"])
         ser._serialize(state, out, indentlevel)
 
     def serialize_exit(self, obj: Exit, ser: serpent.Serializer, out: List[str], indentlevel: int) -> None:
@@ -297,6 +299,11 @@ class TaleDeserializer:
             else:
                 return False, None
 
+    def lookup_class(self, classname: str) -> Type:
+        modulename, classname = classname.rsplit(".", 1)
+        clazz = getattr(importlib.import_module(modulename), classname)
+        return clazz
+
     def make_Player(self, data: Dict) -> Dict[str, Any]:
         p = Player(data.pop("name"), data.pop("gender"),
                    race=data.pop("race"), descr=data.pop("descr"), short_descr=data.pop("short_descr"))
@@ -308,6 +315,7 @@ class TaleDeserializer:
         p.hints = self.recreate_classes(data.pop("hints"), None)
         p.stats = self.recreate_classes(data.pop("stats"), None)
         assert p.title == data.pop("title")
+        following = data.pop("following")
         self.apply_attributes(p, data)
         p.init_nonserializables()
         return {
@@ -315,12 +323,8 @@ class TaleDeserializer:
             "inventory": inv,
             "location": loc,
             "known_locs": known_locs,
+            "following": following
         }
-
-    def lookup_class(self, classname: str) -> Type:
-        modulename, classname = classname.rsplit(".", 1)
-        clazz = getattr(importlib.import_module(modulename), classname)
-        return clazz
 
     def make_Item(self, data: Dict, existing_object_lookup) -> Dict[str, Any]:
         try:
@@ -392,6 +396,7 @@ class TaleDeserializer:
         living.privileges = set(data.pop("privileges"))
         inv = data.pop("inventory")
         loc = data.pop("location")
+        following = data.pop("following")
         living.stats = self.recreate_classes(data.pop("stats"), None)
         if isinstance(living, Shopkeeper):
             # special handling of Shopkeepers
@@ -401,6 +406,7 @@ class TaleDeserializer:
             "living": living,
             "inventory": inv,
             "location": loc,
+            "following": following
         }
 
     def make_StoryConfig(self, data: Dict) -> StoryConfig:
