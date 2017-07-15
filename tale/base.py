@@ -826,6 +826,7 @@ class Location(MudObject):
 
     def notify_npc_left(self, npc: 'Living', target_location: 'Location') -> None:
         """A NPC has left the location. When you override this be sure to call base method."""
+        # creatures that follow the npc should move after it.
         for living in self.livings:
             if living.following is npc:
                 if mud_context.config.server_tick_method == story.TickMethod.COMMAND:
@@ -840,6 +841,7 @@ class Location(MudObject):
 
     def notify_player_left(self, player, target_location: 'Location') -> None:
         """A player has left this location. When you override this be sure to call base method."""
+        # creatures that follow the player should move after them.
         for living in self.livings:
             if living.following is player:
                 if mud_context.config.server_tick_method == story.TickMethod.COMMAND:

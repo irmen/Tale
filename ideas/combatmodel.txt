@@ -10,6 +10,11 @@ combat related commands only change an "in combat" flag
 combat is processed in a controlled way by the driver where a combat action/trigger is done every 1? 2? seconds or so.
 
 
+`DAMAGE TYPES:
+-------------
+    blunt, slash, pierce, water, shock, cold, heat, gas, acid, magic, poison, disease, sonic, psionic,
+    trauma/wound, suffocation, deathray (zap-command), EMP, karma, pressure, decompression, inertia
+
 
 LEVEL  [1 - 30]
 ---------------

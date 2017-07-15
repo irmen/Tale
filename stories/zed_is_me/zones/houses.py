@@ -36,9 +36,8 @@ neighbors_house = Location("Neighbor's House", "The house of your neighbors acro
 # exit to street is defined in the street zone module
 
 bedroom = Location("Bedroom", "A rather untidy little bedroom. There's clothes lying all over the place. The window is open!")
-bedroom.add_extradesc({"clothes"}, "A pile of clothes lies on the floor. The back pocket of some trousers draw your attention.")
+bedroom.add_extradesc({"clothes"}, "A pile of clothes lies on the floor.")
 bedroom.add_extradesc({"window"}, "The bedroom window is open and you see a ladder leading down to the garden.")
-bedroom.add_extradesc({"pocket", "trousers"}, "There's something in the pocket.")
 
 garden = Location("Neighbor's Garden", "The garden of your neighbor across the street. "
                                        "Behind some trees to the south you see what appears to be a storage building of a shop.")

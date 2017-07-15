@@ -4,11 +4,8 @@
          / //\  __/ (_| |  | \__ \  | | | | | |  __/
         /____/\___|\__,_|  |_|___/  |_| |_| |_|\___|
 
-                 a tiny survival adventure
+                 a small survival adventure
 
                  written by Irmen de Jong
                     irmen@razorvine.net
-
-
-                    [ work in progress ]
 

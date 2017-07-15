@@ -1,0 +1,60 @@
+Single-Player IF turn-based (command-driven).
+
+***** WARNING: SPOILERS IN THIS TEXT ********
+
+
+- GOAL: Escape village WITH friend WITH medicine.
+- only a few wanderers left in some places that will (slowly) follow you and when they hit you -> GAME OVER
+- 'flee' to get rid of them (they follow you when walking away normally)
+- slowly spawn more wanderers to build up the pressure
+- require keycard to free your friend Peter
+- Peter will need a medicine before you can leave the village
+- you'll have to 'haggle'/'bargain' that medicine from someone else
+- haggling with less money (or simply give the full price $)
+- find enough money first (haggle needs $10 at least, full price=$20)
+
+
+
+MAP OF THE TOWN:
+
+                                               +-------------+
+                                               |             |
+                                               |  car parking<------  gate
+                                               |             |
+                                               |             |        |   |
+                                               +-------------+        |   |
+                                               locked fence           |   |
+             +-------------+                      ^                   |   |
+             |             |                      |                   |   |
+             |             |                      |                   |   |
+             |   House     |  +-------+           |                   |   |
+             |  (start)    +->|kitchen|    +------+--------+        Rose st.
+             |             |  +-------+....|               |        (north)
+             |             |               |  Playground   <----------+   |
+             +---------+---+               |               |          |   |
+                       |                   +---^-----------+          |   |
++----------+           |                       |                      |   |
+|          |           |                       |                  +---+---+----+                  +-----------+
+| Pharmacy +-----------v------+----------------+------------------+            +------------------+           |
+|          |                  |         Magnolia st.              |  Crossing  |    Magnolia st   |  ArtiGrow |
+|          +------------------+--------+---------------^----------+            +----(east)--------+  factory  |
+|          |                           |          1-way^          |            |                  |           |
++----------+                           |               ^          |            |                  |           |
+                                 +-----v----+     +----+-+        +---+---+----+                  +-----------+
+                                 | Neighbor |     |      |            |   |
+                                 | House    +----->      |            |   |
+                                 |          |     | Gar  |            |   |
+                                 +------+---+     | den  |            |   |
+                                        |         |      |            Rose street
+                                 +------v---+     |      |            |   |
+                                 |          +----->      |            |   |
+                                 |  Bedroom | ladder     |            |   |
+                                 |          |     +------+            |   |
+                                 +----------+         .               |   |
+                                                      v               |   |
+                                                 +-----------+    +---+---+---+
+                                                 |           |    |           |
+                                                 |  storage  <----+ butcher   |
+                                                 |           | locked         |
+                                                 |           |  door          |
+                                                 +-----------+    +-----------+

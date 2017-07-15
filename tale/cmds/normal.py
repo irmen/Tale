@@ -1297,7 +1297,8 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             raise ParseError("You can't flee there.")
         exit.allow_passage(player)
     elif parsed.args:
-        raise ParseError("Flee where?")
+        if parsed.args[0] != "away":
+            raise ParseError("Flee where?")
     random_direction = not exit
     if random_direction:
         # choose a random exit direction

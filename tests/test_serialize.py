@@ -101,9 +101,9 @@ class TestSerializing(unittest.TestCase):
         room2 = base.Location("room2")
         d1, d2 = base.Door.connect(room1, "room2", "to room 2", None, room2, "room1", "to room 1", None)
         x = serializecycle(d1)
-        print(x)        # @todo check
+        # @todo check
         x = serializecycle(d2)
-        print(x)        # @todo check
+        # @todo check
 
     def test_player_and_soul(self):
         o = base.Living("name", "n", title="title", descr="description", race="dragon")

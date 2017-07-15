@@ -86,6 +86,7 @@ class Apothecary(Living):
             actor.tell("%s glares at you." % lang.capital(self.title))
 
 
+# Peter, the player's friend. They have to escape together.
 class Friend(Living):
     @call_periodically(10.0, 20.0)
     def say_something(self, ctx: Context) -> None:
@@ -126,12 +127,12 @@ class Friend(Living):
             raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
 
 
+# A strange person wandering about the town, can kill the player if she's not careful to flee/run.
 class Wanderer(Living):
-    """A strange person wandering about the town, can kill the player if she's not careful to flee/run"""
     def init(self):
         self.attacking = False
 
-    @call_periodically(5, 10)    # @todo tweak wander speed
+    @call_periodically(10, 20)
     def do_wander(self, ctx: Context) -> None:
         if not self.attacking:
             # Let the mob wander randomly.
@@ -139,14 +140,15 @@ class Wanderer(Living):
             if direction:
                 self.move(direction.target, self, direction_names=direction.names)
 
-    @call_periodically(1, 2)    # @todo tweak attack speed
+    @call_periodically(4, 10)
     def do_attack(self, ctx: Context) -> None:
         if not self.attacking:
             for liv in self.location.livings:
                 if isinstance(liv, Player):
                     self.start_attack(liv)
+                    liv.tell("It may be a good idea to run away!")
                     self.attacking = True
-                    ctx.driver.defer(3, self.kill_player, liv)      # give player a moment to react to the attack
+                    ctx.driver.defer(5, self.kill_player, liv)      # give player a moment to react to the attack
                     break
 
     def kill_player(self, player: Player, ctx: Context) -> None:

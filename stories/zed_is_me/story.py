@@ -1,5 +1,5 @@
 """
-'Zed is me' -  a Zombie survival adventure
+'Zed is me' -  a small survival adventure
 
 Written for Tale IF framework.
 Copyright by Irmen de Jong (irmen@razorvine.net)
