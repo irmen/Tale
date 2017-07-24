@@ -19,6 +19,7 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
+[fix] also use smartypants when printing input prompts (such as in the question if you want to load a saved game)
 [code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system...!

@@ -62,7 +62,15 @@ class TestConsoleIo(unittest.TestCase):
         self.assertEqual("derp&#8230;", iobase.smartypants.smartypants("derp..."))
         self.assertEqual("&#8216;txt&#8217;", iobase.smartypants.smartypants("'txt'"))
         self.assertEqual("&#8220;txt&#8221;", iobase.smartypants.smartypants('"txt"'))
-        self.assertEqual(r"slashes\\slashes", iobase.smartypants.smartypants(r"slashes\\slashes"))
+        self.assertEqual(r"slashes\\slashes", iobase.smartypants.smartypants(r"slashes\\slashes"), "html-escaping should be disabled")
+
+    def testSmartquotes(self):
+        adapter = iobase.IoAdapterBase(None)
+        self.assertEqual("‘‘q’’, ‘q’, – dash – derp — emdash — … ellipsis ’quoted’ “quoted2”",
+                         adapter.smartquotes("``q'', `q', -- dash -- derp --- emdash --- ... ellipsis 'quoted' \"quoted2\""))
+        self.assertEqual("<pre>…</pre>", adapter.smartquotes("<pre>...</pre>"))
+        self.assertEqual("<tt>…</tt>", adapter.smartquotes("<tt>...</tt>"))
+        self.assertEqual(r"<> \\", adapter.smartquotes(r"<> \\"), "html-escaping should be disabled")
 
     def testApplyStyles(self):
         io = console_io.ConsoleIo(None)

@@ -522,7 +522,7 @@ def do_force(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
     verb = parsed.args[1]
     # simple check for verb validness
     if verb not in ctx.driver.current_verbs(target) and not player.soul.is_verb(verb) and verb not in target.location.exits:
-        raise ParseError("You cannot let them do '%s'; I don't know that verb." % verb)
+        raise ParseError("You cannot let them do `%s'; I don't know that verb." % verb)
     cmd_parts = parsed.unparsed.partition(verb)
     cmd = cmd_parts[1] + cmd_parts[2]
     room_msg = "%s coerces %s into doing something." % (lang.capital(player.title), target.title)

@@ -45,7 +45,7 @@ class Story(StoryBase):
         player.money = 12.65
 
     def welcome(self, player: Player) -> Optional[str]:
-        player.tell("<bright>Welcome to '%s'.</>" % self.config.name, end=True)
+        player.tell("<bright>Welcome to `%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to communicate with your pet, and exit the house to win the game.")
         player.tell("\n")

@@ -92,7 +92,7 @@ parking_gate, _ = Door.connect(north_street, ["gate", "parking"],
 parking_key = Key("key", "rusty key", descr="It is what appears to be an old key, with a label on it.",
                   short_descr="On the ground is a key, it's become quite rusty.")
 parking_key.key_for(parking_gate)
-parking_key.add_extradesc({"label"}, "The label says: 'parking area gate'.")
+parking_key.add_extradesc({"label"}, "The label says: `parking area gate'.")
 
 
 class StorageRoom(Location):
@@ -120,6 +120,6 @@ storage_room_door, _ = Door.connect(butcher, ["door", "storage"],
 friend = zones.npcs.Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
 storage_room.insert(friend, None)
 
-butcher_key = Key("card", "security card", descr="It is a security card, with a single word 'storage' written on it.")
+butcher_key = Key("card", "security card", descr="It is a security card, with a single word `storage' written on it.")
 butcher_key.key_for(storage_room_door)
 zones.houses.garden.insert(butcher_key, None)

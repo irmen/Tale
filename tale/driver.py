@@ -410,7 +410,7 @@ class Driver(pubsub.Listener):
                 o("")
                 o("")
                 o("<monospaced><bright>")
-                o(("'%s'" % self.story.config.name).center(DEFAULT_SCREEN_WIDTH))
+                o(("`%s'" % self.story.config.name).center(DEFAULT_SCREEN_WIDTH))
                 o(("v" + self.story.config.version).center(DEFAULT_SCREEN_WIDTH))
                 o("")
                 o(("written by " + self.story.config.author).center(DEFAULT_SCREEN_WIDTH))
@@ -455,9 +455,9 @@ class Driver(pubsub.Listener):
                               "up", "down"}:
                     p.tell("You can't go in that direction.")
                 else:
-                    p.tell("The verb '%s' is unrecognized." % x.verb)
+                    p.tell("The verb `%s' is unrecognized." % x.verb)
                     if x.verb[0].isupper():
-                        p.tell("Just type in lowercase ('%s')." % x.verb.lower())
+                        p.tell("Just type in lowercase (`%s')." % x.verb.lower())
             except errors.ActionRefused as x:
                 p.remember_previous_parse()
                 p.tell(str(x))

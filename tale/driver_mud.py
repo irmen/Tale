@@ -181,7 +181,7 @@ class MudDriver(driver.Driver):
                     conn.player.tell("<bright>We're sorry, the mud is running in restricted mode at the moment. "
                                      "It is not allowed to create new characters right now. Please try again later.</bright>")
                     continue
-                conn.player.tell("'%s' is the name of a new character." % name)
+                conn.player.tell("`%s' is the name of a new character." % name)
                 if not (yield "input", ("Do you want to create a new character with this name?", lang.yesno)):
                     conn.player.tell("<it>Okay, let's try that again.</>", end=True)
                     conn.player.tell("-- -- -- --", end=True)

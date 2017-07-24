@@ -20,8 +20,8 @@ class Story(StoryBase):
     config.name = "Circle"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.8"
-    config.requires_tale = "3.6"
+    config.version = "1.9"
+    config.requires_tale = "3.7"
     config.supported_modes = {GameMode.MUD}
     config.money_type = MoneyType.FANTASY
     config.server_tick_method = TickMethod.TIMER
@@ -58,7 +58,7 @@ class Story(StoryBase):
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
         """
-        player.tell("<bright>Hello, %s!</> Welcome to the land of '%s'.  May your visit here be... interesting."
+        player.tell("<bright>Hello, %s!</> Welcome to the land of `%s'.  May your visit here be... interesting."
                     % (player.title, self.config.name), end=True)
         player.tell("--", end=True)
         return None

@@ -4,16 +4,15 @@ Basic Input/Output stuff not tied to a specific I/O implementation.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
-import html.parser
 import sys
-from typing import Union, Sequence, Iterable, Any, Tuple, Optional, List
-
+from typing import Union, Sequence, Any, Tuple, Optional, List
 import smartypants
-
 from .. import verbdefs
 from ..util import format_traceback
 
+
 smartypants.process_escapes = lambda txt: txt  # disable the html escape processing
+smartypants.tags_to_skip = ["abcdefghijklmnopqrstuvwxyz@"]   # setting it to empty list doesn't have the required effect
 
 ALL_STYLE_TAGS = {"dim", "normal", "bright", "ul", "it", "rev", "clear", "location", "monospaced", "/monospaced", "/"}
 
@@ -78,13 +77,10 @@ class IoAdapterBase:
         """
         raise NotImplementedError("implement this in subclass")
 
-    def smartquotes(self, text: str, escaped_entities: bool=False) -> str:
-        """Apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
+    def smartquotes(self, text: str) -> str:
+        """If enabled, apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
         if self.supports_smartquotes and self.do_smartquotes:
-            quoted = smartypants.smartypants(text)
-            if escaped_entities:
-                return quoted
-            return html.parser.unescape(quoted)    # type: ignore  # mypy doesn't know about this method
+            return smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B | smartypants.Attr.D | smartypants.Attr.e | smartypants.Attr.u)
         return text
 
     def output(self, *lines: str) -> None:

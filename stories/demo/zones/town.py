@@ -131,10 +131,10 @@ class AlleyOfDoors(Location):
 
 alley = AlleyOfDoors("Alley of doors", "An alley filled with doors.")
 descr = "The doors seem to be connected to the computer nearby."
-door1 = Door(["first door", "door one"], alley, "There's a door marked 'door one'.", long_descr=descr, locked=False, opened=True)
-door2 = Door(["second door", "door two"], alley, "There's a door marked 'door two'.", long_descr=descr, locked=True, opened=False)
-door3 = Door(["third door", "door three"], alley, "There's a door marked 'door three'.", long_descr=descr, locked=False, opened=False)
-door4 = Door(["fourth door", "door four"], alley, "There's a door marked 'door four'.", long_descr=descr, locked=True, opened=False)
+door1 = Door(["first door", "door one"], alley, "There's a door marked `door one'.", long_descr=descr, locked=False, opened=True)
+door2 = Door(["second door", "door two"], alley, "There's a door marked `door two'.", long_descr=descr, locked=True, opened=False)
+door3 = Door(["third door", "door three"], alley, "There's a door marked `door three'.", long_descr=descr, locked=False, opened=False)
+door4 = Door(["fourth door", "door four"], alley, "There's a door marked `door four'.", long_descr=descr, locked=True, opened=False)
 alley.add_exits([
     door1, door2, door3, door4,
 ])
@@ -166,7 +166,7 @@ class EndDoor(Door):
                     actor.tell_later("<dim>(You will remember this event.)</>")
 
 
-end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign 'Game Over' on it.", locked=True, opened=False)
+end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign `Game Over' on it.", locked=True, opened=False)
 end_door.key_code = "999"
 lane.add_exits([end_door])
 
@@ -184,7 +184,7 @@ class Computer(Item):
         return "It seems to be connected to the four doors. " \
                + self.screen_text() \
                + " There's also a small keyboard to type commands. " \
-               + " On the side of the screen there's a large sticker with 'say hello' written on it."
+               + " On the side of the screen there's a large sticker with `say hello' written on it."
 
     @description.setter
     def description(self, value: str) -> None:
@@ -296,7 +296,7 @@ class DoorKey(Key):
                 actor.tell_later("<dim>(You will remember this event.)</>")
 
 
-doorkey = DoorKey("key", descr="A key with a little label marked 'Game Over'.")
+doorkey = DoorKey("key", descr="A key with a little label marked `Game Over'.")
 doorkey.key_for(end_door)
 alley.insert(doorkey, None)
 

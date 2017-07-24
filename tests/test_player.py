@@ -285,9 +285,9 @@ class TestPlayer(unittest.TestCase):
         attic.tell("message for room")
         pubsub.sync()
         output = pc.get_output()
-        self.assertTrue("[wiretapped from 'Attic': message for room]" in output)
-        self.assertTrue("[wiretapped from 'julie': message for julie]" in output)
-        self.assertTrue("[wiretapped from 'julie': message for room]" in output)
+        self.assertTrue("[wiretapped from `Attic': message for room]" in output)
+        self.assertTrue("[wiretapped from `julie': message for julie]" in output)
+        self.assertTrue("[wiretapped from `julie': message for room]" in output)
         self.assertTrue("message for room " in output)
         # test removing the wiretaps
         player.clear_wiretaps()

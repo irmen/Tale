@@ -202,7 +202,7 @@ class BulletinBoard(Item):
         num, post = self._get_post(arg)
         if "wizard" in actor.privileges or actor.name == post["author"]:
             del self.__posts[num - 1]
-            actor.tell("You've removed message #%d ('%s') from the board." % (num, post["subject"]))
+            actor.tell("You've removed message #%d (`%s') from the board." % (num, post["subject"]))
             actor.tell_others("{Actor} took a message off the %s." % self.title)
             self.save()
         else:

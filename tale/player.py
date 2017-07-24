@@ -123,7 +123,7 @@ class Player(base.Living, pubsub.Listener):
 
     def pubsub_event(self, topicname: pubsub.TopicNameType, event: Tuple[base.MudObject, str]) -> None:
         sender, message = event
-        self.tell("[wiretapped from '%s': %s]" % (sender, message), end=True)
+        self.tell("[wiretapped from `%s': %s]" % (sender, message), end=True)
 
     def clear_wiretaps(self) -> None:
         # clear all wiretaps that this player has
