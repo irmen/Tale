@@ -22,8 +22,14 @@ If you zip up the story's directory as "story.zip", you can then simply:
 
 to launch the game. (as long as you have Tale installed)
 \"\"\"
+from __future__ import print_function
 import os
 import sys
+
+if sys.version_info < (3, 5):
+    raise SystemExit("You have to use Python 3.5 or newer to run this. (current version: %s %s)" %
+                     (sys.executable, ".".join(str(v) for v in sys.version_info[:3])))
+
 try:
     import tale.main
 except ImportError as x:
@@ -49,7 +55,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
         raise IOError("output file already exists: " + zipfilename)
     with zipfile.ZipFile(zipfilename, mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
         os.chdir(path)
-        print("Creating zip file from '{}'...".format(path))
+        print("\nCreating zip file from '{}'...".format(path))
         has_main_py = False
         for base, dirs, files in os.walk("."):
             dirs[:] = [d for d in dirs if d != "__pycache__" and not d.startswith(".")]
@@ -63,17 +69,23 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
         if has_main_py:
             if verbose:
                 print("\nThe story provided a __main__.py itself.")
-                print("(This file is required to be able to do 'python story.zip')")
+                print("(we use this to be able to do 'python story.zip')")
         else:
-            print("\nThe story didn't provide a __main__.py itself.")
-            print("This file is required to be able to do 'python story.zip'")
-            print("Possible game modes:", set(v.value for v in tale.story.GameMode.__members__.values()))  # type: ignore
-            while True:
-                try:
-                    mode = tale.story.GameMode(input("\nWhat is the required game mode? "))
-                    break
-                except ValueError:
-                    pass
+            print("\nThe story didn't provide a __main__.py itself - creating one for you.")
+            print("(needed to be able to do 'python story.zip')")
+            import story
+            possible_game_modes = story.Story.config.supported_modes
+            if len(possible_game_modes) > 1:
+                print("\nSupported game modes for this story:", ",".join([m.value for m in possible_game_modes]))
+                while True:
+                    try:
+                        mode = tale.story.GameMode(input("Which mode do you want to use? "))
+                        break
+                    except ValueError:
+                        pass
+            else:
+                # only one possible game mode, autoselect this one
+                mode = possible_game_modes.pop()
             zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value))
         if embed_tale:
             os.chdir(os.path.dirname(tale.__file__))
