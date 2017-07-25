@@ -380,7 +380,7 @@ class PlayerConnection:
 
     def output_no_newline(self, line: str) -> None:
         """similar to output() but writes a single line, without newline at the end"""
-        self.io.output_no_newline(line)
+        self.io.output_no_newline(self.io.smartquotes(line))
 
     def input_direct(self, prompt: str=None) -> str:
         """
