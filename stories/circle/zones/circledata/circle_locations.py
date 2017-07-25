@@ -74,7 +74,7 @@ class PetShop(Location):
                         pet.description += " A small sign on a chain around the neck says 'My name is %s'." % lang.capital(name)
                         pet.aliases.add(pet.name)
                         pet.name = name
-                    # @todo make pet a follower and charmed
+                    pet.following = actor   # @todo make pet charmed as well (see circle doc/src)
                     actor.money -= price
                     actor.tell_others("{Actor} buys %s as a pet." % pet.title)
                     actor.tell("You paid %s and received %s as your new pet. Happy times!"

@@ -1,6 +1,8 @@
 Concepts for single player Interactive Fiction mode:
 Interesting link: http://www.brasslantern.org/writers/
 ------------------------------------------------------
+[feature,tkinter,html] Add support to show pictures in output.
+[feature,tkinter,html] Add optional startup picture (as part of the welcome message).
 [feature,tkinter,html] Add optional picture to every MudObject description.
 [feature,tkinter,html] Add optional sound clip to locations
 
@@ -19,15 +21,19 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs
+[code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs?
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
-[feature] combat system...!
+[feature] combat system...! see combatmodel.txt
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
     wear, put on, take off, unwear, remove <armor> | wield, unwield, remove <weapon>
 [feature] allow livings to wield a single item (weapon/light/shield/...) (=always in hand), extend circle zone loader to use this
 [code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly like the circle importers?)
 [feature] Hunger/thirst/fatigue (movement/staminapoints)?
 [feature] class/skill system, lockpicking skill to unlock doors without having key, ...
+[feature] pets that are following (pet shop from circle) can easily lose you if you move too fast. Add a way to catch up.
+[feature] pets that are following a player should write who their owner is when examined.
+[tests] save game serialization tests lack load checks
+[tests] tests for @cmd functions are mostly absent
 
 
 [feature] Light/Dark, Weather
