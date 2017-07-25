@@ -77,6 +77,3 @@ def _check_required_libraries():
             else:
                 print("\n\nInstallation finished, try to run me again now.\n")
         raise SystemExit
-
-_check_required_libraries()
-del _check_required_libraries

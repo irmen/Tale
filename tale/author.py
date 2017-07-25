@@ -30,12 +30,24 @@ if sys.version_info < (3, 5):
     raise SystemExit("You have to use Python 3.5 or newer to run this. (current version: %s %s)" %
                      (sys.executable, ".".join(str(v) for v in sys.version_info[:3])))
 
+tale_error = None
 try:
+    import tale
+    tale._check_required_libraries()
     import tale.main
+    from distutils.version import LooseVersion
+    if LooseVersion(tale.__version__) < LooseVersion("{required_tale_version}"):
+        print("Tale version installed:", tale.__version__, file=sys.stderr)
+        print("Tale version required : {required_tale_version}", file=sys.stderr) 
+        tale_error = "installed Tale library version too old"
 except ImportError as x:
-    print("Error loading Tale: ", x, file=sys.stderr)
-    print("To run this game you have to install the Tale library.\\nUsually 'pip install tale' should be enough.\\n", file=sys.stderr)
-    input("Enter to exit: ")
+    tale_error = str(x)
+    
+if tale_error:
+    print("Error loading Tale: ", tale_error, file=sys.stderr)
+    print("To run this game you have to install a recent enough Tale library.\\nRunning the command 'pip install --upgrade tale' usually fixes this.\\n", file=sys.stderr)
+    print("Enter to exit: ", file=sys.stderr)
+    input()
     raise SystemExit
 
 
@@ -86,7 +98,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
             else:
                 # only one possible game mode, autoselect this one
                 mode = possible_game_modes.pop()
-            zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value))
+            zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value, required_tale_version=story.Story.config.requires_tale))
         if embed_tale:
             os.chdir(os.path.dirname(tale.__file__))
             if verbose:

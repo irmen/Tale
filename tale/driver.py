@@ -23,7 +23,7 @@ from typing import Sequence, Union, Tuple, Any, Dict, Callable, Iterable, Genera
 
 import appdirs
 
-from . import __version__ as tale_version_str
+from . import __version__ as tale_version_str, _check_required_libraries
 from . import mud_context, errors, util, cmds, player, pubsub, charbuilder, lang, verbdefs, vfs, base
 from .story import TickMethod, GameMode, MoneyType, StoryBase
 from .tio import DEFAULT_SCREEN_WIDTH
@@ -221,6 +221,7 @@ class Driver(pubsub.Listener):
 
     def start(self, game_file_or_path: str) -> None:
         """Start the driver from a parsed set of arguments"""
+        _check_required_libraries()
         gamepath = pathlib.Path(game_file_or_path)
         if gamepath.is_dir():
             # cd into the game directory (we can import it then), and load its config and zones
