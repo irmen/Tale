@@ -370,7 +370,7 @@ class PlayerConnection:
             self.io.do_prompt_toolkit = self.player.prompt_toolkit_enabled
             if mud_context.config.server_mode == GameMode.IF and self.player.output_line_delay > 0:
                 if os.name == "nt" and self.io.do_prompt_toolkit:
-                    line_delay = 0    # on windows, when using prompt_toolkit, printing individual lines is already very slow
+                    line_delay = 0.0    # on windows, when using prompt_toolkit, printing individual lines is already very slow
                 else:
                     line_delay = self.player.output_line_delay / 1000.0
                 for line in output.rstrip().splitlines():

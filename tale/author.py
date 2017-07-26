@@ -39,14 +39,15 @@ try:
     from distutils.version import LooseVersion
     if LooseVersion(tale.__version__) < LooseVersion("{required_tale_version}"):
         print("Tale version installed:", tale.__version__, file=sys.stderr)
-        print("Tale version required : {required_tale_version}", file=sys.stderr) 
+        print("Tale version required : {required_tale_version}", file=sys.stderr)
         tale_error = "installed Tale library version too old"
 except ImportError as x:
     tale_error = str(x)
-    
+
 if tale_error:
     print("Error loading Tale: ", tale_error, file=sys.stderr)
-    print("To run this game you have to install a recent enough Tale library.\\nRunning the command 'pip install --upgrade tale' usually fixes this.\\n", file=sys.stderr)
+    print("To run this game you have to install a recent enough Tale library.\\n"
+          "Running the command 'pip install --upgrade tale' usually fixes this.\\n", file=sys.stderr)
     print("Enter to exit: ", file=sys.stderr)
     input()
     raise SystemExit
@@ -66,7 +67,7 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
     """Zip a story (possibly including the tale library itself - but not its dependencies, to avoid license hassles) into a zip file."""
     if os.path.exists(zipfilename):
         raise IOError("output file already exists: " + zipfilename)
-    with zipfile.ZipFile(zipfilename+".tmp", mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
+    with zipfile.ZipFile(zipfilename + ".tmp", mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
         prev_dir = os.getcwd()
         os.chdir(path)
         print("\nCreating zip file from '{}'...".format(path))
@@ -100,7 +101,8 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
             else:
                 # only one possible game mode, autoselect this one
                 mode = possible_game_modes.pop()
-            zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value, required_tale_version=story.Story.config.requires_tale))
+            zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value,
+                                                                required_tale_version=story.Story.config.requires_tale))
         if embed_tale:
             os.chdir(os.path.dirname(tale.__file__))
             if verbose:
@@ -117,8 +119,8 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
         os.chdir(prev_dir)
     # use zipapp to add a posix shebang.
     # note: we can't use zipapp conveniently to create the whole zipfile because it also includes temp files that I don't want...
-    zipapp.create_archive(zipfilename+".tmp", zipfilename, interpreter="/usr/bin/env python3")
-    os.remove(zipfilename+".tmp")
+    zipapp.create_archive(zipfilename + ".tmp", zipfilename, interpreter="/usr/bin/env python3")
+    os.remove(zipfilename + ".tmp")
     if verbose:
         print("\nDone. Try running 'python {}'".format(zipfilename))
 

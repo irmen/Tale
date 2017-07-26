@@ -81,10 +81,12 @@ class IoAdapterBase:
         """If enabled, apply 'smart quotes' to the text; replaces quotes and dashes by nicer looking symbols"""
         if self.supports_smartquotes and self.do_smartquotes:
             if hasattr(smartypants.Attr, "u"):
-                return smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B | smartypants.Attr.D | smartypants.Attr.e | smartypants.Attr.u)
+                return smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B |
+                                               smartypants.Attr.D | smartypants.Attr.e | smartypants.Attr.u)
             else:
                 # older smartypants lack attribute 'u' for avoiding html entity creation
-                txt = smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B | smartypants.Attr.D | smartypants.Attr.e)
+                txt = smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B |
+                                              smartypants.Attr.D | smartypants.Attr.e)
                 import html.parser
                 return html.parser.unescape(txt)  # type: ignore
         return text
