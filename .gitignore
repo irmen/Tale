@@ -9,4 +9,5 @@
 /dist/
 /.cache/
 /*_cache/
+/.mypy_cache/
 .DS_Store

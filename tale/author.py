@@ -5,6 +5,7 @@ Utilities for story authors
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import zipfile
+import zipapp
 import sys
 import os
 from typing import Sequence
@@ -65,7 +66,8 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
     """Zip a story (possibly including the tale library itself - but not its dependencies, to avoid license hassles) into a zip file."""
     if os.path.exists(zipfilename):
         raise IOError("output file already exists: " + zipfilename)
-    with zipfile.ZipFile(zipfilename, mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
+    with zipfile.ZipFile(zipfilename+".tmp", mode="w", compression=zipfile.ZIP_DEFLATED) as zip:
+        prev_dir = os.getcwd()
         os.chdir(path)
         print("\nCreating zip file from '{}'...".format(path))
         has_main_py = False
@@ -112,6 +114,11 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
                     zip.write(filename, arcname=arcname)
                     if verbose:
                         print(arcname)
+        os.chdir(prev_dir)
+    # use zipapp to add a posix shebang.
+    # note: we can't use zipapp conveniently to create the whole zipfile because it also includes temp files that I don't want...
+    zipapp.create_archive(zipfilename+".tmp", zipfilename, interpreter="/usr/bin/env python3")
+    os.remove(zipfilename+".tmp")
     if verbose:
         print("\nDone. Try running 'python {}'".format(zipfilename))
 
