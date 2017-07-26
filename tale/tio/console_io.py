@@ -83,6 +83,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                     # word completion for the names of things and people
                     all_candidates = self.tab_complete_get_all_candidates(mud_context.driver)
                     completer = WordCompleter(all_candidates)
+                    # unfortunately prompt_toolkit doesn't allow ansi style codes in the prompt so we use a plain one.
                     cmd = prompt_toolkit.prompt("\n>> ", patch_stdout=True, completer=completer, complete_while_typing=False)
                 else:
                     cmd = input()
