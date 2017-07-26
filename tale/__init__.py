@@ -47,6 +47,7 @@ def _check_required_libraries():
     smartypants_version_required = LooseVersion("1.8.6")
     colorama_version_required = LooseVersion("0.3.6")
     serpent_version_required = LooseVersion("1.23")
+    # Note: prompt_toolkit is a nice to have, but it is not required. We do install it if other libs are missing though.
     if not appdirs:
         print("The 'appdirs' Python library (any recent version) is required to run Tale.", file=sys.stderr)
         all_good = False
@@ -64,14 +65,14 @@ def _check_required_libraries():
         all_good = False
     if not all_good:
         print("\nInstall this/these and try again. Try using your package manager (on Linux) or try executing the following command:")
-        print('  pip install "appdirs" "smartypants>={spv}" "colorama>={cv}" "serpent>={sv}"'
+        print('  pip install "appdirs" "prompt-toolkit" "smartypants>={spv}" "colorama>={cv}" "serpent>={sv}"'
               .format(spv=smartypants_version_required, cv=colorama_version_required, sv=serpent_version_required))
         print("(you may have to add the --user option if you have insufficient privileges)")
         choice = input("\nDo you want to attempt to install them (using pip) right now (y/n)? ")
         if choice == 'y':
             import pip
             # we don't use "--user" here because then it won't work when using a virtualenv.
-            statuscode = pip.main(["install", "appdirs", "smartypants>=" + str(smartypants_version_required),
+            statuscode = pip.main(["install", "appdirs", "prompt-toolkit", "smartypants>=" + str(smartypants_version_required),
                                    "colorama>=" + str(colorama_version_required), "serpent>=" + str(serpent_version_required)])
             if statuscode:
                 print("\n\nInstallation failed.\n")
