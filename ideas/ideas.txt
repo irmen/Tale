@@ -21,7 +21,6 @@ Concepts for multiplayer MUD mode (and not really for single player I.F.):
 
 General ideas/TODO:
 -------------------
-[bug] when using prompt_toolkit on a windows cmd.exe console, the output is very slow when line-delay is >0.
 [code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs?
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
 [feature] combat system...! see combatmodel.txt
