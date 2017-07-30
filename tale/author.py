@@ -12,55 +12,9 @@ from typing import Sequence
 import tale
 import tale.story
 import tale.errors
+import tale.vfs
 
-
-main_py_template = """
-\"\"\"
-This __main__.py file is used to make it very easy to launch stories as a zip file.
-If you zip up the story's directory as "story.zip", you can then simply:
-
-    $ python story.zip
-
-to launch the game. (as long as you have Tale installed)
-\"\"\"
-from __future__ import print_function
-import os
-import sys
-
-if sys.version_info < (3, 5):
-    raise SystemExit("You have to use Python 3.5 or newer to run this. (current version: %s %s)" %
-                     (sys.executable, ".".join(str(v) for v in sys.version_info[:3])))
-
-tale_error = None
-try:
-    import tale
-    tale._check_required_libraries()
-    import tale.main
-    from distutils.version import LooseVersion
-    if LooseVersion(tale.__version__) < LooseVersion("{required_tale_version}"):
-        print("Tale version installed:", tale.__version__, file=sys.stderr)
-        print("Tale version required : {required_tale_version}", file=sys.stderr)
-        tale_error = "installed Tale library version too old"
-except ImportError as x:
-    tale_error = str(x)
-
-if tale_error:
-    print("Error loading Tale: ", tale_error, file=sys.stderr)
-    print("To run this game you have to install a recent enough Tale library.\\n"
-          "Running the command 'pip install --upgrade tale' usually fixes this.\\n", file=sys.stderr)
-    print("Enter to exit: ", file=sys.stderr)
-    input()
-    raise SystemExit
-
-
-# insert path to this game and any necessary command line options (edit these if needed)
-gamelocation = sys.path[0] or os.path.dirname(__file__)
-args = ["--game", gamelocation, "--mode", "{gamemode}"] + sys.argv[1:]
-
-# start the game
-tale.main.run_from_cmdline(args)
-
-"""
+vfs = tale.vfs.VirtualFileSystem(root_package="tale")
 
 
 def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=False) -> None:
@@ -101,8 +55,10 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
             else:
                 # only one possible game mode, autoselect this one
                 mode = possible_game_modes.pop()
-            zip.writestr("__main__.py", main_py_template.format(gamemode=mode.value,
-                                                                required_tale_version=story.Story.config.requires_tale))
+            main_tpl = vfs["authoring/main_tpl.py"].text
+            print(main_tpl)
+            zip.writestr("__main__.py", main_tpl.format(gamemode=mode.value,
+                                                        required_tale_version=story.Story.config.requires_tale))
         if embed_tale:
             os.chdir(os.path.dirname(tale.__file__))
             if verbose:
@@ -125,10 +81,67 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
         print("\nDone. Try running 'python {}'".format(zipfilename))
 
 
+def do_init(path: str) -> None:
+    os.makedirs(path, exist_ok=True)
+    if os.path.exists(os.path.join(path, "story.py")):
+        raise SystemExit("output folder already contains a story.py file")
+    print("------ Setting up new Tale story -----")
+    name = input("Story name: ").strip()
+    author = input("Story author name: ").strip()
+    author_email = input("Story author email: ").strip()
+    player_name = input("Player name: ").strip()
+    player_gender = input("Player gender (m/f/n): ").strip()[:1]
+    money_type = input("Money type (modern/fantasy/nothing): ").strip()
+    if money_type != "nothing":
+        money = float(input("Player start money amount: "))
+    else:
+        money = 0.0
+    if money_type == "modern":
+        money_type = "MoneyType.MODERN"
+    elif money_type == "fantasy":
+        money_type = "MoneyType.FANTASY"
+    else:
+        money_type = "MoneyType.NOTHING"
+    game_mode = input("Game mode (if/mud): ").strip()
+    if game_mode == "if":
+        tick = input("Tick method (command/timer): ").strip()
+        if tick == "command":
+            tick = "TickMethod.COMMAND"
+        else:
+            tick = "TickMethod.TIMER"
+        game_mode = "GameMode.IF"
+    else:
+        tick = "TickMethod.TIMER"
+        game_mode = "GameMode.MUD"
+    story_tpl = vfs["authoring/story_tpl.py"].text
+    tale_version = tale.__version__
+    with open(os.path.join(path, "story.py"), "wt") as out:
+        out.write(story_tpl.format(**locals()))
+    os.chmod(os.path.join(path, "story.py"), 0o755)
+    os.mkdir(os.path.join(path, "zones"))
+    with open(os.path.join(path, "zones/__init__.py"), "wt") as out:
+        print("# Story zone modules go in this package", file=out)
+        print("# See Tale example stories for more example code to learn.", file=out)
+    house_tpl = vfs["authoring/house_tpl.py"].text
+    with open(os.path.join(path, "zones/house.py"), "wt") as out:
+        out.write(house_tpl)
+    os.mkdir(os.path.join(path, "cmds"))
+    with open(os.path.join(path, "cmds/__init__.py"), "wt") as out:
+        print("# Custom commands should be defined in this file.", file=out)
+        print("# see Tale example stories to learn how to do this.", file=out)
+    os.mkdir(os.path.join(path, "messages"))
+    with open(os.path.join(path, "messages/_readme.txt"), "wt") as out:
+        print("Custom story message texts go in this folder.", file=out)
+        print("See Tale example stories to learn how to do this.", file=out)
+    print("\nDone. Go to the '{path}' directory and run story.py to play your game.".format(path=path))
+    print("You can use the 'zip' command of this authoring tool to create a single\n"
+          "zipfile from your story directory, for easy distribution later.")
+
+
 def run_from_cmdline(args: Sequence[str]) -> None:
     """Entrypoint from the commandline to invoke the available tools from this module."""
     if len(args) < 1:
-        print("Give command to execute, one of:  zip")
+        print("Give command to execute, one of:  zip / init")
         raise SystemExit()
     if args[0] == "zip":
         args = args[1:]
@@ -140,6 +153,12 @@ def run_from_cmdline(args: Sequence[str]) -> None:
         verbose = "-v" in args
         embed_tale = "-t" in args
         do_zip(args[0], args[1], embed_tale, verbose)
+    elif args[0] == "init":
+        args = args[1:]
+        if len(args) != 1:
+            print("Arguments for init command are: [story-directory]")
+            raise SystemExit(1)
+        do_init(args[0])
     else:
         print("invalid command")
         raise SystemExit(1)

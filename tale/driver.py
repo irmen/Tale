@@ -285,6 +285,10 @@ class Driver(pubsub.Listener):
             # no particular races in story config, take the defaults
             self.story.config.playable_races = playable_races
         self.zones = self._load_zones(self.story.config.zones)
+        if not self.story.config.startlocation_player:
+            raise errors.StoryConfigError("player startlocation not configured in story")
+        if not self.story.config.startlocation_wizard:
+            self.story.config.startlocation_wizard = self.story.config.startlocation_player
         self.lookup_location(self.story.config.startlocation_player)
         self.lookup_location(self.story.config.startlocation_wizard)
         if self.story.config.server_tick_method == TickMethod.COMMAND:
