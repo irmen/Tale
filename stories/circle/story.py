@@ -20,8 +20,8 @@ class Story(StoryBase):
     config.name = "Circle"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.9"
-    config.requires_tale = "3.7"
+    config.version = "1.10"
+    config.requires_tale = "3.8"
     config.supported_modes = {GameMode.MUD}
     config.money_type = MoneyType.FANTASY
     config.server_tick_method = TickMethod.TIMER

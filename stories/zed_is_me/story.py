@@ -19,8 +19,8 @@ class Story(StoryBase):
     config.name = "Zed is me"
     config.author = "Irmen de Jong"
     config.author_address = "irmen@razorvine.net"
-    config.version = "1.10"
-    config.requires_tale = "3.7"
+    config.version = "1.11"
+    config.requires_tale = "3.8"
     config.supported_modes = {GameMode.IF}
     config.money_type = MoneyType.MODERN
     config.player_name = "julie"
