@@ -56,7 +56,6 @@ def do_zip(path: str, zipfilename: str, embed_tale: bool=False, verbose: bool=Fa
                 # only one possible game mode, autoselect this one
                 mode = possible_game_modes.pop()
             main_tpl = vfs["authoring/main_tpl.py"].text
-            print(main_tpl)
             zip.writestr("__main__.py", main_tpl.format(gamemode=mode.value,
                                                         required_tale_version=story.Story.config.requires_tale))
         if embed_tale:
