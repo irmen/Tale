@@ -30,8 +30,8 @@ except ImportError as x:
 
 if tale_error:
     print("Error loading Tale: ", tale_error, file=sys.stderr)
-    print("To run this game you have to install a recent enough Tale library.\\n"
-          "Running the command 'pip install --upgrade tale' usually fixes this.\\n", file=sys.stderr)
+    print("To run this game you have to install a recent enough Tale library.\n"
+          "Running the command 'pip install --upgrade tale' usually fixes this.\n", file=sys.stderr)
     print("Enter to exit: ", file=sys.stderr)
     input()
     raise SystemExit
