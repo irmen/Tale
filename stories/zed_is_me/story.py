@@ -53,7 +53,7 @@ class Story(StoryBase):
         player.tell("\n")
         player.tell_text_file(self.driver.resources["messages/welcome.txt"])
         player.tell("\n")
-        return "Press enter to continue."
+        return "<bright>Press enter to continue.</>"
 
     def welcome_savegame(self, player: Player) -> Optional[str]:
         """
@@ -64,7 +64,7 @@ class Story(StoryBase):
         player.tell("\n")
         player.tell_text_file(self.driver.resources["messages/welcome.txt"])
         player.tell("\n")
-        return "Press enter to continue where you were before."
+        return "<bright>Press enter to continue where you were before.</>"
 
 
 if __name__ == "__main__":

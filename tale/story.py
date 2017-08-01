@@ -111,7 +111,7 @@ class StoryBase:
         """
         player.tell("<bright>Welcome to `%s'.</>" % self.config.name, end=True)
         player.tell("\n")
-        return "Press enter to start."
+        return "<bright>Press enter to start.</>"
 
     def welcome_savegame(self, player) -> Optional[str]:
         """
@@ -120,7 +120,7 @@ class StoryBase:
         """
         player.tell("<bright>Welcome back to `%s'.</>" % self.config.name, end=True)
         player.tell("\n")
-        return "Press enter to continue where you were before."
+        return "<bright>Press enter to continue where you were before.</>"
 
     def goodbye(self, player) -> None:
         """goodbye text when player quits the game"""

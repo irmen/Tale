@@ -238,7 +238,7 @@ class MudObject:
     """
     Root class of all objects in the mud world
     All objects have an identifying short name (will be lowercased),
-    an optional short title (shown when listed in a room),
+    an optional short title (shown when listed in a room -- don't use 'a' or 'the' or pronouns),
     and an optional longer description (shown when explicitly 'examined').
     The long description is 'dedented' first, which means you can put it between triple-quoted-strings easily.
     Short_description is also optional, and is used in the text when a player 'looks' around.
@@ -321,13 +321,19 @@ class MudObject:
         """(re)set the name and description attributes"""
         self.name = name.lower()
         if title:
-            assert not title.startswith("the ") and not title.startswith("The "), "title must not start with 'the'"
-            assert not title.startswith("a ") and not title.startswith("A "), "title must not start with 'a'"
-            assert not title.startswith("an ") and not title.startswith("An "), "title must not start with 'an'"
+            self._check_title(title)
         self._title = title or name
         self._description = dedent(descr).strip() if descr else ""
         self._short_description = short_descr.strip() if short_descr else ""
         self._extradesc = {}   # maps keyword to description
+
+    def _check_title(self, title: str) -> None:
+        w = title.partition(" ")[0].lower()
+        if w in lang.no_a_words:
+            raise TaleError("title cannot start with '%s' - "
+                            "don't use pronouns and/or use a more generic description" % w)
+        if w == "some":   # @todo properly support titles with 'some'
+            print("warning: title '%s' will result in invalid grammar ('a some...')" % title)
 
     def add_extradesc(self, keywords: Set[str], description: str) -> None:
         """For the set of keywords, add the extra description text"""

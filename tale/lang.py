@@ -283,6 +283,16 @@ def ordinal(number: int) -> str:
     return "%d%s" % (number, suf)
 
 
+# words that cannot be prefixed with 'a' or 'an'
+no_a_words = {
+    "he", "she", "it", "his", "her", "its", "him", "her", "it",
+    "a", "an", "the", "any", "none", "nothing", "nobody", "nowhere",
+    "everyone", "everybody", "everywhere", "everything",
+    "someone", "somebody", "somewhere", "something",
+    "anyone", "anybody", "anywhere", "anything",
+} | set(__number_words) | set(__tens_words)
+
+
 __plural_irregularities = {
     "mouse": "mice",
     "child": "children",

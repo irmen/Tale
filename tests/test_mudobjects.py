@@ -11,7 +11,7 @@ import unittest
 from tale import pubsub, mud_context
 from tale.base import Location, Exit, Item, MudObject, Living, _limbo, Container, Weapon, Door, Key, ParseResult, MudObjRegistry
 from tale.demo.story import Story as DemoStory
-from tale.errors import ActionRefused, LocationIntegrityError, UnknownVerbException
+from tale.errors import ActionRefused, LocationIntegrityError, UnknownVerbException, TaleError
 from tale.player import Player
 from tale.story import MoneyType
 from tale.shop import Shopkeeper
@@ -875,7 +875,7 @@ class TestDescriptions(unittest.TestCase):
         self.assertEqual("a very small, old key that's rusted", item.description)
 
     def test_extradesc(self):
-        item = Item("key", "some key")
+        item = Item("key", "white key")
         item.extra_desc = {"alias1": "first alias desc", "foo": "bar"}
         item.add_extradesc({"alias2", "alias3"}, "more description text")
         self.assertEqual("first alias desc", item.extra_desc["alias1"])
@@ -1208,11 +1208,16 @@ class TestItem(unittest.TestCase):
 
 class TestMudObject(unittest.TestCase):
     def test_basics(self):
-        try:
-            x = Item("name", "the title", descr="description")
-            self.fail("assertion error expected")
-        except AssertionError:
-            pass
+        with self.assertRaises(TaleError) as ex:
+            Item("name", "the title", descr="description")
+        self.assertTrue(str(ex.exception).startswith("title cannot"))
+        with self.assertRaises(TaleError) as ex:
+            Item("name", "five things", descr="description")
+        self.assertTrue(str(ex.exception).startswith("title cannot"))
+        with self.assertRaises(TaleError) as ex:
+            Item("name", "a thing", descr="description")
+        self.assertTrue(str(ex.exception).startswith("title cannot"))
+        x = Item("name", "fifth title", descr="description")
         x = Item("name", "title", descr="description")
         x.init()
         with self.assertRaises(ActionRefused):
