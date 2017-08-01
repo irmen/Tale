@@ -23,7 +23,6 @@ General ideas/TODO:
 -------------------
 [code] add more items/templates in items.basic.  Take ideas from objects in other mudlibs?
 [code] adding 'a' automatically sometimes gives strange results, "you take a someone's wallet"... "you take a some cash"...
-[code] add optional descriptive text when you go through an exit/door before simply dumping you into the next room.
 [feature] combat system...! see combatmodel.txt
 [feature] allow livings to wear items/armour on various body parts, extend circle zone loader to use this
     wear, put on, take off, unwear, remove <armor> | wield, unwield, remove <weapon>

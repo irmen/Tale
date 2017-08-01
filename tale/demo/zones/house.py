@@ -38,6 +38,7 @@ door = Door(
     ["garden", "door"], outside,
     "A door leads to the garden.", "There's a heavy door here that leads to the garden outside the house.",
     locked=True, opened=False, key_code="1")    # oneway door, once outside you're finished, so no reason to go back in
+door.enter_msg = "You step through your garden door into the great unknown that is the outside."
 livingroom.add_exits([door])
 
 Exit.connect(livingroom, "closet", "There's a small closet in your house.", None,

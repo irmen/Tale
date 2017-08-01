@@ -1387,7 +1387,7 @@ class Living(MudObject):
         pass
 
     def look(self, short: bool=None) -> None:
-        """look around in your surroundings. Dummy for base livings."""
+        """look around in your surroundings. Dummy for base livings (they don't perform 'look' nor react to it)."""
         pass
 
     def select_random_move(self) -> Optional['Exit']:
@@ -1467,11 +1467,12 @@ class Exit(MudObject):
     If using a string, it will be retrieved and bound at runtime.
     Short_description will be shown when the player looks around the room.
     Long_description is optional and will be shown instead if the player examines the exit.
+    Enter_msg is the text shown to the player when they succesfully enter/pass through the exit/door.
     The exit's direction is stored as its name attribute (if more than one, the rest are aliases).
     Note that the exit's origin is not stored in the exit object.
     """
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location],
-                 short_descr: str, long_descr: str=None) -> None:
+                 short_descr: str, long_descr: str=None, *, enter_msg: str=None) -> None:
         assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
         if isinstance(directions, str):
             direction = directions
@@ -1496,6 +1497,7 @@ class Exit(MudObject):
             # The driver needs to know about all unbound exits,
             # it will hook them all up once initialization is complete.
             mud_context.driver.register_exit(self)
+        self.enter_msg = enter_msg
 
     def __repr__(self):
         targetname = self.target.name if self.target else self._target_str
@@ -1578,13 +1580,14 @@ class Door(Exit):
     Because a single door is still only one-way, you have to create a second -linked- door to go back.
     This is easily done by the ``reverse_door`` method.
     """
-    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location], short_descr: str,
-                 long_descr: str=None, locked: bool=False, opened: bool=False, key_code: str="") -> None:
+    def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location],
+                 short_descr: str, long_descr: str=None, *, enter_msg: str=None,
+                 locked: bool=False, opened: bool=False, key_code: str="") -> None:
         self.locked = locked
         self.opened = opened
         self.__description_prefix = long_descr or short_descr
         self.key_code = key_code   # you can optionally set this to any code that a key must match to unlock the door
-        super().__init__(directions, target_location, short_descr, long_descr)
+        super().__init__(directions, target_location, short_descr, long_descr, enter_msg=enter_msg)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
         self.linked_door = None  # type: Door
@@ -1597,7 +1600,7 @@ class Door(Exit):
         Create a pair of doors that connect two locations.
         (This requires two door definitions because the directions and descriptions differ for the to- and return-exists)
         """
-        d1 = cls(directions, to_loc, short_descr, long_descr, locked, opened, key_code)
+        d1 = cls(directions, to_loc, short_descr, long_descr, locked=locked, opened=opened, key_code=key_code)
         d2 = d1.reverse_door(return_directions, from_loc, return_short_descr, return_long_descr)
         d1.bind(from_loc)
         d2.bind(to_loc)

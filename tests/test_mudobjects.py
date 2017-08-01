@@ -381,7 +381,7 @@ class TestDoorsExits(unittest.TestCase):
     def test_exits(self):
         hall = Location("hall")
         attic = Location("attic")
-        exit1 = Exit("ladder1", attic, "The first ladder leads to the attic.")
+        exit1 = Exit("ladder1", attic, "The first ladder leads to the attic.", enter_msg="entering the attic")
         exit2 = Exit("up", attic, "Second ladder to attic.")
         exit3 = Exit("ladder3", attic, "Third ladder to attic.")
         exit4 = Exit("window", attic, "A window.", "A window, maybe if you open it you can get out?")
@@ -392,6 +392,8 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual(['[hall]', 'The first ladder leads to the attic. Third ladder to attic. Second ladder to attic. A window.'], strip_text_styles(hall.look()))
         self.assertEqual("Third ladder to attic.", exit3.description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.description)
+        self.assertEqual("entering the attic", exit1.enter_msg)
+        self.assertIsNone(exit2.enter_msg)
         with self.assertRaises(ActionRefused):
             exit1.activate(None)
         with self.assertRaises(ActionRefused):
@@ -408,6 +410,40 @@ class TestDoorsExits(unittest.TestCase):
             exit1.manipulate("frobnitz", None)
         with self.assertRaises(ActionRefused):
             exit1.read(None)
+
+    def test_go_through_exit(self):
+        driver = FakeDriver()
+        hall = Location("hall")
+        attic = Location("attic")
+        exit1 = Exit("ladder1", attic, "exit 1 to attic", enter_msg="entering the attic via exit 1")
+        exit2 = Exit("ladder2", attic, "exit 2 to attic")
+        door = Door("door1", attic, "Door to attic", enter_msg="entering the attic via door", opened=True)
+        hall.add_exits([exit1, exit2, door])
+        julie = Player("julie", "f")
+        peter = Player("peter", "m")
+        sarah = Player("sarah", "f")
+        hall.insert(peter, peter)
+        hall.insert(sarah, sarah)
+        hall.insert(julie, julie)
+        tap_j = julie.get_wiretap()
+        tap_p = peter.get_wiretap()
+        tap_s = sarah.get_wiretap()
+        collector_j = PubsubCollector()
+        collector_p = PubsubCollector()
+        collector_s = PubsubCollector()
+        tap_j.subscribe(collector_j)
+        tap_p.subscribe(collector_p)
+        tap_s.subscribe(collector_s)
+        driver.go_through_exit(julie, "ladder1")
+        driver.go_through_exit(peter, "ladder2")
+        driver.go_through_exit(sarah, "door1")
+        pubsub.sync()
+        self.assertEqual(0, len(hall.livings))
+        self.assertEqual(3, len(attic.livings))
+        self.assertEqual(["entering the attic via exit 1", "\n", "<location>[attic]</>"], collector_j.messages[0:3])
+        self.assertEqual(["Julie leaves.", "<location>[attic]</>"], collector_p.messages[0:2])
+        self.assertEqual(["Julie leaves.", "Peter leaves.", "entering the attic via door",
+                          "\n", "<location>[attic]</>"], collector_s.messages[0:5])
 
     def test_bind_exit(self):
         class ModuleDummy:
