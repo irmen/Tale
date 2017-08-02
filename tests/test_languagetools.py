@@ -21,6 +21,8 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("an egg", lang.a("egg"))
         self.assertEqual("an egg", lang.a("an egg"))
         self.assertEqual("An egg", lang.a("An egg"))
+        self.assertEqual("the egg", lang.a("the egg"))
+        self.assertEqual("The egg", lang.a("The egg"))
         self.assertEqual("a university", lang.a("university"))
         self.assertEqual("a university magazine", lang.a("university magazine"))
         self.assertEqual("a user", lang.a("user"))
@@ -34,7 +36,6 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("An hour", lang.A("hour"))
         self.assertEqual("an uno", lang.a("uno"))
         self.assertEqual("an hourglass", lang.a("hourglass"))
-        self.assertEqual("An egg", lang.A("An egg"))
         self.assertEqual("a unicycle", lang.a("unicycle"))
         self.assertEqual("a universe", lang.a("universe"))
         self.assertEqual("an honest mistake", lang.a("honest mistake"))
@@ -48,6 +49,29 @@ class TestLanguagetools(unittest.TestCase):
         self.assertEqual("a YCLEPED", lang.a("YCLEPED"))
         self.assertEqual("an yttric", lang.a("yttric"))
         self.assertEqual("an yggdrasil", lang.a("yggdrasil"))
+
+    def testAcapital(self):
+        self.assertEqual("", lang.A(""))
+        self.assertEqual("An e", lang.A("e"))
+        self.assertEqual("A q", lang.A("q"))
+        self.assertEqual("A house", lang.A("house"))
+        self.assertEqual("A house", lang.A("a house"))
+        self.assertEqual("A House", lang.A("House"))
+        self.assertEqual("An egg", lang.A("egg"))
+        self.assertEqual("An egg", lang.A("an egg"))
+        self.assertEqual("An egg", lang.A("An egg"))
+        self.assertEqual("The egg", lang.A("the egg"))
+        self.assertEqual("The egg", lang.A("The egg"))
+
+    def testAexceptions(self):
+        self.assertEqual("some egg", lang.a("some egg"))
+        self.assertEqual("someone's egg", lang.a("someone's egg"))
+        self.assertEqual("Someone's egg", lang.A("someone's egg"))
+        self.assertEqual("Someone's egg", lang.A("Someone's egg"))
+        self.assertEqual("five eggs", lang.a("five eggs"))
+        self.assertEqual("the fifth egg", lang.a("fifth egg"))
+        self.assertEqual("the seventieth egg", lang.a("seventieth egg"))
+        self.assertEqual("The seventieth egg", lang.A("seventieth egg"))
 
     def testFullstop(self):
         self.assertEqual("a.", lang.fullstop("a"))

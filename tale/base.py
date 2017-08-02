@@ -329,11 +329,8 @@ class MudObject:
 
     def _check_title(self, title: str) -> None:
         w = title.partition(" ")[0].lower()
-        if w in lang.no_a_words:
-            raise TaleError("title cannot start with '%s' - "
-                            "don't use pronouns and/or use a more generic description" % w)
-        if w == "some":   # @todo properly support titles with 'some'
-            print("warning: title '%s' will result in invalid grammar ('a some...')" % title)
+        if w in {"a", "an", "the"}:
+            raise TaleError("title cannot start with an article: '%s' (these are added automatically)" % title)
 
     def add_extradesc(self, keywords: Set[str], description: str) -> None:
         """For the set of keywords, add the extra description text"""
@@ -965,7 +962,7 @@ class Living(MudObject):
         self.previous_commandline = None   # type: str
         self._previous_parse = None  # type: ParseResult
         self.teleported_from = None   # type: Location   # used by teleport/return commands
-        self.following = None   # type: Living    # @todo save/load this
+        self.following = None   # type: Living
         super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init_gender(self, gender: str) -> None:

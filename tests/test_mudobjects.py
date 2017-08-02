@@ -1212,7 +1212,7 @@ class TestMudObject(unittest.TestCase):
             Item("name", "the title", descr="description")
         self.assertTrue(str(ex.exception).startswith("title cannot"))
         with self.assertRaises(TaleError) as ex:
-            Item("name", "five things", descr="description")
+            Item("name", "the things", descr="description")
         self.assertTrue(str(ex.exception).startswith("title cannot"))
         with self.assertRaises(TaleError) as ex:
             Item("name", "a thing", descr="description")

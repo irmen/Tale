@@ -79,8 +79,8 @@ carpark.add_extradesc({"convertible", "yellow"}, "It is a small two-seater and t
                                                  "but the key is actually still in the ignition!")
 
 # not enough to buy the medicine, player needs to find more, or haggle:
-carpark.init_inventory([Money("wallet", 16.0, title="small wallet",
-    short_descr="A wallet lies on the pavement, someone seems to have lost it. There's some money in it.")])
+carpark.init_inventory([Money("wallet", 16.0, title="someone's wallet",
+    short_descr="Someone's wallet lies on the pavement, they seem to have lost it. There's some money in it.")])
 
 
 parking_gate, _ = Door.connect(north_street, ["gate", "parking"],
