@@ -724,10 +724,16 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         if name in player.location.extra_desc:
             p(player.location.extra_desc[name])   # print the extra description, rather than a generic message
         if living.following:
-            if living.following is player:
-                p("%s's following you." % lang.capital(living.subjective))
+            if living.is_pet:
+                if living.following is player:
+                    p("%s's your loyal pet." % lang.capital(living.subjective))
+                else:
+                    p("%s's a pet of %s." % (lang.capital(living.subjective), living.following.title))
             else:
-                p("It seems that %s's following %s." % (living.subjective, living.following.title))
+                if living.following is player:
+                    p("%s's following you." % lang.capital(living.subjective))
+                else:
+                    p("It seems that %s's following %s." % (living.subjective, living.following.title))
         return
     item, container = player.locate_item(name)
     if item:

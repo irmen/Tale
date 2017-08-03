@@ -75,6 +75,7 @@ class PetShop(Location):
                         pet.aliases.add(pet.name)
                         pet.name = name
                     pet.following = actor   # @todo make pet charmed as well (see circle doc/src)
+                    pet.is_pet = True
                     actor.money -= price
                     actor.tell_others("{Actor} buys %s as a pet." % pet.title)
                     actor.tell("You paid %s and received %s as your new pet. Happy times!"

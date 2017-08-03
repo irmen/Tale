@@ -848,7 +848,6 @@ class Location(MudObject):
                     living.move(target_location)    # move immediately
                 else:
                     mud_context.driver.defer(2, living.move, target_location)   # move after a short delay
-                break
 
     def notify_player_arrived(self, player, previous_location: 'Location') -> None:
         """
@@ -875,7 +874,6 @@ class Location(MudObject):
                     living.move(target_location)    # move immediately
                 else:
                     mud_context.driver.defer(2, living.move, target_location)   # move after a short delay
-                break
 
 
 class Stats:
@@ -963,6 +961,7 @@ class Living(MudObject):
         self._previous_parse = None  # type: ParseResult
         self.teleported_from = None   # type: Location   # used by teleport/return commands
         self.following = None   # type: Living
+        self.is_pet = False   # set this to True if creature is/becomes someone's pet
         super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
     def init_gender(self, gender: str) -> None:
