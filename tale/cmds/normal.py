@@ -710,7 +710,7 @@ def do_examine(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
             p(living.description)
         else:
             p("This is %s." % living.title)
-        if living.stats.race != "human":
+        if ctx.config.display_race and living.stats.race != "human":
             # only print this race related info when dealing with creatures other than humans
             if living.stats.bodytype and living.stats.size:
                 p("{subj}'s a {size} {btype} {race}.".format(
