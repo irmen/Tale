@@ -871,9 +871,9 @@ class Location(MudObject):
         for living in self.livings:
             if living.following is player:
                 if mud_context.config.server_tick_method == story.TickMethod.COMMAND:
-                    living.move(target_location)    # move immediately
+                    living._move_follow(target_location)    # move immediately
                 else:
-                    mud_context.driver.defer(2, living.move, target_location)   # move after a short delay
+                    mud_context.driver.defer(1.5, living._move_follow, target_location)   # move after a short delay
 
 
 class Stats:
@@ -1410,6 +1410,15 @@ class Living(MudObject):
                 else:
                     return xt
         return None
+
+    def _move_follow(self, target_location: Location, ctx: util.Context) -> None:
+        # follow someone that recently moved.
+        if self.is_pet:
+            # pets always keep up with their owner, regardless of the given target_location
+            self.move(self.following.location)
+        else:
+            # non-pets just move to the target location and don't try to keep up.
+            self.move(target_location)
 
 
 class Container(Item):

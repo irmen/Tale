@@ -31,7 +31,6 @@ General ideas/TODO:
 [code] Define a DSL to define the basic world stuff, and convert it to python source (or parse directly like the circle importers?)
 [feature] Hunger/thirst/fatigue (movement/staminapoints)?
 [feature] class/skill system, lockpicking skill to unlock doors without having key, ...
-[feature] pets that are following (pet shop from circle) can easily lose you if you move too fast. Add a way to catch up. (rubberbanding? trail?)
 [tests] tests for @cmd functions are mostly absent
 
 
