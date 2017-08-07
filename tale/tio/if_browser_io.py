@@ -452,7 +452,8 @@ class TaleWsgiApp(TaleWsgiAppBase):
     Note that it is deliberatly simplistic and ony able to handle a single
     player connection; it only works for 'if' single-player game mode.
     """
-    def __init__(self, driver: Driver, player_connection: PlayerConnection, use_ssl: bool, ssl_certs: Tuple[str, str]) -> None:
+    def __init__(self, driver: Driver, player_connection: PlayerConnection,
+                 use_ssl: bool, ssl_certs: Tuple[str, str, str]) -> None:
         super().__init__(driver)
         self.completer = None
         self.player_connection = player_connection   # just a single player here
@@ -462,7 +463,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
 
     @classmethod
     def create_app_server(cls, driver: Driver, player_connection: PlayerConnection, *,
-                          use_ssl: bool=False, ssl_certs: Tuple[str, str]=None) -> Callable:
+                          use_ssl: bool=False, ssl_certs: Tuple[str, str, str]=None) -> Callable:
         wsgi_app = SessionMiddleware(cls(driver, player_connection, use_ssl, ssl_certs))
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
@@ -504,14 +505,15 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     """
     request_queue_size = 10
     use_ssl = False
-    ssl_cert_locations = ("./certs/localhost.pem", "./certs/localhost_cert.pem")    # keyfile, certfile
+    ssl_cert_locations = ("./certs/localhost_cert.pem", "./certs/localhost_key.pem", "")    # certfile, keyfile, certpassword
 
     def server_bind(self):
         if self.use_ssl:
-            print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
+            print("\n\nUsing SSL\n\n")
             import ssl
-            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0],
-                                          certfile=self.ssl_cert_locations[1], server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+            ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ctx.load_cert_chain(self.ssl_cert_locations[0], self.ssl_cert_locations[1] or None, self.ssl_cert_locations[2] or None)
+            self.socket = ctx.wrap_socket(self.socket, server_side=True)
         return super().server_bind()
 
 

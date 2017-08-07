@@ -73,7 +73,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     The actual wsgi app that the player's browser connects to.
     This one is capable of dealing with multiple connected clients (multi-player).
     """
-    def __init__(self, driver: Driver, use_ssl: bool, ssl_certs: Tuple[str, str]) -> None:
+    def __init__(self, driver: Driver, use_ssl: bool, ssl_certs: Tuple[str, str, str]) -> None:
         super().__init__(driver)
         CustomWsgiServer.use_ssl = use_ssl
         if use_ssl and ssl_certs:
@@ -81,7 +81,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
 
     @classmethod
     def create_app_server(cls, driver: Driver, *,
-                          use_ssl: bool=False, ssl_certs: Tuple[str, str]=None) -> WSGIServer:
+                          use_ssl: bool=False, ssl_certs: Tuple[str, str, str]=None) -> WSGIServer:
         wsgi_app = SessionMiddleware(cls(driver, use_ssl, ssl_certs), MemorySessionFactory())
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
@@ -154,14 +154,15 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     """
     request_queue_size = 200
     use_ssl = False
-    ssl_cert_locations = ("./certs/localhost.pem", "./certs/localhost_cert.pem")    # keyfile, certfile
+    ssl_cert_locations = ("./certs/localhost_cert.pem", "./certs/localhost_key.pem", "")    # certfile, keyfile, certpassword
 
     def server_bind(self):
         if self.use_ssl:
-            print("\n\nUsing SSL, cert locations:", self.ssl_cert_locations, end="\n\n")
+            print("\n\nUsing SSL\n\n")
             import ssl
-            self.socket = ssl.wrap_socket(self.socket, keyfile=self.ssl_cert_locations[0],
-                                          certfile=self.ssl_cert_locations[1], server_side=True, ssl_version=ssl.PROTOCOL_TLS)
+            ctx = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ctx.load_cert_chain(self.ssl_cert_locations[0], self.ssl_cert_locations[1] or None, self.ssl_cert_locations[2] or None)
+            self.socket = ctx.wrap_socket(self.socket, server_side=True)
         return super().server_bind()
 
 
