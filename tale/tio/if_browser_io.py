@@ -52,7 +52,7 @@ def squash_parameters(parameters: Dict[str, Any]) -> Dict[str, Any]:
     return parameters
 
 
-# @todo: protect the display and transmission of account/password input text
+# @todo: protect the display and transmission of account/password input text (or just use ssl...)
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface.
