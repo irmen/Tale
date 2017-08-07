@@ -103,7 +103,8 @@ class IFDriver(driver.Driver):
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
             wsgi_server = TaleWsgiApp.create_app_server(self, connection, use_ssl=False, ssl_certs=None)
             # you can enable SSL by using the following:
-            # wsgi_server = TaleWsgiApp.create_app_server(self, connection, use_ssl=True, ssl_certs=("certs/localhost_cert.pem", "certs/localhost_key.pem", ""))
+            # wsgi_server = TaleWsgiApp.create_app_server(self, connection, use_ssl=True,
+            #                   ssl_certs=("certs/localhost_cert.pem", "certs/localhost_key.pem", ""))
             io = HttpIo(connection, wsgi_server)
         elif player_io_type == "console":
             from .tio.console_io import ConsoleIo
