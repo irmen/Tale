@@ -871,7 +871,7 @@ class Location(MudObject):
         for living in self.livings:
             if living.following is player:
                 if mud_context.config.server_tick_method == story.TickMethod.COMMAND:
-                    living._move_follow(target_location)    # move immediately
+                    living._move_follow(target_location, util.Context.from_global())    # move immediately
                 else:
                     mud_context.driver.defer(1.5, living._move_follow, target_location)   # move after a short delay
 

@@ -272,14 +272,11 @@ class TestUtil(unittest.TestCase):
             util.parse_time(["some_weird_occasion"])
 
     def test_context(self):
-        ctx = util.Context(driver=mud_context.driver, clock=mud_context.driver.game_clock, config=mud_context.config, player_connection=42)
+        ctx = util.Context.from_global(player_connection=42)
         self.assertIs(mud_context.driver, ctx.driver)
         self.assertIs(mud_context.driver.game_clock, ctx.clock)
         self.assertIs(mud_context.config, ctx.config)
-        with self.assertRaises(AttributeError):
-            _ = ctx.doesnotexist
-        ctx.x = 99
-        self.assertEqual(99, ctx.x)
+        self.assertEqual(42, ctx.conn)
 
     def test_storyname(self):
         self.assertEqual("name", util.storyname_to_filename("NaMe"))

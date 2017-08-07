@@ -312,7 +312,7 @@ class Money(Item):
         if isinstance(target_container, Living):
             target_container.remove(self, actor)
             target_container.money += self.value
-            self.destroy(util.Context(mud_context.driver, mud_context.driver.game_clock, mud_context.config, None))
+            self.destroy(util.Context.from_global())
 
 
 class Boat(Item):

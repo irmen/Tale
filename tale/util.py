@@ -15,7 +15,7 @@ from decimal import Decimal
 from types import MemberDescriptorType
 from typing import List, Tuple, Dict, Union, Sequence, Any, Callable, Iterable, Type, Set
 
-from . import lang
+from . import lang, mud_context
 from .errors import ParseError, ActionRefused, TaleError
 from .story import MoneyType
 
@@ -366,6 +366,16 @@ class Context:
 
     def __getstate__(self):
         raise RuntimeError("cannot serialize context - if you see this, some other object likely has a ref to us")
+
+    @classmethod
+    def from_global(cls, player_connection=None) -> 'Context':
+        """
+        Create a Context based on the current global mud_context
+        Should only be used to (re)create a ctx where one is required,
+        and you don't have a ctx argument provided already.
+        """
+        return cls(driver=mud_context.driver, clock=mud_context.driver.game_clock,
+                   config=mud_context.config, player_connection=player_connection)
 
 
 def authorized(*privileges: Sequence[str]) -> Callable:

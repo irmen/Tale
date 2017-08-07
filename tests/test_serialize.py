@@ -129,7 +129,7 @@ class TestSerializing(unittest.TestCase):
         # @todo check
 
     def test_Context(self):
-        c = util.Context(driver=mud_context.driver, clock=mud_context.driver.game_clock, config=mud_context.config, player_connection=42)
+        c = util.Context.from_global(player_connection=42)
         with self.assertRaises(RuntimeError) as x:
             serializecycle(c)
         self.assertTrue(str(x.exception).startswith("cannot serialize context"))

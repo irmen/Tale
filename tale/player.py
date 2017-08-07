@@ -428,7 +428,7 @@ class PlayerConnection:
     def destroy(self) -> None:
         ctx = None
         if self.io and self.player:
-            ctx = util.Context(mud_context.driver, mud_context.driver.game_clock, mud_context.config, self)
+            ctx = util.Context.from_global(player_connection=self)
         if self.io:
             self.io.stop_main_loop = True
             self.io.destroy()
