@@ -59,6 +59,11 @@ function process_text(json)
                 txtdiv.innerHTML = "";
                 txtdiv.scrollTop = 0;
             }
+            if(special.indexOf("noecho")>=0) {
+                var inputfield = document.getElementById("input-cmd");
+                inputfield.type = "password";       // may not work in all browsers...
+                inputfield.style.color = "gray";
+            }
         }
         if(json["text"]) {
             document.getElementById("player-location").innerHTML = json["location"];
@@ -95,6 +100,8 @@ function submit_cmd()
     ajax.send("cmd=" + encoded_cmd);
     cmd_input.value="";
     cmd_input.focus();
+    cmd_input.type = "text";
+    cmd_input.style.color = "black";
     return false;
 }
 

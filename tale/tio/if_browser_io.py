@@ -52,7 +52,6 @@ def squash_parameters(parameters: Dict[str, Any]) -> Dict[str, Any]:
     return parameters
 
 
-# @todo: protect the display and transmission of account/password input text (or just use ssl...)
 class HttpIo(iobase.IoAdapterBase):
     """
     I/O adapter for a http/browser based interface.
@@ -333,6 +332,8 @@ class TaleWsgiAppBase:
             html = conn.io.get_html_to_browser()
             special = conn.io.get_html_special()
             if html or special:
+                if conn.io.dont_echo_next_cmd:
+                    special.append("noecho")
                 response = {
                     "text": "\n".join(html),
                     "special": special,

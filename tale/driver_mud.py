@@ -132,7 +132,7 @@ class MudDriver(driver.Driver):
                     "You'll have to create the initial admin user to be able to start the mud.</>")
         while True:
             conn.output("Creating new admin user.")
-            name = yield "input-noecho", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
+            name = yield "input", ("Please type in the admin's player name.", accounts.MudAccounts.accept_name)
             while True:
                 password = yield "input-noecho", ("Please type in the admin password.", accounts.MudAccounts.accept_password)
                 password2 = yield "input-noecho", ("Please retype the admin password.", accounts.MudAccounts.accept_password)
@@ -171,7 +171,7 @@ class MudDriver(driver.Driver):
         while not successful_login:
             existing_player = None
             account = None
-            name = yield "input-noecho", ("Please type in your player name.", accounts.MudAccounts.accept_name)
+            name = yield "input", ("Please type in your player name.", accounts.MudAccounts.accept_name)
 
             # see if it is a new player or a name we already know.
             try:
