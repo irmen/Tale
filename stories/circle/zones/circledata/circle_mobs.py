@@ -436,9 +436,8 @@ mobs_with_special = set()     # type: Set[CircleMob]
 def make_mob(vnum: int, mob_class: Type[CircleMob]=CircleMob) -> Living:
     """Create an instance of an item for the given vnum"""
     c_mob = mobs[vnum]
-    aliases_list = list(c_mob.aliases)  # type: List[str]
-    name = aliases_list[0]
-    aliases = set(aliases_list[1:])   # type: Set[str]
+    name = c_mob.aliases[0]
+    aliases = set(c_mob.aliases[1:])   # type: Set[str]
     title = c_mob.shortdesc
     if title.startswith("the ") or title.startswith("The "):
         title = title[4:]

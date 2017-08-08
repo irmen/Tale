@@ -104,14 +104,6 @@ class MudAccounts:
                             ac integer NOT NULL,
                             maxhp_dice varchar NULL,
                             attack_dice varchar NULL,
-                            agi integer NOT NULL,
-                            cha integer NOT NULL,
-                            int integer NOT NULL,
-                            lck integer NOT NULL,
-                            spd integer NOT NULL,
-                            sta integer NOT NULL,
-                            str integer NOT NULL,
-                            wis integer NOT NULL,
                             alignment integer NOT NULL,
                             FOREIGN KEY(account) REFERENCES Account(id)
                         );
@@ -126,7 +118,6 @@ class MudAccounts:
                         );
                         """)
                     # note: stats not stored in the database are the following:
-                    #       all stat_prios (for agi, cha, int etcetera)
                     #       bodytype, language, weight, and size.
                     #       Those are all static and will be initialized from the races table.
                     conn.commit()
@@ -236,7 +227,7 @@ class MudAccounts:
         name = name.strip()
         email = email.strip()
         lang.validate_gender(stats.gender)
-        if stats.stat_prios is None or not stats.language:
+        if not stats.language:
             raise ValueError("cannot create an account with un-initialized stats")
         self.accept_name(name)
         self.accept_password(password)
@@ -261,7 +252,7 @@ class MudAccounts:
         columns = ["account"]
         values = [account_id]
         stat_vars = dict(vars(stats))
-        for not_stored in ["bodytype", "language", "weight", "size", "stat_prios"]:
+        for not_stored in ["bodytype", "language", "weight", "size"]:
             del stat_vars[not_stored]    # these are not stored, but always initialized from the races table
         for key, value in stat_vars.items():
             columns.append(key)

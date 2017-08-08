@@ -885,15 +885,6 @@ class Stats:
         self.maxhp_dice = None  # type: str
         self.ac = 0
         self.attack_dice = None  # type: str  # damage roll when attacking without a weapon
-        self.agi = 0
-        self.cha = 0
-        self.int = 0
-        self.lck = 0
-        self.spd = 0
-        self.sta = 0
-        self.str = 0
-        self.wis = 0
-        self.stat_prios = None    # type: Dict[int, List[races.StatType]]  # per priority level, the stat(s) with that level (see races.py)
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
         self.bodytype = races.BodyType.HUMANOID
         self.language = None   # type: str
@@ -910,14 +901,6 @@ class Stats:
         s = cls()
         s.gender = gender
         s.race = race
-        s.agi = r.stats.agi[0]
-        s.cha = r.stats.cha[0]
-        s.int = r.stats.int[0]
-        s.lck = r.stats.lck[0]
-        s.spd = r.stats.spd[0]
-        s.sta = r.stats.sta[0]
-        s.str = r.stats.str[0]
-        s.wis = r.stats.wis[0]
         s.set_stats_from_race()
         # @todo initialize xp, hp, maxhp, ac, attack, alignment, level. Current race defs don't include this data
         return s
@@ -925,11 +908,7 @@ class Stats:
     def set_stats_from_race(self) -> None:
         # the stats that are static are always initialized from the races table
         # we look it up via the name, not needed to store the actual Race object here
-        self.stat_prios = defaultdict(list)   # maps prio level to list of stat(s) with that level
         r = races.races[self.race]
-        for stat, (_, prio) in r.stats._asdict().items():
-            st = races.StatType(stat)
-            self.stat_prios[prio].append(st)
         self.bodytype = r.body
         self.language = r.language
         self.weight = r.mass

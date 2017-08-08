@@ -14,7 +14,6 @@ class TestRaces(unittest.TestCase):
     def test_attributes(self):
         human = races._races["human"]
         self.assertEqual(72.0, human["mass"])
-        self.assertEqual(8, len(human["stats"]))
         self.assertEqual(races.BodyType.HUMANOID, human["body"])
         self.assertEqual(races.BodySize.HUMAN_SIZED, human["size"])
         self.assertEqual("English", human["language"])
@@ -22,11 +21,9 @@ class TestRaces(unittest.TestCase):
     def test_generated_race(self):
         human = races.races["human"]
         self.assertEqual(72.0, human.mass)
-        self.assertEqual(8, len(human.stats))
         self.assertEqual(races.BodyType.HUMANOID, human.body)
         self.assertEqual(races.BodySize.HUMAN_SIZED, human.size)
         self.assertEqual("English", human.language)
-        self.assertEqual((33, 3), human.stats.agi)
         self.assertTrue(human.flags.playable)
         self.assertFalse(races.races["plant"].flags.playable)
 

@@ -472,7 +472,6 @@ def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudOb
 
 def try_pick_up_living(player: Player, living: base.Living) -> None:
     if player.stats.size - living.stats.size >= 2:
-        # @todo: do an agi/str/spd/luck check to see if we can pick it up
         player.tell("Even though {subj}'s small enough, you can't carry {obj} with you."
                     .format(subj=living.subjective, obj=living.objective))
         if living.aggressive:
@@ -804,8 +803,6 @@ def do_stats(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         player.tell("Speaks %s." % target.stats.language)
     if target.aggressive:
         player.tell("%s seems to be aggressive." % lang.capital(target.subjective))
-    player.tell("\n")
-    player.tell("Stats: agi={agi} cha={cha} int={int} lck={lck} spd={spd} sta={sta} str={str} wis={wis}".format(**vars(target.stats)))
 
 
 @cmd("tell")

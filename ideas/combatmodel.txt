@@ -33,18 +33,9 @@ Hit points of MOBS per level rule of thumb is about LEVEL SQUARED (low lvls get 
     level 40: ~1500
 
 
-STATS   [1 - 100]
------------------
-
-Stats range from 1 to 100.  They may increase per level gained, depending on stat priority (see races.py)
-
-Stats that have effect on MELEE combat:
-    AGIlity:    how nimble you are, how easy you avoid sudden blows, etc.
-    STRength:   the force with which you can hit, how much you can carry, etc.
-
-Stats that have effect on SPELL combat:
-    INTelligence : spell power/level
-    WISdom       : mana? something else?
+STATS like AGI
+--------------
+Too complex, don't implement.
 
 
 ARMOUR CLASS [ -100 - 0 - +100 ]

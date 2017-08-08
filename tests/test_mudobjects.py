@@ -723,13 +723,11 @@ class TestLiving(unittest.TestCase):
         self.assertEqual("She's quite the looker.", julie.description)
         self.assertEqual("human", julie.stats.race)
         self.assertEqual("f", julie.gender)
-        self.assertTrue(1 < julie.stats.agi < 100)
         self.assertEqual("rat", rat.name)
         self.assertEqual("rat", rat.title)
         self.assertEqual("rodent", rat.stats.race)
         self.assertEqual("", rat.description)
         self.assertEqual("n", rat.gender)
-        self.assertTrue(1 < rat.stats.agi < 100)
         dragon = Living("dragon", "f", race="dragon")
         self.assertFalse(dragon.aggressive)
 
