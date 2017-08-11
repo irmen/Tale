@@ -1,9 +1,11 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  - 3.5
+  - 3.6
+  - pypy3
 
 # Use fast travis build infrastructure explicitly
+dist: trusty
 sudo: false
 
 # Installation installs dependencies
