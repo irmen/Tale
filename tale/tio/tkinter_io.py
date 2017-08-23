@@ -130,13 +130,17 @@ class TaleWindow(tkinter.Toplevel):
         # self.bind('<Escape>',self.Ok) #dismiss dialog
         self.textView.insert(0.0, text)
         self.textView.config(state=tkinter.DISABLED)
-
         try:
             img = tkinter.PhotoImage(data=vfs.internal_resources["tio/quill_pen_paper.gif"].data)
         except tkinter.TclError:
             pass  # older versions of Tkinter can't create an image from data bytes, don't bother then
         else:
-            self.tk.call('wm', 'iconphoto', self, img)
+            self.wm_iconphoto(self, img)
+            if sys.platform == "win32":
+                # tell windows to use a new toolbar icon
+                import ctypes
+                myappid = 'net.Razorvine.Tale.story'  # arbitrary string
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
         self.history = collections.deque(maxlen=100)
         self.history.append("")
