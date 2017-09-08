@@ -8,6 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import time
 import threading
 from typing import Union, Generator, Dict, Tuple, Optional, Any
+
 from .story import GameMode
 from . import accounts
 from . import base
@@ -16,7 +17,6 @@ from . import driver
 from . import errors
 from . import lang
 from . import pubsub
-from . import races
 from . import util
 from .player import PlayerConnection, Player
 from .tio.mud_browser_io import TaleMudWsgiApp
@@ -374,14 +374,19 @@ class MudDriver(driver.Driver):
                         txt = "\n<bright><rev>* internal error (please report this):</>\n" + tb
                         conn.player.tell(txt, format=False)
                         conn.player.tell("<rev><it>Please report this problem.</>")
-            pubsub.sync("driver-pending-tells")
-            # server TICK
-            now = time.time()
-            if now - previous_server_tick >= self.story.config.server_tick_time:
-                self._server_tick()
-                previous_server_tick = now
-            loop_duration = time.time() - loop_start
-            self.server_loop_durations.append(loop_duration)
+            try:
+                pubsub.sync("driver-pending-tells")
+                # server TICK
+                now = time.time()
+                if now - previous_server_tick >= self.story.config.server_tick_time:
+                    self._server_tick()
+                    previous_server_tick = now
+                loop_duration = time.time() - loop_start
+                self.server_loop_durations.append(loop_duration)
+            except errors.StoryCompleted:
+                print("StoryCompleted raised! But that should never happen in a MUD!")
+                conn.player.tell("<rev>StoryCompleted event in MUD mode - should NOT happen</> - Please report this error")
+                raise
 
 
 class LimboReaper(base.Living):
