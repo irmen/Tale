@@ -13,4 +13,4 @@ sudo: false
 install:
   - pip install -r requirements.txt
 
-script: py.test tests
+script: python -E -Wall -tt -bb -m pytest tests
