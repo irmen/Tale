@@ -268,6 +268,7 @@ class MudDriver(driver.Driver):
             self._overwrite_player(conn.player, state)
             conn.output("\n")
         else:
+            self.mud_accounts.logged_in(account.name)
             # for a normal log in, set the connecting player to the proper account name, and move them to the starting location.
             name_info = charbuilder.PlayerNaming()
             name_info.name = account.name
