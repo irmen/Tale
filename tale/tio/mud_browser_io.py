@@ -4,11 +4,13 @@ Webbrowser based I/O for a multi player ('mud') server.
 'Tale' mud driver, mudlib and interactive fiction framework
 Copyright by Irmen de Jong (irmen@razorvine.net)
 """
+
 import hashlib
 import http.cookies
 import random
 import sys
 import time
+import socket
 from html import escape as html_escape
 from socketserver import ThreadingMixIn
 from typing import Dict, Iterable, Any, List, Tuple
@@ -155,6 +157,13 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     request_queue_size = 200
     use_ssl = False
     ssl_cert_locations = ("./certs/localhost_cert.pem", "./certs/localhost_key.pem", "")    # certfile, keyfile, certpassword
+
+    def __init__(self, server_address, rh_class):
+        self.address_family = socket.AF_INET
+        if server_address[0][0] == '[' and server_address[0][-1] == ']':
+            self.address_family = socket.AF_INET6
+            server_address = (server_address[0][1:-1], server_address[1], 0, 0)
+        super().__init__(server_address, rh_class)
 
     def server_bind(self):
         if self.use_ssl:

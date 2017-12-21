@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 
 import time
+import socket
 import threading
 from typing import Union, Generator, Dict, Tuple, Optional, Any
 
@@ -46,10 +47,16 @@ class MudDriver(driver.Driver):
         if self.restricted:
             print("\n* Restricted mode: no new players allowed *\n")
         protocol = "https" if wsgi_server.use_ssl else "http"
-        hostname, port = wsgi_server.server_address
-        if hostname.startswith("127.0"):
-            hostname = "localhost"
-        print("Access the game on this web server url:   %s://%s:%d/tale/" % (protocol, hostname, port), end="\n\n")
+        if wsgi_server.address_family == socket.AF_INET6:
+            hostname, port, _, _ = wsgi_server.server_address
+            if hostname[0] != '[':
+                hostname = '[' + hostname + ']'
+            print("Access the game on this web server url (ipv6):   %s://%s:%d/tale/" % (protocol, hostname, port), end="\n\n")
+        else:
+            hostname, port = wsgi_server.server_address
+            if hostname.startswith("127.0"):
+                hostname = "localhost"
+            print("Access the game on this web server url (ipv4):   %s://%s:%d/tale/" % (protocol, hostname, port), end="\n\n")
         self._main_loop_wrapper(None)   # this doesn't return!
 
     def show_motd(self, player: Player, notify_no_motd: bool=False) -> None:

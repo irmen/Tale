@@ -6,6 +6,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 """
 import json
 import time
+import socket
 from socketserver import ThreadingMixIn
 from email.utils import formatdate, parsedate
 from hashlib import md5
@@ -98,11 +99,19 @@ class HttpIo(iobase.IoAdapterBase):
         import webbrowser
         from threading import Thread
         protocol = "https" if self.wsgi_server.use_ssl else "http"
-        hostname, port = self.wsgi_server.server_address
-        if hostname.startswith("127.0"):
-            hostname = "localhost"
-        url = "%s://%s:%d/tale/" % (protocol, hostname, port)
-        print("\nAccess the game on this web server url:  ", url, end="\n\n")
+
+        if self.wsgi_server.address_family == socket.AF_INET6:
+            hostname, port, _, _ = self.wsgi_server.server_address
+            if hostname[0] != '[':
+                hostname = '[' + hostname + ']'
+            url = "%s://%s:%d/tale/" % (protocol, hostname, port)
+            print("Access the game on this web server url (ipv6):  ", url, end="\n\n")
+        else:
+            hostname, port = self.wsgi_server.server_address
+            if hostname.startswith("127.0"):
+                hostname = "localhost"
+            url = "%s://%s:%d/tale/" % (protocol, hostname, port)
+            print("Access the game on this web server url (ipv4):  ", url, end="\n\n")
         t = Thread(target=webbrowser.open, args=(url, ))   # type: ignore
         t.daemon = True
         t.start()
@@ -507,6 +516,13 @@ class CustomWsgiServer(ThreadingMixIn, WSGIServer):
     request_queue_size = 10
     use_ssl = False
     ssl_cert_locations = ("./certs/localhost_cert.pem", "./certs/localhost_key.pem", "")    # certfile, keyfile, certpassword
+
+    def __init__(self, server_address, rh_class):
+        self.address_family = socket.AF_INET
+        if server_address[0][0] == '[' and server_address[0][-1] == ']':
+            self.address_family = socket.AF_INET6
+            server_address = (server_address[0][1:-1], server_address[1], 0, 0)
+        super().__init__(server_address, rh_class)
 
     def server_bind(self):
         if self.use_ssl:

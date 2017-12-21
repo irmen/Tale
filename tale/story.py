@@ -66,7 +66,7 @@ class StoryConfig:
         self.savegames_enabled = True        # allow savegames?
         self.show_exits_in_look = True       # with the look command, also show exit descriptions automatically?
         self.license_file = ""               # game license file, if applicable
-        self.mud_host = ""                   # for mud mode: hostname to bind the server on
+        self.mud_host = ""                   # for mud mode: hostname to bind the server on. Use "[...]" for IPV6 connectivity.
         self.mud_port = 0                    # for mud mode: port number to bind the server on
         self.zones = []                      # type: List[str]  # names of zone modules to load, in this order
         self.server_mode = GameMode.IF       # the actual game mode the server is operating in (will be set at startup time)
