@@ -80,14 +80,14 @@ carpark.add_extradesc({"convertible", "yellow"}, "It is a small two-seater and t
 
 # not enough to buy the medicine, player needs to find more, or haggle:
 carpark.init_inventory([Money("wallet", 16.0, title="someone's wallet",
-    short_descr="Someone's wallet lies on the pavement, they seem to have lost it. There's some money in it.")])
+                              short_descr="Someone's wallet lies on the pavement, "
+                                          "they seem to have lost it. There's some money in it.")])
 
 
 parking_gate, _ = Door.connect(north_street, ["gate", "parking"],
-    "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.", None,
-    carpark, ["gate", "street"],
-    "Rose street is back through the gate.", None,
-    locked=True, opened=False, key_code="carpark-gate")
+                               "Through the iron gate you can see the car parking. A few cars are still parked there, it seems.",
+                               None, carpark, ["gate", "street"], "Rose street is back through the gate.", None,
+                               locked=True, opened=False, key_code="carpark-gate")
 
 parking_key = Key("key", "rusty key", descr="It is what appears to be an old key, with a label on it.",
                   short_descr="On the ground is a key, it's become quite rusty.")
@@ -112,10 +112,10 @@ Exit.connect(butcher, ["north", "street"], "Rose street is back to the north.", 
 storage_room = StorageRoom("Storage room", "The butcher's meat storage room. Brrrrr, it is cold here!")
 
 storage_room_door, _ = Door.connect(butcher, ["door", "storage"],
-    "A door leads to the storage room.", "The meat storage is behind it. The door's locked with a security card instead of a key.",
-    storage_room, ["door", "shop"],
-    "The door leads back to the shop.", None,
-    locked=True, key_code="butcher1")
+                                    "A door leads to the storage room.",
+                                    "The meat storage is behind it. The door's locked with a security card instead of a key.",
+                                    storage_room, ["door", "shop"], "The door leads back to the shop.", None,
+                                    locked=True, key_code="butcher1")
 
 friend = zones.npcs.Friend("Peter", "m", descr="It's your friend Peter, who works at the butcher shop.")
 storage_room.insert(friend, None)

@@ -48,10 +48,10 @@ class StyleTagsAwareTextWrapper(textwrap.TextWrapper):
                 if not chunk:
                     chunks.pop()
                     continue
-                l = 0 if tag_re.match(chunk) else len(chunk)   # don't count length of any styling tags
-                if cur_len + l <= width:
+                length = 0 if tag_re.match(chunk) else len(chunk)   # don't count length of any styling tags
+                if cur_len + length <= width:
                     cur_line.append(chunks.pop())
-                    cur_len += l
+                    cur_len += length
                 else:
                     break  # line full
 

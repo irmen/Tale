@@ -23,17 +23,11 @@ def init(driver: Driver) -> None:
     board.save()  # make sure the storage file exists
 
 
-square = Location("Town square",
-    """
-    The old town square of the village. It is not much really, and narrow
-    streets quickly lead away from the small fountain in the center.
-    """)
+square = Location("Town square", "The old town square of the village. It is not much really, "
+                                 "and narrow streets quickly lead away from the small fountain in the center.")
 
-lane = Location("Lane of Magicks",
-    """
-    A long straight road leading to the horizon. Apart from a nearby small tower,
-    you can't see any houses or other landmarks. The road seems to go on forever though.
-    """)
+lane = Location("Lane of Magicks", "A long straight road leading to the horizon. Apart from a nearby small tower, "
+                                   "you can't see any houses or other landmarks. The road seems to go on forever though.")
 
 Exit.connect(square, ["north", "lane"], "A long straight lane leads north towards the horizon.", None,
              lane, "south", "The town square lies to the south.", None)

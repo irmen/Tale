@@ -11,11 +11,8 @@ from tale import lang, util
 from tale.base import Location, Exit, Item, Living
 
 
-hall = Location("Main hall of the Tower of Magic",
-    """
-    The main hall of this ancient wizard tower sparkles with traces of magic.
-    Everything seems to glow a little from within. You can hear a very faint hum.
-    """)
+hall = Location("Main hall of the Tower of Magic", "The main hall of this ancient wizard tower sparkles with traces of magic. "
+                                                   "Everything seems to glow a little from within. You can hear a very faint hum.")
 table = Item("table", "oak table", descr="A large dark table with a lot of cracks in its surface.")
 key = Item("key", "rusty key", descr="An old rusty key without a label.")
 
@@ -39,24 +36,17 @@ drone.aggressive = True
 
 hall.init_inventory([table, key, drone])
 
-attic = Location("Tower attic",
-    """
-    The dark and dusty attic of the wizard tower.
-    There are piles of old scrolls and assorted stuff here of which you assume
-    it once held great magical power. All of it is now covered with a thick
-    layer of dust.
-    """)
+attic = Location("Tower attic", "The dark and dusty attic of the wizard tower. There are piles of old scrolls "
+                                "and assorted stuff here of which you assume it once held great magical power. "
+                                "All of it is now covered with a thick layer of dust.")
 attic.add_extradesc({"dust", "stuff", "scrolls"}, "The scrolls look ancient. One looks like a spell!")
 attic.add_extradesc({"spell"}, "The scroll looks like it contains a spell, but on closer inspection, "
                                "it has become too faded to be understood anymore.")
 
 
-kitchen = Location("Tower kitchen",
-    """
-    A cozy little kitchen for hungry wizards.
-    Magically conjured food often tastes like cardboard, so even wizards need to
-    prepare their meals the old-fashioned way. The kitchen looks small but tidy.
-    """)
+kitchen = Location("Tower kitchen", "A cozy little kitchen for hungry wizards. "
+                                    "Magically conjured food often tastes like cardboard, so even wizards need to prepare "
+                                    "their meals the old-fashioned way. The kitchen looks small but tidy.")
 
 Exit.connect(hall, ["up", "ladder"], "A small ladder leads up through a hole in the ceiling.", None,
              attic, ["down", "ladder"], "A small ladder leads back down to the hall.", None)
