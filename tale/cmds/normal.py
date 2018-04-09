@@ -220,12 +220,15 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
         if item is where:
             p("You can't put %s %s itself." % (item.title, word_before))
             continue
+        if item is player:
+            p("What did you mean to do with yourself?")
+            continue
         try:
             if item in player:
                 # simply use the item from the player's inventory
                 item.move(where, player)
                 inventory_items.append(item)
-            elif item in player.location:
+            elif item in player.location.items:
                 # first take the item from the room, then move it to the target location
                 item.move(player, player)
                 p("You take %s." % item.title)
@@ -233,6 +236,9 @@ def do_put(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gener
                 item.move(where, player)
                 p("You put it in the %s." % where.name)
                 player.tell_others("{Actor} puts it in the %s." % where.name)
+            else:
+                p("You can't put %s somewhere else." % item.title)
+                continue
         except ActionRefused as x:
             refused.append((item, str(x)))
     for item, message in refused:
