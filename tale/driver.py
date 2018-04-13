@@ -719,6 +719,10 @@ class Driver(pubsub.Listener):
         Triggering a deferred can not occur sooner than the server tick period!
         """
         assert callable(action)
+        if self.game_clock is None:
+            raise errors.TaleError("Attempt to register a deferred action while Driver hasn't been properly started yet. "
+                                   "A possible cause is importing zone or npc module files that create MudObjects "
+                                   "that use @call_periodically, before the driver has been fully started and loads these by itself.")
         if isinstance(due, datetime.datetime):
             assert due >= self.game_clock.clock
             deferred = Deferred(due, action, vargs, kwargs)

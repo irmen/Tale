@@ -275,6 +275,10 @@ class MudObject:
         self.story_data = {}  # type: Dict[Any, Any]   # not used by Tale itself, story can put custom data here. Use builtin types only.
         self.init()
         if util.get_periodicals(self):
+            if mud_context.driver is None:
+                raise TaleError("Attempt to create MudObject while Driver hasn't been properly initialized yet. "
+                                "Possible cause is importing zone or npc module files that create these objects "
+                                "early before the driver itself loads them.")
             mud_context.driver.register_periodicals(self)
 
     def init(self) -> None:
