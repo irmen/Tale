@@ -24,7 +24,7 @@ Shopping related commands will be roughly::
 
 import datetime
 import random
-from typing import Tuple, Set
+from typing import Tuple, Set, Optional
 
 from . import lang
 from . import mud_context
@@ -138,7 +138,7 @@ class Shopkeeper(Living):
         except IndexError:
             raise ActionRefused("That number doesn't appear on the list of items that are for sale.")
 
-    def allow_give_item(self, item: Item, actor: 'Living') -> None:
+    def allow_give_item(self, item: Item, actor: Optional['Living']) -> None:
         """Do we accept given items? Raise ActionRefused if not. Shopkeeper can only be sold items to!"""
         raise ActionRefused("You can't give stuff to %s just like that, try selling it instead." % self.title)
 

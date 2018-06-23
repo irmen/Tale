@@ -28,7 +28,7 @@ class Player(base.Living, pubsub.Listener):
     Player controlled entity.
     Has a Soul for social interaction.
     """
-    def __init__(self, name: str, gender: str, *, race: str="human", descr: str=None, short_descr: str=None) -> None:
+    def __init__(self, name: str, gender: str, *, race: str="human", descr: str="", short_descr: str="") -> None:
         title = lang.capital(name)
         super().__init__(name, gender, race=race, title=title, descr=descr, short_descr=short_descr)
         self.turns = 0
@@ -133,11 +133,11 @@ class Player(base.Living, pubsub.Listener):
         self.activate_transcript(None, None)
         super().destroy(ctx)
 
-    def allow_give_money(self, actor: base.Living, amount: float) -> None:
+    def allow_give_money(self, amount: float, actor: Optional[base.Living]) -> None:
         """Do we accept money? Raise ActionRefused if not. For Player, the default is that we accept."""
         pass
 
-    def allow_give_item(self, item: base.Item, actor: base.Living) -> None:
+    def allow_give_item(self, item: base.Item, actor: Optional[base.Living]) -> None:
         """Do we accept given items? Raise ActionRefused if not. For Player, the default is that we accept."""
         pass
 
@@ -330,7 +330,10 @@ class PlayerConnection:
     Provides high level i/o operations to input commands and write output for the player.
     Other code should not have to call the i/o adapter directly.
     """
-    def __init__(self, player: Player=None, io: IoAdapterBase=None) -> None:
+    __dummy_player = Player("dummy", "n")
+    __dummy_io = IoAdapterBase(None)
+
+    def __init__(self, player: Player=__dummy_player, io: IoAdapterBase=__dummy_io) -> None:
         self.player = player
         self.io = io
         self.need_new_input_prompt = True

@@ -452,7 +452,7 @@ class TestDoorsExits(unittest.TestCase):
         zones.town = ModuleDummy()
         zones.town.square = Location("square")
         exit = Exit("square", "town.square", "someplace")
-        self.assertIsNone(exit.target)
+        self.assertEqual(_limbo, exit.target)
         self.assertEqual("town.square", exit._target_str)
         exit._bind_target(zones)
         self.assertIsNotNone(exit.target)
@@ -467,7 +467,7 @@ class TestDoorsExits(unittest.TestCase):
         zones.town = ModuleDummy()
         zones.town.square = Location("square")
         door = Door("square", "town.square", "somewhere")
-        self.assertIsNone(door.target)
+        self.assertEqual(_limbo, door.target)
         self.assertEqual("town.square", door._target_str)
         door._bind_target(zones)
         self.assertIsNotNone(door.target)
@@ -579,7 +579,7 @@ class TestLiving(unittest.TestCase):
         self.assertGreater(orc.inventory_size, 0)
         orc.destroy(Context(FakeDriver(), None, None, None))
         self.assertIsNone(orc.soul)
-        self.assertIsNone(orc.location)
+        self.assertEqual(_limbo, orc.location)
         self.assertEqual(orc.inventory_size, 0)
 
     def test_contains(self):
@@ -958,7 +958,7 @@ class TestDestroy(unittest.TestCase):
         gc.collect()
         self.assertTrue(len(player.inventory) == 0)
         self.assertFalse(player in loc.livings)
-        self.assertIsNone(player.location, "destroyed player should end up nowhere (None)")
+        self.assertEqual(_limbo, player.location)
 
     def test_destroy_item(self):
         thing = Item("thing")

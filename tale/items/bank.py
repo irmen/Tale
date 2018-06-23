@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 from collections import defaultdict, deque
 import json
-from typing import Dict, List, MutableSequence
+from typing import Dict, MutableSequence, Optional
 
 from .. import mud_context
 from ..base import Item, Living, ParseResult
@@ -33,7 +33,7 @@ class Bank(Item):
         self.accounts = defaultdict(float)    # type: Dict[str, float]
         self.transaction_log = deque(maxlen=self.max_num_transactions)   # type: MutableSequence[str]   # py 3.5's don't have typing.Deque
 
-    def allow_item_move(self, actor: Living, verb: str="move") -> None:
+    def allow_item_move(self, actor: Optional[Living], verb: str="move") -> None:
         if not self.takeable:
             raise ActionRefused("The %s won't budge." % self.name)
 

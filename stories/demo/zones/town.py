@@ -169,7 +169,7 @@ class Computer(Item):
         super().init()
         self.aliases = {"keyboard", "screen", "wires"}
 
-    def allow_item_move(self, actor: Living, verb: str="move") -> None:
+    def allow_item_move(self, actor: Optional[Living], verb: str="move") -> None:
         raise ActionRefused("You can't %s the computer." % verb)
 
     @property
@@ -277,7 +277,7 @@ alley.insert(computer, None)
 
 
 class DoorKey(Key):
-    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Optional[Living]) -> None:
         # check if a player picked up this key
         player = None
         if isinstance(target_container, Player):
@@ -296,7 +296,7 @@ class MagicGameEnd(Item):
         super().__init__("magic orb", descr="A magic orb of some sort.")
         self.aliases = {"orb"}
 
-    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Optional[Living]) -> None:
         if isinstance(actor, Player):
             actor.tell("You try to pick up the orb, but as soon as you touch it it ends this game!")
             raise StoryCompleted

@@ -307,7 +307,7 @@ class Money(Item):
         else:
             location.insert(self, actor)
 
-    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Living) -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Optional[Living]) -> None:
         # make sure that when the money is moved into a living, it is discarded and its value is added to the living's money.
         if isinstance(target_container, Living):
             target_container.remove(self, actor)

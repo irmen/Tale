@@ -40,7 +40,7 @@ import copy
 import random
 import re
 from weakref import WeakValueDictionary
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from textwrap import dedent
 from types import ModuleType
 from typing import Iterable, Any, Sequence, Optional, Set, Dict, Union, FrozenSet, Tuple, List, Type, no_type_check
@@ -81,7 +81,7 @@ class ParseResult:
             self[key] = value = ParseResult.WhoInfo()
             return value
 
-    def __init__(self, verb: str, *, adverb: str = None, message: str = None, bodypart: str = None, qualifier: str = None,
+    def __init__(self, verb: str, *, adverb: str = "", message: str = "", bodypart: str = "", qualifier: str = "",
                  args: List[str] = None, who_info: WhoInfoOrderedDict = None,
                  unrecognized: List[str] = None, unparsed: str = "", who_list: List = None) -> None:
         self.verb = verb
@@ -108,12 +108,12 @@ class ParseResult:
         self.who_count = len(self.who_info)
 
     @property
-    def who_1(self) -> Optional[Any]:
+    def who_1(self) -> Optional[ParsedWhoType]:
         """Gets the first occurring ParsedWhoType from the parsed line (or None if it doesn't exist)"""
         return next(iter(self.who_info)) if self.who_info else None
 
     @property
-    def who_12(self) -> Tuple[Optional[Any], Optional[Any]]:
+    def who_12(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType]]:
         """
         Returns a tuple (ParsedWhoType, ParsedWhoType) representing the first two occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
@@ -122,7 +122,7 @@ class ParseResult:
         return tuple((whos + [None, None])[:2])   # type: ignore
 
     @property
-    def who_123(self) -> Tuple[Optional[Any], Optional[Any], Optional[Any]]:
+    def who_123(self) -> Tuple[Optional[ParsedWhoType], Optional[ParsedWhoType], Optional[ParsedWhoType]]:
         """
         Returns a tuple (ParsedWhoType, ParsedWhoType, ParsedWhoType) representing the first three occurring Whos in the parsed line.
         If no such subject exists, None is returned in its place.
@@ -131,7 +131,7 @@ class ParseResult:
         return tuple((whos + [None, None, None])[:3])   # type: ignore
 
     @property
-    def who_last(self) -> Optional[Any]:
+    def who_last(self) -> Optional[ParsedWhoType]:
         """Gets the last occurring ParsedWhoType on the line (or None if there wasn't any)"""
         if self.who_info:
             return list(self.who_info)[-1]
@@ -184,8 +184,7 @@ class MudObjRegistry:
             # the 'clone' command consumes too many vnums because of the way deepcopy works.
             # try to find the double registration and remove it.
             pid = instance.vnum - 1
-            existing = None   # type: MudObject
-            existing = MudObjRegistry.all_items.get(pid, None)
+            existing = MudObjRegistry.all_items.get(pid, None)  # type: Optional[MudObject]
             if existing is instance:
                 del MudObjRegistry.all_items[pid]
             else:
@@ -264,9 +263,9 @@ class MudObject:
         MudObjRegistry.track_vnum(instance)
         return instance
 
-    def __init__(self, name: str, title: str = None, *, descr: str = None, short_descr: str = None) -> None:
-        self._extradesc = None  # type: Dict[str,str]
-        self.name = self._description = self._title = self._short_description = None  # type: str
+    def __init__(self, name: str, title: str = "", *, descr: str = "", short_descr: str = "") -> None:
+        self._extradesc = {}  # type: Dict[str,str]
+        self.name = self._description = self._title = self._short_description = ""
         self.init_names(name, title, descr, short_descr)
         self.aliases = set()  # type: Set[str]
         # any custom verbs that need to be recognised (verb->docstring mapping), verb handling is done via handle_verb() callbacks.
@@ -416,8 +415,8 @@ class Item(MudObject):
     to check containment.
     """
 
-    def __init__(self, name: str, title: str = None, *, descr: str = None, short_descr: str = None) -> None:
-        self.contained_in = None   # type: Union[Location, Container, Living]
+    def __init__(self, name: str, title: str = "", *, descr: str = "", short_descr: str = "") -> None:
+        self.contained_in = None   # type: Optional[ContainingType]
         self.default_verb = "examine"
         self.value = 0.0   # what the item is worth
         self.rent = 0.0    # price to keep in store / day
@@ -475,17 +474,19 @@ class Item(MudObject):
             source_container.remove(self, actor)
         try:
             target.insert(self, actor)
-            self.notify_moved(source_container, target, actor)
+            if source_container:
+                self.notify_moved(source_container, target, actor)
         except:
             # insert in target failed, put back in original location
-            source_container.insert(self, actor)
+            if source_container:
+                source_container.insert(self, actor)
             raise
 
-    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: 'Living') -> None:
+    def notify_moved(self, source_container: ContainingType, target_container: ContainingType, actor: Optional['Living']) -> None:
         """Called when the item has been moved from one place to another"""
         pass
 
-    def allow_item_move(self, actor: 'Living', verb: str="move") -> None:
+    def allow_item_move(self, actor: Optional['Living'], verb: str="move") -> None:
         """Does the item allow to be moved (picked up, given away) by someone? (yes; no ActionRefused is raised)"""
         if not self.takeable:
             raise ActionRefused("You can't %s %s." % (verb, self.title))
@@ -538,10 +539,10 @@ class Item(MudObject):
             actor.tell("It's empty.")
 
     @staticmethod
-    def search_item(name: str, collection: Iterable['Item']) -> 'Item':
+    def search_item(name: str, collection: Iterable['Item']) -> Optional['Item']:
         """
         Searches an item (by name) in a collection of Items.
-        Returns the first match. Also considers aliases and titles.
+        Returns the first match (or None if nothing found). Also considers aliases and titles.
         """
         name = name.lower()
         items = [i for i in collection if i.name == name]
@@ -550,7 +551,7 @@ class Item(MudObject):
             items = [i for i in collection if name in i.aliases or i.title.lower() == name]
         return items[0] if items else None
 
-    def clone(self) -> Any:
+    def clone(self) -> 'Item':
         """
         Create a copy of an existing Item.
         Only allowed when it has an empty inventory (to avoid problems).
@@ -591,7 +592,7 @@ class Location(MudObject):
     Has connections ('exits') to other Locations.
     You can test for containment with 'in': item in loc, npc in loc
     """
-    def __init__(self, name: str, descr: str=None) -> None:
+    def __init__(self, name: str, descr: str="") -> None:
         self.name = name
         self.livings = set()  # type: Set[Living] # set of livings in this location
         self.items = set()    # type: Set[Item] # set of all items in the room
@@ -748,10 +749,10 @@ class Location(MudObject):
             paragraphs.append(" ".join(items_and_livings))
         return paragraphs
 
-    def search_living(self, name: str) -> 'Living':
+    def search_living(self, name: str) -> Optional['Living']:
         """
         Search for a living in this location by its name (and title, if no names match).
-        Is alias-aware. If there's more than one match, returns the first.
+        Is alias-aware. If there's more than one match, returns the first. None if nothing found.
         """
         name = name.lower()
         result = [living for living in self.livings if living.name == name]
@@ -886,15 +887,15 @@ class Stats:
         self.level = 0
         self.xp = 0
         self.hp = 0
-        self.maxhp_dice = None  # type: str
+        self.maxhp_dice = ""
         self.ac = 0
-        self.attack_dice = None  # type: str  # damage roll when attacking without a weapon
+        self.attack_dice = ""  # damage roll when attacking without a weapon
         self.alignment = 0   # -1000 (evil) to +1000 (good), neutral=[-349..349]
         self.bodytype = races.BodyType.HUMANOID
-        self.language = None   # type: str
+        self.language = ""
         self.weight = 0.0
         self.size = races.BodySize.HUMAN_SIZED
-        self.race = None  # type: str   # the name of the race of this creature
+        self.race = ""      # the name of the race of this creature
 
     def __repr__(self):
         return "<Stats: %s>" % vars(self)
@@ -927,7 +928,7 @@ class Living(MudObject):
     They also have an inventory object, and you can test for containment with item in living.
     """
     def __init__(self, name: str, gender: str, *, race: str="human",
-                 title: str=None, descr: str=None, short_descr: str=None) -> None:
+                 title: str="", descr: str="", short_descr: str="") -> None:
         if race:
             self.stats = Stats.from_race(race, gender=gender)
         else:
@@ -940,10 +941,10 @@ class Living(MudObject):
         self.money = 0.0  # the currency is determined by util.MoneyFormatter set in the driver
         self.default_verb = "examine"
         self.__inventory = set()   # type: Set[Item]
-        self.previous_commandline = None   # type: str
-        self._previous_parse = None  # type: ParseResult
-        self.teleported_from = None   # type: Location   # used by teleport/return commands
-        self.following = None   # type: Living
+        self.previous_commandline = ""
+        self._previous_parse = ParseResult("")
+        self.teleported_from = None   # type: Optional[Location]   # used by teleport/return commands
+        self.following = None   # type: Optional[Living]
         self.is_pet = False   # set this to True if creature is/becomes someone's pet
         super().__init__(name, title=title, descr=descr, short_descr=short_descr)
 
@@ -1004,18 +1005,18 @@ class Living(MudObject):
         super().destroy(ctx)
         if self.location and self in self.location.livings:
             self.location.livings.remove(self)
-        self.location = None
+        self.location = _limbo
         for item in self.__inventory:
             item.destroy(ctx)
         self.__inventory.clear()
         # @todo: remove attack status, etc.
-        self.soul = None   # truly die ;-)
+        self.soul = None   # type: ignore  # truly die ;-)
 
     @util.authorized("wizard")
     def wiz_clone(self, actor: 'Living', make_clone: bool=True) -> 'Living':
         if make_clone:
             # avoid deepcopying the location
-            location, self.location = self.location, None
+            location, self.location = self.location, _limbo
             duplicate = copy.deepcopy(self)
             self.location = location
             MudObjRegistry.track_vnum(duplicate, fix_clones=True)   # deepcopy overwrites initially given vnum so make a new one
@@ -1230,7 +1231,7 @@ class Living(MudObject):
         assert isinstance(target, Location), "can only move to a Location"
 
         def display_direction(directions: Sequence[str]) -> str:
-            for direction in directions or []:
+            for direction in directions:
                 if direction in {"north", "east", "south", "west", "out", "outside",
                                  "northeast", "northwest", "southeast", "southwest",
                                  "north east", "north west", "south east", "south west"}:
@@ -1241,7 +1242,7 @@ class Living(MudObject):
                     return "down"
                 if direction in {"left", "right"}:
                     return "to the " + direction
-            return None
+            return ""
 
         actor = actor or self
         original_location = None
@@ -1255,7 +1256,7 @@ class Living(MudObject):
                 original_location.insert(self, actor)
                 raise
             if not silent:
-                direction_txt = display_direction(direction_names)
+                direction_txt = display_direction(direction_names or [])
                 if direction_txt:
                     message = "%s leaves %s." % (lang.capital(self.title), direction_txt)
                 else:
@@ -1277,13 +1278,13 @@ class Living(MudObject):
             pending_actions.send(lambda who=self, where=original_location: target.notify_npc_arrived(who, where))
 
     def search_item(self, name: str, include_inventory: bool=True,
-                    include_location: bool=True, include_containers_in_inventory: bool=True) -> Item:
+                    include_location: bool=True, include_containers_in_inventory: bool=True) -> Optional[Item]:
         """The same as locate_item except it only returns the item, or None."""
         item, container = self.locate_item(name, include_inventory, include_location, include_containers_in_inventory)
         return item  # skip the container
 
     def locate_item(self, name: str, include_inventory: bool=True, include_location: bool=True,
-                    include_containers_in_inventory: bool=True) -> Tuple[Item, ContainingType]:
+                    include_containers_in_inventory: bool=True) -> Tuple[Optional[Item], Optional[ContainingType]]:
         """
         Searches an item within the 'visible' world around the living including his inventory.
         If there's more than one hit, just return the first.
@@ -1291,8 +1292,8 @@ class Living(MudObject):
         """
         if not name:
             raise ValueError("name must be given")
-        found = None  # type: Item
-        containing_object = None   # type: Union[Location, Container, 'Living']
+        found = None
+        containing_object = None   # type: Optional[ContainingType]
         if include_inventory:
             containing_object = self
             found = Item.search_item(name, self.__inventory)
@@ -1325,12 +1326,12 @@ class Living(MudObject):
         victim.tell(victim_msg)
         victim.location.tell(room_msg, exclude_living=victim, specific_targets={self}, specific_target_msg=attacker_msg)
 
-    def allow_give_money(self, actor: 'Living', amount: float) -> None:
+    def allow_give_money(self, amount: float, actor: Optional['Living']) -> None:
         """Do we accept money? Raise ActionRefused if not."""
         if self.stats.race not in (None, "human"):
             raise ActionRefused("You can't do that.")
 
-    def allow_give_item(self, item: Item, actor: 'Living') -> None:
+    def allow_give_item(self, item: Item, actor: Optional['Living']) -> None:
         """Do we accept given items? Raise ActionRefused if not."""
         if actor is None or actor is not self and "wizard" not in actor.privileges:
             raise ActionRefused("%s doesn't want %s." % (lang.capital(self.title), item.title))
@@ -1398,7 +1399,8 @@ class Living(MudObject):
         # follow someone that recently moved.
         if self.is_pet:
             # pets always keep up with their owner, regardless of the given target_location
-            self.move(self.following.location)
+            if self.following:
+                self.move(self.following.location)
         else:
             # non-pets just move to the target location and don't try to keep up.
             self.move(target_location)
@@ -1468,33 +1470,33 @@ class Exit(MudObject):
     def __init__(self, directions: Union[str, Sequence[str]], target_location: Union[str, Location],
                  short_descr: str, long_descr: str=None, *, enter_msg: str=None) -> None:
         assert isinstance(target_location, (Location, str)), "target must be a Location or a string"
+        self.target = _limbo   # type: Location
         if isinstance(directions, str):
             direction = directions
             aliases = set()  # type: Set[str]
         else:
             direction = directions[0]
             aliases = set(directions[1:])
-        self.target = None  # type: Location
+        self.target = _limbo
         if isinstance(target_location, Location):
             self.target = target_location
             self._target_str = ""
             title = "Exit to " + self.target.title
         else:
-            self.target = None
             self._target_str = target_location
             title = "Exit to <unbound:%s>" % target_location
         long_descr = long_descr or short_descr
         # the name of the exit/door is the first direction given (any others are aliases)
         super().__init__(direction, title=title, descr=long_descr, short_descr=short_descr)
         self.aliases = aliases
-        if not self.target:
+        if self.target in (_limbo, None):
             # The driver needs to know about all unbound exits,
             # it will hook them all up once initialization is complete.
             mud_context.driver.register_exit(self)
         self.enter_msg = enter_msg
 
     def __repr__(self):
-        targetname = self.target.name if self.target else self._target_str
+        targetname = self.target.name if self.target not in (_limbo, None) else self._target_str
         return "<base.Exit to '%s' #%d @ 0x%x>" % (targetname, self.vnum, id(self))
 
     @property
@@ -1531,7 +1533,7 @@ class Exit(MudObject):
         Usually called by the driver before it starts player interaction.
         The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
         """
-        if not self.target:
+        if self.target in (_limbo, None):
             target_module, target_object = self._target_str.rsplit(".", 1)
             module = game_zones_module
             try:
@@ -1548,7 +1550,7 @@ class Exit(MudObject):
 
     def allow_passage(self, actor: Living) -> None:
         """Is the actor allowed to move through the exit? Raise ActionRefused if not"""
-        if not self.target:
+        if self.target in (None, _limbo):
             raise LocationIntegrityError("exit not bound", None, self, None)
 
     def open(self, actor: Living, item: Item=None) -> None:
@@ -1584,7 +1586,7 @@ class Door(Exit):
         super().__init__(directions, target_location, short_descr, long_descr, enter_msg=enter_msg)
         if locked and opened:
             raise ValueError("door cannot be both locked and opened")
-        self.linked_door = None  # type: Door
+        self.linked_door = None  # type: Optional[Door]
 
     @classmethod
     def connect(cls, from_loc: Location, directions: Union[str, Sequence[str]], short_descr: str, long_descr: Optional[str],
@@ -1667,6 +1669,7 @@ class Door(Exit):
 
     def lock(self, actor: Living, item: Item=None) -> None:
         """Lock the door with the proper key (optional)."""
+        key = None
         if self.locked:
             raise ActionRefused("It's already locked.")
         if self.opened:
@@ -1677,7 +1680,8 @@ class Door(Exit):
             else:
                 raise ActionRefused("You can't use that to lock it.")
         else:
-            key = self.search_key(actor)
+            if actor:
+                key = self.search_key(actor)
             if not key:
                 raise ActionRefused("You don't seem to have the means to lock it.")
         self.locked = True
@@ -1689,6 +1693,7 @@ class Door(Exit):
 
     def unlock(self, actor: Living, item: Item=None) -> None:
         """Unlock the door with the proper key (optional)."""
+        key = None
         if self.opened:
             raise ActionRefused("It's already open, so there's not much unlocking to be done.")
         if not self.locked:
@@ -1699,7 +1704,8 @@ class Door(Exit):
             else:
                 raise ActionRefused("You can't use that to unlock it.")
         else:
-            key = self.search_key(actor)
+            if actor:
+                key = self.search_key(actor)
             if not key:
                 raise ActionRefused("You don't seem to have the means to unlock it.")
         self.locked = False
@@ -1754,7 +1760,7 @@ class Key(Item):
         if code:
             assert door is None
             self.key_code = code
-        else:
+        elif door:
             self.key_code = door.key_code
             if not self.key_code:
                 raise LocationIntegrityError("door has no key_code set", None, door, door.target)
@@ -1772,7 +1778,7 @@ class Soul:
                    "the", "with", "from", "after", "before", "under", "above", "next"}
 
     def __init__(self) -> None:
-        self.__previously_parsed = None  # type: ParseResult
+        self.__previously_parsed = ParseResult("")
 
     def is_verb(self, verb: str) -> bool:
         return verb in verbdefs.VERBS
@@ -1864,10 +1870,10 @@ class Soul:
                 subjective = getattr(only_living, "subjective", "it")  # if no subjective attr, use "it"
                 player_msg = player_msg.replace(" \nIS", " is")
                 player_msg = player_msg.replace(" \nSUBJ", " " + subjective)
-                player_msg = player_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, player))
+                player_msg = player_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, player))   # type: ignore
                 room_msg = room_msg.replace(" \nIS", " is")
                 room_msg = room_msg.replace(" \nSUBJ", " " + subjective)
-                room_msg = room_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, None))
+                room_msg = room_msg.replace(" \nPOSS", " " + Soul.poss_replacement(player, only_living, None))   # type: ignore
             else:
                 targetnames_player = lang.join([Soul.poss_replacement(player, living, player) for living in parsed.who_info])
                 targetnames_room = lang.join([Soul.poss_replacement(player, living, None) for living in parsed.who_info])
@@ -1957,12 +1963,12 @@ class Soul:
 
     def parse(self, player: Living, cmd: str, external_verbs: Set[str]=set()) -> ParseResult:
         """Parse a command string, returns a ParseResult object."""
-        qualifier = None
+        qualifier = ""
         message_verb = False  # does the verb expect a message?
         external_verb = False  # is it a non-soul verb?
-        adverb = None   # type: Optional[str]
+        adverb = ""
         message = []  # type: List[str]
-        bodypart = None   # type: str
+        bodypart = ""
         arg_words = []  # type: List[str]
         unrecognized_words = []   # type: List[str]
         who_info = ParseResult.WhoInfoOrderedDict()
@@ -2012,9 +2018,9 @@ class Soul:
             if exit:
                 if wordcount != len(words):
                     raise ParseError("What do you want to do with that?")
-                unparsed = unparsed[len(exit_name):].lstrip()
+                unparsed = unparsed[len(exit_name or ""):].lstrip()
                 who_info = ParseResult.WhoInfoOrderedDict()
-                raise NonSoulVerb(ParseResult(verb=exit_name, who_list=[exit], qualifier=qualifier, unparsed=unparsed))
+                raise NonSoulVerb(ParseResult(verb=exit_name or "", who_list=[exit], qualifier=qualifier, unparsed=unparsed))
             elif move_action:
                 raise ParseError("You can't %s there." % move_action)
             else:
@@ -2153,7 +2159,8 @@ class Soul:
                     previous_word = None
                     who_sequence += 1
                     who_list.append(exit)
-                    arg_words.append(exit_name)
+                    if exit_name:
+                        arg_words.append(exit_name)
                     while wordcount > 1:
                         next(words_enumerator)
                         wordcount -= 1
@@ -2171,7 +2178,8 @@ class Soul:
                 elif item_or_living in who_info:
                     del who_info[item_or_living]
                     who_list.remove(item_or_living)
-                arg_words.append(full_name)
+                if full_name:
+                    arg_words.append(full_name)
                 previous_word = None
                 continue
             if message_verb and not message:
@@ -2228,7 +2236,7 @@ class Soul:
                 verb = getattr(who_list[0], "default_verb", "examine")
             else:
                 raise UnknownVerbException(words[0], words, qualifier)
-        return ParseResult(verb, who_info=who_info, who_list=who_list,
+        return ParseResult(verb or "", who_info=who_info, who_list=who_list,
                            adverb=adverb, message=message_text, bodypart=bodypart, qualifier=qualifier,
                            args=arg_words, unrecognized=unrecognized_words, unparsed=unparsed)
 

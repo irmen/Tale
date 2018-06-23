@@ -2,6 +2,7 @@
 NPCS in the game.
 """
 import random
+from typing import Optional
 from tale.base import Living, Door, ParseResult, Item
 from tale.player import Player
 from tale.util import call_periodically, Context
@@ -119,7 +120,7 @@ class Friend(Living):
         if self in parsed.who_info or parsed.verb in ("say", "greet", "hi"):
             self.say_something_medicine(Context(mud_context.driver, None, None, None))
 
-    def allow_give_item(self, item: Item, actor: Living) -> None:
+    def allow_give_item(self, item: Item, actor: Optional[Living]) -> None:
         if item.name == "pills":
             self.do_socialize("say \"Keep the bottle with you, I'll ask when I need it. Let us just leave from this place!\"")
             raise ActionRefused()

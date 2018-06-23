@@ -145,7 +145,7 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         assert x["__class__"] == "tale.base.Exit"
         assert x["_target_str"] == "target"
-        assert x["target"] is None
+        assert x["target"] is None or x["target"][1] == "Limbo"
         assert x["descr"] == x["short_descr"] == "somewhere"
         assert x["enter_msg"] == "you enter a dark hallway"
         assert x["name"] == "east"
@@ -157,16 +157,16 @@ class TestSerializing(unittest.TestCase):
         x = serializecycle(o)
         assert x["__class__"] == "tale.base.Door"
         assert x["_target_str"] == "target"
-        assert x["target"] is None
+        assert x["target"] is None or x["target"][1] == "Limbo"
         assert x["descr"] == "somewhere It is closed and locked."
         assert x["short_descr"] == "somewhere"
         assert x["enter_msg"] == "going through"
         assert x["key_code"] == "123"
-        assert x["linked_door"] is None
+        assert x["linked_door"] is None or x["linked_door"][1] == "Limbo"
         assert x["name"] == "east"
         assert x["title"] == "Exit to <unbound:target>"
-        assert x["locked"] == True
-        assert x["opened"] == False
+        assert x["locked"]
+        assert not x["opened"]
         assert x["vnum"] > 0
 
     def test_exit_pair(self):
