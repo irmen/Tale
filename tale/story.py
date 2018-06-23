@@ -60,7 +60,7 @@ class StoryConfig:
         self.max_wait_hours = 2              # the max. number of hours (gametime) the player is allowed to wait (>=0)
         self.display_gametime = False        # enable/disable display of the game time at certain moments
         self.display_race = False            # display race and bodytype when examining a creature?
-        self.epoch = None                    # type: datetime.datetime # start date/time of the game clock
+        self.epoch = None                    # type: Optional[datetime.datetime]  # start date/time of the game clock
         self.startlocation_player = ""       # name of the location where a player starts the game in
         self.startlocation_wizard = ""       # name of the location where a wizard player starts the game in
         self.savegames_enabled = True        # allow savegames?

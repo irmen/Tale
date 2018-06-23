@@ -42,7 +42,7 @@ class IoAdapterBase:
         self.supports_blocking_input = True
         self.player_connection = player_connection
         self.stop_main_loop = False
-        self.last_output_line = None  # type: str
+        self.last_output_line = None  # type: Optional[str]
         self.dont_echo_next_cmd = False   # used to not echo the password input, for instance
 
     def destroy(self) -> None:

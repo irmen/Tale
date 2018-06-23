@@ -658,10 +658,6 @@ def do_help(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
         player.tell("You can get more info about all kinds of stuff by asking 'what is <topic>' (?topic).")
         player.tell("You can get more info about the 'emote' verbs by asking 'what is soul' (?soul).")
         player.tell("To see all possible verbs ask 'what is emotes' (?emotes).", end=True)
-        if player.hints.has_hints():
-            player.tell("\n")
-            player.tell("<bright>Hints:</>")
-            player.tell("When you're stuck, you can use the 'hint' command to try to get a clue about what to do next.")
 
 
 @cmd("look")
@@ -1601,30 +1597,6 @@ def do_config(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
     player.tell("  styles <dim>(enable text styles) =</> %s" % player.screen_styles_enabled, format=False)
     player.tell("  smartquotes <dim>(use typographic quotes) =</> %s" % player.smartquotes_enabled, format=False)
     player.tell("  prompttk <dim>(use prompt_toolkit input) =</> %s" % player.prompt_toolkit_enabled, format=False)
-
-
-@cmd("hint")
-def do_hint(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
-    """Provide a clue about what to do next. Also try 'help', and 'recap'."""
-    hint = player.hints.hint(player)
-    if hint:
-        player.tell(hint)
-    else:
-        player.tell("You're on your own to decide what to do next...")
-
-
-@cmd("recap")
-def do_recap(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
-    """
-    Shows the key events or actions that have happened so that you might
-    get back up to speed with the story so far.
-    """
-    recapmessages = player.hints.recap()
-    if recapmessages:
-        for msg in recapmessages:
-            player.tell(msg, end=True)
-    else:
-        player.tell("There's not much to say about the events thus far.")
 
 
 @cmd("@cls")

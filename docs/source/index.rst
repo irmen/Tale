@@ -143,7 +143,7 @@ A random list of the features of the current codebase:
 - text is nicely formatted when outputted (dynamically wrapped to a configurable width).
 - uses ansi sequence to spice up the console output a bit (needs colorama on windows, falls back to plain text if not installed)
 - uses smartypants to automatically render quotes, dashes, ellipsis in a nicer way.
-- game can be saved (and reloaded); pickle is used to serialize the full game world state
+- game can be saved (and reloaded)
 - save game data is placed in the operating system's user data directory instead of some random location
 - there's a list of 70+ creature races, adapted from the Dead Souls 2 mudlib
 - supports two kinds of money: fantasy (gold/silver/copper) and modern (dollars). Text descriptions adapt to this.
@@ -165,7 +165,6 @@ A random list of the features of the current codebase:
 - stories can define their own commands or override existing commands
 - a lock/unlock/open/close door mechanism is provided with internal door codes to match keys (or key-like objects) against.
 - action and event notification mechanism: objects are notified when things happen (such as the player entering a room, or someone saying a line of text) and can react on that.
-- hint and story-recap system that can adapt dynamically to the progress of the story.
 - contains a simple virtual file system to provide easy resource loading / datafile storage.
 - provides a simple pubsub/event signaling mechanism
 - crashes are reported as detailed tracebacks showing local variable values per frame, to ease error reporting and debugging

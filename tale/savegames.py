@@ -7,7 +7,6 @@ from .base import Item, Location, Living, Exit, Door, MudObject, MudObjRegistry,
 from .story import StoryConfig, MoneyType, GameMode, TickMethod
 from .player import Player
 from .errors import TaleError, ActionRefused
-from .hints import HintSystem
 from .driver import Deferred
 from .util import GameDateTime
 from .shop import ShopBehavior, Shopkeeper
@@ -286,8 +285,6 @@ class TaleDeserializer:
                 return True, float(d["value"])  # serpent encodes a float nan as a special class dict like this
             elif clz == "tale.base.Stats":
                 return True, self.make_Stats(d)
-            elif clz == "tale.hints.HintSystem":
-                return True, self.make_HintSystem(d)
             elif clz == "tale.driver.Deferred":
                 return True, self.make_Deferred(d, existing_object_lookup)
             elif clz == "tale.util.GameDateTime":
@@ -312,7 +309,6 @@ class TaleDeserializer:
         inv = data.pop("inventory")
         loc = data.pop("location")
         known_locs = data.pop("known_locations")
-        p.hints = self.recreate_classes(data.pop("hints"), None)
         p.stats = self.recreate_classes(data.pop("stats"), None)
         assert p.title == data.pop("title")
         following = data.pop("following")
@@ -444,11 +440,6 @@ class TaleDeserializer:
         d.action = data["action"]
         d.owner = existing_object_lookup.resolve_ref(*data["owner"])
         return d
-
-    def make_HintSystem(self, data: Dict) -> HintSystem:
-        hs = HintSystem()
-        self.apply_attributes(hs, data)
-        return hs
 
     def make_Exit(self, data: Dict, existing_object_lookup) -> Union[Exit, Door]:
         exit = existing_object_lookup.resolve_exit(data["vnum"], data["name"], data["__class__"], data["__base_class__"])

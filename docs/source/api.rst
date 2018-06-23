@@ -42,11 +42,6 @@ Tale API
 .. automodule:: tale.errors
     :members:
 
-:mod:`tale.hints` --- Hint system
----------------------------------
-.. automodule:: tale.hints
-    :members:
-
 :mod:`tale.lang` --- Language utilities
 ---------------------------------------
 .. automodule:: tale.lang

@@ -9,7 +9,6 @@ import sys
 from typing import Optional, Generator
 
 from tale.driver import Driver
-from tale.hints import Hint
 from tale.player import Player, PlayerConnection
 from tale.charbuilder import PlayerNaming
 from tale.story import *
@@ -48,10 +47,7 @@ class Story(StoryBase):
         Called by the game driver when it has created the player object (after successful login).
         You can set the hint texts on the player object, or change the state object, etc.
         """
-        player.hints.init([
-            Hint(None, None, "Find a way to open the door that leads to the exit of the game."),
-            Hint("unlocked_enddoor", None, "Step out through the door into the freedom!")
-        ])
+        pass
 
     def create_account_dialog(self, playerconnection: PlayerConnection, playernaming: PlayerNaming) -> Generator:
         """

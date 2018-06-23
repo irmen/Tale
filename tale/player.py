@@ -12,7 +12,6 @@ from threading import Event
 from typing import Any, Sequence, Tuple, IO, Optional, Set, List, Union
 
 from . import base
-from . import hints
 from . import lang
 from . import mud_context
 from . import pubsub
@@ -33,7 +32,6 @@ class Player(base.Living, pubsub.Listener):
         title = lang.capital(name)
         super().__init__(name, gender, race=race, title=title, descr=descr, short_descr=short_descr)
         self.turns = 0
-        self.hints = hints.HintSystem()
         self.screen_width = DEFAULT_SCREEN_WIDTH
         self.screen_indent = DEFAULT_SCREEN_INDENT
         self.screen_styles_enabled = True

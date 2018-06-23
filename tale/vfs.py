@@ -102,14 +102,14 @@ class VirtualFileSystem:
                 raise VfsError("no read access: ", self.root)
         else:
             try:
-                test = pkgutil.get_data(root_package, "@dummy@")
+                test = pkgutil.get_data(root_package or "", "@dummy@")
             except IOError:
                 test = b"okay"
             except ImportError:
                 test = None
             if test is None:
                 raise VfsError("root package cannot be accessed")
-            self.root = root_package
+            self.root = root_package or ""
             self.use_pkgutil = True
 
     def validate_path(self, path: str) -> str:

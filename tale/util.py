@@ -205,9 +205,9 @@ def parse_time(args: Sequence[str]) -> datetime.time:
 
 def parse_duration(args: Sequence[str]) -> datetime.timedelta:
     """parses a duration from args like: 1 hour 20 minutes 15 seconds (hour/h, minutes/min/m, seconds/sec/s)"""
-    hours = minutes = seconds = 0
+    hours = minutes = seconds = 0.0
     if args:
-        number = None
+        number = 0.0
         for arg in args:
             if len(arg) >= 2 and arg.endswith(("h", "m", "s")):
                 try:
@@ -222,13 +222,13 @@ def parse_duration(args: Sequence[str]) -> datetime.timedelta:
                     pass
             if arg in ("hours", "hour", "h"):
                 hours = number
-                number = None
+                number = 0.0
             elif arg in ("minutes", "minute", "min", "m"):
                 minutes = number
-                number = None
+                number = 0.0
             elif arg in ("seconds", "second", "sec", "s"):
                 seconds = number
-                number = None
+                number = 0.0
             else:
                 try:
                     number = float(arg)
@@ -447,7 +447,10 @@ def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, de
         import linecache
         try:
             result.append("-" * width + "\n")
-            result.append(" EXCEPTION: %s\n" % ex_type.__name__)
+            if ex_type is None:
+                result.append(" EXCEPTION: ???\n")
+            else:
+                result.append(" EXCEPTION: %s\n" % ex_type.__name__)
             result.append(" MESSAGE: %s\n" % ex_value)
             result.append(" Extended stacktrace follows (most recent call last):\n")
             skiplocals = True  # don't print the locals of the very first stack frame
@@ -479,7 +482,10 @@ def format_traceback(ex_type: Type=None, ex_value: Any=None, ex_tb: Any=None, de
                                     result.append("        self.%s = %s\n" % (name3, makestrvalue(value)))
                 skiplocals = False
                 ex_tb = ex_tb.tb_next
-            result.append("\n EXCEPTION HERE: %s: %s\n" % (ex_type.__name__, ex_value))
+            if ex_type is None:
+                result.append("\n EXCEPTION HERE: ???: %s\n" % ex_value)
+            else:
+                result.append("\n EXCEPTION HERE: %s: %s\n" % (ex_type.__name__, ex_value))
             result.append("-" * width + "\n")
             return result
         except Exception:

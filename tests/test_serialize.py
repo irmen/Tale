@@ -8,7 +8,7 @@ import os
 import unittest
 import datetime
 
-from tale import mud_context, races, base, player, util, hints, driver
+from tale import mud_context, races, base, player, util, driver
 from tale.items import basic, bank, board
 from tale.story import *
 from tale.savegames import TaleSerializer, TaleDeserializer
@@ -255,8 +255,6 @@ class TestSerializing(unittest.TestCase):
         assert x["story_data"]["data"] == 42
         assert x["turns"] == 0
         assert x["screen_width"] == p.screen_width
-        assert x["hints"]["__class__"] == "tale.hints.HintSystem"
-        assert x["hints"]["checkpoints"] == [None]
         assert x["stats"]["race"] == x["race"] == "human"
         assert x["stats"]["xp"] == 0
         assert len(x["inventory"]) == 1
@@ -281,21 +279,6 @@ class TestSerializing(unittest.TestCase):
         with self.assertRaises(RuntimeError) as x:
             serializecycle(c)
         self.assertTrue(str(x.exception).startswith("cannot serialize context"))
-
-    def test_hints(self):
-        h = hints.HintSystem()
-        h.init([hints.Hint("start", None, "first")])
-        h.checkpoint("checkpoint1", "something has been achieved")
-        x = serializecycle(h)
-        assert x["__class__"] == "tale.hints.HintSystem"
-        assert x["active_hints"] == []
-        assert len(x["all_hints"]) == 1
-        h = x["all_hints"][0]
-        assert h["__class__"] == "tale.hints.Hint"
-        assert h["checkpoint"] == "start"
-        assert h["text"] == "first"
-        assert x["checkpoints"] == [None, 'checkpoint1']
-        assert x["recap_log"] == ["something has been achieved"]
 
     def test_deferreds(self):
         target = Thing()

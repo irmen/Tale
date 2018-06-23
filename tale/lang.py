@@ -20,7 +20,7 @@ OBJECTIVE = {"m": "him", "f": "her", "n": "it"}
 GENDERS = {"m": "male", "f": "female", "n": "neuter"}
 
 
-class OrderedCounter(collections.Counter, collections.OrderedDict):
+class OrderedCounter(collections.Counter, collections.OrderedDict):     # type: ignore
     """A counter that remembers the order in which things are being counted."""
     @classmethod
     def fromkeys(cls, iterable, v=None):
@@ -140,7 +140,7 @@ __number_words = [
 ]
 
 __tens_words = [
-    None, None, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+    "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
 ]
 
 __number_ordinals = [
@@ -149,7 +149,7 @@ __number_ordinals = [
 ]
 
 __tens_ordinals = [
-    None, "tenth", "twentieth", "thirtieth", "fortieth", "fiftieth", "sixtieth", "seventieth", "eightieth", "ninetieth"
+    "", "tenth", "twentieth", "thirtieth", "fortieth", "fiftieth", "sixtieth", "seventieth", "eightieth", "ninetieth"
 ]
 
 

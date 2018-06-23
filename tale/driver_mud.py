@@ -314,7 +314,6 @@ class MudDriver(driver.Driver):
         name_info.wizard = "wizard" in player.privileges
         self._rename_player(player, name_info)
         player.aliases = state.pop("aliases")
-        player.hints = state.pop("hints")
         player.known_locations = state.pop("known_locations")
         player.story_data = state.pop("story_data")
         player.turns = state.pop("turns")

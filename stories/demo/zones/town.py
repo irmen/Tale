@@ -155,9 +155,8 @@ class EndDoor(Door):
         super().unlock(actor, item)
         if not self.locked:
             if isinstance(actor, Player):
-                # remember a hint about unlocking this door
-                if actor.hints.checkpoint("unlocked_enddoor", "The way to freedom lies before you!"):
-                    actor.tell_later("<dim>(You will remember this event.)</>")
+                # we could perhaps remember a hint about unlocking this door
+                pass
 
 
 end_door = EndDoor(["east", "door"], game_end, "To the east is a door with a sign `Game Over' on it.", locked=True, opened=False)
@@ -285,9 +284,6 @@ class DoorKey(Key):
             player = target_container
         elif isinstance(self.contained_in, Player):
             player = self.contained_in
-        if player:
-            if player.hints.checkpoint("got_doorkey", "You've found something that might open the exit."):
-                actor.tell_later("<dim>(You will remember this event.)</>")
 
 
 doorkey = DoorKey("key", descr="A key with a little label marked `Game Over'.")
