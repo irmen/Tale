@@ -371,7 +371,7 @@ class Driver(pubsub.Listener):
         # generator. The reguar player input function has to deal with
         # them as well, caused by normal player commands.
         try:
-            why, what = dialog.send(message)
+            why, what = dialog.send(message or None)
         except StopIteration:
             if conn.player:
                 conn.write_output()   # immediately give feedback (if any) once the dialog ends
