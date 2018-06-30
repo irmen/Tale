@@ -116,15 +116,15 @@ def make_location(vnum: int) -> Location:
         return converted_rooms[vnum]   # get cached version if available
     except KeyError:
         c_room = rooms[vnum]
-        loc = None   # type: Location
+        loc = None
         if vnum in circle_dump_rooms or "death" in c_room.attributes:
             loc = Garbagedump(c_room.name, c_room.desc)
         elif vnum in circle_pet_shops:
             loc = PetShop(c_room.name, c_room.desc)
         else:
             loc = Location(c_room.name, c_room.desc)
-        loc.circle_vnum = vnum   # type: ignore  # keep the circle vnum
-        loc.circle_zone = c_room.zone    # type: ignore  # keep the circle zone number
+        loc.circle_vnum = vnum   # keep the circle vnum
+        loc.circle_zone = c_room.zone    # keep the circle zone number
         for ed in c_room.extradesc:
             loc.add_extradesc(ed["keywords"], ed["text"])
         converted_rooms[vnum] = loc
@@ -173,7 +173,7 @@ def make_shop(vnum: int) -> ShopBehavior:
     except KeyError:
         c_shop = shops[vnum]
         shop = ShopBehavior()
-        shop.circle_vnum = c_shop.circle_vnum  # type: ignore  # keep the vnum
+        shop.circle_vnum = c_shop.circle_vnum  # keep the vnum
         shop.shopkeeper_vnum = c_shop.shopkeeper   # keep the vnum of the shopkeeper
         shop.banks_money = c_shop.banks
         shop.will_fight = c_shop.fights

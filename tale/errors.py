@@ -57,7 +57,7 @@ class RetryParse(TaleFlowControlException):
 
 class LocationIntegrityError(TaleError):
     """When the driver notices an integrity problem with locations, exits, etc."""
-    def __init__(self, msg: str, direction: Optional[str], exit: Any, location: Any) -> None:
+    def __init__(self, msg: str, direction: str, exit: Any, location: Any) -> None:
         super().__init__(msg)
         self.direction = direction
         self.exit = exit

@@ -24,7 +24,7 @@ class Bank(Item):
     def init(self) -> None:
         super().init()
         self.takeable = False   # can be set to true for instance when it's a credit card
-        self.storage_file = None  # type: str
+        self.storage_file = ""
         self.verbs = {
             "balance": "See what the balance on your bank account is.",
             "deposit": "Deposit some money into your bank account.",

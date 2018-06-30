@@ -41,17 +41,17 @@ class Commands:
     Some utility functions to manage the registered commands.
     """
     def __init__(self) -> None:
-        self.commands_per_priv = {None: {}}    # type: Dict[str, Dict[str, Callable]]
+        self.commands_per_priv = {"": {}}    # type: Dict[str, Dict[str, Callable]]
         self.no_soul_parsing = set()   # type: Set[str]
 
-    def add(self, verb: str, func: Callable, privilege: str=None) -> None:
+    def add(self, verb: str, func: Callable, privilege: str="") -> None:
         self.validatefunc(func)
         for commands in self.commands_per_priv.values():
             if verb in commands:
                 raise ValueError("command defined more than once: " + verb)
         self.commands_per_priv.setdefault(privilege, {})[verb] = func
 
-    def override(self, verb: str, func: Callable, privilege: str=None) -> Callable:
+    def override(self, verb: str, func: Callable, privilege: str="") -> Callable:
         self.validatefunc(func)
         if verb in self.commands_per_priv[privilege]:
             existing = self.commands_per_priv[privilege][verb]
@@ -64,7 +64,7 @@ class Commands:
             raise ValueError("the function '%s' is not a proper command function (did you forget the decorator?)" % func.__name__)
 
     def get(self, privileges: Iterable[str]) -> Dict[str, Callable]:
-        result = dict(self.commands_per_priv[None])  # always include the cmds for None
+        result = dict(self.commands_per_priv[""])  # always include the cmds for empty privilege
         for priv in privileges:
             if priv in self.commands_per_priv:
                 result.update(self.commands_per_priv[priv])
@@ -163,12 +163,12 @@ class Deferred:
                 else:
                     raise RuntimeError("invalid owner specifier: " + self.owner)
             func = getattr(self.owner, self.action)
-        if self.periodical and hasattr(func, "_tale_periodically") and not func._tale_periodically:
+        if self.periodical and hasattr(func, "_tale_periodically") and not func._tale_periodically:     # type: ignore
             return  # no longer marked as periodical
         if "ctx" in inspect.signature(func).parameters:
             self.kwargs["ctx"] = kwargs["ctx"]  # add a 'ctx' keyword argument to the call for convenience
         func(*self.vargs, **self.kwargs)
-        if self.periodical and (not hasattr(func, "_tale_periodically") or func._tale_periodically):
+        if self.periodical and (not hasattr(func, "_tale_periodically") or func._tale_periodically):    # type: ignore
             # reschedule the same call!
             assert self.periodical[0] > 0 and self.periodical[1] > 0
             due = random.uniform(self.periodical[0], self.periodical[1])
@@ -200,10 +200,10 @@ class Driver(pubsub.Listener):
         self.commands = Commands()
         self.all_players = {}   # type: Dict[str, player.PlayerConnection]  # maps playername to player connection object
         self.zones = None       # type: ModuleType
-        self.moneyfmt = None    # type: util.MoneyFormatter
+        self.moneyfmt = None    # type: Optional[util.MoneyFormatter]
         self.resources = None   # type: vfs.VirtualFileSystem
         self.user_resources = None  # type: vfs.VirtualFileSystem
-        self.story = None   # type: StoryBase
+        self.story = None       # type: StoryBase
         self.game_clock = None    # type: util.GameDateTime
         self.game_mode = None     # type: GameMode
         self._stop_mainloop = True
@@ -254,8 +254,8 @@ class Driver(pubsub.Listener):
         # check for existence of cmds package in the story root
         loader = pkgutil.get_loader("cmds")
         if loader:
-            ld = pathlib.Path(loader.get_filename("cmds")).parent.parent.resolve()        # type: ignore
-            sd = pathlib.Path(inspect.getabsfile(story)).parent       # type: ignore   # mypy doesn't recognise getabsfile?
+            ld = pathlib.Path(loader.get_filename("cmds")).parent.parent.resolve()      # type: ignore
+            sd = pathlib.Path(inspect.getabsfile(story)).parent
             if ld == sd:   # only load them if the directory is the same as where the story was loaded from
                 cmds.clear_registered_commands()   # making room for the story's commands
                 # noinspection PyUnresolvedReferences
@@ -584,7 +584,7 @@ class Driver(pubsub.Listener):
                             topic_async_dialogs.send((conn, dialog))    # enqueue as async, and continue
                         else:
                             func(player, parsed, ctx)
-                        if func.enable_notify_action:   # type: ignore
+                        if func.enable_notify_action:       # type: ignore
                             topic_pending_actions.send(lambda actor=player: actor.location._notify_action_all(parsed, actor))
                     else:
                         raise errors.ParseError(parse_error)
@@ -620,7 +620,7 @@ class Driver(pubsub.Listener):
                     location = module
                 except ImportError:
                     raise errors.TaleError("location not found: " + location_name)
-        return location   # type: ignore
+        return location     # type: ignore
 
     def _load_zones(self, zone_names: Sequence[str]) -> ModuleType:
         # Pre-load the provided zones (essentially, load the named modules from the zones package)
@@ -633,7 +633,7 @@ class Driver(pubsub.Listener):
                 raise errors.TaleError("zone not found: " + zone)
             if hasattr(module, "init"):
                 # call the zone module initialization function
-                module.init(self)   # type: ignore
+                module.init(self)       # type: ignore
         return importlib.import_module("zones")
 
     def current_custom_verbs(self, player: player.Player) -> Dict[str, str]:
@@ -674,7 +674,7 @@ class Driver(pubsub.Listener):
             return None
         return conn.player
 
-    def do_wait(self, duration: datetime.timedelta) -> Tuple[bool, Optional[str]]:
+    def do_wait(self, duration: datetime.timedelta) -> Tuple[bool, str]:
         # let time pass, duration is in game time (not real time).
         # We do let the game tick for the correct number of times.
         # @todo be able to detect if something happened during the wait
@@ -684,13 +684,13 @@ class Driver(pubsub.Listener):
             # simply advance the clock, and perform a single server_tick
             self.game_clock.add_gametime(duration)
             self._server_tick()
-            return True, None      # uneventful
+            return True, ""      # uneventful
         num_ticks = int(duration.seconds / self.story.config.gametime_to_realtime / self.story.config.server_tick_time)
         if num_ticks < 1:
             return False, "It's no use waiting such a short while."
         for _ in range(num_ticks):
             self._server_tick()
-        return True, None     # wait was uneventful. (@todo return False if something happened)
+        return True, ""     # wait was uneventful. (@todo return False if something happened)
 
     def do_check_savefile_free(self, player: player.Player) -> bool:
         raise NotImplementedError
@@ -756,11 +756,13 @@ class Driver(pubsub.Listener):
             assert callable(event), "the driver-pending-tells events should be callables"
             event()
         elif topicname == "driver-async-dialogs":
-            assert type(event) is tuple
-            conn, dialog = event  # type: ignore
+            if isinstance(event, tuple):
+                conn, dialog = event
+            else:
+                raise TypeError("event must be tuple here")
             assert type(conn) is player.PlayerConnection
             assert inspect.isgenerator(dialog)
-            self._continue_dialog(conn, dialog, None)
+            self._continue_dialog(conn, dialog, "")     # type: ignore
         else:
             raise ValueError("unknown topic: " + str(topicname))
 

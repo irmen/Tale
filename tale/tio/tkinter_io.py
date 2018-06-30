@@ -58,13 +58,13 @@ class TkinterIo(iobase.IoAdapterBase):
         self.gui.destroy()
 
     def gui_terminated(self) -> None:
-        self.gui = None
+        self.gui = None     # type: ignore
 
     def abort_all_input(self, player) -> None:
         """abort any blocking input, if at all possible"""
         player.store_input_line("")
 
-    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> str:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
@@ -72,7 +72,7 @@ class TkinterIo(iobase.IoAdapterBase):
         This tkinter-implementation expects no extra parameters.
         """
         if not paragraphs:
-            return None
+            return ""
         output = []
         for txt, formatted in paragraphs:
             if formatted:

@@ -234,7 +234,7 @@ class Food(Item):
 
 class Money(Item):
     """Some money that is lying around. When picked up, it's added to the money the creature is carrying."""
-    def __init__(self, name: str, value: float, *, title: Optional[str]=None, short_descr: Optional[str]=None) -> None:
+    def __init__(self, name: str, value: float, *, title: str="", short_descr: str="") -> None:
         mft = mud_context.driver.moneyfmt
         if value <= 0.0:
             raise ValueError("attempt to create money with value <= 0")

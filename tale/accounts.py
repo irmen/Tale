@@ -12,7 +12,7 @@ import re
 import sqlite3
 import time
 import json
-from typing import Set, Tuple, List, Dict, Any
+from typing import Set, Tuple, List, Dict, Any, Optional
 import serpent
 
 from . import base
@@ -26,7 +26,7 @@ __all__ = ["Account", "MudAccounts"]
 
 class Account:
     def __init__(self, name: str, email: str, pw_hash: str, pw_salt: str, privileges: Set[str],
-                 created: datetime.datetime, logged_in: datetime.datetime, banned: bool,
+                 created: datetime.datetime, logged_in: Optional[datetime.datetime], banned: bool,
                  stats: base.Stats, story_data: Dict[Any, Any]) -> None:
         # validation on the suitability of names, emails etc is taken care of by the creating code
         if not isinstance(stats, base.Stats):
@@ -163,7 +163,7 @@ class MudAccounts:
         return Account(acc["name"], acc["email"], acc["pw_hash"], acc["pw_salt"], privileges,
                        acc["created"], acc["logged_in"], bool(acc["banned"]), stats, storydata)
 
-    def all_accounts(self, having_privilege: str=None) -> List[Account]:
+    def all_accounts(self, having_privilege: str="") -> List[Account]:
         with self._sqlite_connect() as conn:
             if having_privilege:
                 result = conn.execute("SELECT a.id FROM Account a INNER JOIN Privilege p ON p.account=a.id AND p.privilege=? "
@@ -190,7 +190,7 @@ class MudAccounts:
         raise ValueError("Invalid name or password.")
 
     @staticmethod
-    def _pwhash(password: str, salt: str=None) -> Tuple[str, str]:
+    def _pwhash(password: str, salt: str="") -> Tuple[str, str]:
         if not salt:
             salt = str(random.random() * time.time() + id(password)).replace('.', '')
         pwhash = hashlib.sha1((salt + password).encode("utf-8")).hexdigest()
@@ -260,9 +260,9 @@ class MudAccounts:
         sql = "INSERT INTO CharStat(" + ",".join(columns) + ") VALUES (" + ",".join('?' * len(columns)) + ")"
         conn.execute(sql, values)
 
-    def change_password_email(self, name: str, old_password: str, new_password: str=None, new_email: str=None) -> None:
+    def change_password_email(self, name: str, old_password: str, new_password: str="", new_email: str="") -> None:
         self.valid_password(name, old_password)
-        new_email = new_email.strip() if new_email else None
+        new_email = new_email.strip() if new_email else ""
         if new_password:
             self.accept_password(new_password)
         if new_email:

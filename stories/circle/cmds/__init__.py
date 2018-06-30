@@ -62,7 +62,7 @@ def show_cvnum(player: Player, parsed: ParseResult, ctx: util.Context) -> None:
         player.tell("Objects with circle-vnum %d:" % vnum + " " + (lang.join(str(o) for o in objects) or "none"))
         return
     try:
-        vnum = obj.circle_vnum   # type: ignore
+        vnum = obj.circle_vnum
         player.tell("Circle-Vnum of %s = %d." % (obj, vnum))
     except AttributeError:
         player.tell(str(obj) + " has no circle-vnum.")

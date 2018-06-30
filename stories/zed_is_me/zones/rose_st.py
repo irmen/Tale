@@ -67,7 +67,7 @@ class CarPark(Location):
                 raise ActionRefused("Surely you wouldn't leave the town without your friend Peter! "
                                     "You should find him and get out here together!")
             # player drives the yellow car away from here together with her friend Peter, and thus the story ends!
-            actor.tell_text_file(mud_context.resources["messages/completion_success.txt"])  # type: ignore
+            actor.tell_text_file(mud_context.resources["messages/completion_success.txt"])
             raise StoryCompleted
         return False
 

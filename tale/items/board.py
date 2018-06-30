@@ -29,7 +29,7 @@ class BulletinBoard(Item):
         self.takeable = False
         self.__posts = deque(maxlen=self.max_num_posts)  # type: MutableSequence[PostType]   # some py 3.5's don't have typing.Deque
         self.readonly = False
-        self.storage_file = None  # type: str
+        self.storage_file = ""
         self.verbs = {
             "post": "Write a new message on the board.",
             "write": "Write a new message on the board.",
@@ -176,7 +176,7 @@ class BulletinBoard(Item):
                     "subject": subject,
                     "text": text
                 }
-                self.__posts.appendleft(post)   # type: ignore
+                self.__posts.appendleft(post)       # type: ignore
                 self.save()
                 actor.tell("\n")
                 actor.tell("You've added the message on top of the list on the %s." % self.name)

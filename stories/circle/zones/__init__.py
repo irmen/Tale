@@ -37,7 +37,7 @@ def init_zones(driver: Driver) -> None:
                 assert len(shop_vnums) == 1
                 shop_vnum = shop_vnums[0]
                 shopdata = make_shop(shop_vnum)
-                mob.shop = shopdata  # type: ignore
+                mob.shop = shopdata
                 num_shops += 1
             else:
                 mob = make_mob(mobref.vnum)
@@ -67,10 +67,10 @@ def init_zones(driver: Driver) -> None:
                 del inventory
             if mobref.vnum in all_shopkeepers:
                 # if it is a shopkeeper, the shop.forsale items should also be present in his inventory
-                if mob.inventory_size < len(mob.shop.forsale):   # type: ignore
+                if mob.inventory_size < len(mob.shop.forsale):
                     raise ValueError("shopkeeper %d's inventory missing some shop.forsale items from shop %d" %
-                                     (mobref.vnum, mob.shop.circle_vnum))   # type: ignore
-                for item in mob.shop.forsale:  # type: ignore
+                                     (mobref.vnum, mob.shop.circle_vnum))
+                for item in mob.shop.forsale:
                     if not any(i for i in mob.inventory if i.title == item.title):
                         raise ValueError("shop.forsale item %d (%s) not in shopkeeper %d's inventory" %
                                          (item.circle_vnum, item.title, mobref.vnum))
@@ -141,7 +141,7 @@ def pulse_mobile(ctx: Context=None) -> None:
     """
     for mob in _special_mobs_buckets[0]:
         mob.do_special(ctx)
-    _special_mobs_buckets.rotate()      # type: ignore
+    _special_mobs_buckets.rotate()
 
 
 def pulse_zone(ctx: Context=None) -> None:

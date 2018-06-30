@@ -39,7 +39,7 @@ banking_money_limit = 15000.0
 class ShopBehavior:
     """the data describing the behavior of a particular shop"""
     def __init__(self) -> None:
-        self.shopkeeper_vnum = None   # type: int   # used for circle data to designate the shopkeeper belonging to this shop
+        self.shopkeeper_vnum = -1   # used for circle data to designate the shopkeeper belonging to this shop
         self.banks_money = False
         self.will_fight = False
         self._buyprofit = 0.3     # price factor when shop buys item

@@ -43,7 +43,7 @@ class BodySize(enum.Enum):
 
     def adjust(self, steps: int) -> 'BodySize':
         order = self.order + steps
-        for size in BodySize.__members__.values():      # type: ignore
+        for size in BodySize.__members__.values():
             if size.order == order:
                 return size
         raise LookupError("there is no BodySize for the resulting numeric size")
@@ -564,7 +564,7 @@ def _create_race_defs() -> None:
                       swimming=race in swimming_races,
                       nonmeat=race in nonmeat_races,
                       playable=race in playable_races)
-        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],           # type: ignore
+        races[race] = Race(name=race, body=attrs["body"], language=attrs["language"],       # type: ignore
                            mass=attrs["mass"], size=attrs["size"], flags=flags)
     _all_races = set(_races)
     assert len(swimming_races - _all_races) == 0

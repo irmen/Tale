@@ -69,7 +69,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_tell(self) -> None:
         player = Player("fritz", "m")
-        player.tell(5)  # type: ignore
+        player.tell("5")
         self.assertEqual(["5\n"], player.test_get_output_paragraphs())
         player.tell("")
         self.assertEqual([], player.test_get_output_paragraphs())
@@ -94,8 +94,8 @@ class TestPlayer(unittest.TestCase):
         player.tell("hello\nnewline")
         player.tell("\n")
         player.tell("ints")
-        player.tell(42)  # type: ignore
-        player.tell(999)  # type: ignore
+        player.tell("42")
+        player.tell("999")
         self.assertEqual(["line1\nline2\nhello\nnewline\n", "ints\n42\n999\n"], player.test_get_output_paragraphs())
         self.assertEqual([], player.test_get_output_paragraphs())
         player.tell("para1", end=False)
@@ -815,7 +815,7 @@ class TestMudAccounts(unittest.TestCase):
             self.assertEqual({}, account.story_data)
             account.story_data = {"test": 42, "thing": [1.2, 3.4]}
             with self.assertRaises(TypeError):
-                accounts.save_story_data("testname", "must_be_dictionary")   # type: ignore
+                accounts.save_story_data("testname", "must_be_dictionary")
             accounts.save_story_data("testname", account.story_data)
             account = accounts.get("testname")
             self.assertEqual({"test": 42, "thing": [1.2, 3.4]}, account.story_data)

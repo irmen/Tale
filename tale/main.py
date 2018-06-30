@@ -12,6 +12,7 @@ from typing import Sequence
 from . import __version__
 from .tio import DEFAULT_SCREEN_DELAY
 from .story import GameMode
+from .driver import Driver
 
 
 def run_from_cmdline(cmdline: Sequence[str]) -> None:
@@ -35,10 +36,10 @@ def run_from_cmdline(cmdline: Sequence[str]) -> None:
         game_mode = GameMode(args.mode)
         if game_mode == GameMode.IF:
             from .driver_if import IFDriver
-            driver = IFDriver(screen_delay=args.delay, gui=args.gui, web=args.web, wizard_override=args.wizard)
+            driver = IFDriver(screen_delay=args.delay, gui=args.gui, web=args.web, wizard_override=args.wizard)   # type: Driver
         elif game_mode == GameMode.MUD:
             from .driver_mud import MudDriver
-            driver = MudDriver(args.restricted)  # type: ignore
+            driver = MudDriver(args.restricted)
         else:
             raise ValueError("invalid game mode")
         driver.start(args.game)

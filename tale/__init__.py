@@ -13,9 +13,9 @@ __version__ = "4.2.dev0"
 
 
 class _MudContext:
-    driver = None      # type: Any
-    config = None      # type: Any
-    resources = None   # type: Any
+    driver = None       # type: Any
+    config = None       # type: Any
+    resources = None    # type: Any
 
 
 # The mud_context is a global container for the following attributes,

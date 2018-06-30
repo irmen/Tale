@@ -313,7 +313,7 @@ class TestSerializing(unittest.TestCase):
         assert x["__class__"] == "tale.items.bank.Bank"
         assert x["__base_class__"] == "tale.base.Item"
         assert x["accounts"] == {"test": 55}
-        assert x["storage_file"] is None
+        assert x["storage_file"] == ""
         assert x["takeable"] == False
         assert x["transaction_log"] == ["transaction: $10"]
         assert x["verbs"]["balance"] is not None

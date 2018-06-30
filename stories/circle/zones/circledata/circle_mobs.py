@@ -39,7 +39,7 @@ class CircleMob(Living):
         # Let the mob wander randomly.
         direction = self.select_random_move()
         if direction:
-            if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:  # type: ignore
+            if "stayzone" in self.actions and self.location.circle_zone != direction.target.circle_zone:
                 return   # mob must stay in its own zone
             # @todo avoid certain directions, conditions, etc
             self.move(direction.target, self, direction_names=direction.names)

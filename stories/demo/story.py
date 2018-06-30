@@ -61,21 +61,21 @@ class Story(StoryBase):
         playernaming.story_data["age"] = int(age)    # will be stored in the database (mud)
         return True
 
-    def welcome(self, player: Player) -> Optional[str]:
+    def welcome(self, player: Player) -> str:
         """welcome text when player enters a new game"""
         player.tell("<bright>Hello, %s! Welcome to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].text)
         player.tell("\n")
-        return None
+        return ""
 
-    def welcome_savegame(self, player: Player) -> Optional[str]:
+    def welcome_savegame(self, player: Player) -> str:
         """welcome text when player enters the game after loading a saved game"""
         player.tell("<bright>Hello %s, welcome back to %s.</>" % (player.title, self.config.name), end=True)
         player.tell("\n")
         player.tell(self.driver.resources["messages/welcome.txt"].text)
         player.tell("\n")
-        return None
+        return ""
 
     def goodbye(self, player: Player) -> None:
         """goodbye text when player quits the game"""

@@ -53,15 +53,15 @@ class Resource:
     @property
     def data(self) -> bytes:
         """the (binary) data of this resource"""
-        if self.is_text:
+        if isinstance(self.__data, str):
             raise VfsError("this is a text resource, not binary")
-        return self.__data      # type: ignore
+        return self.__data
 
     @property
     def text(self) -> str:
         """the (text) data of this resource"""
-        if self.is_text:
-            return self.__data   # type: ignore
+        if isinstance(self.__data, str):
+            return self.__data
         raise VfsError("this is a binary resource, not text")
 
     def __repr__(self):
@@ -85,14 +85,16 @@ class VirtualFileSystem:
     It automatically returns the contents of a compressed version of a requested file if the file
     itself doesn't exist but there is a compressed version of it available.
     """
-    def __init__(self, root_package: str=None, root_path: Union[str, pathlib.Path]=None,
+    def __init__(self, root_package: str="", root_path: Union[str, pathlib.Path]=None,
                  readonly: bool=True, everythingtext: bool=False) -> None:
-        if root_package is not None and root_path is not None:
+        if root_package and root_path is not None:
             raise ValueError("specify only one root argument")
         if not readonly and not root_path:
             raise ValueError("Read-write vfs requires root_path argument")
         self.readonly = readonly
         self.everythingtext = everythingtext
+        self.use_pkgutil = True
+        self.root = ""
         if root_path:
             self.root = os.path.abspath(os.path.normpath(str(root_path)))
             self.use_pkgutil = False
@@ -110,7 +112,6 @@ class VirtualFileSystem:
             if test is None:
                 raise VfsError("root package cannot be accessed")
             self.root = root_package or ""
-            self.use_pkgutil = True
 
     def validate_path(self, path: str) -> str:
         """
@@ -160,18 +161,18 @@ class VirtualFileSystem:
                 # if the file cannot be found directly, attempt to read a compressed version of it
                 for suffix in mimetypes.encodings_map:
                     try:
-                        data = loader.get_data(name + suffix)    # type: ignore
+                        data = loader.get_data(name + suffix)       # type: ignore
                         if data:
                             return self[original_name + suffix]
                     except FileNotFoundError:
                         pass
                 raise x
             else:
-                data = loader.get_data(name)   # type: ignore
+                data = loader.get_data(name)        # type: ignore
                 if not data:
                     raise FileNotFoundError(errno.ENOENT, name)
             try:
-                mtime = loader.path_stats(name)["mtime"]        # type: ignore
+                mtime = loader.path_stats(name)["mtime"]    # type: ignore
             except AttributeError:
                 mtime = 0.0   # not all loaders support getting the modification time...
             if encoding:
@@ -220,7 +221,7 @@ class VirtualFileSystem:
         except IOError:
             pass
 
-    def open_write(self, name: str, mimetype: str=None, append: bool=False) -> IO[Any]:
+    def open_write(self, name: str, mimetype: str="", append: bool=False) -> IO[Any]:
         """returns a writable file io stream"""
         if self.readonly:
             raise VfsError("attempt to write to a read-only vfs")

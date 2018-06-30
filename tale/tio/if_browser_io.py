@@ -112,7 +112,7 @@ class HttpIo(iobase.IoAdapterBase):
                 hostname = "localhost"
             url = "%s://%s:%d/tale/" % (protocol, hostname, port)
             print("Access the game on this web server url (ipv4):  ", url, end="\n\n")
-        t = Thread(target=webbrowser.open, args=(url, ))   # type: ignore
+        t = Thread(target=webbrowser.open, args=(url, ))        # type: ignore
         t.daemon = True
         t.start()
         while not self.stop_main_loop:
@@ -130,9 +130,9 @@ class HttpIo(iobase.IoAdapterBase):
     def clear_screen(self) -> None:
         self.append_html_special("clear")
 
-    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> str:
         if not paragraphs:
-            return None
+            return ""
         with self.__html_to_browser_lock:
             for text, formatted in paragraphs:
                 text = self.convert_to_html(text)
@@ -143,7 +143,7 @@ class HttpIo(iobase.IoAdapterBase):
                 else:
                     self.__html_to_browser.append("<pre>" + text + "</pre>\n")
             self.__new_html_available.set()
-        return None    # the output is pushed to the browser via a buffer, rather than printed to a screen
+        return ""    # the output is pushed to the browser via a buffer, rather than printed to a screen
 
     def output(self, *lines: str) -> None:
         super().output(*lines)
@@ -436,7 +436,7 @@ class TaleWsgiAppBase:
             etag = self.etag(id(vfs.internal_resources), resource.mtime, path)
             if_modified = environ.get('HTTP_IF_MODIFIED_SINCE')
             if if_modified:
-                if parsedate(if_modified) >= parsedate(mtime_formatted):
+                if parsedate(if_modified) >= parsedate(mtime_formatted):        # type: ignore
                     # the resource wasn't modified since last requested
                     return self.wsgi_not_modified(start_response)
             if_none = environ.get('HTTP_IF_NONE_MATCH')
@@ -474,7 +474,7 @@ class TaleWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver: Driver, player_connection: PlayerConnection, *,
                           use_ssl: bool=False, ssl_certs: Tuple[str, str, str]=None) -> Callable:
-        wsgi_app = SessionMiddleware(cls(driver, player_connection, use_ssl, ssl_certs))
+        wsgi_app = SessionMiddleware(cls(driver, player_connection, use_ssl, ssl_certs))        # type: ignore
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         wsgi_server.timeout = 0.5

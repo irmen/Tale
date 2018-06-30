@@ -44,16 +44,16 @@ class Story(StoryBase):
     def init_player(self, player: Player) -> None:
         player.money = 12.65
 
-    def welcome(self, player: Player) -> Optional[str]:
+    def welcome(self, player: Player) -> str:
         player.tell("<bright>Welcome to `%s'.</>" % self.config.name, end=True)
         player.tell("This is a tiny embedded story to check out a running Tale environment.")
         player.tell("Try to communicate with your pet, and exit the house to win the game.")
         player.tell("\n")
         player.tell("\n")
-        return None
+        return ""
 
-    def welcome_savegame(self, player: Player) -> Optional[str]:
-        return None  # not supported in demo
+    def welcome_savegame(self, player: Player) -> str:
+        return ""  # not supported in demo
 
     def goodbye(self, player: Player) -> None:
         player.tell("Thanks for trying out Tale!")

@@ -84,7 +84,7 @@ class TaleMudWsgiApp(TaleWsgiAppBase):
     @classmethod
     def create_app_server(cls, driver: Driver, *,
                           use_ssl: bool=False, ssl_certs: Tuple[str, str, str]=None) -> WSGIServer:
-        wsgi_app = SessionMiddleware(cls(driver, use_ssl, ssl_certs), MemorySessionFactory())
+        wsgi_app = SessionMiddleware(cls(driver, use_ssl, ssl_certs), MemorySessionFactory())    # type: ignore
         wsgi_server = make_server(driver.story.config.mud_host, driver.story.config.mud_port, app=wsgi_app,
                                   handler_class=CustomRequestHandler, server_class=CustomWsgiServer)
         return wsgi_server
@@ -200,7 +200,7 @@ class SessionMiddleware:
             return self.app(environ, start_response)
 
         cookies = Cookies.from_env(environ)
-        sid = None
+        sid = ""
         session_is_new = True
         if self.session_cookie_name in cookies:
             sid = cookies[self.session_cookie_name].value
@@ -218,7 +218,7 @@ class SessionMiddleware:
             sid = self.factory.save(environ["wsgi.session"])
             if session_is_new:
                 # add the new session cookie to response
-                cookies = Cookies()  # type: ignore
+                cookies = Cookies()     # type: ignore
                 cookies.add_cookie(self.session_cookie_name, sid, cookie_path)
                 response_headers.extend(cookies.get_http_headers())
             return start_response(status, response_headers, exc_info)
@@ -228,7 +228,7 @@ class SessionMiddleware:
         except SessionMiddleware.CloseSession as x:
             self.factory.delete(sid)
             # clear the browser cookie
-            cookies = Cookies()  # type: ignore
+            cookies = Cookies()     # type: ignore
             cookies.delete_cookie(self.session_cookie_name, cookie_path)
             response_headers = [('Content-Type', x.content_type)]
             response_headers.extend(cookies.get_http_headers())
@@ -239,7 +239,7 @@ class SessionMiddleware:
 class Cookies(http.cookies.SimpleCookie):
     @staticmethod
     def from_env(environ: Dict[str, Any]) -> 'Cookies':
-        cookies = Cookies()  # type: ignore
+        cookies = Cookies()     # type: ignore
         if 'HTTP_COOKIE' in environ:
             cookies.load(environ['HTTP_COOKIE'])
         return cookies
@@ -250,7 +250,7 @@ class Cookies(http.cookies.SimpleCookie):
         morsel["path"] = path
         morsel["httponly"] = "1"
 
-    def delete_cookie(self, name: str, path: str=None) -> None:
+    def delete_cookie(self, name: str, path: str="") -> None:
         self[name] = "deleted"
         morsel = self[name]
         if path:

@@ -17,19 +17,19 @@ from .story import StoryConfig
 
 class PlayerNaming:
     def __init__(self) -> None:
-        self._name = self.title = self.gender = self.description = self.short_description = None  # type: str
+        self._name = self.title = self.gender = self.description = self.short_description = ""
         self.money = mud_context.config.player_money
         self.stats = Stats()
         self.wizard = False
-        self.password = None
-        self.email = None
+        self.password = ""
+        self.email = ""
         self.story_data = {}  # type: Dict[Any, Any]
 
     def apply_to(self, player: Player) -> None:
         assert self._name
         assert self.gender
         player.init_gender(self.gender)
-        title = None if self.title == self._name else self.title
+        title = "" if self.title == self._name else self.title
         player.init_names(self._name, title, self.description, self.short_description)
         player.stats = self.stats
         player.money = self.money

@@ -16,7 +16,7 @@ import serpent
 def mudobj_ref(mudobj: MudObject) -> Optional[Tuple[int, str, str, str]]:
     """generate a serializable reference (vnum, name, classname, baseclassname) for a MudObject"""
     if mudobj:
-        return mudobj.vnum, mudobj.name, qual_classname(mudobj), qual_baseclassname(mudobj)    # type: ignore
+        return mudobj.vnum, mudobj.name, qual_classname(mudobj), qual_baseclassname(mudobj)
     return None
 
 
@@ -459,7 +459,7 @@ class TaleDeserializer:
             if data["linked_door"]:
                 linked_door = existing_object_lookup.resolve_exit(*data["linked_door"])
                 if exit.linked_door is not linked_door:
-                    raise TaleError("door linked door changed, door vnum " + str(exit.vnum))  # type: ignore
+                    raise TaleError("door linked door changed, door vnum " + str(exit.vnum))
         return exit
 
     def make_Location(self, data: Dict, existing_object_lookup) -> Location:

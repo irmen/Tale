@@ -105,19 +105,19 @@ class StoryBase:
         """
         pass
 
-    def welcome(self, player) -> Optional[str]:
+    def welcome(self, player) -> str:
         """
         Welcome text when player enters a new game
-        If you return a string, it is used as an input prompt before continuing (a pause).
+        If you return a non-empty string, it is used as an input prompt before continuing (a pause).
         """
         player.tell("<bright>Welcome to `%s'.</>" % self.config.name, end=True)
         player.tell("\n")
         return "<bright>Press enter to start.</>"
 
-    def welcome_savegame(self, player) -> Optional[str]:
+    def welcome_savegame(self, player) -> str:
         """
         Welcome text when player enters the game after loading a saved game
-        If you return a string, it is used as an input prompt before continuing (a pause).
+        If you return a non-empty string, it is used as an input prompt before continuing (a pause).
         """
         player.tell("<bright>Welcome back to `%s'.</>" % self.config.name, end=True)
         player.tell("\n")

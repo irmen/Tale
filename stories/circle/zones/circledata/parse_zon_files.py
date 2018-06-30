@@ -18,7 +18,7 @@ __all__ = ["get_zones"]
 class ZMobile:
     __slots__ = ("vnum", "max_exist", "room", "comment", "inventory", "equip")
 
-    def __init__(self, vnum: int, max_exist: int, room: int, comment: Optional[str]) -> None:
+    def __init__(self, vnum: int, max_exist: int, room: int, comment: str) -> None:
         self.vnum = vnum
         self.max_exist = max_exist
         self.room = room

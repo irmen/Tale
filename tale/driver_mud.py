@@ -64,7 +64,7 @@ class MudDriver(driver.Driver):
         try:
             message = self.resources["messages/motd.txt"].text.rstrip()
         except IOError:
-            message = None
+            message = ""
         if message:
             player.tell("<bright>Message-of-the-day:</>", end=True)
             player.tell("\n")

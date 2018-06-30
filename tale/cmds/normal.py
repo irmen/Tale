@@ -8,7 +8,7 @@ Copyright by Irmen de Jong (irmen@razorvine.net)
 import datetime
 import itertools
 import random
-from typing import Iterable, List, Dict, Generator, Union
+from typing import Iterable, List, Dict, Generator, Union, Optional
 
 from . import abbreviations, cmd, disabled_in_gamemode, disable_notify_action, overrides_soul, no_soul_parse
 from .. import base
@@ -121,6 +121,7 @@ def do_drop(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                 player.tell("You hold onto your stuff.")
     else:
         # drop a single item from the inventory (or a container in the inventory), or perhaps some coins
+        item = None  # type: Optional[base.ParsedWhoType]
         if parsed.who_count:
             item = parsed.who_1
             if item in player:
@@ -163,11 +164,11 @@ def do_empty(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Non
         raise ActionRefused("You can't take anything from %s." % container.title)
     if container in player.location:
         # move the contents to the room
-        target = player.location
+        target = player.location        # type: base.ContainingType
         action = "dropped"
     elif container in player:
         # move the contents to the player's inventory
-        target = player     # type: ignore
+        target = player
         action = "took"
     else:
         raise ParseError("You can't seem to empty that.")
@@ -447,7 +448,7 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             p("Take things from what?")
 
 
-def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudObject, where_str: str=None) -> int:
+def take_stuff(player: Player, items: Iterable[base.Item], container: base.MudObject, where_str: str="") -> int:
     """Takes stuff and returns the number of items taken"""
     if not items:
         return 0
@@ -534,7 +535,7 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
                 elif player.money < amount:
                     raise ActionRefused("You don't have that amount of wealth.")
                 else:
-                    recipient.allow_give_money(player, amount)
+                    recipient.allow_give_money(amount, player)
                     if (yield "input", ("Are you sure you want to give %s away?" % ctx.driver.moneyfmt.display(amount), lang.yesno)):
                         player.money -= amount
                         recipient.money += amount
@@ -576,12 +577,12 @@ def do_give(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gene
     if isinstance(parsed.who_1, base.Living):
         # if the first is a living, assume "give living [the] thing(s)"
         things = list(parsed.who_info)[1:]
-        give_stuff(player, things, None, target=parsed.who_1)
+        give_stuff(player, things, "", target=parsed.who_1)
         return
     elif isinstance(parsed.who_last, base.Living):
         # if the last is a living, assume "give thing(s) [to] living"
         things = list(parsed.who_info)[:-1]
-        give_stuff(player, things, None, target=parsed.who_last)
+        give_stuff(player, things, "", target=parsed.who_last)
         return
     else:
         raise ActionRefused("It's not clear who you want to give things to.")
@@ -1011,7 +1012,7 @@ def do_open(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
     what_name = parsed.args[0]
     with_item_name = None
     with_item = None
-    what = None  # type: base.MudObject
+    what = None   # type: Optional[base.MudObject]
     if len(parsed.args) == 2:
         with_item_name = parsed.args[1]
     what = player.search_item(what_name, include_inventory=True, include_location=True, include_containers_in_inventory=False)
@@ -1311,7 +1312,8 @@ def do_flee(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
             raise ActionRefused("You can't run anywhere!")
         exit = random.choice(list(player.location.exits.values()))
     exits_to_try = list(player.location.exits.values())
-    exits_to_try.insert(0, exit)
+    if isinstance(exit, base.Exit):
+        exits_to_try.insert(0, exit)
     for exit in exits_to_try:
         try:
             exit.allow_passage(player)
@@ -1360,7 +1362,7 @@ def do_load(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
 def do_transcript(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
     """Makes a transcript of your game session to the specified file, or switches transcript off again."""
     if parsed.unparsed == "off" or (parsed.args and parsed.args[0] == "off"):
-        player.activate_transcript(None, None)
+        player.deactivate_transcript()
     elif not parsed.args:
         raise ParseError("Transcript to what file? (or off)")
     else:
@@ -1663,7 +1665,7 @@ def do_account(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
     player.tell("<ul>Your account data.</ul>", end=True)
     player.tell("name: %s" % account.name, end=True)
     player.tell("email: %s" % account.email, end=True)
-    player.tell("privileges: %s" % (lang.join(account.privileges, None) or "-"), end=True)
+    player.tell("privileges: %s" % (lang.join(account.privileges, "") or "-"), end=True)
     gender = lang.GENDERS[account.stats.gender]
     race = account.stats.race or "creature"
     player.tell("character: level %d %s %s" % (account.stats.level, gender, race), end=True)

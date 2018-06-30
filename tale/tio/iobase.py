@@ -42,7 +42,7 @@ class IoAdapterBase:
         self.supports_blocking_input = True
         self.player_connection = player_connection
         self.stop_main_loop = False
-        self.last_output_line = None  # type: Optional[str]
+        self.last_output_line = ""
         self.dont_echo_next_cmd = False   # used to not echo the password input, for instance
 
     def destroy(self) -> None:
@@ -68,7 +68,7 @@ class IoAdapterBase:
         """abort any blocking input, if at all possible"""
         pass
 
-    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> str:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
@@ -88,7 +88,7 @@ class IoAdapterBase:
                 txt = smartypants.smartypants(text, smartypants.Attr.q | smartypants.Attr.B |
                                               smartypants.Attr.D | smartypants.Attr.e)
                 import html.parser
-                return html.parser.unescape(txt)  # type: ignore
+                return html.parser.unescape(txt)    # type: ignore
         return text
 
     def output(self, *lines: str) -> None:

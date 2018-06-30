@@ -46,9 +46,9 @@ class Player(base.Living, pubsub.Listener):
     def init_nonserializables(self) -> None:
         # these things cannot be serialized or have to be reinitialized
         # call this function after deserialization.
-        self._input = queue.Queue()   # type: Any
+        self._input = queue.Queue()   # type: queue.Queue[str]
         self.input_is_available = Event()
-        self.transcript = None  # type: IO[Any]
+        self.transcript = None   # type: Optional[IO[str]]
         self._output = TextBuffer()
 
     def init_names(self, name: str, title: str, descr: str, short_descr: str) -> None:
@@ -91,13 +91,15 @@ class Player(base.Living, pubsub.Listener):
         else:
             self.tell(file_resource.text, format=False)
 
-    def look(self, short: bool=None) -> None:
+    def look(self, short: Optional[bool]=None) -> None:
         """look around in your surroundings (it excludes the player himself from livings)"""
         if short is None:
             if self.brief == 2:
                 short = True
             elif self.brief == 1:
                 short = self.location in self.known_locations
+            else:
+                short = False
         if self.location:
             self.known_locations.add(self.location)
             look_paragraphs = self.location.look(exclude_living=self, short=short)
@@ -128,9 +130,9 @@ class Player(base.Living, pubsub.Listener):
         # clear all wiretaps that this player has
         pubsub.unsubscribe_all(self)
 
-    def destroy(self, ctx: util.Context) -> None:
+    def destroy(self, ctx: Optional[util.Context]) -> None:
         self.clear_wiretaps()
-        self.activate_transcript(None, None)
+        self.deactivate_transcript()
         super().destroy(ctx)
 
     def allow_give_money(self, amount: float, actor: Optional[base.Living]) -> None:
@@ -164,7 +166,7 @@ class Player(base.Living, pubsub.Listener):
     def idle_time(self) -> float:
         return time.time() - self.last_input_time
 
-    def tell_object_location(self, obj: base.MudObject, known_container: Union[base.Living, base.Item, base.Location],
+    def tell_object_location(self, obj: base.MudObject, known_container: Union[base.Living, base.Item, base.Location, None],
                              print_parentheses: bool=True) -> None:
         """Tells the player some details about the location of the given object."""
         if known_container is None:
@@ -195,18 +197,18 @@ class Player(base.Living, pubsub.Listener):
                 self.tell("%s was found in %s." % (lang.capital(obj.name), known_container.name))
 
     def activate_transcript(self, file: str, vfs: VirtualFileSystem) -> None:
-        if file:
-            if self.transcript:
-                raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
-            self.transcript = vfs.open_write("transcripts/" + file, mimetype="text/plain", append=True)
-            self.tell("Transcript is being written to " + self.transcript.name)
-            self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
-        else:
-            if self.transcript:
-                self.transcript.write("\n*Transcript ending at %s*\n\n" % time.ctime())
-                self.transcript.close()
-                self.transcript = None
-                self.tell("Transcript ended.")
+        if self.transcript:
+            raise ActionRefused("There's already a transcript being made to " + self.transcript.name)
+        self.transcript = vfs.open_write("transcripts/" + file, mimetype="text/plain", append=True)
+        self.tell("Transcript is being written to " + self.transcript.name)
+        self.transcript.write("\n*Transcript starting at %s*\n\n" % time.ctime())
+
+    def deactivate_transcript(self) -> None:
+        if self.transcript:
+            self.transcript.write("\n*Transcript ending at %s*\n\n" % time.ctime())
+            self.transcript.close()
+            self.transcript = None
+            self.tell("Transcript ended.")
 
     def search_extradesc(self, keyword: str, include_inventory: bool=True, include_containers_in_inventory: bool=False) -> str:
         """
@@ -242,7 +244,7 @@ class Player(base.Living, pubsub.Listener):
                         desc = item.extra_desc.get(keyword)
                         if desc:
                             return desc
-        return None
+        return ""
 
     def test_peek_output_paragraphs(self) -> Sequence[Sequence[str]]:
         """
@@ -338,18 +340,18 @@ class PlayerConnection:
         self.io = io
         self.need_new_input_prompt = True
 
-    def get_output(self) -> Optional[str]:
+    def get_output(self) -> str:
         """
         Gets the accumulated output lines, formats them nicely, and clears the buffer.
-        If there is nothing to be outputted, None is returned.
+        If there is nothing to be outputted, empty string is returned.
         """
         paragraphs = self.player._output.get_paragraphs()
         if paragraphs:
             formatted = self.io.render_output(paragraphs, width=self.player.screen_width, indent=self.player.screen_indent)
             if formatted and self.player.transcript:
                 self.player.transcript.write(formatted)
-            return formatted or None
-        return None
+            return formatted or ""
+        return ""
 
     @property
     def last_output_line(self) -> str:
@@ -389,7 +391,7 @@ class PlayerConnection:
         """similar to output() but writes a single line, without newline at the end"""
         self.io.output_no_newline(self.io.smartquotes(line))
 
-    def input_direct(self, prompt: str=None) -> str:
+    def input_direct(self, prompt: str) -> str:
         """
         Writes any pending output and prompts for input directly. Returns stripped result.
         The driver does NOT use this for the regular game loop!
@@ -436,8 +438,8 @@ class PlayerConnection:
             if self.player and mud_context.config.server_mode == GameMode.IF:
                 self.player.destroy(ctx)
                 self.io.abort_all_input(self.player)
-                self.player = None
-            self.io = None
+                self.player = None      # type: ignore
+            self.io = None              # type: ignore
         if self.player:
             self.player.destroy(ctx)
-            self.player = None
+            self.player = None          # type: ignore

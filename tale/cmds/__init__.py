@@ -44,7 +44,7 @@ _all_wizard_commands = {}   # type: Dict[str, Callable]
 cmds_aliases = {}   # type: Dict[str, Tuple[str, ...]]  # commands -> tuple of one or more aliases
 
 
-def all_registered_commands() -> Iterable[Tuple[str, Callable, Optional[str]]]:
+def all_registered_commands() -> Iterable[Tuple[str, Callable, str]]:
     """
     Produce all registered commands so they could be added to the command processor.
     (This is called from the game driver when it is starting up)
@@ -57,7 +57,7 @@ def all_registered_commands() -> Iterable[Tuple[str, Callable, Optional[str]]]:
     for command, func in _all_wizard_commands.items():
         yield command, func, "wizard"
     for command, func in _all_commands.items():
-        yield command, func, None
+        yield command, func, ""
 
 
 def clear_registered_commands():
@@ -76,12 +76,12 @@ def cmd(command: str, *aliases: str) -> Callable:
     def cmd2(func: Callable) -> Callable:
         if command in _all_commands:
             raise ValueError("command defined more than once: " + command)
-        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore # contains async yields?
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore   # contains async yields?
         if cmdfunc_signature_valid(func):
-            func.__doc__ = util.format_docstring(func.__doc__)
-            func.is_tale_command_func = True   # type: ignore
+            func.__doc__ = util.format_docstring(func.__doc__ or "") or None
+            func.is_tale_command_func = True     # type: ignore
             if not hasattr(func, "enable_notify_action"):
-                func.enable_notify_action = True   # type: ignore  # by default the normal commands should be passed to notify_action
+                func.enable_notify_action = True   # type: ignore   # by default the normal commands should be passed to notify_action
             _all_commands[command] = func
             cmds_aliases[command] = aliases
             for alias in aliases:
@@ -106,9 +106,9 @@ def wizcmd(command: str, *aliases: str) -> Callable:
     prefixed_aliases = ["!" + alias for alias in aliases]
 
     def wizcmd2(func: Callable) -> Callable:
-        func.enable_notify_action = False   # type: ignore  # none of the wizard commands should be used with notify_action
+        func.enable_notify_action = False   # type: ignore # none of the wizard commands should be used with notify_action
         func.is_tale_command_func = True    # type: ignore
-        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore  # contains async yields?
+        func.is_generator = inspect.isgeneratorfunction(func)   # type: ignore   # contains async yields?
 
         @functools.wraps(func)
         def executewizcommand(player: Player, parsed: ParseResult, ctx: util.Context) \
@@ -120,7 +120,7 @@ def wizcmd(command: str, *aliases: str) -> Callable:
         if prefixed_command in _all_commands:
             raise ValueError("Command defined more than once: " + prefixed_command)
         if cmdfunc_signature_valid(func):
-            func.__doc__ = util.format_docstring(func.__doc__)
+            func.__doc__ = util.format_docstring(func.__doc__ or "") or None
             executewizcommand.__doc__ = func.__doc__
             _all_wizard_commands[prefixed_command] = executewizcommand
             for alias in prefixed_aliases:
@@ -165,14 +165,14 @@ def cmdfunc_signature_valid(func: Callable) -> bool:
 
 def disable_notify_action(func: Callable) -> Callable:
     """decorator to prevent the command being passed to notify_action events"""
-    func.enable_notify_action = False   # type: ignore
+    func.enable_notify_action = False       # type: ignore
     return func
 
 
 def disabled_in_gamemode(mode: GameMode) -> Callable:
     """decorator to disable a command in the given game mode"""
     def disable(func: Callable) -> Callable:
-        func.disabled_in_mode = mode   # type: ignore
+        func.disabled_in_mode = mode        # type: ignore
         return func
     assert isinstance(mode, GameMode)
     return disable
@@ -180,11 +180,11 @@ def disabled_in_gamemode(mode: GameMode) -> Callable:
 
 def overrides_soul(func: Callable) -> Callable:
     """decorator to let the command override (hide) the corresponding soul command"""
-    func.overrides_soul = True   # type: ignore
+    func.overrides_soul = True      # type: ignore
     return func
 
 
 def no_soul_parse(func: Callable) -> Callable:
     """decorator to tell the command processor to skip the soul parse step and just treat the whole input as plain string"""
-    func.no_soul_parse = True   # type: ignore
+    func.no_soul_parse = True       # type: ignore
     return func

@@ -41,8 +41,8 @@ door = Door(
 door.enter_msg = "You step through your garden door into the great unknown that is the outside."
 livingroom.add_exits([door])
 
-Exit.connect(livingroom, "closet", "There's a small closet in your house.", None,
-             closet, ["living room", "back"], "You can see the living room where you came from.", None)
+Exit.connect(livingroom, "closet", "There's a small closet in your house.", "",
+             closet, ["living room", "back"], "You can see the living room where you came from.", "")
 
 
 # define items and NPCs

@@ -13,7 +13,7 @@ import os
 import platform
 import sys
 from types import ModuleType
-from typing import Generator
+from typing import Generator, Optional
 
 from . import wizcmd, disabled_in_gamemode
 from .. import base, lang, util, pubsub, races, __version__
@@ -171,12 +171,12 @@ def do_clean(player: Player, parsed: base.ParseResult, ctx: util.Context) -> Gen
         if (yield "input", ("Are you sure you want to clean out %s?" % victim.title, lang.yesno)):
             p("Cleaning inventory of %s." % victim)
             player.tell_others("{Actor} cleans out the inventory of %s." % victim.title)
-            items = victim.inventory
+            items = victim.inventory        # type: ignore
             for item in items:
                 victim.remove(item, player)
                 item.destroy(ctx)
                 p("destroyed %s" % item)
-            if victim.inventory_size:
+            if victim.inventory_size:       # type: ignore
                 p("Some items refused to be destroyed!")
         else:
             p("You leave %s be." % victim.subjective)
@@ -307,6 +307,8 @@ def do_return(player: Player, parsed: base.ParseResult, ctx: util.Context) -> No
         who = player
     else:
         raise ActionRefused("You can only return one person at a time.")
+    if not isinstance(who, base.Living):
+        raise ActionRefused("Can only return a living.")
     previous_location = who.teleported_from
     if previous_location:
         player.tell("Returning %s to <location>%s</>" % (who.name, previous_location.name))
@@ -358,7 +360,7 @@ items that are normally fixed in place (move item to playername)."""
     if thing in player:
         thing_container = player
     elif thing in player.location:
-        thing_container = player.location       # type: ignore
+        thing_container = player.location
     else:
         raise ParseError("There seems to be no %s here." % thing.name)
     thing.move(target, player)
@@ -402,12 +404,13 @@ Usage is: set xxx.fieldname=value (you can use Python literals only)"""
     if len(args) != 2:
         raise ParseError("Set what? (usage: set xxx.fieldname=value)")
     name, field = args[0].split(".")
+    obj = None  # type: Optional[base.MudObject]
     if name == "":
         obj = player.location
     else:
-        obj = player.search_item(name, include_inventory=True, include_location=True)   # type: ignore
+        obj = player.search_item(name, include_inventory=True, include_location=True)
     if not obj:
-        obj = player.location.search_living(name)    # type: ignore
+        obj = player.location.search_living(name)
     if not obj:
         raise ActionRefused("Can't find %s." % name)
     player.tell(repr(obj), end=True)
@@ -561,7 +564,7 @@ def do_accounts(player: Player, parsed: base.ParseResult, ctx: util.Context) -> 
         if "wizard" in account.privileges:
             wizards.add(account.name)
         txt.append(" %-12s <dim>|</> %19s <dim>|</> %-20s <dim>|</> %s <dim>|</> %s" %
-                   (account.name, account.logged_in, account.email, "*" if account.banned else " ", lang.join(account.privileges, None)))
+                   (account.name, account.logged_in, account.email, "*" if account.banned else " ", lang.join(account.privileges, "")))
     txt.append("\nWizards: " + lang.join(wizards))
     player.tell("\n".join(txt), format=False)
 
@@ -653,12 +656,12 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
         count = 0
         if name == "items":
             for vnum, item in list(base.MudObjRegistry.all_items.items())[:100]:
-                location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else ""  # type: ignore
+                location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else ""
                 player.tell("%d - %s  (%s)" % (vnum, item.name, location), end=True)
                 count += 1
         elif name == "livings":
             for vnum, living in list(base.MudObjRegistry.all_livings.items())[:100]:
-                location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else ""  # type: ignore
+                location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else ""
                 is_player = "[player]" if isinstance(living, Player) else ""
                 player.tell("%d - %s  %s (%s)" % (vnum, living.name, is_player, location), end=True)
                 count += 1
@@ -679,11 +682,11 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
             raise ActionRefused(str(x))
         if vnum in base.MudObjRegistry.all_items:
             item = base.MudObjRegistry.all_items[vnum]
-            location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else "<none>"  # type: ignore
+            location = "%s, #%d" % (item.location.name, item.location.vnum) if item.location else "<none>"
             player.tell("Item with vnum %d: %r (location: %s)" % (vnum, item, location))
         elif vnum in base.MudObjRegistry.all_livings:
             living = base.MudObjRegistry.all_livings[vnum]
-            location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
+            location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"
             player.tell("Living with vnum %d: %r (location: %s)" % (vnum, living, location))
         elif vnum in base.MudObjRegistry.all_locations:
             player.tell("Location with vnum %d: %r" % (vnum, base.MudObjRegistry.all_locations[vnum]))
@@ -692,7 +695,7 @@ def do_show_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) ->
         else:
             player.tell("There is nothing with that vnum.")
         return
-    vn = obj.vnum  # type: ignore
+    vn = obj.vnum
     player.tell("Vnum of %s = %d." % (obj, vn))
 
 
@@ -709,7 +712,7 @@ def do_go_vnum(player: Player, parsed: base.ParseResult, ctx: util.Context) -> N
         teleport_to(player, base.MudObjRegistry.all_locations[vnum])
     elif vnum in base.MudObjRegistry.all_livings:
         living = base.MudObjRegistry.all_livings[vnum]
-        location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"    # type: ignore
+        location = "%s, #%d" % (living.location.name, living.location.vnum) if living.location else "<none>"
         player.tell("(creature: %s, location: %s)" % (living, location))
         if living.location:
             teleport_to(player, living.location)

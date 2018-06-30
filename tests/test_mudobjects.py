@@ -393,7 +393,7 @@ class TestDoorsExits(unittest.TestCase):
         self.assertEqual("Third ladder to attic.", exit3.description)
         self.assertEqual("A window, maybe if you open it you can get out?", exit4.description)
         self.assertEqual("entering the attic", exit1.enter_msg)
-        self.assertIsNone(exit2.enter_msg)
+        self.assertEqual("", exit2.enter_msg)
         with self.assertRaises(ActionRefused):
             exit1.activate(None)
         with self.assertRaises(ActionRefused):
@@ -1054,9 +1054,9 @@ class TestContainer(unittest.TestCase):
         shopkeep = Shopkeeper("seller", "m")
         rat = Living("rat", "n", race="rodent")
         with self.assertRaises(ActionRefused):
-            rat.allow_give_money(player, 1.0)   # cannot give money to non-human
-        player.allow_give_money(shopkeep, 1.0)
-        shopkeep.allow_give_money(player, 1.0)
+            rat.allow_give_money(1.0, player)   # cannot give money to non-human
+        player.allow_give_money(1.0, shopkeep)
+        shopkeep.allow_give_money(1.0, player)
 
     def test_inventory(self):
         bag = Container("bag")

@@ -44,7 +44,7 @@ class Story(StoryBase):
         """
         pass
 
-    def welcome(self, player: Player) -> Optional[str]:
+    def welcome(self, player: Player) -> str:
         """
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
@@ -55,7 +55,7 @@ class Story(StoryBase):
         player.tell("\n")
         return "<bright>Press enter to continue.</>"
 
-    def welcome_savegame(self, player: Player) -> Optional[str]:
+    def welcome_savegame(self, player: Player) -> str:
         """
         Welcome text when player enters the game after loading a saved game
         If you return a string, it is used as an input prompt before continuing (a pause).

@@ -53,7 +53,7 @@ class Story(StoryBase):
         """
         pass
 
-    def welcome(self, player: Player) -> Optional[str]:
+    def welcome(self, player: Player) -> str:
         """
         Welcome text when player enters a new game
         If you return a string, it is used as an input prompt before continuing (a pause).
@@ -61,7 +61,7 @@ class Story(StoryBase):
         player.tell("<bright>Hello, %s!</> Welcome to the land of `%s'.  May your visit here be... interesting."
                     % (player.title, self.config.name), end=True)
         player.tell("--", end=True)
-        return None
+        return ""
 
 
 if __name__ == "__main__":

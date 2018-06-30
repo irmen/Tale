@@ -147,7 +147,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         sys.stderr.flush()
         os.kill(os.getpid(), signal.SIGINT)
 
-    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> Optional[str]:
+    def render_output(self, paragraphs: Sequence[Tuple[str, bool]], **params: Any) -> str:
         """
         Render (format) the given paragraphs to a text representation.
         It doesn't output anything to the screen yet; it just returns the text string.
@@ -155,7 +155,7 @@ class ConsoleIo(iobase.IoAdapterBase):
         This console-implementation expects 2 extra parameters: "indent" and "width".
         """
         if not paragraphs:
-            return None
+            return ""
         indent = " " * params["indent"]
         wrapper = styleaware_wrapper.StyleTagsAwareTextWrapper(width=params["width"], fix_sentence_endings=True,
                                                                initial_indent=indent, subsequent_indent=indent)
@@ -214,7 +214,7 @@ class ConsoleIo(iobase.IoAdapterBase):
                 line = line.replace("<%s>" % tag, replacement)
             return line
         else:
-            return iobase.strip_text_styles(line)      # type: ignore
+            return iobase.strip_text_styles(line)       # type: ignore
 
 
 class ReadlineTabCompleter:
@@ -226,16 +226,16 @@ class ReadlineTabCompleter:
         self.io = io
         self.candidates = []   # type: List[str]
 
-    def complete(self, prefix: str, state: int) -> Optional[str]:
+    def complete(self, prefix: str, state: int) -> str:
         if not prefix:
-            return None   # we wont auto-suggest every possible command
+            return ""   # we wont auto-suggest every possible command
         if not state:
             # first time called for this prefix, recalculate candidates
             self.candidates = list(self.io.tab_complete(prefix, self.driver))
         try:
             return self.candidates[state]
         except IndexError:
-            return None
+            return ""
 
 
 if __name__ == "__main__":

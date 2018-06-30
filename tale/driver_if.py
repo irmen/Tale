@@ -95,10 +95,9 @@ class IFDriver(driver.Driver):
         connection = PlayerConnection()
         connect_name = "<connecting_%d>" % id(connection)  # unique temporary name
         new_player = Player(connect_name, "n", race="elemental", descr="This player is still connecting to the game.")
-        io = None  # type: iobase.IoAdapterBase
         if player_io_type == "gui":
             from .tio.tkinter_io import TkinterIo
-            io = TkinterIo(self.story.config, connection)
+            io = TkinterIo(self.story.config, connection)  # type: iobase.IoAdapterBase
         elif player_io_type == "web":
             from .tio.if_browser_io import HttpIo, TaleWsgiApp
             wsgi_server = TaleWsgiApp.create_app_server(self, connection, use_ssl=False, ssl_certs=None)
@@ -198,11 +197,12 @@ class IFDriver(driver.Driver):
     def disconnect_player(self, conn: PlayerConnection):
         raise errors.TaleError("Disconnecting a player should not happen in single player IF mode. Please report this bug.")
 
-    def main_loop(self, conn: PlayerConnection) -> None:
+    def main_loop(self, conn: Optional[PlayerConnection]) -> None:
         """
         The game loop, for the single player Interactive Fiction game mode.
         Until the game is exited, it processes player input, and prints the resulting output.
         """
+        assert conn
         conn.write_output()
         loop_duration = 0.0
         previous_server_tick = 0.0
@@ -366,7 +366,7 @@ class IFDriver(driver.Driver):
             saved_player_info = deserializer.recreate_classes(state.pop("player"), None)
             saved_player = saved_player_info["player"]
             assert isinstance(saved_player, Player)
-            base.MudObjRegistry.all_livings[saved_player.vnum] = saved_player   # type: ignore  # overwrite intermediate player object
+            base.MudObjRegistry.all_livings[saved_player.vnum] = saved_player   # overwrite intermediate player object
             contained = {objects_finder.resolve_item_ref(*i_ref) for i_ref in saved_player_info["inventory"]}
             for thing in contained:
                 if thing.contained_in and thing.contained_in is not saved_player:
