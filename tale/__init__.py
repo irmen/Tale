@@ -9,7 +9,7 @@ from distutils.version import LooseVersion
 from typing import Any
 
 
-__version__ = "4.2"
+__version__ = "4.3"
 
 
 class _MudContext:
