@@ -1,4 +1,4 @@
-************************************************************
+
 Tale |version| - MUD, mudlib & Interactive Fiction framework
 ************************************************************
 
@@ -6,8 +6,10 @@ Tale |version| - MUD, mudlib & Interactive Fiction framework
     :align: center
     :alt: Tale logo
 
+*************
 What is Tale?
--------------
+*************
+
 It is a library for building `Interactive Fiction <http://en.wikipedia.org/wiki/Interactive_fiction>`_,
 mudlibs and `muds <http://en.wikipedia.org/wiki/MUD>`_ in Python.
 
@@ -201,5 +203,6 @@ API documentation
 Preliminary (auto-generated) API documentation:
 
 .. toctree::
-
+   :caption: Contents of this manual:
+   
    api.rst
