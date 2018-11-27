@@ -5,7 +5,7 @@ from typing import Any, Tuple, List, Optional, Dict, Type, Sequence, Union
 
 from .base import Item, Location, Living, Exit, Door, MudObject, MudObjRegistry, Stats, _limbo
 from .story import StoryConfig, MoneyType, GameMode, TickMethod
-from .player import Player
+from .player import Player, PlayerConnection
 from .errors import TaleError, ActionRefused
 from .driver import Deferred
 from .util import GameDateTime
@@ -59,7 +59,8 @@ class TaleSerializer:
     def serialize(self, story: StoryConfig, player: Player, items: Sequence[Item], livings: Sequence[Living],
                   locations: Sequence[Location], exits: Sequence[Exit],
                   deferreds: Sequence[Deferred], clock: GameDateTime):
-        livings = [l for l in livings if l is not player]
+        # only serialize livings that are not the current player, and also not the dummy player used for new connections
+        livings = [l for l in livings if l is not player and l.name != PlayerConnection.dummy_player_name]
         if _limbo not in locations:
             locations = list(locations)
             locations.append(_limbo)

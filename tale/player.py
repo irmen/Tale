@@ -332,7 +332,8 @@ class PlayerConnection:
     Provides high level i/o operations to input commands and write output for the player.
     Other code should not have to call the i/o adapter directly.
     """
-    __dummy_player = Player("dummy", "n")
+    dummy_player_name = "dummy-player-for-initial-connection"
+    __dummy_player = Player(dummy_player_name, "n")     # will be registered in MudObjRegistry so beware
     __dummy_io = IoAdapterBase(None)
 
     def __init__(self, player: Player=__dummy_player, io: IoAdapterBase=__dummy_io) -> None:
