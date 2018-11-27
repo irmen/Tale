@@ -357,7 +357,7 @@ def do_loot(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
 
 @cmd("take", "get", "steal", "rob")
 def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
-    """Take something (or all things) from something or someone else.
+    """Take something (or all things) from the room, or something or someone else.
     Keep in mind that stealing and robbing is frowned upon, to say the least."""
     p = player.tell
     if len(parsed.args) == 0:
@@ -440,7 +440,12 @@ def do_take(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None
                         raise ActionRefused("You can't pick that up.")
                     elif item not in player.location.livings:
                         if item in player:
-                            p("You've already got it.")
+                            other_item = player.search_item(item.name, False, True, False)  # look outside of inventory
+                            if other_item:
+                                p("There's another one here!")
+                                items_to_take.append(other_item)
+                            else:
+                                p("You've already got it.")
                         else:
                             p("There's no %s here." % item.name)
                 take_stuff(player, items_to_take, player.location)
