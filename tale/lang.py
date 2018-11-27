@@ -245,7 +245,7 @@ def a(noun_phrase: str) -> str:
         return ""
     if noun_phrase.lower() in {"a", "an"}:
         return "an " + noun_phrase
-    m = re.search('\w+', noun_phrase)
+    m = re.search(r"\w+", noun_phrase)
     if m:
         word = m.group(0)
         if word.lower() in {"a", "an"}:
