@@ -699,7 +699,7 @@ class Driver(pubsub.Listener):
         raise NotImplementedError
 
     def register_exit(self, exit: base.Exit) -> None:
-        if not exit.target:
+        if exit.target in (base._limbo, None):
             self.unbound_exits.append(exit)
 
     DeferDueType = Union[datetime.datetime, float, Tuple[float, float, float]]

@@ -1533,7 +1533,7 @@ class Exit(MudObject):
         Usually called by the driver before it starts player interaction.
         The caller needs to pass in the root module of the game zones (to avoid circular import dependencies)
         """
-        if self.target in (_limbo, None):
+        if self.target in (_limbo, None) and self._target_str:
             target_module, target_object = self._target_str.rsplit(".", 1)
             module = game_zones_module
             try:
