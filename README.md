@@ -4,8 +4,8 @@
 
 ![Tale logo](docs/source/_static/tale-large.png)
 
-'Tale' - mud, mudlib & interactive fiction framework
-====================================================
+'Tale' - mud, mudlib & interactive fiction framework [frozen]
+=============================================================
 
 This software is copyright (c) by Irmen de Jong (irmen@razorvine.net).
 
@@ -38,5 +38,3 @@ On github and in the source distribution there are several much larger [example 
 * 'circle' - MUD that interprets CircleMud's data files and builds the world from those
 * 'demo' - a random collection of stuff including a shop with some people
 * 'zed_is_me' - a small single player (interactive fiction) survival adventure
- 
-If my server is up, you can find the first two running online, see http://www.razorvine.net/

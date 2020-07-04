@@ -1,6 +1,6 @@
 
-Tale |version| - MUD, mudlib & Interactive Fiction framework
-************************************************************
+Tale |version| - MUD, mudlib & Interactive Fiction framework (project is frozen)
+********************************************************************************
 
 .. image:: _static/tale-large.png
     :align: center
@@ -204,5 +204,5 @@ Preliminary (auto-generated) API documentation:
 
 .. toctree::
    :caption: Contents of this manual:
-   
+
    api.rst
